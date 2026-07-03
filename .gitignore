@@ -7,6 +7,8 @@ Projects/*.exe
 lib*.dll*
 zlib*.dll*
 *.o
+src/*.c
+src/*.asm
 share
 etc
 *32.exe

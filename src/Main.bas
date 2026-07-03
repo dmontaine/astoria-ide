@@ -6791,8 +6791,8 @@ Else
 	" Bind events using the Cast(Sub(ByRef Sender As Control), @ProcedureName) syntax.")
 End If
 
-If Dir(ExePath & "\Help\AI prompt\VisualFBEditor IDE Environment.md") <> "" Then
-	WAdd(AIPostDataPtr_2nd, *LoadFromFile(ExePath & "\Help\AI prompt\VisualFBEditor IDE Environment.md"))
+If Dir(ExePath & "\Help\AI prompt\KnowledgeBase\VisualFBEditor IDE Environment.md") <> "" Then
+	WAdd(AIPostDataPtr_2nd, *LoadFromFile(ExePath & "\Help\AI prompt\KnowledgeBase\VisualFBEditor IDE Environment.md"))
 Else
 	WAdd(AIPostDataPtr_2nd, "The VisualFBEditor (commonly abbreviated as `VFBE`) IDE's main window includes a title bar, menu bar, and toolbar at the top; Project Explorer, Toolbox, and AI agent panels on the left; a message output panels at the bottom; and Properties and Events panels on the right." & _
 	" **title bar** The title bar displays the current project name, application name, and working status. VisualFBEditor operates in three states:" & _

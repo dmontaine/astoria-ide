@@ -97,6 +97,8 @@ Work is organized in batches.
 
 Evaluates `#If` / `#Else` / `#EndIf` with Win64 defines (`__USE_WINAPI__`, `__FB_WIN32__`, `__FB_64BIT__`, GTK off). Had a blind spot for the `__EXPORT_PROCS__` symbol (fixed — see §3a); re-run only if new GTK-era files are introduced, and review failures manually for interwoven blocks.
 
+**Safety net for any future re-run (audit flag, 2026-07-03):** the `__EXPORT_PROCS__` blind spot silently deleted `mff64.dll`'s entire export dispatcher, and a clean compile did not catch it — the damage only surfaced when the Designer was exercised at runtime. Before re-running the tool: make sure the working tree is clean so the resulting diff is fully reviewable file-by-file, don't rely on compile-clean alone. After re-running: spot-check that `mff64.dll` still exports the expected symbols (e.g. `dumpbin /exports mff64.dll`) before treating the run as verified.
+
 ---
 
 ## 3a. Batch 2.75.3 — what actually happened
@@ -193,6 +195,7 @@ VFBE already supports two debugger paths for **user projects** (not the IDE itse
 - The real remaining tradeoff, per the owner: `-gen gas64` compiles faster but produces larger/slower executables; `-gen gcc` compiles slower but produces smaller/faster executables.
 - **Owner's judgment:** the target audience (§1 — returning Basic programmers, hobbyists, students) cares more about a fast edit/compile/run work cycle than runtime file size or execution speed, and doesn't believe the size/speed difference is significant enough to matter. This leans toward **`-gen gas64` as the default for user projects.**
 - **Unresolved technical dependency before finalizing:** does the bundled GDB (11.2.90) actually debug a `-gen gas64`-compiled executable correctly? `Debug.bas`'s existing code pairs `-gen gas/gas64` specifically with the *Integrated* (native-stabs) debugger, not GDB, in its own error-checking logic — but GDB has long-standing native support for the STABS debug format, which is plausibly what `-gen gas64 -g` already emits, so this may just work without needing the Integrated debugger path at all. This needs an empirical check (compile a small test program with `-gen gas64 -g`, debug it via VFBE's GDB path, confirm breakpoints/stepping/watches work) before locking in `-gen gas64` as the default — otherwise the GDB decision and a gas64-by-default decision could quietly conflict in practice even though they don't conflict on paper.
+- **Cross-dependency note (audit flag, 2026-07-03):** this check runs against whatever GCC/binutils currently ships under `Compiler/bin/win64/`. If Tier 3's compiler swap later changes that bundled toolchain (§13.1), this result isn't guaranteed to carry over — re-verify rather than assume it still holds after that swap.
 - Once resolved: if GDB works cleanly against gas64 output, default new projects to `-gen gas64` + GDB (fast compiles, standard debugger, best of both). If not, fall back to `-gen gcc` + GDB as originally implied, accepting the slower compile.
 
 Whether the Integrated (stabs) Debugger code path in `Debug.bas` should eventually be pared down once this is settled (rather than kept as an unused alternate path) is a separate, not-yet-decided question — flagging it as a candidate for a future §13.2-style consistency pass rather than deciding now.
@@ -313,6 +316,8 @@ Run a full pass on **latest** `VisualFBEditor64.exe` after `Compile.bat`. Check 
 
 ### Known deferred cleanup (not blocking unless touched)
 
+> **Doc-hygiene note (audit flag, 2026-07-03, deferred):** this list overlaps with §8's "Low-priority cleanup" (both list `src/makefile` and `src/THREADING.md`). Worth consolidating into one canonical deferred-items list eventually — not urgent, noting so it doesn't silently drift out of sync.
+
 - ~~Commented `#IfNDef __USE_GTK__` blocks in source~~ — **done**, see §3a
 - ~~`mff/DarkMode/` directory~~ — **done** (replaced with inert stub, not removed — see §3a for why)
 - ~~Stray dead-code comments from GTK era~~ — **done**, see §3a
@@ -344,6 +349,7 @@ Run a full pass on **latest** `VisualFBEditor64.exe` after `Compile.bat`. Check 
 
 6. Upstream sync strategy (if any) — this fork intentionally diverges (Win64-only); merge upstream only with an explicit plan
 7. Wiki/docs for fork-specific behavior
+8. Basic CI (e.g. run `Compile.bat` on push) — flagged by a second-AI audit (2026-07-03, deferred) as worth adding once the project outgrows one-person manual verification; not urgent today since compile-clean-before-commit is already enforced by convention (§9).
 
 ---
 
@@ -382,7 +388,8 @@ Includes:
 
 - **Minimize scope** — smallest correct diff; match existing code style
 - **No commits** unless user explicitly asks
-- **Every session ends with a push to Codeberg** (added 2026-07-03) — commit any outstanding working-tree changes (status doc updates, INI/scratch state, etc.) with a sensible message, then `git push origin main`, as the last action before signing off for the day. This is a standing instruction, not a one-time request — don't wait to be asked again in future sessions.
+- **Every session ends with a compile-clean commit + push to Codeberg** (added 2026-07-03; compile-clean gate added 2026-07-03 after a second-AI audit flagged the risk of pushing broken intermediate state) — run `Compile.bat` and confirm **0 errors** first. Only if the compile is clean should you commit any outstanding working-tree changes (status doc updates, INI/scratch state, etc.) with a sensible message, then `git push origin main`, as the last action before signing off for the day. If the compile fails and can't be fixed in-session, say so and hold off on the commit/push rather than pushing broken code. This is a standing instruction, not a one-time request — don't wait to be asked again in future sessions.
+- **INI key migration** (added 2026-07-03, second-AI audit) — new keys must ship with a default (never assume an existing user's INI has it); never rename or repurpose an existing key without a migration read of the old key name first, so existing users' settings aren't silently orphaned. Relevant now that §13.4's rename will touch `Settings/VisualFBEditor64.ini`, but applies to any INI key work.
 - **WinAPI only** — do not reintroduce GTK/Linux IDE paths
 - Close running IDE before rebuild
 - `set NOPAUSE=1` for agent compile runs
@@ -493,6 +500,7 @@ FreeBASIC's Win64 backend compiles through a bundled `gcc`/`binutils` (`as`, `ld
 - The FreeBASIC 1.10.3 build already decided on (stw's portal, §8) will have shipped with a specific paired GCC/binutils version — need to check what that is before assuming an independent upgrade is possible.
 - A newer GCC needs a matching MinGW-w64 runtime/headers set; swapping GCC alone without the matching toolchain risks subtle ABI or linker-flag mismatches (`Compile.bat`'s `ld` invocation has a long hand-tuned flag list — see the build log in §3a's verification note).
 - Decide: adopt whatever GCC ships with the chosen fbc build, or independently source a newer one and re-verify the full flag set still links cleanly.
+- **Cross-dependency note (audit flag, 2026-07-03):** §4 has an open gas64-vs-GDB compatibility question tested empirically against the *current* `Compiler/bin/win64/` toolchain. If this swap changes that toolchain, re-verify §4's decision rather than assuming it still holds.
 
 ### 13.2 Structured programming, consistency, and legacy-tech-debt removal
 
@@ -531,7 +539,7 @@ Flagging the rename itself as a **larger mechanical undertaking than it looks**,
 - Output binaries: `VisualFBEditor64.exe`, `mff64.dll` — filenames referenced throughout `Compile.bat`, `.gitignore`, this doc, `README.md`, `BUILD.md`
 - Window class names / mutex or single-instance-detection strings (if any) in `src/VisualFBEditor.bas` / `Main.bas` — renaming these changes on-disk identity, not just cosmetics
 - Splash screen, About dialog, title bar text, `App.Title` (`src/Main.bas` per §3a warnings-fix notes)
-- INI file name/path (`Settings/VisualFBEditor64.ini`) — needs a migration story if existing users' settings shouldn't be silently orphaned
+- INI file name/path (`Settings/VisualFBEditor64.ini`) — needs a migration story if existing users' settings shouldn't be silently orphaned; see the INI key migration convention in §9
 - Repository name on Codeberg (`VFBEWin64`) — a rename here changes clone URLs for anyone already tracking it
 - Every doc file (`README.md`, `PROJECT_STATUS.md`, `src/BUILD.md`, `src/THREADING.md`) and likely dozens of in-code comments/strings referencing "VisualFBEditor" or "VFBE"
 - Decide scope up front: cosmetic rename only (title/About/docs) vs. full identity rename (binaries, repo, INI, window classes) — the second is much larger and should be scheduled as its own tier.

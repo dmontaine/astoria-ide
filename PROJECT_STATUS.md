@@ -1,6 +1,6 @@
 # VFBE Win64 Fork — Project Status & Handoff
 
-**Last updated:** 2026-07-02 (evening)  
+**Last updated:** 2026-07-03  
 **Repository:** [codeberg.org/bigriverguy/VFBEWin64](https://codeberg.org/bigriverguy/VFBEWin64)  
 **Local path:** `C:\Users\dmont\VisualFBEditor`  
 **Owner:** bigriverguy (`dmontaine@gmail.com`)
@@ -17,9 +17,11 @@ This fork (**VFBEWin64**) is a **Win64-only** branch of upstream VisualFBEditor:
 
 | Keep | Remove / defer |
 |------|----------------|
-| Native **WinAPI / Win32** UI | GTK / Linux IDE paths |
+| Native **WinAPI / Win32** UI | GTK / Linux IDE paths (physically deleted, not just hidden) |
 | **64-bit** IDE and bundled `fbc64.exe` | 32-bit IDE (`VisualFBEditor32`, `mff32`) |
-| Bundled compiler at `Compiler\fbc64.exe` | Dark-mode dead code (`mff/DarkMode/`) |
+| Bundled compiler at `Compiler\fbc64.exe` (tracked in-repo; 1.10.3 swap-in planned, see Tier 3) | Dark-mode *implementation* — replaced with an inert stub, interface preserved for a future trustworthy reimplementation (not full removal — see §3a) |
+
+**This is now a fully self-contained fork:** `Compiler/`, `Debuggers/`, and `Controls/MyFbFramework/` are tracked in git (previously vendored/gitignored) — see §3a and §12.
 
 **Build outputs (repo root):**
 
@@ -27,6 +29,16 @@ This fork (**VFBEWin64**) is a **Win64-only** branch of upstream VisualFBEditor:
 - `VisualFBEditor64.exe` — main IDE
 
 **Settings:** `Settings/VisualFBEditor64.ini` (runtime; path via `ExePath/Settings/...`)
+
+### Target audience
+
+This shapes UI/UX decisions (§13.3) and the installer/distribution work (§13.5) — the product is for people who want to *write BASIC programs*, not people evaluating IDE architecture:
+
+- **Returning BASIC programmers** — learned on Basic (QBasic, VB, etc.) years ago, remember it fondly, but have been put off by modern languages' object-orientation requirements and by how hard it's become to write a rich GUI program without a heavyweight framework or web stack.
+- **Desktop-focused hobbyists** — want to build actual desktop programs, not web apps, and are put off by the disjointed nature of modern development (juggling many separate tools/services instead of one cohesive IDE that just works).
+- **Students** — many schools still start programming instruction with Basic, since it's more approachable than even Python for a true beginner.
+
+Common thread: **approachability and cohesion over power-user configurability.** None of these audiences want to assemble a toolchain or fight object-oriented ceremony to get a window on screen — the value proposition is "open one IDE, write BASIC, get a real GUI program," which is exactly the niche modern tooling has abandoned. Keep this in mind against feature creep: the original project's failure mode (§13.4) was doing too much without central attention; this audience is better served by a smaller, more polished, more approachable tool than by chasing feature parity with professional IDEs.
 
 ---
 
@@ -67,13 +79,15 @@ See also `src/BUILD.md` and `README.md`.
 
 ## 3. Roadmap: Tier 2.75 dead-code removal
 
-Work is organized in batches. **Do not start the next batch until the current one compiles and passes manual sign-off.**
+Work is organized in batches.
 
 | Batch | Scope | Status |
 |-------|--------|--------|
 | **2.75.1** | Panel/layout cleanup in `Main.bas` | **Complete** (compile-clean) |
-| **2.75.2** | Bulk GTK preprocessor strip (`Tools/strip_gtk_preprocessor.ps1` on `src/` + `mff/`) | **Complete** (compile-clean); **manual test plan in §7 not fully signed off** |
-| **2.75.3+** | Commented `#IfNDef __USE_GTK__` cleanup, `mff/DarkMode/` removal, dead-code comment cleanup | **Planned / deferred** |
+| **2.75.2** | Bulk GTK preprocessor strip (`Tools/strip_gtk_preprocessor.ps1` on `src/` + `mff/`) | **Complete** (compile-clean). Manual test plan in §7 was **not fully signed off** before the owner explicitly directed the team to proceed into 2.75.3 anyway — see note below. |
+| **2.75.3** | Physical deletion of commented `#IfNDef __USE_GTK__`/`__FB_WIN32__` remnants, dead-legacy-code pass, `mff/DarkMode/` handling | **Complete** — see §3a |
+
+> **Process note:** §7's original gate said Batch 2.75.3 should be blocked on full manual sign-off. The owner explicitly chose to start 2.75.3 before that checklist was finished (several boxes below are still open). That was a deliberate call, not an oversight — flagging it here so future sessions don't assume the gate was satisfied by testing.
 
 ### GTK strip tool
 
@@ -81,7 +95,32 @@ Work is organized in batches. **Do not start the next batch until the current on
 .\Tools\strip_gtk_preprocessor.ps1 src mff
 ```
 
-Evaluates `#If` / `#Else` / `#EndIf` with Win64 defines (`__USE_WINAPI__`, `__FB_WIN32__`, `__FB_64BIT__`, GTK off). Re-run only when needed; review failures manually for interwoven blocks.
+Evaluates `#If` / `#Else` / `#EndIf` with Win64 defines (`__USE_WINAPI__`, `__FB_WIN32__`, `__FB_64BIT__`, GTK off). Had a blind spot for the `__EXPORT_PROCS__` symbol (fixed — see §3a); re-run only if new GTK-era files are introduced, and review failures manually for interwoven blocks.
+
+---
+
+## 3a. Batch 2.75.3 — what actually happened
+
+Beyond the originally-scoped "strip commented GTK markers," this batch also caught and fixed a **shipped-broken Designer** and expanded to a broader dead-legacy-code pass at the owner's explicit direction ("also remove old dead legacy code" encountered along the way, not just GTK-tagged code).
+
+**Root-cause fix — Form Designer never activated for any `.frm` file:**
+`Tools/strip_gtk_preprocessor.ps1` didn't recognize the `__EXPORT_PROCS__` macro and silently deleted the entire `#ifdef __EXPORT_PROCS__` export-dispatcher block from `mff.bi` plus per-file `Export` functions in ~14 `mff/*.bas` files, so `mff64.dll` shipped with **zero exports**. Fixed the strip tool and manually restored the missing blocks (2 `ToolBar.bas` functions deliberately deferred — restoring them hits an unresolved FreeBASIC "Illegal specification" compiler quirk on a `Private Enum` parameter; not called anywhere in the IDE itself). Commit `bef9267`.
+
+**Dark mode — replaced, not removed:**
+The undocumented-API dark-mode implementation (ordinal-resolved `uxtheme.dll` calls, `ntdll` version probing, IAT hooking) was flagged by the owner as unreliable and untrusted. Replaced with an inert stub (`mff/DarkMode/DarkMode.bi`/`.bas`) that preserves the exact public interface as no-ops, so every call site still compiles and behaves as before (dark mode was already forced off). This intentionally leaves a clean seam for a trustworthy reimplementation later rather than deleting the integration points. `mff/DarkMode/IatHook.bi` (zero references) deleted outright; `UAHMenuBar.bi` kept (still used by `Form.bas`, unrelated to the ordinal/IAT fragility). Commit `56f6d18`.
+
+**Confirmed-dead subtree deletion:** `mff/gir_headers/`, `mff/WebView/`, `mff/fbsound/`, `SoundPlayer.bas`/`.bi` — 109 files, ~104k lines, zero references anywhere, verified via clean rebuild. Commit `c494207`.
+
+**Compile warnings:** all resolved (WString default-parameter fixes, `AndAlso`-chained boolean/pointer-property comparisons isolated into explicit `Boolean` locals). Commits `53d8e47` + `56f6d18` (first pass under-verified due to a UTF-16 log encoding gotcha with raw `grep`; corrected in the second commit).
+
+**Physical dead-code deletion** (the literal instruction: delete, don't hide) across:
+- `src/Debug.bas` — dead conditional-breakpoint UI functions, a dead `get_main_file_from_exe`/`get_name_files_from_exe` pair, a duplicate ~300-line dead 32-bit stabs-parsing branch, misc stray markers. Commit `7baebd1`.
+- `src/Designer.bas`/`.bi`, `src/Main.bas`/`.bi`, `src/TabWindow.bas`, `src/VisualFBEditor.bas` — dead WM_KEYDOWN/GTK popup-menu branches, a ~300-line dead GTK VTE-terminal integration block, a dead ListView-based property-panel implementation (superseded by the current `TreeListView`-based one), dead debugger-UI branches. Commit `add4642`.
+- `Controls/MyFbFramework/mff/*.bas` (16 files) — dead GTK-only branches, dead sort/alignment/tooltip logic, dead PNG-loading functions; `NativeFontControl.bas`/`.bi` deleted outright (100% commented out, confirmed unreferenced anywhere). Commit `76abaa5`.
+
+**Verification:** every commit above passed a clean `Compile.bat` rebuild (0 warnings, 0 errors — checked with the `Read` tool, since the log is UTF-16 and raw `grep` silently false-negatives on it). A final repo-wide sweep confirms only one GTK/32-bit marker remains anywhere in `src/` or `mff/`: `TabWindow.bas`'s `CheckCondition()`, which evaluates `#if` conditions in the *user's* FreeBASIC code being edited — a legitimate IDE feature, correctly left alone.
+
+**Git-tracking policy change:** `Compiler/` and `Debuggers/` are now tracked in git (previously vendored/gitignored) — this is intentionally a fully self-contained fork going forward. Commit `b555406`. 32-bit compiler binaries (`Compiler/bin/win32`) removed as out of scope. Commit `15e66cc`.
 
 ---
 
@@ -129,7 +168,19 @@ Several fix cycles addressed bottom panel **save/restore** vs **collapse layout*
 6. **First cold start collapsed — editor gap:** `CloseBottom` in `frmMain_Create` ran before the form was shown; dock layout kept full `pnlBottom` height until manual collapse
    - `frmMain_Show` re-applies `CloseBottom` once the main window is visible (and again after startup focus restore)
 
-**Status: bottom panel code issues — FIXED** (persistence, collapse/reclaim, first-start layout). See §7 for remaining **manual test plan** the owner must complete before Batch 2.75.3.
+**Status: bottom panel code issues — FIXED** (persistence, collapse/reclaim, first-start layout). See §7 for remaining **manual test plan** items.
+
+### Left/right panel Pin click not collapsing
+
+Same root pattern as bottom panel item 5 above, found independently in each: Pin click while the panel was expanded called `SetLeftClosedStyle`/`SetRightClosedStyle(Value, WithClose:=False)`, relying on `frmMain_ActiveControlChanged`'s focus-loss detection to actually collapse — unreliable, especially when focus stayed inside a Form Designer. Fixed both to mirror the already-correct bottom-panel pattern: `WithClose:=True` when collapsing from an expanded state. Right panel: commit `c267284`. Left panel: commit `64daa66`.
+
+### Form Designer never activating (root-caused during 2.75.3)
+
+See §3a — this was actually a fallout of the Batch 2.75.2 GTK strip tool, not a new regression, but wasn't caught until this session. Fixed in commit `bef9267`.
+
+### FreeBASIC compiler version decision (for upcoming Tier 3 work)
+
+Owner plans to replace the bundled `Compiler/` tree and eventually vendor the compiler's own source for future AI-assisted review. Compared 1.10.1 (currently bundled), 1.10.3, 1.10.4 (unreleased), and 1.20 (unreleased) — **decided on 1.10.3** from the `fbc-1.10` maintenance branch. 1.20 was ruled out for now: it removes null-termination from fixed-length strings (`STRING*N`/`WSTRING*N`), a breaking change that would need an audit of this codebase's fixed-string usage first. Owner specified a preferred binary source: community continuous builds at `users.freebasic-portal.de/stw/builds/` (maintainer "stw", trusted long-time contributor) over the "official" release, since stw's build is expected to be equal-or-better quality. **Not yet started** — see Tier 3 in §8.
 
 ---
 
@@ -180,14 +231,33 @@ State model mirrors **left/right** panels:
 - [x] First-start collapsed layout reclaims editor space (`frmMain_Show` re-apply) — **fixed**
 - [x] Codeberg remote + SSH
 - [x] `ActivateMainWindow()` at end of `frmMain_Show` (editor foreground on startup)
+- [x] Right panel Pin click not collapsing — **fixed** (`c267284`)
+- [x] Left panel Pin click not collapsing — **fixed** (`64daa66`)
+- [x] Form Designer never activating for any `.frm` file — **fixed**, root-caused to strip-tool `__EXPORT_PROCS__` blind spot (`bef9267`)
+- [x] `Compiler/`, `Debuggers/` tracked in git (self-contained fork) (`b555406`)
+- [x] 32-bit compiler binaries removed (`Compiler/bin/win32`) (`15e66cc`)
+- [x] All compile warnings resolved, 0 warnings/0 errors (`53d8e47`, `56f6d18`)
+- [x] Dark-mode implementation replaced with inert stub (interface preserved) (`56f6d18`)
+- [x] Confirmed-dead subtrees deleted: `gir_headers/`, `WebView/`, `fbsound/`, `SoundPlayer.*` (`c494207`)
+- [x] Batch 2.75.3 — physical dead-code deletion across `Debug.bas`, `Designer.bas`/`.bi`, `Main.bas`/`.bi`, `TabWindow.bas`, `VisualFBEditor.bas`, ~15 `mff/*.bas` files, `NativeFontControl.bas`/`.bi` deleted outright (`7baebd1`, `add4642`, `76abaa5`)
 
 ---
 
-## 7. Manual test plan — owner sign-off required before 2.75.3
+## 7. Manual test plan — regression validation
 
-> **Handoff note (Claude Code):** Bottom panel **implementation bugs are resolved**. The project owner (**bigriverguy**) still needs to **work through this entire checklist** and sign off before starting Batch 2.75.3. Do not treat “bottom panel fixed” as “Batch 2.75.2 fully validated.”
+> **Handoff note (Claude Code):** Bottom panel **implementation bugs are resolved**, and both left and right panel Pin-click bugs are also now fixed (§4, §6). Batch 2.75.3 (dead-code deletion) **has already happened** — the owner explicitly directed the team to proceed before this checklist was fully signed off, rather than treating it as a hard gate. This checklist is now a **regression-validation pass** covering both the original panel work and the since-completed dead-code deletion, not a pre-2.75.3 gate.
 
 Run a full pass on **latest** `VisualFBEditor64.exe` after `Compile.bat`. Check each box when verified.
+
+### Debugger smoke test (new — added post-2.75.3)
+
+`src/Debug.bas` was the single largest and riskiest file touched in Batch 2.75.3 (core breakpoint/stabs-parsing/debugger-dispatch internals). Dead-code deletion there was verified by clean compilation only; a compile-clean build can still hide a runtime behavior change if a "dead" branch was misjudged. Recommend exercising both debugger paths once each before treating 2.75.3 as fully validated:
+
+- [ ] Integrated IDE debugger — set a breakpoint, run, confirm it stops there
+- [ ] Step over / step into / step out — line highlighting advances correctly
+- [ ] Inspect a local variable and a watch expression while stopped
+- [ ] Integrated GDB debugger path — same breakpoint/step/watch smoke test
+- [ ] Restart-while-debugging and normal stop/exit — no hang or crash
 
 ### Startup
 
@@ -214,17 +284,17 @@ Run a full pass on **latest** `VisualFBEditor64.exe` after `Compile.bat`. Check 
 - [ ] Toolbox insert, project explorer, AI Agent tab (if used)
 - [ ] Session open/save, recent files/projects
 
-### Gate to Tier 2.75.3
+### Gate to Tier 3
 
-**All unchecked items above must pass** (or be explicitly deferred with a note in this file) before Batch 2.75.3 dead-code cleanup begins.
+**All unchecked items above (including the debugger smoke test) should pass** — or be explicitly deferred with a note in this file — before starting Tier 3 compiler-swap work in §8, since a compiler swap makes it harder to isolate whether a future regression came from the dead-code deletion or the new compiler.
 
 ### Known deferred cleanup (not blocking unless touched)
 
-- Commented `#IfNDef __USE_GTK__` blocks in source
-- `mff/DarkMode/` directory removal
-- Stray dead-code comments from GTK era
-- `src/makefile` still references GTK defines (not used by `Compile.bat`)
-- `src/THREADING.md` mentions GTK UI wrapping (historical)
+- ~~Commented `#IfNDef __USE_GTK__` blocks in source~~ — **done**, see §3a
+- ~~`mff/DarkMode/` directory~~ — **done** (replaced with inert stub, not removed — see §3a for why)
+- ~~Stray dead-code comments from GTK era~~ — **done**, see §3a
+- `src/makefile` still references GTK defines (not used by `Compile.bat`) — still open, low priority
+- `src/THREADING.md` mentions GTK UI wrapping (historical) — still open, low priority
 
 ### Optional / housekeeping
 
@@ -233,14 +303,23 @@ Run a full pass on **latest** `VisualFBEditor64.exe` after `Compile.bat`. Check 
 
 ---
 
-## 8. Planned next steps (Tier 2.75.3+)
+## 8. Planned next steps
 
-1. **User sign-off** — complete **§7 manual test plan** (owner in progress; bottom panel core items done)
-2. **Batch 2.75.3** — remove commented GTK preprocessor remnants (careful diff; compile after each logical chunk)
-3. **Remove `mff/DarkMode/`** if no WinAPI references remain
-4. **Dead-code comment pass** — grep for `__USE_GTK__`, `GTK`, `Linux`, `dark mode` in `src/` and `mff/`
-5. **Update `THREADING.md`** — WinAPI-only threading notes
-6. Longer term: upstream sync strategy (if any), wiki/docs for fork-specific behavior
+### Immediate
+
+1. **Regression validation** — complete **§7 manual test plan**, including the new debugger smoke test, before starting Tier 3
+2. **Low-priority cleanup** (optional, not blocking): `src/makefile` GTK defines, `src/THREADING.md` GTK mentions
+
+### Tier 3 — compiler toolchain (owner-directed, not yet started)
+
+3. **Verify a compiled `fbc64` is available for 1.10.3** from `users.freebasic-portal.de/stw/builds/` (build ~#0875, commit `8708d1a`, per owner's preferred source); if not, stand up a build environment instead
+4. **Replace `Compiler/` tree** with the 1.10.3 build; verify `fbc64 -version` reports 1.10.3; full clean rebuild + §7 regression pass again afterward
+5. **Longer term:** vendor the FreeBASIC compiler's own source into the repo tree, in preparation for future AI-assisted review/modification of the compiler itself (owner-flagged as upcoming, no timeline yet)
+
+### Longer term / unscheduled
+
+6. Upstream sync strategy (if any) — this fork intentionally diverges (Win64-only); merge upstream only with an explicit plan
+7. Wiki/docs for fork-specific behavior
 
 ---
 
@@ -323,19 +402,23 @@ Includes:
 
 1. **Read this file first**, then `src/BUILD.md` and `.cursor/skills/contextual-change-validation/SKILL.md` before panel/settings changes.
 
-2. **Bottom panel implementation is complete** — do not reopen unless §7 regression tests fail. If they fail, compare against left/right panel patterns in `src/Main.bas` before patching.
+2. **Bottom/left/right panel implementations are all complete** — do not reopen unless §7 regression tests fail. If they fail, the three panels share one state-machine pattern (`Set*ClosedStyle(Value, WithClose)`), so compare all three against each other in `src/Main.bas`/`src/VisualFBEditor.bas` before patching.
 
-3. **Owner action:** finish every unchecked item in **§7** and update checkboxes here (or note deferrals) before Tier 2.75.3.
+3. **Batch 2.75.3 (dead-code deletion) is complete** — see §3a for full detail. Don't re-run a bulk GTK strip; the remaining single marker in `TabWindow.bas` is intentional (user-code preprocessor evaluator, not build config).
 
-4. **Avoid fix cycles** — map full surface, compile, checklist; if stuck after 4 iterations, stop and document root cause instead of tweaking one line.
+4. **Owner action:** finish every unchecked item in **§7** (now framed as regression validation, not a pre-2.75.3 gate) before starting Tier 3 compiler-swap work.
 
-5. **Batch 2.75.3** is cleanup, not feature work — keep diffs reviewable; compile after each chunk. **Blocked until §7 passes.**
+5. **Avoid fix cycles** — map full surface, compile, checklist; if stuck after 4 iterations, stop and document root cause instead of tweaking one line.
 
-6. **Upstream** is Xusinboy’s VisualFBEditor; this fork intentionally diverges (Win64-only). Merge upstream only with explicit plan.
+6. **Build-log verification gotcha:** `Compile.bat`'s piped output is UTF-16 encoded. Raw `grep`/Bash text search against it silently reports zero matches even when warnings/errors are present. Always verify via the `Read` tool, never raw grep, against these logs.
 
-7. **Examples/** and **Tools/** are largely untouched by Tier 2.75; don’t strip GTK from user examples unless that’s a separate decision.
+7. **Upstream** is Xusinboy's VisualFBEditor; this fork intentionally diverges (Win64-only). Merge upstream only with explicit plan.
 
-8. **Local convenience:** `docompile.bat` at repo root is gitignored (owner’s personal compile shortcut).
+8. **Examples/** and **Tools/** are largely untouched by Tier 2.75; don't strip GTK from user examples unless that's a separate decision.
+
+9. **Local convenience:** `docompile.bat` at repo root is gitignored (owner's personal compile shortcut).
+
+10. **Tier 3 (compiler swap) not yet started** — see §8. Owner has already decided on FreeBASIC 1.10.3 from the `stw` community build portal over the official release; don't re-litigate that decision without new information.
 
 ---
 
@@ -354,6 +437,89 @@ Includes:
 | `e212819` | Bottom panel persistence/collapse; startup guards; `SaveMainWindowPanelLayout`; `PROJECT_STATUS.md` |
 | `e63f1a6` | Status doc commit-hash update |
 | `ef3b43e` | First-start collapsed layout; gitignore `docompile.bat`; handoff/test-plan update |
+| `2511d86` | Record commit hash for `ef3b43e`; save bottom panel INI state |
+| `5a09739` | Update INI window/panel state; rebuild `VisualFBEditor64.exe` |
+| `c267284` | Fix right panel not collapsing on Pin click |
+| `7c1a055` | Save session state after verifying right panel collapse fix |
+| `af5b4be` | Update designer-regenerated `Temp.bas` scratch files |
+| `bef9267` | Fix Form Designer never activating: strip tool silently deleted exported component dispatchers |
+| `b555406` | Track the bundled FBC compiler and GDB debugger toolchains in-repo |
+| `64daa66` | Fix left panel not collapsing on Pin click |
+| `15e66cc` | Remove 32-bit compiler binaries (`Compiler/bin/win32`) — out of scope |
+| `ac29ec8` | Update designer-regenerated `Temp.bas` scratch files |
+| `53d8e47` | Fix all compile warnings (first pass — see `56f6d18` for correction) |
+| `56f6d18` | Remove risky dark-mode implementation (replaced with inert stub); finish fixing mixed-boolean warnings |
+| `c494207` | Delete confirmed-dead code: `gir_headers/`, `WebView/`, `fbsound/`, `SoundPlayer.*` |
+| `7baebd1` | Physically delete dead GTK/32-bit/Linux code and legacy comment cruft in `Debug.bas` |
+| `add4642` | Physically delete dead GTK/32-bit/Linux code in `Designer`/`Main`/`TabWindow`/`VisualFBEditor.bas` |
+| `76abaa5` | Physically delete remaining dead GTK/32-bit code across `MyFbFramework` and `src` headers |
+
+---
+
+## 13. Future enhancements (owner-added, unscheduled)
+
+These are **enhancements, not bugs** — added by the owner after Tier 3 was scoped. No committed order yet; see the owner's own numbering below. None of this work has started.
+
+**Read §13.4's context note before scoping any of this section.** This is a hobby project with no timeline pressure, and the underlying goal across all of §13 — not just the rename — is to avoid the original upstream project's failure mode (too much scope, too little central attention, eventual collapse to one maintainer). Favor depth and coherence over speed or breadth when picking this up.
+
+### 13.1 Evaluate a later GCC version
+
+FreeBASIC's Win64 backend compiles through a bundled `gcc`/`binutils` (`as`, `ld`, `dlltool`, `GoRC`) under `Compiler/bin/win64/`, not just `fbc64.exe` itself. Worth bundling with the Tier 3 compiler swap rather than doing separately, since:
+- The FreeBASIC 1.10.3 build already decided on (stw's portal, §8) will have shipped with a specific paired GCC/binutils version — need to check what that is before assuming an independent upgrade is possible.
+- A newer GCC needs a matching MinGW-w64 runtime/headers set; swapping GCC alone without the matching toolchain risks subtle ABI or linker-flag mismatches (`Compile.bat`'s `ld` invocation has a long hand-tuned flag list — see the build log in §3a's verification note).
+- Decide: adopt whatever GCC ships with the chosen fbc build, or independently source a newer one and re-verify the full flag set still links cleanly.
+
+### 13.2 Structured programming, consistency, and legacy-tech-debt removal
+
+**Owner's stated goal:** this codebase carries the accumulated effect of many independent programmers working on it over many years with minimal communication between them. The point of this pass isn't cosmetic formatting — it's to impose one consistent set of conventions and structure over code that currently has as many styles as it had contributors, so the system becomes legible and maintainable going forward rather than an archaeology exercise every time someone touches it.
+
+Concrete goals, in the owner's words plus scope notes:
+- **Structured programming** — reduce/eliminate spaghetti control flow inherited from the codebase's age (deeply nested conditionals, non-local control flow, functions doing too many unrelated things). `src/Debug.bas` (§3a) is the most extreme example already encountered — a ~12,500-line file mixing multiple debugger-backend eras in one module.
+- **Variable consistency** — one naming convention applied uniformly (this codebase currently mixes Hungarian-ish prefixes in some modules with plain names in others, and inconsistent `Private`/scope conventions).
+- **Standard indenting** — one whitespace style repo-wide (currently mixed tabs/spaces even within single files).
+- **Move repeating code into classes/procedures** — DRY pass; likely the highest-value structural work here, since duplicated logic (already seen in miniature during Tier 2.75.3 — e.g. the duplicate `udt(0)`–`udt(16)` block found dead in `Debug.bas`) is exactly what independent, uncoordinated contributors tend to produce instead of factoring shared code.
+- **Remove legacy tech debt** broadly, not just GTK/32-bit remnants already handled in Tier 2.75.3.
+
+Execution notes:
+- There's no established "prettier"-equivalent formatter for FreeBASIC. Whitespace/indentation normalization is safely scriptable in bulk; naming, structure, and DRY refactors are not — those risk breaking `Alias`/`Export` bindings (as already seen with the `ToolBar.bas` compiler quirk in §3a) and need file-by-file compile verification, same discipline as the dead-code deletion pass.
+- This is real restructuring work, not a mechanical pass — expect it to be the largest single effort in the project, larger than Tier 2.75 was. Owner has explicitly said timeline is not a constraint here (see §13.4) — no need to compress this into a quick pass.
+- Should happen **after** the Tier 3 compiler swap — no point restructuring files that might still change during compiler validation.
+- Natural pairing with §13.4 (rename): if the project is getting a fresh identity specifically to mark a disciplined restart, this is the pass that actually earns that fresh identity.
+
+### 13.3 UI evaluation and modernization
+
+Owner asked whether this review needs a different AI trained specifically on front-end/UX practices, or whether it can be done here.
+
+**Answer:** This can be done in this same environment. The relevant knowledge — Windows desktop UX conventions (Fluent Design / WinUI spacing, typography, and interaction patterns; conventions from comparable dev tools like VS Code and Visual Studio, since VFBE is a code editor, not a general consumer app), accessibility basics (contrast ratios, keyboard navigation, focus indicators), and layout/information-hierarchy heuristics — isn't a separate specialized model; it's general knowledge any capable model has, not something that requires a different AI trained on it. The Claude Code preview tooling can drive the actual built app, take screenshots, and inspect computed styles directly, which is what a review needs. There isn't a categorically "better-suited" different AI for this — the limiting factor is doing the review carefully (screenshot-driven, one panel/dialog at a time) rather than which model does it.
+What **would** add value beyond any AI review: a human with fresh eyes and no context on the app's history, and/or usability testing with an actual end-user developer completing a real task — those catch friction an AI reviewer working from screenshots tends to miss.
+Recommended approach when this is scheduled: run the built IDE, screenshot each major surface (main window, Designer, dialogs, Toolbox, Find/Replace, Settings), evaluate against Fluent/WinUI conventions and basic accessibility, and produce a scoped list of concrete changes rather than a vague "modernize" pass.
+
+**Design against the target audience (§1), not against power users:** the primary audiences (returning Basic programmers, desktop-focused hobbyists, students) value approachability and a cohesive single tool over configurability or professional-IDE feature depth. UI evaluation should weight "is this discoverable and non-intimidating to someone who hasn't touched an IDE in 20 years, or ever" above "does this match what VS Code/Visual Studio power users expect." Avoid recommending changes that add configuration surface or professional-IDE conventions (command palettes, complex multi-pane customization) purely because they're modern — that cuts against the actual audience.
+
+### 13.4 Rename the project (e.g. "ABStudio" — Astoria Basic Studio)
+
+**Owner's context (important — shapes how all of Tier 4 should be approached):** this is a hobby project, and the owner is explicitly willing to spend months building an elegant system from the source-code level up — timeline is not a constraint. The owner's diagnosis of what went wrong with the original upstream project: it tried to do too much, with too little central guidance or attention to detail, and eventually its contributor base collapsed to a single person doing peripheral maintenance because the system had become too difficult to manage as a whole.
+
+That history is the actual reason the rename matters, beyond a cosmetic label: it's meant to mark a deliberate, disciplined fresh start distinct from that trajectory — one with central direction and attention to detail, paired with the structural cleanup in §13.2. Given that framing, this fork should explicitly avoid repeating the original failure mode: **resist scope creep, keep changes centrally reviewed, and prioritize depth/coherence in one area over breadth across many.** Worth keeping in mind for how all of §13 (not just the rename) gets sequenced and scoped as it's picked up.
+
+Flagging the rename itself as a **larger mechanical undertaking than it looks**, not a reason to avoid it — a rename this deep should be a dedicated pass with its own compile-and-test cycle, not folded into other work. Known touch points:
+- Output binaries: `VisualFBEditor64.exe`, `mff64.dll` — filenames referenced throughout `Compile.bat`, `.gitignore`, this doc, `README.md`, `BUILD.md`
+- Window class names / mutex or single-instance-detection strings (if any) in `src/VisualFBEditor.bas` / `Main.bas` — renaming these changes on-disk identity, not just cosmetics
+- Splash screen, About dialog, title bar text, `App.Title` (`src/Main.bas` per §3a warnings-fix notes)
+- INI file name/path (`Settings/VisualFBEditor64.ini`) — needs a migration story if existing users' settings shouldn't be silently orphaned
+- Repository name on Codeberg (`VFBEWin64`) — a rename here changes clone URLs for anyone already tracking it
+- Every doc file (`README.md`, `PROJECT_STATUS.md`, `src/BUILD.md`, `src/THREADING.md`) and likely dozens of in-code comments/strings referencing "VisualFBEditor" or "VFBE"
+- Decide scope up front: cosmetic rename only (title/About/docs) vs. full identity rename (binaries, repo, INI, window classes) — the second is much larger and should be scheduled as its own tier.
+
+### 13.5 Standard Windows installer for end-user developers
+
+Distinct audience from the current git-clone-and-compile workflow: an end-user developer who wants to *write FreeBASIC programs in the IDE*, not modify the IDE's own source — this is the audience described in §1 (returning Basic programmers, desktop-focused hobbyists, students). Implies a second distribution artifact alongside the source repo, not a replacement for it:
+- Real installer/uninstaller (Inno Setup or WiX are the standard choices for a WinAPI-native app like this; both produce a proper uninstall entry in Windows Settings)
+- Pre-built binaries only — `VisualFBEditor64.exe`, `mff64.dll`, the bundled `fbc64` compiler and GDB debugger — no IDE source tree
+- Examples centralized and included (currently under `Examples/` per the key-files map, §10) — bundle as part of the installer, not a separate download
+- Source, if offered at all to this audience, as a single centralized zip rather than the live dev tree (keeps the installer surface small and avoids exposing `Compiler/`/`Debuggers/` internals meant for the fork's own maintainers)
+- Needs a decision on installer scope before starting: does this ship the bundled compiler (making it a fully standalone IDE+compiler), or does it assume the end user already has FreeBASIC installed? Given this fork bundles its own `Compiler/` tree already (§3a), standalone is the more consistent choice.
+- Depends on Tier 3 (compiler swap) being done first, so the installer ships the final intended compiler version rather than needing a re-package immediately after.
 
 ---
 

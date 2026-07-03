@@ -353,7 +353,7 @@ Includes:
 | `bbfa399` | Initial Win64 fork import |
 | `e212819` | Bottom panel persistence/collapse; startup guards; `SaveMainWindowPanelLayout`; `PROJECT_STATUS.md` |
 | `e63f1a6` | Status doc commit-hash update |
-| *(latest)* | First-start collapsed layout; gitignore `docompile.bat`; handoff/test-plan update |
+| `ef3b43e` | First-start collapsed layout; gitignore `docompile.bat`; handoff/test-plan update |
 
 ---
 

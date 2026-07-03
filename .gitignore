@@ -1,0 +1,15 @@
+Compiler
+Debuggers
+MyFbFramework
+*.7z
+*.bak
+Projects/*.exe
+lib*.dll*
+zlib*.dll*
+*.o
+share
+etc
+*32.exe
+VisualFBEditor32*
+mff32*.dll
+VisualFBEditor.wiki

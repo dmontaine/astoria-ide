@@ -1,0 +1,169 @@
+﻿/*'#########################################################*/
+/*'#  VisualFBEditor.rc                                    #*/
+/*'#  This file is part of VisualFBEditor                  #*/
+/*'#  Authors: Xusinboy Bekchanov (2018-2019)              #*/
+/*'#           Liu XiaLin                                  #*/
+/*'#########################################################*/
+
+#include <windows.h>
+
+1 24 "./Manifest.xml"
+1 ICON "../resources/VisualFBEditor.ico"
+//ABOUT PNG "../resources/About.png"
+//Add PNG "../resources/Add.png"
+//Apply PNG "../resources/Apply.png"
+//B32 PNG "../resources/B32.png"
+//B64 PNG "../resources/B64.png"
+//Bookmark PNG "../resources/Bookmark.png"
+//Break PNG "../resources/Break.png"
+//BreakD PNG "../resources/BreakD.png"
+//Breakpoint PNG "../resources/Breakpoint.png"
+//CODE PNG "../resources/Code.png"
+//CODEANDFORM PNG "../resources/CodeAndForm.png"
+//COMPILE PNG "../resources/Compile.png"
+//COMPONENT PNG "../resources/Component.png"
+//COPY PNG "../resources/Copy.png"
+//CUT PNG "../resources/Cut.png"
+//Categorized PNG "../resources/Categorized.png"
+//Close PNG "../resources/Close.png"
+//Collapsed PNG "../resources/Collapsed.png"
+//Comment PNG "../resources/Comment.png"
+//CompleteWord PNG "../resources/CompleteWord.png"
+//Console PNG "../resources/Console.png"
+//DOWN PNG "../resources/Down.png"
+//DropDown PNG "../resources/DropDown.png"
+//DropRight PNG "../resources/DropRight.png"
+//EndD PNG "../resources/EndD.png"
+//EndProgram PNG "../resources/EndProgram.png"
+//Enum PNG "../resources/Enum.png"
+//EnumItem PNG "../resources/EnumItem.png"
+//Eraser PNG "../resources/Eraser.png"
+//Error PNG "../resources/Error.png"
+//Event PNG "../resources/Event.png"
+//Exit PNG "../resources/Exit.png"
+//Expanded PNG "../resources/Expanded.png"
+//FILE PNG "../resources/File.png"
+//FIND PNG "../resources/Find.png"
+//FORM PNG "../resources/Form.png"
+//FileError PNG "../resources/FileError.png"
+//Folder PNG "../resources/Folder.png"
+//Format PNG "../resources/Format.png"
+//Function PNG "../resources/Function.png"
+HAND CURSOR "../resources/Hand.cur"
+//BOOK PNG "../resources/Book.png"
+//INFO PNG "../resources/Info.png"
+//KURSOR PNG "../resources/Kursor.png"
+//LIST PNG "../resources/List.png"
+//LOGO PNG "../resources/Logo.png"
+//Label PNG "../resources/Label.png"
+//MAKE PNG "../resources/Make.png"
+//MainFile PNG "../resources/MainFile.png"
+//MainForm PNG "../resources/MainForm.png"
+//MainModule PNG "../resources/MainModule.png"
+//MainProject PNG "../resources/MainProject.png"
+//MainResource PNG "../resources/MainResource.png"
+//Module PNG "../resources/Module.png"
+//New PNG "../resources/new.png"
+//NotSetted PNG "../resources/NotSetted.png"
+//Numbering PNG "../resources/Numbering.png"
+//Open PNG "../resources/Open.png"
+//Opened PNG "../resources/Opened.png"
+//PASTE PNG "../resources/Paste.png"
+//ParameterInfo PNG "../resources/ParameterInfo.png"
+//Parameters PNG "../resources/Parameters.png"
+//Pin PNG "../resources/Pin.png"
+//Pinned PNG "../resources/Pinned.png"
+//Print PNG "../resources/Print.png"
+//PrintPreview PNG "../resources/PrintPreview.png"
+//Project PNG "../resources/Project.png"
+//Property PNG "../resources/Property.png"
+//REDO PNG "../resources/Redo.png"
+//Remove PNG "../resources/Remove.png"
+//Resource PNG "../resources/Resource.png"
+//SAVE PNG "../resources/Save.png"
+//SAVEALL PNG "../resources/SaveAll.png"
+//Session PNG "../resources/Session.png"
+//SORT PNG "../resources/Sort.png"
+//STANDARTTYPES PNG "../resources/StandartTypes.png"
+//START PNG "../resources/Start.png"
+//STARTD PNG "../resources/StartD.png"
+Scroll CURSOR "../resources/Scroll.cur"
+ScrollDown CURSOR "../resources/ScrollDown.cur"
+ScrollLeft CURSOR "../resources/ScrollLeft.cur"
+ScrollLeftRight CURSOR "../resources/ScrollLeftRight.cur"
+ScrollRight CURSOR "../resources/ScrollRight.cur"
+ScrollUp CURSOR "../resources/ScrollUp.cur"
+ScrollUpDown CURSOR "../resources/ScrollUpDown.cur"
+Select CURSOR "../resources/Select.cur"
+//StartWithCompile PNG "../resources/StartWithCompile.png"
+//StartWithCompileD PNG "../resources/StartWithCompileD.png"
+//Sub PNG "../resources/Sub.png"
+//SyntaxCheck PNG "../resources/SyntaxCheck.png"
+//Tools PNG "../resources/Tools.png"
+//Type PNG "../resources/Type.png"
+//UNDO PNG "../resources/Undo.png"
+//UP PNG "../resources/Up.png"
+//Update PNG "../resources/Update.png"
+//UnComment PNG "../resources/UnComment.png"
+//Unformat PNG "../resources/Unformat.png"
+//UseDebugger PNG "../resources/UseDebugger.png"
+//UserControl PNG "../resources/UserControl.png"
+//WARNING PNG "../resources/Warning.png"
+//weChat PNG "../resources/weChat.png"
+
+#define APP_TITLE_STR               "Visual FB Editor\0"
+#define VER_FILEDESCRIPTION_STR     "Visual FB Editor\0"
+
+#define VER_FILEVERSION             1,3,8,4662
+#define VER_FILEVERSION_STR         "1.3.8.4662\0"
+
+#define VER_LEGALCOPYRIGHT_STR      "\0"
+
+#define VER_INTERNALNAME_STR        "\0"
+#define VER_ORIGINALFILENAME_STR    "\0"
+#define VER_PRODUCTNAME_STR         "VisualFBEditor\0"
+
+#define VER_LEGALTRADEMARKS1_STR    ""
+#define VER_LEGALTRADEMARKS2_STR    ""
+
+#define VER_PRODUCTVERSION          1,3,8,0
+#define VER_PRODUCTVERSION_STR      "1.3.8\0"
+#define VER_COMPANYNAME_STR         "\0"
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION     VER_FILEVERSION
+PRODUCTVERSION  VER_PRODUCTVERSION
+//FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
+//FILEFLAGS       (VER_PRIVATEBUILD|VER_PRERELEASE|VER_DEBUG)
+FILEOS          VOS__WINDOWS32
+FILETYPE        VFT_APP
+FILESUBTYPE     VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904E4"
+        BEGIN
+            VALUE "ApplicationTitle", APP_TITLE_STR
+            VALUE "FileDescription",  VER_FILEDESCRIPTION_STR
+            VALUE "FileVersion",      VER_FILEVERSION_STR
+            VALUE "InternalName",     VER_INTERNALNAME_STR
+            VALUE "LegalCopyright",   VER_LEGALCOPYRIGHT_STR
+            //VALUE "LegalTrademarks1", VER_LEGALTRADEMARKS1_STR
+            //VALUE "LegalTrademarks2", VER_LEGALTRADEMARKS2_STR
+            VALUE "OriginalFilename", VER_ORIGINALFILENAME_STR
+            VALUE "ProductName",      VER_PRODUCTNAME_STR
+            VALUE "ProductVersion",   VER_PRODUCTVERSION_STR
+            VALUE "CompanyName",      VER_COMPANYNAME_STR
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        /* The following Line should only be modified For localized versions.     */
+        /* It consists of Any number of WORD,WORD pairs, With each pair           */
+        /* describing a language,codepage combination supported by the file.      */
+        /*                                                                        */
+        /* For example, a file might have values "0x409,1252" indicating that it  */
+        /* supports English language (0x409) in the Windows ANSI codepage (1252). */
+        VALUE "Translation", 0x409, 1252
+    END
+END

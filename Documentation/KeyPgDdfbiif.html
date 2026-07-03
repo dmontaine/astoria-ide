@@ -1,0 +1,69 @@
+<html>
+<head>
+<title>__FB_IIF__</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+<meta charset="UTF-8">
+</head>
+<body>
+<div id="fb_body_wrapper">
+<div id="fb_tab">
+<div id="fb_tab_l">__FB_IIF__</div>
+<div id="fb_tab_r">&nbsp;<img src="images/fblogo_mini.gif" /></div> 
+</div> 
+<div id="fb_pg_wrapper">
+<div id="fb_pg_body">
+	Intrinsic define (macro) performed by the compiler.<br \>
+<br \>
+<div class="fb_sect_title">Syntax</div><div class="fb_sect_cont"><tt><br \>
+__FB_IIF__( compare-expr, true-expr, false-expr )<br \>
+</tt><br \>
+</div><div class="fb_sect_title">Parameters</div><div class="fb_sect_cont"><br \>
+<tt><i>compare-expr</i></tt><br \>
+<div class="fb_indent">The comparison expression to test.<br \>
+A non-zero value evaluates as true, while a value of zero evaluates as false.<br \>
+</div><tt><i>true-expr</i></tt><br \>
+<div class="fb_indent">Source code to return if <tt><i>compare-expr</i></tt> is true.<br \>
+</div><tt><i>false-expr</i></tt><br \>
+<div class="fb_indent">Source code to return if <tt><i>compare-expr</i></tt> is false.<br \>
+<br \>
+</div></div><div class="fb_sect_title">Description</div><div class="fb_sect_cont"><br \>
+<tt><b>__FB_IIF__</b></tt> returns source code text depending on the result of a comparison expression evaluated at preprocessing-time.<br \>
+Its typical use is in the middle of an expression; it avoids splitting it to put a conditional in the middle.<br \>
+<br \>
+This intrinsic define (macro) differs from the <tt><a href="KeyPgIif.html">IIf</a></tt> conditional statement in that <tt><b>__FB_IIF__</b></tt> is evaluated at compile-time only and returns source code text.  <tt><a href="KeyPgIif.html">IIf</a></tt> is evaluated at compile-time only if the <tt><i>compare-expr</i></tt> is a constant.  Otherwise <tt><a href="KeyPgIif.html">IIf</a></tt> expressions are evaluated at run-time.<br \>
+<br \>
+</div><div class="fb_sect_title">Example</div><div class="fb_sect_cont"><br \>
+<tt><div class="freebasic">
+<span class="com">'&nbsp;From&nbsp;the&nbsp;example&nbsp;of&nbsp;the&nbsp;'#ELSE'&nbsp;documentation&nbsp;page:</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="com">'#DEFINE&nbsp;MODULE_VERSION&nbsp;1</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="com">'Dim&nbsp;a&nbsp;As&nbsp;String</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="com">'#IF&nbsp;(MODULE_VERSION&nbsp;&gt;&nbsp;0)</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="com">'&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;=&nbsp;&quot;Release&quot;</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="com">'#ELSE</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="com">'&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;=&nbsp;&quot;Beta&quot;</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="com">'#ENDIF</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="com">'Print&nbsp;&quot;Program&nbsp;is&nbsp;&quot;;&nbsp;a</span><br />
+<br />
+<span class="com">'&nbsp;Simpler&nbsp;code&nbsp;using&nbsp;'__FB_IIF__':</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="def">#define&nbsp;MODULE_VERSION&nbsp;1<br />
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Dim</span>&nbsp;<span class="wrd">a</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">String</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="wrd">a</span>&nbsp;<span class="oth">=</span>&nbsp;<span class="key">__FB_IIF__</span><span class="oth">(</span>&nbsp;<span class="wrd">MODULE_VERSION</span>&nbsp;<span class="oth">&gt;</span>&nbsp;<span class="num">0</span><span class="oth">,</span>&nbsp;<span class="quo">&quot;Release&quot;</span><span class="oth">,</span>&nbsp;<span class="quo">&quot;Beta&quot;</span>&nbsp;<span class="oth">)</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Print</span>&nbsp;<span class="quo">&quot;Program&nbsp;is&nbsp;&quot;</span><span class="oth">;</span>&nbsp;<span class="wrd">a</span><br />
+</div></tt><br />
+</div><div class="fb_sect_title">Version</div><div class="fb_sect_cont"><br \>
+<ul><li> Since fbc 1.10.0<br \>
+<br \>
+</ul></div><div class="fb_sect_title">Differences from QB</div><div class="fb_sect_cont"><br \>
+<ul><li> New to FreeBASIC<br \>
+<br \>
+</ul></div><div class="fb_sect_title">See also</div><div class="fb_sect_cont"><br \>
+<ul><li> <tt><a href="KeyPgPpif.html">#if</a></tt><br \>
+<li> <tt><a href="KeyPgPpelse.html">#else</a></tt><br \>
+<li> <tt><a href="KeyPgPpendif.html">#endif</a></tt><br \>
+<br \>
+</ul></div>
+</div>
+</div> 
+</div> 
+</body>
+</html>

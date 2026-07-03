@@ -1,0 +1,147 @@
+<html>
+<head>
+<title>__Fb_Query_Symbol__</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+<meta charset="UTF-8">
+</head>
+<body>
+<div id="fb_body_wrapper">
+<div id="fb_tab">
+<div id="fb_tab_l">__Fb_Query_Symbol__</div>
+<div id="fb_tab_r">&nbsp;<img src="images/fblogo_mini.gif" /></div> 
+</div> 
+<div id="fb_pg_wrapper">
+<div id="fb_pg_body">
+	Intrinsic define (macro) performed by the compiler, and its associated sub-macros.<br \>
+<br \>
+<div class="fb_sect_title">Syntax</div><div class="fb_sect_cont"><tt><br \>
+__FB_QUERY_SYMBOL__( what, sym )<br \>
+</tt><br \>
+</div><div class="fb_sect_title">Usage</div><div class="fb_sect_cont"><br \>
+The <tt>./inc/fbc-int/symbol.bi</tt> header exposes internals of the fbc compiler through the built-in macro <b><tt>__FB_QUERY_SYMBOL__</tt></b>.<br \>
+In addition, many convenient sub-macros with <b><tt>'is'</tt></b> as name prefix (also defined in the file <tt>./inc/fbc-int/symbol.bi</tt>) help the user to indirectly call the generic built-in macro <b><tt>__FB_QUERY_SYMBOL__</tt></b>:<br \>
+<div class="fb_indent"><tt><br \>
+#include once "fbc-int/symbol.bi"<br \>
+using <b>FBC</b><br \>
+<br \>
+' then:<br \>
+<div class="fb_indent"><a href="KeyPgDim.html">Dim</a> <i>b</i> <a href="KeyPgAs.html">As</a> <a href="KeyPgBoolean.html">Boolean</a><br \>
+...<br \>
+<i>b</i> = <b>isXXXXX</b>( <i>sym</i> )<br \>
+</div></div></tt><br \>
+</div><div class="fb_sect_title">Parameters</div><div class="fb_sect_cont"><br \>
+<tt><i>sym</i></tt><br \>
+<div class="fb_indent">symbol name to query<br \>
+</div><tt><i>b</i></tt><br \>
+<div class="fb_indent">boolean to store the return value from the macro<br \>
+</div><b><tt>XXXXX</tt></b><br \>
+<div class="fb_indent">body of the sub-macro name standing the kind of query<br \>
+<br \>
+</div></div><div class="fb_sect_title">Description</div><div class="fb_sect_cont"><br \>
+<b><tt>__FB_QUERY_SYMBOL__</tt></b> is a generic built-in macro for querying fbc symbol internals.<br \>
+<br \>
+In the file <tt>./inc/fbc-int/symbol.bi</tt>, many convenient and specialized sub-macros with <b><tt>'is'</tt></b> as name prefix (<b><tt>'isXXXXX'</tt></b>) are also defined (where <b><tt>'XXXXX'</tt></b> stands for the kind of query).<br \>
+They help the user to indirectly call the generic built-in macro <b><tt>__FB_QUERY_SYMBOL__</tt></b> without knowing the encoding of its first parameter and its return value, but passing the only <tt><i>sym</i></tt> parameter to those sub-macros which only return <tt>-1</tt> (for <tt>True</tt>) or <tt>0</tt> (for <tt>False</tt>).<br \>
+<br \>
+For three of the query types, convenient and specialized sub-macros are available:<br \>
+<div class="fb_indent">- 'class of symbols' (like variable, constant, procedure, namespace, ...),<br \>
+- 'class of data' (like integer, float, string, UDT, ...),<br \>
+- 'type of data' (like boolean, byte, ubyte, short, ...).<br \>
+</div>in order to test whether a symbol matches an element of the considered family.<br \>
+<br \>
+</div><div class="fb_sect_title">Example</div><div class="fb_sect_cont"><br \>
+Using convenient sub-macros from the <tt>./inc/fbc-int/symbol.bi</tt> file (indirectly calling <b><tt>__FB_QUERY_SYMBOL__</tt></b>)<br \>
+<div class="fb_indent"><tt><div class="freebasic">
+<span class="def">#include&nbsp;Once&nbsp;&quot;fbc-int/symbol.bi&quot;<br />
+</span><span class="key">Using</span>&nbsp;<span class="wrd">FBC</span><br />
+<br />
+<span class="key">Type</span>&nbsp;<span class="wrd">T</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="wrd">i</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Integer</span><br />
+<span class="key">End</span>&nbsp;<span class="key">Type</span><br />
+<span class="key">Dim</span>&nbsp;<span class="wrd">x</span>&nbsp;<span class="key">As</span>&nbsp;<span class="wrd">T</span><br />
+<br />
+<span class="key">Print</span>&nbsp;<span class="wrd">isUDT</span><span class="oth">(</span>&nbsp;<span class="wrd">T</span>&nbsp;<span class="oth">)</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="com">''&nbsp;returns&nbsp;-1&nbsp;(true)</span><br />
+<span class="key">Print</span>&nbsp;<span class="wrd">isVariable</span><span class="oth">(</span>&nbsp;<span class="wrd">T</span>&nbsp;<span class="oth">)</span>&nbsp;&nbsp;<span class="com">''&nbsp;returns&nbsp;0&nbsp;(false)</span><br />
+<span class="key">Print</span>&nbsp;<span class="wrd">isUDT</span><span class="oth">(</span>&nbsp;<span class="wrd">x</span>&nbsp;<span class="oth">)</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="com">''&nbsp;returns&nbsp;0&nbsp;(false)</span><br />
+<span class="key">Print</span>&nbsp;<span class="wrd">isVariable</span><span class="oth">(</span>&nbsp;<span class="wrd">x</span>&nbsp;<span class="oth">)</span>&nbsp;&nbsp;<span class="com">''&nbsp;returns&nbsp;-1&nbsp;(true)</span><br />
+<br />
+<span class="key">Sleep</span><br />
+</div></tt><br />
+</div>Using directly <b><tt>__FB_QUERY_SYMBOL__</tt></b> and some declarations from the <tt>./inc/fbc-int/symbol.bi</tt> file to output the data class of a symbol:<br \>
+<div class="fb_indent"><tt><div class="freebasic">
+<span class="def">#include&nbsp;Once&nbsp;&quot;fbc-int/symbol.bi&quot;<br />
+</span><span class="key">Using</span>&nbsp;<span class="wrd">FBC</span><br />
+<br />
+<span class="key">Function</span>&nbsp;<span class="wrd">dataclassToStr</span><span class="oth">(</span>&nbsp;<span class="key">ByVal</span>&nbsp;<span class="wrd">classid</span>&nbsp;<span class="key">As</span>&nbsp;<span class="wrd">fbc.FB_DATACLASS</span>&nbsp;<span class="oth">)</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">String</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Static</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">ZString</span>&nbsp;<span class="key">Ptr</span>&nbsp;<span class="wrd">classnames</span>&nbsp;<span class="wrd">_</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="oth">(</span>&nbsp;<span class="wrd">FB_DATACLASS.FB_DATACLASS_INTEGER</span>&nbsp;<span class="key">To</span>&nbsp;<span class="wrd">FB_DATACLASS.FB_DATACLASS_UDT</span>&nbsp;<span class="oth">)</span>&nbsp;<span class="wrd">_</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="oth">=</span>&nbsp;<span class="oth">{</span>&nbsp;<span class="oth">@</span><span class="quo">&quot;integer&quot;</span><span class="oth">,</span>&nbsp;<span class="oth">@</span><span class="quo">&quot;float&quot;</span><span class="oth">,</span>&nbsp;<span class="oth">@</span><span class="quo">&quot;string&quot;</span><span class="oth">,</span>&nbsp;<span class="oth">@</span><span class="quo">&quot;udt&quot;</span>&nbsp;<span class="oth">}</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Select</span>&nbsp;<span class="key">Case</span>&nbsp;<span class="wrd">classid</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Case</span>&nbsp;<span class="key">LBound</span><span class="oth">(</span><span class="wrd">classnames</span><span class="oth">)</span>&nbsp;<span class="key">To</span>&nbsp;<span class="key">UBound</span><span class="oth">(</span><span class="wrd">classnames</span><span class="oth">)</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Return</span>&nbsp;<span class="oth">*</span><span class="wrd">classnames</span><span class="oth">(</span><span class="wrd">classid</span><span class="oth">)</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Case</span>&nbsp;<span class="key">Else</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Return</span>&nbsp;<span class="quo">&quot;*invalid*&quot;</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">End</span>&nbsp;<span class="key">Select</span><br />
+<span class="key">End</span>&nbsp;<span class="key">Function</span><br />
+<br />
+<span class="def">#macro&nbsp;show_dataclass(&nbsp;sym&nbsp;)<br />
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Scope</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Var</span>&nbsp;<span class="wrd">classid</span>&nbsp;<span class="oth">=</span>&nbsp;<span class="wrd">__FB_QUERY_SYMBOL__</span><span class="oth">(</span>&nbsp;<span class="wrd">FB_QUERY_SYMBOL.dataclass</span><span class="oth">,</span>&nbsp;<span class="wrd">sym</span>&nbsp;<span class="oth">)</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Print</span>&nbsp;<span class="key">Left</span><span class="oth">(</span>&nbsp;<span class="quo">&quot;&nbsp;&nbsp;&nbsp;[&quot;</span>&nbsp;<span class="oth">&amp;</span>&nbsp;<span class="wrd">classid</span>&nbsp;<span class="oth">&amp;</span>&nbsp;<span class="quo">&quot;]&nbsp;&quot;</span>&nbsp;<span class="oth">&amp;</span>&nbsp;<span class="wrd">dataclassToStr</span><span class="oth">(</span><span class="wrd">classid</span><span class="oth">)</span>&nbsp;<span class="oth">+</span>&nbsp;<span class="key">Space</span><span class="oth">(</span><span class="num">16</span><span class="oth">),</span>&nbsp;<span class="num">16</span>&nbsp;<span class="oth">)</span>&nbsp;<span class="oth">&amp;</span>&nbsp;<span class="quo">&quot;:&nbsp;&quot;</span><span class="oth">;</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Print</span>&nbsp;<span class="oth">#</span><span class="wrd">sym</span>&nbsp;&nbsp;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">End</span>&nbsp;<span class="key">Scope</span><br />
+<span class="def">#endmacro<br />
+</span><br />
+<span class="key">Dim</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Byte</span>&nbsp;<span class="wrd">b</span><br />
+<span class="key">Dim</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Double</span>&nbsp;<span class="wrd">d</span><br />
+<span class="key">Dim</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">String</span>&nbsp;<span class="wrd">s</span><br />
+<br />
+<span class="key">Type</span>&nbsp;<span class="wrd">T</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Dim</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Long</span>&nbsp;<span class="wrd">l</span><br />
+<span class="key">End</span>&nbsp;<span class="key">Type</span><br />
+<span class="key">Dim</span>&nbsp;<span class="key">As</span>&nbsp;<span class="wrd">T</span>&nbsp;<span class="wrd">t1</span><br />
+<br />
+<span class="key">Print</span>&nbsp;<span class="quo">&quot;EXAMPLES&nbsp;OF&nbsp;'__FB_QUERY_SYMBOL__(&nbsp;FB_QUERY_SYMBOL.dataclass,&nbsp;sym&nbsp;)':&quot;</span><br />
+<br />
+<span class="wrd">show_dataclass</span><span class="oth">(</span>&nbsp;<span class="wrd">b</span>&nbsp;<span class="oth">)</span><br />
+<span class="wrd">show_dataclass</span><span class="oth">(</span>&nbsp;<span class="wrd">d</span>&nbsp;<span class="oth">)</span><br />
+<span class="wrd">show_dataclass</span><span class="oth">(</span>&nbsp;<span class="wrd">s</span>&nbsp;<span class="oth">)</span><br />
+<span class="wrd">show_dataclass</span><span class="oth">(</span>&nbsp;<span class="wrd">T</span>&nbsp;<span class="oth">)</span><br />
+<span class="wrd">show_dataclass</span><span class="oth">(</span>&nbsp;<span class="wrd">T.l</span>&nbsp;<span class="oth">)</span><br />
+<span class="wrd">show_dataclass</span><span class="oth">(</span>&nbsp;<span class="wrd">t1</span>&nbsp;<span class="oth">)</span><br />
+<span class="wrd">show_dataclass</span><span class="oth">(</span>&nbsp;<span class="wrd">t1.l</span>&nbsp;<span class="oth">)</span><br />
+<br />
+<span class="key">Sleep</span><br />
+</div></tt><br />
+</div>Using directly <b><tt>__FB_QUERY_SYMBOL__</tt></b> and some declarations from the <tt>./inc/fbc-int/symbol.bi</tt> file to output the typename as text, the typename as text with special characters replaced with '_', and the decorated (mangled) type name (WIP), of a symbol:<br \>
+<div class="fb_indent"><tt><div class="freebasic">
+<span class="def">#include&nbsp;Once&nbsp;&quot;fbc-int/symbol.bi&quot;<br />
+</span><span class="key">Using</span>&nbsp;<span class="wrd">FBC</span><br />
+<br />
+<span class="key">Namespace</span>&nbsp;<span class="wrd">NS</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Type</span>&nbsp;<span class="wrd">T</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Dim</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Const</span>&nbsp;<span class="key">String</span>&nbsp;<span class="key">Const</span>&nbsp;<span class="key">Ptr</span>&nbsp;<span class="key">Ptr</span>&nbsp;<span class="wrd">pps</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">End</span>&nbsp;<span class="key">Type</span><br />
+<span class="key">End</span>&nbsp;<span class="key">Namespace</span><br />
+<br />
+<span class="def">#print&nbsp;TypeOf(NS.T.pps)<br />
+</span><br />
+<span class="key">Print</span>&nbsp;<span class="quo">&quot;type&nbsp;name&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&quot;</span>&nbsp;<span class="oth">&amp;</span>&nbsp;<span class="key">__FB_QUOTE__</span><span class="oth">(</span>&nbsp;<span class="wrd">__FB_QUERY_SYMBOL__</span><span class="oth">(</span>&nbsp;<span class="wrd">FB_QUERY_SYMBOL.typename</span><span class="oth">,</span>&nbsp;<span class="wrd">NS.T.pps</span>&nbsp;<span class="oth">)</span>&nbsp;<span class="oth">)</span><br />
+<span class="key">Print</span>&nbsp;<span class="quo">&quot;type&nbsp;name&nbsp;id&nbsp;:&nbsp;&quot;</span>&nbsp;<span class="oth">&amp;</span>&nbsp;<span class="key">__FB_QUOTE__</span><span class="oth">(</span>&nbsp;<span class="wrd">__FB_QUERY_SYMBOL__</span><span class="oth">(</span>&nbsp;<span class="wrd">FB_QUERY_SYMBOL.typenameid</span><span class="oth">,</span>&nbsp;<span class="wrd">NS.T.pps</span>&nbsp;<span class="oth">)</span>&nbsp;<span class="oth">)</span><br />
+<span class="key">Print</span>&nbsp;<span class="quo">&quot;mangled&nbsp;id&nbsp;&nbsp;&nbsp;:&nbsp;&quot;</span>&nbsp;<span class="oth">&amp;</span>&nbsp;<span class="key">__FB_QUOTE__</span><span class="oth">(</span>&nbsp;<span class="wrd">__FB_QUERY_SYMBOL__</span><span class="oth">(</span>&nbsp;<span class="wrd">FB_QUERY_SYMBOL.mangleid</span><span class="oth">,</span>&nbsp;<span class="wrd">NS.T.pps</span>&nbsp;<span class="oth">)</span>&nbsp;<span class="oth">)</span><br />
+<br />
+<span class="key">Sleep</span><br />
+</div></tt><br />
+</div></div><div class="fb_sect_title">Version</div><div class="fb_sect_cont"><br \>
+<ul><li> Since fbc 1.10.0<br \>
+<br \>
+</ul></div><div class="fb_sect_title">Differences from QB</div><div class="fb_sect_cont"><br \>
+<ul><li> New to FreeBASIC<br \>
+<br \>
+</ul></div>
+</div>
+</div> 
+</div> 
+</body>
+</html>

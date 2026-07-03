@@ -1,0 +1,47 @@
+<html>
+<head>
+<title>Compiler Option: -nolib</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+<meta charset="UTF-8">
+</head>
+<body>
+<div id="fb_body_wrapper">
+<div id="fb_tab">
+<div id="fb_tab_l">Compiler Option: -nolib</div>
+<div id="fb_tab_r">&nbsp;<img src="images/fblogo_mini.gif" /></div> 
+</div> 
+<div id="fb_pg_wrapper">
+<div id="fb_pg_body">
+	Do not include specific library(s).<br \>
+<br \>
+<div class="fb_sect_title">Syntax</div><div class="fb_sect_cont"><tt><br \>
+<div class="fb_indent"><div class="fb_indent"><b>-nolib</b> &lt; <i>libname1</i> [, <i>libname2</i> [, ... ] ] &gt;<br \>
+</div></div></tt><br \>
+</div><div class="fb_sect_title">Parameters</div><div class="fb_sect_cont"><br \>
+<div class="fb_indent"><tt><i>libname1</i></tt>, <tt><i>libname2</i></tt>, ...<br \>
+<div class="fb_indent">Name (without name's extension) of each library to exclude.<br \>
+<br \>
+</div></div></div><div class="fb_sect_title">Description</div><div class="fb_sect_cont"><br \>
+<div class="fb_indent">The <tt>-nolib</tt> compiler option allows excluding specific libraries when linking, no matter where it came from (default lib, #inclib, -l, objinfo...).<br \>
+(more fine-grained control than <tt><a href="CompilerOptnodeflibs.html">-nodeflibs</a></tt>, and not only for default libraries)<br \>
+<br \>
+This allows selectively blacklisting libraries and can be used to:<br \>
+<div class="fb_indent"><b>-</b> remove unused dependencies when linking against shared libraries (when linking against static libraries via -l, the linker automatically skips unused libs, but not for shared libraries),<br \>
+<b>-</b> override unwanted #inclibs (although arguably this is not the ideal solution for that, but just a last resort),<br \>
+<b>-</b> disable only some default libs, instead of all as done by <tt><a href="CompilerOptnodeflibs.html">-nodeflibs</a></tt>:<br \>
+<div class="fb_indent">For example, this could be used to specifically omit <tt>libtinfo</tt>.<br \>
+Using <tt><a href="CompilerOptnodeflibs.html">-nodeflibs</a></tt> would omit a lot more (including <tt>fbrt0.o</tt>) which would have to be re-added manually again.<br \>
+<br \>
+</div></div></div></div><div class="fb_sect_title">Version</div><div class="fb_sect_cont"><br \>
+<ul><li> Since fbc 1.10.0.<br \>
+<br \>
+</ul></div><div class="fb_sect_title">See also</div><div class="fb_sect_cont"><br \>
+<ul><li> <a href="CompilerOptnodeflibs.html">Compiler Option: -nodeflibs</a><br \>
+<li> <a href="CompilerCmdLine.html">Using the Command Line</a><br \>
+<br \>
+</ul></div>
+</div>
+</div> 
+</div> 
+</body>
+</html>

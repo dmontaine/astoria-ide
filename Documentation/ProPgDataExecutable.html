@@ -1,0 +1,78 @@
+<html>
+<head>
+<title>Embed and Access binary Data in Executable</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+<meta charset="UTF-8">
+</head>
+<body>
+<div id="fb_body_wrapper">
+<div id="fb_tab">
+<div id="fb_tab_l">Embed and Access binary Data in Executable</div>
+<div id="fb_tab_r">&nbsp;<img src="images/fblogo_mini.gif" /></div> 
+</div> 
+<div id="fb_pg_wrapper">
+<div id="fb_pg_body">
+	How to <b>embed</b> binary <b>data</b> into an <b>executable</b> file at compile time, and <b>access</b> it from program code.<br \>
+<tt><i>(based from forum posts of caseih and coderJeff)</i></tt><br \>
+<br \>
+This article describes a way to include binary data in a compiled program, and how to access them.<br \>
+<br \>
+<div class="fb_sect_title">Principle</div><div class="fb_sect_cont"><br \>
+The (G)LD linker (included in the FreeBASIC distribution) can process binary data in a file, by turning them into an object file. This object file exports symbols that can be accessed from the program code to read the data.<br \>
+The linker will so build two byte symbols based on the file name provided:<br \>
+<div class="fb_indent">- a symbol for the beginning of the data block (the first data byte),<br \>
+- another symbol for the end of the data block (just after the last data byte).<br \>
+</div>By compiling the user program with the object file, the addresses of these byte symbols allow to get pointers to the beginning and end of the data.<br \>
+<br \>
+<b>Note:</b> It may be advantageous to apply this principle for example to an audio data file which can thus be included in the executable file. Both a pointer to the start of the audio data and the size of the audio data can be passed to any audio player function.<br \>
+<br \>
+</div><div class="fb_sect_title">Example</div><div class="fb_sect_cont"><br \>
+Simple example to only demonstrate the principle (tested on linux/win 32/64-bit gas/gas64/gcc).<br \>
+This example uses as binary data the ASCII code bytes of a text inserted in a <tt><i>hello.txt</i></tt> text file:<br \>
+<div class="fb_indent"><tt><i>hello.txt</i></tt> text file for example:<br \>
+<div class="fb_indent"><pre class="fb_pre">
+Hello!
+Welcome to the forum.
+			</pre></div>Invoke the LD linker manually to turn the <tt><i>hello.txt</i></tt> text file into an <tt><i>hello.o</i></tt> object file exporting symbols:<br \>
+<div class="fb_indent"><tt>...\ld -r -b binary -o <i>hello.o</i> <i>hello.txt</i></tt><br \>
+<br \>
+</div>Two byte symbols are exported from the <tt><i>hello.o</i></tt> object file:<br \>
+<div class="fb_indent"><b>-</b> on Windows 32-bit:<br \>
+<div class="fb_indent"><div class="fb_indent"><tt><i>binary_hello_txt_start</i></tt> : beginning of the data block (the first data byte)<br \>
+<tt><i>binary_hello_txt_end</i></tt> : end of the data block (just after the last data byte)<br \>
+</div></div><b>-</b> otherwise:<br \>
+<div class="fb_indent"><div class="fb_indent"><tt><i>_binary_hello_txt_start</i></tt> : beginning of the data block (the first data byte)<br \>
+<tt><i>_binary_hello_txt_end</i></tt> : end of the data block (just after the last data byte)<br \>
+<br \>
+</div></div></div>Include the <tt><i>hello.o</i></tt> object file in the command-line when compiling the following program (which prints the ASCII code bytes embedded in the executable):<br \>
+<div class="fb_indent"><tt><div class="freebasic">
+<span class="key">Extern</span>&nbsp;<span class="quo">&quot;C&quot;</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="def">#if&nbsp;defined(__FB_WIN32__)&nbsp;And&nbsp;Not&nbsp;defined(__FB_64BIT__)<br />
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Extern</span>&nbsp;<span class="wrd">hello_txt_start</span>&nbsp;<span class="key">Alias</span>&nbsp;<span class="quo">&quot;binary_hello_txt_start&quot;</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Const</span>&nbsp;<span class="key">Byte</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Extern</span>&nbsp;<span class="wrd">hello_txt_end</span>&nbsp;<span class="key">Alias</span>&nbsp;<span class="quo">&quot;binary_hello_txt_end&quot;</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Const</span>&nbsp;<span class="key">Byte</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="def">#else<br />
+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Extern</span>&nbsp;<span class="wrd">hello_txt_start</span>&nbsp;<span class="key">Alias</span>&nbsp;<span class="quo">&quot;_binary_hello_txt_start&quot;</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Const</span>&nbsp;<span class="key">Byte</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Extern</span>&nbsp;<span class="wrd">hello_txt_end</span>&nbsp;<span class="key">Alias</span>&nbsp;<span class="quo">&quot;_binary_hello_txt_end&quot;</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Const</span>&nbsp;<span class="key">Byte</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="def">#endif<br />
+</span><span class="key">End</span>&nbsp;<span class="key">Extern</span><br />
+<br />
+<span class="key">Dim</span>&nbsp;<span class="wrd">hello_ptr</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Const</span>&nbsp;<span class="key">Byte</span>&nbsp;<span class="key">Const</span>&nbsp;<span class="key">Ptr</span>&nbsp;<span class="oth">=</span>&nbsp;<span class="oth">@</span><span class="wrd">hello_txt_start</span><br />
+<span class="key">Dim</span>&nbsp;<span class="wrd">hello_length</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Const</span>&nbsp;<span class="key">UInteger</span>&nbsp;<span class="oth">=</span>&nbsp;<span class="oth">@</span><span class="wrd">hello_txt_end</span>&nbsp;<span class="oth">-</span>&nbsp;<span class="oth">@</span><span class="wrd">hello_txt_start</span><br />
+<br />
+<span class="key">For</span>&nbsp;<span class="wrd">i</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">UInteger</span>&nbsp;<span class="oth">=</span>&nbsp;<span class="num">0</span>&nbsp;<span class="key">To</span>&nbsp;<span class="wrd">hello_length</span>&nbsp;<span class="oth">-</span>&nbsp;<span class="num">1</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Print</span>&nbsp;<span class="key">Chr</span><span class="oth">(</span><span class="wrd">hello_ptr</span><span class="oth">[</span><span class="wrd">i</span><span class="oth">]);</span><br />
+<span class="key">Next</span><br />
+<span class="key">Print</span><br />
+<br />
+<span class="key">Sleep</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div></tt><br />
+</div></div></div><div class="fb_sect_title">See also</div><div class="fb_sect_cont"><br \>
+<ul><li> <a href="ProPgExecutables.html">Executables</a><br \>
+<li> <a href="CompilerCmdLine.html">fbc command-line</a><br \>
+<br \>
+</ul></div>
+</div>
+</div> 
+</div> 
+</body>
+</html>

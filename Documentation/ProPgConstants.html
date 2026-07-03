@@ -1,0 +1,62 @@
+<html>
+<head>
+<title>Constants</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+<meta charset="UTF-8">
+</head>
+<body>
+<div id="fb_body_wrapper">
+<div id="fb_tab">
+<div id="fb_tab_l">Constants</div>
+<div id="fb_tab_r">&nbsp;<img src="images/fblogo_mini.gif" /></div> 
+</div> 
+<div id="fb_pg_wrapper">
+<div id="fb_pg_body">
+	Constants are identifiers that represent literals or constant expressions that can not be changed after they are defined.<br \>
+<br \>
+For example, <tt>Const PI = 3.1415926535897932</tt> will always mean that the identifier <tt>PI</tt> refers to the number <tt>3.1415926535897932</tt>.  The identifier <tt>PI</tt> can be used instead of repeating the full number in source.<br \>
+<br \>
+Global constants once defined, are available globally and the identifier can be used to refer to the constant anywhere in the source program. <br \>
+<br \>
+After an identifier is defined with the <tt><a href="KeyPgConst.html">Const</a></tt> statement, the symbol cannot be altered. If code tries to alter a constant, an error message will result upon code compilation.<br \>
+<br \>
+Built-in constants include the <tt><a href="KeyPgBoolean.html">Boolean</a></tt> data type values <tt><a href="KeyPgTrue.html">True</a></tt> and <tt><a href="KeyPgFalse.html">False</a></tt>.<br \>
+<br \>
+A constant definition differs from a variable definition.  Variables hold values that can be changed.<br \>
+<br \>
+<div class="fb_sect_title">Example</div><div class="fb_sect_cont"><br \>
+<tt><div class="freebasic">
+<span class="key">Declare</span>&nbsp;<span class="key">Sub</span>&nbsp;<span class="wrd">PrintConstants</span>&nbsp;<span class="oth">()</span><br />
+<br />
+<span class="key">Const</span>&nbsp;<span class="wrd">FirstNumber</span>&nbsp;<span class="oth">=</span>&nbsp;<span class="num">1</span><br />
+<span class="key">Const</span>&nbsp;<span class="wrd">SecondNumber</span>&nbsp;<span class="oth">=</span>&nbsp;<span class="num">2</span><br />
+<span class="key">Const</span>&nbsp;<span class="wrd">FirstString</span>&nbsp;<span class="oth">=</span>&nbsp;<span class="quo">&quot;First&nbsp;string.&quot;</span><br />
+<span class="key">Const</span>&nbsp;<span class="wrd">FirstBoolean</span>&nbsp;<span class="oth">=</span>&nbsp;<span class="key">False</span><br />
+<span class="key">Const</span>&nbsp;<span class="wrd">SecondBoolean</span>&nbsp;<span class="oth">=</span>&nbsp;<span class="key">True</span><br />
+<br />
+<span class="key">Print</span>&nbsp;<span class="wrd">FirstNumber</span><span class="oth">,</span>&nbsp;<span class="wrd">SecondNumber</span>&nbsp;<span class="com">'This&nbsp;will&nbsp;print&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2</span><br />
+<span class="key">Print</span>&nbsp;<span class="wrd">FirstString</span>&nbsp;<span class="com">'This&nbsp;will&nbsp;print&nbsp;First&nbsp;string.</span><br />
+<span class="key">Print</span>&nbsp;<span class="wrd">FirstBoolean</span><span class="oth">,</span>&nbsp;<span class="wrd">SecondBoolean</span>&nbsp;<span class="com">'This&nbsp;will&nbsp;print&nbsp;false&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;true</span><br />
+<span class="key">Print</span><br />
+<br />
+<span class="wrd">PrintConstants</span>&nbsp;<span class="oth">()</span><br />
+<br />
+<span class="key">Sub</span>&nbsp;<span class="wrd">PrintConstants</span>&nbsp;<span class="oth">()</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Print</span>&nbsp;<span class="wrd">FirstNumber</span><span class="oth">,</span>&nbsp;<span class="wrd">SecondNumber</span>&nbsp;<span class="com">'This&nbsp;will&nbsp;also&nbsp;print&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Print</span>&nbsp;<span class="wrd">FirstString</span>&nbsp;<span class="com">'This&nbsp;will&nbsp;also&nbsp;print&nbsp;First&nbsp;string.</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Print</span>&nbsp;<span class="wrd">FirstBoolean</span><span class="oth">,</span>&nbsp;<span class="wrd">SecondBoolean</span>&nbsp;<span class="com">'This&nbsp;will&nbsp;also&nbsp;print&nbsp;false&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;true</span><br />
+<span class="key">End</span>&nbsp;<span class="key">Sub</span><br />
+</div></tt><br />
+<br \>
+</div><div class="fb_sect_title">See also</div><div class="fb_sect_cont"><br \>
+<ul><li> <tt><a href="ProPgConstantExpressions.html">Constant Expressions</a></tt><br \>
+<li> <tt><a href="ProPgLiterals.html">Literals</a></tt><br \>
+<li> <tt><a href="KeyPgConst.html">Const</a></tt><br \>
+<li> <tt><a href="KeyPgEnum.html">Enum</a></tt><br \>
+<br \>
+</ul></div>
+</div>
+</div> 
+</div> 
+</body>
+</html>

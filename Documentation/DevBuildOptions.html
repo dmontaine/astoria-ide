@@ -1,0 +1,117 @@
+<html>
+<head>
+<title>FreeBASIC Build Options</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+<meta charset="UTF-8">
+</head>
+<body>
+<div id="fb_body_wrapper">
+<div id="fb_tab">
+<div id="fb_tab_l">FreeBASIC Build Options</div>
+<div id="fb_tab_r">&nbsp;<img src="images/fblogo_mini.gif" /></div> 
+</div> 
+<div id="fb_pg_wrapper">
+<div id="fb_pg_body">
+	Building FreeBASIC from sources uses a <tt>makefile</tt> that is intended to be used on a host to build the run time library, graphics library, and the FreeBASIC compiler itself.  The <tt>makefile</tt> accepts a number of configuration options or variables.<br \>
+<br \>
+<b><u>Environment Variables</u></b><br \>
+<div class="fb_indent"><tt>SOURCE_DATE_EPOCH</tt><br \>
+<div class="fb_indent">Set the build date for the compilation.  See <a href="https://reproducible-builds.org/specs/source-date-epoch/">SOURCE_DATE_EPOCH Specification</a>.  The <tt>SOURCE_DATE_EPOCH</tt> environment variable specifies a build time constant (a decimal unsigned integer in unix time format) to be used during the build process.  Setting this variable sets the values to be returned by <tt><a href="KeyPgDddate.html">__DATE__</a></tt>, <tt><a href="KeyPgDdtime.html">__TIME__</a></tt>, and <tt><a href="KeyPgDddateiso.html">__DATE_ISO__</a></tt> built-in macros when a source is compiled.  This in turn affects the values returned by <tt><a href="KeyPgDdFBBuildDate.html">__FB_BUILD_DATE__</a></tt> and <tt><a href="KeyPgDdfbbuilddateiso.html">__FB_BUILD_DATE_ISO__</a></tt> when fbc compiler itself is built.<br \>
+<br \>
+</div></div><b><u>Build Options</u></b><br \>
+<div class="fb_indent"><tt>FB[C|L]FLAGS</tt><br \>
+<div class="fb_indent">to set -g -exx etc. for the compiler build and/or link<br \>
+</div><tt>CFLAGS</tt><br \>
+<div class="fb_indent">same for the rtlib and gfxlib2 build<br \>
+</div><tt>prefix</tt><br \>
+<div class="fb_indent">install/uninstall directory, default: /usr/local<br \>
+</div><tt>TARGET</tt><br \>
+<div class="fb_indent">GNU triplet for cross-compiling<br \>
+</div><tt>MULTILIB</tt><br \>
+<div class="fb_indent">"32", "64" or empty for cross-compiling using a gcc multilib toolchain<br \>
+</div><tt>FBC, CC, AR</tt><br \>
+<div class="fb_indent">fbc, gcc, ar programs (TARGET may be prefixed to CC/AR)<br \>
+</div><tt>V=1</tt><br \>
+<div class="fb_indent">to see full command lines<br \>
+</div><tt>ENABLE_STANDALONE=1</tt><br \>
+<div class="fb_indent">build source tree into self-contained FB installation<br \>
+</div><tt>ENABLE_PREFIX=1</tt><br \>
+<div class="fb_indent">use "-d ENABLE_PREFIX=$(prefix)" to hard-code the prefix into fbc<br \>
+</div><tt>ENABLE_SUFFIX=-0.24</tt><br \>
+<div class="fb_indent">append a string like "-0.24" to fbc/FB dir names, and use "-d ENABLE_SUFFIX=$(ENABLE_SUFFIX)" (non-standalone only)<br \>
+</div><tt>ENABLE_LIB64=1</tt><br \>
+<div class="fb_indent">use prefix/lib64/ instead of prefix/lib/ for 64bit libs (non-standalone only)<br \>
+</div><tt>ENABLE_STRIPALL=1</tt><br \>
+<div class="fb_indent">use "-d ENABLE_STRIPALL" with all targets<br \>
+</div><tt>ENABLE_STRIPALL=0</tt><br \>
+<div class="fb_indent">disable "-d ENABLE_STRIPALL" with all targets<br \>
+</div><tt>FBSHA1=1</tt><br \>
+<div class="fb_indent">determine the sha-1 of the current commit in repo and store it in the compiler<br \>
+</div><tt>FBSHA1=some-sha-1</tt><br \>
+<div class="fb_indent">explicitly indicate the sha-1 to store in the compiler<br \>
+</div><tt>FBPACKAGE</tt><br \>
+<div class="fb_indent">bindist: The package/archive file name without path or extension<br \>
+</div><tt>FBPACKSUFFIX</tt><br \>
+<div class="fb_indent">bindist: Allows adding a custom suffix to the normal package name (and the toplevel dir in the archive)<br \>
+</div><tt>FBMANIFEST</tt><br \>
+<div class="fb_indent">bindist: The manifest file name without path or extension<br \>
+</div><tt>FBVERSION</tt><br \>
+<div class="fb_indent">bindist/gitdist: FB version number<br \>
+</div><tt>DISABLE_DOCS</tt><br \>
+<div class="fb_indent">bindist: Don't package readme/changelog/manpage/examples<br \>
+</div><tt>BUILD_PREFIX</tt><br \>
+<div class="fb_indent">automatically set depending on the target but can override for special builds where the build tools have different file naming than the target to build (i.e. cross compiling)<br \>
+</div><tt>DISABLE_GAS64_DEBUG</tt><br \>
+<div class="fb_indent">use "-d DISABLE_GAS64_DEBUG" (see below)<br \>
+<br \>
+</div></div><b><u>compiler source code configuration (FBCFLAGS, FBLFLAGS)</u></b><br \>
+<div class="fb_indent"><tt>-d ENABLE_STANDALONE</tt><br \>
+<div class="fb_indent">build for a self-contained installation<br \>
+</div><tt>-d ENABLE_SUFFIX=-0.24</tt><br \>
+<div class="fb_indent">assume FB's lib dir uses the given suffix (non-standalone only)<br \>
+</div><tt>-d ENABLE_PREFIX=/some/path</tt><br \>
+<div class="fb_indent">hard-code specific $(prefix) into fbc<br \>
+</div><tt>-d ENABLE_LIB64</tt><br \>
+<div class="fb_indent">use prefix/lib64/ instead of prefix/lib/ for 64bit libs (non-standalone only)<br \>
+</div><tt>-d ENABLE_STRIPALL</tt><br \>
+<div class="fb_indent">configure fbc to pass down '--strip-all' to linker by default<br \>
+</div><tt>-d FBSHA1=some-sha-1</tt><br \>
+<div class="fb_indent">store 'some-sha-1' in the compiler for version information<br \>
+</div><tt>-d DISABLE_GAS64_DEBUG</tt><br \>
+<div class="fb_indent">disable gas64 debugging comments in asm files even if <u>FB_DEBUG</u> is defined (-g)<br \>
+<br \>
+</div></div><b><u>internal makefile configuration (but can override)</u></b><br \>
+<div class="fb_indent"><tt>libsubdir</tt><br \>
+<div class="fb_indent">override the library directory - default is set depending on TARGET<br \>
+</div><tt>objsubdir</tt><br \>
+<div class="fb_indent">override object file directory - default is set depending on TARGET<br \>
+</div><tt>fbcobjdir</tt><br \>
+<div class="fb_indent">override compiler object directory - default is set depending on TARGET<br \>
+<br \>
+</div></div><b><u>fbrt source code configuration (FBRTCFLAGS, FBRTLFLAGS)</u></b><br \>
+<div class="fb_indent"><tt>FBRTCFLAGS</tt><br \>
+<div class="fb_indent">override the compiler flags when building fbrt library<br \>
+</div><tt>FBRTLFLAGS</tt><br \>
+<div class="fb_indent">override the linker flags then building fbrt library<br \>
+<br \>
+</div></div><b><u>rtlib/gfxlib2 source code configuration (CFLAGS)</u></b><br \>
+<div class="fb_indent"><tt>-DDISABLE_X11</tt><br \>
+<div class="fb_indent">build without X11 headers (disables X11 gfx driver)<br \>
+</div><tt>-DDISABLE_GPM</tt><br \>
+<div class="fb_indent">build without gpm.h (disables <tt><a href="KeyPgGetmouse.html">GetMouse</a></tt> in the Linux terminal (TERM=linux), although the TERM=xterm variant keeps working)<br \>
+</div><tt>-DDISABLE_FFI</tt><br \>
+<div class="fb_indent">build without ffi.h (disables <tt><a href="KeyPgThreadCall.html">ThreadCall</a></tt>)<br \>
+</div><tt>-DDISABLE_OPENGL</tt><br \>
+<div class="fb_indent">build without OpenGL headers (disables OpenGL gfx drivers)<br \>
+</div><tt>-DDISABLE_FBDEV</tt><br \>
+<div class="fb_indent">build without Linux framebuffer device headers (disables Linux fbdev gfx driver)<br \>
+</div><tt>-DDISABLE_D3D10</tt><br \>
+<div class="fb_indent">build without DirectX 10 driver (disable D2D driver in windows)<br \>
+<br \>
+</div></div><br \>
+
+</div>
+</div> 
+</div> 
+</body>
+</html>

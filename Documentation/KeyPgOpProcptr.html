@@ -1,0 +1,254 @@
+<html>
+<head>
+<title>Operator Procptr (Procedure Pointer And Vtable Index)</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+<meta charset="UTF-8">
+</head>
+<body>
+<div id="fb_body_wrapper">
+<div id="fb_tab">
+<div id="fb_tab_l">Operator Procptr (Procedure Pointer And Vtable Index)</div>
+<div id="fb_tab_r">&nbsp;<img src="images/fblogo_mini.gif" /></div> 
+</div> 
+<div id="fb_pg_wrapper">
+<div id="fb_pg_body">
+	Returns the address of any procedure, and the index in the vtable for a virtual/abstract member procedure.<br \>
+<br \>
+<div class="fb_sect_title">Syntax</div><div class="fb_sect_cont"><tt><br \>
+<a href="KeyPgDeclare.html">Declare</a> <a href="KeyPgOperator.html">Operator</a> <b>ProcPtr</b> ( <a href="KeyPgByref.html">ByRef</a> <i>identifier</i> <a href="KeyPgAs.html">As</a> <i>proctype</i> [, <a href="KeyPgAny.html">Any</a>|<i>user_proctype</i> ] ) <a href="KeyPgAs.html">As</a> <i>internal_proctype</i> <a href="KeyPgPtr.html">Ptr</a><br \>
+<a href="KeyPgDeclare.html">Declare</a> <a href="KeyPgOperator.html">Operator</a> <b>ProcPtr</b> ( <a href="KeyPgByref.html">ByRef</a> <i>identifier</i> <a href="KeyPgAs.html">As</a> <i>proctype</i>, virtual [ <a href="KeyPgAny.html">Any</a>|<i>user_proctype</i> ] ) <a href="KeyPgAs.html">As</a> <a href="KeyPgInteger.html">Integer</a><br \>
+</tt><br \>
+</div><div class="fb_sect_title">Usage</div><div class="fb_sect_cont"><tt><br \>
+<i>result</i> = <b>ProcPtr</b> ( <i>identifier</i> [, [virtual] [any|<i>user_proctype</i>] ] )<br \>
+</tt><br \>
+</div><div class="fb_sect_title">Parameters</div><div class="fb_sect_cont"><br \>
+<tt><i>identifier</i></tt><br \>
+<div class="fb_indent">A procedure identifier.<br \>
+</div><tt><i>user_proctype</i></tt><br \>
+<div class="fb_indent">Any user type of procedure (sub/function, static/member, normal/virtual).<br \>
+(<tt><i>internal_proctype</i></tt> has a supplementary first parameter <tt>byref as udt_name</tt> only for the member procedures)<br \>
+<br \>
+</div></div><div class="fb_sect_title">Return Value</div><div class="fb_sect_cont"><br \>
+Returns the address of any procedure (first syntax), or the index in the vtable for a virtual/abstract member procedure (second syntax with additional qualifier <tt>virtual</tt>).<br \>
+(<tt>any</tt>, ie any procedure signature, does not induce any particular selection (compared to its non-use), but just allows for writing <tt><b>ProcPtr</b></tt> always with 2 arguments)<br \>
+<br \>
+</div><div class="fb_sect_title">Description</div><div class="fb_sect_cont"><br \>
+First syntax:<br \>
+<div class="fb_indent">- This operator returns the address of a <tt><a href="KeyPgSub.html">Sub</a></tt> or <tt><a href="KeyPgFunction.html">Function</a></tt> static/member procedure or member operator.<br \>
+- The type of the return value corresponds to the internal signature of the procedure (user signature, plus a supplementary first parameter <tt>byref as udt_name</tt> for a member procedure) .<br \>
+</div>Second syntax (with qualifier <tt>virtual</tt>):<br \>
+<div class="fb_indent">- This operator returns the zero based index in the vtable for a virtual/abstract member procedure or member operator.<br \>
+- In case of overridden member procedure (polymorphism), the vtable index allows access, from the vtable of the used instance, to the address of the most derived override member procedure.<br \>
+<br \>
+</div>When using the <tt><i>user_proctype</i></tt> argument, <tt><b>ProcPtr</b></tt> syntax allows of getting procedure pointer or vtable index for based on parameter types (including sub/function type and return type if any).<br \>
+This makes it possible to explicitly specify the right procedure to resolve procedure overloads, or make a check for parameter types (including sub/function type and return type if any) on non-overloaded procedures.<br \>
+<br \>
+<tt><a href="KeyPgOpAt.html">Operator @ (Address Of)</a></tt>, when used with procedures, behaves the same as the first <tt><b>ProcPtr</b></tt> syntax without second argument.<br \>
+<br \>
+<b>Note:</b><br \>
+<div class="fb_indent">- If the procedure member is abstract, then <tt> <b>ProcPtr</b> ( <i>identifier</i> [, any|<i>user_proctype</i> ] ) </tt> returns a null procedure pointer of the member procedure call signature (<tt><i>internal_proctype</i></tt>).<br \>
+- If there is no vtable entry (or no vtable at all) then <tt> <b>ProcPtr</b> ( <i>identifier</i> , virtual [any|<i>user_proctype</i>] ) </tt> returns the special value of <tt>-1</tt>.<br \>
+<br \>
+</div></div><div class="fb_sect_title">Example</div><div class="fb_sect_cont"><br \>
+<tt><div class="freebasic">
+<span class="com">'&nbsp;This&nbsp;example&nbsp;uses&nbsp;ProcPtr&nbsp;to&nbsp;demonstrate&nbsp;function&nbsp;pointers</span><br />
+<span class="key">Declare</span>&nbsp;<span class="key">Function</span>&nbsp;<span class="wrd">Subtract</span><span class="oth">(</span>&nbsp;<span class="wrd">x</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Integer</span><span class="oth">,</span>&nbsp;<span class="wrd">y</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Integer</span><span class="oth">)</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Integer</span><br />
+<span class="key">Declare</span>&nbsp;<span class="key">Function</span>&nbsp;<span class="key">Add</span><span class="oth">(</span>&nbsp;<span class="wrd">x</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Integer</span><span class="oth">,</span>&nbsp;<span class="wrd">y</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Integer</span><span class="oth">)</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Integer</span><br />
+<span class="key">Dim</span>&nbsp;<span class="wrd">myFunction</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Function</span><span class="oth">(</span>&nbsp;<span class="wrd">x</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Integer</span><span class="oth">,</span>&nbsp;<span class="wrd">y</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Integer</span><span class="oth">)</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Integer</span><br />
+<br />
+<span class="com">'&nbsp;myFunction&nbsp;will&nbsp;now&nbsp;be&nbsp;assigned&nbsp;to&nbsp;Add</span><br />
+<span class="wrd">myFunction</span>&nbsp;<span class="oth">=</span>&nbsp;<span class="key">ProcPtr</span><span class="oth">(</span>&nbsp;<span class="key">Add</span>&nbsp;<span class="oth">)</span><br />
+<span class="key">Print</span>&nbsp;<span class="wrd">myFunction</span><span class="oth">(</span><span class="num">2</span><span class="oth">,</span>&nbsp;<span class="num">3</span><span class="oth">)</span><br />
+<br />
+<span class="com">'&nbsp;myFunction&nbsp;will&nbsp;now&nbsp;be&nbsp;assigned&nbsp;to&nbsp;Subtract.&nbsp;&nbsp;Notice&nbsp;the&nbsp;different&nbsp;output.</span><br />
+<span class="wrd">myFunction</span>&nbsp;<span class="oth">=</span>&nbsp;<span class="key">ProcPtr</span><span class="oth">(</span>&nbsp;<span class="wrd">Subtract</span>&nbsp;<span class="oth">)</span><br />
+<span class="key">Print</span>&nbsp;<span class="wrd">myFunction</span><span class="oth">(</span><span class="num">2</span><span class="oth">,</span>&nbsp;<span class="num">3</span><span class="oth">)</span><br />
+<br />
+<span class="key">Function</span>&nbsp;<span class="key">Add</span><span class="oth">(</span>&nbsp;<span class="wrd">x</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Integer</span><span class="oth">,</span>&nbsp;<span class="wrd">y</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Integer</span><span class="oth">)</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Integer</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Return</span>&nbsp;<span class="wrd">x</span>&nbsp;<span class="oth">+</span>&nbsp;<span class="wrd">y</span><br />
+<span class="key">End</span>&nbsp;<span class="key">Function</span><br />
+<br />
+<span class="key">Function</span>&nbsp;<span class="wrd">Subtract</span><span class="oth">(</span>&nbsp;<span class="wrd">x</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Integer</span><span class="oth">,</span>&nbsp;<span class="wrd">y</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Integer</span><span class="oth">)</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Integer</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Return</span>&nbsp;<span class="wrd">x</span>&nbsp;<span class="oth">-</span>&nbsp;<span class="wrd">y</span><br />
+<span class="key">End</span>&nbsp;<span class="key">Function</span><br />
+</div></tt><br />
+<tt><div class="freebasic">
+<span class="key">Sub</span>&nbsp;<span class="wrd">s</span>&nbsp;<span class="key">Overload</span><span class="oth">()</span><br />
+<span class="key">End</span>&nbsp;<span class="key">Sub</span><br />
+<br />
+<span class="key">Sub</span>&nbsp;<span class="wrd">s</span><span class="oth">(</span>&nbsp;<span class="key">ByVal</span>&nbsp;<span class="wrd">i</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Integer</span>&nbsp;<span class="oth">)</span><br />
+<span class="key">End</span>&nbsp;<span class="key">Sub</span><br />
+<br />
+<span class="com">'-----&nbsp;since&nbsp;fbc&nbsp;1.09.0,&nbsp;ProcPtr&nbsp;supports&nbsp;a&nbsp;second&nbsp;parameter&nbsp;(optional):</span><br />
+<span class="key">Var</span>&nbsp;<span class="wrd">s1</span>&nbsp;<span class="oth">=</span>&nbsp;<span class="key">ProcPtr</span><span class="oth">(</span>&nbsp;<span class="wrd">s</span><span class="oth">,</span>&nbsp;<span class="key">Sub</span><span class="oth">()</span>&nbsp;<span class="oth">)</span><br />
+<span class="key">Var</span>&nbsp;<span class="wrd">s2</span>&nbsp;<span class="oth">=</span>&nbsp;<span class="key">ProcPtr</span><span class="oth">(</span>&nbsp;<span class="wrd">s</span><span class="oth">,</span>&nbsp;<span class="key">Sub</span><span class="oth">(</span>&nbsp;<span class="key">ByVal</span>&nbsp;<span class="wrd">i</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Integer</span>&nbsp;<span class="oth">)</span>&nbsp;<span class="oth">)</span><br />
+<br />
+<span class="com">'-----&nbsp;before&nbsp;fbc&nbsp;1.09.0,&nbsp;it&nbsp;was&nbsp;only&nbsp;possible&nbsp;with:</span><br />
+<span class="com">'Dim&nbsp;s1&nbsp;As&nbsp;Sub()</span><br />
+<span class="com">'s1&nbsp;=&nbsp;ProcPtr(&nbsp;s&nbsp;)</span><br />
+<span class="com">'Dim&nbsp;s2&nbsp;As&nbsp;Sub(&nbsp;Byval&nbsp;i&nbsp;As&nbsp;Integer)</span><br />
+<span class="com">'s2&nbsp;=&nbsp;ProcPtr(&nbsp;s&nbsp;)</span><br />
+</div></tt><br />
+<tt><div class="freebasic">
+<span class="com">'&nbsp;Since&nbsp;fbc&nbsp;1.10.0,&nbsp;ProcPtr&nbsp;supports&nbsp;the&nbsp;member&nbsp;procedures/operators&nbsp;with&nbsp;various&nbsp;syntaxes</span><br />
+<br />
+<span class="key">Type</span>&nbsp;<span class="wrd">UDT</span>&nbsp;<span class="key">Extends</span>&nbsp;<span class="key">Object</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Dim</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">String</span>&nbsp;<span class="wrd">s1</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Dim</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">String</span>&nbsp;<span class="wrd">s2</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Declare</span>&nbsp;<span class="key">Virtual</span>&nbsp;<span class="key">Sub</span>&nbsp;<span class="wrd">test</span><span class="oth">()</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Declare</span>&nbsp;<span class="key">Virtual</span>&nbsp;<span class="key">Operator</span>&nbsp;<span class="key">Cast</span><span class="oth">()</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">String</span><br />
+<span class="key">End</span>&nbsp;<span class="key">Type</span><br />
+<br />
+<span class="key">Sub</span>&nbsp;<span class="wrd">UDT.test</span><span class="oth">()</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Print</span>&nbsp;<span class="wrd">This.s1</span><br />
+<span class="key">End</span>&nbsp;<span class="key">Sub</span><br />
+<br />
+<span class="key">Operator</span>&nbsp;<span class="wrd">UDT.Cast</span><span class="oth">()</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">String</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Return</span>&nbsp;<span class="wrd">This.s2</span><br />
+<span class="key">End</span>&nbsp;<span class="key">Operator</span><br />
+<br />
+<span class="key">Var</span>&nbsp;<span class="wrd">testPtr1</span>&nbsp;<span class="oth">=</span>&nbsp;<span class="key">ProcPtr</span><span class="oth">(</span><span class="wrd">UDT.test</span><span class="oth">)</span><br />
+<span class="key">Var</span>&nbsp;<span class="wrd">testPtr2</span>&nbsp;<span class="oth">=</span>&nbsp;<span class="key">ProcPtr</span><span class="oth">(</span><span class="wrd">UDT.test</span><span class="oth">,</span>&nbsp;<span class="key">Any</span><span class="oth">)</span><br />
+<span class="key">Var</span>&nbsp;<span class="wrd">testPtr3</span>&nbsp;<span class="oth">=</span>&nbsp;<span class="key">ProcPtr</span><span class="oth">(</span><span class="wrd">UDT.test</span><span class="oth">,</span>&nbsp;<span class="key">Sub</span><span class="oth">())</span><br />
+<br />
+<span class="key">Dim</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Function</span><span class="oth">(</span><span class="key">ByRef</span>&nbsp;<span class="key">As</span>&nbsp;<span class="wrd">UDT</span><span class="oth">)</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">String</span>&nbsp;<span class="wrd">castPtr1</span>&nbsp;<span class="oth">=</span>&nbsp;<span class="key">ProcPtr</span><span class="oth">(</span><span class="wrd">UDT.cast</span><span class="oth">)</span><br />
+<span class="key">Dim</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Function</span><span class="oth">(</span><span class="key">ByRef</span>&nbsp;<span class="key">As</span>&nbsp;<span class="wrd">UDT</span><span class="oth">)</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">String</span>&nbsp;<span class="wrd">castPtr2</span>&nbsp;<span class="oth">=</span>&nbsp;<span class="key">ProcPtr</span><span class="oth">(</span><span class="wrd">UDT.cast</span><span class="oth">,</span>&nbsp;<span class="key">Any</span><span class="oth">)</span><br />
+<span class="key">Dim</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Function</span><span class="oth">(</span><span class="key">ByRef</span>&nbsp;<span class="key">As</span>&nbsp;<span class="wrd">UDT</span><span class="oth">)</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">String</span>&nbsp;<span class="wrd">castPtr3</span>&nbsp;<span class="oth">=</span>&nbsp;&nbsp;<span class="key">ProcPtr</span><span class="oth">(</span><span class="wrd">UDT.cast</span><span class="oth">,</span>&nbsp;<span class="key">Function</span><span class="oth">()</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">String</span><span class="oth">)</span><br />
+<br />
+<span class="key">Var</span>&nbsp;<span class="wrd">testIndex1</span>&nbsp;<span class="oth">=</span>&nbsp;<span class="key">ProcPtr</span><span class="oth">(</span><span class="wrd">UDT.test</span><span class="oth">,</span>&nbsp;<span class="key">Virtual</span><span class="oth">)</span><br />
+<span class="key">Var</span>&nbsp;<span class="wrd">testIndex2</span>&nbsp;<span class="oth">=</span>&nbsp;<span class="key">ProcPtr</span><span class="oth">(</span><span class="wrd">UDT.test</span><span class="oth">,</span>&nbsp;<span class="key">Virtual</span>&nbsp;<span class="key">Any</span><span class="oth">)</span><br />
+<span class="key">Var</span>&nbsp;<span class="wrd">testIndex3</span>&nbsp;<span class="oth">=</span>&nbsp;<span class="key">ProcPtr</span><span class="oth">(</span><span class="wrd">UDT.test</span><span class="oth">,</span>&nbsp;<span class="key">Virtual</span>&nbsp;<span class="key">Sub</span><span class="oth">())</span><br />
+<br />
+<span class="key">Dim</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Integer</span>&nbsp;<span class="wrd">castIndex1</span>&nbsp;<span class="oth">=</span>&nbsp;<span class="key">ProcPtr</span><span class="oth">(</span><span class="wrd">UDT.cast</span><span class="oth">,</span>&nbsp;<span class="key">Virtual</span><span class="oth">)</span><br />
+<span class="key">Dim</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Integer</span>&nbsp;<span class="wrd">castIndex2</span>&nbsp;<span class="oth">=</span>&nbsp;<span class="key">ProcPtr</span><span class="oth">(</span><span class="wrd">UDT.cast</span><span class="oth">,</span>&nbsp;<span class="key">Virtual</span>&nbsp;<span class="key">Any</span><span class="oth">)</span><br />
+<span class="key">Dim</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">Integer</span>&nbsp;<span class="wrd">castIndex3</span>&nbsp;<span class="oth">=</span>&nbsp;<span class="key">ProcPtr</span><span class="oth">(</span><span class="wrd">UDT.cast</span><span class="oth">,</span>&nbsp;<span class="key">Virtual</span>&nbsp;<span class="key">Function</span><span class="oth">()</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">String</span><span class="oth">)</span><br />
+<br />
+<span class="key">Print</span>&nbsp;<span class="wrd">testPtr1</span>&nbsp;&nbsp;<span class="com">''&nbsp;absolue&nbsp;address&nbsp;value&nbsp;of&nbsp;UDT.test&nbsp;pointer</span><br />
+<span class="key">Print</span>&nbsp;<span class="wrd">testPtr2</span>&nbsp;&nbsp;<span class="com">''&nbsp;absolue&nbsp;address&nbsp;value&nbsp;of&nbsp;UDT.test&nbsp;pointer</span><br />
+<span class="key">Print</span>&nbsp;<span class="wrd">testPtr3</span>&nbsp;&nbsp;<span class="com">''&nbsp;absolue&nbsp;address&nbsp;value&nbsp;of&nbsp;UDT.test&nbsp;pointer</span><br />
+<span class="key">Print</span><br />
+<br />
+<span class="key">Print</span>&nbsp;<span class="wrd">castPtr1</span>&nbsp;&nbsp;<span class="com">''&nbsp;absolue&nbsp;address&nbsp;value&nbsp;of&nbsp;UDT.Cast&nbsp;pointer</span><br />
+<span class="key">Print</span>&nbsp;<span class="wrd">castPtr2</span>&nbsp;&nbsp;<span class="com">''&nbsp;absolue&nbsp;address&nbsp;value&nbsp;of&nbsp;UDT.Cast&nbsp;pointer</span><br />
+<span class="key">Print</span>&nbsp;<span class="wrd">castPtr3</span>&nbsp;&nbsp;<span class="com">''&nbsp;absolue&nbsp;address&nbsp;value&nbsp;of&nbsp;UDT.Cast&nbsp;pointer</span><br />
+<span class="key">Print</span><br />
+<br />
+<span class="key">Print</span>&nbsp;<span class="wrd">testIndex1</span>&nbsp;&nbsp;<span class="com">''&nbsp;vtable&nbsp;index&nbsp;of&nbsp;UDT.test</span><br />
+<span class="key">Print</span>&nbsp;<span class="wrd">testIndex2</span>&nbsp;&nbsp;<span class="com">''&nbsp;vtable&nbsp;index&nbsp;of&nbsp;UDT.test</span><br />
+<span class="key">Print</span>&nbsp;<span class="wrd">testIndex3</span>&nbsp;&nbsp;<span class="com">''&nbsp;vtable&nbsp;index&nbsp;of&nbsp;UDT.test</span><br />
+<span class="key">Print</span><br />
+<br />
+<span class="key">Print</span>&nbsp;<span class="wrd">castIndex1</span>&nbsp;&nbsp;<span class="com">''&nbsp;vtable&nbsp;index&nbsp;of&nbsp;UDT.Cast</span><br />
+<span class="key">Print</span>&nbsp;<span class="wrd">castIndex2</span>&nbsp;&nbsp;<span class="com">''&nbsp;vtable&nbsp;index&nbsp;of&nbsp;UDT.Cast</span><br />
+<span class="key">Print</span>&nbsp;<span class="wrd">castIndex3</span>&nbsp;&nbsp;<span class="com">''&nbsp;vtable&nbsp;index&nbsp;of&nbsp;UDT.Cast</span><br />
+<span class="key">Print</span><br />
+<br />
+<span class="key">Dim</span>&nbsp;<span class="key">As</span>&nbsp;<span class="wrd">UDT</span>&nbsp;<span class="wrd">u</span><br />
+<span class="wrd">u.s1</span>&nbsp;<span class="oth">=</span>&nbsp;<span class="quo">&quot;Virtual&nbsp;Sub&nbsp;test()&quot;</span><br />
+<span class="wrd">u.s2</span>&nbsp;<span class="oth">=</span>&nbsp;<span class="quo">&quot;Virtual&nbsp;Operator&nbsp;Cast()&nbsp;As&nbsp;String&quot;</span><br />
+<br />
+<span class="wrd">testPtr1</span><span class="oth">(</span><span class="wrd">u</span><span class="oth">)</span>&nbsp;&nbsp;<span class="com">''&nbsp;execute&nbsp;u.test()&nbsp;through&nbsp;its&nbsp;procedure&nbsp;pointer</span><br />
+<span class="wrd">testPtr2</span><span class="oth">(</span><span class="wrd">u</span><span class="oth">)</span>&nbsp;&nbsp;<span class="com">''&nbsp;execute&nbsp;u.test()&nbsp;through&nbsp;its&nbsp;procedure&nbsp;pointer</span><br />
+<span class="wrd">testPtr3</span><span class="oth">(</span><span class="wrd">u</span><span class="oth">)</span>&nbsp;&nbsp;<span class="com">''&nbsp;execute&nbsp;u.test()&nbsp;through&nbsp;its&nbsp;procedure&nbsp;pointer</span><br />
+<span class="key">Print</span><br />
+<br />
+<span class="key">Print</span>&nbsp;<span class="wrd">castPtr1</span><span class="oth">(</span><span class="wrd">u</span><span class="oth">)</span>&nbsp;&nbsp;<span class="com">''&nbsp;execute&nbsp;Cast(UDT,&nbsp;u)&nbsp;through&nbsp;its&nbsp;procedure&nbsp;pointer</span><br />
+<span class="key">Print</span>&nbsp;<span class="wrd">castPtr2</span><span class="oth">(</span><span class="wrd">u</span><span class="oth">)</span>&nbsp;&nbsp;<span class="com">''&nbsp;execute&nbsp;Cast(UDT,&nbsp;u)&nbsp;through&nbsp;its&nbsp;procedure&nbsp;pointer</span><br />
+<span class="key">Print</span>&nbsp;<span class="wrd">castPtr3</span><span class="oth">(</span><span class="wrd">u</span><span class="oth">)</span>&nbsp;&nbsp;<span class="com">''&nbsp;execute&nbsp;Cast(UDT,&nbsp;u)&nbsp;through&nbsp;its&nbsp;procedure&nbsp;pointer</span><br />
+<span class="key">Print</span><br />
+<br />
+<span class="key">CPtr</span><span class="oth">(</span><span class="key">Sub</span><span class="oth">(</span><span class="key">ByRef</span>&nbsp;<span class="key">As</span>&nbsp;<span class="wrd">UDT</span><span class="oth">),</span>&nbsp;<span class="key">CPtr</span><span class="oth">(</span><span class="key">Any</span>&nbsp;<span class="key">Ptr</span>&nbsp;<span class="key">Ptr</span>&nbsp;<span class="key">Ptr</span><span class="oth">,</span>&nbsp;<span class="oth">@</span><span class="wrd">u</span><span class="oth">)[</span><span class="num">0</span><span class="oth">][</span><span class="wrd">testIndex1</span><span class="oth">])(</span><span class="wrd">u</span><span class="oth">)</span>&nbsp;&nbsp;<span class="com">''&nbsp;execute&nbsp;u.test()&nbsp;through&nbsp;its&nbsp;vtable&nbsp;index</span><br />
+<span class="key">CPtr</span><span class="oth">(</span><span class="key">Sub</span><span class="oth">(</span><span class="key">ByRef</span>&nbsp;<span class="key">As</span>&nbsp;<span class="wrd">UDT</span><span class="oth">),</span>&nbsp;<span class="key">CPtr</span><span class="oth">(</span><span class="key">Any</span>&nbsp;<span class="key">Ptr</span>&nbsp;<span class="key">Ptr</span>&nbsp;<span class="key">Ptr</span><span class="oth">,</span>&nbsp;<span class="oth">@</span><span class="wrd">u</span><span class="oth">)[</span><span class="num">0</span><span class="oth">][</span><span class="wrd">testIndex2</span><span class="oth">])(</span><span class="wrd">u</span><span class="oth">)</span>&nbsp;&nbsp;<span class="com">''&nbsp;execute&nbsp;u.test()&nbsp;through&nbsp;its&nbsp;vtable&nbsp;index</span><br />
+<span class="key">CPtr</span><span class="oth">(</span><span class="key">Sub</span><span class="oth">(</span><span class="key">ByRef</span>&nbsp;<span class="key">As</span>&nbsp;<span class="wrd">UDT</span><span class="oth">),</span>&nbsp;<span class="key">CPtr</span><span class="oth">(</span><span class="key">Any</span>&nbsp;<span class="key">Ptr</span>&nbsp;<span class="key">Ptr</span>&nbsp;<span class="key">Ptr</span><span class="oth">,</span>&nbsp;<span class="oth">@</span><span class="wrd">u</span><span class="oth">)[</span><span class="num">0</span><span class="oth">][</span><span class="wrd">testIndex3</span><span class="oth">])(</span><span class="wrd">u</span><span class="oth">)</span>&nbsp;&nbsp;<span class="com">''&nbsp;execute&nbsp;u.test()&nbsp;through&nbsp;its&nbsp;vtable&nbsp;index</span><br />
+<span class="key">Print</span><br />
+<br />
+<span class="key">Print</span>&nbsp;<span class="key">CPtr</span><span class="oth">(</span><span class="key">Function</span><span class="oth">(</span><span class="key">ByRef</span>&nbsp;<span class="key">As</span>&nbsp;<span class="wrd">UDT</span><span class="oth">)</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">String</span><span class="oth">,</span>&nbsp;<span class="key">CPtr</span><span class="oth">(</span><span class="key">Any</span>&nbsp;<span class="key">Ptr</span>&nbsp;<span class="key">Ptr</span>&nbsp;<span class="key">Ptr</span><span class="oth">,</span>&nbsp;<span class="oth">@</span><span class="wrd">u</span><span class="oth">)[</span><span class="num">0</span><span class="oth">][</span><span class="wrd">castIndex1</span><span class="oth">])(</span><span class="wrd">u</span><span class="oth">)</span>&nbsp;&nbsp;<span class="com">''&nbsp;execute&nbsp;Cast(UDT,&nbsp;u)&nbsp;through&nbsp;its&nbsp;vtable&nbsp;index</span><br />
+<span class="key">Print</span>&nbsp;<span class="key">CPtr</span><span class="oth">(</span><span class="key">Function</span><span class="oth">(</span><span class="key">ByRef</span>&nbsp;<span class="key">As</span>&nbsp;<span class="wrd">UDT</span><span class="oth">)</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">String</span><span class="oth">,</span>&nbsp;<span class="key">CPtr</span><span class="oth">(</span><span class="key">Any</span>&nbsp;<span class="key">Ptr</span>&nbsp;<span class="key">Ptr</span>&nbsp;<span class="key">Ptr</span><span class="oth">,</span>&nbsp;<span class="oth">@</span><span class="wrd">u</span><span class="oth">)[</span><span class="num">0</span><span class="oth">][</span><span class="wrd">castIndex2</span><span class="oth">])(</span><span class="wrd">u</span><span class="oth">)</span>&nbsp;&nbsp;<span class="com">''&nbsp;execute&nbsp;Cast(UDT,&nbsp;u)&nbsp;through&nbsp;its&nbsp;vtable&nbsp;index</span><br />
+<span class="key">Print</span>&nbsp;<span class="key">CPtr</span><span class="oth">(</span><span class="key">Function</span><span class="oth">(</span><span class="key">ByRef</span>&nbsp;<span class="key">As</span>&nbsp;<span class="wrd">UDT</span><span class="oth">)</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">String</span><span class="oth">,</span>&nbsp;<span class="key">CPtr</span><span class="oth">(</span><span class="key">Any</span>&nbsp;<span class="key">Ptr</span>&nbsp;<span class="key">Ptr</span>&nbsp;<span class="key">Ptr</span><span class="oth">,</span>&nbsp;<span class="oth">@</span><span class="wrd">u</span><span class="oth">)[</span><span class="num">0</span><span class="oth">][</span><span class="wrd">castIndex3</span><span class="oth">])(</span><span class="wrd">u</span><span class="oth">)</span>&nbsp;&nbsp;<span class="com">''&nbsp;execute&nbsp;Cast(UDT,&nbsp;u)&nbsp;through&nbsp;its&nbsp;vtable&nbsp;index</span><br />
+<span class="key">Print</span><br />
+<br />
+<span class="key">Sleep</span><br />
+</div></tt><br />
+<tt><div class="freebasic">
+<span class="com">'&nbsp;Since&nbsp;fbc&nbsp;1.10.0,&nbsp;ProcPtr&nbsp;also&nbsp;allows&nbsp;to&nbsp;access&nbsp;the&nbsp;vtable&nbsp;index&nbsp;of&nbsp;a&nbsp;virtual/abstract&nbsp;member&nbsp;procedure/operator</span><br />
+<br />
+<span class="key">Type</span>&nbsp;<span class="wrd">Parent</span>&nbsp;<span class="key">Extends</span>&nbsp;<span class="key">Object</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Declare</span>&nbsp;<span class="key">Abstract</span>&nbsp;<span class="key">Sub</span>&nbsp;<span class="wrd">VirtualTest</span><span class="oth">()</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Declare</span>&nbsp;<span class="key">Virtual</span>&nbsp;<span class="key">Operator</span>&nbsp;<span class="key">Cast</span><span class="oth">()</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">String</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Declare</span>&nbsp;<span class="key">Sub</span>&nbsp;<span class="wrd">NormalTest</span><span class="oth">()</span><br />
+<span class="key">End</span>&nbsp;<span class="key">Type</span><br />
+<br />
+<span class="key">Operator</span>&nbsp;<span class="wrd">Parent.Cast</span><span class="oth">()</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">String</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Return</span>&nbsp;<span class="quo">&quot;Parent.Cast()&nbsp;As&nbsp;String&quot;</span><br />
+<span class="key">End</span>&nbsp;<span class="key">Operator</span><br />
+<br />
+<span class="key">Sub</span>&nbsp;<span class="wrd">Parent.NormalTest</span><span class="oth">()</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Print</span>&nbsp;<span class="quo">&quot;Parent.NormalTest()&quot;</span><br />
+<span class="key">End</span>&nbsp;<span class="key">Sub</span><br />
+<br />
+<span class="key">Type</span>&nbsp;<span class="wrd">Child</span>&nbsp;<span class="key">Extends</span>&nbsp;<span class="wrd">Parent</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Declare</span>&nbsp;<span class="key">Virtual</span>&nbsp;<span class="key">Sub</span>&nbsp;<span class="wrd">VirtualTest</span><span class="oth">()</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="com">''&nbsp;or&nbsp;Declare&nbsp;Sub&nbsp;test()</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Declare</span>&nbsp;<span class="key">Virtual</span>&nbsp;<span class="key">Operator</span>&nbsp;<span class="key">Cast</span><span class="oth">()</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">String</span>&nbsp;&nbsp;<span class="com">''&nbsp;or&nbsp;Declare&nbsp;Operator&nbsp;Cast()&nbsp;As&nbsp;String</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Declare</span>&nbsp;<span class="key">Sub</span>&nbsp;<span class="wrd">NormalTest</span><span class="oth">()</span><br />
+<span class="key">End</span>&nbsp;<span class="key">Type</span><br />
+<br />
+<span class="key">Sub</span>&nbsp;<span class="wrd">Child.VirtualTest</span><span class="oth">()</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Print</span>&nbsp;<span class="quo">&quot;Child.VirtualTest&quot;</span><br />
+<span class="key">End</span>&nbsp;<span class="key">Sub</span><br />
+<br />
+<span class="key">Operator</span>&nbsp;<span class="wrd">Child.Cast</span><span class="oth">()</span>&nbsp;<span class="key">As</span>&nbsp;<span class="key">String</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Return</span>&nbsp;<span class="quo">&quot;Child.Cast()&nbsp;As&nbsp;String&quot;</span><br />
+<span class="key">End</span>&nbsp;<span class="key">Operator</span><br />
+<br />
+<span class="key">Sub</span>&nbsp;<span class="wrd">Child.NormalTest</span><span class="oth">()</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">Print</span>&nbsp;<span class="quo">&quot;Child.NormalTest()&quot;</span><br />
+<span class="key">End</span>&nbsp;<span class="key">Sub</span><br />
+<br />
+<span class="key">Dim</span>&nbsp;<span class="key">As</span>&nbsp;<span class="wrd">Parent</span>&nbsp;<span class="key">Ptr</span>&nbsp;<span class="wrd">p</span>&nbsp;<span class="oth">=</span>&nbsp;<span class="key">New</span>&nbsp;<span class="wrd">Child</span><br />
+<br />
+<span class="oth">(*</span><span class="wrd">p</span><span class="oth">).</span><span class="wrd">VirtualTest</span><span class="oth">()</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="com">''&nbsp;or&nbsp;p-&gt;VirtualTest()</span><br />
+<span class="key">Print</span>&nbsp;<span class="key">Cast</span><span class="oth">(</span><span class="wrd">Parent</span><span class="oth">,</span>&nbsp;<span class="oth">*</span><span class="wrd">p</span><span class="oth">)</span>&nbsp;&nbsp;<span class="com">''&nbsp;or&nbsp;Print&nbsp;*p</span><br />
+<span class="oth">(*</span><span class="wrd">p</span><span class="oth">).</span><span class="wrd">NormalTest</span><span class="oth">()</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="com">''&nbsp;or&nbsp;p-&gt;NormalTest()</span><br />
+<span class="key">Print</span><br />
+<br />
+<span class="def">#define&nbsp;RuntimeProcPtr(instance,&nbsp;procedure,&nbsp;signature...)&nbsp;_&nbsp;&nbsp;&nbsp;''&nbsp;pointer&nbsp;to&nbsp;procedure<br />
+</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">__FB_IIF__</span><span class="oth">(</span><span class="key">ProcPtr</span><span class="oth">(</span><span class="wrd">procedure</span><span class="oth">,</span>&nbsp;<span class="key">Virtual</span>&nbsp;<span class="wrd">signature</span><span class="oth">)</span>&nbsp;<span class="oth">&gt;=</span>&nbsp;<span class="num">0</span><span class="oth">,</span>&nbsp;<span class="wrd">_</span>&nbsp;&nbsp;<span class="com">''&nbsp;(the&nbsp;most&nbsp;derived&nbsp;override&nbsp;if&nbsp;exists)</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">CPtr</span><span class="oth">(</span><span class="key">TypeOf</span><span class="oth">(</span><span class="key">ProcPtr</span><span class="oth">(</span><span class="wrd">procedure</span><span class="oth">,</span>&nbsp;<span class="wrd">signature</span><span class="oth">)),</span>&nbsp;<span class="wrd">_</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">CPtr</span><span class="oth">(</span><span class="key">Any</span>&nbsp;<span class="key">Ptr</span>&nbsp;<span class="key">Ptr</span>&nbsp;<span class="key">Ptr</span><span class="oth">,</span>&nbsp;<span class="oth">@(</span><span class="wrd">instance</span><span class="oth">))</span>&nbsp;<span class="wrd">_</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="oth">[</span><span class="num">0</span><span class="oth">][</span><span class="key">ProcPtr</span><span class="oth">(</span><span class="wrd">procedure</span><span class="oth">,</span>&nbsp;<span class="key">Virtual</span>&nbsp;<span class="wrd">signature</span><span class="oth">)]),</span>&nbsp;<span class="wrd">_</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="key">ProcPtr</span><span class="oth">(</span><span class="wrd">procedure</span><span class="oth">,</span>&nbsp;<span class="wrd">signature</span><span class="oth">))</span><br />
+<br />
+<span class="com">''&nbsp;Here,&nbsp;providing&nbsp;the&nbsp;procedure&nbsp;signature&nbsp;to&nbsp;the&nbsp;macro&nbsp;is&nbsp;useless</span><br />
+<span class="com">''&nbsp;(because&nbsp;there&nbsp;are&nbsp;no&nbsp;procedure&nbsp;overloads&nbsp;to&nbsp;solve&nbsp;in&nbsp;this&nbsp;case)</span><br />
+<span class="wrd">RuntimeProcPtr</span><span class="oth">(*</span><span class="wrd">p</span><span class="oth">,</span>&nbsp;<span class="wrd">Parent.VirtualTest</span><span class="oth">)(*</span><span class="wrd">p</span><span class="oth">)</span>&nbsp;&nbsp;<span class="com">''&nbsp;execute&nbsp;(*p).VirtualTest()&nbsp;through&nbsp;its&nbsp;vtable&nbsp;index</span><br />
+<span class="key">Print</span>&nbsp;<span class="wrd">RuntimeProcPtr</span><span class="oth">(*</span><span class="wrd">p</span><span class="oth">,</span>&nbsp;<span class="wrd">Parent.Cast</span><span class="oth">)(*</span><span class="wrd">p</span><span class="oth">)</span>&nbsp;&nbsp;&nbsp;<span class="com">''&nbsp;execute&nbsp;Cast(Parent,&nbsp;*p)&nbsp;through&nbsp;its&nbsp;vtable&nbsp;index</span><br />
+<span class="wrd">RuntimeProcPtr</span><span class="oth">(*</span><span class="wrd">p</span><span class="oth">,</span>&nbsp;<span class="wrd">Parent.NormalTest</span><span class="oth">)(*</span><span class="wrd">p</span><span class="oth">)</span>&nbsp;&nbsp;&nbsp;<span class="com">''&nbsp;execute&nbsp;(*p).NormalTest()&nbsp;through&nbsp;its&nbsp;compile&nbsp;address</span><br />
+<span class="key">Print</span><br />
+<br />
+<span class="key">Delete</span>&nbsp;<span class="wrd">p</span><br />
+<span class="key">Sleep</span><br />
+</div></tt><br />
+</div><div class="fb_sect_title">Version</div><div class="fb_sect_cont"><br \>
+<ul><li> Before fbc 1.10.0, the member procedures/operators were not supported.<br \>
+<li> Before fbc 1.09.0, the second argument (the optional) was not supported.<br \>
+<br \>
+</ul></div><div class="fb_sect_title">Dialect Differences</div><div class="fb_sect_cont"><br \>
+<ul><li> Not available in the <i><a href="CompilerOptlang.html">-lang qb</a></i> dialect unless referenced with the alias <tt><b>__Procptr</b></tt> (but does not support qualifier <tt>virtual</tt>).<br \>
+<br \>
+</ul></div><div class="fb_sect_title">Differences from QB</div><div class="fb_sect_cont"><br \>
+<ul><li> New to FreeBASIC<br \>
+<br \>
+</ul></div><div class="fb_sect_title">See also</div><div class="fb_sect_cont"><br \>
+<ul><li> <tt><a href="KeyPgSub.html">Sub</a></tt><br \>
+<li> <tt><a href="KeyPgOpVarptr.html">VarPtr</a></tt><br \>
+<li> <tt><a href="KeyPgOpStrptr.html">StrPtr</a></tt><br \>
+<li> <tt><a href="KeyPgAny.html">Any</a></tt><br \>
+<li> <tt><a href="KeyPgVirtual.html">Virtual</a><br \>
+<li> <a href="ProPgPointers.html">Pointers</a><br \>
+<br \>
+</ul></tt></div>
+</div>
+</div> 
+</div> 
+</body>
+</html>

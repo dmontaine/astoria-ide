@@ -1,0 +1,392 @@
+'#########################################################
+'#  frmPath.bas                                          #
+'#  This file is part of VisualFBEditor                  #
+'#  Authors: Xusinboy Bekchanov (bxusinboy@mail.ru)      #
+'#########################################################
+
+#include once "frmPath.bi"
+#include once "frmImageManager.bi"
+#include once "frmCompilerOptions.frm"
+
+'#Region "Form"
+	Constructor frmPath
+		' frmPath
+		With This
+			.Name = "frmPath"
+			.Text = ML("Path")
+			.StartPosition = FormStartPosition.CenterParent
+			.BorderStyle = FormBorderStyle.FixedDialog
+			.MaximizeBox = False
+			.MinimizeBox = False
+			.Designer = @This
+			.OnShow = @Form_Show_
+			.OnClose = @Form_Close_
+			.OnCreate = @_Form_Create
+			.Margins.Bottom = 10
+			.Margins.Left = 10
+			.Margins.Right = 10
+			.Margins.Top = 10
+			.SetBounds 0, 0, 462, 177
+		End With
+		' cmdCancel
+		With cmdCancel
+			.Name = "cmdCancel"
+			.Text = ML("Cancel")
+			.TabIndex = 10
+			.Align = DockStyle.alRight
+			.SetBounds 112, 0, 112, 30
+			.Designer = @This
+			.OnClick = @cmdCancel_Click_
+			.Parent = @hbxCommands
+		End With
+		' lblVersion
+		With lblVersion
+			.Name = "lblVersion"
+			.Text = ML("Version") & ":"
+			.TabIndex = 3
+			.Align = DockStyle.alLeft
+			.SetBounds 0, 0, 84, 20
+			.Parent = @hbxVersion
+		End With
+		' txtVersion
+		With txtVersion
+			.Name = "txtVersion"
+			.Text = ""
+			.TabIndex = 4
+			.Align = DockStyle.alClient
+			.SetBounds 84, 0, 348, 20
+			.Parent = @hbxVersion
+		End With
+		' lblPath
+		With lblPath
+			.Name = "lblPath"
+			.Text = ML("Path") & ":"
+			.TabIndex = 0
+			.Align = DockStyle.alLeft
+			.SetBounds 0, 0, 84, 20
+			.Parent = @hbxPath
+		End With
+		' txtPath
+		With txtPath
+			.Name = "txtPath"
+			.Text = ""
+			.TabIndex = 1
+			.Align = DockStyle.alClient
+			.SetBounds 84, 0, 316, 20
+			.Parent = @hbxPath
+		End With
+		' cmdPath
+		With cmdPath
+			.Name = "cmdPath"
+			.Text = "..."
+			.TabIndex = 2
+			.Align = DockStyle.alRight
+			.SetBounds 400, 0, 32, 20
+			.Caption = "..."
+			.Designer = @This
+			.OnClick = @cmdPath_Click_
+			.Parent = @hbxPath
+		End With
+		' cmdOK
+		With cmdOK
+			.Name = "cmdOK"
+			.Text = ML("OK")
+			.TabIndex = 9
+			.Align = DockStyle.alRight
+			.SetBounds 112, 0, 112, 30
+			.Designer = @This
+			.OnClick = @cmdOK_Click_
+			.Parent = @hbxCommands
+		End With
+		' lblCommandLine
+		With lblCommandLine
+			.Name = "lblCommandLine"
+			.Text = ML("Command line") & ":"
+			.TabIndex = 5
+			.Align = DockStyle.alLeft
+			.SetBounds 0, 0, 84, 20
+			.Parent = @hbxCommandLine
+		End With
+		' txtCommandLine
+		With txtCommandLine
+			.Name = "txtCommandLine"
+			.TabIndex = 11
+			.Align = DockStyle.alClient
+			.SetBounds 84, 0, 156, 20
+			.Text = ""
+			.Parent = @hbxCommandLine
+		End With
+		' txtExtensions
+		With txtExtensions
+			.Name = "txtExtensions"
+			.TabIndex = 8
+			.Align = DockStyle.alRight
+			.SetBounds 304, 0, 128, 20
+			.Text = ""
+			.Parent = @hbxCommandLine
+		End With
+		' lblExtensions
+		With lblExtensions
+			.Name = "lblExtensions"
+			.Text = ML("Extensions") & ":"
+			.TabIndex = 7
+			.Align = DockStyle.alRight
+			.SetBounds 344, 0, 88, 20
+			.Caption = ML("Extensions") & ":"
+			.Parent = @hbxCommandLine
+		End With
+		' cboType
+		With cboType
+			.Name = "cboType"
+			.Text = ""
+			.TabIndex = 6
+			.SetBounds 100, 80, 130, 21
+			.Visible = False
+			.Parent = @This
+		End With
+		' BrowseD
+		With BrowseD
+			.Name = "BrowseD"
+			.SetBounds 0, 0, 16, 16
+			.Designer = @This
+			.Parent = @This
+		End With
+		' OpenD
+		With OpenD
+			.Name = "OpenD"
+			.SetBounds 0, 0, 16, 16
+			.Designer = @This
+			.Parent = @This
+		End With
+		' hbxPath
+		With hbxPath
+			.Name = "hbxPath"
+			.Text = "HorizontalBox1"
+			.AutoSize = True
+			.TabIndex = 12
+			.ControlIndex = 0
+			.Align = DockStyle.alTop
+			.SetBounds 0, 0, 436, 20
+			.Designer = @This
+			.Parent = @VerticalBox1
+		End With
+		' VerticalBox1
+		With VerticalBox1
+			.Name = "VerticalBox1"
+			.Text = "VerticalBox1"
+			.TabIndex = 16
+			.Align = DockStyle.alClient
+			.SetBounds 10, 10, 436, 128
+			.Designer = @This
+			.Parent = @This
+		End With
+		' hbxVersion
+		With hbxVersion
+			.Name = "hbxVersion"
+			.Text = "HorizontalBox1"
+			.AutoSize = True
+			.TabIndex = 21
+			.ControlIndex = 1
+			.ExtraMargins.Top = 10
+			.Align = DockStyle.alTop
+			.SetBounds 0, 10, 436, 20
+			.Designer = @This
+			.Parent = @VerticalBox1
+		End With
+		' hbxCommandLine
+		With hbxCommandLine
+			.Name = "hbxCommandLine"
+			.Text = "HorizontalBox1"
+			.AutoSize = True
+			.TabIndex = 18
+			.ControlIndex = 2
+			.ExtraMargins.Top = 10
+			.Align = DockStyle.alTop
+			.SetBounds 0, 60, 436, 20
+			.Designer = @This
+			.Parent = @VerticalBox1
+		End With
+		' hbxCommands
+		With hbxCommands
+			.Name = "hbxCommands"
+			.Text = "HorizontalBox1"
+			.AutoSize = True
+			.TabIndex = 16
+			.ControlIndex = 3
+			.Align = DockStyle.alBottom
+			.SetBounds 0, 98, 436, 30
+			.Designer = @This
+			.Parent = @VerticalBox1
+		End With
+	End Constructor
+	
+	Private Sub frmPath._Form_Create(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
+		(*Cast(frmPath Ptr, Sender.Designer)).Form_Create(Sender)
+	End Sub
+	
+	Dim Shared frPath As frmPath
+	Dim Shared frPathImageList As frmPath
+	pfPath = @frPath
+	pfPathImageList = @frPathImageList
+'#End Region
+
+Private Sub frmPath.cmdOK_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
+	(*Cast(frmPath Ptr, Sender.Designer)).cmdOK_Click(Sender)
+End Sub
+Private Sub frmPath.cmdOK_Click(ByRef Sender As Control)
+	If Not ChooseFolder AndAlso Trim(txtVersion.Text) = "" Then
+		If ForConfiguration Then
+			MsgBox ML("Enter name of configuration!")
+		Else
+			MsgBox ML("Enter version of program!")
+		End If
+		This.BringToFront()
+		Exit Sub
+	ElseIf Trim(This.txtPath.Text) = "" Then
+		MsgBox ML("Select path of program!")
+		This.BringToFront()
+		Exit Sub
+	End If
+	txtCommandLineText = txtCommandLine.Text
+	txtExtensionsText = txtExtensions.Text
+	cboTypeText = cboType.Text
+	This.ModalResult = ModalResults.OK
+	This.CloseForm
+End Sub
+
+Private Sub frmPath.cmdCancel_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
+	(*Cast(frmPath Ptr, Sender.Designer)).cmdCancel_Click(Sender)
+End Sub
+Private Sub frmPath.cmdCancel_Click(ByRef Sender As Control)
+	This.ModalResult = ModalResults.Cancel
+	This.CloseForm
+End Sub
+
+Private Sub frmPath.cmdPath_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
+	(*Cast(frmPath Ptr, Sender.Designer)).cmdPath_Click(Sender)
+End Sub
+Private Sub frmPath.cmdPath_Click(ByRef Sender As Control)
+	With This
+		If ForConfiguration Then
+			If frmCompilerOptions.ShowModal(Me) = ModalResults.OK Then
+				.txtPath.Text = ""
+				For i As Integer = 0 To frmCompilerOptions.lvCompilerOptions.ListItems.Count - 1
+					If frmCompilerOptions.lvCompilerOptions.ListItems.Item(i)->Checked Then
+						.txtPath.Text = RTrim(.txtPath.Text) & " " & frmCompilerOptions.lvCompilerOptions.ListItems.Item(i)->Text(0)
+					End If
+				Next
+				frmCompilerOptions.CloseForm
+				Me.BringToFront
+			End If
+		ElseIf .WithKey AndAlso .cboType.ItemIndex = 0 Then
+			If pfImageManager->ShowModal(Me) = ModalResults.OK Then
+				If pfImageManager->SelectedItem <> 0 Then
+					.txtPath.Text = pfImageManager->SelectedItem->Text(0)
+					.txtVersion.Text = .txtPath.Text
+				End If
+			End If
+		Else
+			Dim As UString FolderName
+			If .WithType Then
+				FolderName = GetFolderName(.ExeFileName)
+			Else
+				FolderName = GetFolderName(pApp->FileName)
+			End If
+			If .ChooseFolder Then
+				.BrowseD.InitialDir = GetFullPath(.txtPath.Text)
+				If .BrowseD.Execute Then
+					If FolderName <> "" AndAlso StartsWith(.BrowseD.Directory, FolderName) Then
+						.txtPath.Text = "." & Slash & Mid(.BrowseD.Directory, Len(FolderName) + 1)
+					Else
+						.txtPath.Text = .BrowseD.Directory
+					End If
+				End If
+			Else
+				.OpenD.Filter = ML("All Files") & "|*.*;"
+				If .OpenD.Execute Then
+					If FolderName <> "" AndAlso StartsWith(.OpenD.FileName, FolderName) Then
+						.txtPath.Text = "." & Slash & Mid(.OpenD.FileName, Len(FolderName) + 1)
+					Else
+						.txtPath.Text = .OpenD.FileName
+					End If
+					If EndsWith(.OpenD.FileName, ".chm") OrElse .SetFileNameToVersion Then
+						.txtVersion.Text = ..Left(GetFileName(.OpenD.FileName), Len(GetFileName(.OpenD.FileName)) - 4)
+					Else
+						.txtVersion.Text = GetFileName(GetFolderName(.OpenD.FileName, False))
+						If .txtVersion.Text = "bin" OrElse .txtVersion.Text = "fbc_win32_mingw" OrElse .txtVersion.Text = "fbc_win64_mingw" Then
+							.txtVersion.Text = GetFileName(GetFolderName(GetFolderName(.OpenD.FileName, False), False))
+						End If
+					End If
+					If .WithType Then
+						If EndsWith(LCase(.OpenD.FileName), ".bmp") Then
+							.cboType.ItemIndex = 0
+						ElseIf EndsWith(LCase(.OpenD.FileName), ".cur") Then
+							.cboType.ItemIndex = 1
+						ElseIf EndsWith(LCase(.OpenD.FileName), ".ico") Then
+							.cboType.ItemIndex = 2
+						ElseIf EndsWith(LCase(.OpenD.FileName), ".png") Then
+							.cboType.ItemIndex = 3
+						Else
+							.cboType.ItemIndex = 4
+						End If
+					End If
+				End If
+			End If
+		End If
+		.BringToFront()
+	End With
+End Sub
+
+Private Sub frmPath.Form_Show_(ByRef Designer As My.Sys.Object, ByRef Sender As Form)
+	(*Cast(frmPath Ptr, Sender.Designer)).Form_Show(Sender)
+End Sub
+Private Sub frmPath.Form_Show(ByRef Sender As Form)
+	Dim dlgH As Integer = 177
+	If ChooseFolder Then
+		dlgH = 130
+	ElseIf WithExtensions Then
+		dlgH = 207
+	ElseIf ForConfiguration Then
+		dlgH = 160
+	ElseIf WithoutCommandLine Then
+		dlgH = 150
+	End If
+	This.Height = dlgH
+	This.CenterToParent()
+		Dim As Integer scrW = GetSystemMetrics(SM_CXSCREEN)
+		Dim As Integer scrH = GetSystemMetrics(SM_CYSCREEN)
+		If This.Left < 0 OrElse This.Top < 0 OrElse This.Left > scrW - 80 OrElse This.Top > scrH - 80 Then
+			This.CenterToScreen()
+		End If
+End Sub
+
+Private Sub frmPath.Form_Close_(ByRef Designer As My.Sys.Object, ByRef Sender As Form, ByRef Action As Integer)
+	(*Cast(frmPath Ptr, Sender.Designer)).Form_Close(Sender, Action)
+End Sub
+Private Sub frmPath.Form_Close(ByRef Sender As Form, ByRef Action As Integer)
+	This.ModalResult = ModalResults.Cancel
+	ChooseFolder = False
+	ForConfiguration = False
+	WithoutVersion = False
+	WithoutCommandLine = False
+	WithExtensions = False
+	WithType = False
+End Sub
+
+Private Sub frmPath.Form_Create(ByRef Sender As Control)
+	Me.Caption = IIf(ForConfiguration, ML("Build Configurations"), ML("Path"))
+	lblVersion.Visible = (Not WithoutVersion) AndAlso Not ChooseFolder
+	txtVersion.Visible = (Not WithoutVersion) AndAlso Not ChooseFolder
+	lblCommandLine.Visible = Not (WithoutCommandLine OrElse ChooseFolder)
+	txtCommandLine.Visible = Not (WithoutCommandLine OrElse ChooseFolder OrElse WithType)
+	lblExtensions.Visible = WithExtensions
+	txtExtensions.Visible = WithExtensions
+	cboType.Visible = WithType
+	lblPath.Text = IIf(ForConfiguration, ML("Switches") & ":", IIf(WithKey, ML("Resource Name / Path") & ":", ML("Path") & ":"))
+	lblVersion.Text = IIf(ForConfiguration, ML("Name") & ":", IIf(WithType, IIf(WithKey, ML("Key") & ":", ML("Resource Name") & ":"), ML("Version") & ":"))
+	lblCommandLine.Text = IIf(WithType, ML("Type") & ":", ML("Command line") & ":")
+	txtCommandLineText = ""
+	txtExtensionsText = ""
+	cboTypeText = ""
+End Sub
+

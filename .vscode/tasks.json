@@ -1,0 +1,31 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "FreeBASIC Build",
+            "type": "shell",
+            "windows": {
+                "command": "${workspaceFolder}/Compiler/fbc64.exe",
+                "args": [
+                    "-g",
+                    "VisualFBEditor.bas",
+                    "VisualFBEditor.rc",
+                    "-x",
+                    "../VisualFBEditor64.exe",
+                    "-i",
+                    "../Controls/MyFbFramework"
+                ]
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/src"
+            },
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}

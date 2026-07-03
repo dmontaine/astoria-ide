@@ -299,6 +299,8 @@ Declare Sub SetLeftClosedStyle(Value As Boolean, WithClose As Boolean = True)
 Declare Sub SetRightClosedStyle(Value As Boolean, WithClose As Boolean = True)
 Declare Sub SetBottomClosedStyle(Value As Boolean, WithClose As Boolean = True)
 Declare Function GetBottomClosedStyle As Boolean
+Declare Function IsBottomCollapsed As Boolean
+Declare Sub SaveMainWindowPanelLayout()
 Declare Function GetLeftClosedStyle As Boolean
 Declare Function IsLeftCollapsed As Boolean
 Declare Sub UpdateLeftPinLayout()

@@ -6095,8 +6095,9 @@ End Sub
 Sub CloseBottom()
 	splBottom.Visible = False
 	ptabBottom->SelectedTabIndex = -1
-	If GetBottomClosedStyle() Then ptabBottom->TabPosition = tpBottom
-	pnlBottom.Height = Max(ptabBottom->ItemHeight(0) + 2, BOTTOM_PIN_STRIP_WIDTH + 2)
+	Dim collapsedHeight As Integer = Max(ptabBottom->ItemHeight(0) + 2, BOTTOM_PIN_STRIP_WIDTH + 2)
+	pnlBottom.Height = collapsedHeight
+	ptabBottom->Height = collapsedHeight
 	If GetBottomClosedStyle() Then
 		pnlBottomPin.Visible = True
 		tbBottom.Buttons.Item("EraseOutputWindow")->Visible = False
@@ -6115,7 +6116,6 @@ End Sub
 
 Sub ShowBottom()
 	ptabBottom->SetFocus
-	If GetBottomClosedStyle() Then ptabBottom->TabPosition = tpTop
 	pnlBottom.Height = tabBottomHeight
 	ptabBottom->Height = tabBottomHeight
 	pnlBottom.RequestAlign
@@ -8128,9 +8128,11 @@ Sub RestoreStatusText
 End Sub
 
 Function GetBottomClosedStyle As Boolean
-	Dim pinBtn As ToolButton Ptr = tbBottom.Buttons.Item("PinBottom")
-	If pinBtn = 0 Then Return Not ptabBottom->TabPosition = tpTop
-	Return Not pinBtn->Checked
+	Return Not ptabBottom->TabPosition = tpTop
+End Function
+
+Function IsBottomCollapsed As Boolean
+	Return ptabBottom->TabPosition = tpBottom And ptabBottom->SelectedTabIndex = -1
 End Function
 
 Sub SetBottomClosedStyle(Value As Boolean, WithClose As Boolean = True)
@@ -8141,7 +8143,11 @@ Sub SetBottomClosedStyle(Value As Boolean, WithClose As Boolean = True)
 			ptabBottom->TabPosition = tpBottom
 			.ImageKey = "Pin"
 			.Checked = False
-			CloseBottom
+			If WithClose Then
+				CloseBottom
+			Else
+				UpdateBottomPinLayout
+			End If
 		Else
 			ptabBottom->TabPosition = tpTop
 			ptabBottom->Height = tabBottomHeight
@@ -8152,6 +8158,7 @@ Sub SetBottomClosedStyle(Value As Boolean, WithClose As Boolean = True)
 			UpdateBottomPinLayout
 			.ImageKey = "Pinned"
 			.Checked = True
+			If ptabBottom->SelectedTabIndex = -1 AndAlso ptabBottom->TabCount > 0 Then ptabBottom->SelectedTabIndex = 0
 		End If
 	End With
 	frmMain.RequestAlign
@@ -8163,7 +8170,8 @@ Sub tabBottom_DblClick(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 End Sub
 
 Sub tabBottom_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As Control, newIndex As Integer)
-	If GetBottomClosedStyle() AndAlso ptabBottom->SelectedTabIndex <> -1 AndAlso Not splBottom.Visible Then
+	If bApplyingStartupLayout OrElse bClosing Then Exit Sub
+	If ptabBottom->TabPosition = tpBottom AndAlso ptabBottom->SelectedTabIndex <> -1 AndAlso Not splBottom.Visible Then
 		ShowBottom
 	End If
 	Dim As TabPage Ptr tp = ptabBottom->SelectedTab
@@ -8200,7 +8208,7 @@ Sub tabBottom_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As Control
 End Sub
 
 Sub tabBottom_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control) '<...>
-	If GetBottomClosedStyle() AndAlso ptabBottom->SelectedTabIndex <> -1 AndAlso Not splBottom.Visible Then
+	If ptabBottom->TabPosition = tpBottom AndAlso ptabBottom->SelectedTabIndex <> -1 AndAlso Not splBottom.Visible Then
 		ShowBottom
 	End If
 End Sub
@@ -8374,19 +8382,23 @@ End Function
 
 Sub frmMain_ActiveControlChanged(ByRef Designer As My.Sys.Object, ByRef sender As My.Sys.Object)
 	If frmMain.ActiveControl = 0 Then Exit Sub
-	If tabLeft.TabPosition = tpLeft And tabLeft.SelectedTabIndex <> -1 Then
-		If (Not ControlInParent(frmMain.ActiveControl, @tabLeft)) AndAlso (Not ControlInParent(frmMain.ActiveControl, @pnlLeftPin)) Then
-			CloseLeft
+	' Do not auto-collapse docked panels during startup layout or while the main form is closing;
+	' focus changes in those phases would otherwise overwrite the layout saved on exit.
+	If Not FormClosing AndAlso Not bApplyingStartupLayout Then
+		If tabLeft.TabPosition = tpLeft And tabLeft.SelectedTabIndex <> -1 Then
+			If (Not ControlInParent(frmMain.ActiveControl, @tabLeft)) AndAlso (Not ControlInParent(frmMain.ActiveControl, @pnlLeftPin)) Then
+				CloseLeft
+			End If
 		End If
-	End If
-	If tabRight.TabPosition = tpRight And tabRight.SelectedTabIndex <> -1 Then
-		If (Not ControlInParent(frmMain.ActiveControl, @tabRight)) AndAlso (Not ControlInParent(frmMain.ActiveControl, @pnlRightPin)) AndAlso (Not ControlInParent(frmMain.ActiveControl, "Designer")) Then
-			CloseRight()
+		If tabRight.TabPosition = tpRight And tabRight.SelectedTabIndex <> -1 Then
+			If (Not ControlInParent(frmMain.ActiveControl, @tabRight)) AndAlso (Not ControlInParent(frmMain.ActiveControl, @pnlRightPin)) AndAlso (Not ControlInParent(frmMain.ActiveControl, "Designer")) Then
+				CloseRight()
+			End If
 		End If
-	End If
-	If GetBottomClosedStyle() AndAlso ptabBottom->SelectedTabIndex <> -1 AndAlso splBottom.Visible Then
-		If Not ControlInParent(frmMain.ActiveControl, @tabBottom) AndAlso Not ControlInParent(frmMain.ActiveControl, @pnlBottomPin) Then
-			CloseBottom
+		If ptabBottom->TabPosition = tpBottom AndAlso ptabBottom->SelectedTabIndex <> -1 AndAlso splBottom.Visible Then
+			If Not ControlInParent(frmMain.ActiveControl, @tabBottom) AndAlso Not ControlInParent(frmMain.ActiveControl, @pnlBottomPin) Then
+				CloseBottom
+			End If
 		End If
 	End If
 	Dim As TabWindow Ptr tb = Cast(TabWindow Ptr, ptabCode->SelectedTab)
@@ -8677,7 +8689,10 @@ Sub frmMain_Create(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	SetLeftClosedStyle bLeftClosed, iniSettings.ReadBool("MainWindow", "LeftCollapsed", bLeftClosed)
 	Dim bRightClosed As Boolean = iniSettings.ReadBool("MainWindow", "RightClosed", False)
 	SetRightClosedStyle bRightClosed, iniSettings.ReadBool("MainWindow", "RightCollapsed", bRightClosed)
-	SetBottomClosedStyle iniSettings.ReadBool("MainWindow", "BottomClosed", False)
+	Dim bBottomClosed As Boolean = iniSettings.ReadBool("MainWindow", "BottomClosed", False)
+	Dim bBottomCollapsed As Boolean = iniSettings.ReadBool("MainWindow", "BottomCollapsed", bBottomClosed)
+	SetBottomClosedStyle bBottomClosed, bBottomCollapsed
+	If bBottomClosed AndAlso Not bBottomCollapsed Then ShowBottom
 	UpdateBottomPinLayout
 	bApplyingStartupLayout = False
 	ShowProjectFolders = iniSettings.ReadBool("MainWindow", "ProjectFolders", True)
@@ -8919,7 +8934,13 @@ Sub frmMain_Show(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	'		End Select
 	'	End If
 	If ShowTipoftheDay Then frmTipOfDay.ShowModal *pfrmMain
-	ActivateMainWindow
+	bApplyingStartupLayout = True
+	ActivateMainWindow()
+	' ActivateMainWindow steals focus; re-expand auto-hide bottom if that was the saved state.
+	If iniSettings.ReadBool("MainWindow", "BottomClosed", False) AndAlso Not iniSettings.ReadBool("MainWindow", "BottomCollapsed", True) Then
+		If ptabBottom->TabPosition = tpBottom AndAlso Not splBottom.Visible Then ShowBottom
+	End If
+	bApplyingStartupLayout = False
 	
 End Sub
 
@@ -8947,8 +8968,25 @@ Sub frmMain_ActivateApp(ByRef Designer As My.Sys.Object, ByRef Sender As Form)
 	bInActivateApp = False
 End Sub
 
+Sub SaveMainWindowPanelLayout()
+	iniSettings.WriteBool("MainWindow", "LeftClosed", GetLeftClosedStyle)
+	iniSettings.WriteBool("MainWindow", "LeftCollapsed", IsLeftCollapsed)
+	iniSettings.WriteInteger("MainWindow", "LeftWidth", tabLeftWidth)
+	If tabLeft.SelectedTabIndex >= 0 Then leftSelectedTabIndex = tabLeft.SelectedTabIndex
+	iniSettings.WriteInteger("MainWindow", "LeftSelectedTab", leftSelectedTabIndex)
+	iniSettings.WriteBool("MainWindow", "RightClosed", GetRightClosedStyle)
+	iniSettings.WriteBool("MainWindow", "RightCollapsed", IsRightCollapsed)
+	iniSettings.WriteInteger("MainWindow", "RightWidth", tabRightWidth)
+	If tabRight.SelectedTabIndex >= 0 Then rightSelectedTabIndex = tabRight.SelectedTabIndex
+	iniSettings.WriteInteger("MainWindow", "RightSelectedTab", rightSelectedTabIndex)
+	iniSettings.WriteBool("MainWindow", "BottomClosed", GetBottomClosedStyle)
+	iniSettings.WriteBool("MainWindow", "BottomCollapsed", IsBottomCollapsed)
+	If tabBottomHeight >= MIN_BOTTOM_PANEL_HEIGHT Then iniSettings.WriteInteger("MainWindow", "BottomHeight", tabBottomHeight)
+End Sub
+
 Sub frmMain_Close(ByRef Designer As My.Sys.Object, ByRef Sender As Form, ByRef Action As Integer)
 	On Error Goto ErrorHandler
+	SaveMainWindowPanelLayout()
 	If AutoSaveSession AndAlso SessionOpened AndAlso Trim(*RecentSession) <> "" Then
 		SaveSession(True)
 	End If
@@ -8968,23 +9006,11 @@ Sub frmMain_Close(ByRef Designer As My.Sys.Object, ByRef Sender As Form, ByRef A
 		iniSettings.WriteInteger("MainWindow", "Height", frmMain.Height)
 	End If
 	iniSettings.WriteBool("MainWindow", "Maximized", frmMain.WindowState = WindowStates.wsMaximized)
-	iniSettings.WriteBool("MainWindow", "LeftClosed", GetLeftClosedStyle)
-	iniSettings.WriteBool("MainWindow", "LeftCollapsed", IsLeftCollapsed)
-	iniSettings.WriteInteger("MainWindow", "LeftWidth", tabLeftWidth)
-	If tabLeft.SelectedTabIndex >= 0 Then leftSelectedTabIndex = tabLeft.SelectedTabIndex
-	iniSettings.WriteInteger("MainWindow", "LeftSelectedTab", leftSelectedTabIndex)
 	If DefaultAIAgent AndAlso *DefaultAIAgent <> "" Then
 		iniSettings.WriteString("AIAgents", "DefaultAIAgent", *DefaultAIAgent)
 	ElseIf cboAIAgentModels.ItemIndex > 0 Then
 		iniSettings.WriteString("AIAgents", "DefaultAIAgent", cboAIAgentModels.Text)
 	End If
-	iniSettings.WriteBool("MainWindow", "RightClosed", GetRightClosedStyle)
-	iniSettings.WriteBool("MainWindow", "RightCollapsed", IsRightCollapsed)
-	iniSettings.WriteInteger("MainWindow", "RightWidth", tabRightWidth)
-	If tabRight.SelectedTabIndex >= 0 Then rightSelectedTabIndex = tabRight.SelectedTabIndex
-	iniSettings.WriteInteger("MainWindow", "RightSelectedTab", rightSelectedTabIndex)
-	iniSettings.WriteBool("MainWindow", "BottomClosed", GetBottomClosedStyle)
-	If tabBottomHeight >= MIN_BOTTOM_PANEL_HEIGHT Then iniSettings.WriteInteger("MainWindow", "BottomHeight", tabBottomHeight)
 	iniSettings.WriteBool("MainWindow", "ProjectFolders", ShowProjectFolders)
 	iniSettings.WriteBool("MainWindow", "ToolLabels", tbForm.Buttons.Item(0)->Checked)
 	iniSettings.WriteBool("MainWindow", "UseDebugger", UseDebugger)

@@ -836,10 +836,10 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 	Case "PinBottom":
 		Dim pinBtn As ToolButton Ptr = tbBottom.Buttons.Item("PinBottom")
 		If pinBtn = 0 Then Exit Select
-		' Checked toggles before OnClick: expanded-unpinned should collapse in one click, not pin first
-		If splBottom.Visible AndAlso pinBtn->Checked Then
-			pinBtn->Checked = False
-			SetBottomClosedStyle True, False
+		' Checked toggles before OnClick. When expanded, one click collapses to the tab strip.
+		If splBottom.Visible Then
+			If pinBtn->Checked Then pinBtn->Checked = False
+			SetBottomClosedStyle True, True
 		ElseIf pinBtn->Checked Then
 			SetBottomClosedStyle False, False
 		Else

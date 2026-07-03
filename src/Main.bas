@@ -8172,7 +8172,9 @@ End Sub
 Sub tabBottom_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As Control, newIndex As Integer)
 	If bApplyingStartupLayout OrElse bClosing Then Exit Sub
 	Dim As Boolean bIsBottomPositioned = CBool(ptabBottom->TabPosition = tpBottom)
-	If bIsBottomPositioned AndAlso (ptabBottom->SelectedTabIndex <> -1) AndAlso (Not splBottom.Visible) Then
+	Dim As Boolean bHasSelectedTab = CBool(ptabBottom->SelectedTabIndex <> -1)
+	Dim As Boolean bBottomNotVisible = CBool(Not splBottom.Visible)
+	If bIsBottomPositioned AndAlso bHasSelectedTab AndAlso bBottomNotVisible Then
 		ShowBottom
 	End If
 	Dim As TabPage Ptr tp = ptabBottom->SelectedTab
@@ -8210,7 +8212,9 @@ End Sub
 
 Sub tabBottom_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control) '<...>
 	Dim As Boolean bIsBottomPositioned = CBool(ptabBottom->TabPosition = tpBottom)
-	If bIsBottomPositioned AndAlso (ptabBottom->SelectedTabIndex <> -1) AndAlso (Not splBottom.Visible) Then
+	Dim As Boolean bHasSelectedTab = CBool(ptabBottom->SelectedTabIndex <> -1)
+	Dim As Boolean bBottomNotVisible = CBool(Not splBottom.Visible)
+	If bIsBottomPositioned AndAlso bHasSelectedTab AndAlso bBottomNotVisible Then
 		ShowBottom
 	End If
 End Sub
@@ -8398,7 +8402,8 @@ Sub frmMain_ActiveControlChanged(ByRef Designer As My.Sys.Object, ByRef sender A
 			End If
 		End If
 		Dim As Boolean bIsBottomPositioned = CBool(ptabBottom->TabPosition = tpBottom)
-		If bIsBottomPositioned AndAlso (ptabBottom->SelectedTabIndex <> -1) AndAlso splBottom.Visible Then
+		Dim As Boolean bHasSelectedTab = CBool(ptabBottom->SelectedTabIndex <> -1)
+		If bIsBottomPositioned AndAlso bHasSelectedTab AndAlso splBottom.Visible Then
 			If Not ControlInParent(frmMain.ActiveControl, @tabBottom) AndAlso Not ControlInParent(frmMain.ActiveControl, @pnlBottomPin) Then
 				CloseBottom
 			End If

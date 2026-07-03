@@ -233,14 +233,6 @@ Dim Shared As tvrp vrp(VRPMAX)
 Dim Shared As Any Ptr hindexbx
 Dim Shared As tindexdata indexdata
 
-''slash for file WDS<>LNX
-'Dim Shared As ZString *2 slash
-'#Ifdef __FB_WIN32__
-'	slash="\"
-'#else
-'	slash="/"
-'#endif
-
 udt(0).nm="Unknown"
 
 	udt(1).nm="long":udt(1).lg=Len(Long)
@@ -830,88 +822,6 @@ Private Sub brk_unset(ubpon As Integer=False)
 			WriteProcessMemory(dbghand,Cast(LPVOID,brkol(0).ad),@breakcpu,1,0)
 		End If
 	End If
-End Sub
-'============================================================================
-''fills array listitem()
-'============================================================================
-Private Sub brc_fill(parent As Integer,hitem As Integer)
-	Dim As Integer child
-	'While hitem<>0
-	'	listcpt+=1
-	'	listitem(listcpt).items=hitem
-	'	listitem(listcpt).itemc=AddTreeViewItem(GTVIEWBRC,GetTextTreeView(GTVIEWVAR,hitem),Cast (HICON, 0),0,TVI_LAST,parent)
-	'	child=GetChildItemTreeView(GTVIEWVAR,hitem)
-	'	If child<>0 Then
-	'		brc_fill(listitem(listcpt).itemc,child)
-	'	EndIf
-	'    hitem=GetNextItemTreeView(GTVIEWVAR,hitem)
-	'Wend
-End Sub
-'============================================================================
-''prepares for listing all the existing variables/fields for cond BP
-'============================================================================
-Private Sub brc_fillinit()
-	Dim As Integer hitem
-	'DeleteTreeViewItemAll(GTVIEWBRC)
-	'hitem=getfirstitemtreeview(GTVIEWVAR)
-	listcpt=-1
-	brc_fill(0,hitem)
-End Sub
-'====================================================
-'' handles cond BP
-'====================================================
-Private Sub brc_choice()
-	'Dim As Integer cln=line_cursor() 'get line
-	'Dim As Integer rln=line_exec(cln,"Break point Not possible")
-	'Dim As Integer ibrk,typ
-	'For ibrk=1 To brknb 'search if still put on this line
-	'	If brkol(ibrk).nline=cln And brkol(ibrk).isrc=srcdisplayed Then Exit For
-	'Next
-	'If ibrk<=brknb Then ''existing
-	'	typ=brkol(ibrk).typ
-	'	brk_del(ibrk)
-	'	If typ=2 Or typ=3 Then
-	'		Exit Sub
-	'	EndIf
-	'End If
-	'brc_fillinit()
-	'varfind.ad=0
-	'setgadgettext(GBRCVAR1,"?")
-	'setgadgettext(GBRCVALUE,"0")
-	'SetItemComboBox(GBRKVCOND,0)
-	'hidewindow(hbpcondbx,KSHOW)
-End Sub
-'====================================================
-'' checks if variable selected for cond BP is ok
-'====================================================
-Private Sub brc_check()
-	'Dim As Integer hitem=getitemtreeview(GTVIEWBRC),items
-	'For ilist As Integer = 0 To listcpt
-	'	If hitem=listitem(ilist).itemc Then
-	'		items=listitem(ilist).items
-	'		For ivrr As Integer = 1 To vrrnb
-	'			If vrr(ivrr).tv=items Then
-	'				If vrr(ivrr).vr=0 Then Exit Sub
-	'				brkidx1=ivrr
-	'				brkidx2=0
-	'				var_fill(brkidx1)
-	'				#Ifdef __FB_64BIT__
-	'				If varfind.pt Then varfind.ty=9 ''pointer integer64 (longint)
-	'				#Else
-	'				If varfind.pt Then varfind.ty=1 ''pointer integer32 (long)
-	'				#EndIf
-	'				If varfind.ty>12 Then
-	'					messbox("Break on var selection error","Only [unsigned] Byte, Short, integer, longint, single, double")
-	'					brkidx1=0
-	'					brkidx2=0
-	'					Exit Sub
-	'				End If
-	'				SetGadgetText(GBRCVAR1,varfind.nm)
-	'			EndIf
-	'		Next
-	'		Exit For
-	'	EndIf
-	'Next
 End Sub
 '=======================================================================
 '' t 1=permanent breakpoint / 2(var/const)-3(var-var)=conditionnal (on a line + condition) / 4=breakpoint with counter /
@@ -2094,8 +2004,7 @@ runtype = RTOFF
 		If (flaglog And 2) Then Print # filenumber,t
 		
 	End Sub
-	
-	'#IfNDef __USE_GTK__
+
 	Private Function excep_lib(e As Integer) As String 'not managed exception
 		Select Case e
 		Case EXCEPTION_GUARD_PAGE_VIOLATION
@@ -2426,7 +2335,6 @@ runtype = RTOFF
 		End Select
 	End Function
 
-'#ifdef  __fb_linux__
 #define of_entry &h18
 	#define of_section &h28
 	#define of_section_size &h3A
@@ -2443,7 +2351,6 @@ runtype = RTOFF
 			desc As Short
 		End Type
 	End Union
-'#endif
 '--------------------------------------
 '' check if local var already stored
 '--------------------------------------
@@ -4251,14 +4158,6 @@ End Sub
 '' -----------------------
 Private Sub dbg_line(linenum As Integer, ofset As Integer)
 	If linenum Then
-		'#ifndef __FB_64BIT__
-		'	''to skip stabd
-		'	If linenum<rline(linenb).nu Then
-		'		If procnb=rline(linenb).px Then
-		'			Exit Sub
-		'		End If
-		'	End If
-		'#endif
 		If ofset+proc(procnb).db<>rline(linenb).ad Then ''checking to avoid asm with just comment line
 			linenb+=1
 		End If
@@ -4414,60 +4313,12 @@ Private Sub dbg_epilog(ofset As Integer)
 	End If
 End Sub
 
-	'Dim Shared breakcpu As Integer =&hCC
 	Dim Shared As String  dwln '(dwarf) line read
 	Dim Shared As Integer dwff '(dwarf) freefile
-	
+
 	'dwarf management
 	Dim Shared As Long udtbeg,cudtbeg,locbeg,vrbbeg,prcbeg
-	'excluded lines for procs added in dll (DllMain and tmp$x)
-	'Const EXCLDMAX=10
-	'Type texcld
-	'	db As UInteger
-	'	fn As UInteger
-	'End Type
-	'Dim Shared As Long excldnb
-	'Dim Shared As texcld	excldlines(EXCLDMAX)
-	
-	'udt(0).nm="Unknown"
-	''12/07/2015
-	'#ifdef __FB_64BIT__
-	'	udt(1).nm="long":udt(1).lg=Len(Long)
-	'#else
-	'	udt(1).nm="Integer":udt(1).lg=Len(Integer)
-	'#endif
-	'udt(2).nm="Byte":udt(2).lg=Len(Byte)
-	'udt(3).nm="Ubyte":udt(3).lg=Len(UByte)
-	'udt(4).nm="Zstring":udt(4).lg=Len(Integer)'4 12/07/2015
-	'udt(5).nm="Short":udt(5).lg=Len(Short)
-	'udt(6).nm="Ushort":udt(6).lg=Len(UShort)
-	'udt(7).nm="Void":udt(7).lg=Len(Integer)'4 12/07/2015
-	'udt(7).index=7'dwarf
-	''12/07/2015
-	'#ifdef __FB_64BIT__
-	'	udt(8).nm="Ulong":udt(8).lg=Len(ULong)
-	'#else
-	'	udt(8).nm="Uinteger":udt(8).lg=Len(UInteger)
-	'#endif
-	''12/07/2015
-	'#ifdef __FB_64BIT__
-	'	udt(9).nm="Integer":udt(9).lg=Len(Integer)
-	'#else
-	'	udt(9).nm="Longint":udt(9).lg=Len(LongInt)
-	'#endif
-	''12/07/2015
-	'#ifdef __FB_64BIT__
-	'	udt(10).nm="Uinteger":udt(10).lg=Len(UInteger)
-	'#else
-	'	udt(10).nm="Ulongint":udt(10).lg=Len(ULongInt)
-	'#endif
-	'
-	'udt(11).nm="Single":udt(11).lg=Len(Single)
-	'udt(12).nm="Double":udt(12).lg=Len(Double)
-	'udt(13).nm="String":udt(13).lg=Len(String)
-	'udt(14).nm="Fstring":udt(14).lg=Len(Integer)'4 12/07/2015
-	'udt(15).nm="fb_Object":udt(15).lg=Len(UInteger)
-	'udt(16).nm="Boolean": '20/082015 boolean
+
 	For i As Integer =0 To TYPESTD:udt(i).what=1:Next '(dwarf) 20/08/2015 boolean
 
 'Private Function Tree_AddItem(hParent As HTREEITEM, ByRef Text As WString, hInsAfter As HTREEITEM, hTV As HWND, Param As Integer) As HTREEITEM
@@ -7054,17 +6905,6 @@ Private Function debug_extract(exebase As UInteger, nfile As String, dllflag As 
 			ElseIf secnm = ".dbgstr" Then
 			ReadProcessMemory(dbghand,Cast(LPCVOID,pe+12),@basestabs,4,0)
 			ReadProcessMemory(dbghand,Cast(LPCVOID,pe+8),@sizestabs,4,0)
-			'ElseIf secnm=".data" AndAlso flagdll=NODLL Then 'compinfo
-			'	ReadProcessMemory(dbghand,Cast(LPCVOID,pe+12),@basedata,4,0)
-			'	ReadProcessMemory(dbghand,Cast(LPCVOID,pe+8),@sizedata,4,0)
-			'	compinfo_load(basedata+exebase,sizedata)
-			'ElseIf secnm[0]=Asc("/") Then
-			'	If flagdwarf=-1 Then 'to done only one time
-			'		If udtmax<TYPESTD Then udtmax=TYPESTD '20/08/2015
-			'		#ifdef __FB_WIN32__
-			'			flagdwarf=dw_extract(nfile,exebase-baseimg) 'return =0 or =1 if dwarf data found
-			'		#endif
-			'	End If
 		End If
 		
 		pe+=40
@@ -7106,8 +6946,7 @@ Private Function debug_extract(exebase As UInteger, nfile As String, dllflag As 
 				End If
 				
 				'?recup
-				
-				'#ifndef __FB_WIN32__
+
 					Select Case As Const recupstab.code
 					Case 100 '' file name
 						dbg_file(recup,recupstab.ad)
@@ -7142,312 +6981,11 @@ Private Function debug_extract(exebase As UInteger, nfile As String, dllflag As 
 					End Select
 					'=========================================
 					basestab += SizeOf(udtstab)
-				'#else
-				'	Select Case recupstab.code
-				'	Case 36 'proc
-				'		procnodll=False
-				'		' procnmt=cutup_proc(Left(recup,InStr(recup,":")-1))
-				'		procnmt=cutup_proc(recup) '02/11/2014
-				'		If procnmt="main" Then flagstabd=True ' + TODO suppress equivalent below
-				'		'If procnmt<>"" And procnmt<>"{MODLEVEL}" And(flagmain=TRUE Or procnmt<>"main") Then '' mike's bug 02/12/2015
-				'		If procnmt<>"" And(flagmain=True Or procnmt<>"main") Then  '' mike's bug 02/12/2015
-				'			'If InStr(procnmt,"structor : IRHLCCTX")=0 And InStr(procnmt,".LT")=0 Then
-				'			If InStr(procnmt,".LT")=0 Then
-				'				#ifdef fulldbg_prt
-				'					dbg_prt ("Proc : "+procnmt)
-				'				#endif
-				'				If flagmain=True And procnmt="main" Then
-				'					flagmain=False:flagstabd=True'first main ok but not the others
-				'					#ifdef fulldbg_prt
-				'						dbg_prt("MAIN main "+source(sourceix))
-				'					#endif
-				'				End If
-				'				procnodll=True:proc2=recupstab.ad+exebase-baseimg 'only when <> exebase and baseimg (DLL)
-				'				procfg=1:procnb+=1:proc(procnb).sr=sourceix
-				'				proc(procnb).nm=procnmt 'proc(procnb).ad=proc2 keep it if needed
-				'				'GCC to remove @ in proc name ex test@0: --> test:
-				'				If InStr(procnmt,"@") Then
-				'					procnmt=Left(procnmt,InStr(procnmt,"@")-1)
-				'				End If
-				'				proc(procnb).nm = procnmt
-				'				' :F --> public / :f --> private then return value
-				'				Dim As String recupbis
-				'				If gengcc=1 Then recupbis=recup:translate_gcc(recupbis):recup=recupbis
-				'				cutup_retval(procnb,Mid(recup,InStr(recup,":")+2,99))'return value .rv + pointer .pt
-				'				proc(procnb).st=1 'state no checked
-				'				proc(procnb).nu=recupstab.nline:lastline=0
-				'				proc(procnb+1).vr=proc(procnb).vr 'in case there is not param nor local var
-				'				proc(procnb).rvadr = 0 'for now only used in gcc case 19/08/2015
-				'			End If
-				'		End If
-				'	Case 32,38,40,128,160 'init common/ var / uninit var / local / parameter
-				'		cutup_1(recup,recupstab.ad,exebase-baseimg)
-				'		'GCC
-				'	Case 60
-				'		If recup="gcc2_compiled." Then
-				'			'fb_message("Compiled with option -gen gcc","     Expect few strange behaviours   ")
-				'			gengcc=1
-				'			srccomp(sourcenb)=gengcc 'stabs 60 arrives just after stabs 100 ....
-				'		End If
-				'		'END GCC
-				'	Case 100
-				'		If flag=0 Then
-				'			If InStr(recup,":")=0  Then Exit Select ' case just name in excess then new path
-				'			flag=1
-				'			recup=LCase(recup)
-				'			If InStr(recup,".") Then 'full name so can check
-				'				temp=check_source(recup)
-				'			Else
-				'				temp=-1
-				'			End If
-				'			If temp=-1 Then
-				'				sourcenb+=1:source(sourcenb)=recup:sourceix=sourcenb:sourceixs=sourceix
-				'			Else
-				'				sourceix=temp:sourceixs=sourceix
-				'			End If
-				'			dbgmaster=sourcenb 'master bas not the include files
-				'			'reinit when new module (main, lib or dll)
-				'			gengcc=0:procnodll=True
-				'			srccomp(sourcenb)=gengcc 'could be changed after by case60 10/01/2014
-				'		Else
-				'			flag=0 'case path then full name or path then name
-				'			'GCC
-				'			If Right(recup,2)=".c" Then
-				'				recup=Left(recup,Len(recup)-2)+".bas"
-				'				dbgmain=sourcenb 'considering that entry point is inside this source
-				'			End If
-				'			'END GCC
-				'			If InStr(recup,":")=0 Then recup=source(sourcenb)+recup 'path + name
-				'			temp=check_source(recup)
-				'			If temp<>-1 Then
-				'				sourceix=temp:sourceixs=sourceix:sourcenb-=1
-				'			Else
-				'				source(sourcenb)=recup
-				'			End If
-				'		End If
-				'	Case 130 'include RAS
-				'	Case 132 'include
-				'		#ifdef fulldbg_prt
-				'			dbg_prt ("Include : "+recup)
-				'		#endif
-				'		'GCC
-				'		' 	               If InStr(recup,":") Then 'new include file path name with file name
-				'		'                     temp=check_source(recup)
-				'		'                     If temp=-1 Then
-				'		'                        sourcenb+=1:source(sourcenb)=recup:sourceix=sourcenb
-				'		'                        srccomp(sourcenb)=gengcc
-				'		'                     Else
-				'		'                 	      sourceix=temp
-				'		'                     End If
-				'		' 	               Else
-				'		'               	   sourceix=0
-				'		' 	               EndIf
-				'		If InStr(recup,":")=0 Then 'new include file no path only file name
-				'			recup=Left(source(0),InStrRev(source(0),"\"))+recup ''add path
-				'		End If
-				'		recup=LCase(recup)
-				'		temp=check_source(recup)
-				'		If temp=-1 Then
-				'			sourcenb+=1:source(sourcenb)=recup:sourceix=sourcenb
-				'			srccomp(sourcenb)=gengcc
-				'		Else
-				'			sourceix=temp
-				'		End If
-				'		lastline=0 ''2018/08/03
-				'		' ==
-				'		'If InStr(recup,":") Then 'new include file path name with file name
-				'		'	sourcenb+=1:source(sourcenb)=recup:sourceix=sourcenb' Utility: sourcead(sourcenb)=recupstab.ad
-				'		'Else 'return in main source because no path name
-				'		'	sourceix=0
-				'		'EndIf
-				'		'just usefull if GCC because the information for include is arriving after the proc !!!
-				'		If gengcc Then proc(procnb).sr=sourceix':dbg_prt("include ahah "+source(sourceix)+" "+proc(procnb).nm)
-				'		'END GCC
-				'	Case 42 'main proc  = entry point
-				'		flagstabd=False ' order : code 42 / stabd / code 36 main
-				'		dbgmain=dbgmaster
-				'	Case Else
-				'		#ifdef fulldbg_prt
-				'			dbg_prt ("UNKNOWN stabs "+Str(recupstab.code)+" "+Str(recupstab.stabs)+" "+Str(recupstab.nline)+" "+Str(recupstab.ad)+" "+recup)
-				'		#endif
-				'	End Select
-				'#endif
-			'Else
-				'#ifdef __FB_WIN32__
-				'	Select Case recupstab.code
-				'	Case 68
-				'		'dbg_prt2("code 68 "+Str(procnodll)+" "+Str(flagstabd)+" "+Str(recupstab.nline)+" "+Str(lastline))
-				'		'And recupstab.nline>lastline    : To avoid very last line see next comment about lastline
-				'		'recupstab.nline<>65535 And
-				'		If procnodll And flagstabd Then 'And recupstab.nline>lastline Then
-				'			''''''''''''''''==
-				'			'12/01/2014''''''''''''If recupstab.nline<>firstline Then
-				'			If recupstab.nline Then
-				'				
-				'				If recupstab.nline>lastline Then
-				'					'asm with just comment
-				'					If recupstab.ad+proc2<>rline(linenb).ad Then
-				'						linenb+=1
-				'					Else
-				'						WriteProcessMemory(dbghand,Cast(LPVOID,rline(linenb).ad),@rline(linenb).sv,1,0)
-				'					End If
-				'					rline(linenb).ad=recupstab.ad+proc2
-				'					ReadProcessMemory(dbghand,Cast(LPCVOID,rline(linenb).ad),@rline(linenb).sv,1,0) 'sav 1 byte before writing &CC
-				'					If rline(linenb).sv=-112 Then 'nop, address of looping (eg in a for/next loop correponding to the command next)
-				'						linenb-=1
-				'						'''	dbg_prt2("NUM LINE = NOP "+Str(recupstab.nline))'gcc only
-				'					Else
-				'						rline(linenb).nu=recupstab.nline:rline(linenb).px=procnb:rline(linenb).sx=sourceix
-				'						If runtype = RTSTEP Then
-				'							If LimitDebug AndAlso Not EqualPaths(GetFolderName(source(sourceix)), mainfolder) Then
-				'							Else
-				'								WriteProcessMemory(dbghand,Cast(LPVOID,rline(linenb).ad),@breakcpu,1,0)
-				'							End If
-				'						End If
-				'						#ifdef fulldbg_prt
-				'							dbg_prt("Line / adr : "+Str(recupstab.nline)+" "+Hex(rline(linenb).ad))
-				'							dbg_prt("")
-				'						#endif
-				'						If recupstab.ad<>0 Then lastline=recupstab.nline 'first proc line always coded 1 but ad=0
-				'						'12/01/2014'''''''''''''If recupstab.ad=0 AndAlso gengcc=1 Then
-				'						''''''''''''''	firstline=recupstab.nline 'in case of gcc the line could be anything
-				'						''''''''''''''	rLine(linenb).nu=-1
-				'						''''''''''''''Else
-				'						''''''''''''''	firstline=-1
-				'						''''''''''''''EndIf
-				'					End If
-				'				Else
-				'					'dbg_prt2("NUM LINE NOT > LAST LINE")
-				'				End If
-				'			Else
-				'				'dbg_prt2("NUM LINE = 0")
-				'			End If
-				'			'12/01/2014''''''''''''''''Else
-				'			''''''''''''''''dbg_prt2("STILL VERY FIRST LINE = "+Str(firstline))
-				'			'12/01/2014'''''''''''EndIf
-				'		End If
-				'	Case 192
-				'		'' if procfg And procnodll then
-				'		''Begin.block proc, real first program ligne for every proc not use now
-				'		''procfg=0:proc(procnb).db=recupstab.ad+proc2
-				'		''else
-				'		''Begin. of block
-				'		''end if
-				'	Case 224
-				'		''End of block
-				'		If procnodll Then proc1=recupstab.ad+proc2
-				'	Case 36
-				'		''End of proc
-				'		If procnodll Then
-				'			If gengcc=1 Then
-				'				proc1=recupstab.ad+proc2 'under gcc 36=224 or 224 not use 10/01/2014
-				'				proc(procnb).ed=recupstab.ad+proc2
-				'			Else
-				'				proc(procnb).ed=recupstab.ad+proc2 '18/08/2015 for gcc it's done below
-				'			End If
-				'			proc(procnb).fn=proc1:proc(procnb).db=proc2
-				'			
-				'			If proc1>procfn Then procfn=proc1+1 ' just to be sure to be above see gest_brk
-				'			'dbg_prt2("Procfn stab="+Hex(procfn))
-				'		End If
-				'		
-				'		If proc(procnb).nu=rline(linenb).nu AndAlso linenb>2 Then 'for proc added by fbc (constructor, operator, ...) '11/05/2014 adding >2 to avoid case only one line ...
-				'			proc(procnb).nu=-1
-				'			For i As Integer =1 To linenb
-				'				'dbg_prt2("Proc db/fn inside for stab="+Hex(proc(procnb).db)+" "+Hex(proc(procnb).fn))
-				'				'dbg_prt2("Line Adr="+Hex(rline(i).ad)+" "+Str(rline(i).ad))
-				'				If rline(i).ad>=proc(procnb).db AndAlso rline(i).ad<=proc(procnb).fn Then
-				'					'dbg_prt2("Cancel breakpoint adr="+Hex(rline(i).ad)+" "+Str(rline(i).ad))
-				'					WriteProcessMemory(dbghand,Cast(LPVOID,rline(i).ad),@rline(i).sv,1,0)
-				'					'nota rline(linenb).nu=-1
-				'				End If
-				'			Next
-				'		Else
-				'			'for GCC ''''''''''
-				'			If gengcc Then
-				'				If proc(procnb).rv=7 Then 'sub return void
-				'					rline(linenb).nu-=1 'decrement the number of the last line of the proc
-				'					proc(procnb).fn=rline(linenb).ad    'replace address because = next proc address
-				'					''' dbg_prt2("SPECIAL GCC1 "+proc(procnb).nm+" "+Str(rline(linenb).nu)+" "+Str(rline(linenb).ad))
-				'				Else 'function
-				'					linenb-=1 'remove the last line (added by gcc but unexist)
-				'					If proc(procnb).nm<>"main" Then 'main = NO CHANGE
-				'						WriteProcessMemory(dbghand,Cast(LPVOID,rline(linenb).ad),@rline(linenb).sv,1,0) 'restore to avoid stop
-				'						rline(linenb).ad=rline(linenb+1).ad 'replace the address by these of the next one
-				'						rline(linenb).sv=rline(linenb+1).sv
-				'						proc(procnb).fn=rline(linenb).ad    'replace address because = next proc address
-				'						''' dbg_prt2("SPECIAL GCC2 "+proc(procnb).nm+" "+Str(rline(linenb).ad))
-				'					Else
-				'						''' dbg_prt2("SPECIAL GCC3")
-				'					End If
-				'				End If
-				'			End If
-				'		End If
-				'		'''''''''''''''''''''''''''''
-				'		
-				'		''removing {modlevel empty just prolog and epilog
-				'		If proc(procnb).nm="{MODLEVEL}" And proc(procnb).fn-proc(procnb).db <8 Then
-				'			''removing lines
-				'			For iline As Long = linenb To 1 Step -1
-				'				If rline(iline).px=procnb Then
-				'					WriteProcessMemory(dbghand,Cast(LPVOID,rline(iline).ad),@rline(iline).sv,1,0) 'restore to avoid stop
-				'					linenb-=1
-				'				Else
-				'					Exit For
-				'				End If
-				'			Next
-				'			'dbg_prt2("remove modlevel in"+source(proc(procnb).sr))
-				'			procnb-=1 ''removing proc
-				'		End If
-				'	Case 162
-				'		''End include
-				'		sourceix=sourceixs
-				'	Case 100
-				'		flag=0
-				'		'as the definitions for integer, ushort etc are repeated keep only the 15 first ones
-				'		udtcpt=udtmax-TYPESTD '20/08/2015
-				'	Case 46,78 'beginning/end of a relocatable function block, not used
-				'	Case Else   ''should not happen but in this case (reported by luis) terminating the loading.... 2016/08/14
-				'		#ifdef fulldbg_prt
-				'			dbg_prt ("UNKNOWN "+Str(recupstab.code)+" "+Str(recupstab.stabs)+" "+Str(recupstab.nline)+" "+Str(recupstab.ad))
-				'		#endif
-				'		Exit While
-				'	End Select
-				'#endif
-			'End If
-			'basestab += SizeOf(udtstab)
-		Wend
-	End If
-	'
-	'#ifdef __FB_WIN32__
-	'	udtbeg=udtmax+1 'to avoid replacing data already treated
-	'	cudtbeg=cudtnb+1
-	'	locbeg=vrbloc+1
-	'	vrbbeg=vrbgbl+1
-	'	prcbeg=procnb+1
-	'	globals_load()
-	'	
-	'	If procrnb=0 Then '05/02/2014
-	'		If flagwtch=0 AndAlso wtchexe(0,0)<>"" Then watch_check(wtchexe())'19/04/2014
-	'		flagwtch=0
-	'	End If
-	'	
-	'	
-	'	'SendMessage(dbgstatus,SB_SETTEXT,0,Cast(LPARAM,@"Loading sources"))
-	'	'load_sources(n)
-	'	'activate buttons/menu after real start
-	'	'but_enable()
-	'	'menu_enable()
-	'	brk_apply 'apply previous breakpoints
-	'	If runtype = RTFRUN Then
-	'		For j As Integer = 0 To brknb 'breakpoint
-	'			If brkol(j).typ<3 Then WriteProcessMemory(dbghand,Cast(LPVOID,brkol(j).ad),@breakcpu,1,0) 'only enabled
-	'		Next
-	'	End If
-	'#endif
-	'
+			Wend
+		End If
+
 	RestoreStatusText
-	
+
 End Function
 
 '===================================================
@@ -10752,9 +10290,7 @@ End Sub
 					'					tb->txtCode.SetSelection Val(sLine) - 1, Val(sLine) - 1, 0, 0
 					'					tb->txtCode.PaintControl
 					'					info_all_variables_debug()
-					'					#ifdef __FB_WIN32__
-					'						SetForegroundWindow pApp->MainForm->Handle
-					'					#endif
+					'					SetForegroundWindow pApp->MainForm->Handle
 					'				End If
 					
 					'				For i As Long = 0 To UBound(sfiles_array)
@@ -11609,161 +11145,7 @@ End Sub
 		
 	End Sub
 	
-	'Function get_name_files_from_exe(sBuf As String) As Long
-	'
-	'	Dim As Long iBegin = 1 , iFlag , iIndex
-	'
-	'	Dim As String sMarker , sMarker0
-	'
-	'	#ifdef __FB_WIN32__
-	'		If InStr(sBuf , Chr(13) & Chr(10)) Then
-	'			sEndOfLine = Chr(13) & Chr(10)
-	'		Else
-	'			sEndOfLine = Chr(10)
-	'		EndIf
-	'	#endif
-	'
-	'	If iVersionGdb < 11 Then
-	'
-	'		sMarker = "Source files for which symbols will be read in on demand:"
-	'
-	'		sMarker0 = "Source files for which symbols have been read in:"
-	'
-	'	Else
-	'
-	'		sMarker = "(Full debug information has not yet been read for this file.)"
-	'
-	'	EndIf
-	'
-	'	Do
-	'
-	'		Dim As String sLine
-	'
-	'		Dim As Long iFind = InStr(iBegin , sBuf , sEndOfLine)
-	'
-	'		If iFind Then
-	'
-	'			sLine = Trim(Mid(sBuf , iBegin , iFind - iBegin), Any sEndOfLine & " ")
-	'
-	'			If sLine = sMarker0 Then
-	'
-	'				iFlag = 2
-	'
-	'			ElseIf sLine = sMarker Then
-	'
-	'				If Len(sfiles_array(0)) Then Exit Do
-	'
-	'				iFlag = 1
-	'
-	'			ElseIf iFlag AndAlso Len(sLine) Then
-	'
-	'				Dim As Long iB = 1 , iFC
-	'
-	'				Do
-	'
-	'					If iIndex > UBound(sfiles_array) Then
-	'
-	'						ReDim Preserve As String sfiles_array(iIndex+10)
-	'
-	'					EndIf
-	'
-	'					iFC = InStr(iB , sLine , ",")
-	'
-	'					If iFC Then
-	'
-	'						Dim As String s = Trim(Mid(sLine , iB , iFC - iB) ,Any ", " & sEndOfLine)
-	'
-	'						Dim As String sExt = LCase(Getextensionpart(s))
-	'
-	'						If Len(s) AndAlso (sExt = "bas" OrElse sExt = "bi") Then
-	'
-	'							sfiles_array(iIndex) = s
-	'
-	'							iIndex+=1
-	'
-	'						EndIf
-	'
-	'						iB = iFC+1
-	'
-	'					Else
-	'
-	'						Dim As String s = Trim(Mid(sLine , iB), Any ", " & sEndOfLine)
-	'
-	'						Dim As String sExt = LCase(Getextensionpart(s))
-	'
-	'						If Len(s) AndAlso (sExt = "bas" OrElse sExt = "bi") Then
-	'
-	'							sfiles_array(iIndex) = s
-	'
-	'						EndIf
-	'
-	'						Exit Do
-	'
-	'					EndIf
-	'
-	'				Loop
-	'
-	'			EndIf
-	'
-	'			iBegin = iFind+1
-	'
-	'		Else
-	'
-	'			Exit Do
-	'
-	'		EndIf
-	'
-	'	Loop
-	'
-	'	Return iIndex
-	'
-	'End Function
 	
-	'Function get_main_file_from_exe(sBuf As String) As Long
-	'
-	'	#ifdef __FB_64BIT__
-	'		Dim As Long iFind = InStr(sBuf , "int32 main(int32, char **);")
-	'	#else
-	'		Dim As Long iFind = InStr(sBuf , "integer main(integer, char **);")
-	'	#endif
-	'
-	'	If iFind Then
-	'
-	'		Dim As Long iFindMain = InStrRev(sBuf , "File " , iFind)
-	'
-	'		Dim As Long iFindchr10 = InStr(iFindMain , sBuf , sEndOfLine )
-	'
-	'		Dim As String sTemp = Trim(Mid(sBuf , iFindMain+5 , iFindchr10 - (iFindMain+5)) , Any ":" & sEndOfLine)
-	'
-	'		Dim As String sTemp2
-	'
-	'		#ifdef __FB_WIN32__
-	'
-	'			sTemp2 = Replace(sTemp , "/" , "\" , , 1)
-	'
-	'		#endif
-	'
-	'		If Len(sTemp) Then
-	'
-	'			For i As Long = 0 To UBound(sfiles_array)
-	'
-	'				If Len(sfiles_array(i)) AndAlso (sfiles_array(i) = sTemp OrElse sfiles_array(i) = sTemp2 OrElse Getfilepart(sfiles_array(i)) = sTemp) Then
-	'
-	'					iIndexMainFile = i
-	'
-	'					Function = 1
-	'
-	'					Exit For
-	'
-	'				EndIf
-	'
-	'			Next
-	'
-	'		EndIf
-	'
-	'	EndIf
-	'
-	'End Function
 	
 	Function get_version_gdb(s As String) As Long
 		
@@ -12104,9 +11486,7 @@ End Sub
 		iFlagThreadSignal = 0
 		
 		If iFlag Then
-			
-			'#ifdef __FB_WIN32__
-			
+
 			iGlPid = 0
 			
 			'killtimer(0, TimerID)
@@ -12144,25 +11524,7 @@ End Sub
 				Next i
 			Next jj
 			'TimerID = settimer(0, 0, 20, Cast(Any Ptr, @timer_data))
-			
-			'#else
-			
-			'			Disablegadget(E_BUT_STEP_IN , 0)
-			'
-			'			Disablegadget(E_BUT_STEP_OUT , 0)
-			'
-			'			Disablegadget(E_BUT_CONTINUE , 0)
-			'
-			'			Disablegadget(E_BUT_KILL , 0)
-			'
-			'			Disablegadget(E_BUT_UPDATEL , 0)
-			'
-			'			Disablegadget(E_BUT_UPDATEGL , 0)
-			'
-			'			Disablegadget(E_BUT_COMMAND , 0)
-			
-			'#endif
-			
+
 			'run_pipe_write(!"r\n" , 300)
 			writepipe !"r\n"
 			
@@ -12270,18 +11632,7 @@ End Sub
 			bGetPid = False
 			
 		Else
-			'		#ifdef __FB_WIN32__
-			'
-			'			MsgBox("In Windows, this feature does not work. If the debugging application is a console, press it Ctrl + C to suspend the process.", "Warning!")
-			'
-			'		#else
-			'
-			'			kill_(iGlPid , 2)
-			'
-			'			Updateinfoxserver(10000)
-			'
-			'		#endif
-			
+
 		End If
 		
 	End Sub
@@ -12339,12 +11690,8 @@ End Sub
 		'	iFlagThreadSignal = 0
 		'
 		'	Dim As Long iSleep
-		
-		'	#ifdef __FB_WIN32__
-		'		iSleep = 100
-		'	#else
-		'		iSleep = 1
-		'	#endif
+
+		'	iSleep = 1
 		
 		'	If iStateMenu = 1 Then
 		'
@@ -12564,10 +11911,8 @@ Sub RunWithDebug(Debugger As String, ByRef ProjectFileName As WString, ByRef Pro
 	'Dim As UString FirstLine = GetFirstCompileLine(MainFile, Project, CompileLine)
 	ThreadsLeave()
 	If Not Restarting Then
-		'#IfNDef __USE_GTK__
 		exename = GetExeFileName(MainFile, CompileLine & " " & FirstLine)
 		mainfolder = GetFolderName(MainFile)
-		'#EndIf
 	Else
 		Restarting = False
 	End If
@@ -12588,11 +11933,7 @@ Sub RunWithDebug(Debugger As String, ByRef ProjectFileName As WString, ByRef Pro
 		End If
 	End If
 		WatchIndex = -1
-	'#ifdef __USE_GTK__
-	'	If WGet(DebuggerPath) = "" AndAlso *CurrentDebugger <> ML("Integrated GDB Debugger") OrElse InStr(LCase(WGet(DebuggerPath)), "gdb") > 0 Then
-	'#else
 		If WGet(DebuggerPath) <> "" AndAlso runtype <> RTSTEP AndAlso InStr(LCase(WGet(DebuggerPath)), "gdb") > 0 Then
-	'#endif
 		Dim As Integer Fn = FreeFile_
 		Open ExePath & "/Temp/GDBCommands.txt" For Output As #Fn
 		'If TurnOnEnvironmentVariables AndAlso *EnvironmentVariables <> "" Then
@@ -12689,28 +12030,6 @@ Sub RunWithDebug(Debugger As String, ByRef ProjectFileName As WString, ByRef Pro
 					KillTimer(0, GTIMER001)
 					MsgBox(ML("Debuggee not running"), ML("ERROR unable to start the thread managing the debuggee"))
 				EndIf
-				'pClass = NORMAL_PRIORITY_CLASS Or CREATE_UNICODE_ENVIRONMENT Or CREATE_NEW_CONSOLE Or DEBUG_PROCESS Or DEBUG_ONLY_THIS_PROCESS
-				'If CreateProcessW(@exename, CmdL, ByVal NULL, ByVal NULL, False, pClass, NULL, Workdir, @SInfo, @PInfo) Then
-				'	WaitForSingleObject PInfo.hProcess, 10
-				'	dbgprocid = PInfo.dwProcessId
-				'	dbgthreadID = PInfo.dwThreadId
-				'	dbghand = PInfo.hProcess
-				'	dbghthread = PInfo.hThread
-				'	prun = True
-				'	wait_debug
-				'End If
-				'KillTimer 0, 0
-				'InDebug = False
-				'DeleteDebugCursor
-				'Dim As Unsigned Long ExitCode
-				'GetExitCodeProcess(PInfo.hProcess, @ExitCode)
-				'Result = ExitCode
-				'ShowMessages(Time & ": " & ML("Application finished. Returned code") & ": " & Result & " - " & Err2Description(Result))
-				'ChangeEnabledDebug True, False, False
-				'#ifndef __USE_GTK__
-				'	If CurrentTimer <> 0 Then KillTimer 0, CurrentTimer
-				'	CurrentTimer = 0
-				'#endif
 			End If
 		End If
 	If Workdir <> 0 Then _Deallocate( Workdir)

@@ -8889,6 +8889,8 @@ Sub frmMain_Show(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	If MainMaximized Then frmMain.WindowState = WindowStates.wsMaximized
 	If GetLeftClosedStyle Then UpdateLeftPinLayout()
 	UpdateBottomPinLayout
+	' CloseBottom in frmMain_Create runs before the form is shown; redo collapsed layout once docked.
+	If Not splBottom.Visible Then CloseBottom
 	RestoreAIAgentModelSelection()
 	RefreshAIAgentModelsCombo()
 
@@ -8940,6 +8942,7 @@ Sub frmMain_Show(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	If iniSettings.ReadBool("MainWindow", "BottomClosed", False) AndAlso Not iniSettings.ReadBool("MainWindow", "BottomCollapsed", True) Then
 		If ptabBottom->TabPosition = tpBottom AndAlso Not splBottom.Visible Then ShowBottom
 	End If
+	If Not splBottom.Visible Then CloseBottom
 	bApplyingStartupLayout = False
 	
 End Sub

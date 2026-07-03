@@ -1,6 +1,6 @@
 # VFBE Win64 Fork — Project Status & Handoff
 
-**Last updated:** 2026-07-02  
+**Last updated:** 2026-07-02 (evening)  
 **Repository:** [codeberg.org/bigriverguy/VFBEWin64](https://codeberg.org/bigriverguy/VFBEWin64)  
 **Local path:** `C:\Users\dmont\VisualFBEditor`  
 **Owner:** bigriverguy (`dmontaine@gmail.com`)
@@ -72,7 +72,7 @@ Work is organized in batches. **Do not start the next batch until the current on
 | Batch | Scope | Status |
 |-------|--------|--------|
 | **2.75.1** | Panel/layout cleanup in `Main.bas` | **Complete** (compile-clean) |
-| **2.75.2** | Bulk GTK preprocessor strip (`Tools/strip_gtk_preprocessor.ps1` on `src/` + `mff/`) | **Complete** (compile-clean); manual test mostly done |
+| **2.75.2** | Bulk GTK preprocessor strip (`Tools/strip_gtk_preprocessor.ps1` on `src/` + `mff/`) | **Complete** (compile-clean); **manual test plan in §7 not fully signed off** |
 | **2.75.3+** | Commented `#IfNDef __USE_GTK__` cleanup, `mff/DarkMode/` removal, dead-code comment cleanup | **Planned / deferred** |
 
 ### GTK strip tool
@@ -126,8 +126,10 @@ Several fix cycles addressed bottom panel **save/restore** vs **collapse layout*
 5. **Collapse did not reclaim editor space:** `CloseBottom` left `ptabBottom->Height` at expanded size; pin click used `SetBottomClosedStyle(True, False)` without `CloseBottom`
    - Reset both `pnlBottom` and `ptabBottom` heights on collapse
    - Pin click while expanded: `SetBottomClosedStyle(True, True)`
+6. **First cold start collapsed — editor gap:** `CloseBottom` in `frmMain_Create` ran before the form was shown; dock layout kept full `pnlBottom` height until manual collapse
+   - `frmMain_Show` re-applies `CloseBottom` once the main window is visible (and again after startup focus restore)
 
-**User confirmation:** State retention works after (4). Collapse/reclaim fix (5) pending user sign-off on latest build.
+**Status: bottom panel code issues — FIXED** (persistence, collapse/reclaim, first-start layout). See §7 for remaining **manual test plan** the owner must complete before Batch 2.75.3.
 
 ---
 
@@ -172,40 +174,49 @@ State model mirrors **left/right** panels:
 - [x] Batch 2.75.2 GTK preprocessor strip + compile fix
 - [x] Startup freeze fix (autolaunch removal, `_NOT_AUTORUN_FORMS_`)
 - [x] Tab close button glyph (×)
-- [x] Bottom panel pin/collapse/expand behavior (multi-iteration)
-- [x] Bottom panel INI persistence (save timing + startup restore)
-- [x] Bottom panel collapse reclaims editor height (latest; needs user test)
+- [x] Bottom panel pin/collapse/expand behavior (multi-iteration) — **fixed**
+- [x] Bottom panel INI persistence (save timing + startup restore) — **fixed**
+- [x] Bottom panel collapse reclaims editor height — **fixed**
+- [x] First-start collapsed layout reclaims editor space (`frmMain_Show` re-apply) — **fixed**
 - [x] Codeberg remote + SSH
 - [x] `ActivateMainWindow()` at end of `frmMain_Show` (editor foreground on startup)
 
 ---
 
-## 7. Open items & manual test before 2.75.3
+## 7. Manual test plan — owner sign-off required before 2.75.3
 
-### User sign-off still needed
+> **Handoff note (Claude Code):** Bottom panel **implementation bugs are resolved**. The project owner (**bigriverguy**) still needs to **work through this entire checklist** and sign off before starting Batch 2.75.3. Do not treat “bottom panel fixed” as “Batch 2.75.2 fully validated.”
 
-Run a full pass on **latest** `VisualFBEditor64.exe` after `Compile.bat`:
+Run a full pass on **latest** `VisualFBEditor64.exe` after `Compile.bat`. Check each box when verified.
 
-**Startup**
+### Startup
 
 - [ ] Cold start — no ghost Find dialog, splash closes, main window active
 - [ ] Bottom panel opens in same state as last session (pinned / auto-hide collapsed / auto-hide expanded)
+- [ ] Cold start with bottom **collapsed** — editor fills space immediately (no empty gap)
 
-**Bottom panel**
+### Bottom panel (regression on fixes)
 
-- [ ] Pin open → exit → restart — stays pinned (`BottomClosed=false` in INI)
-- [ ] Auto-hide expanded → exit → restart — reopens expanded
-- [ ] Collapse (pin or click-away) — **editor fills freed space** (no empty gap)
+- [x] Pin open → exit → restart — stays pinned (`BottomClosed=false` in INI) — **owner verified**
+- [x] Auto-hide expanded → exit → restart — reopens expanded — **owner verified**
+- [x] Collapse (pin or click-away) — editor fills freed space — **owner verified**
+- [x] First start collapsed — editor fills space — **owner verified**
 - [ ] Pin size/position acceptable in collapsed and expanded modes
 - [ ] Single-click collapse when expanded
 - [ ] Resize height persists (≥ 80px)
 
-**Regression**
+### Regression (Batch 2.75.2 + adjacent areas)
 
 - [ ] Left/right panels pin/collapse/restore
 - [ ] Ctrl+F, Find In Files
 - [ ] Compile/run, Output/Problems tabs
 - [ ] Form design, property editing
+- [ ] Toolbox insert, project explorer, AI Agent tab (if used)
+- [ ] Session open/save, recent files/projects
+
+### Gate to Tier 2.75.3
+
+**All unchecked items above must pass** (or be explicitly deferred with a note in this file) before Batch 2.75.3 dead-code cleanup begins.
 
 ### Known deferred cleanup (not blocking unless touched)
 
@@ -217,14 +228,14 @@ Run a full pass on **latest** `VisualFBEditor64.exe` after `Compile.bat`:
 
 ### Optional / housekeeping
 
-- `docompile.bat` — local helper at repo root (wrong path casing); not part of official build
+- `docompile.bat` — gitignored local helper at repo root (owner convenience)
 - Consider `.gitignore` for `VisualFBEditor64.exe` if binary commits are undesired (currently committed like initial import)
 
 ---
 
 ## 8. Planned next steps (Tier 2.75.3+)
 
-1. **User sign-off** on bottom panel + Batch 2.75.2 checklist
+1. **User sign-off** — complete **§7 manual test plan** (owner in progress; bottom panel core items done)
 2. **Batch 2.75.3** — remove commented GTK preprocessor remnants (careful diff; compile after each logical chunk)
 3. **Remove `mff/DarkMode/`** if no WinAPI references remain
 4. **Dead-code comment pass** — grep for `__USE_GTK__`, `GTK`, `Linux`, `dark mode` in `src/` and `mff/`
@@ -298,26 +309,40 @@ Includes:
 4. `ShowBottom` if auto-hide but not collapsed  
 5. `bApplyingStartupLayout = False`  
 
-**Panel save (`frmMain_Close`):**
+**Panel show (`frmMain_Show`):**
 
-1. `SaveMainWindowPanelLayout()` — **first**, before `CloseSession`  
-2. … session close, other INI keys …
+1. Maximize if saved  
+2. `UpdateBottomPinLayout`; if `Not splBottom.Visible` → `CloseBottom` (fixes first-start dock)  
+3. After `ActivateMainWindow`: re-expand auto-hide if INI says so; `CloseBottom` again if collapsed  
 
 ---
 
 ## 11. Handoff notes for Claude Code
 
+**Primary handoff artifact:** this file (`PROJECT_STATUS.md`) + **§7 manual test plan**.
+
 1. **Read this file first**, then `src/BUILD.md` and `.cursor/skills/contextual-change-validation/SKILL.md` before panel/settings changes.
 
-2. **Bottom panel is the highest-risk area** — save timing, `TabPosition` vs collapse, `ptabBottom->Height`, and `frmMain_ActiveControlChanged` interact. Compare any change to **left/right** panel patterns in the same file.
+2. **Bottom panel implementation is complete** — do not reopen unless §7 regression tests fail. If they fail, compare against left/right panel patterns in `src/Main.bas` before patching.
 
-3. **Avoid fix cycles** — map full surface, compile, checklist; if stuck after 4 iterations, stop and document root cause instead of tweaking one line.
+3. **Owner action:** finish every unchecked item in **§7** and update checkboxes here (or note deferrals) before Tier 2.75.3.
 
-4. **Batch 2.75.3** is cleanup, not feature work — keep diffs reviewable; compile after each chunk.
+4. **Avoid fix cycles** — map full surface, compile, checklist; if stuck after 4 iterations, stop and document root cause instead of tweaking one line.
 
-5. **Upstream** is Xusinboy’s VisualFBEditor; this fork intentionally diverges (Win64-only). Merge upstream only with explicit plan.
+5. **Batch 2.75.3** is cleanup, not feature work — keep diffs reviewable; compile after each chunk. **Blocked until §7 passes.**
 
-6. **Examples/** and **Tools/** are largely untouched by Tier 2.75; don’t strip GTK from user examples unless that’s a separate decision.
+6. **Upstream** is Xusinboy’s VisualFBEditor; this fork intentionally diverges (Win64-only). Merge upstream only with explicit plan.
+
+7. **Examples/** and **Tools/** are largely untouched by Tier 2.75; don’t strip GTK from user examples unless that’s a separate decision.
+
+8. **Local convenience:** `docompile.bat` at repo root is gitignored (owner’s personal compile shortcut).
+
+---
+
+**Panel save (`frmMain_Close`):**
+
+1. `SaveMainWindowPanelLayout()` — **first**, before `CloseSession`  
+2. … session close, other INI keys …
 
 ---
 
@@ -327,6 +352,8 @@ Includes:
 |--------|-------------|
 | `bbfa399` | Initial Win64 fork import |
 | `e212819` | Bottom panel persistence/collapse; startup guards; `SaveMainWindowPanelLayout`; `PROJECT_STATUS.md` |
+| `e63f1a6` | Status doc commit-hash update |
+| *(latest)* | First-start collapsed layout; gitignore `docompile.bat`; handoff/test-plan update |
 
 ---
 

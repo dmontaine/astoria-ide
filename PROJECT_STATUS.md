@@ -357,7 +357,8 @@ Includes:
 ### User / agent conventions (from session)
 
 - **Minimize scope** — smallest correct diff; match existing code style
-- **No commits** unless user explicitly asks (exception: this handoff push)
+- **No commits** unless user explicitly asks
+- **Every session ends with a push to Codeberg** (added 2026-07-03) — commit any outstanding working-tree changes (status doc updates, INI/scratch state, etc.) with a sensible message, then `git push origin main`, as the last action before signing off for the day. This is a standing instruction, not a one-time request — don't wait to be asked again in future sessions.
 - **WinAPI only** — do not reintroduce GTK/Linux IDE paths
 - Close running IDE before rebuild
 - `set NOPAUSE=1` for agent compile runs

@@ -4,7 +4,6 @@
 '#  Authors: Xusinboy Bekchanov (bxusinboy@mail.ru)      #
 '#           Liu XiaLin (LiuZiQi.HK@hotmail.com)         #
 '#########################################################
-'#define __USE_GTK__
 
 #include once "Main.bi"
 #include once "mff/Dialogs.bi"
@@ -3983,11 +3982,6 @@ Sub EndOfLoadFunctions
 				tb = Cast(TabWindow Ptr, ptabCode->Tab(i))
 				If tb Then
 					tb->txtCode.Content.ExternalIncludesLoaded = False
-					'If AutoSuggestions Then
-					'	#ifndef __USE_GTK__
-					'		PostMessage tb->Handle, EM_SETMODIFY, 0, 0
-					'	#endif
-					'End If
 				End If
 			Next i
 		Next j
@@ -7192,61 +7186,6 @@ Sub lvEvents_Resize(ByRef Designer As My.Sys.Object, ByRef Sender As Control, Ne
 	'lvEvents_EndScroll(*Cast(ListView Ptr, @Sender))
 End Sub
 
-'Sub lvProperties_KeyDown(ByRef Sender As Control, Key As Integer, Shift As Integer)
-'    Dim iItem As Integer
-'	Dim dwState As Integer
-'	Dim iIndent As Integer
-'	Dim iIndentChild As Integer
-'	' Get the selected item...
-'	#IfNDef __USE_GTK__
-'		iItem = ListView_GetNextItem(lvProperties.Handle, -1, LVNI_FOCUSED Or LVNI_SELECTED)
-'	#EndIf
-'	If (iItem <> -1) Then
-'    ' Get the item's indent and state values
-'	#IfNDef __USE_GTK__
-'		dwState = Listview_GetItemStateEx(lvProperties.Handle, iItem, iIndent)
-'		Select Case Key
-'		  ' ========================================================
-'		  ' The right arrow key expands the selected item, then selects the current
-'		  ' item's first child
-'		  Case VK_RIGHT
-'			' If the item is collaped, expanded it, otherwise select
-'			' the first child of the selected item (if any)
-'			If (dwState = 1) Then
-'			  AddChildItems(iItem, iIndent)
-'			ElseIf (dwState = 2) Then
-'			  If iItem < lvProperties.ListItems.Count - 1 AndAlso lvProperties.ListItems.Item(iItem + 1)->Indent > iIndent Then
-'				  ListView_SetItemState(lvProperties.Handle, iItem + 1, LVIS_FOCUSED Or LVIS_SELECTED, LVIS_FOCUSED Or LVIS_SELECTED)
-'			  End If
-'			  'iItem = ListView_GetRelativeItem(m_hwndLV, iItem, lvriChild)
-'			  'If (iItem <> -1) Then Call ListView_SetFocusedItem(lvProperties.Handle, iItem)
-'			End If
-'		  ' ========================================================
-'		  ' The left arrow key collapses the selected item, then selects the current
-'		  ' item's parent. The backspace key only selects the current item's parent
-'		  Case VK_LEFT, VK_BACK
-'			' If vbKeyLeft and the item is expanded, collaped it, otherwise select
-'			' the parent of the selected item (if any)
-'			If (Key = VK_LEFT) And (dwState = 2) Then
-'				RemoveChildItems(iItem, iIndent)
-'			Else
-'				For i As Integer = iItem To 0 Step -1
-'					dwState = Listview_GetItemStateEx(lvProperties.Handle, i, iIndentChild)
-'					If iIndentChild < iIndent Then
-'						ListView_SetItemState(lvProperties.Handle, i, LVIS_FOCUSED Or LVIS_SELECTED, LVIS_FOCUSED Or LVIS_SELECTED)
-'						Exit For
-'					End If
-'				Next
-'	'          iItem = ListView_GetRelativeItem(m_hwndLV, iItem, lvriParent)
-'	'          If (iItem <> LVI_NOITEM) Then
-'	'            Call ListView_SetFocusedItem(m_hwndLV, iItem)
-'	'            Call ListView_EnsureVisible(m_hwndLV, iItem, False)
-'	'          End If
-'			End If
-'		End Select   ' KeyCode
-'	#EndIf
-'  End If   ' (iItem <> LVI_NOITEM)
-'End Sub
 
 Sub lvEvents_KeyDown(ByRef Designer As My.Sys.Object, ByRef Sender As Control, ByRef Item As TreeListViewItem Ptr)
 	
@@ -8062,15 +8001,6 @@ Sub lvProblems_ItemActivate(ByRef Designer As My.Sys.Object, ByRef Sender As Con
 	SelectError(GetFullPath(Item->Text(2)), Val(Item->Text(1)), Item->Tag)
 End Sub
 
-'Sub lvErrors_KeyDown(ByRef Sender As Control, Key As Integer,Shift As Integer)
-'    #IfNDef __USE_GTK__
-'		If Key = VK_Return Then
-'			Dim lvi As ListViewItem Ptr = lvErrors.SelectedItem
-'			If lvi <> 0 Then lvErrors_ItemDblClick Sender, *lvi
-'		End If
-'	#EndIf
-'End Sub
-
 lvProblems.Images = @imgList
 'lvErrors.StateImages = @imgList
 lvProblems.SmallImages = @imgList
@@ -8105,15 +8035,6 @@ Sub lvSearch_ItemActivate(ByRef Designer As My.Sys.Object, ByRef Sender As Contr
 		pfFind->Caption = ML("Find")+": " + WStr(gSearchItemIndex+1) + " of " + WStr(lvSearch.ListItems.Count)
 	End If
 End Sub
-
-'Sub lvSearch_KeyDown(ByRef Sender As Control, Key As Integer,Shift As Integer)
-'    #IfNDef __USE_GTK__
-'		If Key = VK_Return Then
-'			Dim lvi As ListViewItem Ptr = lvSearch.SelectedItem
-'			If lvi <> 0 Then lvSearch_ItemDblClick Sender, *lvi
-'		End If
-'	#EndIf
-'End Sub
 
 lvSearch.Align = DockStyle.alClient
 lvSearch.Columns.Add ML("Line Text"), , 500, cfLeft
@@ -8755,23 +8676,7 @@ Sub frmMain_Create(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	tviewthd = tvThd.Handle
 	tviewwch = tvWch.Handle
 	DragAcceptFiles(frmMain.Handle, True)
-	'#ifdef __USE_WINAPI__
-	'	Dim As ..Size sz
-	'	SendMessage(tbExplorer.Handle, TB_GETIDEALSIZE, 0, Cast(LPARAM, @sz))
-	'	tbExplorer.Width = tbExplorer.UnScaleX(sz.cx)
-	'	SendMessage(tbForm.Handle, TB_GETIDEALSIZE, 0, Cast(LPARAM, @sz))
-	'	tbForm.Width = tbForm.UnScaleX(sz.cx)
-	'#endif
-	'	If MainNode <> 0 Then
-	'		' Should have changelog file for every project
-	'		If MainNode->Text<>"" AndAlso InStr(MainNode->Text,".") Then
-	'			Dim As WString Ptr Changelog
-	'			wlet Changelog, ExePath & Slash & StringExtract(MainNode->Text, ".") & "_Change.log", True
-	'			If Dir(*Changelog)<>"" Then txtChangeLog.LoadFromFile(*Changelog) '
-	'			wDeallocate Changelog
-	'		End If
-	'	End If
-	
+
 	App.Title = App.Title & " (" & ML("64-bit") & ")"
 	frmMain.Text = App.Title
 	pfAbout->Label1.Text = App.Title

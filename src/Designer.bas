@@ -230,11 +230,7 @@ Namespace My.Sys.Forms
 	'return trim(Left(*s, L))
 	'end function
 	'
-	'#IfDef __USE_GTK__
 	Function Designer.ControlAt(Parent As Any Ptr, X As Integer, Y As Integer, CtrlPressed As Any Ptr = 0) As Any Ptr
-		'#Else
-		'	function Designer.ControlAt(Parent as HWND,X as integer,Y as integer) as HWND
-		'#EndIf
 			Dim As SymbolsType Ptr st = Symbols(Parent)
 			If st AndAlso st->ReadPropertyFunc Then
 				Dim ParentHwndPtr As HWND Ptr = Cast(HWND Ptr, st->ReadPropertyFunc(Parent, "Handle"))
@@ -394,13 +390,8 @@ Namespace My.Sys.Forms
 		End Function
 	
 	Sub Designer.DblClick(X As Integer, Y As Integer, Shift As Integer, Ctrl As Any Ptr = 0)
-		'#IfDef __USE_GTK__
 		SelectedControl = ControlAt(DesignControl, X, Y, Ctrl)
 		If OnDblClickControl Then OnDblClickControl(This, SelectedControl)
-		'#Else
-		'    FSelControl = ControlAt(FDialog, X, Y)
-		'	If OnDblClickControl Then OnDblClickControl(This, GetControl(FSelControl))
-		'#EndIf
 	End Sub
 	
 		Function Designer.GetControlHandle(Control As Any Ptr) As HWND
@@ -710,11 +701,7 @@ Namespace My.Sys.Forms
 						MapWindowPoints 0, FDialog, Cast(..Point Ptr, @R), 2
 				End If
 				Dim ctr As Any Ptr
-				'#IfDef __USE_GTK__
 				ctr = SelectedControl
-				'#Else
-				'	ctr = Cast(Any Ptr, GetWindowLongPtr(FSelControl, GWLP_USERDATA))
-				'#EndIf
 				If SelectedType = 3 Or SelectedType = 4 Then
 					Dim cpnt As Any Ptr = CreateComponent(SelectedClass, FName, ctr, FBeginX - UnScaleX(R.Left), FBeginY - UnScaleY(R.Top))
 					If OnInsertComponent Then OnInsertComponent(This, FClass, cpnt, 0, 0, FBeginX - UnScaleX(R.Left), FBeginY - UnScaleY(R.Top))
@@ -2211,45 +2198,6 @@ Namespace My.Sys.Forms
 						Return 0
 					Case WM_KEYDOWN
 						.KeyDown(wParam, 0)
-						'Select Case wParam
-					'					Case Keys.Key_Delete
-					'						If Des->FSelControl <> Des->FDialog Then Des->DeleteControl(Des->SelectedControl)
-					'					Case Keys.Key_Left, Keys.Key_Right, Keys.Key_Up, Keys.Key_Down
-					'						Dim As Integer FLeft, FTop, FWidth, FHeight
-					'						Dim As Integer FStepX = Des->FStepX
-					'						Dim As Integer FStepY = Des->FStepY
-					'						If bCtrl Then FStepX = 1: FStepY = 1
-					'						#IfDef __USE_GTK__
-					'						#Else
-					'							Dim As POINT P
-					'							Dim As RECT R
-					'							GetWindowRect(Des->FSelControl, @R)
-					'							P.X     = R.Left
-					'							P.Y     = R.Top
-					'							FWidth  = R.Right - R.Left
-					'							FHeight = R.Bottom - R.Top
-					'							ScreenToClient(GetParent(Des->FSelControl), @P)
-					'							FLeft   = P.X
-					'							FTop    = P.Y
-					'							If bShift Then
-					'								Select Case wParam
-					'								Case Keys.Key_Left: MoveWindow(Des->FSelControl, FLeft, FTop, FWidth - FStepX, FHeight, True)
-					'								Case Keys.Key_Right: MoveWindow(Des->FSelControl, FLeft, FTop, FWidth + FStepX, FHeight, True)
-					'								Case Keys.Key_Up: MoveWindow(Des->FSelControl, FLeft, FTop, FWidth, FHeight - FStepY, True)
-					'								Case Keys.Key_Down: MoveWindow(Des->FSelControl, FLeft, FTop, FWidth, FHeight + FStepY, True)
-					'								End Select
-					'							ElseIf Des->FSelControl <> Des->Dialog Then
-					'								Select Case wParam
-					'								Case Keys.Key_Left: MoveWindow(Des->FSelControl, FLeft - FStepX, FTop, FWidth, FHeight, True)
-					'								Case Keys.Key_Right: MoveWindow(Des->FSelControl, FLeft + FStepX, FTop, FWidth, FHeight, True)
-					'								Case Keys.Key_Up: MoveWindow(Des->FSelControl, FLeft, FTop - FStepY, FWidth, FHeight, True)
-					'								Case Keys.Key_Down: MoveWindow(Des->FSelControl, FLeft, FTop + FStepY, FWidth, FHeight, True)
-					'								End Select
-					'							End If
-					'							Des->MoveDots(Des->FSelControl)
-					'							If Des->OnModified Then Des->OnModified(*Des, GetControl(Des->FSelControl))
-					'						#EndIf
-					'					End Select
 					Case WM_COMMAND
 						If IsWindow(Cast(HWND, lParam)) Then
 						Else
@@ -2831,21 +2779,6 @@ Namespace My.Sys.Forms
 		
 		'mnuDesigner.ImagesList = @imgList '<m>
 		ParentControl->ContextMenu = @mnuDesigner
-		'		#ifdef __USE_GTK__
-		'
-		'		#else
-		'			FPopupMenu  = CreatePopupMenu
-		'			AppendMenu(FPopupMenu, MF_STRING, 10, @"Delete")
-		'			AppendMenu(FPopupMenu, MF_SEPARATOR, -1, @"-")
-		'			AppendMenu(FPopupMenu, MF_STRING, 12, @"Copy")
-		'			AppendMenu(FPopupMenu, MF_STRING, 13, @"Cut")
-		'			AppendMenu(FPopupMenu, MF_STRING, 14, @"Paste")
-		'			AppendMenu(FPopupMenu, MF_SEPARATOR, -1, @"-")
-		'			AppendMenu(FPopupMenu, MF_STRING, 16, @"Bring to Front")
-		'			AppendMenu(FPopupMenu, MF_STRING, 17, @"Send to Back")
-		'			AppendMenu(FPopupMenu, MF_SEPARATOR, -1, @"-")
-		'			AppendMenu(FPopupMenu, MF_STRING, 19, @"Properties")
-		'		#endif
 	End Constructor
 	
 	Destructor Designer

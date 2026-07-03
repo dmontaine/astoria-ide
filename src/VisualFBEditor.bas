@@ -4,11 +4,6 @@
 '#  Authors: Xusinboy Bekchanov (bxusinboy@mail.ru)      #
 '#           Liu XiaLin (LiuZiQi.HK@hotmail.com)         #
 '#########################################################
-'#ifndef __FB_WIN32__
-'	#cmdline "-gen gas64"
-'#endif
-'#define __USE_GTK__
-	'#define __USE_GTK3__
 	#define _NOT_AUTORUN_FORMS_
 
 		#cmdline "-x ../VisualFBEditor64.exe"
@@ -417,7 +412,6 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 					End If
 			Else
 				If InDebug Then
-					'#ifndef __USE_GTK__
 					ChangeEnabledDebug False, True, True
 						If 1 = 0 Then
 							brk_set(12)
@@ -427,32 +421,8 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 						Else
 							fastrun()
 						End If
-					'runtype = RTRUN
-					'thread_resume()
-					'#endif
-					'runtype = RTAUTO
-					'#ifdef __FB_WIN32__
-					'	set_cc()
-					'#else
-					'	If ccstate = KCC_NONE Then
-					'		msgdata = 1 ''CC everywhere
-					'		exec_order(KPT_CCALL)
-					'	End If
-					'#endif
-					'thread_set()
 				ElseIf UseDebugger Then
 					runtype = RTFRUN
-					'runtype = RTRUN
-					'runtype = RTAUTO
-					'#ifdef __FB_WIN32__
-					'	set_cc()
-					'#else
-					'	If ccstate = KCC_NONE Then
-					'		msgdata = 1 ''CC everywhere
-					'		exec_order(KPT_CCALL)
-					'	End If
-					'#endif
-					'thread_set()
 					SetTimer(0, GTIMER001, 1, Cast(Any Ptr, @DEBUG_EVENT))
 					CurrentTimer = SetTimer(0, 0, 1, @TIMERPROC)
 					ThreadCounter(ThreadCreate_(@StartDebuggingWithCompile))
@@ -479,19 +449,12 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 				End If
 		Else
 			If InDebug Then
-				'#ifndef __USE_GTK__
 				ChangeEnabledDebug False, True, True
 					fastrun()
-				'runtype = RTRUN
-				'thread_resume()
-				'#endif
 			ElseIf UseDebugger Then
-				'#ifndef __USE_GTK__
 				runtype = RTFRUN
-				'runtype = RTRUN
 				SetTimer(0, GTIMER001, 1, Cast(Any Ptr, @DEBUG_EVENT))
 				CurrentTimer = SetTimer(0, 0, 1, @TIMERPROC)
-				'#endif
 				ThreadCounter(ThreadCreate_(@StartDebugging))
 			Else
 				ThreadCounter(ThreadCreate_(@RunProgram))
@@ -517,9 +480,6 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 					command_debug "q"
 				End If
 		Else
-			'#ifdef __USE_GTK__
-			'	ChangeEnabledDebug True, False, False
-			'#else
 			'kill_process("Terminate immediatly no saved data, other option Release")
 			For i As Integer = 1 To linenb 'restore old instructions
 				WriteProcessMemory(dbghand, Cast(LPVOID, rline(i).ad), @rline(i).sv, 1, 0)
@@ -529,7 +489,6 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 			thread_resume()
 			DeleteDebugCursor
 			ChangeEnabledDebug True, False, False
-			'#endif
 		End If
 	Case "Restart"
 		ClearThreadsWindow
@@ -537,17 +496,14 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 		If CurrentDebugger = IntegratedGDBDebugger Then
 				command_debug("r")
 		Else
-			'#ifndef __USE_GTK__
 			If prun AndAlso kill_process(ML("Trying to launch but debuggee still running")) = False Then
 				Exit Sub
 			End If
 			runtype = RTFRUN
-			'runtype = RTRUN
 			SetTimer(0, GTIMER001, 1, Cast(Any Ptr, @DEBUG_EVENT))
 			CurrentTimer = SetTimer(0, 0, 1, @TIMERPROC)
 			Restarting = True
 			ThreadCounter(ThreadCreate_(@StartDebugging))
-			'#endif
 		End If
 	Case "StepInto":
 		ClearThreadsWindow
@@ -745,9 +701,7 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 					exe_mod()
 			End If
 		Case "ShowVar":
-			'#ifndef __USE_GTK__
 			var_tip(1)
-			'#endif
 		Case "StepOut":
 			ClearThreadsWindow
 			Dim As DebuggerTypes CurrentDebugger = CurrentDebuggerType64
@@ -789,16 +743,12 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 				Else
 					RunningToCursor = True
 					runtype = RTFRUN
-					'#ifndef __USE_GTK__
 					CurrentTimer = SetTimer(0, 0, 1, @TIMERPROC)
-					'#endif
 					ThreadCounter(ThreadCreate_(@StartDebugging))
 				End If
 			End If
 		Case "AddWatch":
-			'#ifndef __USE_GTK__
 			var_tip(2)
-			'#endif
 		Case "FindNext":                    pfFind->Find(True)
 		Case "FindPrev":                    pfFind->Find(False)
 		Case "Goto":                        pfGoto->Show *pfrmMain : pfGoto->CenterToParent

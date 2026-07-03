@@ -1,0 +1,241 @@
+'################################################################################
+'#  Form.bi                                                                     #
+'#  This file is part of MyFBFramework                                          #
+'#  Authors: Nastase Eodor, Xusinboy Bekchanov, Liu XiaLin                      #
+'#  Based on:                                                                   #
+'#   TForm.bi                                                                   #
+'#   FreeBasic Windows GUI ToolKit                                              #
+'#   Copyright (c) 2007-2008 Nastase Eodor                                      #
+'#   Version 1.0.0                                                              #
+'#  Updated and added cross-platform                                            #
+'#  by Xusinboy Bekchanov (2018-2019), Liu XiaLin (2020)                        #
+'################################################################################
+
+#include once "ContainerControl.bi"
+#include once "Graphic.bi"
+#include once "Sys.bi"
+
+Namespace My.Sys.Forms
+	#define QForm(__Ptr__) (*Cast(Form Ptr,__Ptr__))
+	
+	Private Enum ModalResults
+		'Nothing is returned from the dialog box. This means that the modal dialog continues running.
+		None
+		'The dialog box return value is OK (usually sent from a button labeled OK).
+		OK
+		'The dialog box return value is Cancel (usually sent from a button labeled Cancel).
+		Cancel
+		'The dialog box return value is Abort (usually sent from a button labeled Abort).
+		Abort
+		'The dialog box return value is Retry (usually sent from a button labeled Retry).
+		Retry
+		'The dialog box return value is Ignore (usually sent from a button labeled Ignore).
+		Ignore
+		'The dialog box return value is Yes (usually sent from a button labeled Yes).
+		Yes
+		'The dialog box return value is No (usually sent from a button labeled No).
+		No
+	End Enum
+	
+	Private Enum FormBorderStyle
+		None
+		SizableToolWindow
+		FixedToolWindow
+		Sizable
+		Fixed3D
+		FixedSingle
+		FixedDialog
+	End Enum
+	
+	Private Enum FormStyles
+		fsNormal
+		fsMDIForm
+		fsMDIChild
+		fsStayOnTop
+	End Enum
+	
+	Private Enum FormStartPosition
+		Manual
+		CenterScreen
+		DefaultLocation
+		DefaultBounds
+		CenterParent
+	End Enum
+	
+	Private Enum WindowStates
+		wsHide
+		wsNormal
+		wsMaximized
+		wsMinimized
+	End Enum
+	
+	'A window or dialog box that makes up part of an application's user interface (Windows, Linux, Android, Web).
+	Private Type Form Extends ContainerControl
+	Private:
+		InShowModal    As Boolean
+		FMainStyle(2)  As Integer
+		FMenuItems     As List
+		FBorderStyle   As Integer
+		FFormStyle     As Integer
+		FBorderIcons   As Integer
+		FExStyle(6)    As Integer
+		FCmdShow(4)    As Integer
+		FChild(2)      As Integer
+		FStyle(6)      As Integer
+		FClassStyle(6) As Integer
+		FWindowState   As Integer
+		FFormCreated   As Boolean
+		FDPIChanging   As Boolean
+		FShowInTaskbar As Boolean
+		FOnCreate      As Sub(ByRef Sender As Form)
+		Declare Static Sub ActiveControlChanged(ByRef Sender As Control)
+			Declare Static Sub HandleIsAllocated(ByRef Sender As Control)
+			Declare Static Sub HandleIsDestroyed(ByRef Sender As Control)
+			Declare Static Sub WNDPROC(ByRef Message As Message)
+				Declare Static Function HookClientProc(hDlg As HWND, uMsg As UINT, wParam As WPARAM, lParam As LPARAM) As LRESULT
+				Declare Virtual Sub SetDark(Value As Boolean)
+		Declare Function EnumMenuItems(Item As MenuItem) As Boolean
+		Declare Sub GetMenuItems
+		Declare Sub ShowItems(Ctrl As Control Ptr)
+		Declare Sub HideItems(Ctrl As Control Ptr)
+		Declare Static Sub GraphicChange(ByRef Designer As My.Sys.Object, ByRef Sender As My.Sys.Drawing.GraphicType, Image As Any Ptr, ImageType As Integer)
+		Declare Static Sub IconChanged(ByRef Designer As My.Sys.Object, ByRef Sender As My.Sys.Drawing.Icon)
+	Protected:
+		FControlBox     As Boolean
+		FKeyPreview     As Boolean
+		FMinimizeBox    As Boolean
+		FMaximizeBox    As Boolean
+		FOpacity        As Integer
+		FTransparent    As Boolean
+		FTransparentColor As Integer
+	Public:
+		Declare Virtual Sub ProcessMessage(ByRef Message As Message)
+		'Returns the icon displayed when a form is minimized at run time (Windows, Linux).
+		Icon          As My.Sys.Drawing.Icon
+		'Returns/sets a graphic to be displayed in a control (Windows, Linux, Web).
+		Graphic As My.Sys.Drawing.GraphicType
+		'Returns/sets the dialog result for the form (Windows, Linux).
+		ModalResult   As ModalResults
+			'Reads value from the name of property (Windows, Linux, Android, Web).
+			Declare Virtual Function ReadProperty(ByRef PropertyName As String) As Any Ptr
+			'Writes value to the name of property (Windows, Linux, Android, Web).
+			Declare Virtual Function WriteProperty(ByRef PropertyName As String, Value As Any Ptr) As Boolean
+		'Returns/sets the active control on the container control (Windows, Linux).
+		Declare Property ActiveControl As Control Ptr
+		Declare Property ActiveControl(Value As Control Ptr)
+		'Returns/sets the default button for dialog, acts on the Enter / Return key (Windows, Linux)
+		Declare Property DefaultButton As Control Ptr 'CommandButton
+		Declare Property DefaultButton(Value As Control Ptr)
+		'Returns/sets the cancel button for dialog, acts on the Esc key (Windows, Linux)
+		Declare Property CancelButton As Control Ptr 'CommandButton
+		Declare Property CancelButton(Value As Control Ptr)
+		'Returns/sets the border style of the form (Windows, Linux).
+		Declare Property BorderStyle As FormBorderStyle
+		Declare Property BorderStyle(Value As FormBorderStyle)
+		'Determines the form's style (Windows, Linux).
+		Declare Property FormStyle As FormStyles
+		Declare Property FormStyle(Value As FormStyles)
+		'Returns/sets a value that indicates whether form is minimized, maximized, or normal (Windows, Linux).
+		Declare Property WindowState As WindowStates
+		Declare Property WindowState(Value As WindowStates)
+		'Returns/sets whether keyboard events for an object are invoked before keyboard events for controls on that object (Windows only).
+		Declare Property KeyPreview As Boolean
+		Declare Property KeyPreview(Value As Boolean)
+		'Returns/sets the starting position of the form at run time (Windows, Linux).
+		Declare Property StartPosition As FormStartPosition
+		Declare Property StartPosition(Value As FormStartPosition)
+		'Returns/sets the opacity level of the form (Windows, Linux).
+		Declare Property Opacity As Integer
+		Declare Property Opacity(Value As Integer)
+		'Returns/sets the form that owns this form (Windows, Linux).
+		Declare Property Owner As Form Ptr
+		Declare Property Owner(Value As Form Ptr)
+		'Returns/sets the caption of the control (Windows, Linux, Android, Web).
+		Declare Property Caption ByRef As WString
+		Declare Property Caption(ByRef Value As WString)
+		'Returns/sets the text contained in the control (Windows, Linux, Android, Web).
+		Declare Property Text ByRef As WString
+		Declare Property Text(ByRef Value As WString)
+		'Returns/sets the transparent used to display text and graphics in a form (Windows only).
+		Declare Property Transparent As Boolean
+		Declare Property Transparent(Value As Boolean)
+		'Returns/sets the transparent color used to display text and graphics in a form (Windows only).
+		Declare Property TransparentColor As Integer
+		Declare Property TransparentColor(Value As Integer)
+		'Returns/sets a value indicating whether a Control-menu box is displayed on a form at run time (Windows only)
+		Declare Property ControlBox As Boolean
+		Declare Property ControlBox(Value As Boolean)
+		'Determines whether a form has a Minimize button (Windows only)
+		Declare Property MinimizeBox As Boolean
+		Declare Property MinimizeBox(Value As Boolean)
+		'Determines whether a form has a Maximize button (Windows only)
+		Declare Property MaximizeBox As Boolean
+		Declare Property MaximizeBox(Value As Boolean)
+		'Gets or sets the main form for application. (Windows, Linux, Android, Web)
+		Declare Property MainForm As Boolean
+		Declare Property MainForm(Value As Boolean)
+		'Gets or sets the MainMenu that is displayed in the form (Windows, Linux)
+		Declare Property Menu As MainMenu Ptr
+		Declare Property Menu(Value As MainMenu Ptr)
+		'Returns/sets a value that determines whether an object can respond to user-generated events (Windows, Linux).
+		Declare Property Enabled As Boolean
+		Declare Property Enabled(Value As Boolean)
+		'Returns/sets the parent container of the control (Windows, Linux, Android, Web).
+		Declare Property Parent As Control Ptr
+		Declare Property Parent(Value As Control Ptr)
+		'Returns/sets Gets or sets a value indicating whether the form is displayed in the taskbar (Windows only).
+		Declare Property ShowInTaskbar As Boolean
+		Declare Property ShowInTaskbar(Value As Boolean)
+		'Returns/sets a value that determines whether an object is visible or hidden (Windows, Linux, Web).
+		Declare Property Visible As Boolean
+		Declare Property Visible(Value As Boolean)
+		Declare Operator Cast As Control Ptr
+		'Brings the control to the front of the z-order (Windows, Linux).
+		Declare Sub BringToFront
+		'Sends the control to the back of the z-order (Windows, Linux).
+		Declare Sub SendToBack
+		'Invalidates the entire surface of the control and causes the control to be redrawn (Windows only).
+		Declare Sub Invalidate
+		'Displays the control to the user (Windows, Linux, Android, Web).
+		Declare Sub Show
+		'Shows the form with the specified owner to the user (Windows, Linux, Web).
+		Declare Sub Show(ByRef OwnerForm As Form)
+		'Shows the form as a modal dialog box (Windows, Linux).
+		Declare Function ShowModal As Integer
+		'Shows the form As a modal dialog box With the specified owner (Windows, Linux).
+		Declare Function ShowModal(ByRef Parent As Form) As Integer
+		'Conceals the control from the user.
+		Declare Sub Hide
+		'Maximizes the window (Windows, Linux).
+		Declare Sub Maximize
+		'Minimizes the window (Windows, Linux).
+		Declare Sub Minimize
+		'Closes the form (Windows, Linux).
+		Declare Sub CloseForm
+		'Centers the position of the form within the bounds of the parent form (Windows, Linux).
+		Declare Sub CenterToParent
+		'Centers the form on the current screen (Windows, Linux).
+		Declare Sub CenterToScreen(ByVal ScrLeft As Integer = 0, ByVal ScrTop As Integer = 0, ByVal ScrWidth As Integer = 0, ByVal ScrHeight As Integer = 0)
+		Declare Constructor
+		Declare Destructor
+		'Occurs when the form is activated in code or by the user (Windows, Linux).
+		OnActivate              As Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Form)
+		'Occurs after a Application instance becomes active (Windows, Linux).
+		OnActivateApp           As Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Form)
+		'Occurs when changes focus one of the controls on the form (Windows, Linux).
+		OnActiveControlChange   As Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Form)
+		'Occurs when the form is closed (Windows, Linux).
+		OnClose                 As Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Form, ByRef Action As Integer)
+		'Occurs when the form loses focus and is no longer the active form (Windows, Linux).
+		OnDeActivate            As Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Form)
+		'Occurs after a Application instance becomes deactive (Windows, Linux).
+		OnDeActivateApp         As Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Form)
+		'Occurs when the Visible property value changes to false (Windows, Linux).
+		OnHide                  As Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Form)
+		'Occurs when the Visible property value changes to true (Windows, Linux).
+		OnShow                  As Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Form)
+	End Type
+End Namespace
+
+	#include once "Form.bas"
+

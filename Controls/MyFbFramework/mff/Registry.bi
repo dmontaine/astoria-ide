@@ -1,0 +1,31 @@
+#include once "SysUtils.bi"
+#include once "vbcompat.bi"
+
+Namespace My.Sys.Registry
+	' Possible registry data types
+	Private Enum InTypes
+		ValNull = 0
+		ValString = 1
+		ValXString = 2
+		ValBinary = 3
+		ValDWord = 4
+		ValLink = 6
+		ValMultiString = 7
+		ValResList = 8
+	End Enum
+	
+		' Registry section definitions
+		'Const HKEY_CLASSES_ROOT = &H80000000
+		'Const HKEY_CURRENT_USER = &H80000001
+		'Const HKEY_LOCAL_MACHINE = &H80000002
+		'Const HKEY_USERS = &H80000003
+		'Const HKEY_PERFORMANCE_DATA = &H80000004
+		'Const HKEY_CURRENT_CONFIG = &H80000005
+		
+		Declare Function ReadRegistry(ByVal Group As HKEY, ByVal Section As LPCWSTR, ByVal Key As LPCWSTR) As String
+		
+		Declare Sub WriteRegistry(ByVal Group As HKEY, ByVal Section As LPCWSTR, ByVal Key As LPCWSTR, ByVal ValType As InTypes, value As String)
+End Namespace
+
+	#include once "Registry.bas"
+

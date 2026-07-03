@@ -1,0 +1,910 @@
+Version 1.3.7 (January 3, 2026)
+- Fixed: OnActivate event of TextBox.
+- Added: HTTPConnection in Linux
+- Added: OnPointerDown, OnPointerUpdate, OnPointerUp, OnGesture events to Control.
+- Fixed: Set Text property of ComboBoxEdit on cbDropDown style
+- Fixed: Error in setting a missing icon to a ListView row.
+- Fixed: Icon size on High DPI in Linux
+- Fixed: DPI not initialized correctly on different screens.
+- Fixed: Crash when change the BitmapType handle
+- Changed: Default value of CheckColor and ActiveColor
+- Added: ActiveColor and CheckColor to control CheckBox and RadioButton
+- Fixed: Menu in Design mode
+- Fixed: OnSelectedRowChanged return the selected item only
+- Improved: Paint event
+- Fixed: RichTextBox Zoom resets after RTF update.
+- Fixed: Removing MenuItem
+- Added: VisibleMenuIndex to MenuItem
+- Fixed: Change Dark Mode with ReBar
+- Fixed: Language File of Grid
+- Added: Property FixCols and binding DataArrayPtr(Any, Any) to Grid
+- Fixed: Compiling in Linux
+- Fixed: Memory Leaks
+- Added: Mongoose-Embedded Network Library
+- Fixed: Use GDIP when D2D1 is unsupported in Windows 7.
+- Fixed: Memory leaks
+- Fixed: Standardized Canvas backend
+- Fixed: D2D1 not working in Windows 7
+- Fixed: HTTPServer
+- Fixed: Memory leaks
+- Added: Polygon to Canvas on UseDirect2D
+- Added: DrawAlpha method for Canvas on UseDirect2D
+- Fixed: D2D1 Ellipse functions
+- Fixed: compile Rect error in Linux
+- Fixed: Improve the speed of Form_Size
+- Improved: Canvas
+- Added: UseDirect2D property to Canvas
+- Added: SoundPlayer Control
+- Fixed: Canvas cannot draw alpha images in GDI+ mode.
+- Fixed: GroupBox Visible Property
+- Fixed: Dropdown style ToolButton in Dark mode
+- Added: Memory check for function WLet and WLetEx
+- Fixed: Update Property TextBox.WordWraps(Value As Boolean)
+- Fixed: Showing Cursor on opening ContextMenu of RichTextBox
+- Improved: Controls: Enums without comments
+- Added: Updated more function for SystemInformation.bas
+- Changed: AllowDrop (files) property of Control to AllowDropFiles
+- Added: DoDragDrop method and OnDragDrop, OnDragEnter, OnDragLeave, OnDragOver, OnGiveFeedback, OnQueryContinueDrag events to Control
+- Fixed: Support CRLF strings in Dictionary's LoadFromFile function.
+- Fixed: ReorderTab method of TabControl
+- Added: bNoActivate parameter to ReorderTab method of TabControl
+- Fixed: Activating MDI Child
+- Fixed: Deleting MenuItem
+- Fixed: TextBox getting focus
+- Fixed: CountReplaced parameter of Replace function
+- Improved: StatusBarʼs Add method.
+- Added: TreeNode.EditLabel method
+- Fixed: DefaultFont
+- Fixed: IDE crashes when dragging WebBrowser onto form in Windows 32-bit.
+- Fixed: Initial painting of ListControl in Dark mode
+- Fixed: RichTextBox highlight missing after DPI change.
+- Added: Send Error message after 3 attempts
+- Added: Error message return in HTTP
+- Improved: Debug.Print function: Now if the length of the new text is more than 64,000 characters, the beginning lines are removed from the Immediate Window.
+- Added: OnComplete event for HTTP.
+- Added: Function FormatFileName.
+- Fixed: Warning on compiling.
+- Fixed: ComboBoxEdit.
+- Fixed: Question mark in function ToUTF8.
+- Fixed: RichTextBox SelBold, SelItalic, SelUnderline, SelStrikeout, SelProtected methods.
+- Added: FileListBox.
+- Added: Get or set request cancellation for HTTP.
+- Added: ScrollToEnd and ScrollToLine methods to TextBox and RichTextBox.
+- Added: Timeout for HTTP.
+- Added: Stream Support for HTTP.
+- Improved: HTTPConnection.
+- Improved: RichTextBox.
+- Fixed: Standartized example file names.
+- Added: Add comment to all controls.
+- Added: UTF-8 without BOM support for Ini File.
+- Added: Pipe.bi
+- Fixed: OnNodeActivate and OnNodeDblClick events of TreeView.
+- Fixed: FromUTF8 function.
+- Added code page support to functions SaveToFile and LoadFromFile.
+- Improved UTF-8 BOM-less support.
+- Fixed: Drawing panels of StatusBar in Dark mode
+- Added: OwnerData property, OnCacheHint and OnGetDisplayInfo events to TreeListView
+- Removed: RowsCount property from Grid
+- Added: HoverTime property to Control
+- Improved: Add TreeListViewItem method of TreeListView.
+- Improved: CheckUTF8NoBOM Function.
+- Improved: List.
+- Improved: CommandButton ForeColor now supports visual styles.
+- Fixed: BackColor Of Captions in Windows 7.
+- Fixed: NotifyIcon when compiling with fbc 1.20 64-bit
+- Fixed: ColorDialog is not appearing as a Modal
+- Fixed: Compiling NotifyIcon in Linux
+- Added: ShowInTaskbar property to Form
+- Added: NotifyIcon example
+- Added: NotifyIcon component
+- Fixed: Deleting WebBrowser from Designer
+- Fixed: Mnemonic keys
+- Added: Skip empty element to Split Function.
+- Improved: Split function speed
+Version 1.3.6 (January 1, 2025)
+- Fixed: ExeName function of Application
+- Added： Thread.bi and DynamicArrayList.bi
+- Improved: tbsWholeDropdown ToolButton
+- Added: PrevInstance and Path function to Application
+- Filled: ReadProperty and WriteProperty functions of GraphicType
+- Fixed: Distance between pointer and icon when TreeView moves from High DPI to Low DPI
+- Improved: ImageList on High DPI
+- Fixed: TreeView on High DPI
+- Improved: ToolBar on DPI changing
+- Fixed: DPI on create ToolBar buttons
+- Improved: ReBar on DPI changing
+- Improved: Form size changing
+- Fixed: Row height of TreeListView on DPI changing
+- Added: OnMeasureItem and OnDrawItem events to ListView
+- Fixed: Image missing after DPI changed
+- Replaced: ListSortDirection Enum to SortStyle in Grid
+- Added: OnPanelClick And OnPanelDblClick events to StatusBar, Added: StatusBar Example
+- Added: RayLib Example
+- Improved: Print components
+- Added: Gradient color for Grid
+- Added： SortOrder property to Grid control
+- Added: _CAllocateWithSize definition to FBMemCheck
+- Added： Console Example
+- Added： Console.bi
+- Added： CreateObjectRegFree function
+- Improved: GroupBox on Dark Mode
+- Added: NoInterface.bi
+- Updated: Change the Split sub to a function.
+- Added: OnNewWindowRequested event to WebBrowser
+- Added: ExecuteScript function to WebBrowser
+- Fixed: Compiling Android Project
+- Fixed: Form with GTK4 in Windows
+- Fixed: __USE_CAIRO__ in High DPI
+- Fixed: ImageList in High DPI
+- Fixed: TextRTF property of RichTextBox
+- Renamed: SearchBar to SearchBox
+- Added: Expand property to ToolButton
+- Improved: SearchBar in Linux
+- Imrpoved: Dark mode for all controls
+- Improved: ComboBoxEx in Dark mode
+- Fixed: Changing Form title bar to Dark mode, Fixed: Blinking when opening Form
+- Added: __USE_CAIRO__ definition
+- Improved: TabControl in High DPI
+- Improved: ListView, TreeListView and Grid in High DPI
+- Fixed: ToolButton Width in High DPI
+- Fixed: Icon Size in High DPI
+- Fixed: MDIForm on Light mode
+- Fixed: ReBar in Light mode
+- Added: Default color of BevelOuter, BevelInner in Darkmode
+- Fixed: Update Font property in Canvas.TextOut
+- Fixed: My.Sys.Language function in Linux
+- Fixed: Showing Panel Caption with Font size
+- Added: TreeView on Web
+- Added: ListControl and ComboBox on Web
+- Added: ReadProperty and WriteProperty functions to HTTPConnection and HTTPServer
+- Fixed: HTTPConnection
+- Improved: SearchBar in Light mode
+- Added: FBSound example
+- Fixed: SearchBar in High DPI
+- Added: HorizontalBox, ScrollControl Example
+- Added: WinHTTP example
+- Added: Curl examples
+- Added: SearchBar
+- Fixed: ScrollControl in High DPI
+- Improved: ScrollControl
+- Added: RecalculateScrollBars method to ScrollControl
+- Added: Descriptions for Object, Component, Control, CommandButton, ContainerControl and Form
+- Fixed: ScrollControl
+- Fixed: RichTextBox dark mode
+- Improved: TextRTF property of RichTextBox
+- Added: TextRTF property to RichTextBox on Linux.
+- Improved: RichTextBox in Dark Mode
+- Added： Using Cairo with GDI
+- Added: Cairo Example
+- Added: Animate, Chart, Grid, GridData, ListView, PageScroller, ReBar, TimerComponent, WebBrowser Examples
+- Added: ImageBox on Web
+- Added: OnButtonActivate event to ToolPalette
+- Fixed: UpDown control on High DPI
+- Added: HTTPConnection CallMethod on Windows.
+- Added: HTTP and HTTPServer classes
+- Improved: Form on Web
+- Improved: NumericUpDown control
+- Fixed: NumericUpDown in High DPI
+- Improved: ScrollControl on Design mode
+- Fixed: Compiling PagePanel with gtk2
+- Fixed: SelectedPanelIndex property of PagePanel on Linux
+- Improved: PagePanel
+- Fixed: Parent property of Form in Linux
+- Added: Language property to Application
+- Added: Language function to Sys namespace
+- Improved: CurLanguage property of Application takes the system language by default
+- Added: NumericUpDown control to PagePanel on Design mode
+- Fixed: Focusing Forms after close child form
+- Improved: Clear method of TreeListViewItems
+- Fixed: Visible property and Collapse method of TreeView
+- Added: PagePanel control
+- Added: Alignment and ArrowKeys property to UpDown control
+- Fixed: ToolButton Width property
+- Added: PrintDocument and PrintPreviewControl properties
+- Added: Child property to ToolButton
+- Fixed: Properties of SearchBar in Linux
+- Added: Visible property to TreeListViewItem
+- Added: Visible property to TreeNode
+- Fixed: Export of MsgBox function
+- Improved: PrintPreviewControl and PrintPreviewDialog
+- Added: Support for multiple languages
+- Fixed: Form ShowCaption property
+- Added: HorizontalScrollBar and VerticalScrollBar properties to ListControl
+- Added: RadioCheck property to CheckedListBox
+- Added: GridLines and MultiSelect properties to TreeListView
+- Added: Cancel property to CommandButton
+- Added: ShortCut property to MenuItem
+- Added： ZLet and ZDeAllocate sub
+- Fixed: Visible property of Control
+- Added: PrintDocument, PrintPreviewControl
+- Fixed: PrintPreviewDialog
+- Added: Orientation and PaperSize properties to PageSetupDialog
+- Added: SetBody method to WebBrowser in WebView2 mode
+- Added: GetBody function to WebBrowser in WebView2 mode
+- Improved: Canvas Drawing
+- Added: Spacing property to HorizontalBox and VerticalBox
+- Fixed: TextBox RightMargin property
+- Fixed: CheckedListBox painting
+- Fixed: Get Checked property of ListView item
+- Fixed: Error message when drawing with GDI+
+- Fixed: Control Repaint method
+- Fixed: Memory Leaks of Canvas
+- Added: ShowCaption property to Control
+- Added: StretchMode to show image in a Form body
+- Added: Current.X, Current.Y for layout of the Caption of Controls
+- Added: Transparent Property to Label Control
+- Added: Examples for Label control
+- Improved: AutoSize property of Label Control
+- Added: AutoSize property for Label control
+- Added: GetUrl method for WebBrowser (WebView2)
+- Fixed: WebBrowser's crash when WebView2 runtime is not installed.
+- Fixed: Running WebBrowser with WebView2 in 32-bit
+- Added: __USE_WEBVIEW2__ define for WebBrowser control
+- Improved: Replace function
+- Added: Choose and Switch functions
+- Added: High DPI when compiling with GTK
+- Fixed: Compiling with GTK2
+- Added: Wiki comments to functions
+- Added: Comments to Classes
+- Fixed: Changing Left and Top property of Designer Form and UserControl on Design mode
+- Fixed: Floating point error in Chart control
+- Fixed: AddItem method of ListControl
+- Added: NewIndex property to CheckedListBox, ComboBoxEdit, ComboBoxEx and ListControl
+- Fixed: Disabled the Transparent property in Design Mode.
+- Added: ShiftMask, AltMask, CtrlMask
+- Added: DPI (scale factor) support in Linux
+- Added: workflows
+- Fixed: Fixed: GridData in Linux
+- Fixed: Compiling on Linux
+- Added: EnsureVisible method to TreeListView , Grid, Griddata
+- Added: EnsureVisible method to ListView on Linux
+- Added: EnsureVisible method to ListView
+- Fixed: Changing ComboBoxEx to Dark Mode
+- Fixed: ReBar updating on change to Dark Mode
+- Fixed: Form and TextBox in Web
+Version 1.3.5 (September 17, 2023)
+- Added: Web support
+- Added: Optional Drawing with GDI+ with Canvas
+- Added: ByRef Designer As My.Sys.Object parameter to all events
+- Fixed: TextBox MaxLength property
+- Added: SubString function to UString
+- Fixed: Returning values of Mouse events
+- Fixed: Compiling with GTK in Windows
+- Fixed: Canvas functions
+- Added: Canvas Cls method in Linux
+- Improved: Debug.Print function
+- Added: Contains function to UString
+- Added: LoadFromScreen function to Bitmap
+- Added: DecimalPlaces property to control NumericUpDown
+- Changed: FBMemCheck
+- Added: ReadProperty and WriteProperty functions to ToolPalette
+- Fixed: Redraw while move the control inside Container
+- Added: Operator [] to StringList, WStringlist, Dictionary
+- Fixed: Set StartPosition of Form on Design mode
+- Fixed: Compiling and Fixed: OnMouseDown, OnMouseUp, OnMouseWheel and OnMouseHover
+- Fixed: OnMouseMove event
+- Added: Sort method for Grid
+- Added: Idx parameter to PointerList Contains function
+- Added： DuplicateIndex parameter to Insert function of Grid control
+- Added: SaveToFile and LoadFromFile methods to Grid control
+- Fixed: Set the Default Color Of Cells
+- Added: CellEdited events to control Grid
+- Fixed: Collapsing TreeListView
+- Added: OwnerData Property to control Grid
+- Improved: Grid control
+- Added: StretchImage property to Picture control
+- Fixed: Update when label size changes.
+- Fixed: OpenFileControl
+- Fixed: OpenFileControl deleting
+- Fixed: Change image for Picture control
+- Fixed: Setting Style property of CommandButton
+- Fixed: Setting Style property of TrackBar control
+- Fixed: Setting an empty value to Bitmap property
+- Fixed: ReadProperty and WriteProperty function for Style property of CommandButton control
+- Fixed: ReadProperty and WriteProperty function for CenterImage, RealSizeImage and Style properties of Picture control
+- Added: onDestroy event to Android application
+- Fixed: Compiling for Android
+- Improved: Speed of Split function
+- Improved: Speed of StartsWith and EndsWith functions
+- Added: crDefault cursor definition
+- Added: Editable function for control Grid
+- Fixed: Compiling Panel without Form
+- Added: Animate function for playing all types of media.
+- Added: Reduce Code Example
+- Added: Examples of Forms
+- Fixed: Compiling examples with fbc 1.10.0
+- Added: Examples files: MDIForm, SDIForm, Canvas
+- Added: DarkMode property to Application
+- Fixed: Blink while resize control picture
+- Added: Stretch for Canvas image
+- Fixed: Compiling with fbc 1.10.0
+- Fixed: AutoSizing controls on Design mode
+Version 1.3.4 (March 05, 2023)
+- Added: Event Code message to Animation control
+- Added: Property FullScreenMode for control Animate
+- Added: Add Property Volume, Balance, Position to control Animate
+- Fixed: Showing forms on different screen with different DPI
+- Fixed: Removing ListViewItem
+- Improved: StringList
+- Added: MyFbFramework CHM file
+- Added: Transparent property to Form
+- Added: ListItem parameter to IndexOf and Contains functions
+- Added: KeyPreview property to Form
+- Added: TransparentColor property to Form
+- Fixed: Updating Label's Graphic
+- Added: Graphic property to Panel
+- Added: DrawAlpha to Canvas
+- Fixed: Bitmap
+- Fixed: Cursor object
+- Fixed: TreeView control's Clear method
+- Fixed: NumbericUpDown and UpDown controls on Linux
+- Fixed: Control's Visible property on Linux, Added: NumericUpDown control on Linux
+- Fixed: NumericUpDown on High DPI
+- Fixed: CheckedListBox and UpDown On High DPI
+- Fixed: MenuItem's RadioItem property.
+- Fixed: Control Constraints property on High DPI
+- Fixed: Updating UserControl
+- Fixed: Compiling with fbc 1.10.0
+- Fixed: Application
+- Fixed: PageScroller
+- Added: AutoSize property for CheckBox
+- Added: InputBox
+- Fixed: ListView Add method when type with Index
+- Fixed: File number leak
+- Fixed: Tab messages
+- Fixed: IniFile Load method
+- Added: FullTypeName Export function
+- Fixed: Compiling with Pass All Modules to Compiler option
+- Added: RedefineClassKeyword macro
+- Fixed: Detach TabPage to another TabControl on Linux
+- Fixed: Compiling on Linux
+- Added: NumericUpDown control
+- Improved: UpDown dark mode
+- Added: Dark mode for UpDown and TabControl's UpDown
+- Fixed: Showing TabPage icon on moving to another TabControl
+- Added: OnTabAdded, OnTabRemoved and OnTabReordered events to TabControl
+- Added: Detachable property to TabControl
+- Added: IsSelected function to TabPage
+- Fixed: Form ShowModal method
+- Fixed: Blink on closing Modal Form
+- Fixed: ToolBar Enabled property
+- Fixed: Function Cls in High DPI
+- Added: bEnabled parameter to Menu.Add and MenuItem.Add functions
+- Fixed: Compiling on Android
+- Added: Off Defines for Application, Brush, Chart, CommandButton, Component, Control, DoubleList, Frid, Pen, TextBox, UString, StringParseCount and Match
+- Added: #define Application_Controls_Get_Off #define Application_ControlCount_Get_Off #define Application_Title_Get_Off #define Application_GetVerInfo_Off #define Application_GetControls_Off #define Application_Forms_Get_Off #define BitmapType_Height_Get_Off #define BitmapType_Let_HBITMAP_Off #define BitmapType_Let_HICON_Off #define BitmapType_Let_WString_Off #define BitmapType_LoadFromHICON_Off #define BitmapType_SaveToFile_Off #define BitmapType_Width_Get_Off #define Canvas_DrawTransparent_Off #define Canvas_Rectangle_Double_Double_Double_Double_Off #define Canvas_TransferDoubleBuffer_Off #define Control_IndexOf_String_Off #define Control_RecreateWnd_Off #define Control_ChangeControlIndex_Off #define Control_ChangeStyle_Off #define Control_StyleExists_Off #define Control_TopLevelControl_Off #define Control_Parent_Set_Off #define Cursor_LoadFromFile_Off #define Cursor_LoadFromResourceID_Off #define Cursor_LoadFromResourceName_Off #define Cursor_SaveToFile_Off #define Debug_Print_Off #define Dictionary_Add_Off #define Dictionary_Count_Get_Off #define Dictionary_IndexOf_Off #define Dictionary_IndexOfKey_Off #define Dictionary_IndexOfObject_Off #define Dictionary_Item_Get_Integer_Off #define Dictionary_Sort_Off #define Dictionary_SortKeys_Off #define Dictionary_Text_Get_Off #define Dictionary_Text_Set_Off #define DictionaryItem_Key_Get_Off #define DictionaryItem_Text_Get_Off #define Font_Color_Set_Off #define Form_ShowModal_Off #define GraphicType_LoadFromFile_Off #define GraphicType_LoadFromResourceID_Off #define GraphicType_LoadFromResourceName_Off #define Icon_Height_Get_Off #define Icon_LoadFromResourceID_Off #define Icon_LoadFromResourceName_Off #define Icon_ResName_Set_Off #define Icon_SaveToFile_Off #define Icon_Width_Get_Off #define ImageList_Add_WString_Off #define ImageList_AddFromFile_Off #define ImageList_Clear_Off #define ImageList_GetBitmap_Integer_Off #define ImageList_GetCursor_Integer_Off #define ImageList_GetIcon_Integer_Off #define ImageList_GetMask_Integer_Off #define ImageList_IndexOf_Off #define ImageList_Remove_Integer_Off #define IntegerList_IndexOf_Off #define MainHandle_Off #define Menu_Color_Set_Off #define Menu_IndexOf_WString_Off #define Menu_Item_Set_MenuItem_Off #define MenuItem_IndexOf_WString_Off #define MenuItem_Insert_Off #define MenuItem_Find_WString_Off #define MenuItem_Image_Set_BitmapType_Off #define MenuItem_ImageIndex_Set_Off #define MenuItem_Name_Set_Off #define List_Item_Set_Off #define LoadFromFile_Off #define Replace_Off #define SaveToFile_Off #define WStringList_Add_Off #define WStringList_IndexOf_Off #define WStringList_IndexOfObject_Off #define WStringList_MatchCase_Get_Off #define WStringList_Sort_Off #define WStringList_Text_Set_Off
+- Fixed: Showing last opened TabPage on recreate TabControl window
+- Fixed: Checking RadioButton
+- Added: ReadProperty_Off and WriteProperty_Off checks for ReadProperty and WriteProperty functions.
+- Added: Debug.AssertError and Debug.AssertWarning
+Version 1.3.3 (September 23, 2022)
+- Fixed: WebBrowser Navigate method
+- Fixed: Compiling with gtk2
+- Added: HorizontalBox and VerticalBox container controls
+- Fixed: Opening multiple files with OpenFileDialog on Linux
+- Fixed: ActiveForm property of Application on Linux
+- Fixed: Application Run method
+- Fixed: Recreating OpenFileControl
+- Added: Undo, PasteFromClipboard, CopyToClipboard, CutToClipboard, SelectAll methods to ComboBoxEdit and ComboBoxEx
+- Fixed: the Index of Items for all Control
+- Fixed: Crashing IDE on Linux
+- Added: Ability to change properties of FolderBrowserDialog, FontDialog and ColorDialog through the Properties window
+- Added: Ability to change properties of OpenFileDialog and SaveFileDialog through the Properties window
+- Improved: Showing MDI Child Icon and Minimize, Restore and Close buttons in High DPI
+- Fixed: Image and ImageKey property of MenuItem
+- Added: ActiveMDIChild property to Application
+- Fixed: Showing MDI Child Icon and Minimize, Restore, Close buttons on Dark Mode
+- Added: __HIDE_NO_MAIN_FORM_ON_CLOSE__ define
+- Fixed: RichTextBox TextRTF property and adding to Designer
+- Fixed: BitmapWidth, BitmapHeight, ButtonWidth and ButtonHeight properties of ToolBar on High DPI
+- Fixed: Set Colors in MDI forms
+- Fixed: Show, Hide And CreateWnd methods of ToolTips
+- Fixed: Drawing of the top menu when enabling and disabling elements of the top menu.
+- Fixed: WebBrowser designing
+- Changed: License to modifiedLGPL
+- Added: ControlRepaint Export sub for Control, ChangeIndex method for List, PanelIndex property to StatusPanel, ChangePanelIndex method for StatusBar, ButtonIndex property to ToolButton, ChangeIndex method to ToolButtons
+- Fixed: UpDown control
+- Added: AutoSize property to ContainerControl
+- Added: Vertical centering text of Label with CenterImage property
+- Fixed: Dark mode of MDI Client window
+- Added: OnColumnClick event to Grid
+- Added: NumbersOnly property to TextBox
+- Fixed: AllowDrop property of Control on Design mode
+- Fixed: Form Closing errors
+- Fixed: Dictionary IndexOfKey function
+- Improved: Setting the default property of a CommandButton sets or unsets the DefaultButton property of the parent Form.
+- Fixed: CommandButton Default property
+- Fixed: ToolPalette Remove tool buttons
+- Improved: Drawing checkboxes in CheckedListBox
+- Added: OnActivate and OnDeActivate events to MDI Child
+- Fixed: Tab on MDI Child
+- Added: Selected property to ListView Item
+- Fixed: MDI Form on High DPI
+- Updated: Canvas functions in Linux for Scale
+- Fixed: Crashing Chart control
+- Improved: MDI Form
+- Fixed: Set empty caption to MenuItem on Linux
+- Added: ChangeIndex procedure to Control
+- Added: ControlIndex property to Control
+- Added: ParentMenuItem property to MeniItem
+- Fixed: Form WindowState property on startup
+- Fixed: Closing and Showing MDI Child
+- Fixed: Showing MDI Child Form on Design Mode
+- Added: MouseWheel to ScrollControl
+- Added: ScrollControl on Linux
+- Added: ScrollControl
+- Added: OnLinkClicked event to ToolTips
+- Fixed: KeyPress event of Controls to get Unicode symbols
+- Fixed: ComboBoxEx Text Limit
+- Fixed: Display of ComboBoxEx items with long text
+- Improved: ComboBoxEx events
+- Fixed: OnDblClick event of ComboBoxEx
+- Improved: OnDblClick event triggers also in TextBox for ComboBoxEdit & ComboBoxEx.
+- Added: ItemCount function and Clear method to ComboBoxEx (to extend the properties and methods of the base class)
+- Added: AddItem, RemoveItem and InsertItem methods, Item and ItemData properties, IndexOf, Contains and IndexOfData functions to ComboBoxEx
+- Fixed: Showing ToolPalette icons on High DPI
+- Fixed: Compiling on Android
+- Added: ByRef Idx parameter to WStringList Contains function
+- Fixed: Get and set inner and outer text and html in function GetBody/SetBody of WebBrowser
+- Added: ItemText parameter to IndexOf function of WStringList
+- Improved: Control RequestAlign method
+- Fixed: Showing ComboBoxEdit
+- Fixed: Drawing GroupBox on Dark Mode
+- Fixed: File number leak
+- Fixed: Control Margins property
+- Added: __USE_GTK4__ define
+- Fixed: Refresh ComboBoxEdit items after change item by Index
+- Fixed: LoadFromFile and SaveToFile functions of CheckedListBox, ComboBoxEdit and ListControl
+- Added: LoadFromFile and SaveToFile functions
+- Fixed: Showing EditControl Tooltip
+- Fixed: Showing ToolTip for Form
+- Improved: WLetEx function
+- Added: MatchFullWords optional parameter to IndexOf function of Dictionary
+- Improved: WStringList Sorted Add
+- Added: MatchCase and MatchFullWords properties to WStringList
+- Added: SortInsert parameter to WStringList Add function
+- Improved: The speed IndexOf functions of WStringList and Dictionary
+- Fixed: TextBox Left and Right Margins on High DPI
+- Improved: Set Images to Menu from ImageList
+- Fixed: Hang when changing IDE width at High DPI
+- Fixed: ToolBar on High DPI
+- Fixed: High DPI of ComboBoxEx, TabControl and ToolPalette controls
+- Fixed: ComboBoxEdit Item Height on High DPI
+- Fixed: ImageList on High DPI
+- Added: My.Sys.Registry namespace
+- Fixed: ToolButton State property
+- Added: Debug.Clear function
+- Changed: DebugPrint to Debug.Print
+- Added: Printing with Debug.Print to Debug Window
+- Added: Setting SelStart and SelEnd methods of TextBox in Constructor
+- Improved: Dictionary IndexOfKey method
+- Fixed: FromUTF8 function
+- Fixed: TabPage on Designer
+- Fixed: PopupMenu ParentWindow property (get)
+- Added: Index Parameter to Control Add Method
+- Added: Get and Set Menu and MenuItem Items by Key
+- Added: TabControl DeleteTab by TabPage Pointer
+- Fixed: Splitter update on moving
+Version 1.3.2 (April 16, 2022)
+- Fixed: Unable to register class message
+- Fixed: CheckBox Font in Dark Mode
+- Added: Game FiveInARow example
+- Added: Import Get function in Canvas like freeBasic Graphics function to grab an image
+- Added: DPI Change handling
+- Improved: AddRange control methods are available in gcc backend and 64-bit.
+- Fixed: Reorder TabPage on Windows
+- Fixed: GridData compiling
+- Added: Location and Size properties to Control
+- Fixed: Hanging in DoEvents Function
+- Fixed: FromUTF8 function
+Version 1.3.1 (March 31, 2022)
+- Added: OnMoving event to Splitter
+- Added: SeriesCount and AxisItemsCount functions to Chart control
+- Fixed: Chart UpdateSerie with animation
+- Fixed: Chart UpdateSerie method
+- Fixed: Control Parent property
+- Added: FillColor and FillMode property to Canvas
+- Removed: Picture Canvas field, Picture control gets Canvas field from Base type
+- Fixed: Drawing with BackColor on Canvas
+- Improved: Canvas Line function
+- Fixed: Add Circle function to Canvas
+- Fixed: WebBrowser Segmentation violation signal
+- Fixed: Compiling GridData control
+- Added: GridData control
+- Added: Canvas BackColor property for Cls method
+- Added: ToolTipsFormat property to Chart control
+- Fixed: LabelsPositions and LabelsAlignments properties of Chart control
+- Added: LabelsFormat property to Chart control
+- Added: Cell function to Grid control
+- Added: Tag Property to GridColumn
+- Added: Grid Example
+- Added: GridCell to Grid control
+- Added: ButterflyDraw example
+- Fixed: Hello Example compiling
+- Added: Scale and Cls function to Canvas
+- Fixed: Showing Double values in Chart control
+- Fixed: High DPI Chart, Grid, ListView and TreeListView controls
+- Fixed: Chart control without data
+- Added: Scale function to Canvas on Windows
+- Added: SelectedColumnIndex property to Grid control
+- Added: Dark mode for Grid control
+- Added: AxisMax and AxisMin property to Chart control
+- Added: CountOf function to WStringList
+- Added: CreateDoubleBuffer, TransferDoubleBuffer and DeleteDoubleBuffer methods to Canvas
+- Improved: Canvas SetPixel method and Changed: GetDevice and ReleaseDevice method visibility from Private: to Public:
+- Fixed: OpenFileControl crash on Design Mode
+Version 1.3.0 (March 18, 2022)
+- Improved: ReBar Dark Mode in Linux
+- Added: Object parameter to Dictionary IndexOfKey And ContainsOfKey functions
+- Added: Dark Mode for ToolTips
+- Improved: Dark Mode
+- Added: Changing from Dark Mode to HighLight Mode
+- Added: DarkMode For OpenFileControl 
+- Fixed: TextBox DarkMode
+- Changed: GroupBox and TextBox Border Color on Dark Mode
+- Fixed: MenuItem.Visible property
+- Fixed: Compiling with __USE_GTK__
+- Fixed: Compiling for Android
+- Changed: DarkMode ReBar control to hide white line and ToolBar control to show separator
+- Changed: Numbering from _L_ to _L macros
+- Fixed: Saving resource files (*.rc) end lines with CRLF
+- Fixed: Showing error message on closing IDE
+- Improved: The quality of some resources file
+- Fixed: ComboBoxEdit and ComboBoxEx ScrollBar Dark Mode
+- Fixed: Resources file for Dark Mode
+- Added: InStrMatch function
+- Fixed: Showing ListView GridLines in Dark mode
+- Changed: ListView and TreeListView GridLines Color on Dark mode
+- Fixed: StatusBar Erase Background
+- Added: DarkMode for ProgressBar
+- Added: DarkMode to MenuBar
+- Improved: TabControl and StatusBar Dark mode
+- Fixed: DarkMode on 64-bit
+- Fixed: CheckBox and RadioButton ForeColor property
+- Added: Dark Mode
+- Fixed: Controls Enabled function on create
+- Fixed: Twice OnClick event on the controls in GroupBox
+- Fixed: Set TrackBar Position property
+- Fixed: Saving ScrollBar Position on Design mode
+- Added: EditLabels property to TreeListView
+- Fixed: TreeListView Columns Width property
+- Changed: ComponentGetBounds procedure from Integer Ptr to Integer
+- Fixed: ComboBoxEx Style property and CheckedListBox BackColor property
+- Fixed: ComboBoxEx List Height
+- Fixed: CheckedListBox AddItem method
+- Fixed: ComboBoxEx Text property
+- Fixed: OnChange event on ComboBoxEdit
+- Fixed: Blinking of the close, maximize, minimize buttons of the form when the mouse over them in Windows 7.
+- Changed: Component GetBounds function
+- Added: Visible property to TabPage
+- Fixed: Activating another form on form activation event in Windows 7.
+- Added: Debug print function to save debug log
+- Added: InitialDir to FolderBrowserDialog
+- Fixed: Destructor on Windows GTK
+- Added: CheckBox, RadioButton, MonthCalendar on Android
+- Added: Form, Label, Panel, TextBox, CommandButton controls on Android
+- Added: Left, Top, Width and Height properties to controls in Android
+- Fixed: __USE_GTK__, __USE_WINAPI__ and __USE_JNI__ defines
+- Added: __USE_JNI__ define for Android
+- Changed: Align property type from Integer to Enum
+- Fixed: TextBox LoadFromFile and GetSel method
+- Fixed: ComboBoxEdit Text property
+- Fixed: TextBox SelText and Control Visible property
+- Added: ParentMenuItem property to PopUpMenu
+- Added: Private keyword for all types and procedures
+- Fixed: TabControl RequestAlign (for TabPages)
+- Fixed: Rect and Point types on 64-bit
+- Fixed: Form Resizing on Minimized state
+- Added: TextBox LeftMargin and RightMargin on Linux
+- Added: TextBox LeftMargin and RightMargin properties
+- Added: OnDrawItem and OnMeasureItem events to TreeListView
+- Fixed: Bitmap and Icon LoadFromResourceName functions
+- Fixed: Set system color to RichTextBox
+- Added: AddImage function to RichTextBox on Linux
+- Added: SelPrint function to RichTextBox
+- Added: AddImage functions to RichTextBox
+- Added: AddImageFromFile function to RichTextBox on Windows
+- Added: RichTextBox SelAlignment, SelBackColor, SelColor, SelBold, SelBullet, SelCharOffset, SelCharSet, SelFontName, SelFontSize, SelIndent, SelItalic, SelProtected, SelRightIndent, SelHangingIndent, SelTabCount, SelUnderline, SelStrikeout properties on Windows and Linux
+- Added: RichTextBox Find, FindNext, FindPrev, GetTextRange functions on Linux
+- Added: RichTextBox OnProtectChange event on Windows
+- Fixed: ToolBar and ReBar
+- Added: ReBarBand
+- Improved: ReBar moved to Container controls
+- Added: ReBar on Windows
+- Fixed: Canvas GetPixel, TextWidth and TextHeight functions
+- Added: PageScroller on Linux
+- Added: PageScroller control on Windows
+- Removed: NativeFontControl
+- Fixed: HotKey and Form set text property on Linux
+- Fixed: Text property of LinkLabel
+- Added: Home, End keys, Control and Shift masks to IPAddress control on Linux
+- Fixed: IPAddress control Text property
+- Added: OnChange and OnFieldChanged events to IPAddress control on Linux
+- Added: IPAddress control on Linux
+- Added: OnChange event to IPAddress control
+- Fixed: IPAddress in Windows
+- Added: HotKey Control on Linux
+- Added: Resizable property to Header Control and HeaderSection
+- Fixed: Header Control Height on Linux
+- Added: OnChanging, OnChanged, OnTrack and OnSectionDblClick events to Header control on Linux
+- Added: Header control on Linux
+- Improved: Filled OpenFileControl Read and Write Property functions
+- Added: OpenFileControl
+- Added: Grid control in Linux
+- Added: MonthCalendar
+- Fixed: DateTimePicker Text property on Linux
+- Fixed: Changing year and month in DateTimePicker calendar on Linux.
+- Fixed: DateTimePicker in Gtk2
+- Added: DateTimePicker in Linux
+- Added: ShowNone property to DateTimePicker
+- Improved: DateTimePicker
+- Fixed: Control SetBounds method in Linux
+- Fixed: Width and Height properties of Components in Linux
+- Added: ToolButton Width and Height property in Linux
+- Fixed: Chart sizing in Linux GTK2
+- Fixed: Showing Chart Control in Windows
+- Fixed: MenuItem Checked property
+- Improved: Animate Control supports all media file formats in Windows (including .gif, .mp4 and etc.)
+- Added: IsPlaying funtion to Animate control
+- Added: OnOpen event of Animate control on Windows and Linux
+- Added: OnStart, OnStop and OnClose events to Animate control on Linux
+- Added: Animate Control in Linux
+- Improved: Filled Animate Read and Write property functions
+- Fixed: Compiling with FreeBasic 1.09
+- Improved: TreeListView ListItems property and TreeListViewItem Items property names changed to name Nodes
+- Fixed: TreeView OnSelChanging event
+- Improved: ToolPalette Group collapsed style in Windows
+- Improved: Filled TreeListView Read and Write properties
+- Removed: SmallImages, GroupHeaderImages and View property of TreeListView
+- Fixed: Create TreeListView items in constructor in Windows
+- Fixed: TreeNode ImageIndex property
+- Fixed: TreeNode SelectedImageIndex property
+- Added: Get by index function to Dictionary, OnItemDblClick, OnItemKeyDown and OnSelectedItemChanging events to ListView in Linux
+- Added: Images, SelectedImages and EditLabels property to TreeView in Linux, DraggedNode function to TreeView in Linux, OnNodeClick, OnNodeDblClick, OnNodeCollapsing, OnNodeCollapsed, OnNodeExpanding, OnNodeExpanded, OnSelChanging, OnBeforeLabelEdit and OnAfterLabelEdit events to TreeView in Linux
+- Added: IsChild property to Control in Linux
+- Fixed: TreeView add nodes on Form constructor
+- Added: OnNodeCollapsing, OnNodeCollapsed, OnBeforeLabelEdit events to TreeView in Windows
+- Fixed: Form OnShow event
+- Added: ListView Sort property in Linux, Fixed: ListView View property in Linux
+- Fixed: TabPage ImageKey property, PopupMenu ParentWindow property and ListView View property in Linux
+- Added: View Property and OnItemClick event to ListView in Linux
+- Added: ListView CheckBoxes property and ListViewItem Checked property in Linux
+- Added: BorderStyle, AllowColumnReorder and GridLines properties to ListView in Linux
+- Fixed: ProgressBar ProcessMessage method
+- Fixed: StepBy and StepIt methods of ProgressBar in Linux
+- Improved: Filled ProgressBar Read and Write property functions
+- Added: TrackBar ClearTickMarks method
+- Fixed: ListView SelectedItemIndex property and ListItems.Add function in Linux
+- Added: OnScroll and OnChange events to TrackBar in Linux
+- Fixed: AddTickMark in tmBoth TickStyle in Linux
+- Added: tmManual TickStyle to TrackBar in Linux
+- Added: tmBosh style TickMark to TrackBar in Linux
+- Removed: Tick property of TrackBar.
+- Added: MinValue, MaxValue, Position, LineSize, PageSize, ThumbLength, Frequency, TickStyle and Style property and AddTickMark method to TrackBar in Linux
+- Improved: Filled TrackBar Read and Write property function
+- Added: BGR function in Linux
+- Fixed: BackColor and ForeColor property of Control in Linux
+- Fixed: ScrollarBar controls set MaxValue
+- Added: BringToFront and SendToBack methods to Control in Linux
+- Improved: Filled Read and Write property functions of ScrollBar controls
+- Fixed: Set Text property of GroupBox from Property Grid
+- Added: Registry functions
+- Fixed: TabIndex, TabStop and Text property of TabPage
+- Fixed: Text property of ComboBox and ComboBoxEx
+- Fixed: Form Constraints property in Linux
+- Fixed: Leaking GDI objects
+- Added: Contraints property to controls in Linux
+- Fixed: Get Top position of controls contained in GroupBox
+- Added: SelCount and SelItems properties to ListControl in Linux
+- Fixed: Check items of CheckedListBox in Linux
+- Fixed: Delete GDI objects
+- Fixed: MultiColumn in CheckedListBox
+- Changed: Columns property of ListControl and CheckedListBox to name MultiColumn
+- Fixed: Filled Read and Write property function of CheckedListBox
+- Fixed: CheckedListBox draw focus
+- Added: CheckedListBox in Windows
+- Added: CheckedListBox control in Linux
+- Added: SelItems and SelCount properties to ListControl in Windows
+- Improved: ListBox AddItem and InsertItem method
+- Improved: ListBox Read and Write property function
+- Added: Sort property to ListControl in Linux
+- Added: ListControl borders in Linux
+- Improved: ComboBoxEx Read and Write property functions
+- Removed: AddObject and InsertObject methods from ComboBoxEdit
+- Added: OnMouseEnter, OnMouseMove, OnMouseHover, OnMouseLeave events to ComboBoxes in Linux
+- Fixed: Control ShowHint property in Linux
+- Added: Sort property to ComboBox and ComboBoxEx in Linux
+- Added: OnSelectCanceled event to ComboBox in Linux
+- Fixed: Grid control
+- Fixed: TextBox LoadFromFile method in Linux
+- Changed: Control Perform function access type from Public to Protected
+- Improved: Private, Protected and Public functions and properties
+- Fixed: Label events in Linux
+- Fixed: OnDropFile event in GTK2
+- Added: OnDropFile event to Control in Linux
+- Added: OnActivate, OnActivateApp, OnDeactivate, OnDeactivateApp event to Form in Linux;
+- Removed: OnFree, OnTimer event from Form in Linux
+- Fixed: ComboBoxEdit ItemHeight property
+- Fixed: TextBox in Gtk2
+- Added: ListControl SelectAll sub
+- Added: OnCopy, OnCut, OnPaste, OnScroll, OnUpdate event and Alignment, CaretPos, CharCase, Ctl3D, Lines, MaskChar, Masked, MaxLength, Modified, ScrollBars, SelEnd, SelLength, SelStart, SelText, TopLine, WantReturn, WantTab properties to TextBox in Linux
+- Improved: ImageBox visible in Design mode
+- Fixed: TabStop property of Controls
+- Added: OnMouseHover event to Control in Linux
+- Added: ListView HoverSelection property in Linux
+- Fixed: ImageBox OnClik and OnDblClick event in Linux
+- Fixed: Select ImageBox in Designer
+- Fixed: TextBox WordWraps property in Design Mode
+- Fixed: ImageBox events
+- Fixed: Bitmap and Graphic LoadFromResourceID functions in Linux
+- Added: OnEndScroll event to ListView and TreeListView in Linux
+- Fixed: TextBox CutToClipboard, CopyToClipboard, PasteFromClipboard and SelectAll properties
+- Fixed: Form Hide property in GTK2 (in Linux)
+- Fixed: Hint property of Control
+- Added: Form OnHide event in Linux
+- Added: Checked property to ListViewItem
+- Fixed: ScrollBars and WordWraps properties of TextBox works in design mode
+- Added: WordWrap property to Label
+- Improved: Form and Control help info
+- Fixed: UString Resize
+- Fixed: Form ActiveControl property in Design mode
+- Fixed: AllowColumnReorder, BorderSelect, CheckBoxes, LabelTip properties of ListView
+- Fixed: Color property of ColorDialog
+- Added: OnMove event to Controls
+- Fixed: Hint property Controls in Linux
+- Fixed: Form WindowState in Linux
+- Fixed: ImageBox resizing on select image.
+- Added: AllowColumnReorder, BorderSelect, CheckBoxes, GridLines, HoverTime, FullRowSelect, LabelTip properties to ListView
+- Added: OnMouseEnter event to Controls
+- Added: WordWraps property to TextBox in Linux
+- Improved: Label Read and Write Property functions
+- Fixed: Selecting ListView row when mouse hovers
+- Fixed: Form StartPosition property in Linux
+- Fixed: TextBox GotFocus and LostFocus event in Linux
+- Added: AllowDrop property to Control
+- Fixed: Open and Save Dialogs Caption, Filter, FilterIndex, FileName and InitialDir properties in Linux
+- Added: Initial changes for MDIForm and MDIChild in Linux
+- Fixed: MDIForm and MDIChild properties in Windows
+- Removed: NoScale argument from Control.SetMargins and Component.SetBounds
+- Added: High DPI compatibility
+- Added: TextBox changed event in Linux
+- Added: MinExtra to Splitter
+- Fixed: Update controls on drag Splitter
+- Fixed: Splitter not drags bigger than parent
+- Added: SplitterAlignmentConstants enum
+- Fixed: Set properties of TextBox and RichTextBox in the PropertyGrid
+- Fixed: ListControl AddItem procedure in Linux
+Version 1.2.9 (July 14, 2021)
+- Fixed: Show windows on DPI sets
+- Fixed: CheckBox problem in GroupBox
+- Fixed: Default check property of CheckBox
+Version 1.2.8 (May 16, 2021)
+- Fixed: Control Destructor in Linux
+- Added: RadioButton Checked Property in Linux
+- Fixed: ToolBar Button Captions in Linux
+- Added: StatusBar Read and Write Property Functions
+- Fixed: Icon LoadFromFile
+- Added: ImageListClear Export function
+- Fixed: UString Len function
+- Fixed: StatusBar create crash
+- Fixed: Change ListView Column Text
+- Added: ImageList Read and Write Property functions
+- Added: ImageList Stretch images
+- Fixed: ImageList AddFromFile
+- Added: Text property to Dictionary
+- Added: Canvas Draw transparent
+- Added: Top menu separator
+- Added: ReadProperty and WriteProperty function to ToolBar
+- Added: Selected(Index) property to ListControl
+- Fixed: ShowModal
+- Fixed: Delete Component
+- Added: ToBitmap function to Cursor
+- Fixed: LoadIcon
+- Added: Form Show normal if is minimized
+- Added: Load icon to MenuItem image
+- Fixed: Compile without warning in Win64
+- Fixed: Reduced number of GDI objects
+- Added: Work with image files in Designer
+- Fixed: ListView Get SubItem Text
+- Added: Sort to ListView
+- Added: ToolButtonClick event to ToolBar
+- Added: Load from PNG file
+- Added: ExtMargins property to Controls
+- Added: WantTab property to TextBox
+- Fixed: Separator MenuItem Caption
+- Fixed: MenuItem Read and Write property function
+- Fixed: Form WriteProperty function
+- Fixed: Control Repaint function
+- Fixed: Panel Paint event
+- Fixed: Reallocate functions
+- Fixed: Canvas functions
+- Added: Object property to Dictionary items
+- Added: Chart in Linux
+Version 1.2.7 (March 6, 2021)
+- Added: __USE_WEBKITGTK__ definition
+- Added: Chart control
+- Added: MouseHover event to Control
+- Fixed: GTK window move on Windows
+- Added: TimerComponent on Linux
+- Fixed: RichTextBox crash
+- Fixed: ReadOnly property of RichTextBox in Design Mode
+- Improved: Replace function
+- Fixed: GTK critical warning messages
+- Fixed: MenuItem.Clear
+- Added: OnMessage event to Control
+- Added: Set ListView.ImageIndex And ImageKey
+- Fixed: ComboBoxEdit in Designer on Linux not Disabled
+- Fixed: Icons are now visible in Linux if the path to the editor is in Unicode
+- Fixed: Open and Close files
+- Fixed: GroupBox paint
+- Fixed: Font size
+- Fixed: Menu item icons draws without background
+- Added: Alignment property to controls Label, TextBox, CheckBox, RadioButton
+- Fixed: SetFocus with UI state
+- Added: TabIndex to Controls
+- Fixed: Type changing in SaveFileDialog
+Version 1.2.6 (December 14, 2020)
+- Added: UserControl type
+- Changed: KeyExists function to Public
+- Added: Designer property to My.Sys.Object
+- Added: DraggedNode function to TreeView
+- Added: FBMemCheck.bi to check memory leaks
+- Fixed: MemLeaks
+- Fixed: ListView View property
+- Fixed: SaveFileDialog FilterIndex function
+- Fixed: Text Property of Control
+Version 1.2.5 (August 2, 2020)
+- Added: ActivateApp And DeActivateApp events to Form
+- Added: KeyRemove Function in IniFile
+- Added: TreeView events: OnSelChanging, OnNodeExpanding, OnNodeExpanded
+- Added: TreeNode.Bold property
+- Fixed: TreeNode.ImageKey and TreeNode.SelectedImageKey properties
+- Fixed: TabControl in Windows Classic Theme
+- Fixed: StatusBar functionality on 64-bit Windows
+- Fixed: OpenFileDialog and SaveFileDialog Filter property
+- Fixed: Deleted Menu update on Enable menu item
+- Fixed: ComboBoxEdit Esc and Return key events
+- Fixed: PageSetupDialog and PrintDialog execute crash
+- Fixed: HotKey.Text property
+- Fixed: Delete objects, clear lists and etc.
+- Fixed: TimerComponent OnTimer event
+Version 1.2.4 (May 24, 2020)
+- Added: Canvas Example (in Windows and Linux)
+- Added: Canvas Support (in Linux)
+- Added: FullTypeName function in Object type (Thanks to fxm)
+- Fixed: ComboBoxEx Text property (in Linux)
+- Fixed: ShowModal (in gtk2)
+- Fixed: Scroll in widgets without native scrolling capabilities (in gtk2)
+- Fixed: TimerComponent properties (in ReadProperty and WriteProperty function)
+Version 1.2.3 (May 17, 2020)
+- Added: UString
+- Added: FontDialog (in Linux)
+- Added: ColorDialog (in Linux)
+Version 1.2.2 (December 31, 2019)
+- Added: Reorderable property in TabControl
+Version 1.2.1 (December 18, 2019)
+- Fixed: Windows 7 support
+Version 1.2.0 (December 15, 2019)
+- Added: Picture
+- Added: Printer
+- Added: PageSetupDialog
+- Added: PrintDialog
+Version 1.1.0 (April 23, 2019)
+- Added: PNG Support
+- Added: TreeListView Control
+- Fixed: Setting Font Property of Controls (in Linux)
+Version 1.0.3.40 (February 24, 2019)
+- Added: __EXPORT_PROCS__ definition
+Version 1.0.2.1 (January 02, 2019)
+- Added: Gtk2 Support
+Version 1.0.2 (December 20, 2018)
+- Added: Cross-platform functionality
+- Added: ToolPalette control
+- Added: ImageBox control
+Version 1.0.1 (August 19, 2018)
+- Added: ColorDialog
+- Fixed: CommandButton OnClick event.
+Version 1.0.0 (July 14, 2018)
+- Added: GUI elements
+- Added: Drawing classes
+and others.

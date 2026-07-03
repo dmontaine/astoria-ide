@@ -1,0 +1,42 @@
+'******************************************************************************
+'* ClipboardType
+'* This file is part of MyFBFramework
+'* Based on:
+'*  TClipboard
+'*  FreeBasic Windows GUI ToolKit
+'*  Copyright (c) 2007-2008 Nastase Eodor
+'*  nastase_eodor@yahoo.com
+'* Updated and added cross-platform
+'* by Xusinboy Bekchanov (2018-2019)
+'******************************************************************************
+#include once "Component.bi"
+
+Namespace My.Sys
+	'Provides static methods that facilitate transferring data to and from the system Clipboard (Windows, Linux).
+	Private Type ClipboardType
+	Private:
+		FFormatCount As Integer
+		FFormat      As WString Ptr
+		FText        As WString Ptr
+	Public:
+		Declare Sub Open
+		Declare Sub Clear
+		Declare Sub Close
+		Declare Sub SetAsText(ByRef Value As WString)
+		Declare Function GetAsText ByRef As WString
+			Declare Sub SetAsHandle(FFormat As WORD, Value As HANDLE)
+			Declare Function GetAsHandle(FFormat As WORD) As HANDLE
+			Declare Function HasFormat(FFormat As WORD) As Boolean
+		Declare Property FormatCount As Integer
+		Declare Property FormatCount(Value As Integer)
+		Declare Property Format ByRef As WString
+		Declare Property Format(ByRef Value As WString)
+		Declare Constructor
+		Declare Destructor
+	End Type
+End Namespace
+
+'Common Shared As My.Sys.ClipboardType Ptr pClipboard
+
+	#include once "Clipboard.bas"
+

@@ -1,0 +1,119 @@
+'################################################################################
+'#  Brush.bi                                                                    #
+'#  This file is part of MyFBFramework                                          #
+'#  Authors: Nastase Eodor, Xusinboy Bekchanov, Liu XiaLin                      #
+'#  Based on:                                                                   #
+'#   TBrush.bi                                                                  #
+'#   FreeBasic Windows GUI ToolKit                                              #
+'#   Copyright (c) 2007-2008 Nastase Eodor                                      #
+'#   Version 1.0.0                                                              #
+'#  Modified by Xusinboy Bekchanov (2018-2019), Liu XiaLin (2020)               #
+'################################################################################
+
+#include once "Brush.bi"
+
+	' ugly colors for illustration purposes
+	g_brItemBackground = CreateSolidBrush(BGR(&hC0, &hC0, &hFF))
+	g_brItemBackgroundHot = CreateSolidBrush(BGR(&hD0, &hD0, &hFF))
+	g_brItemBackgroundSelected = CreateSolidBrush(BGR(&hE0, &hE0, &hFF))
+	g_menuTheme = 0
+	hbrBkgnd = CreateSolidBrush(darkBkColor)
+	hbrHlBkgnd = CreateSolidBrush(darkHlBkColor)
+	hbrBkgndMenu = CreateSolidBrush(darkBkColorMenu)
+
+Namespace My.Sys.Drawing
+		Private Function Brush.ReadProperty(ByRef PropertyName As String) As Any Ptr
+			Select Case LCase(PropertyName)
+			Case "color": Return @FColor
+			Case "style": Return @FStyle
+			Case "hatchstyle": Return @FHatchStyle
+			Case Else: Return Base.ReadProperty(PropertyName)
+			End Select
+			Return 0
+		End Function
+	
+		Private Function Brush.WriteProperty(ByRef PropertyName As String, Value As Any Ptr) As Boolean
+			Select Case LCase(PropertyName)
+			Case "color": This.Color = QInteger(Value)
+			Case "style": This.Style = *Cast(BrushStyles Ptr, Value)
+			Case "hatchstyle": This.HatchStyle = *Cast(HatchStyles Ptr, Value)
+			Case Else: Return Base.WriteProperty(PropertyName, Value)
+			End Select
+			Return True
+		End Function
+	
+		Private Property Brush.Color As Integer
+			Return FColor
+		End Property
+	
+	Private Property Brush.Color(Value As Integer)
+		FColor = Value
+		Create
+	End Property
+	
+	Private Property Brush.Style As BrushStyles
+		Return FStyle
+	End Property
+	
+	Private Property Brush.Style(Value As BrushStyles)
+		FStyle = Value
+		Create
+	End Property
+	
+	Private Property Brush.HatchStyle As HatchStyles
+		Return FHatchStyle
+	End Property
+	
+	Private Property Brush.HatchStyle(Value As HatchStyles)
+		FHatchStyle = Value
+		Create
+	End Property
+	
+	Private Sub Brush.Create
+			Dim As LOGBRUSH LB
+			LB.lbColor = FColor
+			LB.lbHatch = FHatchStyle
+			Select Case FStyle
+			Case bsClear
+				LB.lbStyle = BS_NULL
+			Case bsSolid
+				LB.lbStyle = BS_SOLID
+			Case bsHatch
+				LB.lbStyle = BS_HATCHED
+				LB.lbHatch = FHatchStyle
+			End Select
+			If (FHandle <> 0) AndAlso (FHandle <> hbrBkgnd) Then DeleteObject(FHandle)
+			FHandle = CreateBrushIndirect(@LB)
+			If FHandle Then If OnCreate Then OnCreate(*Designer, This)
+	End Sub
+	
+		Private Operator Brush.Let(Value As HBRUSH)
+			If (FHandle <> 0) AndAlso (FHandle <> hbrBkgnd) Then DeleteObject(FHandle)
+			FHandle = Value
+		End Operator
+		
+		Private Property Brush.Handle As HBRUSH
+			Return FHandle
+		End Property
+		
+		Private Property Brush.Handle(Value As HBRUSH)
+			If (FHandle <> 0) AndAlso (FHandle <> hbrBkgnd) Then DeleteObject(FHandle)
+			FHandle = Value
+		End Property
+	
+	Private Operator Brush.Cast As Any Ptr
+		Return @This
+	End Operator
+	
+	Private Constructor Brush
+		FColor = &HFFFFFF
+		FStyle = bsSolid
+		'Create
+		WLet(FClassName, "Brush")
+	End Constructor
+	
+	Private Destructor Brush
+			If FHandle AndAlso FHandle <> hbrBkgnd Then DeleteObject FHandle
+	End Destructor
+End Namespace
+

@@ -10,6 +10,7 @@ $Defined = @{
     '__USE_GTK3__'  = $false
     '__FB_LINUX__'  = $false
     '__USE_WINAPI__'= $true
+    '__EXPORT_PROCS__' = $true
 }
 
 function Eval-Condition([string]$Expr) {

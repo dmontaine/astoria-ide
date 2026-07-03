@@ -1,0 +1,212 @@
+'###############################################################################
+'#  Application.bi                                                             #
+'#  This file is part of MyFBFramework                                         #
+'#  Authors: Nastase Eodor, Xusinboy Bekchanov                                 #
+'#  Based on:                                                                  #
+'#   TApplication.bi                                                           #
+'#   FreeBasic Windows GUI ToolKit                                             #
+'#   Copyright (c) 2007-2008 Nastase Eodor                                     #
+'#   Version 1.0.1                                                             #
+'#  Updated and added cross-platform                                           #
+'#  by Xusinboy Bekchanov (2018-2019)                                          #
+'###############################################################################
+
+#include once "WStringList.bi"
+#include once "Dictionary.bi"
+#include once "Form.bi"
+Dim Shared As Dictionary mlKeys
+	#include once "win/winver.bi"
+#ifndef APP_TITLE
+	#define APP_TITLE ""
+#endif
+
+'#DEFINE crArrow       LoadCursor(0,IDC_ARROW)
+'#DEFINE crAppStarting LoadCursor(0,IDC_APPSTARTING)
+'#DEFINE crCross       LoadCursor(0,IDC_CROSS)
+'#DEFINE crIBeam       LoadCursor(0,IDC_IBEAM)
+'#DEFINE crIcon        LoadCursor(0,IDC_ICON)
+'#DEFINE crNo          LoadCursor(0,IDC_NO)
+'#DEFINE crSize        LoadCursor(0,IDC_SIZE)
+'#DEFINE crSizeAll     LoadCursor(0,IDC_SIZEALL)
+'#DEFINE crSizeNESW    LoadCursor(0,IDC_SIZENESW)
+'#DEFINE crSizeNS      LoadCursor(0,IDC_SIZENS)
+'#DEFINE crSizeNVSE    LoadCursor(0,IDC_SIZENWSE)
+'#DEFINE crSizeWE      LoadCursor(0,IDC_SIZEWE)
+'#DEFINE crUpArrow     LoadCursor(0,IDC_UPARROW)
+'#DEFINE crWait        LoadCursor(0,IDC_WAIT)
+'#DEFINE crDrag        LoadCursor(GetModuleHandle(NULL),"DRAG")
+'#DEFINE crMultiDrag   LoadCursor(GetModuleHandle(NULL),"MULTIDRAG")
+'#DEFINE crHandPoint   LoadCursor(GetModuleHandle(NULL),"HANDPOINT")
+'#DEFINE crSQLWait     LoadCursor(GetModuleHandle(NULL),"SQLWAIT")
+'#DEFINE crHSplit      LoadCursor(GetModuleHandle(NULL),"HSPLIT")
+'#DEFINE crVSplit      LoadCursor(GetModuleHandle(NULL),"VSPLIT")
+'#DEFINE crNoDrop      LoadCursor(GetModuleHandle(NULL),"NODROP")
+'
+Private Enum MessageType
+	mtInfo
+	mtWarning
+	mtQuestion
+	mtError
+	mtOther
+End Enum
+
+Private Enum ButtonsTypes
+	btNone
+	btOK
+	btYesNo
+	btYesNoCancel
+	btOkCancel
+End Enum
+
+Private Enum MessageResult
+	mrAbort
+	mrCancel
+	mrIgnore
+	mrNo
+	mrOK
+	mrRetry
+	mrYes
+End Enum
+
+Enum FileEncodings
+	PlainText
+	Utf8
+	Utf8BOM
+	Utf16BOM
+	Utf32BOM
+End Enum
+
+Enum NewLineTypes
+	WindowsCRLF
+	LinuxLF
+	MacOSCR
+End Enum
+
+Private Enum ShutdownMode
+	smAfterMainFormCloses
+	smAfterAllFormsCloses
+End Enum
+
+Namespace My
+	#define QApplication(__Ptr__) (*Cast(Application Ptr,__Ptr__))
+	
+	'Provides methods and properties to manage an application, such as methods to start and stop an application, and properties to get information about an application. (Windows, Linux, Web, Android)
+	Private Type Application Extends My.Sys.Object
+	Private:
+		FDarkMode       As Boolean
+		FTitle          As WString Ptr
+		FCurLanguage    As WString Ptr
+		FCurLanguagePath As WString Ptr
+		FLanguage       As WString Ptr
+		FIcon           As My.Sys.Drawing.Icon
+		FExeName        As WString Ptr
+		FPath        As WString Ptr
+		FFileName       As WString Ptr
+		FHintColor      As Integer
+		FHintPause      As Integer
+		FHintShortPause As Integer
+		FHintHidePause  As Integer
+		FFormCount      As Integer
+		FForms          As My.Sys.Forms.Form Ptr Ptr
+		FControlCount   As Integer
+		FControls       As My.Sys.Forms.Control Ptr Ptr
+		FActiveForm     As My.Sys.Forms.Form Ptr
+		FActiveMDIChild As My.Sys.Forms.Form Ptr
+		FMainForm       As My.Sys.Forms.Form Ptr
+		Declare Sub GetControls
+		Declare Sub EnumControls(Control As My.Sys.Forms.Control)
+			Declare Static Function EnumThreadWindowsProc(FWindow As HWND,LData As LPARAM) As BOOL
+			Declare Static Function EnumFontsProc(LOGFONT As LOGFONT Ptr, TEXTMETRIC As TEXTMETRIC Ptr, FontStyle As DWORD, hData As LPARAM) As Integer
+		Declare Sub GetFonts
+		Declare Sub GetForms
+		As Byte initialized
+			Dim m_hMutex As HANDLE
+			Dim As Any Ptr hLibUser32
+		As Any Ptr _vinfo
+		As String TranslationString
+	Public:
+			Declare Virtual Function ReadProperty(ByRef PropertyName As String) As Any Ptr
+			Declare Virtual Function WriteProperty(ByRef PropertyName As String, Value As Any Ptr) As Boolean
+		Fonts               As WStringList
+		MouseX              As Integer
+		MouseY              As Integer
+		HelpFile            As String
+			Instance        As HINSTANCE
+		Declare Property ActiveForm As My.Sys.Forms.Form Ptr
+		Declare Property ActiveForm(Value As My.Sys.Forms.Form Ptr)
+		Declare Property ActiveMDIChild As My.Sys.Forms.Form Ptr
+		Declare Property ActiveMDIChild(Value As My.Sys.Forms.Form Ptr)
+		Declare Property DarkMode As Boolean
+		Declare Property DarkMode(Value As Boolean)
+		Declare Function FileName ByRef As WString
+		Declare Function Version() As String
+		Declare Function GetVerInfo(ByRef InfoName As String) As String
+		Declare Property Icon As My.Sys.Drawing.Icon
+		Declare Property Icon(Value As My.Sys.Drawing.Icon)
+		Declare Property Title ByRef As WString
+		Declare Property Title(ByRef Value As WString)
+		Declare Property CurLanguagePath ByRef As WString
+		Declare Property CurLanguagePath(ByRef Value As WString)
+		Declare Property CurLanguage ByRef As WString
+		Declare Property CurLanguage(ByRef Value As WString)
+		Declare Property Language ByRef As WString
+		Declare Property Language(ByRef Value As WString)
+		Declare Function PrevInstance As Boolean
+		Declare Function Path ByRef As WString
+		Declare Function ExeName ByRef As WString
+		Declare Property MainForm As My.Sys.Forms.Form Ptr
+		Declare Property MainForm(Value As My.Sys.Forms.Form Ptr)
+'		Declare Property HintColor As Integer
+'		Declare Property HintColor(value As Integer)
+'		Declare Property HintPause As Integer
+'		Declare Property HintPause (value As Integer)
+'		Declare Property HintShortPause As Integer
+'		Declare Property HintShortPause(value As Integer)
+'		Declare Property HintHidePause As Integer
+'		Declare Property HintHidePause(value As Integer)
+		Declare Property ControlCount As Integer
+		Declare Property ControlCount(Value  As Integer)
+		Declare Property Controls As My.Sys.Forms.Control Ptr Ptr
+		Declare Property Controls(Value  As My.Sys.Forms.Control Ptr Ptr)
+		Declare Function FormCount As Integer
+		Declare Property Forms As My.Sys.Forms.Form Ptr Ptr
+		Declare Property Forms(Value As My.Sys.Forms.Form Ptr Ptr)
+		Declare Operator Cast As Any Ptr
+		Declare Sub Run
+		Declare Sub Terminate
+		Declare Sub DoEvents
+		Declare Sub HelpCommand(CommandID As Integer,FData As Long)
+		Declare Sub HelpContext(ContextID As Long)
+		Declare Sub HelpJump(TopicID As String)
+		Declare Function IndexOfForm(Form As My.Sys.Forms.Form Ptr) As Integer
+			Declare Function FindControl Overload(ControlHandle As HWND) As My.Sys.Forms.Control Ptr
+		Declare Function FindControl(ControlName As String) As My.Sys.Forms.Control Ptr
+		Declare Function IndexOfControl(Control As My.Sys.Forms.Control Ptr) As Integer
+		Declare Constructor
+		Declare Destructor
+		OnMouseMove As Sub(ByRef X As Integer, ByRef Y As Integer)
+		OnMessage As Sub(ByRef MSG As Message)
+	End Type
+End Namespace
+
+Dim Shared pApp As My.Application Ptr 'Global for entire Application
+
+'Displays a message in a dialog box, waits for the user to click a button, and returns an Integer indicating which button the user clicked.
+Declare Function MsgBox Alias "MsgBox" (ByRef MsgStr As WString, ByRef Caption As WString = "", MsgType As MessageType = MessageType.mtInfo, ButtonsType As ButtonsTypes = ButtonsTypes.btOK) As MessageResult
+Declare Function ML(ByRef V As WString) ByRef As WString
+Declare Function CheckUTF8NoBOM(ByRef SourceStr As String, ByVal SampleSize As Long = 0) As Boolean
+Declare Function LoadFromFile(ByRef FileName As WString, ByRef FileEncoding As FileEncodings = FileEncodings.Utf8BOM, ByRef NewLineType As NewLineTypes = NewLineTypes.WindowsCRLF, ByVal nCodePage As Integer = -1) As WString Ptr
+Declare Function SaveToFile(ByRef FileName As WString, ByRef wData As WString, ByRef FileEncoding As FileEncodings = FileEncodings.Utf8BOM, ByRef NewLineType As NewLineTypes = NewLineTypes.WindowsCRLF, ByVal nCodePage As Integer = -1) As Boolean
+Declare Function ByteToString(ByVal Src As UByte Ptr, ByVal Size As Long) As String
+
+Namespace Debug
+	Declare Sub Clear
+	Declare Sub Print Overload(ByRef Msg As WString, ByRef Msg1 As Const WString = "", ByRef Msg2 As Const WString = "", ByRef Msg3 As Const WString = "", ByRef Msg4 As Const WString = "", bWriteLog As Boolean = False, bPrintMsg As Boolean = False, bShowMsg As Boolean = False, bPrintToDebugWindow As Boolean = True)
+	Declare Sub Print Overload(ByVal Msg As Integer, ByVal Msg1 As Integer = -1, ByVal Msg2 As Integer = -1, ByVal Msg3 As Integer = -1, ByVal Msg4 As Integer = -1, bWriteLog As Boolean = False, bPrintMsg As Boolean = False, bShowMsg As Boolean = False, bPrintToDebugWindow As Boolean = True)
+	Declare Sub Print Overload(ByRef Msg As UString, bWriteLog As Boolean = False, bPrintMsg As Boolean = False, bShowMsg As Boolean = False, bPrintToDebugWindow As Boolean = True)
+End Namespace
+Declare Function ApplicationMainForm Alias "ApplicationMainForm" (App As My.Application Ptr) As My.Sys.Forms.Control Ptr
+Declare Function ApplicationFileName Alias "ApplicationFileName"(App As My.Application Ptr) ByRef As WString
+
+	#include once "Application.bas"
+

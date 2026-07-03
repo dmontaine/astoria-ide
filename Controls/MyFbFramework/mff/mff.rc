@@ -1,0 +1,130 @@
+﻿/*'#########################################################*/
+/*'#  mff.rc                                               #*/
+/*'#  This file is part of MyFbFramework                   #*/
+/*'#  Authors: Xusinboy Bekchanov(2018-2019)  Liu XiaLin   #*/
+/*'#########################################################*/
+
+#include <windows.h>
+
+Animate PNG "../resources/Animate.png"
+FolderBrowserDialog PNG "../resources/FolderBrowserDialog.png"
+Chart PNG "../resources/Chart.png"
+CheckBox PNG "../resources/CheckBox.png"
+CheckedListBox PNG "../resources/CheckedListBox.png"
+ColorDialog PNG "../resources/ColorDialog.png"
+ComboBoxEdit PNG "../resources/ComboBoxEdit.png"
+ComboBoxEx PNG "../resources/ComboBoxEx.png"
+CommandButton PNG "../resources/CommandButton.png"
+DateTimePicker PNG "../resources/DateTimePicker.png"
+FontDialog PNG "../resources/FontDialog.png"
+Form PNG "../resources/Form.png"
+Grid PNG "../resources/Grid.png"
+GridData PNG "../resources/GridData.png"
+GroupBox PNG "../resources/GroupBox.png"
+Header PNG "../resources/Header.png"
+HotKey PNG "../resources/HotKey.png"
+HorizontalBox PNG "../resources/HorizontalBox.png"
+HTTPConnection PNG "../resources/HTTPConnection.png"
+HTTPServer PNG "../resources/HTTPServer.png"
+ImageBox PNG "../resources/ImageBox.png"
+ImageList PNG "../resources/ImageList.png"
+IPAddress PNG "../resources/IPAddress.png"
+Label PNG "../resources/Label.png"
+LinkLabel PNG "../resources/LinkLabel.png"
+ListControl PNG "../resources/ListControl.png"
+ListView PNG "../resources/ListView.png"
+ListViewEx PNG "../resources/ListViewEx.png"
+MaskedEdit PNG "../resources/MaskedEdit.png"
+MainMenu PNG "../resources/MainMenu.png"
+MonthCalendar PNG "../resources/MonthCalendar.png"
+NativeFontControl PNG "../resources/FontDialog.png"
+NotifyIcon PNG "../resources/NotifyIcon.png"
+NumericUpDown PNG "../resources/NumericUpDown.png"
+RadioButton PNG "../resources/RadioButton.png"
+OpenFileControl PNG "../resources/OpenFileControl.png"
+OpenFileDialog PNG "../resources/OpenFileDialog.png"
+PagePanel PNG "../resources/Panel.png"
+PageScroller PNG "../resources/PageScroller.png"
+Panel PNG "../resources/Panel.png"
+PageSetupDialog PNG "../resources/PageSetupDialog.png"
+Picture PNG "../resources/Picture.png"
+PopUpMenu PNG "../resources/ContextMenu.png"
+PrintDialog PNG "../resources/PrintDialog.png"
+PrintPreviewControl PNG "../resources/PrintPreviewControl.png"
+PrintPreviewDialog PNG "../resources/PrintPreviewDialog.png"
+PrintDocument PNG "../resources/PrintDocument.png"
+Printer PNG "../resources/Printer.png"
+ProgressBar PNG "../resources/ProgressBar.png"
+RichTextBox PNG "../resources/RichTextBox.png"
+ScrollBarControl PNG "../resources/HScrollBar.png"
+ScrollControl PNG "../resources/ScrollControl.png"
+SearchBar PNG "../resources/SearchBar.png"
+SearchBox PNG "../resources/SearchBox.png"
+TabPage PNG "../resources/TabPage.png"
+ToolPalette PNG "../resources/ToolPalette.png"
+HScrollBar PNG "../resources/HScrollBar.png"
+VScrollBar PNG "../resources/VScrollBar.png"
+SaveFileDialog PNG "../resources/SaveFileDialog.png"
+Splitter PNG "../resources/Splitter.png"
+StatusBar PNG "../resources/StatusBar.png"
+TabControl PNG "../resources/TabControl.png"
+TextBox PNG "../resources/TextBox.png"
+ToolBar PNG "../resources/ToolBar.png"
+Rebar PNG "../resources/ReBar.png"
+ToolTips PNG "../resources/ToolTips.png"
+TrackBar PNG "../resources/TrackBar.png"
+TreeListView PNG "../resources/TreeView.png"
+TreeView PNG "../resources/TreeView.png"
+TimerComponent PNG "../resources/TimerComponent.png"
+UpDown PNG "../resources/UpDown.png"
+UserControl PNG "../resources/UserControl.png"
+VerticalBox PNG "../resources/VerticalBox.png"
+WebBrowser PNG "../resources/WebBrowser.png"
+
+#define VER_FILEDESCRIPTION_STR     "My FreeBasic Framework\0"
+
+#define VER_FILEVERSION             1,3,7,655
+#define VER_FILEVERSION_STR         "1.3.7.655\0"
+
+#define VER_LEGALCOPYRIGHT_STR      "\0"
+
+#define VER_INTERNALNAME_STR        "\0"
+#define VER_ORIGINALFILENAME_STR    "\0"
+#define VER_PRODUCTNAME_STR         "MyFbFramework\0"
+
+#define VER_PRODUCTVERSION          1,3,7,0
+#define VER_PRODUCTVERSION_STR      "1.3.7\0"
+#define VER_COMPANYNAME_STR         "\0"
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION     VER_FILEVERSION
+PRODUCTVERSION  VER_PRODUCTVERSION
+FILEOS          VOS__WINDOWS32
+FILETYPE        VFT_APP
+FILESUBTYPE     VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904E4"
+        BEGIN
+            VALUE "CompanyName",      VER_COMPANYNAME_STR
+            VALUE "FileDescription",  VER_FILEDESCRIPTION_STR
+            VALUE "FileVersion",      VER_FILEVERSION_STR
+            VALUE "InternalName",     VER_INTERNALNAME_STR
+            VALUE "LegalCopyright",   VER_LEGALCOPYRIGHT_STR
+            VALUE "OriginalFilename", VER_ORIGINALFILENAME_STR
+            VALUE "ProductName",      VER_PRODUCTNAME_STR
+            VALUE "ProductVersion",   VER_PRODUCTVERSION_STR
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        /* The following line should only be modified for localized versions.     */
+        /* It consists of any number of WORD,WORD pairs, with each pair           */
+        /* describing a language,codepage combination supported by the file.      */
+        /*                                                                        */
+        /* For example, a file might have values "0x409,1252" indicating that it  */
+        /* supports English language (0x409) in the Windows ANSI codepage (1252). */
+        VALUE "Translation", 0x409, 1252
+    END
+END

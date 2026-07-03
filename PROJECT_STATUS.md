@@ -326,7 +326,7 @@ Includes:
 | Commit | Description |
 |--------|-------------|
 | `bbfa399` | Initial Win64 fork import |
-| *(pending)* | Bottom panel persistence/collapse fixes; startup guards; tab × glyph; autolaunch removal (post-import session work) |
+| `e212819` | Bottom panel persistence/collapse; startup guards; `SaveMainWindowPanelLayout`; `PROJECT_STATUS.md` |
 
 ---
 

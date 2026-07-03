@@ -5622,13 +5622,13 @@ Sub CreateMenusAndToolBars
 	mnuEnd = miRun->Add(ML("&End") & HK("End"), "EndProgram", "End", @mClick, , , False)
 	mnuRestart = miRun->Add(ML("&Restart") & HK("Restart", "Shift+F5"), "", "Restart", @mClick, , , False)
 	
-	miXizmat = mnuMain.Add(ML("Servi&ce"), "", "Service")
+	miXizmat = mnuMain.Add(ML("&Tools"), "", "Service")
 	miAddProcedure = miXizmat->Add(ML("Add &Procedure") & "..." & HK("AddProcedure"), "", "AddProcedure", @mClick, , , False)
 	miAddType = miXizmat->Add(ML("Add &Type") & "..." & HK("AddType"), "", "AddType", @mClick, , , False)
 	miXizmat->Add("-")
 	miXizmat->Add(ML("&Add-Ins") & "..." & HK("AddIns"), "", "AddIns", @mClick)
 	miXizmat->Add("-")
-	miXizmat->Add(ML("&Tools") & "..." & HK("Tools"), "", "Tools", @mClick)
+	miXizmat->Add(ML("&External Tools") & "..." & HK("Tools"), "", "Tools", @mClick)
 	miXizmat->Add("-")
 	Dim As My.Sys.Drawing.BitmapType Bitm
 	Dim As WString * 1024 Buff

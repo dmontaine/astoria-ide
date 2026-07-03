@@ -630,21 +630,6 @@ Namespace My.Sys.Forms
 		FItems.Remove Index
 	End Sub
 	
-	'	#IfNDef __USE_GTK__
-	'		Private Function CompareFunc(lParam1 As LPARAM, lParam2 As LPARAM, lParamSort As LPARAM) As Long
-	'			Return 0
-	'		End Function
-	'	#EndIf
-	
-	'    Private Sub GridDataItems.Sort
-	'		#IfNDef __USE_GTK__
-	'			If Parent AndAlso Parent->Handle Then
-	'				Parent->Perform LVM_SORTITEMS, 0, @CompareFunc
-	'				ListView_SortItems
-	'			End If
-	'		#EndIf
-	'    End Sub
-	
 	Private Function GridDataItems.IndexOf(ByRef FItem As GridDataItem Ptr) As Integer
 		Return FItems.IndexOf(FItem)
 	End Function

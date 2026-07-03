@@ -814,23 +814,6 @@ Namespace My.Sys.Forms
 			If FHandle Then Perform(WM_PASTE, 0, 0)
 	End Sub
 	
-	'	Sub TextBox.Delete
-	'		#ifdef __USE_GTK__
-	'			If gtk_is_editable(widget) Then
-	'				If gtk_editable_get_selection_bounds(gtk_editable(widget), 0, 0) Then
-	'					gtk_editable_delete_selection(gtk_editable(widget))
-	'				Else
-	'					Dim As Integer pos1 = gtk_editable_get_position(gtk_editable(widget))
-	'					gtk_editable_delete_text(gtk_editable(widget), pos1, pos1 + 1)
-	'				End If
-	'			Else
-	'
-	'			End If
-	'		#else
-	'			If FHandle Then Perform(WM_KEYDOWN, WM_DELETE, 0)
-	'		#endif
-	'	End Sub
-	
 	Private Sub TextBox.CopyToClipboard
 			If FHandle Then Perform(WM_COPY, 0, 0)
 	End Sub

@@ -393,15 +393,6 @@ Namespace My.Sys.Forms
 	End Function
 	
 	Private Sub TreeNodeCollection.Remove(Index As Integer)
-		'		#ifdef __USE_GTK__
-		'			If Parent AndAlso Parent->widget Then
-		'				gtk_tree_store_remove(Cast(TreeView Ptr, Parent)->TreeStore, @This.Item(Index)->TreeIter)
-		'			End If
-		'		#else
-		'			If Parent AndAlso Parent->Handle Then
-		'				TreeView_DeleteItem(Parent->Handle, Item(Index)->Handle)
-		'			End If
-		'		#endif
 		_Delete(Item(Index))
 		FNodes.Remove Index
 	End Sub
@@ -450,20 +441,9 @@ Namespace My.Sys.Forms
 	End Property
 	
 	Private Sub TreeNodeCollection.Clear
-		'		If ParentNode = 0 Then
-		'			#ifdef __USE_GTK__
-		'				If Parent AndAlso Cast(TreeView Ptr, Parent)->TreeStore Then gtk_tree_store_clear(Cast(TreeView Ptr, Parent)->TreeStore)
-		'			#else
-		'				If Parent AndAlso Parent->Handle Then SendMessage(Parent->Handle, TVM_DELETEITEM, 0, Cast(LPARAM, TVI_ROOT))
-		'			#endif
 		For i As Integer = FNodes.Count - 1 To 0 Step -1
 			If Cast(TreeNode Ptr, FNodes.Items[i])->FDynamic Then _Delete( Cast(TreeNode Ptr, FNodes.Items[i]))
 		Next i
-		'		Else
-		'			For i As Integer = Count - 1 To 0 Step -1
-		'				Remove i
-		'			Next i
-		'		End If
 		FNodes.Clear
 	End Sub
 	

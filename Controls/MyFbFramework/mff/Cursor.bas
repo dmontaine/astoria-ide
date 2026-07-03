@@ -180,9 +180,6 @@ Namespace My.Sys.Drawing
 	
 	Private Constructor Cursor
 		WLet(FClassName, "Cursor")
-'		#ifndef __USE_GTK__
-'			Handle = LoadCursor(NULL,IDC_ARROW)
-'		#endif
 		If Changed Then Changed(*Designer, This)
 	End Constructor
 	

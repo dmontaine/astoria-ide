@@ -12,10 +12,6 @@
 '###############################################################################
 
 #include once "Graphics.bi"
-'#ifdef __FB_WIN32__
-'	#include once "win/wingdi.bi"
-'#endif
-#include once "Graphics.bi"
 
 Private Function ColorToRGB(FColor As Integer) As Integer
 	If FColor < 0 Then

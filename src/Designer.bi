@@ -153,11 +153,7 @@ Namespace My.Sys.Forms
 		Declare Sub RegisterDotClass(ByRef clsName As WString)
 		Declare Sub CreateDots(Parent As Control Ptr)
 		Declare Sub DestroyDots
-		'#IfDef __USE_GTK__
 		Declare Function ControlAt(Parent As Any Ptr, X As Integer, Y As Integer, Ctrl As Any Ptr = 0) As Any Ptr
-		'#Else
-		'	declare        function ControlAt(Parent as HWND,X as integer,Y as integer) as HWND
-		'#EndIf
 			Declare Sub GetChilds(Parent As HWND = 0)
 		Declare Sub UpdateGrid
 		Declare Sub PaintGrid

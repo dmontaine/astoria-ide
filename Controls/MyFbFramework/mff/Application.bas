@@ -296,61 +296,6 @@ Namespace My
 	Private Property Application.Forms(Value  As My.Sys.Forms.Form Ptr Ptr)
 	End Property
 	
-	'	Property Application.HintColor As Integer
-	'		Return FHintColor
-	'	End Property
-	'
-	'	Property Application.HintColor(value As Integer)
-	'		Dim As Integer i
-	'		FHintColor = value
-	'		For i = 0 To ControlCount -1
-	'			#ifndef __USE_GTK__
-	'				If Controls[i]->ToolTipHandle Then SendMessage(Controls[i]->ToolTipHandle,TTM_SETTIPBKCOLOR,value,0)
-	'			#endif
-	'		Next i
-	'	End Property
-	'
-	'	Property Application.HintPause As Integer
-	'		Return FHintPause
-	'	End Property
-	'
-	'	Property Application.HintPause (value As Integer)
-	'		Dim As Integer i
-	'		FHintPause = value
-	'		For i = 0 To ControlCount -1
-	'			#ifndef __USE_GTK__
-	'				If Controls[i]->ToolTipHandle Then SendMessage(Controls[i]->ToolTipHandle,TTM_SETDELAYTIME,TTDT_INITIAL,value)
-	'			#endif
-	'		Next i
-	'	End Property
-	'
-	'	Property Application.HintShortPause As Integer
-	'		Return FHintShortPause
-	'	End Property
-	'
-	'	Property Application.HintShortPause(value As Integer)
-	'		Dim As Integer i
-	'		FHintShortPause = value
-	'		For i = 0 To ControlCount -1
-	'			#ifndef __USE_GTK__
-	'				If Controls[i]->ToolTipHandle Then SendMessage(Controls[i]->ToolTipHandle,TTM_SETDELAYTIME,TTDT_RESHOW,value)
-	'			#endif
-	'		Next i
-	'	End Property
-	'
-	'	Property Application.HintHidePause As Integer
-	'		Return FHintHidePause
-	'	End Property
-	'
-	'	Property Application.HintHidePause(value As Integer)
-	'		Dim As Integer i
-	'		FHintHidePause = value
-	'		For i = 0 To ControlCount -1
-	'			#ifndef __USE_GTK__
-	'				If Controls[i]->ToolTipHandle Then SendMessage(Controls[i]->ToolTipHandle,TTM_SETDELAYTIME,TTDT_AUTOPOP,value)
-	'			#endif
-	'		Next i
-	'	End Property
 	
 	Private Sub Application.HelpCommand(CommandID As Integer,FData As Long)
 			If MainForm Then WinHelp(MainForm->Handle, HelpFile, CommandID, FData)

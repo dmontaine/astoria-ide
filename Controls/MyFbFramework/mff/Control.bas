@@ -361,30 +361,6 @@ Namespace My.Sys.Forms
 			
 			Private Property Control.Align(Value As DockStyle)
 				FAlign = Value
-				'                #IfDef __USE_GTK__
-				'					If widget Then
-				'						Select Case FAlign
-				'						Case 0 'None
-				'							gtk_widget_set_halign(widget, GTK_ALIGN_BASELINE)
-				'							gtk_widget_set_valign(widget, GTK_ALIGN_BASELINE)
-				'						Case 1 'Left
-				'							gtk_widget_set_halign(widget, GTK_ALIGN_START)
-				'							gtk_widget_set_valign(widget, GTK_ALIGN_FILL)
-				'						Case 2 'Right
-				'							gtk_widget_set_halign(widget, GTK_ALIGN_END)
-				'							gtk_widget_set_valign(widget, GTK_ALIGN_FILL)
-				'						Case 3 'Top
-				'							gtk_widget_set_halign(widget, GTK_ALIGN_FILL)
-				'							gtk_widget_set_valign(widget, GTK_ALIGN_START)
-				'						Case 4 'Bottom
-				'							gtk_widget_set_halign(widget, GTK_ALIGN_FILL)
-				'							gtk_widget_set_valign(widget, GTK_ALIGN_END)
-				'						Case 5 'Client
-				'							gtk_widget_set_halign(widget, GTK_ALIGN_FILL)
-				'							gtk_widget_set_valign(widget, GTK_ALIGN_FILL)
-				'						End Select
-				'					End If
-				'                #EndIf
 				If FParent <> 0 Then QControl(FParent).RequestAlign
 			End Property
 		
@@ -1759,28 +1735,6 @@ Namespace My.Sys.Forms
 			bTop  = iClientHeight - Margins.Bottom
 			If ControlCount <> 0 Then
 				'This.UpdateLock
-				'#ifdef __USE_GTK__
-				'	Dim bNotPainted As Boolean
-				'	For i = 0 To ControlCount - 1
-				'		If Controls[i]->FAutoSize Then
-				'			If Controls[i]->AllocatedWidth = 0 AndAlso Controls[i]->AllocatedHeight = 0 Then
-				'				Controls[i]->Repaint
-				'				bNotPainted = True
-				'			End If
-				'		End If
-				'	Next
-				'	If bNotPainted Then
-				'		AllocatedWidth = 0
-				'		AllocatedHeight = 0
-				'		Repaint
-				'		'If FAutoSize AndAlso This.Parent Then
-				'			This.Parent->AllocatedWidth = 0
-				'			This.Parent->AllocatedHeight = 0
-				'		'	This.Parent->Repaint
-				'		'End If
-				'		Exit Sub
-				'	End If
-				'#endif
 				For i = 0 To ControlCount - 1
 					'If Controls[i]->Handle = 0 Then Continue For
 					Select Case Controls[i]->Align
@@ -1840,29 +1794,7 @@ Namespace My.Sys.Forms
 							End If
 						End If
 					End With
-					'Select Case Controls[i]->Align
-					'Case 0 'None
-					'	gtk_widget_set_halign(Controls[i]->widget, GTK_ALIGN_BASELINE)
-					'	gtk_widget_set_valign(Controls[i]->widget, GTK_ALIGN_BASELINE)
-					'Case 1 'Left
-					'	gtk_widget_set_halign(Controls[i]->widget, GTK_ALIGN_START)
-					'	gtk_widget_set_valign(Controls[i]->widget, GTK_ALIGN_FILL)
-					'Case 2 'Right
-					'	gtk_widget_set_halign(Controls[i]->widget, GTK_ALIGN_END)
-					'	gtk_widget_set_valign(Controls[i]->widget, GTK_ALIGN_FILL)
-					'Case 3 'Top
-					'	gtk_widget_set_halign(Controls[i]->widget, GTK_ALIGN_FILL)
-					'	gtk_widget_set_valign(Controls[i]->widget, GTK_ALIGN_START)
-					'Case 4 'Bottom
-					'	gtk_widget_set_halign(Controls[i]->widget, GTK_ALIGN_FILL)
-					'	gtk_widget_set_valign(Controls[i]->widget, GTK_ALIGN_END)
-					'Case 5 'Client
-					'	gtk_widget_set_halign(Controls[i]->widget, GTK_ALIGN_FILL)
-					'	gtk_widget_set_valign(Controls[i]->widget, GTK_ALIGN_FILL)
-					'End Select
 				Next i
-				'#IfDef __USE_GTK__
-				'#Else
 				'?ClassName, rLeft, bTop
 				For i = 0 To TopCount -1
 					With *ListTop[i]

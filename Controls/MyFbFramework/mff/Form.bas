@@ -1333,9 +1333,6 @@ Namespace My.Sys.Forms
 	
 	Private Destructor Form
 		'		If OnFree Then OnFree(This)
-		'		#ifndef __USE_GTK__
-		'			If FHandle Then FreeWnd
-		'		#endif
 		This.Menu = 0
 		FMenuItems.Clear
 			If Accelerator Then DestroyAcceleratorTable(Accelerator)

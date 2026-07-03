@@ -126,11 +126,7 @@ Namespace My.Sys.ComponentModel
 			End Property
 	
 		Private Sub Component.Move(cLeft As Integer, cTop As Integer, cWidth As Integer, cHeight As Integer)
-			'#ifdef __USE_GTK__
-			'	Dim As Integer iLeft = FLeft, iTop = FTop, iWidth = FWidth, iHeight = FHeight
-			'#else
 				Dim As Integer iLeft = cLeft, iTop = cTop, iWidth = cWidth, iHeight = cHeight
-			'#endif
 			If FParent Then
 				Dim As Component Ptr cParent = FParent
 				If cParent Then

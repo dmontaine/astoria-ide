@@ -178,11 +178,6 @@ Namespace My.Sys.Forms
 	End Property
 	
 	Private Property ListControl.ItemCount As Integer
-		'		#ifndef __USE_GTK__
-		'			If Handle Then
-		'				Return Perform(LB_GETCOUNT,0,0)
-		'			End If
-		'		#endif
 		Return Items.Count
 	End Property
 	

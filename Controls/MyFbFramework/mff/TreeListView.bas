@@ -710,17 +710,6 @@ Namespace My.Sys.Forms
 	End Function
 	
 	Private Sub TreeListViewItems.Remove(Index As Integer)
-		'		#ifdef __USE_GTK__
-		'			If Parent AndAlso Parent->widget Then
-		'				'gtk_tree_store_remove(Cast(TreeListView Ptr, Parent)->TreeStore, @This.Item(Index)->TreeIter)
-		'				Delete_( Cast(TreeListViewItem Ptr, FItems.Items[Index]))
-		'			End If
-		'		#else
-		'			If Parent AndAlso Parent->Handle Then
-		'				'Item(Index)->Visible = False
-		'				Delete_( Cast(TreeListViewItem Ptr, FItems.Items[Index]))
-		'			End If
-		'		#endif
 		If Count < 1 OrElse Index < 0 OrElse Index > Count - 1 Then Exit Sub
 		If Cast(TreeListViewItem Ptr, FItems.Items[Index])->FDynamic Then _Delete( Cast(TreeListViewItem Ptr, FItems.Items[Index]))
 		FItems.Remove Index

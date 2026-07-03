@@ -546,16 +546,6 @@ Namespace My.Sys.Forms
 		FOwner = value
 	End Property
 	
-	'	#IfNDef __USE_GTK__
-	'		property MenuItem.Menu as HMENU
-	'			return FMenu
-	'		end property
-	'
-	'		property MenuItem.Menu(value as HMENU)
-	'			FMenu = value
-	'		end property
-	'	#EndIf
-	
 	Private Property MenuItem.Parent As My.Sys.Object Ptr
 		If FParentMenuItem Then
 			Return FParentMenuItem
@@ -778,9 +768,6 @@ Namespace My.Sys.Forms
 			value->MenuIndex = Index
 			value->FParentMenuItem    = @This
 			value->Owner     = Owner
-			'			#IfNDef __USE_GTK__
-			'				value->Menu      = This.Menu
-			'			#EndIf
 			AllocateCommand(value)
 			FItems[Index]            = value
 				If SubMenu = 0 Then
@@ -874,9 +861,6 @@ Namespace My.Sys.Forms
 					FItems[Index]->MenuIndex = Index
 					FItems[Index]->FParentMenuItem    = @This
 					FItems[Index]->Owner     = Owner
-					'				#IfNDef __USE_GTK__
-					'					FItems[Index]->Menu      = This.Menu
-					'				#EndIf
 					AllocateCommand(value)
 					If FCount > 0 Then
 							If Handle = 0 Then
@@ -1207,9 +1191,6 @@ Namespace My.Sys.Forms
 			FItems[Index] = value
 			value->Parent    = 0
 			value->MenuIndex = Index
-			'               #IfNDef __USE_GTK__
-			'				value->Menu      = Handle
-			'				#EndIf
 			value->Owner     = @This
 			AllocateCommand(value)
 				value->SetInfo(FInfo)
@@ -1218,9 +1199,6 @@ Namespace My.Sys.Forms
 				End If
 			For i As Integer = 0 To value->Count-1
 				value->Item(i)->Owner = value->Owner
-				'               #IfNDef __USE_GTK__
-				'				value->item(i)->Menu  = Handle
-				'				#EndIf
 			Next i
 				If FParentWindow AndAlso IsWindow(FParentWindow->Handle) Then DrawMenuBar(FParentWindow->Handle)
 		End If
@@ -1314,9 +1292,6 @@ Namespace My.Sys.Forms
 				Next i
 				For i As Integer = 0 To value->Count-1
 					value->Item(i)->Owner = value->Owner
-					'                  #IfNDef __USE_GTK__
-					'					value->item(i)->Menu  = Handle
-					'				#EndIf
 				Next i
 					If FParentWindow AndAlso IsWindow(FParentWindow->Handle) Then DrawMenuBar(FParentWindow->Handle)
 			End If

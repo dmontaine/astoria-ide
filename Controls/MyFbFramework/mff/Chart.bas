@@ -480,29 +480,6 @@ Namespace My.Sys.Forms
 		(*Cast(Chart Ptr, Sender.Designer)).tmrMOUSEOVER_Timer(Sender)
 	End Sub
 	Private Sub Chart.tmrMOUSEOVER_Timer(ByRef Sender As TimerComponent)
-		'		#ifndef __USE_GTK__
-		'			Dim PT As Point
-		'			Dim Rect As RectL
-		'			If c_lhWnd = 0 Then Exit Sub
-		'
-		'			GetCursorPos @PT
-		'			ScreenToClient c_lhWnd, @PT
-		'
-		'			With Rect
-		'				.Left = m_PT.X - (m_Left - ScaleX(This.Left))
-		'				.Top = m_PT.Y - (m_Top - ScaleY(This.Top))
-		'				.Right = This.ClientWidth
-		'				.Bottom = This.ClientHeight
-		'			End With
-		'
-		'			If PtInRectL(Rect, PT.X, PT.Y) = 0 Then
-		'				'mHotBar = -1
-		'				HotItem = -1
-		'				tmrMOUSEOVER.Interval = 0
-		'				Me.Refresh
-		'				'RaiseEvent MouseLeave
-		'			End If
-		'		#endif
 	End Sub
 	
 	Private Sub Chart.InitProperties()

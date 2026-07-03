@@ -55,14 +55,12 @@ Namespace My.Sys.Drawing
 	Private Sub GraphicType.BitmapChanged(ByRef Designer As My.Sys.Object, ByRef Sender As My.Sys.Drawing.BitmapType)
 		If Sender.Graphic Then
 			With QGraphic(Sender.Graphic)
-				'#IfNDef __USE_GTK__
 				.Image = Sender.Handle
 				.ImageType = 0
 				If .Ctrl Then
 					'QGraphic(Sender.Graphic).Ctrl->Perform(CM_CHANGEIMAGE,IMAGE_BITMAP,0)
 					If .OnChange Then .OnChange(*QGraphic(Sender.Graphic).Designer, QGraphic(Sender.Graphic), Sender.Handle, .ImageType)
 				End If
-				'#EndIf
 			End With
 		End If
 	End Sub
@@ -70,13 +68,11 @@ Namespace My.Sys.Drawing
 	Private Sub GraphicType.IconChanged(ByRef Designer As My.Sys.Object, ByRef Sender As My.Sys.Drawing.Icon)
 		If Sender.Graphic Then
 			With QGraphic(Sender.Graphic)
-				'#IfNDef __USE_GTK__
 				.Image = Sender.Handle
 				.ImageType = 1
 				If .Ctrl Then
 					If .OnChange Then .OnChange(*QGraphic(Sender.Graphic).Designer, QGraphic(Sender.Graphic), Sender.Handle, .ImageType)
 				End If
-				'#EndIf
 			End With
 		End If
 	End Sub
@@ -84,13 +80,11 @@ Namespace My.Sys.Drawing
 	Private Sub GraphicType.CursorChanged(ByRef Designer As My.Sys.Object, ByRef Sender As My.Sys.Drawing.Cursor)
 		If Sender.Graphic Then
 			With QGraphic(Sender.Graphic)
-				'#IfNDef __USE_GTK__
 				.Image = Sender.Handle
 				.ImageType = 2
 				If .Ctrl Then
 					If .OnChange Then .OnChange(*QGraphic(Sender.Graphic).Designer, QGraphic(Sender.Graphic), Sender.Handle, .ImageType)
 				End If
-				'#EndIf
 			End With
 		End If
 	End Sub

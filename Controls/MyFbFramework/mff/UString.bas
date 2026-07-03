@@ -665,61 +665,6 @@ Private Function WGet(ByRef subject As WString Ptr) ByRef As WString
 End Function
 
 Private Function ToUtf8(ByRef nWString As WString) As String
-	'	#ifdef __USE_GTK__
-	'		Static As gchar Ptr s = NULL
-	'		Dim As GError Ptr Error1 = NULL
-	'		Dim As gsize r_bytes, w_bytes
-	'		Dim As ZString Ptr fc
-	'		Dim As gchar Ptr from_codeset = NULL
-	'
-	'		If nWString = "" Then Return WStr("")
-	'		'If (t = 0) Then g_assert_not_reached()
-	'		'If (g_utf8_validate(Cast(gchar Ptr, @nWString), -1, NULL)) Then Return nWString
-	'
-	'		/' so we got a non-UTF-8 '/
-	'
-	'		If Len(Environ("SMB_CODESET")) <> 0 Then
-	'			from_codeset = g_strdup(Environ("SMB_CODESET"))
-	'		Else
-	'			g_get_charset(@fc)
-	'			If (fc) Then
-	'				from_codeset = g_strdup(fc)
-	'			Else
-	'				from_codeset = g_strdup("ISO-8859-1")
-	'			End If
-	'		End If
-	'
-	'		If *from_codeset = "ISO-" Then
-	'			g_free(from_codeset)
-	'			from_codeset = g_strdup("ISO-8859-1")
-	'		End If
-	'		If (s) Then g_free(s)
-	'
-	''		For c As Integer = 0 To Len(nWString)
-	''			If (@nWString)[c] < 32 AndAlso (@nWString)[c] <> Asc(!"\n") Then (@nWString)[c] = Asc(" ")
-	''		Next
-	'		s = g_convert(nWString, Len(nWString), "UTF-8", from_codeset, @r_bytes, @w_bytes, @Error1)
-	'		g_free(from_codeset)
-	'
-	''		If (s = 0) Then
-	''			s = g_strdup(Cast(gchar Ptr, @nWString))
-	''			For c As Integer = 0 To Len(*s)
-	''				If s[c] > 128 Then s[c] = Asc("?")
-	''			Next
-	''		End If
-	'		If (Error1) Then
-	'			'Print ("DBG: %s. Codeset for system is: %s\n", Error->message,from_codeset)
-	'			'Print ("DBG: You should set the environment variable SMB_CODESET To ISO-8859-1\n")
-	'			g_error_free(Error1)
-	'		End If
-	'		Return *s
-	'		'Return *g_locale_to_utf8(nWString, Len(nWString), 0, 0, 0)
-	'	#else
-	'		Dim cbLen As Integer
-	'		Dim m_BufferLen As Integer = Len(nWString)
-	'		If m_BufferLen = 0 Then Return WStr("")
-	'		Dim buffer As String = String(m_BufferLen * 5 + 1, 0)
-	'		Return *Cast(ZString Ptr, WCharToUTF(1, @nWString, m_BufferLen * 2, StrPtr(buffer), @cbLen))
 	Dim As Integer m_BufferLen = Len(nWString)
 	Dim i1 As ULong = m_BufferLen * 5 + 1                   'if all unicode chars use 5 bytes in utf8
 	Dim As String ansiStr = String(i1, 0)
@@ -727,9 +672,6 @@ Private Function ToUtf8(ByRef nWString As WString) As String
 End Function
 
 Private Function FromUtf8(pZString As ZString Ptr) As WString Ptr
-	'	#ifdef __USE_GTK__
-	'		Return g_locale_from_utf8(*pZString, Len(*pZString), 0, 0, 0)
-	'	#else
 	'UTF-8: EF BB BF
 	'UTF-16: FF FE
 	'UTF-16 big-endian: FE FF

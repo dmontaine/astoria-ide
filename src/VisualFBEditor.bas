@@ -831,7 +831,21 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 	Case "FindInFiles":                     mFormFindInFile = True:  pfFindFile->Show *pfrmMain : pfFindFile->CenterToParent
 	Case "ReplaceInFiles":                  mFormFindInFile = False:  pfFindFile->Show *pfrmMain : pfFindFile->CenterToParent
 	Case "Replace":                         pfFind->mFormFind = False: pfFind->Show *pfrmMain
-	Case "PinLeft":                         SetLeftClosedStyle Not tbLeft.Buttons.Item("PinLeft")->Checked, False
+	Case "PinLeft":
+		Dim pinLeftBtn As ToolButton Ptr = tbLeft.Buttons.Item("PinLeft")
+		If pinLeftBtn = 0 Then Exit Select
+		' Checked toggles before OnClick. When expanded, one click collapses to the tab strip.
+		' (Mirrors "PinRight"/"PinBottom" — relying on frmMain_ActiveControlChanged to collapse
+		' later isn't reliable whenever the click itself doesn't shift focus somewhere outside
+		' tabLeft/pnlLeftPin, e.g. while working in a form Designer.)
+		If splLeft.Visible Then
+			If pinLeftBtn->Checked Then pinLeftBtn->Checked = False
+			SetLeftClosedStyle True, True
+		ElseIf pinLeftBtn->Checked Then
+			SetLeftClosedStyle False, False
+		Else
+			SetLeftClosedStyle True, False
+		End If
 	Case "PinRight":
 		Dim pinRightBtn As ToolButton Ptr = tbRight.Buttons.Item("PinRight")
 		If pinRightBtn = 0 Then Exit Select

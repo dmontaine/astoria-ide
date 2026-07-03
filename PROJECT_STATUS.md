@@ -182,6 +182,21 @@ See §3a — this was actually a fallout of the Batch 2.75.2 GTK strip tool, not
 
 Owner plans to replace the bundled `Compiler/` tree and eventually vendor the compiler's own source for future AI-assisted review. Compared 1.10.1 (currently bundled), 1.10.3, 1.10.4 (unreleased), and 1.20 (unreleased) — **decided on 1.10.3** from the `fbc-1.10` maintenance branch. 1.20 was ruled out for now: it removes null-termination from fixed-length strings (`STRING*N`/`WSTRING*N`), a breaking change that would need an audit of this codebase's fixed-string usage first. Owner specified a preferred binary source: community continuous builds at `users.freebasic-portal.de/stw/builds/` (maintainer "stw", trusted long-time contributor) over the "official" release, since stw's build is expected to be equal-or-better quality. **Not yet started** — see Tier 3 in §8.
 
+### Debugger backend decision: GDB, not gas64/Integrated
+
+VFBE already supports two debugger paths for **user projects** (not the IDE itself) as a per-project setting (`ToGAS`/`ToGCC` in `src/BuildService.bas`/`src/TabWindow.bas`): the "Integrated IDE Debugger" in `src/Debug.bas` (requires the user's project compiled with `-gen gas/gas64 -g`, reads FreeBASIC's native stabs debug format directly) versus the "Integrated GDB Debugger" (requires `-gen gcc` + gcc debug flags, standard GDB). These are matched pairs, not interchangeable — `Debug.bas` explicitly errors if the wrong backend/debug-format combination is used.
+
+**Decided: GDB is the project's debugger.** Settled by what's actually bundled: `Debuggers/gdb-11.2.90.20220320-x86_64/` contains only `gdb.exe`/`gdbserver.exe` — there's no separate gas64-native debugger tool anywhere in this repo, so the practical toolchain already implies GDB. This also matched the research-backed recommendation from the same session (Tiko, a comparable FreeBASIC IDE, recently reversed its own default away from gas64 back to GCC for 64-bit builds).
+
+**Open decision point (not yet decided): compile-backend default for user projects (`-gen gas64` vs `-gen gcc`).** This is a separate question from which debugger tool is used, and it's still open:
+- Owner has read further forum threads since the debugger decision above and believes the FreeBASIC 1.10.1-era `gas64` problems that motivated caution have since been fixed upstream (not independently verified by Claude — worth a quick sanity check when this is picked up, e.g. skim the later pages of the [gas64 thread](https://www.freebasic.net/forum/viewtopic.php?t=27478) for confirmation of what was fixed and when).
+- The real remaining tradeoff, per the owner: `-gen gas64` compiles faster but produces larger/slower executables; `-gen gcc` compiles slower but produces smaller/faster executables.
+- **Owner's judgment:** the target audience (§1 — returning Basic programmers, hobbyists, students) cares more about a fast edit/compile/run work cycle than runtime file size or execution speed, and doesn't believe the size/speed difference is significant enough to matter. This leans toward **`-gen gas64` as the default for user projects.**
+- **Unresolved technical dependency before finalizing:** does the bundled GDB (11.2.90) actually debug a `-gen gas64`-compiled executable correctly? `Debug.bas`'s existing code pairs `-gen gas/gas64` specifically with the *Integrated* (native-stabs) debugger, not GDB, in its own error-checking logic — but GDB has long-standing native support for the STABS debug format, which is plausibly what `-gen gas64 -g` already emits, so this may just work without needing the Integrated debugger path at all. This needs an empirical check (compile a small test program with `-gen gas64 -g`, debug it via VFBE's GDB path, confirm breakpoints/stepping/watches work) before locking in `-gen gas64` as the default — otherwise the GDB decision and a gas64-by-default decision could quietly conflict in practice even though they don't conflict on paper.
+- Once resolved: if GDB works cleanly against gas64 output, default new projects to `-gen gas64` + GDB (fast compiles, standard debugger, best of both). If not, fall back to `-gen gcc` + GDB as originally implied, accepting the slower compile.
+
+Whether the Integrated (stabs) Debugger code path in `Debug.bas` should eventually be pared down once this is settled (rather than kept as an unused alternate path) is a separate, not-yet-decided question — flagging it as a candidate for a future §13.2-style consistency pass rather than deciding now.
+
 ---
 
 ## 5. Bottom panel — intended behavior (reference)
@@ -251,13 +266,21 @@ Run a full pass on **latest** `VisualFBEditor64.exe` after `Compile.bat`. Check 
 
 ### Debugger smoke test (new — added post-2.75.3)
 
-`src/Debug.bas` was the single largest and riskiest file touched in Batch 2.75.3 (core breakpoint/stabs-parsing/debugger-dispatch internals). Dead-code deletion there was verified by clean compilation only; a compile-clean build can still hide a runtime behavior change if a "dead" branch was misjudged. Recommend exercising both debugger paths once each before treating 2.75.3 as fully validated:
+`src/Debug.bas` was the single largest and riskiest file touched in Batch 2.75.3 (core breakpoint/stabs-parsing/debugger-dispatch internals). Dead-code deletion there was verified by clean compilation only; a compile-clean build can still hide a runtime behavior change if a "dead" branch was misjudged.
 
-- [ ] Integrated IDE debugger — set a breakpoint, run, confirm it stops there
-- [ ] Step over / step into / step out — line highlighting advances correctly
-- [ ] Inspect a local variable and a watch expression while stopped
-- [ ] Integrated GDB debugger path — same breakpoint/step/watch smoke test
-- [ ] Restart-while-debugging and normal stop/exit — no hang or crash
+- [~] Integrated IDE debugger (non-GDB path) — **deprioritized**, not tested. Given §4's "GDB is the project's debugger" decision, this path is a candidate for eventual removal rather than something worth validating further right now.
+- [x] Step into — line highlighting advances correctly — **owner verified** via GDB path: 2-line loop body (`b = a * 2` / `Print a, b`) stepped 8→9→8→9 per iteration, exactly as expected.
+- [x] Inspect a local variable while stopped — **owner verified** via GDB path: values displayed correctly during stepping.
+- [x] Integrated GDB debugger path — breakpoint stop + Step Into + inspect all confirmed working — **owner verified**. This also resolved an earlier false "Can not be used for debugging 32bit exe..." error, which turned out to be the *Integrated* (non-GDB) debugger's `check_bitness()` check firing because the debugger type wasn't actually set to GDB yet — not a real 32-bit/64-bit mismatch. `check_bitness()` (`Debug.bas` ~line 9871) doesn't check whether the underlying `GetBinaryType` call actually succeeded, so it can misreport in other failure modes too — low priority given this path is being deprioritized, but worth knowing if it resurfaces.
+- [x] ~~Restart-while-debugging and normal stop/exit — no hang or crash~~ — superseded by the two bugs found below; IDE itself never froze, stayed usable throughout.
+- [ ] **Gas64 vs GCC backend check** (resolves the open §4 decision point) — still open, deferred along with the bugs below
+
+**Two real bugs found during this testing — confirmed pre-existing (not introduced by any cleanup), deferred, not blocking:**
+
+1. **Step Out sends the wrong GDB command.** `src/VisualFBEditor.bas`, `Case "StepOut"` (~line 705) calls `step_debug("n")` — `"n"` is GDB's *next* (step-over) command, not `"finish"` (proper step-out: run until the current function returns). So Step Out currently behaves identically to Step Over instead of leaving the current function. Confirmed via `git log -L` on this exact line range: present since `bbfa399` (initial fork import), never touched by any commit since — this is inherited from upstream, not something this fork's cleanup work caused.
+2. **Command dispatch race condition between debug actions.** The mechanism that hands a command to the background GDB-communication thread (`NewCommand`, a single shared string set by `step_debug()`/`continue_debug()` and cleared by the reader loop in `Debug.bas`) is not a real queue. Firing multiple debug actions in quick succession (e.g. Step Over, then Step Out, then Step Into, then Continue) can silently overwrite an earlier pending command before the background thread ever reads it — some clicks do nothing not because anything hung, but because a later click clobbered them first. Also confirmed pre-existing via `git log -L` (`readpipe()`, `continue_debug()`, `set_bp()` all untouched since `bbfa399`; the one function touched by cleanup, `step_debug()`, only had a dead comment block removed — the live logic is byte-identical to before).
+
+**Owner's call (2026-07-03, 8 AM Portland time):** defer both. Neither makes the IDE unusable — basic breakpoint + Step Into + variable inspection all work correctly at a normal (non-rapid-clicking) pace, which covers ordinary debugging use. **Revisit if:** future manual testing specifically needs reliable Step Over/Step Out, or needs firing debug actions in fast succession. Until then, the practical guidance for using the debugger is: click one debug action at a time and wait for it to visibly take effect before clicking the next, and treat Step Out as equivalent to Step Over for now.
 
 ### Startup
 
@@ -295,6 +318,7 @@ Run a full pass on **latest** `VisualFBEditor64.exe` after `Compile.bat`. Check 
 - ~~Stray dead-code comments from GTK era~~ — **done**, see §3a
 - `src/makefile` still references GTK defines (not used by `Compile.bat`) — still open, low priority
 - `src/THREADING.md` mentions GTK UI wrapping (historical) — still open, low priority
+- **Debugger: Step Out sends wrong GDB command, and debug-action command dispatch has a race condition** — found during this session's debugger smoke test (see above), confirmed pre-existing/inherited from upstream, deferred per owner's call. Good candidate example for the §13.2 structured-programming/tech-debt pass when that's picked up.
 
 ### Optional / housekeeping
 

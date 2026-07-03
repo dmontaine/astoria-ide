@@ -331,7 +331,7 @@ End Sub
 
 ' Compile() moved to BuildService.bas
 
-Sub SelectSearchResult(ByRef FileName As WString, iLine As Integer, ByVal iSelStart As Integer =-1, ByVal iSelLength As Integer =-1, tabw As TabWindow Ptr = 0, ByRef SearchText As WString = "")
+Sub SelectSearchResult(ByRef FileName As WString, iLine As Integer, ByVal iSelStart As Integer =-1, ByVal iSelLength As Integer =-1, tabw As TabWindow Ptr = 0, ByRef SearchText As WString = WStr(""))
 	Dim tb As TabWindow Ptr
 	If tabw <> 0 AndAlso ptabCode->IndexOfTab(tabw) <> -1 Then
 		tb = tabw
@@ -8171,7 +8171,8 @@ End Sub
 
 Sub tabBottom_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As Control, newIndex As Integer)
 	If bApplyingStartupLayout OrElse bClosing Then Exit Sub
-	If ptabBottom->TabPosition = tpBottom AndAlso ptabBottom->SelectedTabIndex <> -1 AndAlso Not splBottom.Visible Then
+	Dim As Boolean bIsBottomPositioned = CBool(ptabBottom->TabPosition = tpBottom)
+	If bIsBottomPositioned AndAlso (ptabBottom->SelectedTabIndex <> -1) AndAlso (Not splBottom.Visible) Then
 		ShowBottom
 	End If
 	Dim As TabPage Ptr tp = ptabBottom->SelectedTab
@@ -8208,7 +8209,8 @@ Sub tabBottom_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As Control
 End Sub
 
 Sub tabBottom_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control) '<...>
-	If ptabBottom->TabPosition = tpBottom AndAlso ptabBottom->SelectedTabIndex <> -1 AndAlso Not splBottom.Visible Then
+	Dim As Boolean bIsBottomPositioned = CBool(ptabBottom->TabPosition = tpBottom)
+	If bIsBottomPositioned AndAlso (ptabBottom->SelectedTabIndex <> -1) AndAlso (Not splBottom.Visible) Then
 		ShowBottom
 	End If
 End Sub
@@ -8395,7 +8397,8 @@ Sub frmMain_ActiveControlChanged(ByRef Designer As My.Sys.Object, ByRef sender A
 				CloseRight()
 			End If
 		End If
-		If ptabBottom->TabPosition = tpBottom AndAlso ptabBottom->SelectedTabIndex <> -1 AndAlso splBottom.Visible Then
+		Dim As Boolean bIsBottomPositioned = CBool(ptabBottom->TabPosition = tpBottom)
+		If bIsBottomPositioned AndAlso (ptabBottom->SelectedTabIndex <> -1) AndAlso splBottom.Visible Then
 			If Not ControlInParent(frmMain.ActiveControl, @tabBottom) AndAlso Not ControlInParent(frmMain.ActiveControl, @pnlBottomPin) Then
 				CloseBottom
 			End If

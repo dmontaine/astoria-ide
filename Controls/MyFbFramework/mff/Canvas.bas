@@ -910,7 +910,7 @@ Namespace My.Sys.Drawing
 								pRenderTarget->lpVtbl->SetTarget(pRenderTarget, pTargetBitmap)
 								pRenderTarget->lpVtbl->SetTextAntialiasMode(pRenderTarget, D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE)
 								pRenderTarget->lpVtbl->SetAntialiasMode(pRenderTarget, D2D1_ANTIALIAS_MODE_PER_PRIMITIVE)
-								CreateTextFormat(pDWriteFactory, Font.Name, 0, DWRITE_FONT_WEIGHT_THIN, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, Font.Size * ydpi / 72 * 96, @"en-us", @pFormat)
+								CreateTextFormat(pDWriteFactory, Font.Name, 0, DWRITE_FONT_WEIGHT_THIN, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, Font.Size * ydpi / 72 * 96, @WStr("en-us"), @pFormat)
 							End If
 						End If
 					End If
@@ -1407,7 +1407,7 @@ Namespace My.Sys.Drawing
 				If .Handle Then SelectObject(.Handle, Sender.Handle)
 				If .FUseDirect2D AndAlso .pRenderTarget <> 0 Then
 					If .pFormat Then .pFormat->lpVtbl->Release(.pFormat): .pFormat = 0
-					CreateTextFormat(pDWriteFactory, Sender.Name, 0, DWRITE_FONT_WEIGHT_THIN, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, Sender.Size * .ydpi / 72 * 96, @"en-us", @.pFormat)
+					CreateTextFormat(pDWriteFactory, Sender.Name, 0, DWRITE_FONT_WEIGHT_THIN, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, Sender.Size * .ydpi / 72 * 96, @WStr("en-us"), @.pFormat)
 				End If
 		End With
 	End Sub

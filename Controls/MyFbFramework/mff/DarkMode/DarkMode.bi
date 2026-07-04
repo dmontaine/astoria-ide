@@ -49,6 +49,6 @@ Declare Sub AllowDarkModeForApp(allow As BOOL)
 Declare Sub EnableDarkScrollBarForWindowAndChildren(hwnd As HWND)
 Declare Sub InitDarkMode()
 Declare Function IsWindows11() As BOOL
-Declare Sub SetDarkMode(useDarkMode As Boolean, fixDarkScrollbar As Boolean)
+Declare Sub SetDarkMode(useDarkMode As Boolean, fixDarkScrollbar As Boolean, DoBroadcast As Boolean = True)
 
 #include once "DarkMode.bas"

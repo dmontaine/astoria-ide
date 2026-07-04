@@ -182,7 +182,7 @@ Function IsWindows11() As BOOL
 	Return g_buildNumber >= WIN11
 End Function
 
-Sub SetDarkMode(useDark As Boolean, fixDarkScrollbar_ As Boolean)
+Sub SetDarkMode(useDark As Boolean, fixDarkScrollbar_ As Boolean, DoBroadcast As Boolean = True)
 	' Master switch: enable or disable dark mode globally.
 	'
 	' When enabling, sets g_darkModeEnabled = True; the WM_PAINT handler in
@@ -192,18 +192,33 @@ Sub SetDarkMode(useDark As Boolean, fixDarkScrollbar_ As Boolean)
 	'
 	' fixDarkScrollbar is accepted for interface compatibility but isn't
 	' needed with the SetWindowTheme-based approach.
+	'
+	' DoBroadcast controls the desktop-wide WM_SETTINGCHANGE notification
+	' below. It exists only to make already-visible windows refresh
+	' immediately when the user toggles the setting live (Options dialog).
+	' At startup, when this runs before any of the app's own windows exist
+	' yet, there's nothing to refresh - every control will already paint in
+	' the correct state via its own first WM_PAINT - so callers applying a
+	' saved setting at startup should pass False here.
 	If Not g_darkModeSupported Then Exit Sub
 
 	Dim As Boolean prevState = g_darkModeEnabled
 	g_darkModeEnabled = useDark
 
-	If prevState <> useDark Then
+	If DoBroadcast AndAlso prevState <> useDark Then
 		' BroadcastThemeChangeEvent (uxtheme) would do this but it's
 		' undocumented. Send WM_SETTINGCHANGE with "ImmersiveColorSet"
 		' instead - the framework's WM_THEMECHANGED/WM_SETTINGCHANGE
 		' handlers already call AllowDarkModeForWindow + RefreshTitleBarThemeColor.
+		'
+		' WM_SETTINGCHANGE's lParam must point to a wide (UTF-16) string -
+		' StrPtr() returns an ANSI string pointer, which every other window
+		' on the desktop (not just ours) reads as if it were wide, running
+		' past the buffer. That mismatch crashed inside UxTheme.dll. Use a
+		' Static WString so the pointer stays valid and correctly encoded.
+		Static As WString * 32 wsImmersiveColorSet = "ImmersiveColorSet"
 		SendMessageTimeoutW(HWND_BROADCAST, WM_SETTINGCHANGE, 0, _
-			Cast(LPARAM, StrPtr("ImmersiveColorSet")), _
+			Cast(LPARAM, @wsImmersiveColorSet), _
 			SMTO_ABORTIFHUNG, 1000, NULL)
 	End If
 End Sub

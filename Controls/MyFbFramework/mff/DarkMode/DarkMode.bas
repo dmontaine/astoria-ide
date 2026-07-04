@@ -2,21 +2,85 @@
 
 #include "DarkMode.bi"
 
-' No-op stub implementation - see the comment in DarkMode.bi. g_darkModeSupported
-' and g_darkModeEnabled default to False and are never set True, so every guard
-' of the form "If g_darkModeSupported AndAlso g_darkModeEnabled Then" throughout
-' the framework's control classes takes its existing light-mode branch, exactly
-' as it already did at runtime under the previous implementation.
+' === Private helper: get the true Windows version via RtlGetVersion ===
+
+Private Function GetTrueWindowsVersion() As DWORD
+	' RtlGetVersion is exported by name from ntdll.dll.
+	' It returns the real OS version without compatibility-shim lying
+	' (unlike GetVersionEx, which lies to apps without a compatible manifest).
+	Dim As OSVERSIONINFOW osvi
+	osvi.dwOSVersionInfoSize = SizeOf(OSVERSIONINFOW)
+
+	Dim As Any Ptr hNtdll = GetModuleHandleW("ntdll.dll")
+	If hNtdll = 0 Then Return 0
+
+	Dim As Function(ByVal lpVersionInfo As LPOSVERSIONINFOW) As LONG RtlGetVersion
+	RtlGetVersion = Cast(Any Ptr, GetProcAddress(hNtdll, "RtlGetVersion"))
+	If RtlGetVersion = 0 Then Return 0
+
+	If RtlGetVersion(@osvi) <> 0 Then Return 0
+
+	Return osvi.dwBuildNumber
+End Function
+
+' === Private helper: read system dark mode preference from registry ===
+
+Private Function ReadSystemDarkModePreference() As BOOL
+	' Reads HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize\AppsUseLightTheme
+	' Returns TRUE if the system is in dark mode, FALSE if light mode or can't read
+	Dim As HKEY hKey
+	Dim As DWORD dwType, dwValue, dwSize
+	Dim As Long result
+
+	result = RegOpenKeyExW( _
+		HKEY_CURRENT_USER, _
+		"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", _
+		0, _
+		KEY_READ, _
+		@hKey)
+
+	If result <> ERROR_SUCCESS Then Return False
+
+	dwSize = SizeOf(DWORD)
+	result = RegQueryValueExW(hKey, "AppsUseLightTheme", NULL, @dwType, Cast(LPBYTE, @dwValue), @dwSize)
+	RegCloseKey(hKey)
+
+	If result <> ERROR_SUCCESS Then Return False
+	If dwType <> REG_DWORD Then Return False
+
+	' AppsUseLightTheme: 0 = dark, 1 = light
+	Return (dwValue = 0)
+End Function
+
+' === Public functions ===
 
 Function ShouldAppsUseDarkMode() As BOOL
-	Return False
+	' Checks the live system preference from registry - this reads the
+	' CURRENT system setting, not a cached value.
+	If Not g_darkModeSupported Then Return False
+	Return ReadSystemDarkModePreference()
 End Function
 
 Function AllowDarkModeForWindow(hWnd As HWND, allow As BOOL) As BOOL
-	Return False
+	' Apply or remove the dark Explorer theme from a window.
+	' For common controls (ListViews, TreeViews, ScrollBars, etc.),
+	' SetWindowTheme with "DarkMode_Explorer" enables the dark visual style.
+	' For top-level windows, title bar dark mode is handled separately
+	' by RefreshTitleBarThemeColor / SetTitleBarThemeColor.
+	If hWnd = 0 Then Return False
+
+	If allow Then
+		SetWindowTheme(hWnd, "DarkMode_Explorer", NULL)
+	Else
+		SetWindowTheme(hWnd, NULL, NULL)
+	End If
+
+	Return True
 End Function
 
 Function IsHighContrast() As BOOL
+	' Uses the documented SystemParametersInfoW API - already safe.
+	' Preserved from the previous stub; this implementation was never problematic.
 	Dim As HIGHCONTRASTW highContrast = (SizeOf(HIGHCONTRASTW))
 	If (SystemParametersInfoW(SPI_GETHIGHCONTRAST, SizeOf(HIGHCONTRASTW), @highContrast, False)) Then
 		Return highContrast.dwFlags And HCF_HIGHCONTRASTON
@@ -25,31 +89,121 @@ Function IsHighContrast() As BOOL
 End Function
 
 Sub SetTitleBarThemeColor(hWnd As HWND, dark As BOOL)
+	' Apply dark mode to the window's title bar using DwmSetWindowAttribute.
+	'
+	' DWMWA_USE_IMMERSIVE_DARK_MODE values:
+	'   20 = Windows 10 2004+ (build >= 19041) and Windows 11
+	'   19 = Windows 10 1809-1909 (build 17763-18362)
+	If hWnd = 0 Then Exit Sub
+	If Not g_darkModeSupported Then Exit Sub
+	If IsHighContrast() Then Exit Sub  ' Don't interfere with high contrast themes
+
+	Dim As DWORD attrib = IIf(g_buildNumber >= WIN10_2004, _
+		DWMWA_USE_IMMERSIVE_DARK_MODE, _
+		DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1)
+
+	Dim As BOOL value = dark
+	DwmSetWindowAttribute(hWnd, attrib, @value, SizeOf(BOOL))
 End Sub
 
 Sub RefreshTitleBarThemeColor(hWnd As HWND)
+	' Re-apply the current dark/light mode to the title bar and force a
+	' non-client area redraw so the change takes effect immediately.
+	If hWnd = 0 Then Exit Sub
+	If Not g_darkModeSupported Then Exit Sub
+
+	SetTitleBarThemeColor(hWnd, g_darkModeEnabled)
+
+	' SWP_FRAMECHANGED forces the window manager to re-evaluate the
+	' non-client area (title bar, borders). Without this, DwmSetWindowAttribute
+	' changes won't be visible until the next window resize or focus change.
+	SetWindowPos(hWnd, NULL, 0, 0, 0, 0, _
+		SWP_NOMOVE Or SWP_NOSIZE Or SWP_NOZORDER Or SWP_NOOWNERZORDER Or SWP_FRAMECHANGED)
 End Sub
 
 Function IsColorSchemeChangeMessage(lParam As LPARAM) As BOOL
+	' Windows broadcasts WM_SETTINGCHANGE with lParam pointing to
+	' "ImmersiveColorSet" when the user toggles between light and dark mode
+	' in Windows Settings > Personalization > Colors.
+	If lParam = 0 Then Return False
+	If g_buildNumber < WIN10_1809 Then Return False
+
+	Dim As WString Ptr pwsz = Cast(WString Ptr, lParam)
+	If *pwsz = "ImmersiveColorSet" Then Return True
+
 	Return False
 End Function
 
 Function IsColorSchemeChangeMessage(message As UINT, lParam As LPARAM) As BOOL
-	Return False
+	' Overload retained for interface compatibility; delegates to the
+	' lParam-only variant since the message check is handled at the call site.
+	Return IsColorSchemeChangeMessage(lParam)
 End Function
 
 Sub AllowDarkModeForApp(allow As BOOL)
+	' Sets the global dark mode flag. The original implementation called
+	' undocumented uxtheme ordinals here; this safe version simply sets the
+	' flag - the actual per-window dark mode application happens in
+	' AllowDarkModeForWindow, SetTitleBarThemeColor, and each control's
+	' SetDark method.
+	g_darkModeEnabled = allow
 End Sub
 
 Sub EnableDarkScrollBarForWindowAndChildren(hwnd As HWND)
+	' Apply the dark Explorer theme to a window and all its child windows,
+	' enabling dark scrollbars on common controls.
+	If hwnd = 0 Then Exit Sub
+	If Not g_darkModeSupported Then Exit Sub
+
+	SetWindowTheme(hwnd, "DarkMode_Explorer", NULL)
+
+	Dim As HWND hChild = GetWindow(hwnd, GW_CHILD)
+	While hChild <> 0
+		SetWindowTheme(hChild, "DarkMode_Explorer", NULL)
+		EnableDarkScrollBarForWindowAndChildren(hChild)  ' recursive
+		hChild = GetWindow(hChild, GW_HWNDNEXT)
+	Wend
+End Sub
+
+Sub InitDarkMode()
+	' Detect the Windows version and determine if dark mode is supported.
+	' Called once at startup - after this, g_darkModeSupported indicates
+	' whether the current Windows build supports dark mode features.
+	If g_buildNumber <> 0 Then Exit Sub
+
+	g_buildNumber = GetTrueWindowsVersion()
+
+	' Windows 10 1809 (build 17763) is the minimum for dark mode support -
+	' title bar dark mode via DwmSetWindowAttribute requires this build.
+	g_darkModeSupported = (g_buildNumber >= WIN10_1809)
 End Sub
 
 Function IsWindows11() As BOOL
-	Return False
+	Return g_buildNumber >= WIN11
 End Function
 
-Sub InitDarkMode()
-End Sub
-
 Sub SetDarkMode(useDark As Boolean, fixDarkScrollbar_ As Boolean)
+	' Master switch: enable or disable dark mode globally.
+	'
+	' When enabling, sets g_darkModeEnabled = True; the WM_PAINT handler in
+	' Control.bas detects this and calls SetDark(True) on every control
+	' during its next paint cycle. When disabling, controls revert to
+	' system colors on next paint.
+	'
+	' fixDarkScrollbar is accepted for interface compatibility but isn't
+	' needed with the SetWindowTheme-based approach.
+	If Not g_darkModeSupported Then Exit Sub
+
+	Dim As Boolean prevState = g_darkModeEnabled
+	g_darkModeEnabled = useDark
+
+	If prevState <> useDark Then
+		' BroadcastThemeChangeEvent (uxtheme) would do this but it's
+		' undocumented. Send WM_SETTINGCHANGE with "ImmersiveColorSet"
+		' instead - the framework's WM_THEMECHANGED/WM_SETTINGCHANGE
+		' handlers already call AllowDarkModeForWindow + RefreshTitleBarThemeColor.
+		SendMessageTimeoutW(HWND_BROADCAST, WM_SETTINGCHANGE, 0, _
+			Cast(LPARAM, StrPtr("ImmersiveColorSet")), _
+			SMTO_ABORTIFHUNG, 1000, NULL)
+	End If
 End Sub

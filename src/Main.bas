@@ -73,7 +73,8 @@ Dim Shared As Boolean bQuitting
 	DyLibLoad(App.Path & "\Controls\MyFbFramework\mff64.dll")
 	
 	InitDarkMode
-	SetDarkMode False, False
+	' SetDarkMode is called from SettingsService's LoadSettings once the
+	' saved DarkMode INI preference (or the App.DarkMode default) is known.
 
 #include once "frmSplash.bi"
 pfSplash->MainForm = False

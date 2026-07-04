@@ -2339,10 +2339,8 @@ pfOptions = @fOptions
 		' chkDarkMode
 		With chkDarkMode
 			.Name = "chkDarkMode"
-			.Text = ML("Dark Mode (available for Linux, Windows 10 and above)")
+			.Text = ML("Dark Mode (Windows 10 1809 and above)")
 			.TabIndex = 195
-			'.Caption = ML("Dark Mode")
-			'.Caption = ML("Dark Mode (available for Linux, Windows 10 and above)")
 			.Align = DockStyle.alTop
 			.Constraints.Height = 21
 			.AutoSize = True
@@ -3223,7 +3221,9 @@ pfOptions = @fOptions
 		chkDisplayIcons.Parent = @vbxGeneral
 		chkShowMainToolbar.Parent = @vbxGeneral
 		chkShowPropLocal.Parent = @vbxGeneral
-		chkDarkMode.Visible = False
+		chkDarkMode.Parent = @vbxGeneral
+		' The rest of the "Themes" page (interface color/theme picker) is
+		' still broken and stays orphaned - see PROJECT_STATUS.md.
 		hbxInterfaceColors.Visible = False
 		grbThemes.Visible = False
 	End Constructor
@@ -3418,6 +3418,7 @@ Sub frmOptions.LoadSettings()
 		.chkShowMainToolbar.Checked = ShowMainToolBar
 		'.chkShowToolBoxLocal.Checked = gLocalToolBox
 		.chkShowPropLocal.Checked = gLocalProperties
+		.chkDarkMode.Checked = DarkMode
 		Dim As String f
 		Dim As Integer Fn, Result
 		Dim Buff As WString * 2048 '
@@ -4080,9 +4081,8 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		ShowMainToolBar = .chkShowMainToolbar.Checked
 		'gLocalToolBox = .chkShowToolBoxLocal.Checked
 		gLocalProperties = .chkShowPropLocal.Checked
-		DarkMode = False
-		App.DarkMode = False
-		SetDarkMode False, False
+		DarkMode = .chkDarkMode.Checked
+		App.DarkMode = DarkMode
 		SetColors
 		UpdateAllTabWindows
 		If .HotKeysChanged Then
@@ -4304,7 +4304,7 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		
 		piniSettings->WriteBool "Options", "DisplayMenuIcons", DisplayMenuIcons
 		piniSettings->WriteBool "Options", "ShowMainToolbar", ShowMainToolBar
-		piniSettings->WriteBool "Options", "DarkMode", False
+		piniSettings->WriteBool "Options", "DarkMode", DarkMode
 		'piniSettings->WriteBool "Options", "ShowToolBoxLocal", gLocalToolBox
 		piniSettings->WriteBool("Options", "PropertiesLocal", gLocalProperties) 'David Change
 		pfrmMain->Menu->ImagesList = IIf(DisplayMenuIcons, pimgList, 0)

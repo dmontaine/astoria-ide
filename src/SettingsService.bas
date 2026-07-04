@@ -71,7 +71,7 @@ Private Function NoMoreIndexedSettingsKeys(i As Integer) As Boolean
 	keySum += iniSettings.KeyExists("OtherEditors", "Version_" & WStr(i))
 	keySum += iniSettings.KeyExists("IncludePaths", "Path_" & WStr(i))
 	keySum += iniSettings.KeyExists("LibraryPaths", "Path_" & WStr(i))
-	Return keySum = -9
+	Return keySum = -8
 End Function
 
 Private Sub AddSeededAIAgent(ByRef AgentName As WString, ByRef HostName As WString = "openrouter.ai", ByRef AddressPath As WString = "api/v1/chat/completions")
@@ -310,8 +310,8 @@ Sub LoadSettings
 		InterfaceFontSize = iniSettings.ReadInteger("Options", "InterfaceFontSize", 8)
 	DisplayMenuIcons = iniSettings.ReadBool("Options", "DisplayMenuIcons", True)
 	ShowMainToolBar = iniSettings.ReadBool("Options", "ShowMainToolbar", True)
-	DarkMode = False
-	App.DarkMode = False
+	DarkMode = iniSettings.ReadBool("Options", "DarkMode", False)
+	App.DarkMode = DarkMode
 	'gLocalToolBox = iniSettings.ReadBool("Options", "ShowToolBoxLocal", False)
 	gLocalProperties = iniSettings.ReadBool("Options", "PropertiesLocal", False)
 	'gLocalKeyWords = iniSettings.ReadBool("Options", "KeyWordsLocal", False)
@@ -321,7 +321,6 @@ Sub LoadSettings
 	mnuMain.DisplayIcons = DisplayMenuIcons
 	mnuMain.ImagesList = IIf(DisplayMenuIcons, @imgList, 0)
 	MainReBar.Visible = ShowMainToolBar
-	SetDarkMode False, False
 	
 	WLet(Compiler64Arguments, iniSettings.ReadString("Parameters", "Compiler64Arguments", "-b {S} -exx"))
 	WLet(Make1Arguments, iniSettings.ReadString("Parameters", "Make1Arguments", ""))

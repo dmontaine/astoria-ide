@@ -40,6 +40,18 @@ This shapes UI/UX decisions (§13.3) and the installer/distribution work (§13.5
 
 Common thread: **approachability and cohesion over power-user configurability.** None of these audiences want to assemble a toolchain or fight object-oriented ceremony to get a window on screen — the value proposition is "open one IDE, write BASIC, get a real GUI program," which is exactly the niche modern tooling has abandoned. Keep this in mind against feature creep: the original project's failure mode (§13.4) was doing too much without central attention; this audience is better served by a smaller, more polished, more approachable tool than by chasing feature parity with professional IDEs.
 
+### Guiding principle: don't give the user unnecessary options (added 2026-07-03)
+
+**This is a highly opinionated project, not a configurable one.** The focus is build → design → compile → run being as smooth and frictionless as possible. Power users who want knobs to turn have other IDEs; this one should not encourage settings-fiddling as a substitute for a good default.
+
+**Rule of thumb when adding or reviewing any feature:**
+- If there's only one reasonable choice, **don't expose a setting for it at all** — just do the right thing and don't show the option.
+- If there are genuinely two reasonable choices (e.g. a debug build vs. a final/release build), give a single simple choice — one radio button or dropdown with plain labels (e.g. "Debugger: Development / Final") — not a settings page with independently-togglable flags that happen to combine into those two states.
+- Only expose real configurability when there's a **real, user-facing reason** someone would need to change it — not "because the underlying implementation happens to have a flag here." An internal implementation detail becoming a user-facing setting is a smell, not a feature.
+- When in doubt, prefer fewer visible options over more. This is the same anti-scope-creep instinct as §13.4's rename rationale, applied specifically to UI/settings surface rather than codebase surface.
+
+**How to apply:** relevant to §13.3 (UI evaluation) and §13.5 (installer) — both should be scoped against this principle, not against "what a power-user IDE like VS Code offers." When §13.2's structured-programming pass or any future feature work exposes an existing internal flag as a new checkbox/dropdown "just in case," push back and ask whether the option needs to exist at all.
+
 ---
 
 ## 2. Repository & toolchain
@@ -123,6 +135,23 @@ The undocumented-API dark-mode implementation (ordinal-resolved `uxtheme.dll` ca
 **Verification:** every commit above passed a clean `Compile.bat` rebuild (0 warnings, 0 errors — checked with the `Read` tool, since the log is UTF-16 and raw `grep` silently false-negatives on it). A final repo-wide sweep confirms only one GTK/32-bit marker remains anywhere in `src/` or `mff/`: `TabWindow.bas`'s `CheckCondition()`, which evaluates `#if` conditions in the *user's* FreeBASIC code being edited — a legitimate IDE feature, correctly left alone.
 
 **Git-tracking policy change:** `Compiler/` and `Debuggers/` are now tracked in git (previously vendored/gitignored) — this is intentionally a fully self-contained fork going forward. Commit `b555406`. 32-bit compiler binaries (`Compiler/bin/win32`) removed as out of scope. Commit `15e66cc`.
+
+---
+
+## 3b. Examples/ GTK/Linux/Win32-only audit (2026-07-03) — result: nothing to remove
+
+**Premise checked and rejected:** went through all 33 `Examples/` subdirectories looking for GTK-dependent, Linux-only, or Win32-only (non-64-bit-compatible) example projects to remove as leftover cross-platform cruft. **None qualified.** The `#ifdef __USE_GTK__` blocks present in ~15 `.frm` files are harmless MyFbFramework designer boilerplate (an icon-loading fallback that resolves to the Windows `#else` branch) — not real GTK dependencies. `__FB_WIN32__`/`__FB_LINUX__`/`__FB_UNIX__` checks found are standard FreeBASIC "which OS" conditionals that correctly fall through to Windows-appropriate code. Every example either has valid 64-bit `.vfp` compile args already, or has source that's fully Win64-portable regardless of a missing project file.
+
+**Follow-up work done as a result of the audit, instead:**
+
+- **Fixed a real bug found incidentally:** `Examples/Add-In/Module1.bas` and `Examples/Add-In/My Add-In.bas` both called `mff.MenuFindByName(mnuMenu, "Service")` — the top-level menu commit `ae74b31` renamed from "Service" to "Tools". Both files fixed (string and the `mnuService`→`mnuTools` variable rename for clarity). `Module1.bas` is the more complete/current of the two duplicate implementations (has an extra `OnBeforeCompile` handler `My Add-In.bas` lacks) and is now the file wired into the new `.vfp`; `My Add-In.bas` is left in place, fixed, but not part of the compiled project.
+- **Created missing `.vfp` project files** for examples that had none (a project-hygiene gap, not a platform issue): `Add-In`, `Graphics`, `Web Page`, `WellCOM Example` (two projects: `WellCOM.vfp` the COM server DLL, `Test_WellCOM.vfp` the console test client), and three of four `Game` subfolders (`Calculator`, `FiveInARow`, `Maze` — `Sudoku` already had one). Also created missing `Manifest.xml`/resource `.rc` files where a `.frm`'s embedded `#cmdline "Form1.rc"` designer directive pointed at a file that didn't exist (`Web Page`, `Maze`, `FiveInARow`'s manifest).
+- **Verified by direct compilation** (same technique as the `_WIN32_WINNT` fix verification, §4): every new project was compiled directly with `fbc64.exe` using IDE-equivalent flags before being considered done. Confirmed compiling clean: `Add-In`, `Web Page`, `Maze`, `Calculator`, `FiveInARow`, `Test_WellCOM`.
+
+**Two genuine pre-existing bugs surfaced by this verification pass — not fixed, flagged for a decision:**
+
+1. **`Examples/Graphics/CanvasDraw.bas` doesn't compile against the current `mff` API.** Calls `CreateDoubleBuffer`/`TransferDoubleBuffer` (no longer exist) and hits an ambiguous `STYLE()` overload. The current Canvas API replaced manual double-buffer create/transfer calls with a simple `DoubleBuffer` boolean property (`mff/Canvas.bi`). This is API drift, not a mechanical fix — correctly fixing it means rewriting the example's buffering logic against the new property-based API, which needs a real decision to take on rather than a guess.
+2. **`Examples/WellCOM Example/WellCOM.bas` doesn't compile with the bundled FreeBASIC 1.10.1.** It defines its own `Function DllMain(...) As Boolean`, which conflicts at the C level with FreeBASIC's auto-generated `DllMain` entry point when compiling with `-dll` (`error 42: conflicting types for 'DllMain'`). This means the shipped `WellCOM.dll` (currently a 32-bit binary, itself a leftover gap) can't simply be recompiled for 64-bit with today's toolchain — the source itself needs a fix for how it defines the DLL entry point, which requires FreeBASIC-internals understanding to get right without silently breaking COM initialization behavior. Left as a known, documented issue rather than guessed at.
 
 ---
 
@@ -341,15 +370,17 @@ Run a full pass on **latest** `VisualFBEditor64.exe` after `Compile.bat`. Check 
 ### Regression (Batch 2.75.2 + adjacent areas)
 
 - [x] Left/right panels pin/collapse/restore — **owner verified**
-- [ ] Ctrl+F, Find In Files
-- [ ] Compile/run, Output/Problems tabs
-- [ ] Form design, property editing
-- [ ] Toolbox insert, project explorer, AI Agent tab (if used)
-- [ ] Session open/save, recent files/projects
+- [x] Ctrl+F, Find In Files — **owner verified**
+- [x] Compile/run, Output/Problems tabs — **owner verified**
+- [x] Form design, property editing — **owner verified**
+- [x] Toolbox insert, project explorer, AI Agent tab (if used) — **owner verified**
+- [x] Session open/save, recent files/projects — **owner verified**
+
+All items above passed **before** the owner separately found the critical `_WIN32_WINNT` compiler-header bug (see §4) while trying the `MDINotepad` example — that bug is a pre-existing defect in the bundled compiler's headers, unrelated to (and not caught by) this regression pass, since the regression checklist exercises the IDE's own UI/workflow rather than compiling every example project. Now fixed — see §4.
 
 ### Gate to Tier 3
 
-**All unchecked items above (including the debugger smoke test) should pass** — or be explicitly deferred with a note in this file — before starting Tier 3 compiler-swap work in §8, since a compiler swap makes it harder to isolate whether a future regression came from the dead-code deletion or the new compiler.
+**Regression validation is now complete**, aside from the still-open gas64-vs-GCC backend check above (§4/§8). Compiler-header robustness work (the `_WIN32_WINNT` fix, §4) happened in parallel/after this pass and doesn't need to be re-validated here — it's covered by its own verification in §4.
 
 ### Known deferred cleanup (not blocking unless touched)
 
@@ -373,20 +404,21 @@ Run a full pass on **latest** `VisualFBEditor64.exe` after `Compile.bat`. Check 
 
 ### Immediate
 
-1. **Regression validation** — complete **§7 manual test plan**, including the new debugger smoke test, before starting Tier 3
+1. ~~**Regression validation** — complete §7 manual test plan~~ — **done** (2026-07-03), all items passed except the still-open gas64-vs-GCC backend check (§4)
 2. **Low-priority cleanup** (optional, not blocking): `src/makefile` GTK defines, `src/THREADING.md` GTK mentions
+3. ~~**Examples/ GTK/Linux/Win32-only audit**~~ — **done** (2026-07-03). Result: **none of the 33 example folders needed removal** — the premise didn't hold. See §3b for full findings and follow-up work done/flagged as a result.
 
 ### Tier 3 — compiler toolchain (owner-directed, not yet started)
 
-3. **Verify a compiled `fbc64` is available for 1.10.3** from `users.freebasic-portal.de/stw/builds/` (build ~#0875, commit `8708d1a`, per owner's preferred source); if not, stand up a build environment instead
-4. **Replace `Compiler/` tree** with the 1.10.3 build; verify `fbc64 -version` reports 1.10.3; full clean rebuild + §7 regression pass again afterward
-5. **Longer term:** vendor the FreeBASIC compiler's own source into the repo tree, in preparation for future AI-assisted review/modification of the compiler itself (owner-flagged as upcoming, no timeline yet)
+4. **Verify a compiled `fbc64` is available for 1.10.3** from `users.freebasic-portal.de/stw/builds/` (build ~#0875, commit `8708d1a`, per owner's preferred source); if not, stand up a build environment instead
+5. **Replace `Compiler/` tree** with the 1.10.3 build; verify `fbc64 -version` reports 1.10.3; full clean rebuild + §7 regression pass again afterward. **Also check whether 1.10.3's bundled headers already fix the `_WIN32_WINNT` exact-equality bug (§4)** — if so the patch applied to the 1.10.1 headers won't need reapplying; if not, reapply the same fix to the new header tree.
+6. **Longer term:** vendor the FreeBASIC compiler's own source into the repo tree, in preparation for future AI-assisted review/modification of the compiler itself (owner-flagged as upcoming, no timeline yet)
 
 ### Longer term / unscheduled
 
-6. Upstream sync strategy (if any) — this fork intentionally diverges (Win64-only); merge upstream only with an explicit plan
-7. Wiki/docs for fork-specific behavior
-8. Basic CI (e.g. run `Compile.bat` on push) — flagged by a second-AI audit (2026-07-03, deferred) as worth adding once the project outgrows one-person manual verification; not urgent today since compile-clean-before-commit is already enforced by convention (§9).
+7. Upstream sync strategy (if any) — this fork intentionally diverges (Win64-only); merge upstream only with an explicit plan
+8. Wiki/docs for fork-specific behavior
+9. Basic CI (e.g. run `Compile.bat` on push) — flagged by a second-AI audit (2026-07-03, deferred) as worth adding once the project outgrows one-person manual verification; not urgent today since compile-clean-before-commit is already enforced by convention (§9).
 
 ---
 

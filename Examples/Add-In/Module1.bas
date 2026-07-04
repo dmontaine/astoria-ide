@@ -74,7 +74,7 @@ End Sub
 
 Dim Shared As Any Ptr MainForm, MainReBar
 Dim Shared As Any Ptr tbStandard, tbMyAddin, tbMyAddinSeparator
-Dim Shared As Any Ptr mnuService, mnuMyAddin, mnuMyAddinSeparator
+Dim Shared As Any Ptr mnuTools, mnuMyAddin, mnuMyAddinSeparator
 
 Dim Shared s As WString Ptr
 Function GetFolderPath(ByRef FileName As WString) ByRef As WString
@@ -134,11 +134,11 @@ Sub OnConnection Alias "OnConnection"(VisualFBEditorApp As Any Ptr, ByRef AppPat
 			End If
 			If mff.ReadProperty <> 0 AndAlso mff.MenuFindByName <> 0 Then
 				Dim As Any Ptr mnuMenu = mff.ReadProperty(MainForm, "Menu")
-				mnuService = mff.MenuFindByName(mnuMenu, "Service")
-				If mnuService <> 0 AndAlso mff.MenuItemAdd <> 0 Then
-					Var IndexOfKey = mff.MenuItemIndexOfKey(mnuService, "AddIns")
-					mnuMyAddinSeparator = mff.MenuItemAdd(mnuService, "-", "", "", , IndexOfKey + 1)
-					mnuMyAddin = mff.MenuItemAdd(mnuService, "My Add-In", "About", , @OnMyAddinButtonClick, IndexOfKey + 2)
+				mnuTools = mff.MenuFindByName(mnuMenu, "Tools")
+				If mnuTools <> 0 AndAlso mff.MenuItemAdd <> 0 Then
+					Var IndexOfKey = mff.MenuItemIndexOfKey(mnuTools, "AddIns")
+					mnuMyAddinSeparator = mff.MenuItemAdd(mnuTools, "-", "", "", , IndexOfKey + 1)
+					mnuMyAddin = mff.MenuItemAdd(mnuTools, "My Add-In", "About", , @OnMyAddinButtonClick, IndexOfKey + 2)
 				End If
 			End If
 		End If
@@ -157,13 +157,13 @@ Sub OnDisconnection Alias "OnDisconnection"(VisualFBEditorApp As Any Ptr) Export
 			If mff.ObjectDelete <> 0 Then mff.ObjectDelete(tbMyAddin)
 		End If
 	End If
-	If mnuService <> 0 AndAlso mff.MenuItemRemove <> 0 Then
+	If mnuTools <> 0 AndAlso mff.MenuItemRemove <> 0 Then
 		If mnuMyAddinSeparator <> 0 Then
-			mff.MenuItemRemove(mnuService, mnuMyAddinSeparator)
+			mff.MenuItemRemove(mnuTools, mnuMyAddinSeparator)
 			If mff.ObjectDelete <> 0 Then mff.ObjectDelete(mnuMyAddinSeparator)
 		End If
 		If mnuMyAddin <> 0 Then
-			mff.MenuItemRemove(mnuService, mnuMyAddin)
+			mff.MenuItemRemove(mnuTools, mnuMyAddin)
 			If mff.ObjectDelete <> 0 Then mff.ObjectDelete(mnuMyAddin)
 		End If
 	End If

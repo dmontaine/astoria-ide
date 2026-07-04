@@ -19,7 +19,7 @@ This fork (**VFBEWin64**) is a **Win64-only** branch of upstream VisualFBEditor:
 |------|----------------|
 | Native **WinAPI / Win32** UI | GTK / Linux IDE paths (physically deleted, not just hidden) |
 | **64-bit** IDE and bundled `fbc64.exe` | 32-bit IDE (`VisualFBEditor32`, `mff32`) |
-| Bundled compiler at `Compiler\fbc64.exe` (tracked in-repo; 1.10.3 swap-in planned, see Tier 3) | Dark-mode *implementation* — replaced with an inert stub, interface preserved for a future trustworthy reimplementation (not full removal — see §3a) |
+| Bundled compiler at `Compiler\fbc64.exe` (tracked in-repo; staying on 1.10.1 — see Tier 3, no viable 1.10.3 binary exists) | Dark-mode *implementation* — replaced with an inert stub, interface preserved for a future trustworthy reimplementation (not full removal — see §3a) |
 
 **This is now a fully self-contained fork:** `Compiler/`, `Debuggers/`, and `Controls/MyFbFramework/` are tracked in git (previously vendored/gitignored) — see §3a and §12.
 
@@ -231,7 +231,7 @@ See §3a — this was actually a fallout of the Batch 2.75.2 GTK strip tool, not
 - IDE self-build (`Compile.bat`) still compiles clean, 0 errors/0 warnings, after the header fix.
 - Direct reproduction: compiled `Examples/MDINotepad/MDIMain.frm` with the exact flags the IDE uses (`-d __USE_WINAPI__ -d _WIN32_WINNT=&h0A00`, etc.) — failed before the fix (matching the owner's screenshot), succeeds cleanly after, producing a working executable.
 
-**Not yet done:** full regression pass compiling other example projects to confirm no other examples relied on the old (buggy) exclusion behavior; and confirming whether FreeBASIC 1.10.3 (the Tier 3 target) already fixes this upstream or whether this same patch will need reapplying after the compiler swap.
+**Not yet done:** full regression pass compiling other example projects to confirm no other examples relied on the old (buggy) exclusion behavior. (The "does 1.10.3 already fix this" question is now moot — Tier 3's compiler swap was attempted and closed 2026-07-03, staying on 1.10.1; see §4's compiler-version-decision section.)
 
 ### Ad-hoc addition: stale bottom-panel content on project close (2026-07-03)
 
@@ -248,9 +248,18 @@ See §3a — this was actually a fallout of the Batch 2.75.2 GTK strip tool, not
 
 Compiled clean (0 errors/0 warnings) after the fix. Not yet manually smoke-tested in the running IDE.
 
-### FreeBASIC compiler version decision (for upcoming Tier 3 work)
+### FreeBASIC compiler version decision (Tier 3 — attempted 2026-07-03, reversed: staying on 1.10.1)
 
-Owner plans to replace the bundled `Compiler/` tree and eventually vendor the compiler's own source for future AI-assisted review. Compared 1.10.1 (currently bundled), 1.10.3, 1.10.4 (unreleased), and 1.20 (unreleased) — **decided on 1.10.3** from the `fbc-1.10` maintenance branch. 1.20 was ruled out for now: it removes null-termination from fixed-length strings (`STRING*N`/`WSTRING*N`), a breaking change that would need an audit of this codebase's fixed-string usage first. Owner specified a preferred binary source: community continuous builds at `users.freebasic-portal.de/stw/builds/` (maintainer "stw", trusted long-time contributor) over the "official" release, since stw's build is expected to be equal-or-better quality. **Not yet started** — see Tier 3 in §8.
+Owner plans to replace the bundled `Compiler/` tree and eventually vendor the compiler's own source for future AI-assisted review. Compared 1.10.1 (currently bundled), 1.10.3, 1.10.4 (unreleased), and 1.20 (unreleased) — **originally decided on 1.10.3** from the `fbc-1.10` maintenance branch. 1.20 was ruled out for now: it removes null-termination from fixed-length strings (`STRING*N`/`WSTRING*N`), a breaking change that would need an audit of this codebase's fixed-string usage first. Owner specified a preferred binary source: community continuous builds at `users.freebasic-portal.de/stw/builds/` (maintainer "stw", trusted long-time contributor) over the "official" release, since stw's build is expected to be equal-or-better quality.
+
+**Tier 3 was started 2026-07-03 and immediately hit a dead end: no viable 1.10.3 Windows binary exists anywhere, from any source.** What was found:
+- **stw's portal build #875** (`fbc_win64_mingw_0875_2025-04-21.zip`) was the specific build the plan pointed at — its changelog entry cites the exact right commit (`8708d1a`, confirmed on GitHub to be the real `1.10.3` tag). But the downloaded binary itself reports `--version` as **1.20.0**, and its bundled `changelog.txt` confirms large 1.20-era features already present (the same breaking `STRING*N` change, a WIP Clang backend, Android support). Root cause: stw's `win64/` build series is one continuous numbered stream tracking **trunk**, not a separate frozen maintenance branch — the "1.10.3 Release" commit is just a changelog-update commit that appears in trunk's shared history at that point, not a marker that trunk itself was in a 1.10.3 state. Trunk had already moved well past it by build #875.
+- **No official binary exists either.** Checked GitHub Releases (`freebasic/fbc/releases`) — only goes up to 1.10.1 with attached Windows assets, nothing for 1.10.2/1.10.3. Checked SourceForge (`sourceforge.net/projects/fbc/files/`) — same story, no 1.10.2 or 1.10.3 release folder exists at all. A web search turned up nothing beyond 1.10.1 on any mirror either.
+- **Getting an actual 1.10.3 binary would require building FreeBASIC from source** at the `1.10.3` git tag — a real undertaking, since FreeBASIC is self-hosting (needs an existing `fbc` to bootstrap a new one) plus a full MinGW-w64/GCC toolchain, not a quick task.
+
+**Decided (owner, 2026-07-03): stay on the currently-bundled 1.10.1 rather than build from source for one point-release's worth of bugfixes.** Tier 3's "replace the compiler" work is closed for now, not deferred to "later in this same form" — if a genuine prebuilt point-release binary ever surfaces, or if the source-build effort becomes worthwhile for other reasons (e.g. paired with the already-planned "vendor the compiler's own source" work), this can be revisited then.
+
+**This unblocks something:** the gas64-vs-GDB debugging check (below) was explicitly sequenced to wait for Tier 3 to land first, since a compiler swap could have invalidated the result. With Tier 3 now closed (staying on 1.10.1), **that sequencing reason no longer applies — the gas64/GDB check can proceed directly against the current toolchain whenever it's picked up**, no need to wait.
 
 ### Debugger backend decision: GDB, not gas64/Integrated
 
@@ -265,7 +274,7 @@ VFBE already supports two debugger paths for **user projects** (not the IDE itse
 - **Unresolved technical dependency before finalizing:** does the bundled GDB (11.2.90) actually debug a `-gen gas64`-compiled executable correctly? `Debug.bas`'s existing code pairs `-gen gas/gas64` specifically with the *Integrated* (native-stabs) debugger, not GDB, in its own error-checking logic — but GDB has long-standing native support for the STABS debug format, which is plausibly what `-gen gas64 -g` already emits, so this may just work without needing the Integrated debugger path at all. This needs an empirical check (compile a small test program with `-gen gas64 -g`, debug it via VFBE's GDB path, confirm breakpoints/stepping/watches work) before locking in `-gen gas64` as the default — otherwise the GDB decision and a gas64-by-default decision could quietly conflict in practice even though they don't conflict on paper.
 - **Cross-dependency note (audit flag, 2026-07-03):** this check runs against whatever GCC/binutils currently ships under `Compiler/bin/win64/`. If Tier 3's compiler swap later changes that bundled toolchain (§13.1), this result isn't guaranteed to carry over — re-verify rather than assume it still holds after that swap.
 - Once resolved: if GDB works cleanly against gas64 output, default new projects to `-gen gas64` + GDB (fast compiles, standard debugger, best of both). If not, fall back to `-gen gcc` + GDB as originally implied, accepting the slower compile.
-- **Sequencing decision (owner, 2026-07-03): resolve Tier 3 (compiler swap to 1.10.3) first, then do the gas64-vs-GDB empirical check against whatever ships in the new `Compiler/` tree.** Reasoning: the cross-dependency note above already flags that this check's result might not carry over across a compiler-toolchain swap, so testing against the current (soon-to-be-replaced) 1.10.1 toolchain risks wasted/invalidated work. Don't jump straight to the empirical gas64/GDB test before Tier 3 lands.
+- ~~**Sequencing decision (owner, 2026-07-03): resolve Tier 3 (compiler swap to 1.10.3) first, then do the gas64-vs-GDB empirical check.**~~ — **superseded 2026-07-03.** Tier 3 turned out to have no viable 1.10.3 binary anywhere (see the compiler-version-decision writeup above) and the project is staying on 1.10.1. The original reasoning (don't test against a toolchain about to be replaced) no longer applies — **the gas64/GDB check can proceed directly against the current 1.10.1 toolchain now**, whenever it's picked up.
 - **Considered and ruled out: Clang/LLVM as an alternative backend, and MinGW as a separate toolchain choice (owner discussion, 2026-07-03).** MinGW isn't actually a distinct option here — the bundled `gcc.exe` under `Compiler/bin/win64/` is already a MinGW-w64 build; that's what makes it produce native Windows PE executables at all. Clang/LLVM is more interesting but not worth pursuing: `TabWindow.bas`'s `CompileTo` project setting already exposes **four** backend choices in Project Properties today — `ToGAS`, `ToGCC`, `ToLLVM`, `ToCLANG` — but `Compiler/bin/win64/` only ships GCC/binutils; there's no bundled `clang.exe` or LLVM tooling at all, so selecting Clang or LLVM today just fails. Decided not to bundle a second full toolchain for a speculative compile-speed benefit when `gas64` already delivers that with zero new dependencies, and FreeBASIC's own GCC backend is far more battle-tested than its Clang/LLVM paths. **`ToCLANG`/`ToLLVM` are therefore dead, non-functional options sitting in Project Properties right now** — flagged as a concrete target for the §13.2 simplification campaign below (remove or clearly gray out, per the §1 "no unnecessary options" principle).
 
 Whether the Integrated (stabs) Debugger code path in `Debug.bas` should eventually be pared down once this is settled (rather than kept as an unused alternate path) is a separate, not-yet-decided question — flagging it as a candidate for a future §13.2-style consistency pass rather than deciding now.
@@ -437,11 +446,11 @@ All items above passed **before** the owner separately found the critical `_WIN3
 2. **Low-priority cleanup** (optional, not blocking): `src/makefile` GTK defines, `src/THREADING.md` GTK mentions
 3. ~~**Examples/ GTK/Linux/Win32-only audit**~~ — **done** (2026-07-03). Result: **none of the 33 example folders needed removal** — the premise didn't hold. See §3b for full findings and follow-up work done/flagged as a result.
 
-### Tier 3 — compiler toolchain (owner-directed, not yet started)
+### Tier 3 — compiler toolchain (attempted 2026-07-03, closed for now — see §4)
 
-4. **Verify a compiled `fbc64` is available for 1.10.3** from `users.freebasic-portal.de/stw/builds/` (build ~#0875, commit `8708d1a`, per owner's preferred source); if not, stand up a build environment instead
-5. **Replace `Compiler/` tree** with the 1.10.3 build; verify `fbc64 -version` reports 1.10.3; full clean rebuild + §7 regression pass again afterward. **Also check whether 1.10.3's bundled headers already fix the `_WIN32_WINNT` exact-equality bug (§4)** — if so the patch applied to the 1.10.1 headers won't need reapplying; if not, reapply the same fix to the new header tree.
-6. **Longer term:** vendor the FreeBASIC compiler's own source into the repo tree, in preparation for future AI-assisted review/modification of the compiler itself (owner-flagged as upcoming, no timeline yet)
+4. ~~**Verify a compiled `fbc64` is available for 1.10.3**~~ — **done** (2026-07-03): no viable 1.10.3 Windows binary exists anywhere (stw's portal build #875 is mislabeled — it's actually trunk/1.20, not a frozen 1.10.3 build; no official binary exists on GitHub Releases or SourceForge either). Full writeup in §4.
+5. ~~**Replace `Compiler/` tree** with the 1.10.3 build~~ — **not happening** (2026-07-03): staying on the currently-bundled 1.10.1 rather than building FreeBASIC from source for one point-release's worth of fixes. Removed cleanly from the immediate plan, not silently dropped — see §4 for the reasoning and what would need to be true to revisit it.
+6. **Longer term:** vendor the FreeBASIC compiler's own source into the repo tree, in preparation for future AI-assisted review/modification of the compiler itself (owner-flagged as upcoming, no timeline yet). If this happens, it's the natural point to reconsider building a newer FreeBASIC version from source too, rather than doing that build effort as a one-off just for a point release.
 
 ### Longer term / unscheduled
 
@@ -548,7 +557,7 @@ Includes:
 
 9. **Local convenience:** `docompile.bat` at repo root is gitignored (owner's personal compile shortcut).
 
-10. **Tier 3 (compiler swap) not yet started** — see §8. Owner has already decided on FreeBASIC 1.10.3 from the `stw` community build portal over the official release; don't re-litigate that decision without new information.
+10. **Tier 3 (compiler swap) attempted and closed 2026-07-03** — see §4/§8. No viable 1.10.3 Windows binary exists anywhere; staying on the currently-bundled 1.10.1. Don't re-attempt fetching a prebuilt 1.10.3 binary without new information (a genuine point-release build surfacing somewhere) — this was checked thoroughly (stw's portal, GitHub Releases, SourceForge, general web search) before concluding.
 
 ---
 
@@ -594,8 +603,8 @@ These are **enhancements, not bugs** — added by the owner after Tier 3 was sco
 
 ### 13.1 Evaluate a later GCC version
 
-FreeBASIC's Win64 backend compiles through a bundled `gcc`/`binutils` (`as`, `ld`, `dlltool`, `GoRC`) under `Compiler/bin/win64/`, not just `fbc64.exe` itself. Worth bundling with the Tier 3 compiler swap rather than doing separately, since:
-- The FreeBASIC 1.10.3 build already decided on (stw's portal, §8) will have shipped with a specific paired GCC/binutils version — need to check what that is before assuming an independent upgrade is possible.
+FreeBASIC's Win64 backend compiles through a bundled `gcc`/`binutils` (`as`, `ld`, `dlltool`, `GoRC`) under `Compiler/bin/win64/`, not just `fbc64.exe` itself. Tier 3 (compiler swap) was attempted and closed 2026-07-03 — no viable 1.10.3 binary exists, staying on 1.10.1 (see §4/§8) — so this is now independent of any near-term compiler swap, not something to bundle with it:
+- Any independent GCC upgrade would be evaluated against the current 1.10.1-paired GCC/binutils version, not a future 1.10.3 pairing that isn't happening.
 - A newer GCC needs a matching MinGW-w64 runtime/headers set; swapping GCC alone without the matching toolchain risks subtle ABI or linker-flag mismatches (`Compile.bat`'s `ld` invocation has a long hand-tuned flag list — see the build log in §3a's verification note).
 - Decide: adopt whatever GCC ships with the chosen fbc build, or independently source a newer one and re-verify the full flag set still links cleanly.
 - **Cross-dependency note (audit flag, 2026-07-03):** §4 has an open gas64-vs-GDB compatibility question tested empirically against the *current* `Compiler/bin/win64/` toolchain. If this swap changes that toolchain, re-verify §4's decision rather than assuming it still holds.

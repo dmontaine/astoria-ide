@@ -77,7 +77,7 @@
 			.Anchor.Bottom = AnchorStyle.asAnchor
 			.BackColor = 8388736
 			.CenterImage = True
-			.StretchImage= StretchMode.smStretchProportional
+			.StretchImage= My.Sys.Forms.StretchMode.smStretchProportional
 			.Graphic.Bitmap.LoadFromFile(ExePath & "/wheel.png")
 			.SetBounds 22, 56, 300, 160
 			.Designer = @This
@@ -233,12 +233,11 @@ Private Sub Form1Type.CommandButton1_Click(ByRef Sender As Control)
 	CommandButton1.Caption = "Waiting......Drawing"  '"稍等，正在绘画"     '"Waiting......Drawing" '
 	'Picture1.Visible = False
 	With Picture1.Canvas
-		.CreateDoubleBuffer
 		'.Cls
 		.Scale(-10, -10, 10, 10)
 		.Pen.Color = clGreen
 		.Pen.Size = 2
-		.Pen.Style = 3 'PenStyle.psDashDot
+		.Pen.Style = PenStyle.psDashDot
 		'.Pen.Mode = PenMode.pmMerge
 		' draw across  画十字线条
 		'.FillMode = BrushFillMode.bmOpaque
@@ -276,7 +275,6 @@ Private Sub Form1Type.CommandButton1_Click(ByRef Sender As Control)
 			'.TextOut 20, 20, Str(i), clYellow, -1
 		Next
 		.TextOut - 9, -9, "Elapsed Time: " & Timer - T & "ms", clGreen , -1 '"用时 " & GetTickCount - t & "毫秒", clGreen , -1
-		.TransferDoubleBuffer
 	End With
 	
 	CommandButton1.Caption = "Start Draw" '"开始绘画"    '"Start Draw"
@@ -307,12 +305,11 @@ End Sub
 
 Private Sub Form1Type.cmdGDIDraw_Click(ByRef Sender As Control)
 	With Picture1.Canvas
-		.CreateDoubleBuffer
 		'.Cls
 		.Scale(-100, 100, 100, -100)
 		.Pen.Color = clGreen
 		.Pen.Size = 1
-		.Pen.Style = 3 'PenStyle.psDashDot
+		.Pen.Style = PenStyle.psDashDot
 		'Print Picture1.BackColor
 		.FillMode = BrushFillMode.bmTransparent
 		.Line (-100, 0, 100, 0) '画X轴
@@ -349,7 +346,7 @@ Private Sub Form1Type.cmdGDIDraw_Click(ByRef Sender As Control)
 		.Line 40, 70, 80, 90, clBlue, "F"
 		
 		.DrawWidth = 2 '设置画笔宽度
-		.Pen.Style = 0
+		.Pen.Style = PenStyle.psSolid
 		'绘制弧线、弦割线、饼图
 		.Arc(30, 50, 70, 80, 70, 60, 30, 60)
 		.Chord(10, 60, 40, 80, 40, 60, 10, 70)
@@ -402,7 +399,6 @@ Private Sub Form1Type.cmdGDIDraw_Click(ByRef Sender As Control)
 		
 		'绘制文本
 		'TextOut(20, 220, TEXT("GDI画图输出测试程序"), 11);
-		.TransferDoubleBuffer
 	End With
 End Sub
 

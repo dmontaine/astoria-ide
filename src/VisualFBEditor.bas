@@ -490,6 +490,7 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 			DeleteDebugCursor
 			ChangeEnabledDebug True, False, False
 		End If
+		ClearDebugPanels
 	Case "Restart"
 		ClearThreadsWindow
 		Dim As DebuggerTypes CurrentDebugger = CurrentDebuggerType64

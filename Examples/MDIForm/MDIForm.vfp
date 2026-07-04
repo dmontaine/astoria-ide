@@ -1,4 +1,4 @@
-File=MDIChild.frm
+﻿File=MDIChild.frm
 File=MDIList.frm
 *File=MDIMain.frm
 File=MDIMain.rc
@@ -31,6 +31,8 @@ OptimizationFastCode=false
 OptimizationSmallCode=false
 CompilationArguments64Windows="-x "MDIForm64.exe" -gen gas64"
 CompilationArguments64Linux=""
+CompilationArguments32Windows=""
+CompilationArguments32Linux=""
 CompilerPath=""
 CommandLineArguments=""
 CreateDebugInfo=false

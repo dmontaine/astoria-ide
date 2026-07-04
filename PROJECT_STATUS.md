@@ -180,6 +180,41 @@ Same root pattern as bottom panel item 5 above, found independently in each: Pin
 
 See §3a — this was actually a fallout of the Batch 2.75.2 GTK strip tool, not a new regression, but wasn't caught until this session. Fixed in commit `bef9267`.
 
+### Critical fix: bundled Windows headers silently dropped Windows-8.1+ APIs for every user project (2026-07-03)
+
+**Discovered when the owner tried to compile the `MDINotepad` example project and got 11 errors in `Controls/MyFbFramework/mff/Control.bas`** (`WM_POINTERDOWN`/`POINTER_INFO`/`GetPointerInfo`/`PT_MOUSE` all "not declared"). This turned out to be a serious, longstanding bug — not something introduced by tonight's session — that likely blocked **any** standard GUI project from compiling through the IDE, not just this one example.
+
+**Root cause:** `src/Main.bi` defines `TARGET_COMPILE_DEFINE = "__USE_WINAPI__ -d _WIN32_WINNT=&h0A00"` (Windows 10), unconditionally appended to every user-project compile command (`TabWindow.bas:11378`). The bundled compiler's Windows headers (`Compiler/inc/win/*.bi`) gate all "Windows 8.1 and later" API declarations behind **exact-equality** version checks — `#if _WIN32_WINNT = &h0602` — instead of the correct minimum-version form (`#if _WIN32_WINNT >= &h0602`). Since the project explicitly targets Windows 10 (`&h0A00 ≠ &h0602`), every one of those blocks was silently excluded, even though Windows 10 is a strict superset of Windows 8.1 and should include all of it. `Control.bas` (the base class for every MyFbFramework control, pulled in by the default `Form.frm` template used by GUI/Windows Application projects) hits this via its pointer-input handling — meaning essentially any new GUI project with a form would fail the same way.
+
+**Verified via the original download too:** the owner confirmed the same `MDINotepad` project also fails on the unmodified upstream project (different failure signature — fails earlier, before producing a detailed error list — consistent with the upstream toolchain not even being fully set up). This confirms the defect predates this fork and Tier 2.75 cleanup entirely.
+
+**Scope confirmed systemic, not isolated:** grepped the whole `Compiler/inc/win/` tree — the same exact-equality anti-pattern (`_WIN32_WINNT = &h0602`) appears **116 times across 18 files** (`aclui.bi`, `authz.bi`, `combaseapi.bi`, `commctrl.bi`, `ncrypt.bi`, `ntddndis.bi`, `shellapi.bi`, `shldisp.bi`, `shlobj.bi`, `shobjidl.bi`, `userenv.bi`, `winbase.bi`, `wincrypt.bi`, `windot11.bi`, `wingdi.bi`, `winnls.bi`, `winnt.bi`, `winuser.bi`) — a single consistent spelling, no case/spacing variants. This is almost certainly a FreeBASIC header-porting bug: Microsoft's own SDK headers use "at least this version" semantics (`NTDDI_VERSION >= NTDDI_WIN8`), not exact equality.
+
+**Safety verified before fixing:** confirmed (via cross-referencing every declared symbol name against the rest of each file, including `#elseif` chains) that no file has a competing higher-version guard (`>= &h0603`, `&h0A00`, etc.) for the same symbols — so widening `=` to `>=` cannot cause duplicate-definition conflicts anywhere. All 116 occurrences are either standalone `#if`/`#endif` blocks or the terminal branch of an `#elseif` chain with nothing after them.
+
+**Fix:** mechanical find-and-replace, `_WIN32_WINNT = &h0602` → `_WIN32_WINNT >= &h0602`, across all 18 files. Purely additive — for the IDE's own self-build (which doesn't force `_WIN32_WINNT`, so `Control.bi`'s own `#ifndef` fallback sets it to exactly `&h0602`), behavior is unchanged; for user projects (`&h0A00`), the correct Windows-8.1+ API set now compiles.
+
+**Verified:**
+- IDE self-build (`Compile.bat`) still compiles clean, 0 errors/0 warnings, after the header fix.
+- Direct reproduction: compiled `Examples/MDINotepad/MDIMain.frm` with the exact flags the IDE uses (`-d __USE_WINAPI__ -d _WIN32_WINNT=&h0A00`, etc.) — failed before the fix (matching the owner's screenshot), succeeds cleanly after, producing a working executable.
+
+**Not yet done:** full regression pass compiling other example projects to confirm no other examples relied on the old (buggy) exclusion behavior; and confirming whether FreeBASIC 1.10.3 (the Tier 3 target) already fixes this upstream or whether this same patch will need reapplying after the compiler swap.
+
+### Ad-hoc addition: stale bottom-panel content on project close (2026-07-03)
+
+**Not part of any planned tier — arose from the owner noticing the Output/Problems tabs kept a closed project's content after opening a different project.** Investigated all 14 bottom-panel tabs (`src/Main.bas` ~line 8200) and found they split into two groups with different natural lifetimes:
+
+- **Analysis tabs (6): Output, Problems, Suggestions, Find, ToDo, Change Log** — hold scan/compile results scoped to whichever project or file produced them (confirmed `Change Log` is explicitly keyed to the current tree node via `mChangelogName`). Stale content here is actively misleading once a different project is open.
+- **Debug/profiler tabs (8): Locals, Globals, Procedures, Threads, Watches, Memory, Profiler, Immediate** — only ever have content during an active debug/profiling run, which can't exist without a project open.
+
+**Fix:** two new Subs in `src/Main.bas` (next to the existing `ClearMessages()`):
+- `ClearAnalysisPanels()` — clears the 6 analysis tabs, called from `CloseProject` (Main.bas).
+- `ClearDebugPanels()` — clears the 8 debug/profiler tabs, called from the `Case "End"` debug-stop handler in `src/VisualFBEditor.bas` (so it fires when a debug session ends, not just on project close), and also from `CloseProject` as a backstop.
+
+**Gotcha hit along the way, worth remembering for any future cross-file Sub call:** `Main.bi` `#include`s `Main.bas` near its own end (line ~316), and `VisualFBEditor.bas` pulls in `Main.bi` near its top (line 36) — before it reaches its own Sub definitions further down (e.g. `ClearThreadsWindow` at line 299). So a Sub defined in `VisualFBEditor.bas` is **not** visible to code in `Main.bas` without an explicit forward `Declare` in `Main.bi` (added one for `ClearThreadsWindow`, following the existing `ChangeEnabledDebug`-style pattern) — even though calling in the other direction (`VisualFBEditor.bas` calling a `Main.bas` Sub) works fine, since `Main.bas`'s content is textually inlined before `VisualFBEditor.bas` continues past line 36.
+
+Compiled clean (0 errors/0 warnings) after the fix. Not yet manually smoke-tested in the running IDE.
+
 ### FreeBASIC compiler version decision (for upcoming Tier 3 work)
 
 Owner plans to replace the bundled `Compiler/` tree and eventually vendor the compiler's own source for future AI-assisted review. Compared 1.10.1 (currently bundled), 1.10.3, 1.10.4 (unreleased), and 1.20 (unreleased) — **decided on 1.10.3** from the `fbc-1.10` maintenance branch. 1.20 was ruled out for now: it removes null-termination from fixed-length strings (`STRING*N`/`WSTRING*N`), a breaking change that would need an audit of this codebase's fixed-string usage first. Owner specified a preferred binary source: community continuous builds at `users.freebasic-portal.de/stw/builds/` (maintainer "stw", trusted long-time contributor) over the "official" release, since stw's build is expected to be equal-or-better quality. **Not yet started** — see Tier 3 in §8.
@@ -258,6 +293,8 @@ State model mirrors **left/right** panels:
 - [x] Dark-mode implementation replaced with inert stub (interface preserved) (`56f6d18`)
 - [x] Confirmed-dead subtrees deleted: `gir_headers/`, `WebView/`, `fbsound/`, `SoundPlayer.*` (`c494207`)
 - [x] Batch 2.75.3 — physical dead-code deletion across `Debug.bas`, `Designer.bas`/`.bi`, `Main.bas`/`.bi`, `TabWindow.bas`, `VisualFBEditor.bas`, ~15 `mff/*.bas` files, `NativeFontControl.bas`/`.bi` deleted outright (`7baebd1`, `add4642`, `76abaa5`)
+- [x] AI KnowledgeBase path bug fixed — `VisualFBEditor IDE Environment.md` was never loading due to a missing `\KnowledgeBase\` path segment in `Main.bas` (found via second-AI audit verification, §4)
+- [x] Ad-hoc: bottom-panel analysis/debug tabs now clear on project close and debug-session-end instead of retaining stale cross-project content — see §4
 
 ---
 
@@ -287,9 +324,9 @@ Run a full pass on **latest** `VisualFBEditor64.exe` after `Compile.bat`. Check 
 
 ### Startup
 
-- [ ] Cold start — no ghost Find dialog, splash closes, main window active
-- [ ] Bottom panel opens in same state as last session (pinned / auto-hide collapsed / auto-hide expanded)
-- [ ] Cold start with bottom **collapsed** — editor fills space immediately (no empty gap)
+- [x] Cold start — no ghost Find dialog, splash closes, main window active — **owner verified**
+- [x] Bottom panel opens in same state as last session (pinned / auto-hide collapsed / auto-hide expanded) — **owner verified**
+- [x] Cold start with bottom **collapsed** — editor fills space immediately (no empty gap) — **owner verified**
 
 ### Bottom panel (regression on fixes)
 
@@ -297,13 +334,13 @@ Run a full pass on **latest** `VisualFBEditor64.exe` after `Compile.bat`. Check 
 - [x] Auto-hide expanded → exit → restart — reopens expanded — **owner verified**
 - [x] Collapse (pin or click-away) — editor fills freed space — **owner verified**
 - [x] First start collapsed — editor fills space — **owner verified**
-- [ ] Pin size/position acceptable in collapsed and expanded modes
-- [ ] Single-click collapse when expanded
-- [ ] Resize height persists (≥ 80px)
+- [x] Pin size/position acceptable in collapsed and expanded modes — **owner verified**
+- [x] Single-click collapse when expanded — **owner verified**
+- [x] Resize height persists (≥ 80px) — **owner verified**
 
 ### Regression (Batch 2.75.2 + adjacent areas)
 
-- [ ] Left/right panels pin/collapse/restore
+- [x] Left/right panels pin/collapse/restore — **owner verified**
 - [ ] Ctrl+F, Find In Files
 - [ ] Compile/run, Output/Problems tabs
 - [ ] Form design, property editing

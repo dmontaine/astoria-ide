@@ -291,6 +291,45 @@ Sub ClearMessages()
 	txtOutput.Update
 End Sub
 
+' Output/Problems/Suggestions/Find/ToDo/Change Log hold results scoped to whichever
+' project or file produced them; stale entries from a closed project are misleading
+' once a different project is open. Cleared on CloseProject/CloseSession.
+Sub ClearAnalysisPanels()
+	ClearMessages()
+	lvProblems.ListItems.Clear
+	tpProblems->Caption = ML("Problems")
+	lvSuggestions.ListItems.Clear
+	tpSuggestions->Caption = ML("Suggestions")
+	lvSearch.ListItems.Clear
+	tpFind->Caption = ML("Find")
+	lvToDo.ListItems.Clear
+	tpToDo->Caption = ML("ToDo")
+	txtChangeLog.Text = ""
+	mLoadLog = False
+	mLoadToDo = False
+End Sub
+
+' Locals/Globals/Procedures/Threads/Watches/Memory/Profiler/Immediate only hold
+' meaningful content during an active debug/profiling run. Cleared when a debug
+' session ends (Case "End" in VisualFBEditor.bas), and as a backstop on
+' CloseProject/CloseSession.
+Sub ClearDebugPanels()
+	ClearThreadsWindow
+	lvLocals.Nodes.Clear
+	tpLocals->Caption = ML("Locals")
+	tvVar.Nodes.Clear
+	lvGlobals.Nodes.Clear
+	tpGlobals->Caption = ML("Globals")
+	tvPrc.Nodes.Clear
+	lvWatches.Nodes.Clear
+	tpWatches->Caption = ML("Watches")
+	tvWch.Nodes.Clear
+	tvThd.Nodes.Clear
+	lvMemory.ListItems.Clear
+	lvProfiler.Nodes.Clear
+	txtImmediate.Text = ""
+End Sub
+
 Sub SetCodeVisible(tb As TabWindow Ptr)
 	If tb->tbrTop.Buttons.Item("Form")->Checked = True Then tb->tbrTop.Buttons.Item("Code")->Checked = True: tbrTop_ButtonClick *tb->tbrTop.Designer, tb->tbrTop, *tb->tbrTop.Buttons.Item("Code")
 End Sub
@@ -2153,6 +2192,8 @@ Function CloseProject(tn As TreeNode Ptr, WithoutMessage As Boolean = False) As 
 	'miProjectProperties->Enabled = False
 	'miExplorerProjectProperties->Enabled = False
 	If tvExplorer.Nodes.IndexOf(tn) <> -1 Then tvExplorer.Nodes.Remove tvExplorer.Nodes.IndexOf(tn)
+	ClearAnalysisPanels()
+	ClearDebugPanels()
 	ChangeMenuItemsEnabled
 	Return True
 End Function

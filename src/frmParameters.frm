@@ -150,12 +150,6 @@
 			.SetBounds 16, 28, 266, 17
 			.Parent = @grbDebug
 		End With
-		With cboDebug64
-			.Name = "cboDebug64"
-			.TabIndex = 23
-			.SetBounds 90, 24, 278, 21
-			.Parent = @grbDebug
-		End With
 		With lblAddCompilerOption64
 			.Name = "lblAddCompilerOption64"
 			.Text = "+"
@@ -201,15 +195,6 @@ Sub frmParameters.LoadSettings()
 		Next
 		.cboRun.ItemIndex = .cboRun.IndexOf(*CurrentTerminal)
 		If .cboRun.ItemIndex = -1 Then .cboRun.ItemIndex = .cboRun.IndexOf(*DefaultTerminal)
-		.cboDebug64.Clear
-		.cboDebug64.AddItem ML("Integrated IDE Debugger")
-		.cboDebug64.AddItem ML("Integrated GDB Debugger")
-		For i As Integer = 0 To pDebuggers->Count - 1
-			.cboDebug64.AddItem pDebuggers->Item(i)->Key
-		Next
-		.cboDebug64.ItemIndex = IIf(CurrentDebuggerType64 = CustomDebugger, .cboDebug64.IndexOf(*CurrentDebugger64), CurrentDebuggerType64)
-		If .cboDebug64.ItemIndex = -1 Then .cboDebug64.ItemIndex = IIf(DefaultDebuggerType64 = CustomDebugger, .cboDebug64.IndexOf(ML(*DefaultDebugger64)), DefaultDebuggerType64)
-		If .cboDebug64.ItemIndex = -1 Then .cboDebug64.ItemIndex = 0
 	End With
 End Sub
 
@@ -237,9 +222,6 @@ Private Sub frmParameters.cmdOK_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		WLet(MakeToolPath2, pMakeTools->Get(*CurrentMakeTool2, pMakeTools->Get(*DefaultMakeTool)))
 		WLet(CurrentTerminal, .cboRun.Text)
 		WLet(TerminalPath, IIf(.cboRun.ItemIndex = 0, pTerminals->Get(*DefaultTerminal), pTerminals->Get(*CurrentTerminal)))
-		WLet(CurrentDebugger64, IIf(.cboDebug64.ItemIndex = 0, WStr("Integrated IDE Debugger"), IIf(.cboDebug64.ItemIndex = 1, WStr("Integrated GDB Debugger"), .cboDebug64.Text)))
-		CurrentDebuggerType64 = IIf(.cboDebug64.ItemIndex = 0, IntegratedIDEDebugger, IIf(.cboDebug64.ItemIndex = 1, IntegratedGDBDebugger, CustomDebugger))
-		WLet(Debugger64Path, IIf(.cboDebug64.ItemIndex = 0, pDebuggers->Get(*DefaultDebugger64), pDebuggers->Get(*CurrentDebugger64)))
 		piniSettings->WriteString "Parameters", "Compiler64Arguments", *Compiler64Arguments
 		piniSettings->WriteString "Parameters", "Make1Arguments", *Make1Arguments
 		piniSettings->WriteString "Parameters", "Make2Arguments", *Make2Arguments

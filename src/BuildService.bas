@@ -158,10 +158,7 @@ Function Compile(Parameter As String, bAll As Boolean) As Integer
 		If Project Then
 			Select Case Project->CompileTo
 			Case ByDefault:
-			Case ToGAS: WAdd(ctx.CompileWith, " -gen gas64")
-			Case ToLLVM: WAdd(ctx.CompileWith, " -gen llvm" )
 			Case ToGCC: WAdd(ctx.CompileWith, " -gen gcc" )
-			Case ToCLANG: WAdd(ctx.CompileWith, " -gen clang" )
 			End Select
 			For i As Integer = 0 To Project->Components.Count - 1
 				If EndsWith(Project->Components.Item(i), Slash) Then

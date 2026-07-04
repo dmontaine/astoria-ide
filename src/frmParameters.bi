@@ -28,7 +28,7 @@ Type frmParameters Extends Form
 	Dim As CommandButton cmdOK, cmdCancel
 	Dim As Label lblfbc64, lblMake1, llblMake2, lblRun, lblDebug64, lblAddCompilerOption64
 	Dim As TextBox txtfbc64, txtMake1, txtMake2, txtRun, txtDebug64
-	Dim As ComboBoxEdit cboCompiler64, cboMake1, cboMake2, cboRun, cboDebug64
+	Dim As ComboBoxEdit cboCompiler64, cboMake1, cboMake2, cboRun
 End Type
 
 Common Shared pfParameters As frmParameters Ptr

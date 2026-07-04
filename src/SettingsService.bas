@@ -65,7 +65,6 @@ Private Function NoMoreIndexedSettingsKeys(i As Integer) As Boolean
 	Dim As Integer keySum = 0
 	keySum += iniSettings.KeyExists("AIAgents", "Version_" & WStr(i))
 	keySum += iniSettings.KeyExists("MakeTools", "Version_" & WStr(i))
-	keySum += iniSettings.KeyExists("Debuggers", "Version_" & WStr(i))
 	keySum += iniSettings.KeyExists("Terminals", "Version_" & WStr(i))
 	keySum += iniSettings.KeyExists("BuildConfigurations", "Name_" & WStr(i))
 	keySum += iniSettings.KeyExists("Helps", "Version_" & WStr(i))
@@ -196,14 +195,6 @@ Sub LoadSettings
 			Tool->Parameters = iniSettings.ReadString("MakeTools", "Command_" & WStr(i), "")
 			MakeTools.Add Temp, Tool->Path, Tool
 		End If
-		Temp = iniSettings.ReadString("Debuggers", "Version_" & WStr(i), "")
-		If Temp <> "" Then
-			Tool = _New(ToolType)
-			Tool->Name = Temp
-			Tool->Path = iniSettings.ReadString("Debuggers", "Path_" & WStr(i), "")
-			Tool->Parameters = iniSettings.ReadString("Debuggers", "Command_" & WStr(i), "")
-			Debuggers.Add Temp, Tool->Path, Tool
-		End If
 		Temp = iniSettings.ReadString("Terminals", "Version_" & WStr(i), "")
 		If Temp <> "" Then
 			Tool = _New(ToolType)
@@ -241,13 +232,6 @@ Sub LoadSettings
 	WLet(MakeToolPath1, MakeTools.Get(*CurrentMakeTool1, "make"))
 	WLet(CurrentMakeTool2, *DefaultMakeTool)
 	WLet(MakeToolPath2, MakeTools.Get(*CurrentMakeTool2, "make"))
-		WLet(DefaultDebugger64, iniSettings.ReadString("Debuggers", "DefaultDebugger64", "Integrated IDE Debugger"))
-	DefaultDebuggerType64 = IIf(*DefaultDebugger64 = "Integrated IDE Debugger", IntegratedIDEDebugger, IIf(*DefaultDebugger64 = "Integrated GDB Debugger", IntegratedGDBDebugger, CustomDebugger))
-	WLet(CurrentDebugger64, *DefaultDebugger64)
-	CurrentDebuggerType64 = DefaultDebuggerType64
-	WLet(Debugger64Path, Debuggers.Get(*CurrentDebugger64, ""))
-	WLet(GDBDebugger64, iniSettings.ReadString("Debuggers", "GDBDebugger64", ""))
-	WLet(GDBDebugger64Path, Debuggers.Get(*GDBDebugger64, ""))
 	WLet(DefaultTerminal, iniSettings.ReadString("Terminals", "DefaultTerminal", ""))
 	WLet(CurrentTerminal, *DefaultTerminal)
 	WLet(TerminalPath, Terminals.Get(*CurrentTerminal, ""))

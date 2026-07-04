@@ -118,7 +118,7 @@ Dim Shared As WStringOrStringList Comps, GlobalAsmFunctionsHelp, GlobalFunctions
 'Dim Shared As WStringOrStringList GlobalNamespaces, GlobalTypes, GlobalEnums, GlobalDefines, GlobalFunctions, GlobalTypeProcedures, GlobalArgs
 Dim Shared As WStringList AddIns, IncludeFiles, LoadPaths, IncludePaths, LibraryPaths, MRUAIChat, MRUFiles, MRUFolders, MRUProjects, MRUSessions, ProfilingFunctions ' add Sessions
 Dim Shared As WString Ptr RecentFiles, RecentFile, RecentProject, RecentFolder, RecentSession, RecentAIChat
-Dim Shared As Dictionary Helps, HotKeys, Compilers, MakeTools, Debuggers, Terminals, OtherEditors, BuildConfigurations, mlCompiler, mlTemplates, AIAgents, mpKeys, mcKeys
+Dim Shared As Dictionary Helps, HotKeys, Compilers, MakeTools, Terminals, OtherEditors, BuildConfigurations, mlCompiler, mlTemplates, AIAgents, mpKeys, mcKeys
 Dim Shared As ListView lvProblems, lvSuggestions, lvSearch, lvToDo, lvMemory
 Dim Shared As ProgressBar prProgress
 Dim Shared As CommandButton btnPropertyValue
@@ -159,7 +159,6 @@ pTools = @Tools
 pControlLibraries = @ControlLibraries
 pCompilers = @Compilers
 pMakeTools = @MakeTools
-pDebuggers = @Debuggers
 pTerminals = @Terminals
 pOtherEditors = @OtherEditors
 pHelps = @Helps
@@ -2311,24 +2310,6 @@ Sub ChangeEnabledDebug(bStart As Boolean, bBreak As Boolean, bEnd As Boolean)
 	miShowNextStatement->Enabled = bEnd
 End Sub
 
-Sub TimerProc(hwnd As HWND, uMsg As UINT, idEvent As UINT_PTR, dwTime As DWORD)
-	If fntab < 0 Or fcurlig < 1 Then Exit Sub
-	If source(fntab) = "" Then Exit Sub
-	shwtab = fntab
-	Dim As TabWindow Ptr tb = Cast(TabWindow Ptr, ptabCode->SelectedTab)
-	If tb = 0 OrElse Not EqualPaths(tb->FileName, source(fntab)) Then
-		tb = AddTab(LCase(source(fntab)))
-	End If
-	If tb = 0 Then Exit Sub
-	CurEC = @tb->txtCode
-	tb->txtCode.CurExecutedLine = fcurlig - 1
-	tb->txtCode.SetSelection fcurlig - 1, fcurlig - 1, 0, 0
-	tb->txtCode.PaintControl
-		SetForegroundWindow frmMain.Handle
-		ChangeEnabledDebug True, False, True
-	fntab = 0
-	fcurlig = -1
-End Sub
 
 	Function TimerProcGDB() As Integer
 		If fcurlig < 1 AndAlso fcurlig <> -2 Then Return 1
@@ -7415,7 +7396,6 @@ tvVar.Visible = False
 tvVar.Align = DockStyle.alClient
 
 Sub tvPrc_NodeActivate(ByRef Designer As My.Sys.Object, ByRef Sender As Control, ByRef Item As TreeNode)
-	proc_loc
 End Sub
 
 tvPrc.Align = DockStyle.alClient
@@ -7443,15 +7423,6 @@ lvThreads.Images = @imgListStates
 lvThreads.OnItemActivate = @lvThreads_ItemActivate
 
 Sub tvVar_Message(ByRef Designer As My.Sys.Object, ByRef Sender As Control, ByRef message As Message)
-	Select Case message.Msg
-	Case CM_NOTIFY
-		Dim tvp As NMTREEVIEW Ptr = Cast(NMTREEVIEW Ptr, message.lParam)
-		If tvp <> 0 Then
-			Select Case tvp->hdr.code
-			Case TVN_ITEMEXPANDING: UpdateItems(TreeView_GetNextItem(tviewvar, tvp->itemNew.hItem, TVGN_CHILD))
-			End Select
-		End If
-	End Select
 End Sub
 
 tvVar.ContextMenu = @mnuVars
@@ -7796,9 +7767,6 @@ Sub tabCode_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As TabContro
 		If tb->FindFormPosiTop > 0 Then pfFind->Top = tb->FindFormPosiTop
 	End If
 	tbOld = tb
-	For i As Integer = 0 To sourcenb
-		If EqualPaths(tb->FileName, source(i)) Then shwtab = i: Exit For
-	Next
 	MouseHoverTimerVal = Timer
 	If pfFind->cboFindRange.ItemIndex <> 2 Then
 		WLet(gSearchSave, "")
@@ -8146,9 +8114,6 @@ Sub tabBottom_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As Control
 	tbBottom.Buttons.Item("RemoveWatch")->Visible = tp = tpWatches
 	tbBottom.Buttons.Item("Update")->Visible = tp = tpGlobals
 	If newIndex = 9 Then tbBottom.Buttons.Item("AddWatch")->State = Cast(ToolButtonState, tbBottom.Buttons.Item("AddWatch")->State Or ToolButtonState.tstWrap)
-	If ptabBottom->SelectedTab = tpProcedures Then
-		proc_sh
-	End If
 	If MainNode <> 0 AndAlso MainNode->Text <> "" AndAlso InStr(MainNode->Text, ".") Then
 		If ptabBottom->SelectedTab = tpChangeLog AndAlso CInt(Not mLoadLog) Then ' AndAlso CInt(Not mLoadToDo)
 			If mChangeLogEdited AndAlso mChangelogName<> "" Then
@@ -9140,11 +9105,6 @@ Sub OnProgramQuit() Destructor
 	WDeAllocate(MakeToolPath2)
 	WDeAllocate(DefaultAIAgent)
 	WDeAllocate(CurrentAIAgent)
-	WDeAllocate(DefaultDebugger64)
-	WDeAllocate(GDBDebugger64)
-	WDeAllocate(CurrentDebugger64)
-	WDeAllocate(Debugger64Path)
-	WDeAllocate(GDBDebugger64Path)
 	WDeAllocate(DefaultTerminal)
 	WDeAllocate(CurrentTerminal)
 	WDeAllocate(TerminalPath)
@@ -9203,10 +9163,6 @@ Sub OnProgramQuit() Destructor
 	Next i
 	For i As Integer = 0 To pMakeTools->Count - 1
 		Tool = pMakeTools->Item(i)->Object
-		_Delete(Tool)
-	Next i
-	For i As Integer = 0 To pDebuggers->Count - 1
-		Tool = pDebuggers->Item(i)->Object
 		_Delete(Tool)
 	Next i
 	For i As Integer = 0 To pTerminals->Count - 1

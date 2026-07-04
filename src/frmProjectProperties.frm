@@ -267,13 +267,6 @@ pfProjectProperties = @fProjectProperties
 		grbCompileToGCC.TabIndex = 87
 		grbCompileToGCC.SetBounds 10, 35, 469, 101
 		grbCompileToGCC.Parent = @tpCompile
-		' optCompileToGas
-		optCompileToGas.Name = "optCompileToGas"
-		optCompileToGas.Text = ML("Compile to GAS")
-		optCompileToGas.TabIndex = 46
-		optCompileToGas.SetBounds 180, 15, 140, 16
-		optCompileToGas.OnClick = @optCompileToGas_Click
-		optCompileToGas.Parent = @tpCompile
 		' optCompileToGcc
 		optCompileToGcc.Name = "optCompileToGcc"
 		optCompileToGcc.Text = ML("Compile to GCC")
@@ -497,17 +490,6 @@ pfProjectProperties = @fProjectProperties
 			'.Caption = ML("Compile by default")
 			.Designer = @This
 			.OnClick = @optCompileByDefault_Click_
-			.Parent = @tpCompile
-		End With
-		' optCompileToLLVM
-		With optCompileToLLVM
-			.Name = "optCompileToLLVM"
-			.Text = ML("Compile to LLVM")
-			.TabIndex = 47
-			.SetBounds 330, 15, 140, 16
-			'.Caption = ML("Compile to LLVM")
-			.Designer = @This
-			.OnClick = @optCompileToLLVM_Click_
 			.Parent = @tpCompile
 		End With
 		' CommandButton1
@@ -850,18 +832,6 @@ pfProjectProperties = @fProjectProperties
 			.Designer = @This
 			.Parent = @tpIncludes
 		End With
-		' optCompileToClang
-		With optCompileToClang
-			.Name = "optCompileToClang"
-			.Text = ML("Compile to CLANG")
-			.TabIndex = 111
-			.ControlIndex = 3
-			.Caption = ML("Compile to CLANG")
-			.SetBounds 180, 34, 142, 16
-			.Designer = @This
-			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As RadioButton), @optCompileToClang_Click)
-			.Parent = @tpCompile
-		End With
 	End Constructor
 	
 	Private Sub frmProjectProperties._cmdRemoveLibrary_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
@@ -953,10 +923,7 @@ Private Sub frmProjectProperties.cmdOK_Click(ByRef Designer As My.Sys.Object, By
 		WLet(ppe->ProductName, .Types.Get(ML("Product Name")))
 		Select Case True
 		Case .optCompileByDefault.Checked: ppe->CompileTo = ByDefault
-		Case .optCompileToGas.Checked: ppe->CompileTo = ToGAS
-		Case .optCompileToLLVM.Checked: ppe->CompileTo = ToLLVM
 		Case .optCompileToGcc.Checked: ppe->CompileTo = ToGCC
-		Case .optCompileToCLANG.Checked: ppe->CompileTo = ToCLANG
 		End Select
 		ppe->OptimizationFastCode = .optOptimizationFastCode.Checked
 		ppe->OptimizationSmallCode = .optOptimizationSmallCode.Checked
@@ -1128,18 +1095,12 @@ Public Sub frmProjectProperties.RefreshProperties()
 				.Types.Set ML("Original Filename"), *ppe->OriginalFilename
 				.Types.Set ML("Product Name"), *ppe->ProductName
 				.optCompileByDefault.Checked = False
-				.optCompileToGas.Checked = False
-				.optCompileToLLVM.Checked = False
 				.optCompileToGcc.Checked = False
-				.optCompileToClang.Checked = False
 				Select Case ppe->CompileTo
 				Case ByDefault: .optCompileByDefault.Checked = True
-				Case ToGAS: .optCompileToGas.Checked = True
-				Case ToLLVM: .optCompileToLLVM.Checked = True
 				Case ToGCC: .optCompileToGcc.Checked = True
-				Case ToCLANG: .optCompileToClang.Checked = True
 				End Select
-				.optCompileToGas_Click(*.optCompileToGas.Designer, .optCompileToGas)
+				.UpdateOptimizationControlsEnabled(*.optCompileToGcc.Designer, .optCompileToGcc)
 				.optNoOptimization.Checked = ppe->OptimizationLevel = 0
 				.optOptimizationLevel.Checked = ppe->OptimizationLevel > 0
 				.cboOptimizationLevel.ItemIndex = ppe->OptimizationLevel
@@ -1235,9 +1196,9 @@ Private Sub frmProjectProperties.Form_Show(ByRef Designer As My.Sys.Object, ByRe
 	
 End Sub
 
-Private Sub frmProjectProperties.optCompileToGas_Click(ByRef Designer As My.Sys.Object, ByRef Sender As RadioButton)
+Private Sub frmProjectProperties.UpdateOptimizationControlsEnabled(ByRef Designer As My.Sys.Object, ByRef Sender As RadioButton)
 	With fProjectProperties
-		Dim As Boolean bEnabled = .optCompileToGcc.Checked OrElse .optCompileToClang.Checked
+		Dim As Boolean bEnabled = .optCompileToGcc.Checked
 		.grbCompileToGCC.Enabled = bEnabled
 		.optOptimizationLevel.Enabled = bEnabled
 		.optOptimizationSmallCode.Enabled = bEnabled
@@ -1249,21 +1210,14 @@ Private Sub frmProjectProperties.optCompileToGas_Click(ByRef Designer As My.Sys.
 End Sub
 
 Private Sub frmProjectProperties.optCompileToGcc_Click(ByRef Designer As My.Sys.Object, ByRef Sender As RadioButton)
-	frmProjectProperties.optCompileToGas_Click Designer, Sender
+	frmProjectProperties.UpdateOptimizationControlsEnabled Designer, Sender
 End Sub
 
 Private Sub frmProjectProperties.optCompileByDefault_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As RadioButton)
 	(*Cast(frmProjectProperties Ptr, Sender.Designer)).optCompileByDefault_Click(Sender)
 End Sub
 Private Sub frmProjectProperties.optCompileByDefault_Click(ByRef Sender As RadioButton)
-	frmProjectProperties.optCompileToGas_Click *Sender.Designer, Sender
-End Sub
-
-Private Sub frmProjectProperties.optCompileToLLVM_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As RadioButton)
-	(*Cast(frmProjectProperties Ptr, Sender.Designer)).optCompileToLLVM_Click(Sender)
-End Sub
-Private Sub frmProjectProperties.optCompileToLLVM_Click(ByRef Sender As RadioButton)
-	frmProjectProperties.optCompileToGas_Click *Sender.Designer, Sender
+	frmProjectProperties.UpdateOptimizationControlsEnabled *Sender.Designer, Sender
 End Sub
 
 Private Sub frmProjectProperties.CommandButton1_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
@@ -1373,9 +1327,5 @@ End Sub
 Private Sub frmProjectProperties.cmdRemoveLibrary_Click(ByRef Sender As Control)
 	Var Index = lstLibraryPaths.ItemIndex
 	If Index <> -1 Then lstLibraryPaths.RemoveItem Index
-End Sub
-
-Private Sub frmProjectProperties.optCompileToClang_Click(ByRef Sender As RadioButton)
-	frmProjectProperties.optCompileToGas_Click *Sender.Designer, Sender
 End Sub
 

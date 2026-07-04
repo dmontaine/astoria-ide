@@ -645,12 +645,6 @@ Sub OnMouseHoverEdit(ByRef Designer As My.Sys.Object, ByRef Sender As Control, M
 		TypeName = tb->txtCode.Content.GetLeftArgTypeName(iSelEndLine, iSelEndCharFunc - 1, te, teOld, teTypeOld, OldTypeName)
 		Value = GetParameters(sWord, te, teOld)
 	End If
-	If InDebug Then
-		Dim As String sWord = tb->txtCode.GetWordAtPoint(x, y, True)
-		If sWord <> "" Then
-				Value = Value & IIf(Value = "", "", !"\rValue: ") & get_var_value(sWord, tb->txtCode.LineIndexFromPoint(x, y))
-		End If
-	End If
 	If Value <> "" Then
 		tb->txtCode.HintMouseHover = Value
 		tb->txtCode.ShowMouseHoverToolTipAt x, y + tb->txtCode.dwCharY
@@ -11361,16 +11355,8 @@ Function GetFirstCompileLine(ByRef FileName As WString, ByRef Project As Project
 			Case 2: Result += " -s gui"
 			End Select
 		End If
-		If Project->CompileTo = ToGAS Then
-			Result += " -gen gas64"
-		ElseIf Project->CompileTo = ToLLVM Then
-			Result += " -gen llvm"
-		ElseIf Project->CompileTo = ToGCC Then
+		If Project->CompileTo = ToGCC Then
 			Result += " -gen gcc" & IIf(Project->OptimizationLevel > 0, " -Wc -O" & Str(Project->OptimizationLevel), IIf(Project->OptimizationFastCode, " -Wc -Ofast", IIf(Project->OptimizationSmallCode, " -Wc -Os", ""))) & _
-			IIf(Project->ShowUnusedLabelWarnings, " -Wc -Wunused-label", "") & IIf(Project->ShowUnusedFunctionWarnings, " -Wc -Wunused-function", "") & IIf(Project->ShowUnusedVariableWarnings, " -Wc -Wunused-variable", "") & _
-			IIf(Project->ShowUnusedButSetVariableWarnings, " -Wc -Wunused-but-set-variable", "") & IIf(Project->ShowMainWarnings, " -Wc -Wmain", "")
-		ElseIf Project->CompileTo = ToCLANG Then
-			Result += " -gen clang" & IIf(Project->OptimizationLevel > 0, " -Wc -O" & Str(Project->OptimizationLevel), IIf(Project->OptimizationFastCode, " -Wc -Ofast", IIf(Project->OptimizationSmallCode, " -Wc -Os", ""))) & _
 			IIf(Project->ShowUnusedLabelWarnings, " -Wc -Wunused-label", "") & IIf(Project->ShowUnusedFunctionWarnings, " -Wc -Wunused-function", "") & IIf(Project->ShowUnusedVariableWarnings, " -Wc -Wunused-variable", "") & _
 			IIf(Project->ShowUnusedButSetVariableWarnings, " -Wc -Wunused-but-set-variable", "") & IIf(Project->ShowMainWarnings, " -Wc -Wmain", "")
 		End If

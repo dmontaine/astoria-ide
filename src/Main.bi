@@ -117,6 +117,7 @@ Common Shared As Double  AIAgentTop_P, AIAgentTemperature 'Between 0 and 2.
 Const TARGET_COMPILE_DEFINE As String = "__USE_WINAPI__ -d _WIN32_WINNT=&h0A00"
 Const BUNDLED_COMPILER_FOLDER As String = "Compiler"
 Const BUNDLED_COMPILER_EXE As String = "fbc64.exe"
+Const BUNDLED_GDB_PATH As String = "Debuggers\gdb-11.2.90.20220320-x86_64\bin\gdb.exe"
 Common Shared As String  AIAgentHost, AIAgentAddress, AIAgentAPIKey, AIAgentModelName, AIAgentProvider, AIAgentName, AIRTF_HEADER, AIEditorFontName
 Common Shared As WString Ptr DefaultProjectFile
 Common Shared As WString Ptr InterfaceFontName
@@ -124,9 +125,9 @@ Common Shared As WString Ptr gSearchSave, EnvironmentVariables
 Common Shared As WString Ptr ProjectsPath, LastOpenPath, CommandPromptFolder
 Common Shared As WString Ptr DefaultHelp, HelpPath, KeywordsHelpPath, AsmKeywordsHelpPath, DefaultBuildConfiguration
 Common Shared As WString Ptr DefaultMakeTool, CurrentMakeTool1, CurrentMakeTool2, DefaultAIAgent, CurrentAIAgent
-Common Shared As WString Ptr DefaultDebugger64, GDBDebugger64, CurrentDebugger64, DefaultTerminal, CurrentTerminal
+Common Shared As WString Ptr DefaultTerminal, CurrentTerminal
 Common Shared As WString Ptr DefaultCompiler64, CurrentCompiler64
-Common Shared As WString Ptr MakeToolPath1, MakeToolPath2, Debugger64Path, GDBDebugger64Path, TerminalPath, Compiler64Path
+Common Shared As WString Ptr MakeToolPath1, MakeToolPath2, TerminalPath, Compiler64Path
 Common Shared As WString Ptr Compiler64Arguments, Make1Arguments, Make2Arguments, RunArguments, Debug64Arguments
 Common Shared As Any Ptr tlock, tlockSave, tlockToDo, tlockGDB, tlockSuggestions
 
@@ -187,7 +188,7 @@ Common Shared As List Ptr pTools, pControlLibraries
 Common Shared As WStringOrStringList Ptr pComps, pGlobalNamespaces, pGlobalTypes, pGlobalEnums, pGlobalDefines, pGlobalFunctions, pGlobalTypeProcedures, pGlobalArgs
 Common Shared As WStringList Ptr pAddIns, pIncludeFiles, pLoadPaths, pIncludePaths, pLibraryPaths
 'Common Shared As WStringList Ptr pLocalTypes, pLocalEnums, pLocalProcedures, pLocalFunctions, pLocalFunctionsOthers, pLocalArgs,
-Common Shared As Dictionary Ptr pHelps, pCompilers, pMakeTools, pDebuggers, pTerminals, pOtherEditors, pAIAgents
+Common Shared As Dictionary Ptr pHelps, pCompilers, pMakeTools, pTerminals, pOtherEditors, pAIAgents
 
 Enum LoadParam
 	OnlyFilePath
@@ -240,7 +241,6 @@ Declare Sub ChangeUseDebugger(bUseDebugger As Boolean, ChangeObject As Integer =
 Declare Sub ChangeFileEncoding(FileEncoding As FileEncodings)
 Declare Sub ChangeNewLineType(NewLineType As NewLineTypes)
 	Common Shared As UINT_PTR CurrentTimer, CurrentTimerData
-	Declare Sub TimerProc(hwnd As HWND, uMsg As UINT, idEvent As UINT_PTR, dwTime As DWORD)
 Declare Function WithoutPointers(ByRef e As String) As String
 Declare Function WithoutQuotes(ByRef e As UString) As UString
 Declare Sub ChangeFolderType(Value As ProjectFolderTypes)

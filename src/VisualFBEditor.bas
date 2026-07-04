@@ -390,179 +390,67 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 	Case "ModulePreprocessorNumberOff": ThreadCounter(ThreadCreate_(@NumberingModule, @Sender))
 	Case "Parameters":                          pfParameters->ShowModal *pfrmMain : pfParameters->CenterToParent
 	Case "GDBCommand":                          GDBCommand
-	Case "LocateProcedure":                     proc_loc
-	Case "EnableDisable":                       proc_enable
 	Case "StartWithCompile"
 		ClearThreadsWindow
 		If SaveAllBeforeCompile Then
 			ChangeEnabledDebug False, True, True
-			'SaveAll '
-			Dim As DebuggerTypes CurrentDebugger = CurrentDebuggerType64
-			If CurrentDebugger = IntegratedGDBDebugger Then
-					If iFlagStartDebug = 0 Then
-						If UseDebugger Then
-							runtype = RTFRUN
-							CurrentTimer = SetTimer(0, 0, 1, Cast(Any Ptr, @TimerProcGDB))
-							ThreadCounter(ThreadCreate_(@StartDebuggingWithCompile))
-						Else
-							ThreadCounter(ThreadCreate_(@CompileAndRun))
-						End If
-					Else
-						continue_debug
-					End If
-			Else
-				If InDebug Then
-					ChangeEnabledDebug False, True, True
-						If 1 = 0 Then
-							brk_set(12)
-							runtype = RTAUTO
-								set_cc()
-							thread_set()
-						Else
-							fastrun()
-						End If
-				ElseIf UseDebugger Then
+			If iFlagStartDebug = 0 Then
+				If UseDebugger Then
 					runtype = RTFRUN
-					SetTimer(0, GTIMER001, 1, Cast(Any Ptr, @DEBUG_EVENT))
-					CurrentTimer = SetTimer(0, 0, 1, @TIMERPROC)
+					CurrentTimer = SetTimer(0, 0, 1, Cast(Any Ptr, @TimerProcGDB))
 					ThreadCounter(ThreadCreate_(@StartDebuggingWithCompile))
 				Else
 					ThreadCounter(ThreadCreate_(@CompileAndRun))
 				End If
+			Else
+				continue_debug
 			End If
 		End If
 	Case "Start"
 		ClearThreadsWindow
-		Dim As DebuggerTypes CurrentDebugger = CurrentDebuggerType64
-		If CurrentDebugger = IntegratedGDBDebugger Then
-				If iFlagStartDebug = 0 Then
-					If UseDebugger Then
-						runtype= RTFRUN
-						CurrentTimer = SetTimer(0, 0, 1, Cast(Any Ptr, @TimerProcGDB))
-						ThreadCounter(ThreadCreate_(@StartDebugging))
-					Else
-						ThreadCounter(ThreadCreate_(@RunProgram))
-					End If
-				Else
-					ChangeEnabledDebug False, True, True
-					continue_debug()
-				End If
-		Else
-			If InDebug Then
-				ChangeEnabledDebug False, True, True
-					fastrun()
-			ElseIf UseDebugger Then
-				runtype = RTFRUN
-				SetTimer(0, GTIMER001, 1, Cast(Any Ptr, @DEBUG_EVENT))
-				CurrentTimer = SetTimer(0, 0, 1, @TIMERPROC)
+		If iFlagStartDebug = 0 Then
+			If UseDebugger Then
+				runtype= RTFRUN
+				CurrentTimer = SetTimer(0, 0, 1, Cast(Any Ptr, @TimerProcGDB))
 				ThreadCounter(ThreadCreate_(@StartDebugging))
 			Else
 				ThreadCounter(ThreadCreate_(@RunProgram))
 			End If
+		Else
+			ChangeEnabledDebug False, True, True
+			continue_debug()
 		End If
 	Case "Break":
-			If runtype=RTFREE Or runtype=RTFRUN Then
-				runtype=RTFRUN 'to treat free as fast
-				For i As Integer = 1 To linenb 'restore every breakpoint
-					WriteProcessMemory(dbghand,Cast(LPVOID,rline(i).ad),@breakcpu,1,0)
-				Next
-			Else
-				runtype=RTSTEP:procad=0:procin=0:proctop=False:procbot=0
-			End If
-			stopcode=CSHALTBU
-			'SetFocus(richeditcur)
+			' Pause-while-running was only ever wired up for the Integrated debugger
+			' (now removed); GDB has no equivalent interrupt path yet. Pre-existing
+			' gap, not a regression -- see PROJECT_STATUS.md.
 	Case "End":
-		Dim As DebuggerTypes CurrentDebugger = CurrentDebuggerType64
-		If CurrentDebugger = IntegratedGDBDebugger Then
-				If Running Then
-					kill_debug()
-				Else
-					command_debug "q"
-				End If
+		If Running Then
+			kill_debug()
 		Else
-			'kill_process("Terminate immediatly no saved data, other option Release")
-			For i As Integer = 1 To linenb 'restore old instructions
-				WriteProcessMemory(dbghand, Cast(LPVOID, rline(i).ad), @rline(i).sv, 1, 0)
-			Next
-			runtype = RTFREE
-			'but_enable()
-			thread_resume()
-			DeleteDebugCursor
-			ChangeEnabledDebug True, False, False
+			command_debug "q"
 		End If
 		ClearDebugPanels
 	Case "Restart"
 		ClearThreadsWindow
-		Dim As DebuggerTypes CurrentDebugger = CurrentDebuggerType64
-		If CurrentDebugger = IntegratedGDBDebugger Then
-				command_debug("r")
-		Else
-			If prun AndAlso kill_process(ML("Trying to launch but debuggee still running")) = False Then
-				Exit Sub
-			End If
-			runtype = RTFRUN
-			SetTimer(0, GTIMER001, 1, Cast(Any Ptr, @DEBUG_EVENT))
-			CurrentTimer = SetTimer(0, 0, 1, @TIMERPROC)
-			Restarting = True
-			ThreadCounter(ThreadCreate_(@StartDebugging))
-		End If
+		command_debug("r")
 	Case "StepInto":
 		ClearThreadsWindow
 		ptabBottom->TabIndex = 6 'David Changed
-		Dim As DebuggerTypes CurrentDebugger = CurrentDebuggerType64
-		If CurrentDebugger = IntegratedGDBDebugger Then
-				If iFlagStartDebug = 0 Then
-					runtype = RTSTEP
-					CurrentTimer = SetTimer(0, 0, 1, Cast(Any Ptr, @TimerProcGDB))
-					ThreadCounter(ThreadCreate_(@StartDebugging))
-				Else
-					step_debug("s")
-				End If
+		If iFlagStartDebug = 0 Then
+			runtype = RTSTEP
+			CurrentTimer = SetTimer(0, 0, 1, Cast(Any Ptr, @TimerProcGDB))
+			ThreadCounter(ThreadCreate_(@StartDebugging))
 		Else
-			If InDebug Then
-				ChangeEnabledDebug False, True, True
-				'runtype = RTSTEP
-				'stopcode=0
-				''bcktrk_close
-				'SetFocus(windmain)
-				'thread_resume
-					set_cc()
-				dbg_prt2 "=============== STEP =================================="
-				stopcode=0
-				runtype=RTSTEP
-				thread_set()
-				'thread_resume()
-			Else
-				runtype = RTSTEP
-				SetTimer(0, GTIMER001, 1, Cast(Any Ptr, @DEBUG_EVENT))
-				CurrentTimer = SetTimer(0, 0, 1, @TIMERPROC)
-				ThreadCounter(ThreadCreate_(@StartDebugging))
-			End If
+			step_debug("s")
 		End If
 	Case "StepOver":
 		ClearThreadsWindow
-		Dim As DebuggerTypes CurrentDebugger = CurrentDebuggerType64
-		If CurrentDebugger = IntegratedGDBDebugger Then
-				If iFlagStartDebug = 0 Then
-					CurrentTimer = SetTimer(0, 0, 1, Cast(Any Ptr, @TimerProcGDB))
-					ThreadCounter(ThreadCreate_(@StartDebugging))
-				Else
-					step_debug("n")
-				End If
+		If iFlagStartDebug = 0 Then
+			CurrentTimer = SetTimer(0, 0, 1, Cast(Any Ptr, @TimerProcGDB))
+			ThreadCounter(ThreadCreate_(@StartDebugging))
 		Else
-			If InDebug Then
-				ChangeEnabledDebug False, True, True
-					procin = procsk
-					runtype = RTRUN
-					SetFocus(windmain)
-					thread_rsm()
-			Else
-					procin = procsk
-					runtype = RTFRUN
-					SetTimer(0, GTIMER001, 1, Cast(Any Ptr, @DEBUG_EVENT))
-					CurrentTimer = SetTimer(0, 0, 1, @TIMERPROC)
-				ThreadCounter(ThreadCreate_(@StartDebugging))
-			End If
+			step_debug("n")
 		End If
 	Case "AIRelease"
 		AIRelease
@@ -576,7 +464,7 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 		ptxtAIRequest->SetFocus
 	Case "SaveAs", "Close", "SyntaxCheck", "Compile", "CompileAndRun", "Run", "RunToCursor", "SplitHorizontally", "SplitVertically", _
 		"Start", "Stop", "StepOut", "FindNext", "FindPrev", "Goto", "SetNextStatement", "SplitLines", "CombineLines", "SortLines", "DeleteBlankLines", "FormatWithBasisWord", "ConvertFromHexStrUnicode", "ConvertToHexStrUnicode", "ConvertToUppercaseFirstLetter", "ConvertToLowercase", "ConvertToUppercase", "SplitUp", "SplitDown", "SplitLeft", "SplitRight", _
-		"AddWatch", "ShowVar", "NextBookmark", "PreviousBookmark", "ClearAllBookmarks", "Code", "Form", "CodeAndForm", "GotoCodeForm", "AddProcedure", "AddType", "AIAddComment", "AIOptimizeCode", "AIIntellicode", "AITracepointError", "AITranslate", "AITranslateE"
+		"AddWatch", "NextBookmark", "PreviousBookmark", "ClearAllBookmarks", "Code", "Form", "CodeAndForm", "GotoCodeForm", "AddProcedure", "AddType", "AIAddComment", "AIOptimizeCode", "AIIntellicode", "AITracepointError", "AITranslate", "AITranslateE"
 		Dim tb As TabWindow Ptr = Cast(TabWindow Ptr, ptabCode->SelectedTab)
 		If tb = 0 Then Exit Sub
 		Select Case Sender.ToString
@@ -693,63 +581,29 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 			
 		Case "SetNextStatement":
 			ClearThreadsWindow
-			Dim As DebuggerTypes CurrentDebugger = CurrentDebuggerType64
-			If CurrentDebugger = IntegratedGDBDebugger Then
-					Dim As Integer iStartLine, iEndLine, iStartChar, iEndChar
-					tb->txtCode.GetSelection iStartLine, iEndLine, iStartChar, iEndChar
-					command_debug("jump " & Replace(tb->FileName, "\", "/") & ":" & Str(iEndLine))
-			Else
-					exe_mod()
-			End If
-		Case "ShowVar":
-			var_tip(1)
+			Dim As Integer iStartLine, iEndLine, iStartChar, iEndChar
+			tb->txtCode.GetSelection iStartLine, iEndLine, iStartChar, iEndChar
+			command_debug("jump " & Replace(tb->FileName, "\", "/") & ":" & Str(iEndLine))
 		Case "StepOut":
 			ClearThreadsWindow
-			Dim As DebuggerTypes CurrentDebugger = CurrentDebuggerType64
-			If CurrentDebugger = IntegratedGDBDebugger Then
-					If iFlagStartDebug = 0 Then
-						ThreadCounter(ThreadCreate_(@StartDebugging))
-					Else
-						step_debug("n")
-					End If
+			If iFlagStartDebug = 0 Then
+				ThreadCounter(ThreadCreate_(@StartDebugging))
 			Else
-					If InDebug Then
-						ChangeEnabledDebug False, True, True
-						If (threadcur<>0 AndAlso proc_find(thread(threadcur).id,KLAST)<>proc_find(thread(threadcur).id,KFIRST)) _
-							OrElse (threadcur=0 AndAlso PROC(procr(proc_find(thread(0).id,KLAST)).idx).nm<>"main") Then 'impossible to go out first proc of thread, constructore for shared 22/12/2015
-							procad = procsv
-							runtype = RTFRUN
-						End If
-						SetFocus(windmain)
-						thread_rsm()
-					End If
+				step_debug("n")
 			End If
 		Case "RunToCursor":
 			ClearThreadsWindow
-			Dim As DebuggerTypes CurrentDebugger = CurrentDebuggerType64
-			If CurrentDebugger = IntegratedGDBDebugger Then
-					If iFlagStartDebug = 1 Then
-						ChangeEnabledDebug False, True, True
-						set_bp True
-						continue_debug
-					Else
-						RunningToCursor = True
-						CurrentTimer = SetTimer(0, 0, 1, Cast(Any Ptr, @TimerProcGDB))
-						ThreadCounter(ThreadCreate_(@StartDebugging))
-					End If
+			If iFlagStartDebug = 1 Then
+				ChangeEnabledDebug False, True, True
+				set_bp True
+				continue_debug
 			Else
-				If InDebug Then
-					ChangeEnabledDebug False, True, True
-						brk_set(9)
-				Else
-					RunningToCursor = True
-					runtype = RTFRUN
-					CurrentTimer = SetTimer(0, 0, 1, @TIMERPROC)
-					ThreadCounter(ThreadCreate_(@StartDebugging))
-				End If
+				RunningToCursor = True
+				CurrentTimer = SetTimer(0, 0, 1, Cast(Any Ptr, @TimerProcGDB))
+				ThreadCounter(ThreadCreate_(@StartDebugging))
 			End If
 		Case "AddWatch":
-			var_tip(2)
+			If tb->txtCode.SelText <> "" Then lvWatches.Nodes.Add(tb->txtCode.SelText)
 		Case "FindNext":                    pfFind->Find(True)
 		Case "FindPrev":                    pfFind->Find(False)
 		Case "Goto":                        pfGoto->Show *pfrmMain : pfGoto->CenterToParent
@@ -862,13 +716,6 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 			tb->NewLineType = NewLineType
 			tb->Modified = True
 		End If
-	Case "VariableDump":                var_dump(tviewvar)
-	Case "PointedDataDump":             var_dump(tviewvar, 1)
-	Case "MemoryDumpWatch":             var_dump(tviewwch)
-		Case "ShowStringWatch":             string_sh(tviewwch)
-		Case "ShowExpandVariableWatch":     shwexp_new(tviewwch)
-		Case "ShowString":                  string_sh(tviewvar)
-		Case "ShowExpandVariable":          shwexp_new(tviewvar)
 	Case "Undo", "Redo", "CutCurrentLine", "Cut", "Copy", "Paste", "SelectAll", "Duplicate", "SingleComment", "BlockComment", "UnComment", _
 		"Indent", "Outdent", "Format", "Unformat", "AddSpaces", "NumberOn", "MacroNumberOn", "NumberOff", "ProcedureNumberOn", "ProcedureMacroNumberOn", "ProcedureNumberOff", _
 		"PreprocessorNumberOn", "PreprocessorNumberOff", "Breakpoint", "ToggleBookmark", "CollapseAll", "UnCollapseAll", "CollapseAllProcedures", "UnCollapseAllProcedures", _
@@ -951,13 +798,8 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 				Case "Unformat":                    ec->UnformatCode
 				Case "AddSpaces":                   tb->AddSpaces
 				Case "Breakpoint":
-					Dim As DebuggerTypes CurrentDebugger = CurrentDebuggerType64
-					If CurrentDebugger = IntegratedGDBDebugger Then
-							If iFlagStartDebug = 1 Then
-								set_bp
-							End If
-					Else
-							If InDebug Then: brk_set(1): End If
+					If iFlagStartDebug = 1 Then
+						set_bp
 					End If
 					ec->Breakpoint
 				Case "CollapseAll":                 ec->CollapseAll

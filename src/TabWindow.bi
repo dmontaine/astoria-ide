@@ -31,10 +31,7 @@ Declare Sub CompleteWord()
 
 Enum CompileToVariants
 	ByDefault
-	ToGAS
-	ToLLVM
 	ToGCC
-	ToCLANG
 End Enum
 
 Type ProjectElement Extends ExplorerElement

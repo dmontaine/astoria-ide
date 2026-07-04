@@ -3219,9 +3219,13 @@ pfOptions = @fOptions
 		pnlInterfaceFont.Align = DockStyle.alTop
 		pnlInterfaceFont.ControlIndex = 0
 		chkDisplayIcons.Parent = @vbxGeneral
+		chkDisplayIcons.ControlIndex = 1
 		chkShowMainToolbar.Parent = @vbxGeneral
+		chkShowMainToolbar.ControlIndex = 2
 		chkShowPropLocal.Parent = @vbxGeneral
+		chkShowPropLocal.ControlIndex = 3
 		chkDarkMode.Parent = @vbxGeneral
+		chkDarkMode.ControlIndex = 4
 		' The rest of the "Themes" page (interface color/theme picker) is
 		' still broken and stays orphaned - see PROJECT_STATUS.md.
 		hbxInterfaceColors.Visible = False
@@ -4571,7 +4575,7 @@ Private Sub frmOptions.Form_Close(ByRef Designer As My.Sys.Object, ByRef Sender 
 End Sub
 
 Private Sub frmOptions.Form_Show(ByRef Designer As My.Sys.Object, ByRef Sender As Form)
-	
+
 End Sub
 
 Private Sub frmOptions.TreeView1_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As TreeView, ByRef Item As TreeNode)
@@ -4594,6 +4598,16 @@ Private Sub frmOptions.TreeView1_SelChange(ByRef Designer As My.Sys.Object, ByRe
 		.pnlLocalization.Visible = Key = "Localization"
 		.pnlHelp.Visible = Key = "Help"
 		.pnlAIAgent.Visible = Key = "AIAgent"
+		If Key = "General" Then
+			' The interface-settings controls relocated into vbxGeneral at
+			' runtime (pnlInterfaceFont, chkDisplayIcons, chkShowMainToolbar,
+			' chkShowPropLocal, chkDarkMode) can end up repositioned back to
+			' their pre-relocation bounds by a native-window recreation that
+			' happens when this page first becomes visible. Forcing one more
+			' layout pass here, after that settles, guarantees the final
+			' on-screen stacking is correct regardless of that timing.
+			.vbxGeneral.RequestAlign
+		End If
 	End With
 End Sub
 

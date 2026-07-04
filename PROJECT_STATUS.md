@@ -470,14 +470,27 @@ All items above passed **before** the owner separately found the critical `_WIN3
 
 ## 8. Planned next steps
 
-### Next session start here — Form Designer capability concern (raised 2026-07-03, unstarted)
+### Next session start here — Form Designer capability gap (raised 2026-07-03, characterized + scoped 2026-07-04, implementation not started)
 
-**Owner's concern, raised at the end of tonight's session:** tonight's debugging (the `vbxGeneral` checkbox-overlap regression above) took multiple rounds of temporary runtime instrumentation to root-cause, because the framework's own layout/docking engine (`Control.RequestAlign`/`CreateWnd`/`Move` in `Control.bas`/`Component.bas`) has multiple timing-dependent passes that are hard to reason about statically. The owner's working theory: **`frmOptions.frm` (~6,300 lines, 17 panels, deep `VerticalBox`/`HorizontalBox` nesting) was hand-coded directly rather than built through the visual Form Designer because the Designer can't actually handle a form this large/complex** — and separately, the Designer's own navigation was found to be difficult to use during tonight's session (no clear way to jump between a multi-panel form's pages, per session transcript). If the visual Designer genuinely can't support real-world-complexity forms, that undermines this project's core premise as a user-friendly RAD IDE for returning Basic programmers ([[project_vfbe_audience]]) — this isn't a cosmetic issue, it's potentially existential for the project's value proposition.
+**Owner's concern, raised 2026-07-03:** the `vbxGeneral` checkbox-overlap regression took multiple rounds of temporary runtime instrumentation to root-cause, because the framework's docking engine has timing-dependent passes hard to reason about statically. Owner's working theory: `frmOptions.frm` (~6,300 lines, 17 panels, deep nesting) was hand-coded directly because the Designer can't handle a form this large/complex, and its own navigation was hard to use.
 
-**Not yet scoped or started.** Before deciding on a fix (extend the Designer's navigation, harden the docking engine, or accept hand-coding large forms as a permanent limitation), first characterize the actual problem precisely:
-- Is the issue specifically Designer **navigation** (can't select/switch between a multi-page form's panels — the concrete symptom hit tonight), or can the Designer not visually place/drag controls correctly once nesting gets deep, or something else (can't open `frmOptions.frm` in a usable WYSIWYG view at all)?
-- Test with a form of INTERMEDIATE complexity (not as extreme as `frmOptions.frm`, not as simple as a single-panel dialog) to find where the Designer's capability actually breaks down.
-- Only after that's characterized, decide whether this is a contained navigation fix vs. a genuine rethink of how the Designer handles complex layouts.
+**Characterized 2026-07-04:** owner pinned down two concrete gaps (confirmed by research, see below):
+1. The Designer's project tree stops at the form/file level — no per-form list of child elements. Owner: "crucial in finding lost z-order elements" (directly why the checkbox-overlap bug took hours to diagnose).
+2. No way to navigate between a form's internal pages/panels once viewing one — owner got stuck on `frmOptions`'s last panel ("AI Agent") with no path to any other.
+
+Owner's conclusion: "Designer fine for simple 1 layer forms in visual mode, anything layered has to be hand coded" — and explicitly: **not interested in building a designer from scratch**, needed to know if the existing one can be salvaged.
+
+**Researched 2026-07-04 — verdict: salvageable, additive scope, not a rewrite.**
+- The project tree (`Main.bas:610-760`, `AddProject`) goes Project → category folders → files, four levels, and genuinely stops at the file node. Confirmed dead end.
+- `cboClass` (`TabWindow.bas`, `Sub cboClass_Change` ~line 2811; population at `TabWindow.bas:9684-9754`) **already exists** and flatly lists every control on a form regardless of nesting depth, and can independently select any of them (`Des->SelectedControl = Ctrl`, `MoveDots`) — real, working VB/Delphi-style Object-selector infrastructure, just never surfaced as a discoverable tree.
+- `PagePanel.bas` **already has a working panel-switch mechanism**: right-click a `PagePanel` in design mode → `UpDownControl_Changing` (`PagePanel.bas:277-291`) builds a "Show Panel" popup menu from `SelectedPanelIndex`, and picking one switches panels correctly. The owner independently found this spinner control and correctly guessed its purpose — "it just didn't work" — because it's disconnected from `cboClass`/tree selection: picking a control that lives on a currently-hidden panel doesn't flip that panel visible first (`BringToFront`, `Designer.bas:2082`, only does Z-order, never touches `SelectedPanelIndex`), so you silently select an invisible control.
+- **The queryable data model the owner assumed didn't exist actually does** — `Designer.Objects`/`Components`/`Controls` (`Designer.bi:174-176`) plus `cboClass`'s already-populated flat list. It's presented as a flat, hidden combo instead of a tree, and panel-switching exists but is buried and disconnected.
+
+**Scope for the actual fix (not yet started):**
+- **(a) Per-form control tree**: reuse `cboClass`'s existing population logic + each control's `Parent` property (readable via `SymbolsType.ReadPropertyFunc(Ctrl,"Parent")`) to build parent/child nesting instead of a flat list.
+- **(b) Panel navigation**: make `PagePanel` switching visible/discoverable (real tabs instead of the hidden spinner + right-click menu), and make tree/`cboClass` selection panel-aware — flip the ancestor `PagePanel.SelectedPanelIndex` before `MoveDots`/selecting, so selecting a control on another panel actually shows it.
+
+**Recurring pattern worth remembering:** this is the second time in one day that "sound design, unfinished last-mile integration" showed up (the docking engine was the first — see the dark-mode crash writeup above). Owner's framing: "There is a lot to like about it, just that last 10% that takes 70% of the time and effort never got done." Treat this as a signature of this codebase generally, not a one-off — foundational pieces tend to be genuinely well thought out; look for missing integration/polish before assuming something needs to be rebuilt from scratch.
 
 ### Immediate
 

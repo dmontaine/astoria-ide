@@ -212,7 +212,14 @@ Namespace My.Sys.Forms
 		Tag2 As Any Ptr
 		Declare Destructor
 	End Type
-	
+
+	' Project-tree node tag for a form's control nodes (Explorer control tree, Main.bas).
+	' pTb holds a TabWindow Ptr; kept as Any Ptr here to avoid a circular include with TabWindow.bi.
+	Type ControlTreeElement Extends ExplorerElement
+		Ctrl As Any Ptr
+		pTb As Any Ptr
+	End Type
+
 	Type ConstructionBlock
 		Types As WStringOrStringList
 		Enums As WStringOrStringList

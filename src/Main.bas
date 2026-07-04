@@ -522,6 +522,7 @@ Sub ExpandFolder(ByRef tn As TreeNode Ptr)
 		ee1 = _New( ExplorerElement)
 		WLet(ee1->FileName, Files.Item(i))
 		tn1->Tag = ee1
+		If IconName = "Form" Then tn1->Nodes.Add ""
 		Dim As TabWindow Ptr tb
 		For jj As Integer = 0 To TabPanels.Count - 1
 			Var ptabCode = @Cast(TabPanel Ptr, TabPanels.Item(jj))->tabCode
@@ -534,6 +535,99 @@ Sub ExpandFolder(ByRef tn As TreeNode Ptr)
 			Next j
 		Next jj
 	Next i
+End Sub
+
+Function FindOpenTabWindowForNode(tn As TreeNode Ptr) As TabWindow Ptr
+	Dim As TabWindow Ptr tb
+	For jj As Integer = 0 To TabPanels.Count - 1
+		Var ptabCode = @Cast(TabPanel Ptr, TabPanels.Item(jj))->tabCode
+		For j As Integer = 0 To ptabCode->TabCount - 1
+			tb = Cast(TabWindow Ptr, ptabCode->Tab(j))
+			If tb->tn = tn Then Return tb
+		Next j
+	Next jj
+	Return 0
+End Function
+
+' Loads a control class's real icon (the same one the Toolbox tree already shows,
+' e.g. CheckBox/TextBox/PagePanel) into imgList - the ImageList tvExplorer is bound
+' to - on first use, from the control library DLL that owns it (same source
+' InitToolBoxTree uses via the global Comps registry / imgListTools).
+Sub EnsureControlIcon(ByRef ClassName As String)
+	If ClassName = "" OrElse imgList.IndexOf(ClassName) >= 0 Then Exit Sub
+	Dim As Integer idx = Comps.IndexOf(ClassName)
+	If idx < 0 Then Exit Sub
+	Dim As TypeElement Ptr tbi = Comps.Object(idx)
+	If tbi = 0 OrElse tbi->Tag = 0 Then Exit Sub
+	imgList.Add ClassName, ClassName, Cast(Library Ptr, tbi->Tag)->Handle
+End Sub
+
+' Mirrors TabWindow.bas's (currently unused) GetControls traversal, but builds
+' tvExplorer tree nodes directly instead of a flat list, so nesting reflects the
+' live container hierarchy (ControlCount/ControlByIndexFunc) rather than declaration order.
+Sub AddControlTreeNode(ParentNode As TreeNode Ptr, Des As My.Sys.Forms.Designer Ptr, tb As TabWindow Ptr, Ctrl As Any Ptr)
+	Dim As SymbolsType Ptr st = Des->SymbolsReadProperty(Ctrl)
+	If st = 0 Then Exit Sub
+	Dim As String CtrlName = QWString(st->ReadPropertyFunc(Ctrl, "Name"))
+	Dim As String ClassName = QWString(st->ReadPropertyFunc(Ctrl, "ClassName"))
+	EnsureControlIcon ClassName
+	Dim As TreeNode Ptr tn = ParentNode->Nodes.Add(CtrlName & " (" & ClassName & ")", , , ClassName, ClassName)
+	Dim As ControlTreeElement Ptr cte = _New(ControlTreeElement)
+	cte->Ctrl = Ctrl
+	cte->pTb = tb
+	tn->Tag = cte
+	If Des->Controls.Contains(Ctrl) Then
+		Dim As Integer Ptr pCount = st->ReadPropertyFunc(Ctrl, "ControlCount")
+		If pCount <> 0 AndAlso st->ControlByIndexFunc <> 0 Then
+			For i As Integer = 0 To *pCount - 1
+				AddControlTreeNode tn, Des, tb, st->ControlByIndexFunc(Ctrl, i)
+			Next
+		End If
+	End If
+End Sub
+
+Sub ExpandFormControls(ByRef Item As TreeNode)
+	ClearTreeNode @Item
+	Dim As TabWindow Ptr tb = FindOpenTabWindowForNode(@Item)
+	If tb = 0 OrElse tb->Des = 0 Then
+		Item.Nodes.Add ML("(Open the form to view its controls)")
+		Exit Sub
+	End If
+	Dim As My.Sys.Forms.Designer Ptr Des = tb->Des
+	Dim As Any Ptr FormCtrl = Des->DesignControl
+	Dim As SymbolsType Ptr st = Des->SymbolsReadProperty(FormCtrl)
+	If CInt(FormCtrl <> 0) AndAlso CInt(st <> 0) AndAlso CInt(Des->Controls.Contains(FormCtrl)) Then
+		Dim As Integer Ptr pCount = st->ReadPropertyFunc(FormCtrl, "ControlCount")
+		If pCount <> 0 AndAlso st->ControlByIndexFunc <> 0 Then
+			For i As Integer = 0 To *pCount - 1
+				AddControlTreeNode @Item, Des, tb, st->ControlByIndexFunc(FormCtrl, i)
+			Next
+		End If
+	End If
+	If Item.Nodes.Count = 0 Then Item.Nodes.Add ML("(No controls)")
+End Sub
+
+Sub SelectControlTreeNode(cte As ControlTreeElement Ptr)
+	If cte = 0 OrElse cte->Ctrl = 0 OrElse cte->pTb = 0 Then Exit Sub
+	Dim As TabWindow Ptr tb = Cast(TabWindow Ptr, cte->pTb)
+	If tb->Des = 0 Then Exit Sub
+	Dim As Any Ptr Ctrl = cte->Ctrl
+	Dim As SymbolsType Ptr st = tb->Des->SymbolsReadProperty(Ctrl)
+	If st = 0 Then Exit Sub
+	If Not tb->IsSelected Then tb->SelectTab
+	If tb->tbrTop.Buttons.Item("Code")->Checked Then
+		tb->tbrTop.Buttons.Item("CodeAndForm")->Checked = True
+		tbrTop_ButtonClick *tb->tbrTop.Designer, tb->tbrTop, *tb->tbrTop.Buttons.Item("CodeAndForm")
+	End If
+	Dim As Any Ptr iParentCtrl = tb->Des->GetParentControl(Ctrl)
+	' Note: BringToFront only fixes Z-order, not PagePanel visibility - selecting a
+	' control on a currently-hidden panel page won't reveal it yet (separate, deferred fix).
+	If iParentCtrl <> 0 Then tb->Des->BringToFront iParentCtrl
+	If Not tb->Des->SelectedControls.Contains(Ctrl) Then tb->Des->SelectedControls.Clear
+	tb->Des->SelectedControl = Ctrl
+	Dim As Any Ptr hw = st->ReadPropertyFunc(Ctrl, "Handle")
+	If hw <> 0 Then tb->Des->MoveDots(Ctrl, False) Else tb->Des->MoveDots(0, False)
+	DesignerChangeSelection *tb->Des, Ctrl
 End Sub
 
 Sub CloseFolder(ByRef tn As TreeNode Ptr)
@@ -740,6 +834,7 @@ Function AddProject(ByRef FileName As WString, pFilesList As WStringList Ptr, tn
 					If Not FileEx Then IconName = "New"
 					If Not inFolder Then
 						tn2 = tn1->Nodes.Add(GetFileName(*ee->FileName) & ZvFile,, *ee->FileName, IconName, IconName, True)
+						If IconName = "Form" Then tn2->Nodes.Add ""
 						If bMain Then
 							If MainNode = 0 Then SetMainNode GetParentNode(tn1)
 							If bNew AndAlso IconName <> "MainRes" Then AddTab *ee->TemplateFileName, bNew, tn2
@@ -1559,6 +1654,18 @@ Sub PageSetup()
 		PageSetupD.Execute
 End Sub
 
+Function ProjectHasOpenTabs(ProjectNode As TreeNode Ptr) As Boolean
+	Dim As TabWindow Ptr tb
+	For jj As Integer = 0 To TabPanels.Count - 1
+		Var ptabCode = @Cast(TabPanel Ptr, TabPanels.Item(jj))->tabCode
+		For i As Integer = 0 To ptabCode->TabCount - 1
+			tb = Cast(TabWindow Ptr, ptabCode->Tab(i))
+			If tb->ptn = ProjectNode Then Return True
+		Next i
+	Next jj
+	Return False
+End Function
+
 Sub CloseAllTabs(WithoutCurrent As Boolean = False)
 	Dim tb As TabWindow Ptr
 	Dim j As Integer = ptabCode->SelectedTabIndex
@@ -1572,6 +1679,19 @@ Sub CloseAllTabs(WithoutCurrent As Boolean = False)
 			CloseTab(tb)
 		Next i
 	Next jj
+	' CloseTab only ever removes a *file's* tree node, never a project's (see
+	' TabWindow.CloseTab's explicit ImageKey<>"Project" guard) - so after closing
+	' every tab, sweep and close any project that has nothing left open under it.
+	' Mirrors the same sweep CloseSession already does; only skips a project if
+	' one of its tabs is still open (kept via WithoutCurrent, or the user hit
+	' Cancel on that tab's unsaved-changes prompt).
+	Dim As TreeNode Ptr tn
+	For i As Integer = tvExplorer.Nodes.Count - 1 To 0 Step -1
+		tn = tvExplorer.Nodes.Item(i)
+		If CInt(tn->ImageKey = "Project") AndAlso Not ProjectHasOpenTabs(tn) Then
+			CloseProject(tn, True)
+		End If
+	Next i
 End Sub
 
 Function CloseSession() As Boolean
@@ -6241,50 +6361,11 @@ Function ToolType.GetCommand(ByRef FileName As WString, WithoutProgram As Boolea
 	Return Params
 End Function
 
-Sub tvExplorer_NodeActivate(ByRef Designer As My.Sys.Object, ByRef Sender As Control, ByRef Item As TreeNode)
-	RestoreStatusText
-	If Item.ImageKey = "Opened" Then Exit Sub
-	If Item.ImageKey = "Project" AndAlso Item.ParentNode = 0 Then Exit Sub
-	Dim As ExplorerElement Ptr ee = Item.Tag
-	If ee <> 0 Then
-		If *ee Is TypeElement Then
-			Dim As TypeElement Ptr te = Item.Tag
-			If te->Tag <> 0 Then
-				Dim As TabWindow Ptr tb = te->Tag
-				If Not tb->IsSelected Then
-					tb->SelectTab
-				End If
-				tb->txtCode.SetSelection te->StartLine, te->StartLine, te->StartChar, te->StartChar
-			End If
-			Exit Sub
-		Else
-			Dim As Integer Pos1 = InStrRev(*ee->FileName, ".")
-			If Pos1 > 0 Then
-				Dim As UString Extension = Mid(*ee->FileName, Pos1)
-				For i As Integer = 0 To pOtherEditors->Count - 1
-					Dim As ToolType Ptr Tool = pOtherEditors->Item(i)->Object
-					If InStr(" " & LCase(Tool->Extensions) & ",", " " & LCase(Extension) & ",") > 0 Then
-						If Not FileExists(GetFullPath(Tool->Path)) Then Continue For
-						'Shell """" & Tool->GetCommand(*ee->FileName) & """"
-						PipeCmd "", Tool->GetCommand(*ee->FileName)
-						Exit Sub
-					End If
-				Next
-			End If
-			Dim As String extStr = LCase(Right(*ee->FileName, 4))
-			If CBool(extStr = ".exe" OrElse extStr = ".dll"  OrElse extStr = ".png" OrElse extStr = ".jpg" OrElse extStr = ".bmp" OrElse extStr = ".ico" OrElse extStr = ".cur" OrElse extStr = ".gif" OrElse extStr = ".avi" OrElse _
-				extStr = ".chm" OrElse extStr = ".zip" OrElse extStr = ".rar") OrElse EndsWith(LCase(*ee->FileName), ".dll.a") OrElse EndsWith(LCase(*ee->FileName), ".so") OrElse EndsWith(LCase(*ee->FileName), ".7z") Then
-				Shell *ee->FileName
-				'PipeCmd "", *ee->FileName
-				Exit Sub
-			ElseIf extStr = ".vfp" Then
-				AddProject *ee->FileName
-				WLet(RecentProject, *ee->FileName)
-				tpProject->SelectTab
-				Exit Sub
-			End If
-		End If
-	End If
+' Opens/focuses Item's own tab (creating it via AddTab if needed) and, for a Form
+' node, auto-expands + populates its control tree. Shared by double-click activate
+' and single-click open - assumes the caller has already ruled out anything that
+' should instead launch externally (Shell/other-editor tools) or switch projects.
+Sub OpenPlainFileTreeNode(ByRef Item As TreeNode, ee As ExplorerElement Ptr)
 	Dim t As Boolean
 	Dim As TabWindow Ptr tb
 	Dim As TabControl Ptr ptabCode
@@ -6315,13 +6396,103 @@ Sub tvExplorer_NodeActivate(ByRef Designer As My.Sys.Object, ByRef Sender As Con
 	End If
 End Sub
 
+Sub tvExplorer_NodeActivate(ByRef Designer As My.Sys.Object, ByRef Sender As Control, ByRef Item As TreeNode)
+	RestoreStatusText
+	If Item.ImageKey = "Opened" Then Exit Sub
+	If Item.ImageKey = "Project" AndAlso Item.ParentNode = 0 Then Exit Sub
+	Dim As ExplorerElement Ptr ee = Item.Tag
+	If ee <> 0 Then
+		If *ee Is TypeElement Then
+			Dim As TypeElement Ptr te = Item.Tag
+			If te->Tag <> 0 Then
+				Dim As TabWindow Ptr tb = te->Tag
+				If Not tb->IsSelected Then
+					tb->SelectTab
+				End If
+				tb->txtCode.SetSelection te->StartLine, te->StartLine, te->StartChar, te->StartChar
+			End If
+			Exit Sub
+		ElseIf *ee Is ControlTreeElement Then
+			SelectControlTreeNode Cast(ControlTreeElement Ptr, ee)
+			Exit Sub
+		Else
+			Dim As Integer Pos1 = InStrRev(*ee->FileName, ".")
+			If Pos1 > 0 Then
+				Dim As UString Extension = Mid(*ee->FileName, Pos1)
+				For i As Integer = 0 To pOtherEditors->Count - 1
+					Dim As ToolType Ptr Tool = pOtherEditors->Item(i)->Object
+					If InStr(" " & LCase(Tool->Extensions) & ",", " " & LCase(Extension) & ",") > 0 Then
+						If Not FileExists(GetFullPath(Tool->Path)) Then Continue For
+						'Shell """" & Tool->GetCommand(*ee->FileName) & """"
+						PipeCmd "", Tool->GetCommand(*ee->FileName)
+						Exit Sub
+					End If
+				Next
+			End If
+			Dim As String extStr = LCase(Right(*ee->FileName, 4))
+			If CBool(extStr = ".exe" OrElse extStr = ".dll"  OrElse extStr = ".png" OrElse extStr = ".jpg" OrElse extStr = ".bmp" OrElse extStr = ".ico" OrElse extStr = ".cur" OrElse extStr = ".gif" OrElse extStr = ".avi" OrElse _
+				extStr = ".chm" OrElse extStr = ".zip" OrElse extStr = ".rar") OrElse EndsWith(LCase(*ee->FileName), ".dll.a") OrElse EndsWith(LCase(*ee->FileName), ".so") OrElse EndsWith(LCase(*ee->FileName), ".7z") Then
+				Shell *ee->FileName
+				'PipeCmd "", *ee->FileName
+				Exit Sub
+			ElseIf extStr = ".vfp" Then
+				AddProject *ee->FileName
+				WLet(RecentProject, *ee->FileName)
+				tpProject->SelectTab
+				Exit Sub
+			End If
+		End If
+	End If
+	OpenPlainFileTreeNode Item, ee
+End Sub
+
+' Single-click ("select") equivalent of NodeActivate, used from tvExplorer_SelChange.
+' Deliberately narrower: only opens files that land in our own text/form editor.
+' Anything NodeActivate would hand off externally (Shell-launch binaries/media,
+' other-editor tools) or that switches the active sub-project (.vfp) is skipped -
+' those still require an explicit double-click, so a stray single click can't
+' launch an external program or change projects.
+Sub OpenTreeNodeOnSingleClick(ByRef Item As TreeNode)
+	If Item.ImageKey = "Opened" Then Exit Sub
+	If Item.ImageKey = "Project" Then Exit Sub
+	Dim As ExplorerElement Ptr ee = Item.Tag
+	If ee = 0 OrElse ee->FileName = 0 Then Exit Sub
+	If *ee Is TypeElement Then
+		Dim As TypeElement Ptr te = Item.Tag
+		If te->Tag <> 0 Then
+			Dim As TabWindow Ptr tb = te->Tag
+			If Not tb->IsSelected Then tb->SelectTab
+			tb->txtCode.SetSelection te->StartLine, te->StartLine, te->StartChar, te->StartChar
+		End If
+		Exit Sub
+	End If
+	Dim As Integer Pos1 = InStrRev(*ee->FileName, ".")
+	If Pos1 > 0 Then
+		Dim As UString Extension = Mid(*ee->FileName, Pos1)
+		For i As Integer = 0 To pOtherEditors->Count - 1
+			Dim As ToolType Ptr Tool = pOtherEditors->Item(i)->Object
+			If InStr(" " & LCase(Tool->Extensions) & ",", " " & LCase(Extension) & ",") > 0 Then Exit Sub
+		Next
+	End If
+	Dim As String extStr = LCase(Right(*ee->FileName, 4))
+	If CBool(extStr = ".exe" OrElse extStr = ".dll"  OrElse extStr = ".png" OrElse extStr = ".jpg" OrElse extStr = ".bmp" OrElse extStr = ".ico" OrElse extStr = ".cur" OrElse extStr = ".gif" OrElse extStr = ".avi" OrElse _
+		extStr = ".chm" OrElse extStr = ".zip" OrElse extStr = ".rar") OrElse EndsWith(LCase(*ee->FileName), ".dll.a") OrElse EndsWith(LCase(*ee->FileName), ".so") OrElse EndsWith(LCase(*ee->FileName), ".7z") OrElse extStr = ".vfp" Then
+		Exit Sub
+	End If
+	OpenPlainFileTreeNode Item, ee
+End Sub
+
 Sub tvExplorer_NodeExpanding(ByRef Designer As My.Sys.Object, ByRef Sender As Control, ByRef Item As TreeNode, ByRef Cancel As Boolean)
 	Dim As ExplorerElement Ptr ee = Item.Tag
-	If ee = 0 OrElse Not FolderExists(*ee->FileName) Then Exit Sub
-	If bNotExpand Then Exit Sub
-	bNotExpand = True
-	ExpandFolder @Item
-	bNotExpand = False
+	If ee = 0 Then Exit Sub
+	If ee->FileName <> 0 AndAlso FolderExists(*ee->FileName) Then
+		If bNotExpand Then Exit Sub
+		bNotExpand = True
+		ExpandFolder @Item
+		bNotExpand = False
+	ElseIf Item.ImageKey = "Form" Then
+		ExpandFormControls Item
+	End If
 End Sub
 
 Sub tvExplorer_DblClick(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
@@ -6360,6 +6531,14 @@ End Function
 
 Sub tvExplorer_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As TreeView, ByRef Item As TreeNode)
 	Static OldParentNode As TreeNode Ptr
+	Dim As ExplorerElement Ptr eeSel = Item.Tag
+	If eeSel <> 0 AndAlso *eeSel Is ControlTreeElement Then
+		SelectControlTreeNode Cast(ControlTreeElement Ptr, eeSel)
+		Exit Sub
+	End If
+	' A single click on any real editable file node (Forms, Includes, Modules, ...)
+	' opens it immediately, same as double-click would.
+	OpenTreeNodeOnSingleClick Item
 	Dim As TreeNode Ptr ptn = tvExplorer.SelectedNode
 	If ptn = 0 Then Exit Sub 'David Change For Safty
 	ptn = GetParentNode(ptn)
@@ -6446,7 +6625,9 @@ Sub tvExplorer_MouseUp(ByRef Designer As My.Sys.Object, ByRef Sender As Control,
 		miSetAsMain->Caption = ML("Set as Start Up")
 	End If
 	Dim As String tmpKeyStr = " @Sub @StandartTypes @Property @Enum @EnumItem @Type @Function @Opened "
-	If CInt(tn = 0) OrElse CInt(tn <> 0 AndAlso InStr(tmpKeyStr, " @" & tn->ImageKey & " ")) Then
+	Dim As ExplorerElement Ptr eeMenu
+	If tn <> 0 Then eeMenu = tn->Tag
+	If CInt(tn = 0) OrElse CInt(eeMenu <> 0 AndAlso *eeMenu Is ControlTreeElement) OrElse CInt(tn <> 0 AndAlso InStr(tmpKeyStr, " @" & tn->ImageKey & " ")) Then
 		miSetAsMain->Enabled = IIf(tn <> 0 AndAlso tn->ParentNode <> 0, False, True)
 		miRemoveFiles->Enabled = False
 		miRemoveFiles->Caption = ML("Remove")

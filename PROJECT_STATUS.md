@@ -1,6 +1,6 @@
 # VFBE Win64 Fork — Project Status & Handoff
 
-**Last updated:** 2026-07-03  
+**Last updated:** 2026-07-05  
 **Repository:** [codeberg.org/bigriverguy/VFBEWin64](https://codeberg.org/bigriverguy/VFBEWin64)  
 **Local path:** `C:\Users\dmont\VisualFBEditor`  
 **Owner:** bigriverguy (`dmontaine@gmail.com`)
@@ -98,6 +98,10 @@ Work is organized in batches.
 | **2.75.1** | Panel/layout cleanup in `Main.bas` | **Complete** (compile-clean) |
 | **2.75.2** | Bulk GTK preprocessor strip (`Tools/strip_gtk_preprocessor.ps1` on `src/` + `mff/`) | **Complete** (compile-clean). Manual test plan in §7 was **not fully signed off** before the owner explicitly directed the team to proceed into 2.75.3 anyway — see note below. |
 | **2.75.3** | Physical deletion of commented `#IfNDef __USE_GTK__`/`__FB_WIN32__` remnants, dead-legacy-code pass, `mff/DarkMode/` handling | **Complete** — see §3a |
+| **Phase 1** | 2.1.1 indentation, 2.1.2 dead code, 2.1.3 magic numbers | **Complete** (2026-07-05) |
+| **Phase 2** | 2.2.1 naming conventions, 2.2.2 DRY pass (3 extractions done), 2.2.3 file splits | **Partial** — 2.2.1 + 2.2.2 (conservative) done; 2.2.3 deferred to next session |
+| **Phase 3** | 2.3.1 compile-mode toggle, 2.3.2 UI sweep | **Complete** (2026-07-05) |
+| **Phase 4** | 2.4.1 final audit, 2.4.2 docs cleanup | **Not started** |
 
 > **Process note:** §7's original gate said Batch 2.75.3 should be blocked on full manual sign-off. The owner explicitly chose to start 2.75.3 before that checklist was finished (several boxes below are still open). That was a deliberate call, not an oversight — flagging it here so future sessions don't assume the gate was satisfied by testing.
 
@@ -404,6 +408,12 @@ State model mirrors **left/right** panels:
 - [x] Form Designer capability gap, part (b): PagePanel layer/page navigation from the control tree, the Designer's right-click menu, and Ctrl+PageUp/PageDown; fixed a real right-click-never-selects bug and a load-time page-visibility bug along the way — see §8 (one known cosmetic gap deferred, §13.9)
 - [x] Dark mode crash #3 root-caused (WM_THEMECHANGED ↔ SetWindowTheme infinite recursion → stack overflow, caught live under GDB) and fixed with a re-entrancy guard in `AllowDarkModeForWindow`; also fixed a latent crash-on-system-theme-change — see §4
 - [x] Dark mode visual completion: horizontal (tpTop) tab-strip dark painting + real dark background fill in `TabControl` — dark mode now stable and enabled; popup menus deferred to §13.10 — see §4
+- [x] **2.1.3 Audit and fix magic numbers** — named constants added for: `INDEXED_SETTINGS_SECTION_COUNT` (-8 count-sum), `DEFAULT_AI_PORT`/`TEMPERATURE`/`CONTENTSIZE_KB` (duplicated AI defaults), `MAX_PREPROCESSOR_DEPTH` (array+bound sync), `SAVED_FIELD_COUNT` (shared dim), `PROJECT_FOLDER_*`/`SAVE_FILTER_*` (folder/filter indices); ASCII ranges replaced with `Asc("X")` for readability — see §4
+- [x] **2.1.2 Remove dead/comment-cruft and empty handlers** — 342 lines removed: 3 dead Declares (CompileWithDebugger, LoadFromTabWindow, LoadInterfaceTheme), 15 empty event handlers + wirings across 10 .frm files, 57 lines of commented-out code blocks, ~75 `.Caption` migration vestiges, dead `__USE_GTK__` markers — see §4
+- [x] **2.2.1 Standardize variable naming** — fixed typos (`bPreprocesssor`→`bPreprocessor`, `bStartsOfProcs`→`bStartsOfProcedures` in TabWindow.bas; Turkish `Yaratilmadi`→`WasNotCreated`, `Band`→`Blocked` in BuildService.bas; misleading `pClass`→`iClass` in VisualFBEditor.bas + TabWindow.bas); `bInThingk`/`bInNOTThingk` deferred (cross-file globals) — see §4
+- [x] **2.3.2 UI/settings sweep — orphaned controls** — 5 dead compiler-management buttons + 1 label removed from frmOptions (and .bi, Temp.bas); dead `cmdHelp` removed from frmProjectProperties; theme picker page (`grbThemes`/`hbxInterfaceColors`, ~20 controls) identified as unreachable but left in place — see §4
+- [x] **2.3.1 Development/Final compile-mode toggle** — replaced CompileToVariants enum with CompileModeVariants (Development/Final), replaced 6 Project Properties controls (compile-backend radio, 4 optimization radios, debug-info checkbox, optimization combo) with single radio pair; pipeline: Development = `-gen gcc -O0 -g`, Final = `-gen gcc -O2`; all old serialization keys migrated — see §4
+- [x] **2.2.2 DRY pass (conservative)** — 3 extractions: `ShowErrorInfo()` unified 8 identical error MsgBox calls in TabWindow.bas; `SetDotCursor()` extracted 3 identical dot-to-cursor maps in Designer.bas; `SaveTabPagePlacement()` replaced 19 WriteString/Integer pairs in Main.bas — see §4
 
 ---
 
@@ -519,7 +529,17 @@ Owner reported: after File > Close or File > Close All, everything else reset (t
 
 1. ~~**Regression validation** — complete §7 manual test plan~~ — **done** (2026-07-03), all items passed except the still-open gas64-vs-GCC backend check (§4)
 2. **Low-priority cleanup** (optional, not blocking): `src/makefile` GTK defines, `src/THREADING.md` GTK mentions
-3. ~~**Examples/ GTK/Linux/Win32-only audit**~~ — **done** (2026-07-03). Result: **none of the 33 example folders needed removal** — the premise didn't hold. See §3b for full findings and follow-up work done/flagged as a result.
+3. ~~**Examples/ GTK/Linux/Win32-only audit**~~ — **done** (2026-07-03)
+
+### Active (2026-07-05 session)
+
+4. ~~**2.1.3 Magic numbers**~~ — **done**
+5. ~~**2.1.2 Dead code/comments**~~ — **done**
+6. ~~**2.2.1 Variable naming**~~ — **done**
+7. ~~**2.3.2 UI sweep**~~ — **done**
+8. ~~**2.3.1 Dev/Final compile toggle**~~ — **done**
+9. ~~**2.2.2 DRY pass**~~ — **done** (3 conservative extractions)
+10. **2.2.3 Split oversized files** — deferred to next session (highest risk)
 
 ### Tier 3 — compiler toolchain (attempted 2026-07-03, closed for now — see §4)
 

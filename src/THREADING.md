@@ -82,7 +82,7 @@ This prevents two threads from advancing the debuggee or updating breakpoint sta
 
 ## Rules for UI updates from background threads
 
-1. **Wrap GTK UI calls** in `ThreadsEnter` / `ThreadsLeave` (compile output, Problems list, progress bar, message pane, debug toolbar state).
+1. **Wrap UI calls** in `ThreadsEnter` / `ThreadsLeave` (compile output, Problems list, progress bar, message pane, debug toolbar state).
 2. **Protect shared data** with the appropriate `tlock*` mutex when multiple workers can touch the same tab, include list, or GDB pipe.
 3. **Do not call blocking UI dialogs** (`MsgBox`, modal `InputBox`) from worker threads without marshaling to the main thread.
 4. **AI requests** set `bInAIThread = True` and use `ThreadsEnter`/`ThreadsLeave` when updating `txtAIAgent` and related controls.

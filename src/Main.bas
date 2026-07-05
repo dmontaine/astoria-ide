@@ -2882,9 +2882,6 @@ Sub LoadFunctions(ByRef Path As WString, LoadParameter As LoadParam = FilePathAn
 	If OldFile <> 0 AndAlso OldFile->Includes.Contains(Path, , , , Idx) Then
 		OldFile->Includes.Object(Idx) = File
 	End If
-	'	#ifdef __US_GTK__
-	'		Exit Sub
-	'	#endif
 	Dim As WString * 2048 b, b1, Comment, bTrim, bTrimLCase
 	Dim As WString * 255 PathFunction, LoadFunctionPath
 	Dim As String t, e, tOrig, bt, CurrentCondition

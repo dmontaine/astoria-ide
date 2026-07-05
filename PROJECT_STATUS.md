@@ -101,7 +101,7 @@ Work is organized in batches.
 | **Phase 1** | 2.1.1 indentation, 2.1.2 dead code, 2.1.3 magic numbers | **Complete** (2026-07-05) |
 | **Phase 2** | 2.2.1 naming conventions, 2.2.2 DRY pass (3 extractions done), 2.2.3 file splits | **Partial** — 2.2.1 + 2.2.2 (conservative) done; 2.2.3 deferred to next session |
 | **Phase 3** | 2.3.1 compile-mode toggle, 2.3.2 UI sweep | **Complete** (2026-07-05) |
-| **Phase 4** | 2.4.1 final audit, 2.4.2 docs cleanup | **Not started** |
+| **Phase 4** | 2.4.1 final audit, 2.4.2 docs cleanup | **Complete** (2026-07-05) |
 
 > **Process note:** §7's original gate said Batch 2.75.3 should be blocked on full manual sign-off. The owner explicitly chose to start 2.75.3 before that checklist was finished (several boxes below are still open). That was a deliberate call, not an oversight — flagging it here so future sessions don't assume the gate was satisfied by testing.
 
@@ -413,7 +413,8 @@ State model mirrors **left/right** panels:
 - [x] **2.2.1 Standardize variable naming** — fixed typos (`bPreprocesssor`→`bPreprocessor`, `bStartsOfProcs`→`bStartsOfProcedures` in TabWindow.bas; Turkish `Yaratilmadi`→`WasNotCreated`, `Band`→`Blocked` in BuildService.bas; misleading `pClass`→`iClass` in VisualFBEditor.bas + TabWindow.bas); `bInThingk`/`bInNOTThingk` deferred (cross-file globals) — see §4
 - [x] **2.3.2 UI/settings sweep — orphaned controls** — 5 dead compiler-management buttons + 1 label removed from frmOptions (and .bi, Temp.bas); dead `cmdHelp` removed from frmProjectProperties; theme picker page (`grbThemes`/`hbxInterfaceColors`, ~20 controls) identified as unreachable but left in place — see §4
 - [x] **2.3.1 Development/Final compile-mode toggle** — replaced CompileToVariants enum with CompileModeVariants (Development/Final), replaced 6 Project Properties controls (compile-backend radio, 4 optimization radios, debug-info checkbox, optimization combo) with single radio pair; pipeline: Development = `-gen gcc -O0 -g`, Final = `-gen gcc -O2`; all old serialization keys migrated — see §4
-- [x] **2.2.2 DRY pass (conservative)** — 3 extractions: `ShowErrorInfo()` unified 8 identical error MsgBox calls in TabWindow.bas; `SetDotCursor()` extracted 3 identical dot-to-cursor maps in Designer.bas; `SaveTabPagePlacement()` replaced 19 WriteString/Integer pairs in Main.bas — see §4
+- [x] **2.2.2 DRY pass (conservative)** — `SaveTabPagePlacement()` replaced 19 WriteString/Integer pairs in Main.bas — see §4
+- [x] **2.4.1/2.4.2 Final audit + docs cleanup** — `src/makefile` deleted (unused Linux/GTK build system, 239 lines); `src/THREADING.md` GTK reference removed; only remaining artifact is intentional `TabWindow.bas:CheckCondition()` handling `__fb_linux__` for IDE's user-code preprocessor evaluator — see §4
 
 ---
 

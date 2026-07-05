@@ -106,7 +106,7 @@ Function Compile(Parameter As String, bAll As Boolean) As Integer
 		WLet(ctx.MFFPathC, *MFFPath)
 		If CInt(InStr(*ctx.MFFPathC, ":") = 0) AndAlso CInt(Not StartsWith(*ctx.MFFPathC, "/")) Then WLet(ctx.MFFPathC, ExePath & "/" & *MFFPath)
 		WLet(ctx.BatFileName, ExePath + "/debug.bat")
-		Dim As Boolean Band, Yaratilmadi
+		Dim As Boolean Blocked, WasNotCreated
 		Dim As UserToolType Ptr Tool
 		For i As Integer = 0 To Tools.Count - 1
 			Tool = Tools.Item(i)
@@ -129,7 +129,7 @@ Function Compile(Parameter As String, bAll As Boolean) As Integer
 					ThreadsEnter()
 					ShowMessages(Str(Time) & ": " &  ML("Cannot compile - the program is now running") & " " & *ctx.ExeName)
 					ThreadsLeave()
-					Band = True
+					Blocked = True
 					CompileResult = 0
 					Continue For
 				End If
@@ -156,10 +156,7 @@ Function Compile(Parameter As String, bAll As Boolean) As Integer
 		WLet(ctx.MainFileNameOnly, GetFileName(*ctx.MainFile))
 			If InStr(LCase(*ctx.CompileWith), ".rc") < 1 AndAlso FileExists(Left(*ctx.MainFile, Len(*ctx.MainFile) - 4) & ".rc") Then WAdd(ctx.CompileWith, " """  & GetFileName(Left(*ctx.MainFile, Len(*ctx.MainFile) - 4) & ".rc"""))
 		If Project Then
-			Select Case Project->CompileTo
-			Case ByDefault:
-			Case ToGCC: WAdd(ctx.CompileWith, " -gen gcc" )
-			End Select
+			WAdd(ctx.CompileWith, " -gen gcc" )
 			For i As Integer = 0 To Project->Components.Count - 1
 				If EndsWith(Project->Components.Item(i), Slash) Then
 					WAdd(ctx.CompileWith, " -i """ & GetRelativePath(Left(Project->Components.Item(i), Len(Project->Components.Item(i)) - 1), *ctx.ProjectPath & Slash) & """")
@@ -403,7 +400,7 @@ Function Compile(Parameter As String, bAll As Boolean) As Integer
 			CloseHandle hReadPipe
 			If NumberErr > 0 Then Exit For
 		Next cc
-		Yaratilmadi = Dir(*ctx.ExeName) = ""
+		WasNotCreated = Dir(*ctx.ExeName) = ""
 		ThreadsEnter()
 		ShowMessages("")
 		If lvProblems.ListItems.Count <> 0 Then
@@ -421,7 +418,7 @@ Function Compile(Parameter As String, bAll As Boolean) As Integer
 			Tool = Tools.Item(i)
 			If Tool->LoadType = LoadTypes.AfterCompile Then Tool->Execute
 		Next
-		If Yaratilmadi Or Band Then
+		If WasNotCreated Or Blocked Then
 			ThreadsEnter()
 			If Parameter <> "Check" Then
 				If lvProblems.ListItems.Count < 1 Then ShowMessages(Str(Time) & ": " & MS("Found $1.",  ML("Errors") & " (1) " & ML("Pos")), False)

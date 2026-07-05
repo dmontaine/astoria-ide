@@ -141,7 +141,6 @@ Private Sub frmMenuEditor.Form_Paint(ByRef Sender As Control, ByRef Canvas As My
 	Dim As SymbolsType Ptr stCurrentToolBar = Des->Symbols(CurrentToolBar)
 	Dim As SymbolsType Ptr stCurrentStatusBar = Des->Symbols(CurrentStatusBar)
 	With Canvas
-		'.CreateDoubleBuffer
 		.Font = This.Font
 		If g_darkModeEnabled Then
 			.Brush.Color = darkBkColor
@@ -503,8 +502,6 @@ Private Sub frmMenuEditor.Form_Paint(ByRef Sender As Control, ByRef Canvas As My
 				End If
 			Next
 		End If
-		'.TransferDoubleBuffer
-		'.DeleteDoubleBuffer
 	End With
 End Sub
 
@@ -642,7 +639,6 @@ Sub frmMenuEditor.EditRect(i As Integer, NewObject As Boolean)
 			picActive.Height = .Bottom - .Top - 3
 		End If
 		picActive.Visible = True
-		'If NewObject Then TabWindowFormDesign
 		Repaint
 		txtActive.SetFocus
 	End With

@@ -20,7 +20,6 @@ pfOptions = @fOptions
 		This.Text = ML("Options")
 		This.OnCreate = @Form_Create
 		This.OnClose = @Form_Close
-		This.OnShow = @Form_Show
 			This.Icon.LoadFromResourceID(1)
 		This.MinimizeBox = False
 		This.MaximizeBox = False
@@ -544,56 +543,6 @@ pfOptions = @fOptions
 		cboLanguage.TabIndex = 98
 		cboLanguage.SetBounds 0, 0, 257, 21
 		cboLanguage.Parent = @pnlLanguage
-		' cmdClearCompilers
-		With cmdClearCompilers
-			.Name = "cmdClearCompilers"
-			.Text = ML("&Clear")
-			.ExtraMargins.Right = 0
-			.ExtraMargins.Left = 0
-			.ExtraMargins.Bottom = 0
-			.Align = DockStyle.alRight
-			.TabIndex = 4
-			.SetBounds 290, 0, 97, 24
-			.OnClick = @cmdClearCompilers_Click
-			.Parent = @hbxCompilers
-		End With
-		' cmdRemoveCompiler
-		With cmdRemoveCompiler
-			.Name = "cmdRemoveCompiler"
-			.Text = ML("&Remove")
-			.ExtraMargins.Bottom = 0
-			.ExtraMargins.Right = 0
-			.ExtraMargins.Left = 0
-			.Align = DockStyle.alRight
-			.TabIndex = 5
-			.SetBounds 193, 0, 97, 24
-			.OnClick = @cmdRemoveCompiler_Click
-			.Parent = @hbxCompilers
-		End With
-		' cmdChangeCompiler
-		With cmdChangeCompiler
-			.Name = "cmdChangeCompiler"
-			.Text = ML("Chan&ge")
-			.ExtraMargins.Bottom = 0
-			.ExtraMargins.Left = 0
-			.ExtraMargins.Right = 0
-			.Align = DockStyle.alRight
-			.TabIndex = 6
-			.SetBounds 96, 0, 97, 24
-			.OnClick = @cmdChangeCompiler_Click
-			.Parent = @hbxCompilers
-		End With
-		' cmdAddCompiler
-		cmdAddCompiler.Name = "cmdAddCompiler"
-		cmdAddCompiler.Text = ML("&Add")
-		cmdAddCompiler.ExtraMargins.Left = 0
-		cmdAddCompiler.ExtraMargins.Bottom = 0
-		cmdAddCompiler.ExtraMargins.Right = 0
-		cmdAddCompiler.Align = DockStyle.alRight
-		cmdAddCompiler.TabIndex = 7
-		cmdAddCompiler.SetBounds -1, 0, 97, 24
-		cmdAddCompiler.OnClick = @cmdAddCompiler_Click
-		cmdAddCompiler.Parent = @hbxCompilers
 		' vbxGeneral
 		With vbxGeneral
 			.Name = "vbxGeneral"
@@ -798,7 +747,7 @@ pfOptions = @fOptions
 			.Designer = @This
 			.Parent = @vbxCodeEditor
 		End With
-			'.Caption = ML("Enable Auto Suggestions")
+
 		' chkShowKeywordsTooltip
 		With chkShowKeywordsTooltip
 			.Name = "chkShowKeywordsTooltip"
@@ -809,7 +758,7 @@ pfOptions = @fOptions
 			.Constraints.Height = 21
 			.AutoSize = True
 			.SetBounds 0, 86, 166, 21
-			'.Caption = ML("Show Keywords Tooltip")
+
 			.Parent = @vbxCodeEditor
 		End With
 		' chkShowTooltipsAtTheTop
@@ -835,7 +784,7 @@ pfOptions = @fOptions
 			.Constraints.Height = 21
 			.AutoSize = True
 			.SetBounds 0, 86, 166, 21
-			'.Caption = ML("Show Symbols Tooltips On Mouse Hover")
+
 			.Parent = @vbxCodeEditor
 		End With
 		' chkShowSymbolsTooltipsOnMouseHover
@@ -848,7 +797,7 @@ pfOptions = @fOptions
 			.Constraints.Height = 21
 			.AutoSize = True
 			.SetBounds 0, 86, 166, 21
-			'.Caption = ML("Show Classes Explorer On Open Window")
+
 			.Parent = @vbxCodeEditor
 		End With
 		' chkShowHorizontalSeparatorLines
@@ -858,7 +807,7 @@ pfOptions = @fOptions
 			.TabIndex = 230
 			.Align = DockStyle.alTop
 			.ControlIndex = 6
-			'.Caption = ML("Show Horizontal Separator Lines")
+
 			.Constraints.Height = 21
 			.AutoSize = True
 			.SetBounds 0, 128, 210, 21
@@ -924,7 +873,7 @@ pfOptions = @fOptions
 			.Constraints.Height = 21
 			.AutoSize = True
 			.SetBounds 0, 212, 178, 21
-			'.Caption = ML("Add Spaces To Operators")
+
 			.Parent = @vbxCodeEditor
 		End With
 		' chkSyntaxHighlightingIdentifiers
@@ -933,7 +882,7 @@ pfOptions = @fOptions
 			.Text = ML("Syntax Highlighting Identifiers")
 			.TabIndex = 121
 			.Align = DockStyle.alTop
-			'.Caption = ML("Syntax Highlighting Identifiers")
+
 			.Constraints.Height = 21
 			.AutoSize = True
 			.SetBounds 0, 233, 199, 21
@@ -1933,7 +1882,7 @@ pfOptions = @fOptions
 			.Text = ML("Create non-static event handlers")
 			.TabIndex = 162
 			.SetBounds 12, 150, 288, 24
-			'.Caption = ML("Create non-static event handlers")
+
 			.Designer = @This
 			.OnClick = @chkCreateNonStaticEventHandlers_Click_
 			.Parent = @pnlDesigner
@@ -2034,7 +1983,7 @@ pfOptions = @fOptions
 			.Text = ML("When Visual FB Editor starts") & ":"
 			.Align = DockStyle.alTop
 			.ExtraMargins.Top = 5
-			'.Caption = ML("When Visual FB Editor starts") & ":"
+
 			.TabIndex = 168
 			.SetBounds 0, 97, 417, 120
 			.Parent = @vbxGeneral
@@ -2085,7 +2034,7 @@ pfOptions = @fOptions
 			.Text = ML("Prompt for Project / File")
 			.TabIndex = 171
 			.SetBounds 18, 22, 184, 16
-			'.Caption = ML("Prompt for Project / File")
+
 			.Designer = @This
 			.OnClick = @optPromptForProjectAndFiles_Click
 			.Parent = @grbWhenVFBEStarts
@@ -2096,7 +2045,7 @@ pfOptions = @fOptions
 			.Text = ML("Create Project / File")
 			.TabIndex = 172
 			.SetBounds 18, 45, 184, 16
-			'.Caption = ML("Create Project / File")
+
 			.Designer = @This
 			.OnClick = @optCreateProjectFile_Click
 			.Parent = @grbWhenVFBEStarts
@@ -2117,7 +2066,7 @@ pfOptions = @fOptions
 			.Text = ML("Don't Nothing")
 			.TabIndex = 174
 			.SetBounds 19, 90, 184, 16
-			'.Caption = ML("Don't Nothing")
+
 			.Designer = @This
 			.OnClick = @optDoNotNothing_Click
 			.Parent = @grbWhenVFBEStarts
@@ -2175,39 +2124,13 @@ pfOptions = @fOptions
 			.SetBounds 100, 0, 287, 21
 			.Parent = @hbxDefaultNewLineFormat
 		End With
-		' cmdFindCompilers
-		With cmdFindCompilers
-			.Name = "cmdFindCompilers"
-			.Text = ML("&Find")
-			.TabIndex = 177
-			.Align = DockStyle.alTop
-			.ExtraMargins.Left = 300
-			.ExtraMargins.Right = -1
-			.SetBounds 315, 20, 88, 24
-			'.Caption = ML("&Find")
-			.Designer = @This
-			.OnClick = @cmdFindCompilers_Click_
-			.Parent = @grbCompilerPaths
-		End With
-		' lblFindCompilersFromComputer
-		With lblFindCompilersFromComputer
-			.Name = "lblFindCompilersFromComputer"
-			.Text = ML("Find Compilers from Computer?")
-			.TabIndex = 178
-			.ExtraMargins.Top = -22
-			.ExtraMargins.Right = 100
-			.Align = DockStyle.alTop
-			.SetBounds 15, 22, 287, 20
-			'.Caption = ML("Find Compilers from Computer:")
-			.Parent = @grbCompilerPaths
-		End With
 		' optPromptToSave
 		With optPromptToSave
 			.Name = "optPromptToSave"
 			.Text = ML("Prompt To Save")
 			.TabIndex = 176
 			.SetBounds 18, 68, 184, 16
-			'.Caption = ML("Prompt To Save")
+
 			.Parent = @grbWhenCompiling
 		End With
 		' cboOpenedFile
@@ -2224,7 +2147,7 @@ pfOptions = @fOptions
 			.Text = ML("Create Form types without Type word")
 			.TabIndex = 180
 			.SetBounds 12, 128, 288, 24
-			'.Caption = ML("Create Form types without Type word")
+
 			.Parent = @pnlDesigner
 		End With
 		' grbCommandPromptOptions
@@ -2235,7 +2158,7 @@ pfOptions = @fOptions
 			.Align = DockStyle.alTop
 			.ExtraMargins.Top = 5
 			.SetBounds 10, 69, 417, 94
-			'.Caption = ML("Command Prompt options")
+
 			.Parent = @pnlTerminal
 		End With
 		' optMainFileFolder
@@ -2244,7 +2167,7 @@ pfOptions = @fOptions
 			.Text = ML("Main File folder")
 			.TabIndex = 182
 			.SetBounds 20, 39, 220, 20
-			'.Caption = ML("Main File folder")
+
 			.Parent = @grbCommandPromptOptions
 		End With
 		' lblOpenCommandPromptIn
@@ -2253,7 +2176,7 @@ pfOptions = @fOptions
 			.Text = ML("Open command prompt in:")
 			.TabIndex = 183
 			.SetBounds 20, 19, 380, 20
-			'.Caption = ML("Open command prompt in:")
+
 			.Parent = @grbCommandPromptOptions
 		End With
 		' optInFolder
@@ -2262,7 +2185,7 @@ pfOptions = @fOptions
 			.Text = ML("Folder") & ":"
 			.TabIndex = 184
 			.SetBounds 20, 59, 120, 20
-			'.Caption = ML("Folder:")
+
 			.Parent = @grbCommandPromptOptions
 		End With
 		' txtInFolder
@@ -2288,7 +2211,7 @@ pfOptions = @fOptions
 			.Name = "lblIntellisenseLimit"
 			.Text = ML("Intellisense limit") & ":"
 			.TabIndex = 187
-			'.Caption = ML("Intellisense limit") & ":"
+
 			.ExtraMargins.Top = 2
 			.ExtraMargins.Right = 0
 			.ExtraMargins.Left = 40
@@ -2315,7 +2238,7 @@ pfOptions = @fOptions
 			.Name = "chkTurnOnEnvironmentVariables"
 			.Text = ML("Turn on Environment variables") & ":"
 			.TabIndex = 191
-			'.Caption = ML("Turn on Environment variables") & ":"
+
 			.ExtraMargins.Top = 5
 			.Align = DockStyle.alTop
 			.ExtraMargins.Right = 170
@@ -2352,7 +2275,7 @@ pfOptions = @fOptions
 			.Name = "chkPlaceStaticEventHandlersAfterTheConstructor"
 			.Text = ML("Place static event handlers after the Constructor")
 			.TabIndex = 196
-			'.Caption = ML("Place static event handlers after the Constructor")
+
 			.SetBounds 32, 172, 310, 24
 			.Parent = @pnlDesigner
 		End With
@@ -2361,7 +2284,7 @@ pfOptions = @fOptions
 			.Name = "chkCreateStaticEventHandlersWithAnUnderscoreAtTheBeginning"
 			.Text = ML("Create static event handlers with an underscore at the beginning")
 			.TabIndex = 197
-			'.Caption = ML("Create static event handlers with an underscore at the beginning")
+
 			.SetBounds 32, 195, 380, 24
 			.Parent = @pnlDesigner
 		End With
@@ -2484,7 +2407,7 @@ pfOptions = @fOptions
 			.ExtraMargins.Left = 40
 			.Align = DockStyle.alClient
 			.ControlIndex = 0
-			'.Caption = ML("History file saving days") & ":"
+
 			.SetBounds 40, 2, 175, 18
 			.Designer = @This
 			.Parent = @pnlHistoryFileSavingDays
@@ -2752,7 +2675,7 @@ pfOptions = @fOptions
 			.Margins.Bottom = 18
 			.Margins.Right = 15
 			.TabIndex = 155
-			'.Caption = ML("Default Configuration")
+
 			.SetBounds 10, 0, 417, 61
 			.Parent = @pnlBuildConfigurations
 		End With
@@ -2778,7 +2701,7 @@ pfOptions = @fOptions
 			.Margins.Right = 15
 			.Margins.Left = 15
 			.Margins.Bottom = 15
-			'.Caption = ML("Configurations")
+
 			.SetBounds 10, 66, 417, 334
 			.Designer = @This
 			.Parent = @pnlBuildConfigurations
@@ -3603,8 +3526,7 @@ Sub frmOptions.LoadSettings()
 		AddColors ColorGlobalTypes, , , , False
 		AddColors IndicatorLines, , False, False, False, False, False, False
 		For k As Integer = 0 To UBound(Keywords)
-			'ReDim Preserve Keywords(k)
-			AddColors Keywords(k), , , , False
+				AddColors Keywords(k), , , , False
 		Next
 		
 		AddColors LineNumbers, , , False, False
@@ -3626,12 +3548,6 @@ Sub frmOptions.LoadSettings()
 		WLet(.oldInterfFontName, *InterfaceFontName)
 		.InterfFontSize = InterfaceFontSize
 		.oldInterfFontSize = InterfaceFontSize
-		'.txtAIAgentName.Text = *CurrentAIAgent
-		'.txtAIAgentModelName.Text = AIAgentModelName
-		'.cboAIAgentHost.Text = AIAgentHost
-		'.cboAIAgentAddress.Text = AIAgentAddress
-		'.cboAIAgentPort.Text = Str(AIAgentPort)
-		'.txtAIAgentAPIKey.Text = AIAgentAPIKey
 		.oldDisplayMenuIcons = DisplayMenuIcons
 		.lblInterfaceFont.Font.Name = *InterfaceFontName
 		.lblInterfaceFont.Caption = * (.InterfFontName) & ", " & .InterfFontSize & "pt"
@@ -4574,10 +4490,6 @@ Private Sub frmOptions.Form_Close(ByRef Designer As My.Sys.Object, ByRef Sender 
 	'If fOptions.HotKeysChanged Then MsgBox ML("Hotkey changes will be applied the next time the application is run.")
 End Sub
 
-Private Sub frmOptions.Form_Show(ByRef Designer As My.Sys.Object, ByRef Sender As Form)
-
-End Sub
-
 Private Sub frmOptions.TreeView1_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As TreeView, ByRef Item As TreeNode)
 	With fOptions
 		If .FDisposing Then Exit Sub
@@ -4609,10 +4521,6 @@ Private Sub frmOptions.TreeView1_SelChange(ByRef Designer As My.Sys.Object, ByRe
 			.vbxGeneral.RequestAlign
 		End If
 	End With
-End Sub
-
-Private Sub frmOptions.pnlIncludes_ActiveControlChange(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-	
 End Sub
 
 Private Sub frmOptions.cmdMFFPath_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
@@ -4862,18 +4770,6 @@ Private Sub frmOptions.cmdRemove_Click(ByRef Designer As My.Sys.Object, ByRef Se
 	End With
 End Sub
 
-Private Sub frmOptions.cmdAddCompiler_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-End Sub
-
-Private Sub frmOptions.cmdChangeCompiler_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-End Sub
-
-Private Sub frmOptions.cmdRemoveCompiler_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-End Sub
-
-Private Sub frmOptions.cmdClearCompilers_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-End Sub
-
 Private Sub frmOptions.cmdAddMakeTool_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	pfPath->txtVersion.Text = ""
 	pfPath->txtPath.Text = ""
@@ -5045,14 +4941,6 @@ Private Sub frmOptions.cmdClearHelps_Click(ByRef Designer As My.Sys.Object, ByRe
 End Sub
 
 Private Sub frmOptions.cmdAddAIAgent_Click(ByRef Sender As Control)
-	'frmAIAgent.txtAIAgentName.Text = ""
-	'frmAIAgent.cboAIAgentHost.Text = ""
-	'frmAIAgent.cboAIAgentPort.Text = ""
-	'frmAIAgent.cboAIAgentAddress.Text = ""
-	'frmAIAgent.txtAIAgentModelName.Text = ""
-	'frmAIAgent.txtAIAgentAPIKey.Text = ""
-	'frmAIAgent.updnAIAgentTemperature.Text = ""
-	'frmAIAgent.chkAIAgentStream.Checked = True
 	If frmAIAgent.ShowModal(fOptions) = ModalResults.OK Then
 		With fOptions
 			If .cboAIAgent.IndexOf(frmAIAgent.txtAIAgentName.Text) = -1 Then
@@ -5156,8 +5044,7 @@ Private Sub frmOptions.cmdAddInclude_Click(ByRef Designer As My.Sys.Object, ByRe
 	If pfPath->ShowModal(fOptions) = ModalResults.OK Then
 		With fOptions
 			If Not .lstIncludePaths.Items.Contains(pfPath->txtPath.Text) Then
-				'.lstIncludePaths.Items.Add pfPath->txtPath.Text
-				.lstIncludePaths.AddItem pfPath->txtPath.Text
+					.lstIncludePaths.AddItem pfPath->txtPath.Text
 			Else
 				MsgBox ML("This path is exists!")
 			End If
@@ -5171,8 +5058,7 @@ Private Sub frmOptions.cmdAddLibrary_Click(ByRef Designer As My.Sys.Object, ByRe
 	If pfPath->ShowModal(fOptions) = ModalResults.OK Then
 		With fOptions
 			If Not .lstLibraryPaths.Items.Contains(pfPath->txtPath.Text) Then
-				'.lstLibraryPaths.Items.Add pfPath->txtPath.Text
-				.lstLibraryPaths.AddItem pfPath->txtPath.Text
+					.lstLibraryPaths.AddItem pfPath->txtPath.Text
 			Else
 				MsgBox ML("This path is exists!")
 			End If
@@ -5305,9 +5191,6 @@ Private Sub frmOptions.optDoNotNothing_Click(ByRef Designer As My.Sys.Object, By
 	cboDefaultProjectFileCheckEnable
 End Sub
 
-Private Sub frmOptions.cmdFindCompilers_Click(ByRef Sender As Control)
-End Sub
-
 Sub HistoryCodeClean(ByRef Path As WString)
 	Dim As WString * 1024 f, f1
 	Dim As Double d2
@@ -5326,10 +5209,6 @@ Sub HistoryCodeClean(ByRef Path As WString)
 		f = Dir()
 	Wend
 	HistoryCodeCleanDay = DateValue(Format(Now, "yyyy/mm/dd"))
-End Sub
-
-Private Sub frmOptions.cmdFindCompilers_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-	(*Cast(frmOptions Ptr, Sender.Designer)).cmdFindCompilers_Click(Sender)
 End Sub
 
 Private Sub frmOptions.lvOtherEditors_ItemActivate_(ByRef Designer As My.Sys.Object, ByRef Sender As ListView, ByVal ItemIndex As Integer)
@@ -5365,7 +5244,6 @@ Private Sub frmOptions.lvCompilerPaths_ItemActivate_(ByRef Designer As My.Sys.Ob
 	(*Cast(frmOptions Ptr, Sender.Designer)).lvCompilerPaths_ItemActivate(Sender, ItemIndex)
 End Sub
 Private Sub frmOptions.lvCompilerPaths_ItemActivate(ByRef Sender As ListView, ByVal ItemIndex As Integer)
-	cmdChangeCompiler_Click *cmdChangeCompiler.Designer, cmdChangeCompiler
 End Sub
 
 Private Sub frmOptions.cmdInFolder_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)

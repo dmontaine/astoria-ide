@@ -162,13 +162,14 @@ Dim Shared wtch(WTCHMAX) As twtch  ''zero based
 Dim Shared wtchcpt As Integer 'counter of watched value, used for the menu
 Dim Shared hwtchbx As Any Ptr    'handle
 Dim Shared wtchidx As Integer 'index for delete
-Dim Shared wtchexe(9,WTCHMAX) As String 'watched var (no memory for next execution)
+Const SAVED_FIELD_COUNT As Integer = 9
+Dim Shared wtchexe(SAVED_FIELD_COUNT, WTCHMAX) As String 'watched var (no memory for next execution)
 Dim Shared wtchnew As Integer 'to keep index after creating new watched
 
 ''breakpoint on line
 Dim Shared As tbrkol brkol(BRKMAX)
 Dim Shared As Integer brknb
-Dim Shared As String brkexe(9,BRKMAX) 'to save breakpoints by session
+Dim Shared As String brkexe(SAVED_FIELD_COUNT, BRKMAX) 'to save breakpoints by session
 Dim Shared As Any Ptr hbrkbx ''window for managing breakpoints
 Dim Shared As Boolean bpbox
 Dim Shared As Integer brkidx1 ''index for BP mem or cond

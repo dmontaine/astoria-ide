@@ -52,7 +52,6 @@
 			.OnCreate = @Form_Create_
 			.ControlBox = True
 			.Icon = "1"
-			.OnShow = @Form_Show_
 			.SetBounds 0, 0, 460, 410
 		End With
 		' pnlCommands
@@ -213,10 +212,6 @@
 			.Parent = @pnlRight
 		End With
 	End Constructor
-	
-	Private Sub frmComponentsType.Form_Show_(ByRef Designer As My.Sys.Object, ByRef Sender As Form)
-		(*Cast(frmComponentsType Ptr, Sender.Designer)).Form_Show(Sender)
-	End Sub
 	
 	Private Sub frmComponentsType.chkSelectedItemsOnly_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As CheckBox)
 		(*Cast(frmComponentsType Ptr, Sender.Designer)).chkSelectedItemsOnly_Click(Sender)
@@ -402,9 +397,5 @@ Private Sub frmComponentsType.chkSelectedItemsOnly_Click(ByRef Sender As CheckBo
 		Wend
 		If ItemCount = 0 AndAlso chlControls.ItemCount > 0 Then chlControls.ItemIndex = 0: chlControls_Change(chlControls)
 	End If
-End Sub
-
-Private Sub frmComponentsType.Form_Show(ByRef Sender As Form)
-	
 End Sub
 

@@ -40,6 +40,19 @@
 Using My.Sys.Forms
 Using My.Sys.Drawing
 
+Const PROJECT_FOLDER_INCLUDES As Integer = 0
+Const PROJECT_FOLDER_FORMS As Integer = 1
+Const PROJECT_FOLDER_MODULES As Integer = 2
+Const PROJECT_FOLDER_RESOURCES As Integer = 3
+Const PROJECT_FOLDER_OTHERS As Integer = 4
+
+Const SAVE_FILTER_BAS As Integer = 1
+Const SAVE_FILTER_BI As Integer = 2
+Const SAVE_FILTER_INC As Integer = 3
+Const SAVE_FILTER_FRM As Integer = 4
+Const SAVE_FILTER_RC As Integer = 5
+Const SAVE_FILTER_OTHER As Integer = 6
+
 Dim Shared As Boolean bQuitting
 	Function EnumWindowsProc(ByVal hWnd As HWND, ByVal lParam As LPARAM) As BOOL
 		Dim As Any Ptr VisualFBEditorAppPtr = GetProp(hWnd, "VisualFBEditorApp")
@@ -348,7 +361,6 @@ Sub SelectError(ByRef FileName As WString, iLine As Integer, tabw As TabWindow P
 End Sub
 
 Sub lvProperties_CellEditing(ByRef Designer As My.Sys.Object, ByRef Sender As TreeListView, ByRef Item As TreeListViewItem Ptr, ByVal SubItemIndex As Integer, CellEditor As Control Ptr, ByRef Cancel As Boolean)
-	'CellEditor = @cboPropertyValue
 End Sub
 
 Sub lvProperties_CellEdited(ByRef Designer As My.Sys.Object, ByRef Sender As TreeListView, ByRef Item As TreeListViewItem Ptr, ByVal SubItemIndex As Integer, ByRef NewText As WString, ByRef Cancel As Boolean)
@@ -405,15 +417,15 @@ End Sub
 Function GetTreeNodeChild(tn As TreeNode Ptr, ByRef FileName As WString) As TreeNode Ptr
 	If tn->Tag AndAlso *Cast(ExplorerElement Ptr, tn->Tag) Is ProjectElement AndAlso Cast(ProjectElement Ptr, tn->Tag)->ProjectFolderType = ProjectFolderTypes.ShowWithFolders Then
 		If EndsWith(LCase(FileName), ".bi") Then
-			Return tn->Nodes.Item(0)
+			Return tn->Nodes.Item(PROJECT_FOLDER_INCLUDES)
 		ElseIf EndsWith(LCase(FileName), ".frm") Then
-			Return tn->Nodes.Item(1)
+			Return tn->Nodes.Item(PROJECT_FOLDER_FORMS)
 		ElseIf EndsWith(LCase(FileName), ".bas") OrElse EndsWith(LCase(FileName), ".inc") Then
-			Return tn->Nodes.Item(2)
+			Return tn->Nodes.Item(PROJECT_FOLDER_MODULES)
 		ElseIf EndsWith(LCase(FileName), ".rc") Then
-			Return tn->Nodes.Item(3)
+			Return tn->Nodes.Item(PROJECT_FOLDER_RESOURCES)
 		Else
-			Return tn->Nodes.Item(4)
+			Return tn->Nodes.Item(PROJECT_FOLDER_OTHERS)
 		End If
 	Else
 		Return tn
@@ -898,14 +910,8 @@ Function AddProject(ByRef FileName As WString, pFilesList As WStringList Ptr, tn
 					WLet(ppe->OriginalFilename, Mid(Buff, Pos1 + 2, Len(Buff) - Pos1 - 2))
 				ElseIf Parameter = "ProductName" Then
 					WLet(ppe->ProductName, Mid(Buff, Pos1 + 2, Len(Buff) - Pos1 - 2))
-				ElseIf Parameter = "CompileTo" Then
-					ppe->CompileTo = Cast(CompileToVariants, Val(Mid(Buff, Pos1 + 1)))
-				ElseIf Parameter = "OptimizationLevel" Then
-					ppe->OptimizationLevel = Val(Mid(Buff, Pos1 + 1))
-				ElseIf Parameter = "OptimizationFastCode" Then
-					ppe->OptimizationFastCode = CBool(Mid(Buff, Pos1 + 1))
-				ElseIf Parameter = "OptimizationSmallCode" Then
-					ppe->OptimizationFastCode = CBool(Mid(Buff, Pos1 + 1))
+				ElseIf Parameter = "CompileMode" Then
+					ppe->CompileMode = Cast(CompileModeVariants, Val(Mid(Buff, Pos1 + 1)))
 				ElseIf Parameter = "CompilationArguments64Windows" Then
 					WLet(ppe->CompilationArguments64Windows, Mid(Buff, Pos1 + 2, Len(Buff) - Pos1 - 2))
 				ElseIf Parameter = "CompilationArguments64Linux" Then
@@ -919,8 +925,6 @@ Function AddProject(ByRef FileName As WString, pFilesList As WStringList Ptr, tn
 					WLet(ppe->CompilerPath, Mid(Buff, Pos1 + 2, Len(Buff) - Pos1 - 2))
 				ElseIf Parameter = "CommandLineArguments" Then
 					WLet(ppe->CommandLineArguments, Mid(Buff, Pos1 + 2, Len(Buff) - Pos1 - 2))
-				ElseIf Parameter = "CreateDebugInfo" Then
-					ppe->CreateDebugInfo = CBool(Mid(Buff, Pos1 + 1))
 				' Win64-only fork: kept because .vfp backward compatibility (no IDE UI)
 				ElseIf Parameter = "AndroidSDKLocation" Then
 					WLet(ppe->AndroidSDKLocation, Mid(Buff, Pos1 + 2, Len(Buff) - Pos1 - 2))
@@ -1363,20 +1367,20 @@ Sub SetSaveDialogParameters(ByRef FileName As WString)
 	If FileName = ML("Untitled") Then
 		'pSaveD->FileName = FileName & ".bas"
 		pSaveD->InitialDir = GetFullPath(*ProjectsPath)
-		pSaveD->FilterIndex = 1
+		pSaveD->FilterIndex = SAVE_FILTER_BAS
 	ElseIf EndsWith(LCase(FileName), ".bas") Then
-		pSaveD->FilterIndex = 1
+		pSaveD->FilterIndex = SAVE_FILTER_BAS
 	ElseIf EndsWith(LCase(FileName), ".bi") Then
-		pSaveD->FilterIndex = 2
+		pSaveD->FilterIndex = SAVE_FILTER_BI
 	ElseIf EndsWith(LCase(FileName), ".inc") Then
-		pSaveD->FilterIndex = 3
+		pSaveD->FilterIndex = SAVE_FILTER_INC
 	ElseIf EndsWith(LCase(FileName), ".frm") Then
-		pSaveD->FilterIndex = 4
+		pSaveD->FilterIndex = SAVE_FILTER_FRM
 	ElseIf EndsWith(LCase(FileName), ".rc") Then
-		pSaveD->FilterIndex = 5
+		pSaveD->FilterIndex = SAVE_FILTER_RC
 	Else
 		pSaveD->FileName = FileName
-		pSaveD->FilterIndex = 6
+		pSaveD->FilterIndex = SAVE_FILTER_OTHER
 	End If
 End Sub
 
@@ -1526,10 +1530,7 @@ Function SaveProject(ByRef tnP As TreeNode Ptr, bWithQuestion As Boolean = False
 	Print #Fn, "LegalTrademarks=""" & *ppe->LegalTrademarks & """"
 	Print #Fn, "OriginalFilename=""" & *ppe->OriginalFilename & """"
 	Print #Fn, "ProductName=""" & *ppe->ProductName & """"
-	Print #Fn, "CompileTo=" & ppe->CompileTo
-	Print #Fn, "OptimizationLevel=" & ppe->OptimizationLevel
-	Print #Fn, "OptimizationFastCode=" & ppe->OptimizationFastCode
-	Print #Fn, "OptimizationSmallCode=" & ppe->OptimizationSmallCode
+	Print #Fn, "CompileMode=" & ppe->CompileMode
 	Print #Fn, "CompilationArguments64Windows=""" & *ppe->CompilationArguments64Windows & """"
 	Print #Fn, "CompilationArguments64Linux=""" & *ppe->CompilationArguments64Linux & """"
 	' Win64-only fork: kept because .vfp backward compatibility (no IDE UI)
@@ -1537,7 +1538,6 @@ Function SaveProject(ByRef tnP As TreeNode Ptr, bWithQuestion As Boolean = False
 	Print #Fn, "CompilationArguments32Linux=""" & *ppe->CompilationArguments32Linux & """"
 	Print #Fn, "CompilerPath=""" & *ppe->CompilerPath & """"
 	Print #Fn, "CommandLineArguments=""" & *ppe->CommandLineArguments & """"
-	Print #Fn, "CreateDebugInfo=" & ppe->CreateDebugInfo
 	' Win64-only fork: kept because .vfp backward compatibility (no IDE UI)
 	Print #Fn, "AndroidSDKLocation=""" & *ppe->AndroidSDKLocation & """"
 	Print #Fn, "AndroidNDKLocation=""" & *ppe->AndroidNDKLocation & """"
@@ -4930,10 +4930,6 @@ For i = 0 To Globals.Functions.Count - 1
 		" (Handler function: " & __FUNCTION__ & ") in module " & ZGet(Ermn()) & _
 		" (Handler file: " & __FILE__ & ") "
 	MsgBox errMsg
-End Sub
-
-Sub LoadInterfaceTheme
-	' Interface theming removed; keep light UI defaults.
 End Sub
 
 Sub LoadTheme
@@ -9281,8 +9277,6 @@ frmMain.Add ptabPanel
 frmMain.Show
 
 Sub OnProgramStart() Constructor
-	'	pfSplash = @fSplash
-	'	pfSplash->Show
 End Sub
 
 Sub OnProgramQuit() Destructor

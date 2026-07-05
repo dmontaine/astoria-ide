@@ -199,8 +199,8 @@ End Sub
 
 Sub NumberingModule(pSender As Any Ptr)
 	Dim As Boolean bMacro = StartsWith(Cast(My.Sys.Object Ptr, pSender)->ToString, "ModuleMacroNumberOn")
-	Dim As Boolean bStartsOfProcs = EndsWith(Cast(My.Sys.Object Ptr, pSender)->ToString, "StartsOfProcs")
-	Dim As Boolean bPreprocesssor = StartsWith(Cast(My.Sys.Object Ptr, pSender)->ToString, "ModulePreprocessor")
+	Dim As Boolean bStartsOfProcedures = EndsWith(Cast(My.Sys.Object Ptr, pSender)->ToString, "StartsOfProcs")
+	Dim As Boolean bPreprocessor = StartsWith(Cast(My.Sys.Object Ptr, pSender)->ToString, "ModulePreprocessor")
 	Dim As Boolean bRemove = Cast(My.Sys.Object Ptr, pSender)->ToString = "ModuleNumberOff"
 	Dim As Boolean bRemovePreprocessor = Cast(My.Sys.Object Ptr, pSender)->ToString = "ModulePreprocessorNumberOff"
 	Dim As EditControl Ptr ptxt
@@ -209,7 +209,7 @@ Sub NumberingModule(pSender As Any Ptr)
 	pfrmMain->Enabled = False
 	StartProgress
 	ptxt = @tbCurrent->txtCode
-	If bPreprocesssor Then
+	If bPreprocessor Then
 		If bRemovePreprocessor Then PreprocessorNumberingOff(*ptxt, True) Else PreprocessorNumberingOn(*ptxt, tbCurrent->FileName, True)
 	Else
 		Dim As Integer ehStart, ehEnd
@@ -220,7 +220,7 @@ Sub NumberingModule(pSender As Any Ptr)
 		Else
 			ehStart = 0 : ehEnd = ptxt->LinesCount - 1
 		End If
-		If bRemove Then NumberingOff(ehStart, ehEnd, *ptxt, True) Else NumberingOn(0, ptxt->LinesCount - 1, bMacro, *ptxt, True, bStartsOfProcs)
+		If bRemove Then NumberingOff(ehStart, ehEnd, *ptxt, True) Else NumberingOn(0, ptxt->LinesCount - 1, bMacro, *ptxt, True, bStartsOfProcedures)
 	End If
 	StopProgress
 	pfrmMain->Enabled = True
@@ -231,8 +231,8 @@ Sub NumberingProject(pSender As Any Ptr)
 	Dim As TreeNode Ptr tn, tn1, tn2 = ptvExplorer->SelectedNode
 	Dim As ExplorerElement Ptr ee
 	Dim As Boolean bMacro = StartsWith(Cast(My.Sys.Object Ptr, pSender)->ToString, "ProjectMacroNumberOn")
-	Dim As Boolean bStartsOfProcs = EndsWith(Cast(My.Sys.Object Ptr, pSender)->ToString, "StartsOfProcs")
-	Dim As Boolean bPreprocesssor = StartsWith(Cast(My.Sys.Object Ptr, pSender)->ToString, "ProjectPreprocessor")
+	Dim As Boolean bStartsOfProcedures = EndsWith(Cast(My.Sys.Object Ptr, pSender)->ToString, "StartsOfProcs")
+	Dim As Boolean bPreprocessor = StartsWith(Cast(My.Sys.Object Ptr, pSender)->ToString, "ProjectPreprocessor")
 	Dim As Boolean bRemove = Cast(My.Sys.Object Ptr, pSender)->ToString = "ProjectNumberOff"
 	Dim As Boolean bRemovePreprocessor = Cast(My.Sys.Object Ptr, pSender)->ToString = "ProjectPreprocessorNumberOff"
 	Dim As EditControl txt
@@ -260,10 +260,10 @@ Sub NumberingProject(pSender As Any Ptr)
 						Else
 							ptxt = @tb->txtCode
 						End If
-						If bPreprocesssor Then
+						If bPreprocessor Then
 							If bRemovePreprocessor Then PreprocessorNumberingOff(*ptxt, True) Else PreprocessorNumberingOn(*ptxt, *ee->FileName, True)
 						Else
-							If bRemove Then NumberingOff(0, ptxt->LinesCount - 1, *ptxt, True) Else NumberingOn(0, ptxt->LinesCount - 1, bMacro, *ptxt, True, bStartsOfProcs)
+							If bRemove Then NumberingOff(0, ptxt->LinesCount - 1, *ptxt, True) Else NumberingOn(0, ptxt->LinesCount - 1, bMacro, *ptxt, True, bStartsOfProcedures)
 						End If
 						If tb = 0 Then
 							FileCopy  *ee->FileName, GetBakFileName(*ee->FileName)
@@ -280,10 +280,10 @@ Sub NumberingProject(pSender As Any Ptr)
 			Else
 				ptxt = @tb->txtCode
 			End If
-			If bPreprocesssor Then
+			If bPreprocessor Then
 				If bRemovePreprocessor Then PreprocessorNumberingOff(*ptxt, True) Else PreprocessorNumberingOn(*ptxt, *ee->FileName, True)
 			Else
-				If bRemove Then NumberingOff(0, ptxt->LinesCount - 1, *ptxt, True) Else NumberingOn(0, ptxt->LinesCount - 1, bMacro, *ptxt, True, bStartsOfProcs)
+				If bRemove Then NumberingOff(0, ptxt->LinesCount - 1, *ptxt, True) Else NumberingOn(0, ptxt->LinesCount - 1, bMacro, *ptxt, True, bStartsOfProcedures)
 			End If
 			If tb = 0 Then
 				FileCopy  *ee->FileName, GetBakFileName(*ee->FileName)
@@ -684,7 +684,7 @@ Function IsLabel(ByRef LeftA As WString) As Boolean
 		If InStr("," & SingleConstructions & ",", "," & strLeftA & ",") > 0 Then Return False
 		For i As Integer = 1 To Len(strLeftA)
 			t = Asc(Mid(strLeftA, i, 1))
-			If t >= 48 And t <= 57 Or t >= 65 And t <= 90 Or t >= 97 And t <= 122 Or t = Asc("_") Then
+			If t >= Asc("0") And t <= Asc("9") Or t >= Asc("A") And t <= Asc("Z") Or t >= Asc("a") And t <= Asc("z") Or t = Asc("_") Then
 			Else: Return False
 			End If
 		Next
@@ -5563,7 +5563,6 @@ End Function
 'End Function
 
 Sub OnDropDownCloseUp(ByRef Designer As My.Sys.Object, ByRef Sender As EditControl)
-	'Sender.FileDropDown = False
 End Sub
 
 Sub OnKeyDownEdit(ByRef Designer As My.Sys.Object, ByRef Sender As Control, Key As Integer, Shift As Integer)
@@ -6089,9 +6088,9 @@ Sub AnalyzeTab(Param As Any Ptr)
 							End If
 							'FECLine->Ends.Add l, @Comments
 							Exit Do
-						ElseIf t >= 48 AndAlso t <= 57 OrElse t >= 65 AndAlso t <= 90 OrElse t >= 97 AndAlso t <= 122 OrElse (CInt(FECLine->InAsm = False) AndAlso t = Asc("#")) OrElse t = Asc("$") OrElse t = Asc("_") Then
+						ElseIf t >= Asc("0") AndAlso t <= Asc("9") OrElse t >= Asc("A") AndAlso t <= Asc("Z") OrElse t >= Asc("a") AndAlso t <= Asc("z") OrElse (CInt(FECLine->InAsm = False) AndAlso t = Asc("#")) OrElse t = Asc("$") OrElse t = Asc("_") Then
 							If MatnBoshi = 0 Then MatnBoshi = j
-							If Not (u >= 48 AndAlso u <= 57 OrElse u >= 65 AndAlso u <= 90 OrElse u >= 97 AndAlso u <= 122 OrElse u = Asc("#") OrElse u = Asc("$") OrElse u = Asc("_")) Then
+							If Not (u >= Asc("0") AndAlso u <= Asc("9") OrElse u >= Asc("A") AndAlso u <= Asc("Z") OrElse u >= Asc("a") AndAlso u <= Asc("z") OrElse u = Asc("#") OrElse u = Asc("$") OrElse u = Asc("_")) Then
 								Matn = Mid(*s, MatnBoshi, j - MatnBoshi + 1)
 								MatnLCase = LCase(Matn)
 								If InStr("#$", .Left(Matn, 1)) Then
@@ -8611,11 +8610,6 @@ Sub TabWindow.FormDesign(NotForms As Boolean = False)
 	'txtCode.Content.Enums.Clear
 	'txtCode.Content.TypeProcedures.Clear
 	'txtCode.Content.Procedures.Clear
-	'txtCode.Content.LineLabels.Clear
-	'txtCode.Content.Args.Clear
-	'AnyTexts.Clear
-	''ThreadCreate_(@LoadFromTabWindow, @This)
-	''LoadFunctions FileName, OnlyFilePath, Types, Procedures, Args, @txtCode
 	t = False
 	Var bT = False
 	c = False
@@ -11436,7 +11430,7 @@ Function GetFirstCompileLine(ByRef FileName As WString, ByRef Project As Project
 			Result += " -s gui"
 		End If
 	End If
-	If CInt(UseDebugger) OrElse CInt(CInt(Project) AndAlso CInt(Project->CreateDebugInfo)) Then Result += " -g"
+	If CInt(UseDebugger) OrElse CInt(CInt(Project) AndAlso CInt(Project->CompileMode = Development)) Then Result += " -g"
 	If CInt(mnuUseProfiler->Checked) Then Result += " -profgen fb"
 	If CInt(InStr(Result, " -v ") = 0)  Then
 		Result += " -v "
@@ -11449,11 +11443,13 @@ Function GetFirstCompileLine(ByRef FileName As WString, ByRef Project As Project
 			Case 2: Result += " -s gui"
 			End Select
 		End If
-		If Project->CompileTo = ToGCC Then
-			Result += " -gen gcc" & IIf(Project->OptimizationLevel > 0, " -Wc -O" & Str(Project->OptimizationLevel), IIf(Project->OptimizationFastCode, " -Wc -Ofast", IIf(Project->OptimizationSmallCode, " -Wc -Os", ""))) & _
+		Result += " -gen gcc"
+		If Project->CompileMode = Final Then
+			Result += " -Wc -O2"
+		End If
+		Result += _
 			IIf(Project->ShowUnusedLabelWarnings, " -Wc -Wunused-label", "") & IIf(Project->ShowUnusedFunctionWarnings, " -Wc -Wunused-function", "") & IIf(Project->ShowUnusedVariableWarnings, " -Wc -Wunused-variable", "") & _
 			IIf(Project->ShowUnusedButSetVariableWarnings, " -Wc -Wunused-but-set-variable", "") & IIf(Project->ShowMainWarnings, " -Wc -Wmain", "")
-		End If
 	End If
 	Result += " -d " & TARGET_COMPILE_DEFINE
 	If cboBuildConfiguration.ItemIndex > 0 Then
@@ -11478,7 +11474,8 @@ Function GetFirstCompileLine(ByRef FileName As WString, ByRef Project As Project
 	If FileOpenResult = 0 Then
 		Dim As WString * 1024 sLine
 		Dim As Integer i, n, l = 0
-		Dim As Boolean k(10), kIfElseIf(10)
+		Const MAX_PREPROCESSOR_DEPTH As Integer = 10
+		Dim As Boolean k(MAX_PREPROCESSOR_DEPTH), kIfElseIf(MAX_PREPROCESSOR_DEPTH)
 		k(l) = True
 		kIfElseIf(l) = True
 		Do Until IIf(bFromTab, d = LinesCount, EOF(Fn))
@@ -11523,7 +11520,7 @@ Function GetFirstCompileLine(ByRef FileName As WString, ByRef Project As Project
 					'Exit Do
 				End If
 			End If
-			If l >= 10 Then Exit Do
+			If l >= MAX_PREPROCESSOR_DEPTH Then Exit Do
 		Loop
 	End If
 	If Not bFromTab Then
@@ -12069,7 +12066,7 @@ Sub RunPr(Debugger As String = "", ByRef ProjectFileName As WString, ByRef Proje
 		If CmdL Then _Deallocate(CmdL)
 	Else
 		WLet(ExeFileName, (GetExeFileName(MainFile, CompileLine & " " & FirstLine)))
-			Dim As Integer pClass
+			Dim As Integer iClass
 			Dim As WString Ptr Workdir, CmdL
 			Dim As ULong ExitCode 
 			If EndsWith(*ExeFileName, ".html") Then
@@ -12125,9 +12122,9 @@ Sub RunPr(Debugger As String = "", ByRef ProjectFileName As WString, ByRef Proje
 				si.hStdOutput = hWritePipe
 				si.hStdError = hWritePipe
 				si.wShowWindow = SW_SHOW
-				pClass = NORMAL_PRIORITY_CLASS Or CREATE_UNICODE_ENVIRONMENT Or CREATE_NEW_CONSOLE
+				iClass = NORMAL_PRIORITY_CLASS Or CREATE_UNICODE_ENVIRONMENT Or CREATE_NEW_CONSOLE
 				ChDir(GetFolderName(*ExeFileName))
-				If CreateProcess(0, *CmdL, @sa, @sa, 1, pClass, 0, 0, @si, @pi) = 0 Then
+				If CreateProcess(0, *CmdL, @sa, @sa, 1, iClass, 0, 0, @si, @pi) = 0 Then
 					ShowMessages(ML("Error: Couldn't Create Process"), False)
 					If Workdir Then _Deallocate(Workdir)
 					If CmdL Then _Deallocate(CmdL)
@@ -12193,9 +12190,9 @@ Sub RunPr(Debugger As String = "", ByRef ProjectFileName As WString, ByRef Proje
 				SInfo.cb = Len(SInfo)
 				SInfo.dwFlags = STARTF_USESHOWWINDOW
 				SInfo.wShowWindow = SW_NORMAL
-				pClass = CREATE_UNICODE_ENVIRONMENT Or CREATE_NEW_CONSOLE
+				iClass = CREATE_UNICODE_ENVIRONMENT Or CREATE_NEW_CONSOLE
 				ChDir(GetFolderName(*ExeFileName))
-				If CreateProcessW(NULL, CmdL, ByVal NULL, ByVal NULL, False, pClass, NULL, Workdir, @SInfo, @PInfo) Then
+				If CreateProcessW(NULL, CmdL, ByVal NULL, ByVal NULL, False, iClass, NULL, Workdir, @SInfo, @PInfo) Then
 					dbghand = PInfo.hProcess
 					prun = True
 					WaitForSingleObject PInfo.hProcess, INFINITE

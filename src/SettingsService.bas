@@ -8,6 +8,11 @@
 #include once "SettingsService.bi"
 #include once "AIService.bi"
 
+Const INDEXED_SETTINGS_SECTION_COUNT As Integer = 8
+Const DEFAULT_AI_PORT As Integer = 443
+Const DEFAULT_AI_TEMPERATURE As Double = 0.6
+Const DEFAULT_AI_CONTENTSIZE_KB As Integer = 100
+
 Function GetBundledCompilerFolder() As UString
 	Return ExePath & "/" & BUNDLED_COMPILER_FOLDER
 End Function
@@ -71,7 +76,7 @@ Private Function NoMoreIndexedSettingsKeys(i As Integer) As Boolean
 	keySum += iniSettings.KeyExists("OtherEditors", "Version_" & WStr(i))
 	keySum += iniSettings.KeyExists("IncludePaths", "Path_" & WStr(i))
 	keySum += iniSettings.KeyExists("LibraryPaths", "Path_" & WStr(i))
-	Return keySum = -8
+	Return keySum = -INDEXED_SETTINGS_SECTION_COUNT
 End Function
 
 Private Sub AddSeededAIAgent(ByRef AgentName As WString, ByRef HostName As WString = "openrouter.ai", ByRef AddressPath As WString = "api/v1/chat/completions")
@@ -86,15 +91,15 @@ Private Sub AddSeededAIAgent(ByRef AgentName As WString, ByRef HostName As WStri
 		Info->ModelName = AgentName
 		Info->Provider = "OpenRouter"
 	End If
-	Info->Port = 443
+	Info->Port = DEFAULT_AI_PORT
 	Info->Host = HostName
 	Info->Address = AddressPath
 	Info->APIKey = ""
 	Info->Response_Format = ""
-	Info->Temperature = 0.6
+	Info->Temperature = DEFAULT_AI_TEMPERATURE
 	Info->Top_P = 0
 	Info->Stream = True
-	Info->ContentSize = 100 * 1024
+	Info->ContentSize = DEFAULT_AI_CONTENTSIZE_KB * 1024
 	AIAgents.Add AgentName, Info->Host, Info
 	If *CurrentAIAgent = AgentName Then
 		AIAgentModelName = Info->ModelName
@@ -163,15 +168,15 @@ Sub LoadSettings
 			Info->Name = Temp
 			Info->ModelName = iniSettings.ReadString("AIAgents", "ModelName_" & WStr(i), "deepseek/deepseek-chat-v3-0324:free")
 			Info->Provider = iniSettings.ReadString("AIAgents", "Provider_" & WStr(i), "OpenRouter")
-			Info->Port = iniSettings.ReadInteger("AIAgents", "Port_" & WStr(i), 443)
+			Info->Port = iniSettings.ReadInteger("AIAgents", "Port_" & WStr(i), DEFAULT_AI_PORT)
 			Info->Host = iniSettings.ReadString("AIAgents", "Host_" & WStr(i), "openrouter.ai")
 			Info->Address = iniSettings.ReadString("AIAgents", "Address_" & WStr(i), "api/v1/chat/completions")
 			Info->APIKey = NormalizeAIAgentAPIKey(iniSettings.ReadString("AIAgents", "APIKey_" & WStr(i), ""))
 			Info->Response_Format = iniSettings.ReadString("AIAgents", "Response_Format_" & WStr(i), "")
-			Info->Temperature = iniSettings.ReadFloat("AIAgents", "Temperature_" & WStr(i), 0.6)
+			Info->Temperature = iniSettings.ReadFloat("AIAgents", "Temperature_" & WStr(i), DEFAULT_AI_TEMPERATURE)
 			Info->Top_P = iniSettings.ReadFloat("AIAgents", "Top_P_" & WStr(i), 0)
 			Info->Stream = iniSettings.ReadBool("AIAgents", "Stream_" & WStr(i), True)
-			Info->ContentSize = iniSettings.ReadInteger("AIAgents", "ContentSize_" & WStr(i), 100) * 1024
+			Info->ContentSize = iniSettings.ReadInteger("AIAgents", "ContentSize_" & WStr(i), DEFAULT_AI_CONTENTSIZE_KB) * 1024
 			AIAgents.Add Temp, Info->Host, Info
 			If *CurrentAIAgent = Temp Then
 				AIAgentModelName = Info->ModelName

@@ -251,7 +251,6 @@ Declare Sub Save
 Declare Function SaveAllBeforeCompile() As Boolean
 Declare Function SaveSession(WithoutQuestion As Boolean = False) As Boolean
 Declare Sub CompileProgram(Param As Any Ptr)
-Declare Sub CompileWithDebugger(Param As Any Ptr)
 Declare Sub CompileAndRun(Param As Any Ptr)
 Declare Sub MakeExecute(Param As Any Ptr)
 Declare Sub MakeClean(Param As Any Ptr)
@@ -277,7 +276,6 @@ Declare Sub LoadOnlyFilePath(Param As Any Ptr)
 Declare Sub LoadOnlyFilePathOverwrite(Param As Any Ptr)
 Declare Sub LoadOnlyFilePathOverwriteWithContent(Param As Any Ptr)
 Declare Sub LoadOnlyIncludeFiles(Param As Any Ptr)
-Declare Sub LoadFromTabWindow(Param As Any Ptr)
 Declare Sub LoadToolBox(ForLibrary As Library Ptr = 0)
 Declare Function IsMyFbFrameworkLibrary(ByRef Path As UString) As Boolean
 Declare Sub RemoveToolBoxLibraryNodes(CtlLibrary As Library Ptr)
@@ -285,7 +283,6 @@ Declare Sub InitToolBoxTree()
 Declare Sub CloseAllTabs(WithoutCurrent As Boolean = False)
 Declare Sub UpdateAllTabWindows
 Declare Sub LoadTheme
-Declare Sub LoadInterfaceTheme
 Declare Sub RunHelp(Param As Any Ptr)
 
 Common Shared As Integer tabLeftWidth, tabRightWidth, tabBottomHeight, leftSelectedTabIndex, rightSelectedTabIndex

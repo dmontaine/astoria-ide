@@ -18,7 +18,6 @@
 		This.CancelButton = @cmdCancel
 		This.DefaultButton = @cmdOK
 		This.OnCreate = @Form_Create
-		This.OnShow = @Form_Show
 		This.SetBounds 0, 0, 742, 360
 		grbCompile.Name = "grbCompile"
 		grbCompile.Text = ML("Compile")
@@ -202,10 +201,6 @@ Private Sub frmParameters.Form_Create(ByRef Designer As My.Sys.Object, ByRef Sen
 	With fParameters
 		.LoadSettings
 	End With
-End Sub
-
-Private Sub frmParameters.Form_Show(ByRef Designer As My.Sys.Object, ByRef Sender As Form)
-	
 End Sub
 
 Private Sub frmParameters.cmdOK_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)

@@ -38,7 +38,6 @@
 			.Name = "frmAIAgent"
 			.Text = ML("AI Agent")
 			.Designer = @This
-			.OnShow = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Form), @Form_Show)
 			.OnCreate = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @Form_Create)
 			.WindowState = WindowStates.wsNormal
 			.StartPosition = FormStartPosition.CenterParent
@@ -289,31 +288,6 @@
 			.Parent = @HorizontalBox2
 		End With
 		
-		'Dim As FileListBox imgAIAgentFile
-		'Dim As WString * 1028 tmpFileName
-		'Dim As Integer Posi
-		'imgAIAgentFile.Pattern = "*_dark.png"
-		'imgAIAgentFile.Path = ExePath & "/" & "Resources/AIAgent/models"
-		'For i As Integer = 0 To imgAIAgentFile.ListCount - 1
-		'	tmpFileName = imgAIAgentFile.FileList.Item(i)
-		'	Posi = InStrRev(tmpFileName, Any "\/:")
-		'	If Posi > 0 Then
-		'		tmpFileName = Mid(tmpFileName, Posi + 1, Len(tmpFileName) - 4)
-		'		pimgListAIModels32->Add tmpFileName, tmpFileName
-		'		cboAIAgentModelName.AddItem tmpFileName
-		'	End If
-		'Next
-		'imgAIAgentFile.Pattern = "*_dark.png"
-		'imgAIAgentFile.Path = ExePath & "/" & "Resources/AIAgent/providers"
-		'For i As Integer = 0 To imgAIAgentFile.ListCount - 1
-		'	tmpFileName = imgAIAgentFile.FileList.Item(i)
-		'	Posi = InStrRev(tmpFileName, Any "\/:")
-		'	If Posi > 0 Then
-		'		tmpFileName = Mid(tmpFileName, Posi + 1, Len(tmpFileName) - 9)
-		'		pimgListAIModels32->Add tmpFileName, tmpFileName
-		'		cboAIAgentProvider.AddItem tmpFileName
-		'	End If
-		'Next
 		' chkAIAgentAuto
 		With chkAIAgentAuto
 			.Name = "chkAIAgentAuto"
@@ -513,10 +487,6 @@ End Sub
 Private Sub frmAIAgentType.txtAIAgentAPIKey_LostFocus(ByRef Sender As Control)
 	Dim As String Normalized = NormalizeAIAgentAPIKey(txtAIAgentAPIKey.Text)
 	If Normalized <> txtAIAgentAPIKey.Text Then txtAIAgentAPIKey.Text = Normalized
-End Sub
-
-Private Sub frmAIAgentType.Form_Show(ByRef Sender As Form)
-	
 End Sub
 
 Private Sub frmAIAgentType.chkAIAgentAuto_Click(ByRef Sender As CheckBox)

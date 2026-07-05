@@ -29,9 +29,9 @@ Using My.Sys.Forms
 
 Declare Sub CompleteWord()
 
-Enum CompileToVariants
-	ByDefault
-	ToGCC
+Enum CompileModeVariants
+	Development
+	Final
 End Enum
 
 Type ProjectElement Extends ExplorerElement
@@ -64,10 +64,7 @@ Type ProjectElement Extends ExplorerElement
 	LegalTrademarks As WString Ptr
 	OriginalFilename As WString Ptr
 	ProductName As WString Ptr
-	CompileTo As CompileToVariants
-	OptimizationLevel As Integer
-	OptimizationFastCode As Boolean
-	OptimizationSmallCode As Boolean
+	CompileMode As CompileModeVariants
 	ShowUnusedLabelWarnings As Boolean
 	ShowUnusedFunctionWarnings As Boolean
 	ShowUnusedVariableWarnings As Boolean
@@ -80,7 +77,7 @@ Type ProjectElement Extends ExplorerElement
 	CompilationArguments32Linux As WString Ptr
 	CompilerPath As WString Ptr
 	CommandLineArguments As WString Ptr
-	CreateDebugInfo As Boolean
+
 	' Win64-only fork: kept because .vfp backward compatibility (no IDE UI)
 	AndroidSDKLocation As WString Ptr
 	AndroidNDKLocation As WString Ptr

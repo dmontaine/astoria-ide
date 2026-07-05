@@ -23,7 +23,6 @@ pfProjectProperties = @fProjectProperties
 		This.BorderStyle = FormBorderStyle.Fixed3D
 		This.MaximizeBox = False
 		This.MinimizeBox = False
-		This.OnShow       = @Form_Show
 		This.DefaultButton = @cmdOK
 		This.CancelButton = @cmdCancel
 		This.SetBounds 0, 0, 510, 458
@@ -53,7 +52,6 @@ pfProjectProperties = @fProjectProperties
 		tpCompile.SetBounds 2, 22, 487, 346
 		tpCompile.Visible = True
 		tpCompile.UseVisualStyleBackColor = True
-		tpCompile.OnClick = @tpCompile_Click
 		tpCompile.Parent = @tabProperties
 		' cmdOK
 		cmdOK.Name = "cmdOK"
@@ -70,12 +68,7 @@ pfProjectProperties = @fProjectProperties
 		cmdCancel.SetBounds 269, 389, 120, 34
 		cmdCancel.OnClick = @cmdCancel_Click
 		cmdCancel.Parent = @This
-		' cmdHelp
-		cmdHelp.Name = "cmdHelp"
-		cmdHelp.Text = ML("Help")
-		cmdHelp.TabIndex = 86
-		cmdHelp.SetBounds 391, 389, 106, 34
-		cmdHelp.Parent = @This
+
 		' tabProperties
 		tabProperties.Name = "tabProperties"
 		tabProperties.Text = "TabControl1"
@@ -260,20 +253,25 @@ pfProjectProperties = @fProjectProperties
 		lblHelpFileName.TabIndex = 14
 		lblHelpFileName.SetBounds 10, 240, 172, 18
 		lblHelpFileName.Parent = @tpGeneral
-		' grbCompileToGCC
-		grbCompileToGCC.Name = "grbCompileToGCC"
-		grbCompileToGCC.Text = ""
-		grbCompileToGCC.Enabled = False
-		grbCompileToGCC.TabIndex = 87
-		grbCompileToGCC.SetBounds 10, 35, 469, 101
-		grbCompileToGCC.Parent = @tpCompile
-		' optCompileToGcc
-		optCompileToGcc.Name = "optCompileToGcc"
-		optCompileToGcc.Text = ML("Compile to GCC")
-		optCompileToGcc.TabIndex = 48
-		optCompileToGcc.SetBounds 16, 34, 132, 16
-		optCompileToGcc.OnClick = @optCompileToGcc_Click
-		optCompileToGcc.Parent = @tpCompile
+		' grbCompileMode
+		grbCompileMode.Name = "grbCompileMode"
+		grbCompileMode.Text = ML("Compile Mode")
+		grbCompileMode.TabIndex = 87
+		grbCompileMode.SetBounds 10, 10, 200, 60
+		grbCompileMode.Parent = @tpCompile
+		' optDevelopment
+		optDevelopment.Name = "optDevelopment"
+		optDevelopment.Text = ML("Development (-g, no optimization)")
+		optDevelopment.TabIndex = 48
+		optDevelopment.Checked = True
+		optDevelopment.SetBounds 16, 20, 175, 20
+		optDevelopment.Parent = @grbCompileMode
+		' optFinal
+		optFinal.Name = "optFinal"
+		optFinal.Text = ML("Final (-O2, no debug info)")
+		optFinal.TabIndex = 49
+		optFinal.SetBounds 16, 42, 175, 20
+		optFinal.Parent = @grbCompileMode
 		' tpIncludes
 		With tpIncludes
 			.Name = "tpIncludes"
@@ -285,64 +283,6 @@ pfProjectProperties = @fProjectProperties
 			.Designer = @This
 			.Parent = @tabProperties
 		End With
-		' tpDebugging
-		tpDebugging.Name = "tpDebugging"
-		tpDebugging.TabIndex = 70
-		tpDebugging.SetBounds 2, 22, 487, 316
-		tpDebugging.UseVisualStyleBackColor = True
-		tpDebugging.Visible = True
-		tpDebugging.Text = ML("Debugging")
-		tpDebugging.Designer = @This
-		tpDebugging.OnClick = @tpDebugging_Click_
-		tpDebugging.Parent = @tabProperties
-		' lblCompilationArguments321
-		lblCompilationArguments321.Name = "lblCompilationArguments321"
-		lblCompilationArguments321.Text = ML("Command Line Arguments") & ":"
-		lblCompilationArguments321.TabIndex = 71
-		lblCompilationArguments321.SetBounds 21, 16, 172, 18
-		lblCompilationArguments321.Parent = @tpDebugging
-		' txtCommandLineArguments
-		txtCommandLineArguments.Name = "txtCommandLineArguments"
-		txtCommandLineArguments.TabIndex = 72
-		txtCommandLineArguments.SetBounds 211, 14, 262, 21
-		txtCommandLineArguments.Text = ""
-		txtCommandLineArguments.Parent = @tpDebugging
-		' picCompileToGCC
-		picCompileToGCC.Name = "picCompileToGCC"
-		picCompileToGCC.TabIndex = 49
-		picCompileToGCC.SetBounds 22, 51, 445, 80
-		picCompileToGCC.Text = ""
-		picCompileToGCC.Parent = @tpCompile
-		' optOptimizationFastCode
-		optOptimizationFastCode.Name = "optOptimizationFastCode"
-		optOptimizationFastCode.Text = ML("Optimize for Fast Code")
-		optOptimizationFastCode.TabIndex = 50
-		optOptimizationFastCode.SetBounds 10, 3, 184, 24
-		optOptimizationFastCode.Parent = @picCompileToGCC
-		' optOptimizationLevel
-		optOptimizationLevel.Name = "optOptimizationLevel"
-		optOptimizationLevel.Text = ML("Optimization level") & ":"
-		optOptimizationLevel.TabIndex = 51
-		optOptimizationLevel.SetBounds 220, 9, 160, 16
-		optOptimizationLevel.Parent = @picCompileToGCC
-		' optOptimizationSmallCode
-		optOptimizationSmallCode.Name = "optOptimizationSmallCode"
-		optOptimizationSmallCode.Text = ML("Optimize for Small Code")
-		optOptimizationSmallCode.TabIndex = 53
-		optOptimizationSmallCode.SetBounds 10, 29, 184, 16
-		optOptimizationSmallCode.Parent = @picCompileToGCC
-		' optNoOptimization
-		optNoOptimization.Name = "optNoOptimization"
-		optNoOptimization.Text = ML("No Optimization")
-		optNoOptimization.TabIndex = 54
-		optNoOptimization.SetBounds 10, 52, 192, 16
-		optNoOptimization.Parent = @picCompileToGCC
-		' chkCreateDebugInfo
-		chkCreateDebugInfo.Name = "chkCreateDebugInfo"
-		chkCreateDebugInfo.Text = ML("Create Symbolic Debug Info")
-		chkCreateDebugInfo.TabIndex = 73
-		chkCreateDebugInfo.SetBounds 211, 45, 254, 32
-		chkCreateDebugInfo.Parent = @tpDebugging
 		' Initialization
 		cboProjectType.AddItem ML("Executable")
 		cboProjectType.AddItem ML("Dynamic library")
@@ -350,25 +290,25 @@ pfProjectProperties = @fProjectProperties
 		cboSubsystem.AddItem ML("(not selected)")
 		cboSubsystem.AddItem ML("Console")
 		cboSubsystem.AddItem ML("GUI")
-		' cboOptimizationLevel
-		cboOptimizationLevel.Name = "cboOptimizationLevel"
-		cboOptimizationLevel.Text = "ComboBoxEdit1"
-		cboOptimizationLevel.TabIndex = 52
-		cboOptimizationLevel.SetBounds 386, 6, 56, 21
-		cboOptimizationLevel.Parent = @picCompileToGCC
-		cboOptimizationLevel.AddItem "0"
-		cboOptimizationLevel.AddItem "1"
-		cboOptimizationLevel.AddItem "2"
-		cboOptimizationLevel.Designer = @This
-		cboOptimizationLevel.OnSelected = @_cboOptimizationLevel_Selected
-		cboOptimizationLevel.AddItem "3"
 		' cmdAdvancedOptions
 		cmdAdvancedOptions.Name = "cmdAdvancedOptions"
 		cmdAdvancedOptions.Text = ML("Advanced Options") & " ..."
 		cmdAdvancedOptions.TabIndex = 55
-		cmdAdvancedOptions.SetBounds 220, 46, 224, 24
+		cmdAdvancedOptions.SetBounds 220, 42, 224, 24
 		cmdAdvancedOptions.OnClick = @cmdAdvancedOptions_Click
-		cmdAdvancedOptions.Parent = @picCompileToGCC
+		cmdAdvancedOptions.Parent = @tpCompile
+		' lblCompilationArguments321
+		lblCompilationArguments321.Name = "lblCompilationArguments321"
+		lblCompilationArguments321.Text = ML("Command Line Arguments") & ":"
+		lblCompilationArguments321.TabIndex = 71
+		lblCompilationArguments321.SetBounds 16, 80, 172, 18
+		lblCompilationArguments321.Parent = @tpCompile
+		' txtCommandLineArguments
+		txtCommandLineArguments.Name = "txtCommandLineArguments"
+		txtCommandLineArguments.TabIndex = 72
+		txtCommandLineArguments.SetBounds 206, 78, 262, 21
+		txtCommandLineArguments.Text = ""
+		txtCommandLineArguments.Parent = @tpCompile
 		' txtCompilationArguments64Linux
 		With txtCompilationArguments64Linux
 			.Name = "txtCompilationArguments64Linux"
@@ -480,25 +420,13 @@ pfProjectProperties = @fProjectProperties
 			.Text = ""
 			.Parent = @tpCompile
 		End With
-		' optCompileByDefault
-		With optCompileByDefault
-			.Name = "optCompileByDefault"
-			.Text = ML("Compile by default")
-			.TabIndex = 45
-			.Checked = True
-			.SetBounds 16, 15, 150, 16
-			'.Caption = ML("Compile by default")
-			.Designer = @This
-			.OnClick = @optCompileByDefault_Click_
-			.Parent = @tpCompile
-		End With
 		' CommandButton1
 		With CommandButton1
 			.Name = "CommandButton1"
 			.Text = "..."
 			.TabIndex = 35
 			.SetBounds 114, 36, 20, 20
-			'.Caption = "..."
+
 			.Designer = @This
 			.OnClick = @CommandButton1_Click_
 			.Parent = @picApplication
@@ -516,7 +444,7 @@ pfProjectProperties = @fProjectProperties
 			.Text = ML("Pass All Module Files To Compiler")
 			.TabIndex = 16
 			.SetBounds 11, 120, 192, 22
-			'.Caption = ML("Pass All Module Files To Compiler")
+
 			.Parent = @tpGeneral
 		End With
 		' cboSubsystem
@@ -533,7 +461,7 @@ pfProjectProperties = @fProjectProperties
 			.Text = ML("Subsystem") & " (" & ML("For Windows") & "):"
 			.TabIndex = 6
 			.SetBounds 10, 66, 202, 18
-			'.Caption = ML("Subsystem") & " (" & ML("For Windows") & "):"
+
 			.Parent = @tpGeneral
 		End With
 		' BrowseD
@@ -553,7 +481,7 @@ pfProjectProperties = @fProjectProperties
 			.Name = "lblCompiler"
 			.Text = ML("Compiler") & ":"
 			.TabIndex = 66
-			'.Caption = ML("Compiler") & ":"
+
 			.SetBounds 29, 288, 90, 20
 			.Parent = @tpCompile
 		End With
@@ -592,7 +520,7 @@ pfProjectProperties = @fProjectProperties
 			.Name = "chkManifest"
 			.Text = ML("Manifest")
 			.TabIndex = 36
-			'.Caption = ML("Manifest")
+
 			.SetBounds 4, 59, 130, 20
 			.Designer = @This
 			.OnClick = @chkManifest_Click_
@@ -603,7 +531,7 @@ pfProjectProperties = @fProjectProperties
 			.Name = "chkRunAsAdministrator"
 			.Text = ML("Run as administrator")
 			.TabIndex = 37
-			'.Caption = ML("Run as administrator")
+
 			.SetBounds 30, 80, 170, 20
 			.Designer = @This
 			.Parent = @picApplication
@@ -614,7 +542,7 @@ pfProjectProperties = @fProjectProperties
 			.Text = ML("Open Project As Folder")
 			.TabIndex = 90
 			.ControlIndex = 14
-			'.Caption = ML("Open Project As Folder")
+
 			.SetBounds 11, 147, 192, 22
 			.Designer = @This
 			.Parent = @tpGeneral
@@ -625,7 +553,7 @@ pfProjectProperties = @fProjectProperties
 			.Text = ML("Batch Compilation File") & " (" & ML("For Windows") & "):"
 			.TabIndex = 91
 			.ControlIndex = 9
-			'.Caption = ML("Batch Compilation File") & " (" & ML("For Windows") & "):"
+
 			.SetBounds 224, 182, 262, 18
 			.Designer = @This
 			.Parent = @tpGeneral
@@ -862,10 +790,6 @@ pfProjectProperties = @fProjectProperties
 		(*Cast(frmProjectProperties Ptr, Sender.Designer)).Form_Create(Sender)
 	End Sub
 	
-	Private Sub frmProjectProperties._cboOptimizationLevel_Selected(ByRef Designer As My.Sys.Object, ByRef Sender As ComboBoxEdit, ItemIndex As Integer)
-		(*Cast(frmProjectProperties Ptr, Sender.Designer)).cboOptimizationLevel_Selected(Sender, ItemIndex)
-	End Sub
-	
 	Private Sub frmProjectProperties.chkManifest_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As CheckBox)
 		(*Cast(frmProjectProperties Ptr, Sender.Designer)).chkManifest_Click(Sender)
 	End Sub
@@ -921,13 +845,7 @@ Private Sub frmProjectProperties.cmdOK_Click(ByRef Designer As My.Sys.Object, By
 		WLet(ppe->LegalTrademarks, .Types.Get(ML("Legal Trademarks")))
 		WLet(ppe->OriginalFilename, .Types.Get(ML("Original Filename")))
 		WLet(ppe->ProductName, .Types.Get(ML("Product Name")))
-		Select Case True
-		Case .optCompileByDefault.Checked: ppe->CompileTo = ByDefault
-		Case .optCompileToGcc.Checked: ppe->CompileTo = ToGCC
-		End Select
-		ppe->OptimizationFastCode = .optOptimizationFastCode.Checked
-		ppe->OptimizationSmallCode = .optOptimizationSmallCode.Checked
-		ppe->OptimizationLevel = IIf(.optOptimizationLevel.Checked, Val(.cboOptimizationLevel.Text), 0)
+		If .optDevelopment.Checked Then ppe->CompileMode = Development Else ppe->CompileMode = Final
 		' Win64-only fork: 32-bit compile-arg fields have no UI; values round-trip via ProjectElement
 		WLet(ppe->CompilationArguments64Windows, .txtCompilationArguments64Windows.Text)
 		WLet(ppe->CompilationArguments64Linux, .txtCompilationArguments64Linux.Text)
@@ -945,7 +863,6 @@ Private Sub frmProjectProperties.cmdOK_Click(ByRef Designer As My.Sys.Object, By
 			ppe->LibraryPaths.Add .lstLibraryPaths.Item(i)
 		Next
 		WLet(ppe->CommandLineArguments, .txtCommandLineArguments.Text)
-		ppe->CreateDebugInfo = .chkCreateDebugInfo.Checked
 		If Not EndsWith(.ProjectTreeNode->Text, "*") Then .ProjectTreeNode->Text &= "*"
 		.CloseForm
 	End With
@@ -1078,11 +995,7 @@ Public Sub frmProjectProperties.RefreshProperties()
 				.txtTitle.Text = *ppe->ApplicationTitle
 				.txtIcon.Text = *ppe->ApplicationIcon
 				If Trim(*ppe->ApplicationIcon) <> "" Then
-					'#ifdef __USE_GTK__
-						imgIcon.Graphic.Icon.LoadFromFile(GetResNamePath(*ppe->ApplicationIcon, GetResourceFile(True)), 32, 32)
-					'#else
-					'	DrawIconEx GetDC(picApplication.Handle), 0, 0, imgIcon.Graphic.Icon.Handle, 32, 32, 0, 0, DI_NORMAL
-					'#endif
+					imgIcon.Graphic.Icon.LoadFromFile(GetResNamePath(*ppe->ApplicationIcon, GetResourceFile(True)), 32, 32)
 				End If
 				.chkManifest.Checked = ppe->Manifest
 				.chkManifest_Click(.chkManifest)
@@ -1094,18 +1007,8 @@ Public Sub frmProjectProperties.RefreshProperties()
 				.Types.Set ML("Legal Trademarks"), *ppe->LegalTrademarks
 				.Types.Set ML("Original Filename"), *ppe->OriginalFilename
 				.Types.Set ML("Product Name"), *ppe->ProductName
-				.optCompileByDefault.Checked = False
-				.optCompileToGcc.Checked = False
-				Select Case ppe->CompileTo
-				Case ByDefault: .optCompileByDefault.Checked = True
-				Case ToGCC: .optCompileToGcc.Checked = True
-				End Select
-				.UpdateOptimizationControlsEnabled(*.optCompileToGcc.Designer, .optCompileToGcc)
-				.optNoOptimization.Checked = ppe->OptimizationLevel = 0
-				.optOptimizationLevel.Checked = ppe->OptimizationLevel > 0
-				.cboOptimizationLevel.ItemIndex = ppe->OptimizationLevel
-				.optOptimizationSmallCode.Checked = ppe->OptimizationSmallCode
-				.optOptimizationFastCode.Checked = ppe->OptimizationFastCode
+				.optDevelopment.Checked = (ppe->CompileMode = Development)
+				.optFinal.Checked = (ppe->CompileMode = Final)
 				.txtCompilationArguments64Windows.Text = *ppe->CompilationArguments64Windows
 				.txtCompilationArguments64Linux.Text = *ppe->CompilationArguments64Linux
 				.txtCompilerPath.Text = *ppe->CompilerPath
@@ -1119,7 +1022,6 @@ Public Sub frmProjectProperties.RefreshProperties()
 					.lstLibraryPaths.AddItem ppe->LibraryPaths.Item(i)
 				Next
 				.txtCommandLineArguments.Text = *ppe->CommandLineArguments
-				.chkCreateDebugInfo.Checked = ppe->CreateDebugInfo
 			End If
 		Else
 			.ProjectTreeNode = ptn
@@ -1152,10 +1054,6 @@ Public Sub frmProjectProperties.RefreshProperties()
 			.txtCompilerPath.Text = ""
 		End If
 	End With
-End Sub
-
-Private Sub frmProjectProperties.tpCompile_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-	
 End Sub
 
 Private Sub frmProjectProperties.lstType_Change(ByRef Designer As My.Sys.Object, ByRef Sender As ListControl)
@@ -1192,32 +1090,10 @@ Private Sub frmProjectProperties.cmdAdvancedOptions_Click(ByRef Designer As My.S
 	End With
 End Sub
 
-Private Sub frmProjectProperties.Form_Show(ByRef Designer As My.Sys.Object, ByRef Sender As Form)
-	
+Private Sub frmProjectProperties.optDevelopment_Click(ByRef Designer As My.Sys.Object, ByRef Sender As RadioButton)
 End Sub
 
-Private Sub frmProjectProperties.UpdateOptimizationControlsEnabled(ByRef Designer As My.Sys.Object, ByRef Sender As RadioButton)
-	With fProjectProperties
-		Dim As Boolean bEnabled = .optCompileToGcc.Checked
-		.grbCompileToGCC.Enabled = bEnabled
-		.optOptimizationLevel.Enabled = bEnabled
-		.optOptimizationSmallCode.Enabled = bEnabled
-		.optNoOptimization.Enabled = bEnabled
-		.optOptimizationFastCode.Enabled = bEnabled
-		.cboOptimizationLevel.Enabled = bEnabled
-		.cmdAdvancedOptions.Enabled = bEnabled
-	End With
-End Sub
-
-Private Sub frmProjectProperties.optCompileToGcc_Click(ByRef Designer As My.Sys.Object, ByRef Sender As RadioButton)
-	frmProjectProperties.UpdateOptimizationControlsEnabled Designer, Sender
-End Sub
-
-Private Sub frmProjectProperties.optCompileByDefault_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As RadioButton)
-	(*Cast(frmProjectProperties Ptr, Sender.Designer)).optCompileByDefault_Click(Sender)
-End Sub
-Private Sub frmProjectProperties.optCompileByDefault_Click(ByRef Sender As RadioButton)
-	frmProjectProperties.UpdateOptimizationControlsEnabled *Sender.Designer, Sender
+Private Sub frmProjectProperties.optFinal_Click(ByRef Designer As My.Sys.Object, ByRef Sender As RadioButton)
 End Sub
 
 Private Sub frmProjectProperties.CommandButton1_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
@@ -1229,22 +1105,12 @@ Private Sub frmProjectProperties.CommandButton1_Click(ByRef Sender As Control)
 	If pfImageManager->ShowModal(Me) = ModalResults.OK Then
 		If pfImageManager->SelectedItem <> 0 Then
 			txtIcon.Text = pfImageManager->SelectedItem->Text(0)
-			'#ifdef __USE_GTK__
 				imgIcon.Graphic.Icon.LoadFromFile(GetRelativePath(pfImageManager->SelectedItem->Text(2), pfImageManager->ResourceFile), 32, 32)
-			'#else
-			'	DrawIconEx GetDC(picApplication.Handle), 0, 0, imgIcon.Graphic.Icon.Handle, 32, 32, 0, 0, DI_NORMAL
-			'#endif
 		End If
 	End If
 	pfImageManager->WithoutMainNode = False
 End Sub
 
-Private Sub frmProjectProperties.tpDebugging_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-	(*Cast(frmProjectProperties Ptr, Sender.Designer)).tpDebugging_Click(Sender)
-End Sub
-Private Sub frmProjectProperties.tpDebugging_Click(ByRef Sender As Control)
-	
-End Sub
 
 Private Sub frmProjectProperties.cmdCompiler_Click(ByRef Sender As Control)
 	OpenD.InitialDir = GetFolderName(txtCompilerPath.Text)
@@ -1265,10 +1131,6 @@ End Sub
 
 Private Sub frmProjectProperties.chkManifest_Click(ByRef Sender As CheckBox)
 	chkRunAsAdministrator.Enabled = chkManifest.Checked
-End Sub
-
-Private Sub frmProjectProperties.cboOptimizationLevel_Selected(ByRef Sender As ComboBoxEdit, ItemIndex As Integer)
-	optOptimizationLevel.Checked = True
 End Sub
 
 Private Sub frmProjectProperties.Form_Create(ByRef Sender As Control)

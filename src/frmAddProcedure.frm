@@ -73,7 +73,6 @@
 			.MaximizeBox = False
 			.MinimizeBox = False
 			.Icon = "1"
-			.OnShow = @Form_Show_
 			.OnCreate = @_Form_Create
 			.SetBounds 0, 0, 340, 600
 		End With
@@ -567,10 +566,6 @@
 		(*Cast(frmAddProcedureType Ptr, Sender.Designer)).cboType_Change(Sender)
 	End Sub
 	
-	Private Sub frmAddProcedureType.Form_Show_(ByRef Designer As My.Sys.Object, ByRef Sender As Form)
-		(*Cast(frmAddProcedureType Ptr, Sender.Designer)).Form_Show(Sender)
-	End Sub
-	
 	Private Sub frmAddProcedureType.cmdOK_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		(*Cast(frmAddProcedureType Ptr, Sender.Designer)).cmdOK_Click(Sender)
 	End Sub
@@ -726,10 +721,6 @@ Private Sub frmAddProcedureType.cmdOK_Click(ByRef Sender As Control)
 	'OnLineChangeEdit tb->txtCode, i + q1 + 2, i + q1 + 2
 	bNotDesignForms = False
 	This.CloseForm
-End Sub
-
-Private Sub frmAddProcedureType.Form_Show(ByRef Sender As Form)
-	
 End Sub
 
 Private Sub frmAddProcedureType.cboType_Change(ByRef Sender As ComboBoxEdit)

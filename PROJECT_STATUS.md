@@ -676,33 +676,47 @@ These are **enhancements, not bugs** — added by the owner after Tier 3 was sco
 
 **Read §13.4's context note before scoping any of this section.** This is a hobby project with no timeline pressure, and the underlying goal across all of §13 — not just the rename — is to avoid the original upstream project's failure mode (too much scope, too little central attention, eventual collapse to one maintainer). Favor depth and coherence over speed or breadth when picking this up.
 
-### 13.1 Evaluate a later GCC version
+### 13.1 Evaluate a later GCC version — **CLOSED (2026-07-04): evaluated, declined**
 
-FreeBASIC's Win64 backend compiles through a bundled `gcc`/`binutils` (`as`, `ld`, `dlltool`, `GoRC`) under `Compiler/bin/win64/`, not just `fbc64.exe` itself. Tier 3 (compiler swap) was attempted and closed 2026-07-03 — no viable 1.10.3 binary exists, staying on 1.10.1 (see §4/§8) — so this is now independent of any near-term compiler swap, not something to bundle with it:
-- Any independent GCC upgrade would be evaluated against the current 1.10.1-paired GCC/binutils version, not a future 1.10.3 pairing that isn't happening.
-- A newer GCC needs a matching MinGW-w64 runtime/headers set; swapping GCC alone without the matching toolchain risks subtle ABI or linker-flag mismatches (`Compile.bat`'s `ld` invocation has a long hand-tuned flag list — see the build log in §3a's verification note).
-- Decide: adopt whatever GCC ships with the chosen fbc build, or independently source a newer one and re-verify the full flag set still links cleanly.
-- **Cross-dependency note (audit flag, 2026-07-03):** §4 has an open gas64-vs-GDB compatibility question tested empirically against the *current* `Compiler/bin/win64/` toolchain. If this swap changes that toolchain, re-verify §4's decision rather than assuming it still holds.
+Current: GCC 9.3.0 (MinGW-W64, posix-sjlj), Binutils 2.34. No actual problem exists — the IDE and all examples compile cleanly. A standalone GCC swap carries high ABI risk (FreeBASIC 1.10.1's bundled `crt*.o`, `libgcc.a`, and `libfbmt.a` were built against this specific GCC; mismatched exception models between `sjlj` and `seh` can silently corrupt the stack at runtime). Marginal benefits (10-20% faster compiles, 5-10% better -O2 output) don't justify the testing burden and risk. Revisit only if a specific, concrete problem attributable to the GCC version surfaces.
 
 ### 13.2 Structured programming, consistency, and legacy-tech-debt removal
 
 **Owner's stated goal:** this codebase carries the accumulated effect of many independent programmers working on it over many years with minimal communication between them. The point of this pass isn't cosmetic formatting — it's to impose one consistent set of conventions and structure over code that currently has as many styles as it had contributors, so the system becomes legible and maintainable going forward rather than an archaeology exercise every time someone touches it.
 
-Concrete goals, in the owner's words plus scope notes:
-- **Structured programming** — reduce/eliminate spaghetti control flow inherited from the codebase's age (deeply nested conditionals, non-local control flow, functions doing too many unrelated things). `src/Debug.bas` (§3a) is the most extreme example already encountered — a ~12,500-line file mixing multiple debugger-backend eras in one module.
-- **Variable consistency** — one naming convention applied uniformly (this codebase currently mixes Hungarian-ish prefixes in some modules with plain names in others, and inconsistent `Private`/scope conventions).
-- **Standard indenting** — one whitespace style repo-wide (currently mixed tabs/spaces even within single files).
-- **Move repeating code into classes/procedures** — DRY pass; likely the highest-value structural work here, since duplicated logic (already seen in miniature during Tier 2.75.3 — e.g. the duplicate `udt(0)`–`udt(16)` block found dead in `Debug.bas`) is exactly what independent, uncoordinated contributors tend to produce instead of factoring shared code.
-- **Remove legacy tech debt** broadly, not just GTK/32-bit remnants already handled in Tier 2.75.3.
-- **Audit for magic numbers** — unnamed numeric literals standing in for a count/size/flag that has to stay in sync with something else by hand. `SettingsService.bas`'s `NoMoreIndexedSettingsKeys` (see the 2026-07-03 regression writeup above in §4) is the concrete example: `Return keySum = -9` encoded "9 sections checked" as a bare literal with nothing tying it to the 8 (now-9, formerly-9) `KeyExists` lines above it, so removing one line silently broke the count and caused an infinite loop that a clean compile couldn't catch. Prefer deriving the comparison from the actual number of checks (e.g. counting the lines, or an explicit named constant) wherever this pattern repeats.
+**Codebase size:** ~277 files, ~5 MB total. Largest files: `TabWindow.bas` (576 KB), `Main.bas` (412 KB), `EditControl.bas` (316 KB), `Chart.bas` (114 KB), `Designer.bas` (117 KB).
 
-Execution notes:
-- There's no established "prettier"-equivalent formatter for FreeBASIC. Whitespace/indentation normalization is safely scriptable in bulk; naming, structure, and DRY refactors are not — those risk breaking `Alias`/`Export` bindings (as already seen with the `ToolBar.bas` compiler quirk in §3a) and need file-by-file compile verification, same discipline as the dead-code deletion pass.
-- This is real restructuring work, not a mechanical pass — expect it to be the largest single effort in the project, larger than Tier 2.75 was. Owner has explicitly said timeline is not a constraint here (see §13.4) — no need to compress this into a quick pass.
-- ~~Should happen **after** the Tier 3 compiler swap~~ — moot: Tier 3 was attempted and closed 2026-07-03 (no viable 1.10.3 binary exists, staying on 1.10.1 — see §4), so there's no pending compiler swap to wait for anymore.
-- Natural pairing with §13.4 (rename): if the project is getting a fresh identity specifically to mark a disciplined restart, this is the pass that actually earns that fresh identity.
-- **Concrete target added 2026-07-03, tied to the §1 "no unnecessary options" principle:** collapse the Project Properties compile/debug settings (`optCompileToGas`/`optCompileToGcc`/`optCompileToLLVM`, `optOptimizationFastCode`/`optOptimizationLevel`/`optOptimizationSmallCode`, `chkCreateDebugInfo` — six controls across two tabs today) into a single opinionated "Development"/"Final" two-state choice, with no exposed compiler flags at all. Full design and final resolution (gas64 confirmed dead, both modes use `gcc`) written up under §4's gas64/GDB discussion ("Concrete design: Development/Final compile-mode toggle").
-- **UI/settings cleanup note added 2026-07-03 (owner):** beyond the code-level removal already in progress (§4's "Code-stripping pass"), do a pass specifically over **user-facing settings and UI elements** — not just source code branches — for leftover support of: **GTK**, **Linux**, **alternative compiler backends** (`gas64`, Clang, LLVM), and **alternative debuggers** (the Integrated stabs debugger). The code-level dead-code removal (§3a, and the in-progress pass in §4) should naturally take most of this UI surface with it as the underlying branches are deleted, but call it out explicitly so nothing lingers unnoticed — e.g. a stray Options/Settings checkbox, a leftover GTK theme control, a Linux-specific path field, or a Project Properties control whose underlying code got deleted but whose UI declaration didn't. Worth a dedicated visual sweep of `frmOptions.frm`/`frmProjectProperties.frm` (and any other settings dialogs) once the code-stripping pass lands, checking for orphaned controls left behind.
+#### Phase 1 — Safe mechanical cleanup (low risk, scriptable)
+
+- **2.1.1 Standardize indentation (whitespace only):** convert mixed tabs/spaces to one consistent scheme across all `.bas`/`.bi`/`.frm`. Scriptable in bulk, zero logic changes. Gate: `CompileDebug.bat` clean.
+- **2.1.2 Remove dead/comment-cruft and empty handlers:** sweep for commented-out code blocks, dead `Declare` forwards with no implementation, empty no-op event handlers. Clean `src/Temp.bas` (238 KB of designer-generated scratch). Gate: compile clean + grep for removed identifiers.
+- **2.1.3 Audit and fix magic numbers:** hunt for unnamed numeric literals standing in for counts/sizes/flags. Known example: `SettingsService.bas` `NoMoreIndexedSettingsKeys` `Return keySum = -9` (already fixed, but the pattern repeats). Gate: compile clean + spot-check constant values.
+
+#### Phase 2 — Codebase readability (moderate risk, file-by-file)
+
+- **2.2.1 Standardize variable naming conventions:** pick one convention and apply uniformly. Rename file-by-file (not cross-file), avoids breaking `Alias`/`Export`/`Declare` bindings. Gate: `CompileDebug.bat` after each file.
+- **2.2.2 DRY pass — extract repeated code within files:** identify duplicated logic patterns within single files and extract into `Private Function`/`Sub`. Gate: compile after each extraction.
+- **2.2.3 Split oversized files by logical domain:** `TabWindow.bas` (Editor/Designer/Debug/Project/Build), `Main.bas` (panels/settings/toolbars/project tree), `EditControl.bas` (highlighting/folding/intellisense). Gate: compile after each split, verify `Export`/`Alias` bindings.
+
+#### Phase 3 — Architecture improvements (high value, high risk)
+
+- **2.3.1 Development/Final compile-mode toggle:** replace 6 Project Properties controls with one "Development"/"Final" radio pair. Both use `-gen gcc`. Gate: compile clean + compile a test project in both modes.
+- **2.3.2 UI/settings sweep — remove orphaned controls:** audit `frmOptions.frm`, `frmProjectProperties.frm` for GTK/Linux controls, alt-compiler radios, alt-debugger references, orphaned theme pickers whose underlying code was deleted in Tier 2.75.3. Gate: compile clean + visual verification.
+- **2.3.3 Extract shared framework utilities:** move common patterns into shared modules. Candidates: INI key migration, GDB command construction, panel-size clamping, DPI scaling helpers. Gate: compile after each extraction.
+
+#### Phase 4 — Legacy tech debt (lowest priority)
+
+- **2.4.1 Final audit for remaining GTK/Linux/32-bit artifacts:** verify nothing new was introduced since Tier 2.75.3. Gate: `grep -rn "GTK\|__USE_GTK__\|__FB_LINUX__\|32bit\|i686" src/ mff/` returns zero (except intentional `CheckCondition()` in `TabWindow.bas`).
+- **2.4.2 Clean `src/makefile` and `src/THREADING.md`:** remove GTK references. Gate: docs-only, compile not affected.
+
+#### Recommended execution order
+
+```
+2.1.1 → 2.1.3 → 2.1.2   (mechanical, safe, quick wins)
+2.2.1 → 2.3.2            (variable naming + UI sweep — user-facing)
+2.3.1                     (compile toggle — immediate user value)
+2.2.2 → 2.2.3            (DRY + file splits — the real structural work, highest risk)
+2.3.3 → 2.4.1 → 2.4.2   (final cleanup)
 
 ### 13.3 UI evaluation and modernization
 

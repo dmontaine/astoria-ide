@@ -10,7 +10,6 @@
 				.Icon.LoadFromResourceID(1)
 			.Designer = @This
 			.BorderStyle = FormBorderStyle.Sizable
-			.OnShow = @Form_Show_
 			.OnClose = @Form_Close_
 			.OnCreate = @_Form_Create
 			.SetBounds 0, 0, 657, 440
@@ -99,8 +98,7 @@
 			.ExtraMargins.Bottom = 10
 			.TabIndex = 16
 			.SetBounds 430, 0, 88, 20
-			'.Caption = ML("OK")
-			.Designer = @This
+				.Designer = @This
 			.OnClick = @cmdOK_Click_
 			.Parent = @pnlBottom
 		End With
@@ -437,12 +435,6 @@ Private Sub frmTemplates.lvTemplates_ItemActivate(ByRef Sender As ListView, ByVa
 	cmdOK_Click cmdOK
 End Sub
 
-Private Sub frmTemplates.Form_Show_(ByRef Designer As My.Sys.Object, ByRef Sender As Form)
-	(*Cast(frmTemplates Ptr, Sender.Designer)).Form_Show(Sender)
-End Sub
-Private Sub frmTemplates.Form_Show(ByRef Sender As Form)
-	
-End Sub
 
 Private Sub frmTemplates.Form_Close_(ByRef Designer As My.Sys.Object, ByRef Sender As Form, ByRef Action As Integer)
 	(*Cast(frmTemplates Ptr, Sender.Designer)).Form_Close(Sender, Action)

@@ -18,8 +18,6 @@ pAvailableAddIns = @AvailableAddIns
 		This.Name = "frmAddIns"
 		This.Text = ML("Add-Ins")
 		This.OnCreate = @Form_Create
-		This.OnClose = @Form_Close
-		This.OnShow = @Form_Show
 		This.BorderStyle = FormBorderStyle.FixedDialog
 		This.ControlBox = True
 		This.MinimizeBox = False
@@ -106,12 +104,6 @@ Destructor AddInType
 End Destructor
 
 Destructor frmAddIns
-'	For i As Integer = 0 To AvailableAddIns.Count - 1
-'		#ifndef __USE_GTK__
-'			Delete Cast(AddInType Ptr, AvailableAddIns.Item(i))
-'		#endif
-'	Next
-'	AvailableAddIns.Clear
 End Destructor
 
 Private Sub frmAddIns.cmdOK_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
@@ -218,10 +210,6 @@ Private Sub frmAddIns.chkLoadOnStartup_Click(ByRef Designer As My.Sys.Object, By
 	ChangeItem fAddIns.lvAddIns.SelectedItemIndex
 End Sub
 
-Private Sub frmAddIns.Form_Close(ByRef Designer As My.Sys.Object, ByRef Sender As Form, ByRef Action As Integer)
-	
-End Sub
-
 Private Sub frmAddIns.lvAddIns_SelectedItemChanged(ByRef Designer As My.Sys.Object, ByRef Sender As ListView, ItemIndex As Integer)
 	Dim i As Integer = ItemIndex
 	If i < 0 Then
@@ -238,10 +226,6 @@ Private Sub frmAddIns.lvAddIns_SelectedItemChanged(ByRef Designer As My.Sys.Obje
 		fAddIns.chkLoadOnStartup.Enabled = True
 		fAddIns.txtDescription.Text = WGet(Add_In->Description)
 	End If
-End Sub
-
-Private Sub frmAddIns.Form_Show(ByRef Designer As My.Sys.Object, ByRef Sender As Form)
-	
 End Sub
 
 Private Sub frmAddIns.lvAddIns_ItemClick(ByRef Designer As My.Sys.Object, ByRef Sender As ListView, ByVal ItemIndex As Integer)

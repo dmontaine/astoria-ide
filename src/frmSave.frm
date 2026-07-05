@@ -6,8 +6,7 @@
 		With This
 			.Name = "frmSave"
 			.Text = "Visual FB Editor"
-			'.Caption = "Visual FB Editor"
-			.BorderStyle = FormBorderStyle.FixedDialog
+				.BorderStyle = FormBorderStyle.FixedDialog
 				This.Icon.LoadFromResourceID(1)
 			.FormStyle = FormStyles.fsStayOnTop
 			.MaximizeBox = False

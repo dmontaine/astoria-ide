@@ -54,7 +54,6 @@ Dim Shared  As WString Ptr BuffTips(Any)
 			.Designer = @This
 				.DefaultButton = @cmdClose
 				.CancelButton = @cmdClose
-			.OnShow = @Form_Show_
 			.OnCreate = @_Form_Create
 			.OnClose = @_Form_Close
 			.SetBounds 0, 0, 540, 350
@@ -96,7 +95,6 @@ Dim Shared  As WString Ptr BuffTips(Any)
 			.TabIndex = 1
 			.SetBounds 20, 282, 180, 20
 			.Designer = @This
-			.OnClick = @chkDoNotShow_Click_
 			.Parent = @This
 		End With
 		' lblTips
@@ -131,16 +129,8 @@ Dim Shared  As WString Ptr BuffTips(Any)
 		(*Cast(frmTipOfDayType Ptr, Sender.Designer)).cmdNextTip_Click(Sender)
 	End Sub
 	
-	Private Sub frmTipOfDayType.chkDoNotShow_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As CheckBox)
-		(*Cast(frmTipOfDayType Ptr, Sender.Designer)).chkDoNotShow_Click(Sender)
-	End Sub
-	
 	Private Sub frmTipOfDayType.cmdPreviousTip_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		(*Cast(frmTipOfDayType Ptr, Sender.Designer)).cmdPreviousTip_Click(Sender)
-	End Sub
-	
-	Private Sub frmTipOfDayType.Form_Show_(ByRef Designer As My.Sys.Object, ByRef Sender As Form)
-		(*Cast(frmTipOfDayType Ptr, Sender.Designer)).Form_Show(Sender)
 	End Sub
 	
 	Private Sub frmTipOfDayType.cmdClose_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
@@ -152,14 +142,6 @@ Dim Shared  As WString Ptr BuffTips(Any)
 
 Private Sub frmTipOfDayType.cmdClose_Click(ByRef Sender As Control)
 	This.CloseForm
-End Sub
-
-Private Sub frmTipOfDayType.Form_Show(ByRef Sender As Form)
-	
-End Sub
-
-Private Sub frmTipOfDayType.chkDoNotShow_Click(ByRef Sender As CheckBox)
-	
 End Sub
 
 Private Sub frmTipOfDayType.cmdPreviousTip_Click(ByRef Sender As Control)

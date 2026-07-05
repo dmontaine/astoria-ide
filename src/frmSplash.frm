@@ -13,11 +13,6 @@ Using My.Sys.Forms
 	Constructor frmSplash
 		This.Text = "Visual FB Editor"
 		This.Icon = "VisualFBEditor"
-		'#ifdef __USE_GTK__
-		'	This.Icon.LoadFromFile(ExePath & "/Resources/VisualFBEditor.ico")
-		'#else
-		'	This.Icon.LoadFromResourceID(1)
-		'#endif
 		This.Cursor = crWait
 		This.BackColor = 0
 		This.SetBounds 0, 0, 412, 412

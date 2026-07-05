@@ -26,8 +26,7 @@
 			.Designer = @This
 			.ShowCaption = True
 			.OnCreate = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @Form_Create)
-			'.Caption = ML("Compiler Options")
-			.OnShow = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Form), @Form_Show)
+				.OnShow = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Form), @Form_Show)
 			.SetBounds 0, 0, 350, 420
 		End With
 		' lvCompilerOptions

@@ -69,9 +69,6 @@ Common Shared As Integer oldIndex, newIndex
 		Declare Static Sub chkUnderline_Click(ByRef Designer As My.Sys.Object, ByRef Sender As CheckBox)
 		Declare Static Sub cmdAdd_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Static Sub cmdRemove_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-		Declare Static Sub cmdAddCompiler_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-		Declare Static Sub cmdRemoveCompiler_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-		Declare Static Sub cmdClearCompilers_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Static Sub cmdAddMakeTool_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Static Sub cmdRemoveMakeTool_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Static Sub cmdClearMakeTools_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
@@ -80,7 +77,6 @@ Common Shared As Integer oldIndex, newIndex
 		Declare Static Sub cmdClearTerminals_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Static Sub cmdFrame_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Static Sub chkFrame_Click(ByRef Designer As My.Sys.Object, ByRef Sender As CheckBox)
-		Declare Static Sub cmdChangeCompiler_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Static Sub cmdChangeTerminal_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Static Sub cmdChangeMakeTool_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Static Sub cmdAddHelp_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
@@ -107,8 +103,6 @@ Common Shared As Integer oldIndex, newIndex
 		Declare Static Sub optCreateProjectFile_Click(ByRef Designer As My.Sys.Object, ByRef Sender As RadioButton)
 		Declare Static Sub optOpenLastSession_Click(ByRef Designer As My.Sys.Object, ByRef Sender As RadioButton)
 		Declare Static Sub optDoNotNothing_Click(ByRef Designer As My.Sys.Object, ByRef Sender As RadioButton)
-		Declare Static Sub cmdFindCompilers_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-		Declare Sub cmdFindCompilers_Click(ByRef Sender As Control)
 		Declare Static Sub lvOtherEditors_ItemActivate_(ByRef Designer As My.Sys.Object, ByRef Sender As ListView, ByVal ItemIndex As Integer)
 		Declare Sub lvOtherEditors_ItemActivate(ByRef Sender As ListView, ByVal ItemIndex As Integer)
 		Declare Static Sub lvTerminalPaths_ItemActivate_(ByRef Designer As My.Sys.Object, ByRef Sender As ListView, ByVal ItemIndex As Integer)
@@ -154,7 +148,7 @@ Common Shared As Integer oldIndex, newIndex
 		Declare Destructor
 		
 		Dim As TreeView tvOptions
-		Dim As CommandButton cmdOK, cmdCancel, cmdApply, cmdAddCompiler, cmdMFFPath, cmdAddInclude, cmdRemoveInclude, cmdAddLibrary, cmdRemoveLibrary, cmdChangeTerminal, cmdChangeMakeTool, cmdAdd, cmdRemove, cmdForeground, cmdFont, cmdProjectsPath, cmdBackground, cmdIndicator, cmdRemoveCompiler, cmdClearCompilers, cmdAddMakeTool, cmdRemoveMakeTool, cmdClearMakeTools, cmdAddTerminal, cmdRemoveTerminal, cmdClearTerminals, cmdSetShortcut
+		Dim As CommandButton cmdOK, cmdCancel, cmdApply, cmdMFFPath, cmdAddInclude, cmdRemoveInclude, cmdAddLibrary, cmdRemoveLibrary, cmdChangeTerminal, cmdChangeMakeTool, cmdAdd, cmdRemove, cmdForeground, cmdFont, cmdProjectsPath, cmdBackground, cmdIndicator, cmdAddMakeTool, cmdRemoveMakeTool, cmdClearMakeTools, cmdAddTerminal, cmdRemoveTerminal, cmdClearTerminals, cmdSetShortcut
 		Dim As Label lblBlack, lblCompiler64, lblCompiler64Path, lblCompilerCommandLine, lblTabSize, lblHistoryLimit, lblGridSize, lblFont, lblProjectsPath, lblForeground, lblBackground, lblIndicator, lblOthers, lblShortcut, lblDefaultFileFormat
 		Dim As ScrollControl pnlGeneral, pnlCodeEditor, pnlDesigner, sccColors, sccInterfaceColors
 		Dim As Panel pnlLocalization, pnlThemes, pnlShortcuts, pnlColorsAndFonts, pnlCompiler, pnlMake, pnlDebugger, pnlTerminal, pnlHelp, pnlIncludes, pnlIncludeMFFPath, pnlInterfaceFont, pnlGrid, pnlOtherEditors, pnlLine, pnlLanguage, pnlProjectsPath, pnlSelectShortcut, pnlAutoSaveCharMax, pnlBuildConfigurations, pnlAIAgent, pnlDefaults
@@ -187,8 +181,8 @@ Common Shared As Integer oldIndex, newIndex
 		Dim As CommandButton cmdInterfaceFont
 		Dim As Label lblInterfaceFontLabel
 		Dim As CheckBox chkDisplayIcons, chkShowMainToolbar, chkAutoCreateBakFiles, chkShowToolBoxLocal, chkShowPropLocal
-		Dim As Label lblFrame, lblFindCompilersFromComputer, lblOpenCommandPromptIn, lblIntellisenseLimit, lblHistoryDay, lblShowMsg, lbAutoSaveCharMax, lblCodeEditorHoverTime, lblDefaultNewLineFormat, lblInterfaceColor
-		Dim As CommandButton cmdFrame, cmdChangeCompiler, cmdAddHelp, cmdChangeHelp, cmdRemoveHelp, cmdClearHelps, cmdAddEditor, cmdChangeEditor, cmdRemoveEditor, cmdClearEditor, cmdFindCompilers, cmdInFolder, cmdUpdateLng,  cmdUpdateLngHTMLFolds(0),  cmdReplaceInFiles(0), cmdClearConfigurations, cmdRemoveConfiguration, cmdChangeConfiguration, cmdAddConfiguration, cmdClearAIAgent, cmdRemoveAIAgent, cmdChangeAIAgent, cmdAddAIAgent, cmdInterfaceThemeAdd, cmdInterfaceThemeRemove, cmdInterfaceColor
+		Dim As Label lblFrame, lblOpenCommandPromptIn, lblIntellisenseLimit, lblHistoryDay, lblShowMsg, lbAutoSaveCharMax, lblCodeEditorHoverTime, lblDefaultNewLineFormat, lblInterfaceColor
+		Dim As CommandButton cmdFrame, cmdAddHelp, cmdChangeHelp, cmdRemoveHelp, cmdClearHelps, cmdAddEditor, cmdChangeEditor, cmdRemoveEditor, cmdClearEditor, cmdInFolder, cmdUpdateLng,  cmdUpdateLngHTMLFolds(0),  cmdReplaceInFiles(0), cmdClearConfigurations, cmdRemoveConfiguration, cmdChangeConfiguration, cmdAddConfiguration, cmdClearAIAgent, cmdRemoveAIAgent, cmdChangeAIAgent, cmdAddAIAgent, cmdInterfaceThemeAdd, cmdInterfaceThemeRemove, cmdInterfaceColor
 		Dim As CheckBox chkAllLNG, chkFrame, chkForeground, chkBackground, chkIndicator
 		Dim As CheckBox chkHighlightCurrentWord
 		Dim As CheckBox chkHighlightCurrentLine

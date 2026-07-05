@@ -79,15 +79,15 @@ Sub RunCmd(Param As Any Ptr)
 		WLet(Workdir, *CommandPromptFolder)
 	End If
 		cmd = Environ("COMSPEC") & " /K cd /D """ & *Workdir & """"
-		Dim As Integer pClass
+		Dim As Integer iClass
 		Dim SInfo As STARTUPINFO
 		Dim PInfo As PROCESS_INFORMATION
 		WLet(CmdL, cmd)
 		SInfo.cb = Len(SInfo)
 		SInfo.dwFlags = STARTF_USESHOWWINDOW
 		SInfo.wShowWindow = SW_NORMAL
-		pClass = CREATE_UNICODE_ENVIRONMENT Or CREATE_NEW_CONSOLE
-		If CreateProcessW(NULL, CmdL, ByVal NULL, ByVal NULL, False, pClass, NULL, Workdir, @SInfo, @PInfo) Then
+		iClass = CREATE_UNICODE_ENVIRONMENT Or CREATE_NEW_CONSOLE
+		If CreateProcessW(NULL, CmdL, ByVal NULL, ByVal NULL, False, iClass, NULL, Workdir, @SInfo, @PInfo) Then
 			CloseHandle(PInfo.hProcess)
 			CloseHandle(PInfo.hThread)
 		End If

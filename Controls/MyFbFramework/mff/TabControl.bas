@@ -741,6 +741,14 @@ Namespace My.Sys.Forms
 				
 			Case WM_ERASEBKGND
 				If g_darkModeSupported AndAlso g_darkModeEnabled Then
+					' Actually fill dark before claiming the background is handled -
+					' this previously returned "erased" without painting anything, so
+					' whatever was underneath (usually the default white) showed
+					' through: most visibly as the big light body of an empty
+					' TabControl (the IDE's central area with no files open).
+					Dim As ..Rect RC
+					GetClientRect(FHandle, @RC)
+					FillRect(Cast(HDC, Message.wParam), @RC, hbrBkgnd)
 					Message.Result = -1
 					Exit Sub
 				End If
@@ -782,6 +790,44 @@ Namespace My.Sys.Forms
 						SetBkMode(Dc, OPAQUE)
 						NewFontHandle = SelectObject(Dc, OldFontHandle)
 						DeleteObject(NewFontHandle)
+						Canvas.UnSetHandle
+						EndPaint Handle, @Ps
+						Message.Result = 0
+						Return
+					ElseIf FTabPosition = tpTop OrElse FTabPosition = tpBottom Then
+						' Same idea as the tpLeft/tpRight branch above, but for
+						' horizontal tab strips (no rotated font needed). Top-positioned
+						' tabs have TCS_OWNERDRAWFIXED switched off (see TabPosition
+						' setter), so the native control would otherwise paint the strip
+						' and items with the light visual-styles theme - this drop-in
+						' paint covers the strip background, item highlight, icon and
+						' caption in the dark palette instead.
+						Dim As HDC Dc
+						Dim As PAINTSTRUCT Ps
+						Dc = BeginPaint(Handle, @Ps)
+						Canvas.SetHandle Dc
+						If OnPaint Then OnPaint(*Designer, This, Canvas)
+						FillRect Dc, @Ps.rcPaint, Brush.Handle
+						Dim As HFONT OldFontHandle = SelectObject(Dc, Font.Handle)
+						SetTextColor(Dc, darkTextColor)
+						SetBkMode(Dc, TRANSPARENT)
+						For i As Integer = 0 To TabCount - 1
+							Dim As ..Rect R
+							Perform(TCM_GETITEMRECT, i, CInt(@R))
+							If i = SelectedTabIndex Then
+								FillRect(Dc, @R, hbrHlBkgnd)
+							End If
+							Dim As Integer iTextLeft = R.Left + ScaleX(5)
+							If Images <> 0 AndAlso Images->Handle <> 0 AndAlso Tabs[i]->ImageIndex > -1 Then
+								ImageList_Draw(Images->Handle, Tabs[i]->ImageIndex, Dc, iTextLeft, R.Top + (R.Bottom - R.Top - ScaleY(Images->ImageHeight)) \ 2, ILD_TRANSPARENT)
+								iTextLeft += ScaleX(Images->ImageWidth + 3)
+							End If
+							Dim As ..Rect RText = R
+							RText.Left = iTextLeft
+							DrawText(Dc, Tabs[i]->Caption, Len(Tabs[i]->Caption), @RText, DT_LEFT Or DT_SINGLELINE Or DT_VCENTER)
+						Next i
+						SetBkMode(Dc, OPAQUE)
+						SelectObject(Dc, OldFontHandle)
 						Canvas.UnSetHandle
 						EndPaint Handle, @Ps
 						Message.Result = 0

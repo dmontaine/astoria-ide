@@ -69,12 +69,30 @@ Function AllowDarkModeForWindow(hWnd As HWND, allow As BOOL) As BOOL
 	' by RefreshTitleBarThemeColor / SetTitleBarThemeColor.
 	If hWnd = 0 Then Return False
 
+	' Re-entrancy guard. SetWindowTheme synchronously sends WM_THEMECHANGED
+	' back to the window it themes, and several controls' WM_THEMECHANGED
+	' handlers (Form, Grid, ListView, TreeListView, TreeView) respond by
+	' calling this function again for that same window - without this guard
+	' that's unbounded mutual recursion and a stack-overflow crash (this was
+	' the long-standing "enabling dark mode crashes the app" bug: 0xc0000005
+	' with the guard page hit at a varying point in the cycle's frames, so
+	' the faulting module looked like UxTheme.dll). Same-window re-entry is
+	' cut here, at the one choke point all those handlers share; nested calls
+	' for a *different* window (e.g. a ListView theming its header from
+	' inside its own handler) still pass. GUI is single-threaded, so a
+	' Static slot is sufficient.
+	Static As HWND hWndInProgress
+	If hWndInProgress = hWnd Then Return False
+	Dim As HWND hWndPrev = hWndInProgress
+	hWndInProgress = hWnd
+
 	If allow Then
 		SetWindowTheme(hWnd, "DarkMode_Explorer", NULL)
 	Else
 		SetWindowTheme(hWnd, NULL, NULL)
 	End If
 
+	hWndInProgress = hWndPrev
 	Return True
 End Function
 

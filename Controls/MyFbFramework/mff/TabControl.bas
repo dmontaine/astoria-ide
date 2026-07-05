@@ -1072,6 +1072,16 @@ Namespace My.Sys.Forms
 		DeleteTab IndexOfTab(Value)
 	End Sub
 	
+	Private Sub TabControl.DetachTab(Value As TabPage Ptr)
+		If Value = 0 Then Exit Sub
+		Dim As Integer idx = IndexOfTab(Value)
+		If idx < 0 Then Exit Sub
+		Dim As Boolean bDynamic = Value->FDynamic
+		Value->FDynamic = False
+		DeleteTab idx
+		Value->FDynamic = bDynamic
+	End Sub
+	
 	Private Function TabControl.InsertTab(Index As Integer, ByRef Caption As WString, AObject As Any Ptr = 0) As TabPage Ptr
 		Dim As Integer i
 		Dim As TabPage Ptr It, tp

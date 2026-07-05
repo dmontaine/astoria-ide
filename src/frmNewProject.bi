@@ -17,20 +17,17 @@
 		Declare Sub lvTemplates_ItemActivate(ByRef Sender As ListView, ByVal ItemIndex As Integer)
 		Declare Static Sub lvTemplates_SelectedItemChanged_(ByRef Designer As My.Sys.Object, ByRef Sender As ListView, ByVal ItemIndex As Integer)
 		Declare Sub lvTemplates_SelectedItemChanged(ByRef Sender As ListView, ByVal ItemIndex As Integer)
-		Declare Static Sub cmdSaveLocation_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-		Declare Sub cmdSaveLocation_Click(ByRef Sender As Control)
 		Declare Static Sub Form_Create_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Sub Form_Create(ByRef Sender As Control)
 		Declare Constructor
 		
 		Dim As ListView lvTemplates
-		Dim As CommandButton cmdOK, cmdCancel, cmdSaveLocation
-		Dim As Label lblPrompt, lblSaveLocation
-		Dim As TextBox txtSaveLocation
-		Dim As Panel pnlSaveLocation, pnlBottom
+		Dim As CommandButton cmdOK, cmdCancel
+		Dim As Label lblProjectTemplates, lblProjectName
+		Dim As TextBox txtProjectName
+		Dim As Panel pnlProjectName, pnlBottom
 		Dim As WStringList TemplateNames
 		Dim As UString SelectedTemplate, SelectedFolder
-		Dim As String NewName
 	End Type
 	
 	Common Shared pfNewProject As frmNewProject Ptr

@@ -174,7 +174,6 @@
 			.ExtraMargins.Right = 10
 			.SetBounds 0, 10, 120, 313
 			.Parent = @tpRecent
-			.Nodes.Add ML("Sessions")
 			.Nodes.Add ML("Folders")
 			.Nodes.Add ML("Projects")
 			.Nodes.Add ML("Files")
@@ -475,10 +474,9 @@ Private Sub frmTemplates.tvRecent_SelChanged(ByRef Sender As TreeView, ByRef Ite
 	Dim As WStringList Ptr MRUList
 	lvRecent.ListItems.Clear
 	Select Case Item.Index
-	Case 0: MRUList = @MRUSessions
-	Case 1: MRUList = @MRUFolders
-	Case 2: MRUList = @MRUProjects
-	Case 3: MRUList = @MRUFiles
+	Case 0: MRUList = @MRUFolders
+	Case 1: MRUList = @MRUProjects
+	Case 2: MRUList = @MRUFiles
 	Case Else: Exit Sub
 	End Select
 	Dim sTmp As WString * 1024
@@ -536,18 +534,14 @@ Private Sub frmTemplates.cmdClear_Click(ByRef Sender As Control)
 	Dim NodeIdx As Integer = -1
 	If tvRecent.SelectedNode <> 0 Then NodeIdx = tvRecent.SelectedNode->Index
 	If NodeIdx = 0 Then
-		miRecentSessions->Clear
-		miRecentSessions->Enabled = False
-		MRUSessions.Clear
-	ElseIf NodeIdx = 1 Then
 		miRecentFolders->Clear
 		miRecentFolders->Enabled = False
 		MRUFolders.Clear
-	ElseIf NodeIdx = 2 Then
+	ElseIf NodeIdx = 1 Then
 		miRecentProjects->Clear
 		miRecentProjects->Enabled = False
 		MRUProjects.Clear
-	ElseIf NodeIdx = 3 Then
+	ElseIf NodeIdx = 2 Then
 		miRecentFiles->Clear
 		miRecentFiles->Enabled = False
 		MRUFiles.Clear
@@ -561,16 +555,13 @@ Private Sub frmTemplates.cmdRemove_Click(ByRef Sender As Control)
 	Dim NodeIdx As Integer = -1
 	If tvRecent.SelectedNode <> 0 Then NodeIdx = tvRecent.SelectedNode->Index
 	If Idx <> -1 Then
-		If NodeIdx <= 0 Then
-			miRecentSessions->Remove miRecentSessions->Item(Idx)
-			MRUSessions.Remove Idx
-		ElseIf NodeIdx = 1 Then
+		If NodeIdx = 0 Then
 			miRecentFolders->Remove miRecentFolders->Item(Idx)
 			MRUFolders.Remove Idx
-		ElseIf NodeIdx = 2 Then
+		ElseIf NodeIdx = 1 Then
 			miRecentProjects->Remove miRecentProjects->Item(Idx)
 			MRUProjects.Remove Idx
-		ElseIf NodeIdx = 3 Then
+		ElseIf NodeIdx = 2 Then
 			miRecentFiles->Remove miRecentFiles->Item(Idx)
 			MRUFiles.Remove Idx
 		End If
@@ -586,7 +577,7 @@ Private Sub frmTemplates.cmdChange_Click(ByRef Sender As Control)
 	If Idx <> -1 Then
 		pfPath->WithoutVersion = True
 		pfPath->WithoutCommandLine = True
-		If NodeIdx = 1 Then
+		If NodeIdx = 0 Then
 			pfPath->ChooseFolder = True
 		End If
 		pfPath->txtPath.Text = lvRecent.SelectedItem->Text(1)
@@ -597,16 +588,13 @@ Private Sub frmTemplates.cmdChange_Click(ByRef Sender As Control)
 			Exit Sub
 		End If
 		If StartsWith(Path, "." & Slash) Then Path = Mid(Path, 3)
-		If NodeIdx <= 0 Then
-			miRecentSessions->Item(Idx)->Caption = Path
-			MRUSessions.Item(Idx) = Path
-		ElseIf NodeIdx = 1 Then
+		If NodeIdx = 0 Then
 			miRecentFolders->Item(Idx)->Caption = Path
 			MRUFolders.Item(Idx) = Path
-		ElseIf NodeIdx = 2 Then
+		ElseIf NodeIdx = 1 Then
 			miRecentProjects->Item(Idx)->Caption = Path
 			MRUProjects.Item(Idx) = Path
-		ElseIf NodeIdx = 3 Then
+		ElseIf NodeIdx = 2 Then
 			miRecentFiles->Item(Idx)->Caption = Path
 			MRUFiles.Item(Idx) = Path
 		End If
@@ -633,16 +621,13 @@ Private Sub frmTemplates.cmdAdd_Click(ByRef Sender As Control)
 		Exit Sub
 	End If
 	If StartsWith(Path, "." & Slash) Then Path = Mid(Path, 3)
-	If NodeIdx <= 0 Then
-		miRecentSessions->Add Path, "", , @mClickMRU, , 0
-		MRUSessions.Insert 0, Path
-	ElseIf NodeIdx = 1 Then
+	If NodeIdx = 0 Then
 		miRecentFolders->Add Path, "", , @mClickMRU, , 0
 		MRUFolders.Insert 0, Path
-	ElseIf NodeIdx = 2 Then
+	ElseIf NodeIdx = 1 Then
 		miRecentProjects->Add Path, "", , @mClickMRU, , 0
 		MRUProjects.Insert 0, Path
-	ElseIf NodeIdx = 3 Then
+	ElseIf NodeIdx = 2 Then
 		miRecentFiles->Add Path, "", , @mClickMRU, , 0
 		MRUFiles.Insert 0, Path
 	End If

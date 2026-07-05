@@ -537,19 +537,6 @@ pfOptions = @fOptions
 			.ID = 1009
 			.Parent = @vbxGeneral
 		End With
-		' chkAutoSaveSession
-		With chkAutoSaveSession
-			.Name = "chkAutoSaveSession"
-			.Text = ML("Auto save session (if session opened)")
-			.TabIndex = 246
-			.Align = DockStyle.alTop
-			.AutoSize = True
-			.ControlIndex = 2
-			.Constraints.Height = 21
-			.SetBounds 0, 0, 142, 21
-			.Designer = @This
-			.Parent = @vbxGeneral
-		End With
 		' chkAutoCreateRC
 		chkAutoCreateRC.Name = "chkAutoCreateRC"
 		chkAutoCreateRC.Text = ML("Auto create resource and manifest files (.rc, .xml)")
@@ -2988,7 +2975,6 @@ Sub frmOptions.LoadSettings()
 		.chkAutoIndentation.Checked = AutoIndentation
 		.chkAutoCreateRC.Checked = AutoCreateRC
 		.chkAutoCreateBakFiles.Checked = AutoCreateBakFiles
-		.chkAutoSaveSession.Checked = AutoSaveSession
 		.chkAddRelativePathsToRecent.Checked = AddRelativePathsToRecent
 		.chkCreateNonStaticEventHandlers.Checked = CreateNonStaticEventHandlers
 		.chkPlaceStaticEventHandlersAfterTheConstructor.Checked = PlaceStaticEventHandlersAfterTheConstructor
@@ -3540,7 +3526,6 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		AutoSuggestions = .chkEnableAutoSuggestions.Checked
 		AutoCreateRC = .chkAutoCreateRC.Checked
 		AutoCreateBakFiles = .chkAutoCreateBakFiles.Checked
-		AutoSaveSession = .chkAutoSaveSession.Checked
 		AddRelativePathsToRecent = .chkAddRelativePathsToRecent.Checked
 		CreateNonStaticEventHandlers = .chkCreateNonStaticEventHandlers.Checked
 		PlaceStaticEventHandlersAfterTheConstructor = .chkPlaceStaticEventHandlersAfterTheConstructor.Checked
@@ -3759,7 +3744,6 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		piniSettings->WriteBool "Options", "AutoSuggestions", AutoSuggestions
 		piniSettings->WriteBool "Options", "AutoCreateRC", AutoCreateRC
 		piniSettings->WriteBool "Options", "AutoCreateBakFiles", AutoCreateBakFiles
-		piniSettings->WriteBool "Options", "AutoSaveSession", AutoSaveSession
 		piniSettings->WriteBool "Options", "AddRelativePathsToRecent", AddRelativePathsToRecent
 		piniSettings->WriteString "Options", "DefaultProjectFile", WGet(DefaultProjectFile)
 		piniSettings->WriteInteger "Options", "DefaultFileFormat", DefaultFileFormat

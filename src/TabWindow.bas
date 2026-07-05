@@ -349,7 +349,6 @@ Sub ChangeMenuItemsEnabled
 	miSaveProjectAs->Enabled = bEnabledProjectAndFolder
 	miCloseProject->Enabled = bEnabledProjectAndFolder
 	miDeleteProject->Enabled = bEnabledProjectAndFolder
-	miRenameProject->Enabled = bEnabledProjectAndFolder
 	miCloseFolder->Enabled = bEnabledProjectAndFolder
 	miExplorerCloseProject->Enabled = bEnabledProjectAndFolder
 	miProjectProperties->Enabled = bEnabledProjectAndFolder
@@ -362,14 +361,12 @@ Sub ChangeMenuItemsEnabled
 	miAddType->Enabled = bEnabledTab
 	mnuSplitHorizontally->Enabled = bEnabledTab
 	mnuSplitVertically->Enabled = bEnabledTab
-	miSave->Enabled = bEnabled
+	miSaveFile->Enabled = bEnabled
 	tbtSave->Enabled = bEnabled
-	miSaveAs->Enabled = bEnabled
-	miSaveAll->Enabled = bEnabled
+	miSaveFileAs->Enabled = bEnabled
 	tbtSaveAll->Enabled = bEnabled
-	miClose->Enabled = bEnabled
-	miCloseAll->Enabled = bEnabled
-	miCloseSession->Enabled = bEnabled
+	miCloseFile->Enabled = bEnabled
+	miDeleteFile->Enabled = bEnabled
 	miPrint->Enabled = bEnabled
 	miPrintPreview->Enabled = bEnabled
 	miPageSetup->Enabled = bEnabled

@@ -343,6 +343,46 @@ With `gas64` confirmed dead and Clang/LLVM never bundled, all code and UI that e
 
 **Post-merge regression found and fixed (2026-07-03):** this pass's `SettingsService.bas` edit removed the `"Debuggers"` section from `NoMoreIndexedSettingsKeys`'s multi-section key-existence check (8 sections remain) but left the function's termination condition at `Return keySum = -9` — a magic number that was never updated to match the new count (should be `-8`). Since `keySum` can now reach at most `-8`, the condition could never be true, and `LoadSettings`' `Do ... Loop Until NoMoreIndexedSettingsKeys(i)` (line ~225) never terminated — a genuine infinite loop, not a deadlock, burning 100% CPU on every startup. The commit compiled clean and passed the dead-identifier grep sweep, but nobody actually *launched* the app afterward, so this shipped to Codeberg undetected until the next session's dark-mode work prompted an actual smoke test. Found by binary-bisecting between this commit and the previous known-good commit (`e139c2c`), then narrowing file-by-file until the exact function was implicated. Fixed by correcting the constant to `-8`. **Lesson: a clean compile + grep sweep is necessary but not sufficient for large removals — launch the app at least once afterward, especially after touching loop-termination logic.**
 
+### Session 2026-07-05 (part 2): automatic workspace, File menu, bottom panel tab captions
+
+**Automatic workspace (replaces `.vfs` sessions in UX):**
+
+- Removed session menus, MRU sessions, `.vfs` filters, and `RenameProject` from the File menu.
+- Internal workspace at `Settings/Workspace.ini` via `SaveWorkspace()` / `LoadWorkspace()` — saves open project + editor tabs on exit; restores on cold start unless a command-line file is opened or Options create-default-project applies.
+- Single-project model: opening another project calls `PrepareForAnotherProject()` → `CloseProject()` with save prompt.
+- Renamed `CloseSession` → `CloseAllDocuments()`; removed `AutoSaveSession` and session-related INI keys from `SettingsService.bas`.
+
+**File menu restructure:**
+
+- **Project section:** New Project, Open Project, Recent Projects, Close/Delete Project, Close Folder, Save Project / Save Project As.
+- **File section (new):** New File, Open File, Recent Files (stub), Close File, Delete File (stub), Save File, Save File As.
+- Removed ambiguous Save/Save As/Save All/Close/Close All items and Rename Project.
+- WinAPI name clashes (`OpenFile`, `DeleteFile`) resolved: menu commands keep short names; internal subs are `OpenEditorFile()`, `CloseEditorFile()`, etc.
+- **New forms:** `frmNewFile` (file templates from `Templates/Files/`), `frmOpenProject` (`.vfp` only), `frmRecentProjects`.
+- Filter fixes: Open File no longer offers `.vfp`; New Project lists `Templates/Projects/*.vfp` only.
+
+**Bottom panel tab caption bug (found + fixed same session):**
+
+**Symptom:** All always-visible bottom tabs showed "Globals" instead of Output, Problems, etc.
+
+**Root cause:** `SetDebugTabsVisible(False)` (added in prior commit) called `DeleteTab` on tabs created by `InsertTab`, which marks them `FDynamic`. `DeleteTab` then **destroyed** the `TabPage` objects while global pointers (`tpGlobals`, etc.) remained. `ClearDebugPanels` also wrote captions to freed tabs after project close → heap corruption. Debug tabs were hidden **after** the tab-control HWND was created, so Win32 labels were built for all 14 tabs first. Saved INI indices of `-1` (from detached tabs) caused every tab to insert at index 0 on next load.
+
+**Fix:**
+
+- `TabControl.DetachTab()` — removes a tab from the strip without destroying the page (mirrors `AddTab`'s FDynamic guard).
+- `SetDebugTabsVisible` uses `DetachTab` / guarded `AddTab`; `ClearDebugPanels` only updates captions when `Parent <> 0`.
+- Hide debug tabs **before** `ptabBottom->Parent` assignment so `HandleIsAllocated` only registers the 7 always-visible tabs.
+- `AddToTabControl`: treat saved index `-1` as default index; `SaveTabPagePlacement`: guard `Parent = 0`.
+
+**Compile:** `CompileDebug.bat` — 0 errors (2026-07-05).
+
+**Deferred to next session (owner):**
+
+- [ ] **Bottom panel manual test checklist** — startup tab names, debug show/hide, project close, tab order persistence (checklist prepared in agent handoff).
+- [ ] `OpenRecentFiles()` — stub; needs `frmRecentFiles` dialog.
+- [ ] `DeleteEditorFile()` — stub.
+- [ ] `frmNewProject` template icons — `@imgList32` may not be populated at form creation time.
+
 ---
 
 ## 5. Bottom panel — intended behavior (reference)
@@ -421,7 +461,11 @@ State model mirrors **left/right** panels:
 - [x] **Window menu doc list** — all open documents listed with active checked
 - [x] **MRU fixed** — frmTemplates reads from memory not stale INI; duplicate "Recent Projects" removed from File menu
 - [x] **Startup simplified** — no template dialog on startup; default is Do Nothing; startup options removed from Options dialog
+- [x] **Automatic workspace** — `.vfs` sessions removed from UX; `Settings/Workspace.ini` save/restore on exit/startup; single-project switch via `PrepareForAnotherProject()` — see §4
+- [x] **File menu (part 2)** — Project vs File sections; `frmNewFile`, `frmOpenProject`, `frmRecentProjects`; WinAPI handler rename — see §4
+- [x] **Bottom panel tab captions** — `DetachTab`, hide debug tabs before HWND init, INI index `-1` guard — see §4
 - [ ] **frmNewProject icons** — template icons not displaying on new form (icon name derivation matches frmTemplates pattern but `@imgList32` may not be populated at form creation time); deferred
+- [ ] **Bottom panel regression (tab captions + debug hide/show)** — owner to run at start of next session; checklist in §7
 
 ---
 
@@ -464,6 +508,18 @@ Run a full pass on **latest** `VisualFBEditor64.exe` after `Compile.bat`. Check 
 - [x] Pin size/position acceptable in collapsed and expanded modes — **owner verified**
 - [x] Single-click collapse when expanded — **owner verified**
 - [x] Resize height persists (≥ 80px) — **owner verified**
+
+### Bottom panel — tab captions & debug tabs (added 2026-07-05, **pending owner verification**)
+
+Run at the **start of the next session** on latest `VisualFBEditor64.exe` after `CompileDebug.bat`:
+
+- [ ] Cold start — always-visible tabs show correct names (Output, Problems, Suggestions, Find, ToDo, Change Log, Immediate), not all "Globals"
+- [ ] Debug tabs (Locals, Globals, Procedures, Threads, Watches, Memory, Profiler) hidden at startup
+- [ ] Start debugging — debug tabs appear with correct names; end debugging — they hide again
+- [ ] Start/end debug multiple times — no duplicate tabs, no caption corruption
+- [ ] Close project — no crash; bottom tab captions remain correct
+- [ ] Restart IDE — bottom tab order persists (no scrambled order from saved `-1` indices)
+- [ ] Pin/collapse bottom panel — tab labels stay correct in both modes
 
 ### Regression (Batch 2.75.2 + adjacent areas)
 
@@ -547,7 +603,10 @@ Owner reported: after File > Close or File > Close All, everything else reset (t
 7. ~~**2.3.2 UI sweep**~~ — **done**
 8. ~~**2.3.1 Dev/Final compile toggle**~~ — **done**
 9. ~~**2.2.2 DRY pass**~~ — **done** (3 conservative extractions)
-10. **2.2.3 Split oversized files** — deferred to next session (highest risk)
+10. ~~**Automatic workspace + File menu part 2 + bottom panel tab captions**~~ — **done** (see §4 session 2026-07-05 part 2)
+11. **Bottom panel tab-caption regression** — owner checklist in §7; run first thing next session
+12. **2.2.3 Split oversized files** — deferred (highest risk)
+13. **Stubs:** `OpenRecentFiles()`, `DeleteEditorFile()`; **frmNewProject icons**
 
 ### Tier 3 — compiler toolchain (attempted 2026-07-03, closed for now — see §4)
 
@@ -619,7 +678,9 @@ Includes:
 | Settings load/save | `src/SettingsService.bas`, `Settings/VisualFBEditor64.ini` |
 | Tab editor chrome | `src/TabWindow.bas` |
 | Splash | `src/frmSplash.frm` |
-| Framework | `Controls/MyFbFramework/mff/` → `mff64.dll` |
+| Framework | `Controls/MyFbFramework/mff/` → `mff64.dll` (`TabControl.DetachTab` added 2026-07-05) |
+| Workspace | `Settings/Workspace.ini` (auto save/restore; not user-facing) |
+| File dialogs | `src/frmNewFile.*`, `src/frmOpenProject.*`, `src/frmRecentProjects.*` |
 | Build | `Compile.bat`, `CompileDebug.bat` |
 | GTK strip | `Tools/strip_gtk_preprocessor.ps1` |
 | Build docs | `src/BUILD.md`, `README.md` |

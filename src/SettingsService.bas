@@ -262,7 +262,6 @@ Sub LoadSettings
 	SnapToGridOption = iniSettings.ReadBool("Options", "SnapToGrid", True)
 	AutoIncrement = iniSettings.ReadBool("Options", "AutoIncrement", True)
 	AutoCreateRC = iniSettings.ReadBool("Options", "AutoCreateRC", True)
-	AutoSaveSession = iniSettings.ReadBool("Options", "AutoSaveSession", False)
 	AutoSaveBeforeCompiling = iniSettings.ReadInteger("Options", "AutoSaveBeforeCompiling", 1)
 	AutoCreateBakFiles = iniSettings.ReadBool("Options", "AutoCreateBakFiles", False)
 	AddRelativePathsToRecent = iniSettings.ReadBool("Options", "AddRelativePathsToRecent", True)
@@ -481,13 +480,6 @@ Sub SaveMRU
 	Next
 	For i = i To miRecentMax
 		iniSettings.KeyRemove("MRUProjects", "MRUProject_0" & WStr(i))
-	Next
-	MRUStart = Max(MRUSessions.Count - miRecentMax, 0)
-	For i = MRUStart To MRUSessions.Count - 1
-		iniSettings.WriteString("MRUSessions", "MRUSession_0" & WStr(i - MRUStart), MRUSessions.Item(i))
-	Next
-	For i = i To miRecentMax
-		iniSettings.KeyRemove("MRUSessions", "MRUSession_0" & WStr(i))
 	Next
 End Sub
 

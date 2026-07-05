@@ -218,10 +218,6 @@ Sub mClickMRU(ByRef Designer As My.Sys.Object, Sender As My.Sys.Object)
 		miRecentFolders->Clear
 		miRecentFolders->Enabled = False
 		MRUFolders.Clear
-	Case "ClearSessions"
-		miRecentSessions->Clear
-		miRecentSessions->Enabled = False
-		MRUSessions.Clear
 	Case Else
 		OpenFiles GetFullPath(Sender.ToString)
 	End Select
@@ -304,20 +300,24 @@ End Sub
 Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 	Select Case Sender.ToString
 	Case "NewProject":                          NewProject
-	Case "OpenProject":                         OpenProjectTemplate 1
-	Case "RecentProject":                       OpenProjectTemplate 2
+	Case "OpenProject":                         OpenProject
+	Case "RecentProject":                       OpenRecentProject
 	Case "DeleteProject":                       DeleteProject
-	Case "RenameProject":                       RenameProject
 	Case "OpenFolder":                          OpenFolder
-	Case "OpenSession":                         OpenSession
 	Case "SaveProject":                         SaveProject ptvExplorer->SelectedNode
 	Case "SaveProjectAs":                       SaveProject ptvExplorer->SelectedNode, True
-	Case "SaveSession":                         SaveSession
 	Case "CloseFolder":                         CloseFolder GetParentNode(ptvExplorer->SelectedNode)
 	Case "CloseProject":                        CloseProject GetParentNode(ptvExplorer->SelectedNode)
-	Case "New":                                 Dim As TabWindow Ptr tb = AddTab(ExePath & "/Templates/Files/Module.bas", False) : If tb <> 0 Then tb->FileName = ML("Untitled") : tb->Caption = tb->FileName + "*"
-	Case "Open":                                OpenProgram
-	Case "Save":                                Save
+	Case "NewFile":                             NewFile
+	Case "OpenFile":                            OpenEditorFile
+	Case "RecentFiles":                         OpenRecentFiles
+	Case "CloseFile":                           CloseEditorFile
+	Case "DeleteFile":                          DeleteEditorFile
+	Case "SaveFile":                            SaveEditorFile
+	Case "SaveFileAs":                          SaveEditorFileAs
+	Case "New":                                 NewFile
+	Case "Open":                                OpenEditorFile
+	Case "Save":                                SaveEditorFile
 	Case "Print":                               PrintThis
 	Case "PrintPreview":                        PrintPreview
 	Case "PageSetup":                           PageSetup
@@ -465,15 +465,15 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 	Case "AIConvertCtoFB"
 		ptxtAIRequest->Text = ML("Convert the given C source code into equivalent FreeBasic source code.") & " " & ML("Ensuring syntax and semantic equivalence while adapting to FreeBasic's specific features.") & !"\r\n" & "```C" & !"\r\n" & "       " & !"\r\n" & "```"
 		ptxtAIRequest->SetFocus
-	Case "SaveAs", "Close", "SyntaxCheck", "Compile", "CompileAndRun", "Run", "RunToCursor", "SplitHorizontally", "SplitVertically", _
+	Case "SaveAs", "Close", "CloseFile", "SyntaxCheck", "Compile", "CompileAndRun", "Run", "RunToCursor", "SplitHorizontally", "SplitVertically", _
 		"Start", "Stop", "StepOut", "FindNext", "FindPrev", "Goto", "SetNextStatement", "SplitLines", "CombineLines", "SortLines", "DeleteBlankLines", "FormatWithBasisWord", "ConvertFromHexStrUnicode", "ConvertToHexStrUnicode", "ConvertToUppercaseFirstLetter", "ConvertToLowercase", "ConvertToUppercase", "SplitUp", "SplitDown", "SplitLeft", "SplitRight", _
 		"AddWatch", "NextBookmark", "PreviousBookmark", "ClearAllBookmarks", "Code", "Form", "CodeAndForm", "GotoCodeForm", "AddProcedure", "AddType", "AIAddComment", "AIOptimizeCode", "AIIntellicode", "AITracepointError", "AITranslate", "AITranslateE"
 		Dim tb As TabWindow Ptr = Cast(TabWindow Ptr, ptabCode->SelectedTab)
 		If tb = 0 Then Exit Sub
 		Select Case Sender.ToString
-		Case "Save":                        tb->Save
-		Case "SaveAs":                      tb->SaveAs:  frmMain.Caption = tb->FileName & " - " & App.Title
-		Case "Close":                       CloseTab(tb)
+		Case "Save":                        SaveEditorFile
+		Case "SaveAs":                      SaveEditorFileAs
+		Case "Close", "CloseFile":          CloseEditorFile
 		Case "SplitLines":                  tb->SplitLines
 		Case "CombineLines":                tb->CombineLines
 		Case "SortLines":                   tb->SortLines
@@ -632,7 +632,6 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 		End Select
 	Case "SaveAll":                         SaveAll
 	Case "CloseAll":                        CloseAllTabs
-	Case "CloseSession":                    CloseSession
 	Case "CloseAllWithoutCurrent":          CloseAllTabs(True)
 	Case "Exit":                            pfrmMain->CloseForm
 	Case "Find":                            pfFind->mFormFind = True: pfFind->Show *pfrmMain

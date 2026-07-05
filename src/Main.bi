@@ -28,6 +28,7 @@
 	#include once "mff/Printer.bi"
 
 		#define SettingsPath ExePath & "/Settings/VisualFBEditor64.ini"
+	#define WorkspacePath ExePath & "/Settings/Workspace.ini"
 
 	#define Slash "\"
 	#define BackSlash "/"
@@ -90,7 +91,6 @@ Common Shared As Boolean AutoComplete
 Common Shared As Boolean AutoSuggestions, ProjectAutoSuggestions
 Common Shared As Boolean AutoCreateRC
 Common Shared As Boolean AutoCreateBakFiles, gLocalProperties
-Common Shared As Boolean AutoSaveSession, SessionOpened
 Common Shared As Boolean AddRelativePathsToRecent
 Common Shared As Boolean UseMakeOnStartWithCompile
 Common Shared As Boolean CreateNonStaticEventHandlers, CreateFormTypesWithoutTypeWord
@@ -207,11 +207,18 @@ End Enum
 
 Declare Sub NewProject
 Declare Sub OpenProject
+Declare Sub OpenRecentProject
+Declare Sub NewFile
+Declare Sub OpenEditorFile
+Declare Sub OpenRecentFiles
+Declare Sub CloseEditorFile
+Declare Sub DeleteEditorFile
+Declare Sub SaveEditorFile
+Declare Sub SaveEditorFileAs
 Declare Sub AddNew(ByRef Template As WString = "")
 Declare Sub AddMRUFile(ByRef FileName As WString)
 Declare Sub AddMRUProject(ByRef FileName As WString) '
 Declare Sub AddMRUFolder(ByRef FolderName As WString)
-Declare Sub AddMRUSession(ByRef FileName As WString) '
 Declare Sub AddFromTemplates
 Declare Sub AddFilesToProject
 Declare Sub RemoveFileFromProject
@@ -223,7 +230,11 @@ Declare Function CloseProject(tn As TreeNode Ptr, WithoutMessage As Boolean = Fa
 Declare Sub SetMainNode(tn As TreeNode Ptr)
 Declare Sub OpenProjectFolder
 Declare Sub OpenFiles(ByRef FileName As WString)
-Declare Sub OpenSession
+Declare Function GetOpenProjectNode() As TreeNode Ptr
+Declare Function PrepareForAnotherProject(ByRef NewProjectPath As WString = "") As Boolean
+Declare Sub SaveWorkspace()
+Declare Function LoadWorkspace() As Boolean
+Declare Function CloseAllDocuments() As Boolean
 Declare Sub OpenProgram()
 Declare Sub PrintThis()
 Declare Sub PrintPreview()
@@ -249,7 +260,6 @@ Declare Sub SetMenuItemPairEnabled(mi_ As MenuItem Ptr, dmi_ As MenuItem Ptr, bE
 Declare Function FolderCopy(FromDir As UString, ToDir As UString) As Integer
 Declare Sub Save
 Declare Function SaveAllBeforeCompile() As Boolean
-Declare Function SaveSession(WithoutQuestion As Boolean = False) As Boolean
 Declare Sub CompileProgram(Param As Any Ptr)
 Declare Sub CompileAndRun(Param As Any Ptr)
 Declare Sub MakeExecute(Param As Any Ptr)

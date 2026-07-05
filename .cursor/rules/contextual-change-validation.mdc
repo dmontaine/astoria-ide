@@ -11,7 +11,7 @@ When you change code, validate the **entire affected surface**, not only the sin
 
 1. **Map the change surface** — From touched files, list every feature, panel, setting consumer, and init path in that area.
 2. **Init / first-run audit** — If you touch startup, settings load, or panel handlers, verify cold start and first-run paths (not only the happy path you changed).
-3. **Compile** — Run `Compile.bat` and confirm **0 errors** before reporting done.
+3. **Compile** — Run `CompileDebug.bat` during development and confirm **0 errors** before reporting done. Use `Compile.bat` only for release verification when explicitly requested.
 4. **User test checklist** — Produce a checklist for the **whole area** (all features in the surface), not one bullet for the fix alone.
 
 ## Detailed workflow
@@ -20,7 +20,7 @@ Follow the project skill **contextual-change-validation** (`.cursor/skills/conte
 
 ## Escalation
 
-If a bug or fix is **unresolved after 4 fix cycles**, escalate to the **Opus fix-review loop** (see Preliminary Plan — Escalation: Opus Fix-Review Loop): `Compile.bat` 0 errors → Bugbot/Opus review → fix critical/high/medium → repeat until clean (max 5 iterations). User manual testing **only after** Opus sign-off.
+If a bug or fix is **unresolved after 4 fix cycles**, escalate to the **Opus fix-review loop** (see Preliminary Plan — Escalation: Opus Fix-Review Loop): `CompileDebug.bat` 0 errors → Bugbot/Opus review → fix critical/high/medium → repeat until clean (max 5 iterations). User manual testing **only after** Opus sign-off.
 
 ## Do not
 

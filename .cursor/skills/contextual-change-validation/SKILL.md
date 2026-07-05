@@ -52,9 +52,13 @@ Verify each scenario does not crash and respects saved layout.
 
 ## Step 4 — Compile
 
+During development, use the debug build (runtime checks, symbols, no optimization):
+
 ```bat
-Compile.bat
+CompileDebug.bat
 ```
+
+Use `Compile.bat` only for release verification when explicitly requested.
 
 **Gate:** 0 errors before handoff, Opus review, or user manual test.
 

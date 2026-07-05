@@ -304,7 +304,10 @@ End Sub
 Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 	Select Case Sender.ToString
 	Case "NewProject":                          NewProject
-	Case "OpenProject":                         OpenProject
+	Case "OpenProject":                         OpenProjectTemplate 1
+	Case "RecentProject":                       OpenProjectTemplate 2
+	Case "DeleteProject":                       DeleteProject
+	Case "RenameProject":                       RenameProject
 	Case "OpenFolder":                          OpenFolder
 	Case "OpenSession":                         OpenSession
 	Case "SaveProject":                         SaveProject ptvExplorer->SelectedNode

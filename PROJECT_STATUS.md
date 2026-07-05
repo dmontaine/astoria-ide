@@ -415,6 +415,13 @@ State model mirrors **left/right** panels:
 - [x] **2.3.1 Development/Final compile-mode toggle** — replaced CompileToVariants enum with CompileModeVariants (Development/Final), replaced 6 Project Properties controls (compile-backend radio, 4 optimization radios, debug-info checkbox, optimization combo) with single radio pair; pipeline: Development = `-gen gcc -O0 -g`, Final = `-gen gcc -O2`; all old serialization keys migrated — see §4
 - [x] **2.2.2 DRY pass (conservative)** — `SaveTabPagePlacement()` replaced 19 WriteString/Integer pairs in Main.bas — see §4
 - [x] **2.4.1/2.4.2 Final audit + docs cleanup** — `src/makefile` deleted (unused Linux/GTK build system, 239 lines); `src/THREADING.md` GTK reference removed; only remaining artifact is intentional `TabWindow.bas:CheckCondition()` handling `__fb_linux__` for IDE's user-code preprocessor evaluator — see §4
+- [x] **13.3 UI evaluation** — comprehensive review of all IDE surfaces; 28 fixes applied (menu labels, dialog cleanup, defaults, orphaned controls, find dialog overhaul, save dialog auto-timer, Code Editor grouped, Project Properties simplified, Options→Compiler simplified) — see §4
+- [x] **File menu restructured** — project items grouped (New/Open/Recent/Rename/Close/Delete Project), template adapted per menu item, `frmNewProject` as simplified New Project form
+- [x] **Debug tabs** — 7 debug tabs hidden when not debugging via `SetDebugTabsVisible`
+- [x] **Window menu doc list** — all open documents listed with active checked
+- [x] **MRU fixed** — frmTemplates reads from memory not stale INI; duplicate "Recent Projects" removed from File menu
+- [x] **Startup simplified** — no template dialog on startup; default is Do Nothing; startup options removed from Options dialog
+- [ ] **frmNewProject icons** — template icons not displaying on new form (icon name derivation matches frmTemplates pattern but `@imgList32` may not be populated at form creation time); deferred
 
 ---
 
@@ -598,6 +605,7 @@ Includes:
 - `set NOPAUSE=1` for agent compile runs
 - Prefer `Compile.bat` over ad-hoc `fbc64` unless debugging
 - **Compile logs** (added 2026-07-05) — all compile log output goes to `Logs/<name>.txt`; delete contents of `Logs/` at the end of each session. `Logs/` is in `.gitignore`.
+- **Cross-reference before deleting/moving** (added 2026-07-05) — after deleting or moving any item (menu item, control, function, variable, etc.), search the entire `src/` tree for references to that item and update or remove them before proceeding. A clean compile is not sufficient — dormant paths like `ChangeMenuItemsEnabled` can hold stale references that only trigger at runtime.
 
 ---
 

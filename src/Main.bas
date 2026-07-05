@@ -112,7 +112,7 @@ Dim Shared As TrackBar trLeft
 Dim Shared As MainMenu mnuMain
 Dim Shared As MenuItem Ptr mnuStartWithCompile, mnuStart, mnuBreak, mnuEnd, mnuRestart, mnuStandardToolBar, mnuEditToolBar, mnuProjectToolBar, mnuFormatToolBar, mnuBuildToolBar, mnuDebugToolBar, mnuRunToolBar, mnuSplit, mnuSplitHorizontally, mnuSplitVertically, mnuWindowSeparator, miRecentProjects, miRecentFiles, miRecentFolders, miRecentSessions, miSetAsMain, miClearStartUp, miTabSetAsMain, miTabReloadHistoryCode, miRemoveFiles, miToolBars
 Dim Shared As MenuItem Ptr miRecentAIChat,  miFileAIChat
-Dim Shared As MenuItem Ptr miSaveProject, miSaveProjectAs, miCloseProject, miCloseFolder, miSave, miSaveAs, miSaveAll, miClose, miCloseAll, miCloseSession, miPrint, miPrintPreview, miPageSetup, miOpenProjectFolder, miProjectProperties, miExplorerOpenProjectFolder, miExplorerRename, miExplorerProjectProperties, miExplorerCloseProject, miRename, miRemoveFileFromProject
+Dim Shared As MenuItem Ptr miSaveProject, miSaveProjectAs, miCloseProject, miDeleteProject, miRenameProject, miCloseFolder, miSave, miSaveAs, miSaveAll, miClose, miCloseAll, miCloseSession, miPrint, miPrintPreview, miPageSetup, miOpenProjectFolder, miProjectProperties, miExplorerOpenProjectFolder, miExplorerRename, miExplorerProjectProperties, miExplorerCloseProject, miRename, miRemoveFileFromProject
 Dim Shared As MenuItem Ptr miUndo, miRedo, miCutCurrentLine, miCut, miCopy, miPaste, miSingleComment, miBlockComment, miUncommentBlock, miDuplicate, miSelectAll, miIndent, miOutdent, miFormat, miUnformat, miFormatProject, miUnformatProject, miAddSpaces, miDeleteBlankLines, miSuggestions, miCompleteWord, miParameterInfo, miStepInto, miStepOver, miStepOut, miRunToCursor, miGDBCommand, miAddWatch, miToggleBreakpoint, miClearAllBreakpoints, miSetNextStatement, miShowNextStatement
 Dim Shared As MenuItem Ptr miNumbering, miMacroNumbering, miRemoveNumbering, miProcedureNumbering, miProcedureMacroNumbering, miRemoveProcedureNumbering, miProjectMacroNumbering, miProjectMacroNumberingStartsOfProcedures, miRemoveProjectNumbering, miModuleMacroNumbering, miModuleMacroNumberingStartsOfProcedures, miRemoveModuleNumbering, miPreprocessorNumbering, miRemovePreprocessorNumbering, miProjectPreprocessorNumbering, miRemoveProjectPreprocessorNumbering, miModulePreprocessorNumbering, miRemoveModulePreprocessorNumbering, miOnErrorResumeNext, miOnErrorGoto, miOnErrorGotoResumeNext, miOnLocalErrorGoto, miOnLocalErrorGotoResumeNext, miRemoveErrorHandling
 Dim Shared As MenuItem Ptr dmiNumbering, dmiMacroNumbering, dmiRemoveNumbering, dmiProcedureNumbering, dmiProcedureMacroNumbering, dmiRemoveProcedureNumbering, dmiModuleMacroNumbering, dmiModuleMacroNumberingStartsOfProcedures, dmiRemoveModuleNumbering, dmiPreprocessorNumbering, dmiRemovePreprocessorNumbering, dmiModulePreprocessorNumbering, dmiRemoveModulePreprocessorNumbering, dmiOnErrorResumeNext, dmiOnErrorGoto, dmiOnErrorGotoResumeNext, dmiOnLocalErrorGoto, dmiOnLocalErrorGotoResumeNext, dmiRemoveErrorHandling, dmiMake, dmiMakeClean
@@ -218,6 +218,7 @@ LoadSettings
 #include once "frmImageManager.bi"
 #include once "frmOptions.bi"
 #include once "frmTemplates.bi"
+#include once "frmNewProject.bi"
 #include once "frmParameters.bi"
 #include once "frmProjectProperties.bi"
 #include once "frmSave.bi"
@@ -1867,7 +1868,9 @@ Sub RunHelp(Param As Any Ptr)
 		End If
 End Sub
 
-Sub NewProject()
+Sub OpenProjectTemplate(ByVal TabIndex As Integer = 0)
+	pfTemplates->DialogMode = IIf(TabIndex = 0, 1, TabIndex)
+	pfTemplates->Text = ML(IIf(TabIndex = 0, "New Project", IIf(TabIndex = 1, "Open Project", "Recent Project")))
 	If pfTemplates->ShowModal(frmMain) = ModalResults.OK Then
 		If pfTemplates->SelectedFolder <> "" Then
 			AddFolder pfTemplates->SelectedFolder
@@ -1875,6 +1878,18 @@ Sub NewProject()
 			AddNew pfTemplates->SelectedTemplate
 		ElseIf pfTemplates->SelectedFile <> "" Then
 			OpenFiles pfTemplates->SelectedFile
+		End If
+	End If
+End Sub
+
+Sub NewProject()
+	Dim fNewProject As frmNewProject
+	pfNewProject = @fNewProject
+	If pfNewProject->ShowModal(frmMain) = ModalResults.OK Then
+		If pfNewProject->SelectedFolder <> "" Then
+			AddFolder pfNewProject->SelectedFolder
+		ElseIf pfNewProject->SelectedTemplate <> "" Then
+			AddNew pfNewProject->SelectedTemplate
 		End If
 	End If
 End Sub
@@ -2338,6 +2353,44 @@ Function CloseProject(tn As TreeNode Ptr, WithoutMessage As Boolean = False) As 
 	ClearAnalysisPanels()
 	ClearDebugPanels()
 	ChangeMenuItemsEnabled
+	Return True
+End Function
+
+Function DeleteProject() As Boolean
+	Dim As TreeNode Ptr tn = GetParentNode(ptvExplorer->SelectedNode)
+	If tn = 0 Then Return False
+	If tn->Tag = 0 Then Return False
+	If MsgBox(ML("Are you sure you want to delete the project") & " """ & tn->Text & """?", "Visual FB Editor", mtWarning, btYesNo) <> mrYes Then Return False
+	If Not CloseProject(tn, True) Then Return False
+	Dim As ProjectElement Ptr ppe = Cast(ProjectElement Ptr, tn->Tag)
+	Dim As UString ProjectPath = GetFolderName(WGet(ppe->FileName))
+	If ProjectPath <> "" AndAlso FolderExists(ProjectPath) Then
+		PipeCmd "cmd /c rd /s /q """ & ProjectPath & """", ""
+	End If
+	Return True
+End Function
+
+Function RenameProject() As Boolean
+	Dim As TreeNode Ptr tn = GetParentNode(ptvExplorer->SelectedNode)
+	If tn = 0 Then Return False
+	If tn->Tag = 0 Then Return False
+	Dim As ProjectElement Ptr ppe = Cast(ProjectElement Ptr, tn->Tag)
+	Dim As UString OldPath = WGet(ppe->FileName)
+	Dim As UString OldFolder = GetFolderName(OldPath)
+	Dim As UString NewName = InputBox(ML("New project name") & ":", ML("Rename Project"), tn->Text)
+	If NewName = "" Then Return False
+	If NewName = tn->Text Then Return True
+	Dim As UString NewFolder = GetFolderName(OldFolder, False) & NewName
+	If FolderExists(NewFolder) Then
+		MsgBox ML("A folder with that name already exists.")
+		Return False
+	End If
+	If CloseProject(tn, True) = False Then Return False
+	Name OldFolder As NewFolder
+	Dim As UString NewVfpPath = NewFolder & Slash & NewName & ".vfp"
+	If FileExists(NewVfpPath) Then
+		AddProject NewVfpPath
+	End If
 	Return True
 End Function
 
@@ -5505,21 +5558,18 @@ Sub CreateMenusAndToolBars
 	LoadHotKeys
 	Var miFile = mnuMain.Add(ML("&File"), "", "File")
 	miFile->Add(ML("&New Project") & HK("NewProject", "Ctrl+Shift+N"), "Project", "NewProject", @mClick)
-	miFile->Add("-")
-	miFile->Add(ML("&New") & HK("New", "Ctrl+N"), "New", "New", @mClick)
-	miFile->Add(ML("&Open") & "..." & HK("Open", "Ctrl+O"), "Open", "Open", @mClick)
-	'miFile->Add(ML("New Project") & HK("NewProject", "Ctrl+Shift+N"), "Project", "NewProject", @mClick)
-	'miFile->Add(ML("Open Project") & HK("OpenProject", "Ctrl+Shift+O"), "", "OpenProject", @mClick)
+	miFile->Add(ML("&Open Project") & "...", "", "OpenProject", @mClick)
+	miFile->Add(ML("&Recent Project") & "...", "", "RecentProject", @mClick)
+	miRenameProject = miFile->Add(ML("Rename Project") & "...", "", "RenameProject", @mClick, , , False)
+	miCloseProject = miFile->Add(ML("Close Project") & HK("CloseProject", "Ctrl+Shift+F4"), "", "CloseProject", @mClick, , , False)
+	miDeleteProject = miFile->Add(ML("Delete Project"), "", "DeleteProject", @mClick, , , False)
+	miCloseFolder = miFile->Add(ML("Close Folder") & HK("CloseFolder", "Alt+F4"), "", "CloseFolder", @mClick, , , False)
 	miFile->Add("-")
 	miSaveProject = miFile->Add(ML("Save Project") & "..." & HK("SaveProject", "Ctrl+Shift+S"), "SaveAll", "SaveProject", @mClick, , , False)
 	miSaveProjectAs = miFile->Add(ML("Save Project As") & "..." & HK("SaveProjectAs"), "", "SaveProjectAs", @mClick, , , False)
-	miCloseProject = miFile->Add(ML("Close Project") & HK("CloseProject", "Ctrl+Shift+F4"), "", "CloseProject", @mClick, , , False)
 	miFile->Add("-")
-	miFile->Add(ML("Open Session") & HK("OpenSession", "Ctrl+Alt+O"), "", "OpenSession", @mClick)
-	miFile->Add(ML("Save Session") & HK("SaveFolder", "Ctrl+Alt+S"), "", "SaveSession", @mClick)
-	miFile->Add("-")
-	miFile->Add(ML("Open Folder") & HK("OpenFolder", "Alt+O"), "", "OpenFolder", @mClick)
-	miCloseFolder = miFile->Add(ML("Close Folder") & HK("CloseFolder", "Alt+F4"), "", "CloseFolder", @mClick, , , False)
+	miFile->Add(ML("&New") & HK("New", "Ctrl+N"), "New", "New", @mClick)
+	miFile->Add(ML("&Open") & "..." & HK("Open", "Ctrl+O"), "Open", "Open", @mClick)
 	miFile->Add("-")
 	miSave = miFile->Add(ML("&Save") & "..." & HK("Save", "Ctrl+S"), "Save", "Save", @mClick, , , False)
 	miSaveAs = miFile->Add(ML("Save &As") & "..." & HK("SaveAs"), "", "SaveAs", @mClick, , , False)
@@ -5544,7 +5594,7 @@ Sub CreateMenusAndToolBars
 	miLinuxLF = miFileFormat->Add(ML("Newline") & ": " & ML("Linux (LF)") & HK("LinuxLF"), "", "LinuxLF", @mClick, True)
 	miMacOSCR = miFileFormat->Add(ML("Newline") & ": " & ML("MacOS (CR)") & HK("MacOSCR"), "", "MacOSCR", @mClick, True)
 	miUtf8BOM->Checked = True
-		miWindowsCRLF->Checked = True
+	miWindowsCRLF->Checked = True
 	miFile->Add("-")
 	
 	'David Change  Add Recent Sessions
@@ -5573,16 +5623,12 @@ Sub CreateMenusAndToolBars
 	
 	' Add Recent Sessions
 	miRecentProjects = miFile->Add(ML("Recent Projects"), "", "RecentProjects", @mClick)
+	miRecentProjects->Visible = False
 	For i As Integer = 0 To miRecentMax
 		sTmp = iniSettings.ReadString("MRUProjects", "MRUProject_0" & WStr(i), "")
-		If Trim(sTmp) <> "" Then
-			MRUProjects.Add sTmp
-			miRecentProjects->Add(sTmp, "", sTmp, @mClickMRU)
-		End If
+		If Trim(sTmp) <> "" Then MRUProjects.Add sTmp
 	Next
-	miRecentProjects->Add("-")
-	miRecentProjects->Add(ML("Clear Recently Opened"),"","ClearProjects", @mClickMRU)
-	
+
 	miRecentFiles = miFile->Add(ML("Recent Files"), "", "RecentFiles", @mClick)
 	For i As Integer = 0 To miRecentMax
 		sTmp = iniSettings.ReadString("MRUFiles", "MRUFile_0" & WStr(i), "")
@@ -6666,6 +6712,8 @@ Sub tvExplorer_MouseUp(ByRef Designer As My.Sys.Object, ByRef Sender As Control,
 		If ptn->ImageKey <> "Project" Then
 			miProjectProperties->Enabled = False
 			miCloseProject->Enabled = False
+			miDeleteProject->Enabled = False
+			miRenameProject->Enabled = False
 		End If
 		miSetAsMain->Caption = ML("Set as Main")
 		If tn->ImageKey = "Opened" Then
@@ -9060,7 +9108,7 @@ Sub frmMain_Show(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	End If
 	If bSharedFind Then
 		Select Case WhenVisualFBEditorStarts
-		Case 1: If Not bFileOpening Then NewProject 'pfTemplates->ShowModal
+		Case 1: If Not bFileOpening Then AddNew ExePath & Slash & "Templates" & Slash & WGet(DefaultProjectFile)
 		Case 2: If Not bFileOpening Then AddNew ExePath & Slash & "Templates" & Slash & WGet(DefaultProjectFile)
 		Case 3:
 			'Select Case LastOpenedFileType

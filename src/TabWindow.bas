@@ -348,6 +348,8 @@ Sub ChangeMenuItemsEnabled
 	miSaveProject->Enabled = bEnabledProjectAndFolder
 	miSaveProjectAs->Enabled = bEnabledProjectAndFolder
 	miCloseProject->Enabled = bEnabledProjectAndFolder
+	miDeleteProject->Enabled = bEnabledProjectAndFolder
+	miRenameProject->Enabled = bEnabledProjectAndFolder
 	miCloseFolder->Enabled = bEnabledProjectAndFolder
 	miExplorerCloseProject->Enabled = bEnabledProjectAndFolder
 	miProjectProperties->Enabled = bEnabledProjectAndFolder

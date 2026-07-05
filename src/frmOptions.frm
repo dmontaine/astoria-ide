@@ -1466,7 +1466,7 @@ pfOptions = @fOptions
 		' lblInterfaceFont
 		With lblInterfaceFont
 			.Name = "lblInterfaceFont"
-			.Text = "Tahoma, 8 pt"
+			.Text = "Segoe UI, 9 pt"
 			.ControlIndex = 5
 			.Align = DockStyle.alLeft
 			.TabIndex = 149
@@ -1856,17 +1856,6 @@ pfOptions = @fOptions
 			'.Caption = "Change"
 			'.Caption = "Remove"
 			'.Caption = "Clear"
-		' grbWhenVFBEStarts
-		With grbWhenVFBEStarts
-			.Name = "grbWhenVFBEStarts"
-			.Text = ML("When Visual FB Editor starts") & ":"
-			.Align = DockStyle.alTop
-			.ExtraMargins.Top = 5
-
-			.TabIndex = 168
-			.SetBounds 0, 97, 417, 120
-			.Parent = @vbxGeneral
-		End With
 		' grbWhenCompiling
 		With grbWhenCompiling
 			.Name = "grbWhenCompiling"
@@ -1907,57 +1896,6 @@ pfOptions = @fOptions
 		cmdProjectsPath.SetBounds 394, -1, 24, 22
 		cmdProjectsPath.OnClick = @cmdProjectsPath_Click
 		cmdProjectsPath.Parent = @pnlProjectsPath
-		' optPromptForProjectAndFile
-		With optPromptForProjectAndFile
-			.Name = "optPromptForProjectAndFile"
-			.Text = ML("Prompt for Project / File")
-			.TabIndex = 171
-			.SetBounds 18, 22, 184, 16
-
-			.Designer = @This
-			.OnClick = @optPromptForProjectAndFiles_Click
-			.Parent = @grbWhenVFBEStarts
-		End With
-		' optCreateProjectFile
-		With optCreateProjectFile
-			.Name = "optCreateProjectFile"
-			.Text = ML("Create Project / File")
-			.TabIndex = 172
-			.SetBounds 18, 45, 184, 16
-
-			.Designer = @This
-			.OnClick = @optCreateProjectFile_Click
-			.Parent = @grbWhenVFBEStarts
-		End With
-		' optOpenLastSession
-		With optOpenLastSession
-			.Name = "optOpenLastSession"
-			.Text = ML("Open Last Opened File")
-			.TabIndex = 173
-			.SetBounds 19, 67, 184, 16
-			.Designer = @This
-			.OnClick = @optOpenLastSession_Click
-			.Parent = @grbWhenVFBEStarts
-		End With
-		' optDoNotNothing
-		With optDoNotNothing
-			.Name = "optDoNotNothing"
-			.Text = ML("Do Nothing")
-			.TabIndex = 174
-			.SetBounds 19, 90, 184, 16
-
-			.Designer = @This
-			.OnClick = @optDoNotNothing_Click
-			.Parent = @grbWhenVFBEStarts
-		End With
-		' cboDefaultProjectFile
-		With cboDefaultProjectFile
-			.Name = "cboDefaultProjectFile"
-			.Text = "ComboBoxEdit1"
-			.TabIndex = 175
-			.SetBounds 222, 41, 175, 21
-			.Parent = @grbWhenVFBEStarts
-		End With
 		' lblDefaultFileFormat
 		With lblDefaultFileFormat
 			.Name = "lblDefaultFileFormat"
@@ -2011,14 +1949,6 @@ pfOptions = @fOptions
 			.SetBounds 18, 68, 184, 16
 
 			.Parent = @grbWhenCompiling
-		End With
-		' cboOpenedFile
-		With cboOpenedFile
-			.Name = "cboOpenedFile"
-			.Text = "ComboBoxEdit1"
-			.TabIndex = 179
-			.SetBounds 222, 65, 175, 21
-			.Parent = @grbWhenVFBEStarts
 		End With
 		' chkCreateFormTypesWithoutTypeWord
 		With chkCreateFormTypesWithoutTypeWord
@@ -3069,12 +2999,6 @@ Sub frmOptions.LoadSettings()
 		.optMainFileFolder.Checked = OpenCommandPromptInMainFileFolder
 		.optInFolder.Checked = Not OpenCommandPromptInMainFileFolder
 		.txtInFolder.Text = *CommandPromptFolder
-		Select Case WhenVisualFBEditorStarts
-		Case 0: .optDoNotNothing.Checked = True
-		Case 1: .optPromptForProjectAndFile.Checked = True
-		Case 2: .optCreateProjectFile.Checked = True
-		Case 3: .optOpenLastSession.Checked = True
-		End Select
 		Select Case AutoSaveBeforeCompiling
 		Case 0: .optDoNotSave.Checked = True
 		Case 1: .optSaveCurrentFile.Checked = True
@@ -3106,21 +3030,6 @@ Sub frmOptions.LoadSettings()
 		Dim Buff As WString * 2048 '
 		Dim As UString FileName
 		'On Error Resume Next
-		.cboDefaultProjectFile.Clear
-		f = Dir(ExePath & "/Templates/Projects/*.vfp")
-		While f <> ""
-			.cboDefaultProjectFile.AddItem ..Left(f, IfNegative(InStr(f, ".") - 1, Len(f)))
-			Templates.Add "Projects/" & f
-			f = Dir()
-		Wend
-		f = Dir(ExePath & "/Templates/Files/*")
-		While f <> ""
-			.cboDefaultProjectFile.AddItem ..Left(f, IfNegative(InStr(f, ".") - 1, Len(f)))
-			Templates.Add "Files/" & f
-			f = Dir()
-		Wend
-		.cboDefaultProjectFile.ItemIndex = Templates.IndexOf(WGet(DefaultProjectFile))
-		.cboOpenedFile.ItemIndex = LastOpenedFileType
 		f = Dir(ExePath & "/Settings/Languages/*.lng")
 		While f <> ""
 			FileName = ExePath & "/Settings/Languages/" & f
@@ -3463,17 +3372,10 @@ Private Sub frmOptions.Form_Create(ByRef Designer As My.Sys.Object, ByRef Sender
 		.lstColorKeys.AddItem ML("Strings")
 		ReDim .Colors(.lstColorKeys.Items.Count - 1, 7)
 		.lstColorKeys.ItemIndex = 0
-		.cboOpenedFile.Clear
-		.cboOpenedFile.AddItem ML("All file types")
-		.cboOpenedFile.AddItem ML("Session file")
-		.cboOpenedFile.AddItem ML("Folder")
-		.cboOpenedFile.AddItem ML("Project file")
-		.cboOpenedFile.AddItem ML("Other file types")
 		For i As Integer = 0 To pfrmMain->Menu->Count - 1
 			AddShortcuts(pfrmMain->Menu->Item(i))
 		Next
 		.LoadSettings
-		cboDefaultProjectFileCheckEnable
 	End With
 End Sub
 
@@ -3647,11 +3549,6 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		CreateFormTypesWithoutTypeWord = .chkCreateFormTypesWithoutTypeWord.Checked
 		OpenCommandPromptInMainFileFolder = .optMainFileFolder.Checked
 		WLet(CommandPromptFolder, .txtInFolder.Text)
-		If .cboDefaultProjectFile.ItemIndex = -1 Then
-			WLet(DefaultProjectFile, "")
-		Else
-			WLet(DefaultProjectFile, .Templates.Item(.cboDefaultProjectFile.ItemIndex))
-		End If
 		Select Case .cboDefaultFileFormat.ItemIndex
 		Case 0: DefaultFileFormat = FileEncodings.PlainText
 		Case 1: DefaultFileFormat = FileEncodings.Utf8
@@ -3664,8 +3561,6 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		Case 1: DefaultNewLineFormat = NewLineTypes.LinuxLF
 		Case 2: DefaultNewLineFormat = NewLineTypes.MacOSCR
 		End Select
-		LastOpenedFileType = .cboOpenedFile.ItemIndex
-		WhenVisualFBEditorStarts = IIf(.optPromptForProjectAndFile.Checked, 1, IIf(.optCreateProjectFile.Checked, 2, IIf(.optOpenLastSession.Checked, 3, 0)))
 		AutoSaveBeforeCompiling = IIf(.optSaveCurrentFile.Checked, 1, IIf(.optSaveAllFiles.Checked, 2, IIf(.optPromptToSave.Checked, 3, 0)))
 		ShowSpaces = .chkShowSpaces.Checked
 		ShowKeywordsToolTip = .chkShowKeywordsTooltip.Checked
@@ -3869,8 +3764,6 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		piniSettings->WriteString "Options", "DefaultProjectFile", WGet(DefaultProjectFile)
 		piniSettings->WriteInteger "Options", "DefaultFileFormat", DefaultFileFormat
 		piniSettings->WriteInteger "Options", "DefaultNewLineFormat", DefaultNewLineFormat
-		piniSettings->WriteInteger "Options", "LastOpenedFileType", LastOpenedFileType
-		piniSettings->WriteInteger "Options", "WhenVisualFBEditorStarts", WhenVisualFBEditorStarts
 		piniSettings->WriteInteger "Options", "AutoSaveBeforeCompiling", AutoSaveBeforeCompiling
 		piniSettings->WriteBool "Options", "ShowSpaces", ShowSpaces
 		piniSettings->WriteBool "Options", "ShowKeywordsTooltip", ShowKeywordsToolTip
@@ -4796,27 +4689,6 @@ Private Sub frmOptions.cmdClearEditor_Click_(ByRef Designer As My.Sys.Object, By
 End Sub
 Private Sub frmOptions.cmdClearEditor_Click(ByRef Sender As Control)
 	lvOtherEditors.ListItems.Clear
-End Sub
-
-Sub cboDefaultProjectFileCheckEnable
-	fOptions.cboDefaultProjectFile.Enabled = fOptions.optCreateProjectFile.Checked
-	fOptions.cboOpenedFile.Enabled = fOptions.optOpenLastSession.Checked
-End Sub
-
-Private Sub frmOptions.optPromptForProjectAndFiles_Click(ByRef Designer As My.Sys.Object, ByRef Sender As RadioButton)
-	cboDefaultProjectFileCheckEnable
-End Sub
-
-Private Sub frmOptions.optCreateProjectFile_Click(ByRef Designer As My.Sys.Object, ByRef Sender As RadioButton)
-	cboDefaultProjectFileCheckEnable
-End Sub
-
-Private Sub frmOptions.optOpenLastSession_Click(ByRef Designer As My.Sys.Object, ByRef Sender As RadioButton)
-	cboDefaultProjectFileCheckEnable
-End Sub
-
-Private Sub frmOptions.optDoNotNothing_Click(ByRef Designer As My.Sys.Object, ByRef Sender As RadioButton)
-	cboDefaultProjectFileCheckEnable
 End Sub
 
 Sub HistoryCodeClean(ByRef Path As WString)

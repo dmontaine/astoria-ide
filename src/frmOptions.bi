@@ -94,10 +94,6 @@ Common Shared As Integer oldIndex, newIndex
 		Declare Sub cmdRemoveEditor_Click(ByRef Sender As Control)
 		Declare Static Sub cmdClearEditor_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Sub cmdClearEditor_Click(ByRef Sender As Control)
-		Declare Static Sub optPromptForProjectAndFiles_Click(ByRef Designer As My.Sys.Object, ByRef Sender As RadioButton)
-		Declare Static Sub optCreateProjectFile_Click(ByRef Designer As My.Sys.Object, ByRef Sender As RadioButton)
-		Declare Static Sub optOpenLastSession_Click(ByRef Designer As My.Sys.Object, ByRef Sender As RadioButton)
-		Declare Static Sub optDoNotNothing_Click(ByRef Designer As My.Sys.Object, ByRef Sender As RadioButton)
 		Declare Static Sub lvOtherEditors_ItemActivate_(ByRef Designer As My.Sys.Object, ByRef Sender As ListView, ByVal ItemIndex As Integer)
 		Declare Sub lvOtherEditors_ItemActivate(ByRef Sender As ListView, ByVal ItemIndex As Integer)
 		Declare Static Sub lvTerminalPaths_ItemActivate_(ByRef Designer As My.Sys.Object, ByRef Sender As ListView, ByVal ItemIndex As Integer)
@@ -144,7 +140,7 @@ Common Shared As Integer oldIndex, newIndex
 		Dim As Panel pnlChangeKeywordsCase, pnlChangeIdentifiersCase, pnlTreatTabAsSpaces, pnlTabSize, pnlHistoryLimit, pnlIntellisenseLimit, pnlHistoryFileSavingDays, hbxDefaultFileFormat, hbxDefaultNewLineFormat, pnlChangeEndingType, pnlCodeEditorHoverTime
 		Dim As TextBox txtColorForeground, txtColorBackground, txtColorIndicator, txtColorFrame
 		Dim As TextBox txtMFFpath, txtTabSize, txtHistoryLimit, txtGridSize, txtProjectsPath, txtInFolder, txtIntellisenseLimit, txtEnvironmentVariables, txtHistoryCodeDays,  txtFoldsHtml(0), txtFoldsLng, txtAutoSaveCharMax, txtCodeEditorHoverTime, txtInterfaceColor
-		Dim As ComboBoxEdit cboLanguage, cboIdentifiersCase, cboCase, cboTabStyle, cboTheme, cboCompiler64, cboTerminal, cboHelp, cboDefaultProjectFile, cboDefaultFileFormat, cboDefaultNewLineFormat, cboOpenedFile, cboAIAgent, cboConstructions, cboInterfaceTheme
+		Dim As ComboBoxEdit cboLanguage, cboIdentifiersCase, cboCase, cboTabStyle, cboTheme, cboCompiler64, cboTerminal, cboHelp, cboDefaultFileFormat, cboDefaultNewLineFormat, cboAIAgent, cboConstructions, cboInterfaceTheme
 		Dim As CheckBox chkAutoCreateRC, chkAutoSaveCurrentFileBeforeCompiling, chkEnableAutoComplete, chkTabAsSpaces, chkAutoIndentation, chkShowSpaces, chkShowAlignmentGrid, chkSnapToGrid, chkChangeKeywordsCase, chkBold, chkItalic, chkUnderline
 		Dim As HotKey hkShortcut
 		Dim OpenD As OpenFileDialog
@@ -163,7 +159,7 @@ Common Shared As Integer oldIndex, newIndex
 		Dim As Boolean HotKeysChanged
 		Dim As Integer LibraryPathsCount
 		Dim As ListControl lstIncludePaths, lstLibraryPaths, lstColorKeys, lstInterfaceColorKeys
-		Dim As GroupBox grbGrid, grbColors, grbThemes, grbFont, grbDefaultCompilers, grbCompilerPaths, grbDefaultTerminal, grbTerminalPaths, grbIncludePaths, grbLibraryPaths, grbLanguage, grbDefaultHelp, grbHelpPaths, grbWhenCompiling, grbShortcuts, grbOtherEditors, grbWhenVFBEStarts, grbCommandPromptOptions, grbAIAgent, grbAIAgentType, grbDefaultAIAgent, grbDefaults, grbDisplay, grbCompletion, grbIntelliSense, grbHistory
+		Dim As GroupBox grbGrid, grbColors, grbThemes, grbFont, grbDefaultCompilers, grbCompilerPaths, grbDefaultTerminal, grbTerminalPaths, grbIncludePaths, grbLibraryPaths, grbLanguage, grbDefaultHelp, grbHelpPaths, grbWhenCompiling, grbShortcuts, grbOtherEditors, grbCommandPromptOptions, grbAIAgent, grbAIAgentType, grbDefaultAIAgent, grbDefaults, grbDisplay, grbCompletion, grbIntelliSense, grbHistory
 		Dim As ListView lvCompilerPaths, lvTerminalPaths, lvHelpPaths, lvShortcuts, lvOtherEditors, lvAIAgentTypes
 		Dim As Label lblInterfaceFont
 		Dim As CommandButton cmdInterfaceFont
@@ -176,7 +172,7 @@ Common Shared As Integer oldIndex, newIndex
 		Dim As CheckBox chkHighlightCurrentLine
 		Dim As CheckBox chkHighlightBrackets, chkIncludeMFFPath, chkLimitDebug, chkDisplayWarningsInDebug, chkCreateNonStaticEventHandlers, chkShowKeywordsTooltip, chkShowSymbolsTooltipsOnMouseHover, chkShowClassesExplorerOnOpenWindow, chkAddSpacesToOperators, chkCreateFormTypesWithoutTypeWord, chkTurnOnEnvironmentVariables, chkDarkMode, chkPlaceStaticEventHandlersAfterTheConstructor, chkCreateStaticEventHandlersWithAnUnderscoreAtTheBeginning, chkAddRelativePathsToRecent, chkShowTooltipsAtTheTop, chkChangeIdentifiersCase, chkSyntaxHighlightingIdentifiers, chkEnableAutoSuggestions, chkShowHorizontalSeparatorLines, chkCreateEventHandlersWithoutStaticEventHandlerIfEventAllowsIt, chkAutoSaveSession, chkShowHolidayFrame, ShowClassesExplorerOnOpenWindow, chkChangeEndingType, chkUseDirect2D, chkInterfaceColor
 		Dim As Boolean oldDisplayMenuIcons
-		Dim As RadioButton optSaveCurrentFile, optDoNotSave, optSaveAllFiles, optPromptForProjectAndFile, optCreateProjectFile, optOpenLastSession, optDoNotNothing, optPromptToSave, optMainFileFolder, optInFolder
+		Dim As RadioButton optSaveCurrentFile, optDoNotSave, optSaveAllFiles, optPromptToSave, optMainFileFolder, optInFolder
 		Dim As VerticalBox vbxCodeEditor, vbxGeneral, vbxColors
 		Dim As VerticalBox vbxTheme, vbxDefaults, vbxIncludePaths, vbxLibraryPaths, vbxInterfaceTheme, vbxInterfaceColors
 		Dim As PagePanel pplGeneral
@@ -184,7 +180,6 @@ Common Shared As Integer oldIndex, newIndex
 '#End Region
 
 
-Declare Sub cboDefaultProjectFileCheckEnable
 Declare Sub HistoryCodeClean(ByRef Path As WString)
 Common Shared pfOptions As frmOptions Ptr
 

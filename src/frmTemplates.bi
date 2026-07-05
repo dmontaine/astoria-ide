@@ -56,6 +56,7 @@
 		Dim As WStringList Templates
 		Dim As Boolean OnlyFiles, RecentChanged
 		Dim As UString SelectedTemplate, SelectedFile, SelectedFolder
+		Dim As Integer DialogMode
 		Dim As OpenFileControl OpenFileControl1
 		Dim As Panel pnlBottom, pnlSaveLocation, pnlRecent
 		Dim As Label lblSaveLocation

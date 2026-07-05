@@ -436,6 +436,31 @@ Private Sub frmTemplates.lvTemplates_ItemActivate(ByRef Sender As ListView, ByVa
 End Sub
 
 
+Private Sub frmTemplates.Form_Show_(ByRef Designer As My.Sys.Object, ByRef Sender As Form)
+	(*Cast(frmTemplates Ptr, Sender.Designer)).Form_Show(Sender)
+End Sub
+Private Sub frmTemplates.Form_Show(ByRef Sender As Form)
+	Select Case DialogMode
+	Case 0
+		SendMessage(TabControl1.Handle, TCM_SETITEMSIZE, 0, MAKELONG(0, 22))
+		tvTemplates.Visible = True
+		tvRecent.Visible = True
+	Case 1
+		TabControl1.SelectedTabIndex = 0
+		SendMessage(TabControl1.Handle, TCM_SETITEMSIZE, 0, 0)
+		tvTemplates.Visible = False
+		tvTemplates.SelectedNode = tvTemplates.Nodes.Item(0)
+		tvTemplates_SelChanged tvTemplates, *tvTemplates.SelectedNode
+	Case 2, 3
+		TabControl1.SelectedTabIndex = 2
+		SendMessage(TabControl1.Handle, TCM_SETITEMSIZE, 0, 0)
+		tvRecent.Visible = False
+		tvRecent.SelectedNode = tvRecent.Nodes.Item(2)
+		tvRecent_SelChanged tvRecent, *tvRecent.SelectedNode
+	End Select
+	pnlRecent.Visible = True
+End Sub
+
 Private Sub frmTemplates.Form_Close_(ByRef Designer As My.Sys.Object, ByRef Sender As Form, ByRef Action As Integer)
 	(*Cast(frmTemplates Ptr, Sender.Designer)).Form_Close(Sender, Action)
 End Sub
@@ -447,21 +472,20 @@ Private Sub frmTemplates.tvRecent_SelChanged_(ByRef Designer As My.Sys.Object, B
 	(*Cast(frmTemplates Ptr, Sender.Designer)).tvRecent_SelChanged(Sender, Item)
 End Sub
 Private Sub frmTemplates.tvRecent_SelChanged(ByRef Sender As TreeView, ByRef Item As TreeNode)
-	Dim As String MRUName
+	Dim As WStringList Ptr MRUList
 	lvRecent.ListItems.Clear
 	Select Case Item.Index
-	Case 0: MRUName = "Session"
-	Case 1: MRUName = "Folder"
-	Case 2: MRUName = "Project"
-	Case 3: MRUName = "File"
+	Case 0: MRUList = @MRUSessions
+	Case 1: MRUList = @MRUFolders
+	Case 2: MRUList = @MRUProjects
+	Case 3: MRUList = @MRUFiles
+	Case Else: Exit Sub
 	End Select
 	Dim sTmp As WString * 1024
-	For i As Integer = 0 To miRecentMax
-		sTmp = iniSettings.ReadString("MRU" & MRUName & "s", "MRU" & MRUName & "_0" & WStr(i), "")
-		If Trim(sTmp) <> "" Then
-			lvRecent.ListItems.Add GetFileName(sTmp), GetIconName(sTmp)
-			lvRecent.ListItems.Item(i)->Text(1) = sTmp
-		End If
+	For i As Integer = 0 To MRUList->Count - 1
+		sTmp = MRUList->Item(i)
+		lvRecent.ListItems.Add GetFileName(sTmp), GetIconName(sTmp)
+		lvRecent.ListItems.Item(i)->Text(1) = sTmp
 	Next
 End Sub
 

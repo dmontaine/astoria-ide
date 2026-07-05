@@ -1235,8 +1235,10 @@ Namespace My.Sys.Forms
 					miStruct = Cast(MEASUREITEMSTRUCT Ptr, Message.lParam)
 					Select Case miStruct->CtlType
 					Case ODT_MENU
-						'miStruct->itemWidth = miStruct->itemWidth + 8
-						'If miStruct->itemHeight < 18 Then miStruct->itemHeight = 18
+						If g_darkModeSupported AndAlso g_darkModeEnabled Then
+							miStruct->itemHeight = ScaleY(22)
+							miStruct->itemWidth  = ScaleX(300)
+						End If
 					Case ODT_LISTBOX, ODT_COMBOBOX, ODT_BUTTON, ODT_HEADER, ODT_LISTVIEW, ODT_STATIC, ODT_TAB
 						Dim As Control Ptr Ctrl = Cast(Any Ptr, GetWindowLongPtr(GetDlgItem(FHandle, Message.wParam), GWLP_USERDATA))
 						If Ctrl = 0 Then

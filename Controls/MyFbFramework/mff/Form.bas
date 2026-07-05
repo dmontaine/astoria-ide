@@ -947,6 +947,25 @@ Namespace My.Sys.Forms
 				IsMenuItem = True
 			Case WM_INITMENU
 			Case WM_INITMENUPOPUP
+				If g_darkModeSupported AndAlso g_darkModeEnabled Then
+					Dim As Boolean isSystemMenu = ((msg.lParam Shr 16) And &HFFFF) <> 0
+					If Not isSystemMenu Then
+						Dim As HMENU hPopup = Cast(HMENU, msg.wParam)
+						Dim As Integer nCount = GetMenuItemCount(hPopup)
+						If nCount > 0 Then
+							Dim As MENUITEMINFO mii
+							mii.cbSize = SizeOf(mii)
+							mii.fMask = MIIM_FTYPE
+							For i As Integer = 0 To nCount - 1
+								GetMenuItemInfo(hPopup, i, True, @mii)
+								If Not (mii.fType And MFT_OWNERDRAW) Then
+									mii.fType Or = MFT_OWNERDRAW
+									SetMenuItemInfo(hPopup, i, True, @mii)
+								End If
+							Next i
+						End If
+					End If
+				End If
 				'			Case WM_TIMER
 				'				If OnTimer Then OnTimer(This)
 			Case WM_MDIACTIVATE
@@ -988,9 +1007,53 @@ Namespace My.Sys.Forms
 				diStruct = Cast(DRAWITEMSTRUCT Ptr, msg.lParam)
 				Select Case diStruct->CtlType
 				Case ODT_MENU
-					'If This.Menu AndAlso This.Menu->ImagesList AndAlso This.Menu->ImagesList->Handle AndAlso diStruct->itemData <> 0 Then
-					'    ImageList_Draw(This.Menu->ImagesList->Handle, Cast(MenuItem Ptr, diStruct->itemData)->ImageIndex, diStruct->hDC, 2, 2, ILD_NORMAL)
-					'End If
+					If g_darkModeSupported AndAlso g_darkModeEnabled Then
+						Dim As HDC hdc = diStruct->hDC
+						Dim As RECT rc = diStruct->rcItem
+						Dim As Boolean bSelected = (diStruct->itemState And ODS_SELECTED) <> 0
+						Dim As Boolean bDisabled = (diStruct->itemState And (ODS_GRAYED Or ODS_DISABLED)) <> 0
+						Dim As Boolean bHot = (diStruct->itemState And ODS_HOTLIGHT) <> 0
+						Dim As MenuItem Ptr pItem = Cast(MenuItem Ptr, diStruct->itemData)
+
+						If bSelected Or bHot Then
+							FillRect(hdc, @rc, hbrHlBkgnd)
+						Else
+							FillRect(hdc, @rc, hbrBkgndMenu)
+						End If
+
+						If pItem Then
+							Dim As WString * 512 wszText
+							Dim As MENUITEMINFO miiText
+							miiText.cbSize = SizeOf(miiText)
+							miiText.fMask = MIIM_STRING
+							miiText.dwTypeData = @wszText
+							miiText.cch = 512
+							If GetMenuItemInfo(Cast(HMENU, diStruct->hwndItem), diStruct->itemID, False, @miiText) Then
+								Dim As Integer tabPos = InStr(wszText, !"\t")
+								Dim As Integer margin = ScaleX(4)
+								Dim As RECT rcText = rc
+								rcText.Left = rcText.Left + ScaleX(24)
+								rcText.Right = rcText.Right - margin
+
+								SetBkMode(hdc, TRANSPARENT)
+								If bDisabled Then
+									SetTextColor(hdc, darkHlBkColor)
+								Else
+									SetTextColor(hdc, darkTextColor)
+								End If
+
+								If tabPos > 0 Then
+									DrawTextW(hdc, @wszText, tabPos - 1, @rcText, DT_LEFT Or DT_VCENTER Or DT_SINGLELINE Or DT_HIDEPREFIX)
+									If Not bDisabled Then SetTextColor(hdc, darkHlBkColor)
+									DrawTextW(hdc, @wszText[tabPos], -1, @rcText, DT_RIGHT Or DT_VCENTER Or DT_SINGLELINE Or DT_NOPREFIX)
+								Else
+									DrawTextW(hdc, @wszText, -1, @rcText, DT_LEFT Or DT_VCENTER Or DT_SINGLELINE Or DT_HIDEPREFIX)
+								End If
+							End If
+						End If
+
+						msg.Result = 1
+					End If
 				End Select
 			Case CM_HELP
 				Dim As My.Sys.Drawing.Point P

@@ -6167,7 +6167,13 @@ Sub CloseRight()
 	splRight.Visible = False
 	tabRight.SelectedTabIndex = -1
 	pnlRight.Width = tabRight.ItemWidth(0) + 2
-	If Not GetRightClosedStyle Then pnlRightPin.Visible = False
+	If GetRightClosedStyle Then
+		pnlRightPin.Align = DockStyle.alTop
+		pnlRightPin.Height = tbRight.Height
+		pnlRightPin.Visible = True
+	Else
+		pnlRightPin.Visible = False
+	End If
 	frmMain.RequestAlign
 End Sub
 
@@ -7531,8 +7537,9 @@ Sub SetRightClosedStyle(Value As Boolean, WithClose As Boolean = True)
 			tabRight.TabPosition = tpRight
 			.ImageKey = "Pin"
 			.Checked = False
-			pnlRightPin.Top = 2
-			pnlRightPin.Left = tabRightWidth - pnlRightPin.Width - tabItemHeight
+			pnlRightPin.Anchor.Right = AnchorStyle.asNone
+			pnlRightPin.Align = DockStyle.alTop
+			pnlRightPin.Height = tbRight.Height
 			pnlRightPin.Visible = True
 			If WithClose Then CloseRight
 		Else
@@ -7541,6 +7548,9 @@ Sub SetRightClosedStyle(Value As Boolean, WithClose As Boolean = True)
 			pnlRight.Width = tabRightWidth
 			'pnlRight.RequestAlign
 			splRight.Visible = True
+			pnlRightPin.Align = DockStyle.alNone
+			pnlRightPin.Width = tbRight.Width
+			pnlRightPin.Height = tbRight.Height
 			pnlRightPin.Visible = True
 			.ImageKey = "Pinned"
 			.Checked = True

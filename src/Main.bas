@@ -619,9 +619,8 @@ Sub SelectControlTreeNode(cte As ControlTreeElement Ptr)
 		tb->tbrTop.Buttons.Item("CodeAndForm")->Checked = True
 		tbrTop_ButtonClick *tb->tbrTop.Designer, tb->tbrTop, *tb->tbrTop.Buttons.Item("CodeAndForm")
 	End If
+	RevealAncestorPanels tb->Des, Ctrl
 	Dim As Any Ptr iParentCtrl = tb->Des->GetParentControl(Ctrl)
-	' Note: BringToFront only fixes Z-order, not PagePanel visibility - selecting a
-	' control on a currently-hidden panel page won't reveal it yet (separate, deferred fix).
 	If iParentCtrl <> 0 Then tb->Des->BringToFront iParentCtrl
 	If Not tb->Des->SelectedControls.Contains(Ctrl) Then tb->Des->SelectedControls.Clear
 	tb->Des->SelectedControl = Ctrl

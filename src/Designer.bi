@@ -34,6 +34,7 @@ Namespace My.Sys.Forms
 	
 	
 	Dim Shared mnuDesigner As PopupMenu
+	Dim Shared mnuShowPanelDesigner As MenuItem Ptr
 	
 	Type SymbolsType
 		Handle As Any Ptr
@@ -163,12 +164,29 @@ Namespace My.Sys.Forms
 		Declare Sub Clear
 		Declare Function GetClassAcceptControls(AClassName As String) As Boolean
 		Declare Sub DblClick(X As Integer, Y As Integer, Shift As Integer, Ctrl As Any Ptr = 0)
+		' Nearest PagePanel ancestor of Ctrl (walking up Parent), or 0 if none -
+		' shared by the "Show Panel" menu (ChangeFirstMenuItem) and MovePanelLayer.
+		Declare Function FindPagePanelAncestor(Ctrl As Any Ptr) As Any Ptr
 		Declare Sub MouseDown(X As Integer, Y As Integer, Shift As Integer, Ctrl As Any Ptr = 0)
 		Declare Sub MouseUp(X As Integer, Y As Integer, Shift As Integer)
 		Declare Sub MouseMove(X As Integer, Y As Integer, Shift As Integer)
 		Declare Sub KeyDown(Key As Integer, Shift As Integer, Ctrl As Any Ptr = 0)
 	Public:
 		DesignControl As Any Ptr
+		' True while a form's source is being (re)parsed and its controls recreated
+		' from scratch (TabWindow.FormDesign), as opposed to a control being added
+		' interactively by the user (e.g. dragged from the Toolbox). Queryable by
+		' framework controls (which can't see this IDE-only type directly) via the
+		' inherited Object.ReadProperty("Loading") - see the ReadProperty override
+		' below and PagePanel.Add's use of it.
+		Loading As Boolean
+		Declare Virtual Function ReadProperty(ByRef PropertyName As String) As Any Ptr
+		' Switches to the previous (-1) or next (+1) page on SelectedControl's
+		' nearest PagePanel ancestor, wrapping at the ends. Used by Ctrl+PageUp/
+		' PageDown (KeyDown) and the "Previous/Next Layer" menu items, so panels
+		' can be cycled from within the design surface itself, not just via the
+		' project tree or the "Show Panel" list.
+		Declare Sub MovePanelLayer(ByVal Direction As Integer)
 		SelectedControl As Any Ptr
 		SelectedControls As List
 		Objects As List

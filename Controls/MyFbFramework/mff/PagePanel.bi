@@ -20,6 +20,10 @@ Namespace My.Sys.Forms
 			Declare Static Sub WNDPROC(ByRef Message As Message)
 		FSelectedPanelIndex As Integer
 		FTransparent As Boolean
+		' True while the IDE Designer is (re)parsing a form's source and recreating
+		' its controls from scratch, as opposed to a genuine interactive add (e.g.
+		' dragging a new page from the Toolbox) - see Add's use of it below.
+		FLoading As Boolean
 		Declare Static Sub GraphicChange(ByRef Designer As My.Sys.Object, ByRef Sender As My.Sys.Drawing.GraphicType, Image As Any Ptr, ImageType As Integer)
 	Protected:
 		NumericUpDownControl As NumericUpDown

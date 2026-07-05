@@ -93,8 +93,33 @@ Sub PopupClick(ByRef Designer As My.Sys.Object, ByRef Sender As My.Sys.Object)
 	Case "Duplicate":       tb->Des->DuplicateControl
 	Case "BringToFront":    DesignerBringToFront(*tb->Des, tb->Des->SelectedControl)
 	Case "SendToBack":      DesignerSendToBack(*tb->Des, tb->Des->SelectedControl)
+	Case "PreviousLayer":   tb->Des->MovePanelLayer(-1)
+	Case "NextLayer":       tb->Des->MovePanelLayer(1)
 	Case "Properties":      If tb->Des->OnClickProperties Then tb->Des->OnClickProperties(*tb->Des, tb->Des->SelectedControl)
 	End Select
+End Sub
+
+' Click handler for the Designer right-click menu's dynamically-built "Show Panel"
+' submenu (see Designer.ChangeFirstMenuItem) - lets a stacked/layered control's
+' page be switched from within the visual design surface itself, not just via the
+' project tree, since PagePanel's own design-time spinner never actually fires
+' (Design Mode intercepts clicks for selection, not the control's real behavior).
+Sub ShowPanelMenuItem_Click(ByRef Sender As MenuItem)
+	Var tb = Cast(TabWindow Ptr, ptabCode->SelectedTab)
+	If tb = 0 OrElse tb->Des = 0 Then Exit Sub
+	Dim As Any Ptr PageCtrl = Sender.Tag
+	If PageCtrl = 0 Then Exit Sub
+	Dim As SymbolsType Ptr stPage = tb->Des->SymbolsReadProperty(PageCtrl)
+	If stPage = 0 Then Exit Sub
+	Dim As Any Ptr PagePanelCtrl = tb->Des->GetParentControl(PageCtrl, False)
+	Dim As SymbolsType Ptr stPagePanel = tb->Des->SymbolsWriteProperty(PagePanelCtrl)
+	If stPagePanel = 0 Then Exit Sub
+	stPagePanel->WritePropertyFunc(PagePanelCtrl, "SelectedPanel", PageCtrl)
+	If Not tb->Des->SelectedControls.Contains(PageCtrl) Then tb->Des->SelectedControls.Clear
+	tb->Des->SelectedControl = PageCtrl
+	Dim As Any Ptr hw = stPage->ReadPropertyFunc(PageCtrl, "Handle")
+	If hw <> 0 Then tb->Des->MoveDots(PageCtrl, False) Else tb->Des->MoveDots(0, False)
+	DesignerChangeSelection *tb->Des, PageCtrl
 End Sub
 
 ' Could not find in the child node
@@ -2808,6 +2833,31 @@ Sub DesignerInsertingControl(ByRef Sender As Designer, ByRef ClassName As String
 	AName = NewName
 End Sub
 
+' A PagePanel's own SelectedPanelIndex/SelectedPanel is the only thing that
+' decides which stacked page is visible while designing - the form's own
+' runtime page-switch logic (e.g. a category list's SelChange handler flipping
+' .Visible on each page) is user code that only runs in the compiled app, never
+' while editing in the Designer. So a control nested under a currently-hidden
+' page stays exactly as hidden as it was when the file was last saved, with no
+' way back short of hand-editing SelectedPanelIndex - walk every PagePanel
+' ancestor of the control being selected and flip it to the child on the path
+' down to that control, revealing it before selection.
+Sub RevealAncestorPanels(Des As My.Sys.Forms.Designer Ptr, Ctrl As Any Ptr)
+	Dim As Any Ptr Child = Ctrl
+	Dim As SymbolsType Ptr stChild = Des->SymbolsReadProperty(Child)
+	Do While stChild <> 0
+		Dim As Any Ptr ParentCtrl = stChild->ReadPropertyFunc(Child, "Parent")
+		If ParentCtrl = 0 Then Exit Do
+		Dim As SymbolsType Ptr stParent = Des->SymbolsReadProperty(ParentCtrl)
+		If stParent = 0 OrElse stParent->WritePropertyFunc = 0 Then Exit Do
+		If QWString(stParent->ReadPropertyFunc(ParentCtrl, "ClassName")) = "PagePanel" Then
+			stParent->WritePropertyFunc(ParentCtrl, "SelectedPanel", Child)
+		End If
+		Child = ParentCtrl
+		stChild = stParent
+	Loop
+End Sub
+
 Sub cboClass_Change(ByRef Designer As My.Sys.Object, ByRef Sender As ComboBoxEdit, ItemIndex As Integer)
 	'If Sender.Parent = 0 Then Exit Sub
 	'Dim As TabWindow Ptr tb = Cast(TabWindow Ptr, Sender.Parent->Parent->Parent)
@@ -2834,6 +2884,7 @@ Sub cboClass_Change(ByRef Designer As My.Sys.Object, ByRef Sender As ComboBoxEdi
 		If tb->Des = 0 Then Exit Sub
 		Dim As SymbolsType Ptr st = tb->Des->Symbols(Ctrl)
 		If st AndAlso st->ReadPropertyFunc <> 0 Then
+				RevealAncestorPanels tb->Des, Ctrl
 				Dim iParentCtrl As Any Ptr = tb->Des->GetParentControl(Ctrl)
 					If iParentCtrl <> 0 Then tb->Des->BringToFront iParentCtrl
 				If Not tb->Des->SelectedControls.Contains(Ctrl) Then
@@ -8385,6 +8436,7 @@ Sub TabWindow.FormDesign(NotForms As Boolean = False)
 	End If
 	pfrmMain->UpdateLock
 	bNotDesign = True
+	If Des <> 0 Then Des->Loading = True
 	QuitThread Project, @This
 	Dim CtrlName As String
 	Dim SelControlName As String
@@ -9614,6 +9666,7 @@ Sub TabWindow.FormDesign(NotForms As Boolean = False)
 							If pnlForm.Handle = 0 Then pnlForm.CreateWnd
 						Des = _New( My.Sys.Forms.Designer(@pnlForm))
 						If Des = 0 Then FLine= 0: bNotDesign = False: pfrmMain->UpdateUnLock: Exit Sub
+						Des->Loading = True
 						Des->Tag = @This
 						Des->OnInsertingControl = @DesignerInsertingControl
 						Des->OnInsertControl = @DesignerInsertControl
@@ -10028,6 +10081,38 @@ Sub TabWindow.FormDesign(NotForms As Boolean = False)
 	ConstructionBlocks.Clear
 	SelControlNames.Clear
 	bNotDesign = False
+	If Des <> 0 Then
+		Des->Loading = False
+		' Every control was stamped "Loading=True" at creation time (see
+		' Designer.CreateControl) so containers like PagePanel could tell a
+		' from-source recreation apart from a live interactive add - now that
+		' the form is fully reconstructed, reset it so a later genuine
+		' interactive add (e.g. dragging a new page from the Toolbox) still
+		' behaves normally.
+		Dim As Boolean bFalseVal = False
+		For i As Integer = 0 To Des->Controls.Count - 1
+			Dim As Any Ptr LoadedCtrl = Des->Controls.Item(i)
+			Dim As SymbolsType Ptr stLoaded = Des->SymbolsWriteProperty(LoadedCtrl)
+			If stLoaded <> 0 Then
+				stLoaded->WritePropertyFunc(LoadedCtrl, "Loading", @bFalseVal)
+				' Also force one final refresh of each PagePanel's page visibility
+				' now that ALL of its pages truly exist. PagePanel.Add re-applies
+				' SelectedPanelIndex as each page is added during the load, but relying
+				' on every one of those incremental passes to land in exactly the
+				' right state is fragile - reading the (already-correct)
+				' SelectedPanelIndex back and writing it again here forces the real
+				' visibility-toggling loop to run once more against the complete,
+				' final child list, which is what actually guarantees correctness.
+				If stLoaded->ReadPropertyFunc <> 0 AndAlso QWString(stLoaded->ReadPropertyFunc(LoadedCtrl, "ClassName")) = "PagePanel" Then
+					Dim As Integer Ptr pCurIndex = stLoaded->ReadPropertyFunc(LoadedCtrl, "SelectedPanelIndex")
+					If pCurIndex <> 0 Then
+						Dim As Integer CurIndexVal = *pCurIndex
+						stLoaded->WritePropertyFunc(LoadedCtrl, "SelectedPanelIndex", @CurIndexVal)
+					End If
+				End If
+			End If
+		Next i
+	End If
 	pfrmMain->UpdateUnLock
 	SetQuitThread Project, @This, False
 	If AutoSuggestions AndAlso LoadFunctionsCount = 0 Then
@@ -10516,6 +10601,15 @@ Constructor TabWindow(ByRef wFileName As WString = "", bNew As Boolean = False, 
 		If tn = 0 Then
 			Dim As String IconName = GetIconName(FileName)
 			tn = ptvExplorer->Nodes.Add(This.Caption, , , IconName, IconName)
+			' Standalone "File > Open" (no project/folder context) never went through
+			' AddProject/ExpandFolder, so this node was missing the ExplorerElement
+			' Tag every other file node gets (tvExplorer_NodeExpanding bails out
+			' immediately without one) and the dummy child that gives Form nodes
+			' an expand arrow in the first place.
+			Dim As ExplorerElement Ptr ee1 = _New(ExplorerElement)
+			WLet(ee1->FileName, FileName)
+			tn->Tag = ee1
+			If IconName = "Form" Then tn->Nodes.Add ""
 		End If
 	End If
 	ptn = GetParentNode(tn)

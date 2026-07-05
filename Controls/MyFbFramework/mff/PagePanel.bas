@@ -35,14 +35,19 @@ Namespace My.Sys.Forms
 							MoveNumericUpDownControl
 					End If
 				Case "selectedpanel": SelectedPanel = Value
-				Case "selectedpanelindex": 
-					If FDesignMode Then
-						NumericUpDownControl.Position = QInteger(Value)
-					Else
-						SelectedPanelIndex = QInteger(Value)
-					End If
+				Case "selectedpanelindex":
+					' Call the real setter directly rather than relying solely on
+					' NumericUpDownControl.Position's Win32 EN_CHANGE notification to
+					' relay it - during Designer Constructor replay there's no
+					' guarantee that notification fires (or that the spinner's HWND
+					' even exists yet), so a design-time write could otherwise
+					' silently do nothing. Still sync .Position afterward so the
+					' spinner's displayed value matches.
+					SelectedPanelIndex = QInteger(Value)
+					If FDesignMode Then NumericUpDownControl.Position = FSelectedPanelIndex
 				Case "tabindex": TabIndex = QInteger(Value)
 				Case "transparent": This.Transparent = QBoolean(Value)
+				Case "loading": FLoading = QBoolean(Value)
 				Case Else: Return Base.WriteProperty(PropertyName, Value)
 				End Select
 			End If
@@ -227,6 +232,15 @@ Namespace My.Sys.Forms
 						If FDesignMode Then ShowWindow(Controls[i]->Handle, IIf(bVisible, SW_SHOW, SW_HIDE))
 						If bVisible Then
 							SetWindowPos FHandle, IIf(FDesignMode, NumericUpDownControl.Handle, HWND_TOP), 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE
+							' A page that was hidden while its layout would otherwise have
+							' been recomputed (e.g. throughout Designer reconstruction, or
+							' just while sitting invisible behind another page) can come
+							' back with stale/never-computed child positions - becoming
+							' Visible again doesn't retroactively fix that on its own.
+							' Force a fresh layout pass so it actually renders correctly
+							' the moment it's shown, not only once something else (like
+							' selecting a control inside it) happens to trigger one.
+							Controls[i]->RequestAlign
 						End If
 				Next
 		End If
@@ -251,7 +265,25 @@ Namespace My.Sys.Forms
 				UpDownControl.Enabled = NumericUpDownControl.MaxValue >= 0
 				NeedBringToFront = True
 				NumericUpDownControl.ControlIndex = ControlCount - 1
-				NumericUpDownControl.Position = ControlCount - 2
+				' Jumping to the newest child is correct for a genuine interactive
+				' add (e.g. dragging a new page from the Toolbox), but this same Add
+				' also fires once per pre-existing page while the IDE Designer is
+				' just recreating an existing form's controls from source - in that
+				' case jumping on every single one would silently override whatever
+				' page the form's own code actually selected (see FLoading).
+				If Not FLoading Then
+					NumericUpDownControl.Position = ControlCount - 2
+				Else
+					' The form's own SelectedPanelIndex assignment (if any) runs
+					' before any of its pages exist yet, so the visibility-toggling
+					' loop it triggers has nothing real to show/hide at that point -
+					' every page added afterward just keeps its own default
+					' Visible=True forever, and whichever ends up on top of the
+					' Z-order (the last one added) is what's actually seen. Re-apply
+					' the same index on every add while loading so each newly-added
+					' page's Visible state gets correctly (re-)evaluated too.
+					SelectedPanelIndex = FSelectedPanelIndex
+				End If
 		End If
 	End Sub
 	

@@ -56,6 +56,7 @@ Common Shared As HelpOptions HelpOption
 
 #include once "Localization.bi"
 Declare Sub PopupClick(ByRef Designer As My.Sys.Object, ByRef Sender As My.Sys.Object)
+Declare Sub ShowPanelMenuItem_Click(ByRef Sender As MenuItem)
 Declare Sub mClick(ByRef Designer As My.Sys.Object, Sender As My.Sys.Object)
 Declare Sub mClickAIChat(ByRef Designer As My.Sys.Object, Sender As My.Sys.Object)
 Declare Sub mClickMRU(ByRef Designer As My.Sys.Object, Sender As My.Sys.Object)

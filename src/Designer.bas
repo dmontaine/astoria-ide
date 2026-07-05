@@ -15,6 +15,60 @@ Namespace My.Sys.Forms
 		Function Designer.GetControl(ControlHandle As HWND) As Any Ptr
 			Return Cast(Any Ptr, GetProp(ControlHandle, "MFFControl"))
 		End Function
+
+		Function Designer.ReadProperty(ByRef PropertyName As String) As Any Ptr
+			Select Case LCase(PropertyName)
+			Case "loading": Return @Loading
+			Case Else: Return Base.ReadProperty(PropertyName)
+			End Select
+		End Function
+
+		Function Designer.FindPagePanelAncestor(Ctrl As Any Ptr) As Any Ptr
+			Dim As Any Ptr WalkCtrl = Ctrl
+			Dim As SymbolsType Ptr stWalk = SymbolsReadProperty(WalkCtrl)
+			' Ctrl itself may already be the PagePanel (e.g. right-clicked directly
+			' on its own surface rather than on one of its page's controls).
+			If stWalk <> 0 AndAlso QWString(stWalk->ReadPropertyFunc(WalkCtrl, "ClassName")) = "PagePanel" Then Return WalkCtrl
+			Do While stWalk <> 0
+				Dim As Any Ptr ParentCtrl = stWalk->ReadPropertyFunc(WalkCtrl, "Parent")
+				If ParentCtrl = 0 Then Return 0
+				Dim As SymbolsType Ptr stParent = SymbolsReadProperty(ParentCtrl)
+				If stParent = 0 Then Return 0
+				If QWString(stParent->ReadPropertyFunc(ParentCtrl, "ClassName")) = "PagePanel" Then Return ParentCtrl
+				WalkCtrl = ParentCtrl
+				stWalk = stParent
+			Loop
+			Return 0
+		End Function
+
+		Sub Designer.MovePanelLayer(ByVal Direction As Integer)
+			Dim As Any Ptr PagePanelCtrl = FindPagePanelAncestor(SelectedControl)
+			If PagePanelCtrl = 0 Then Exit Sub
+			Dim As SymbolsType Ptr st = SymbolsWriteProperty(PagePanelCtrl)
+			If st = 0 OrElse st->ReadPropertyFunc = 0 OrElse st->ControlByIndexFunc = 0 Then Exit Sub
+			Dim As Integer Ptr pIndex = st->ReadPropertyFunc(PagePanelCtrl, "SelectedPanelIndex")
+			Dim As Integer Ptr pCount = st->ReadPropertyFunc(PagePanelCtrl, "ControlCount")
+			If pIndex = 0 OrElse pCount = 0 Then Exit Sub
+			' ControlCount includes PagePanel's own hidden spinner, always pinned to
+			' the last raw slot (see PagePanel.Add), so real pages occupy raw
+			' indices 0..ControlCount-2 - matches SelectedPanelIndex's own indexing.
+			Dim As Integer LastPage = *pCount - 2
+			If LastPage < 0 Then Exit Sub
+			Dim As Integer NewIndex = *pIndex + Direction
+			If NewIndex < 0 Then NewIndex = LastPage
+			If NewIndex > LastPage Then NewIndex = 0
+			st->WritePropertyFunc(PagePanelCtrl, "SelectedPanelIndex", @NewIndex)
+			Dim As Any Ptr PageCtrl = st->ControlByIndexFunc(PagePanelCtrl, NewIndex)
+			If PageCtrl = 0 Then Exit Sub
+			If Not SelectedControls.Contains(PageCtrl) Then SelectedControls.Clear
+			SelectedControl = PageCtrl
+			Dim As SymbolsType Ptr stPage = SymbolsReadProperty(PageCtrl)
+			If stPage <> 0 Then
+				Dim As Any Ptr hw = stPage->ReadPropertyFunc(PageCtrl, "Handle")
+				If hw <> 0 Then MoveDots(PageCtrl, False) Else MoveDots(0, False)
+			End If
+			If OnChangeSelection Then OnChangeSelection(This, PageCtrl)
+		End Sub
 	
 	Function Designer.GetParentControl(iControl As Any Ptr, ByVal toRoot As Boolean = True) As Any Ptr
 		If iControl = 0 Then Return iControl
@@ -99,6 +153,33 @@ Namespace My.Sys.Forms
 					mnuDesigner.Item(0)->Caption = ML("Default event")
 					mnuDesigner.Item(0)->Image = "Code"
 				End Select
+			End If
+		End If
+		' "Show Panel"/"Previous Layer"/"Next Layer" - let a control's page on a
+		' stacked/layered PagePanel be switched from within the visual design
+		' surface itself, not just via the project tree, since PagePanel's own
+		' design-time spinner never actually works (Design Mode intercepts clicks
+		' for selection, not the control's real click behavior).
+		Dim As Any Ptr PagePanelCtrl = FindPagePanelAncestor(SelectedControl)
+		mnuShowPanelDesigner->Visible = (PagePanelCtrl <> 0)
+		mnuDesigner.Item("ShowPanelSeparator")->Visible = (PagePanelCtrl <> 0)
+		mnuDesigner.Item("PreviousLayer")->Visible = (PagePanelCtrl <> 0)
+		mnuDesigner.Item("NextLayer")->Visible = (PagePanelCtrl <> 0)
+		If PagePanelCtrl <> 0 Then
+			mnuShowPanelDesigner->Clear
+			Dim As SymbolsType Ptr stPanel = SymbolsReadProperty(PagePanelCtrl)
+			If stPanel <> 0 AndAlso stPanel->ControlByIndexFunc <> 0 Then
+				Dim As Integer Ptr pCount = stPanel->ReadPropertyFunc(PagePanelCtrl, "ControlCount")
+				If pCount <> 0 Then
+					For i As Integer = 0 To *pCount - 1
+						Dim As Any Ptr PageCtrl = stPanel->ControlByIndexFunc(PagePanelCtrl, i)
+						Dim As SymbolsType Ptr stPage = SymbolsReadProperty(PageCtrl)
+						If stPage <> 0 AndAlso QWString(stPage->ReadPropertyFunc(PageCtrl, "ClassName")) <> "NumericUpDown" Then
+							Dim As MenuItem Ptr mnu = mnuShowPanelDesigner->Add(QWString(stPage->ReadPropertyFunc(PageCtrl, "Name")), "", "", Cast(NotifyEvent, @ShowPanelMenuItem_Click))
+							mnu->Tag = PageCtrl
+						End If
+					Next i
+				End If
 			End If
 		End If
 	End Sub
@@ -1076,10 +1157,10 @@ Namespace My.Sys.Forms
 						Dim As Boolean bTrue = True
 						st->WritePropertyFunc(Ctrl, "DesignMode", @bTrue)
 						st->WritePropertyFunc(Ctrl, "ControlDesigner", @This)
-							
+						st->WritePropertyFunc(Ctrl, "Loading", @Loading)
 					End If
 				Else
-					
+
 				End If
 			End If
 		End If
@@ -1554,6 +1635,17 @@ Namespace My.Sys.Forms
 						P.X = LoWord(lParam)
 						P.Y = HiWord(lParam)
 						ClientToScreen(hDlg, @P)
+						' Unlike WM_LBUTTONDOWN (above), right-click never selected the
+						' control it landed on - ChangeFirstMenuItem (and anything that
+						' depends on SelectedControl, e.g. the "Show Panel"/layer menu)
+						' was acting on whatever was last left-clicked instead.
+						Dim As Any Ptr RClickCtrl = GetProp(hDlg, "MFFControl")
+						If RClickCtrl <> 0 AndAlso Not .SelectedControls.Contains(RClickCtrl) Then
+							.SelectedControls.Clear
+							.SelectedControls.Add RClickCtrl
+							.SelectedControl = RClickCtrl
+							.MoveDots(RClickCtrl)
+						End If
 						'mnuDesigner.Popup(P.x, P.y)
 						.ChangeFirstMenuItem
 						TrackPopupMenu(mnuDesigner.Handle, 0, P.X, P.Y, 0, hDlg, 0)
@@ -2499,6 +2591,8 @@ Namespace My.Sys.Forms
 		Select Case KeyCode
 		Case Keys.Key_Delete: DeleteControl()
 		Case Keys.Key_Enter: If OnDblClickControl Then OnDblClickControl(This, SelectedControl)
+		Case VK_PRIOR: If bCtrl Then MovePanelLayer(-1)
+		Case VK_NEXT: If bCtrl Then MovePanelLayer(1)
 		Case Keys.Key_Left, Keys.Key_Right, Keys.Key_Up, Keys.Key_Down
 			FStepX = GridSize
 			FStepY = GridSize
@@ -2818,6 +2912,10 @@ mnuDesigner.Add(ML("Duplicate") & !"\t Ctrl+D", "", "Duplicate", @mClick)
 mnuDesigner.Add("-", "", "OrderSeparator")
 mnuDesigner.Add(ML("Bring to Front"), "BringToFront", "BringToFront", @PopupClick)
 mnuDesigner.Add(ML("Send to Back"), "SendToBack", "SendToBack", @PopupClick)
+mnuDesigner.Add("-", "", "ShowPanelSeparator")
+mnuDesigner.Add(ML("Previous Layer") & !"\t Ctrl+PgUp", "", "PreviousLayer", @PopupClick)
+mnuDesigner.Add(ML("Next Layer") & !"\t Ctrl+PgDn", "", "NextLayer", @PopupClick)
+mnuShowPanelDesigner = mnuDesigner.Add(ML("Show Panel"), "", "ShowPanel")
 mnuDesigner.Add("-")
 mnuDesigner.Add(ML("Properties"), "Property", "Properties", @PopupClick)
 

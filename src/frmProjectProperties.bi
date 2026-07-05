@@ -36,12 +36,6 @@ Using My.Sys.Forms
 		Declare Static Sub cmdAdvancedOptions_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Static Sub CommandButton1_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Sub CommandButton1_Click(ByRef Sender As Control)
-		Declare Static Sub cmdCompiler_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-		Declare Sub cmdCompiler_Click(ByRef Sender As Control)
-		Declare Static Sub txtCompilerPath_Change_(ByRef Designer As My.Sys.Object, ByRef Sender As TextBox)
-		Declare Sub txtCompilerPath_Change(ByRef Sender As TextBox)
-		Declare Static Sub cboCompiler_Selected_(ByRef Designer As My.Sys.Object, ByRef Sender As ComboBoxEdit, ItemIndex As Integer)
-		Declare Sub cboCompiler_Selected(ByRef Sender As ComboBoxEdit, ItemIndex As Integer)
 		Declare Static Sub chkManifest_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As CheckBox)
 		Declare Sub chkManifest_Click(ByRef Sender As CheckBox)
 		Declare Static Sub optDevelopment_Click(ByRef Designer As My.Sys.Object, ByRef Sender As RadioButton)
@@ -64,16 +58,16 @@ Using My.Sys.Forms
 		
 		Dim As TabControl tabProperties
 		Dim As TabPage tpGeneral, tpMake, tpCompile, tpIncludes
-		Dim As CommandButton cmdOK, cmdCancel, cmdAdvancedOptions, CommandButton1, cmdCompiler, cmdAddComponent, cmdRemoveComponent, cmdAddOtherInclude, cmdRemoveOtherInclude, cmdAddLibrary, cmdRemoveLibrary
-		Dim As Label lblProjectType, lblMainFile, lblProjectName, lblProjectDescription, lblCompilationArguments64, lblIcon, lblTitle, lblMajor, lblMinor, lblRevision, lblBuild, lblResourceFile, lblIconResourceFile, lblCompilationArguments64Linux, lblType, lblValue, lblHelpFileName, lblCompilationArguments321, lblSubsystem, lblCompiler, lblBatchCompilationFileWindows, lblBatchCompilationFileLinux, lblComponents, lblOthers
-		Dim As Picture picVersionNumber, picApplication, picVersionInformation, picCompilationArguments, picComponents, picOtherIncludes
-		Dim As ComboBoxEdit cboProjectType, cboMainFile, cboResourceFile, cboIconResourceFile, cboSubsystem, cboCompiler, cboBatchCompilationFileWindows, cboBatchCompilationFileLinux
-		Dim As TextBox txtProjectName, txtProjectDescription, txtCompilationArguments64Windows, txtIcon, txtTitle, txtMajor, txtMinor, txtRevision, txtBuild, txtValue, txtHelpFileName, txtCommandLineArguments, txtCompilationArguments64Linux, txtCompilerPath
-		Dim As GroupBox grbVersionNumber, grbApplication, grbVersionInformation, grbCompilationArguments, grbCompileMode, grbIncludePaths, grbLibraryPaths
+		Dim As CommandButton cmdOK, cmdCancel, cmdAdvancedOptions, CommandButton1, cmdAddComponent, cmdRemoveComponent, cmdAddOtherInclude, cmdRemoveOtherInclude, cmdAddLibrary, cmdRemoveLibrary
+		Dim As Label lblProjectType, lblMainFile, lblProjectName, lblProjectDescription, lblIcon, lblTitle, lblMajor, lblMinor, lblRevision, lblBuild, lblResourceFile, lblIconResourceFile, lblType, lblValue, lblHelpFileName, lblSubsystem, lblComponents, lblOthers
+		Dim As Picture picVersionNumber, picApplication, picVersionInformation, picComponents, picOtherIncludes
+		Dim As ComboBoxEdit cboProjectType, cboMainFile, cboResourceFile, cboIconResourceFile, cboSubsystem
+		Dim As TextBox txtProjectName, txtProjectDescription, txtIcon, txtTitle, txtMajor, txtMinor, txtRevision, txtBuild, txtValue, txtHelpFileName
+		Dim As GroupBox grbVersionNumber, grbApplication, grbVersionInformation, grbCompileMode, grbIncludePaths, grbLibraryPaths
 		Dim As CheckBox chkAutoIncrementVersion, chkPassAllModuleFilesToCompiler, chkManifest, chkRunAsAdministrator, chkOpenProjectAsFolder
 		Dim As ListControl lstType, lstComponents, lstOtherIncludes, lstLibraryPaths
 		Dim As RadioButton optDevelopment, optFinal
-		Dim As Dictionary Types, MainFiles, ResourceFiles, IconResourceFiles, BatchCompilationFilesWindows, BatchCompilationFilesLinux
+		Dim As Dictionary Types, MainFiles, ResourceFiles, IconResourceFiles
 		Dim As TreeNode Ptr ProjectTreeNode
 		Dim As ImageBox imgIcon
 		Dim As FolderBrowserDialog BrowseD

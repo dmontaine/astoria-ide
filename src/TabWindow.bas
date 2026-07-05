@@ -16,6 +16,7 @@ Dim Shared FPropertyItems As WStringList
 Dim Shared FListItems As WStringList
 Dim Shared txtCodeBi As EditControl
 Dim Shared mnuCode As PopupMenu
+Static Shared untitledCounter As Integer = 0
 pmnuCode = @mnuCode
 Dim Shared MouseHoverTimerVal As Double
 txtCodeBi.WithHistory = False
@@ -68,9 +69,9 @@ Public Sub TabCtl.MoveCloseButtons(ptabCode As TabControl Ptr)
 		If tb = 0 Then Continue For
 			SendMessage(ptabCode->Handle, TCM_GETITEMRECT, tb->Index, CInt(@RR))
 			bVisible = True
-			If ptabCode->UpDownControl.Handle AndAlso CInt(ptabCode->UpDownControl.Visible) AndAlso RR.Right - ptabCode->ScaleX(18) + ptabCode->ScaleX(14) > ptabCode->ScaleX(ptabCode->UpDownControl.Left) Then bVisible = False
+			If ptabCode->UpDownControl.Handle AndAlso CInt(ptabCode->UpDownControl.Visible) AndAlso RR.Right - ptabCode->ScaleX(18) + ptabCode->ScaleX(18) > ptabCode->ScaleX(ptabCode->UpDownControl.Left) Then bVisible = False
 			tb->btnClose.Visible = bVisible
-			MoveWindow tb->btnClose.Handle, RR.Right - ptabCode->ScaleX(14) - (RR.Bottom - ptabCode->ScaleY(14)) / 2, (RR.Bottom - ptabCode->ScaleY(14)) / 2, ptabCode->ScaleX(14), ptabCode->ScaleY(14), True
+			MoveWindow tb->btnClose.Handle, RR.Right - ptabCode->ScaleX(18) - (RR.Bottom - ptabCode->ScaleY(18)) / 2, (RR.Bottom - ptabCode->ScaleY(18)) / 2, ptabCode->ScaleX(18), ptabCode->ScaleY(18), True
 			'If g_darkModeSupported AndAlso g_darkModeEnabled Then
 			'	UpdateWindow ptabCode->Handle
 			'End If
@@ -10145,7 +10146,7 @@ Sub tbrTop_ButtonClick(ByRef Designer As My.Sys.Object, ByRef Sender As ToolBar,
 			.splForm.Visible = False
 			.LastButton = Button.Name
 			If (.bNotDesign = False) AndAlso tb->FormNeedDesign Then .FormDesign: tb->FormNeedDesign = False
-			'tpToolbox->SelectTab
+			tpToolbox->SelectTab
 		Case "CodeAndForm"
 			'If tb->cboClass.Items.Count < 2 Then Exit Sub
 			.pnlForm.Align = DockStyle.alRight
@@ -10155,7 +10156,7 @@ Sub tbrTop_ButtonClick(ByRef Designer As My.Sys.Object, ByRef Sender As ToolBar,
 			.pnlCode.Visible = True
 			.LastButton = Button.Name
 			If (.bNotDesign = False) AndAlso tb->FormNeedDesign Then .FormDesign: tb->FormNeedDesign = False
-			'tpToolbox->SelectTab
+			tpToolbox->SelectTab
 		End Select
 		.RequestAlign
 	End With
@@ -10452,7 +10453,8 @@ Constructor TabWindow(ByRef wFileName As WString = "", bNew As Boolean = False, 
 	txtCode.OnDropDownCloseUp = @OnDropDownCloseUp
 	txtCode.OnSplitHorizontallyChange = @OnSplitHorizontallyChangeEdit
 	txtCode.OnSplitVerticallyChange = @OnSplitVerticallyChangeEdit
-	txtCode.Content.FileName = ML("Untitled")
+	untitledCounter += 1
+	txtCode.Content.FileName = ML("Untitled") & WStr(untitledCounter)
 	txtCode.Tag = @This
 	txtCode.ShowHint = False
 	'CheckedFiles.Sorted = True
@@ -10471,7 +10473,7 @@ Constructor TabWindow(ByRef wFileName As WString = "", bNew As Boolean = False, 
 	'txtCode.FunctionsOthers.Sorted = True
 	'txtCode.Args.Sorted = True
 	LastButton = "CodeAndForm"
-	lvPropertyWidth = 150
+	lvPropertyWidth = 180
 	btnClose.tbParent = @This
 		pnlTop.Height = 25
 	pnlTop.Width = This.Width
@@ -10486,8 +10488,8 @@ Constructor TabWindow(ByRef wFileName As WString = "", bNew As Boolean = False, 
 	pnlCode.Align = DockStyle.alClient
 	pnlEdit.Align = DockStyle.alClient
 	pnlTopMenu.Parent = @pnlForm
-		pnlTopMenu.Font.Name = "Tahoma"
-		pnlTopMenu.Font.Size = 8
+		pnlTopMenu.Font.Name = WGet(InterfaceFontName)
+		pnlTopMenu.Font.Size = InterfaceFontSize
 	'lvComponentsList.Images = @imgListTools
 	'lvComponentsList.StateImages = @imgListTools
 	'lvComponentsList.SmallImages = @imgListTools
@@ -10551,7 +10553,7 @@ Constructor TabWindow(ByRef wFileName As WString = "", bNew As Boolean = False, 
 		'txtCode.LoadFromFile(wFileName, False)
 		This.Caption = GetFileName(FileName)
 	Else
-		This.Caption = ML("Untitled") & "*"
+		This.Caption = ML("Untitled") & WStr(untitledCounter) & "*"
 	End If
 	IsNew = bNew OrElse wFileName = ""
 	pnlForm.Top = -500

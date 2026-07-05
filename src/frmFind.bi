@@ -11,7 +11,7 @@
 #include once "mff/ComboBoxEdit.bi"
 #include once "mff/CheckBox.bi"
 #include once "mff/CommandButton.bi"
-#include once "mff/TrackBar.bi"
+
 #include once "mff/Label.bi"
 #include once "mff/RadioButton.bi"
 #include once "TabWindow.bi"
@@ -40,15 +40,13 @@ Using My.Sys.Forms
 		Declare Sub Form_Create(ByRef Sender As Control)
 		Declare Sub Form_Show(ByRef Sender As Form)
 		Declare Sub ReplaceInProj(ByRef tSearch As WString="", ByRef tReplace As WString="", ByRef tn As TreeNode Ptr)
-		Declare Sub TrackBar1_Change(ByRef Sender As TrackBar, Position As Integer)
 		Declare Constructor
 		Declare Destructor
 		
 		Dim As CheckBox chkMatchCase, chkMatchWholeWords, chkUsePatternMatching
-		Dim As Label lblFind, lblTrack, lblReplace
+		Dim As Label lblFind, lblReplace, lblSearchIn
 		Dim As ComboBoxEdit txtFind, txtReplace, cboFindRange
 		Dim As CommandButton btnCancel, btnFind, btnFindPrev, btnReplaceAll, btnReplace, btnReplaceShow, btnFindAll
-		Dim As TrackBar TrackBar1
 		As Boolean mFormFind = True
 	End Type
 	Common Shared As frmFind Ptr pfFind

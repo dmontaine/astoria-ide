@@ -5,7 +5,7 @@
 		' frmAdvancedOptions
 		With This
 			.Name = "frmAdvancedOptions"
-			.Text = ML("Advanced Options")
+			.Text = ML("Compiler Warnings")
 			.Name = "frmAdvancedOptions"
 			.StartPosition = FormStartPosition.CenterParent
 			.BorderStyle = FormBorderStyle.FixedDialog
@@ -16,7 +16,7 @@
 		' Label1
 		With Label1
 			.Name = "Label1"
-			.Text = ML("Warning: enabling the following optimizatons will help reduce unused code")
+			.Text = ML("Select which compiler warnings to display:")
 			.TabIndex = 0
 			.SetBounds 10, 10, 320, 30
 			.Parent = @This
@@ -56,7 +56,7 @@
 		' chkShowMainWarnings
 		With chkShowMainWarnings
 			.Name = "chkShowMainWarnings"
-			.Text = ML("Show main warnings")
+			.Text = ML("Show entry-point warnings")
 			.TabIndex = 5
 			.SetBounds 10, 130, 240, 20
 			.Parent = @This

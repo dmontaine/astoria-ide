@@ -79,15 +79,10 @@
 			.Parent = @This
 		End With
 		' Label11
-		With Label11
-			.Name = "Label11"
-			.Text = "Label11"
-			.TabIndex = 3
-			.SetBounds 127, 39, 260, 22
-			.Font.Size = 10
-			.Alignment = AlignmentConstants.taCenter
-			.Parent = @This
-		End With
+		Label11.Name = "Label11"
+		Label11.Text = ML("Version")
+		Label11.SetBounds 80, 40, 200, 18
+		Label11.Parent = @This
 	End Constructor
 
 	Dim Shared As frmAbout fAbout

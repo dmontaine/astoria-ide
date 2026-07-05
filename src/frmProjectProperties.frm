@@ -39,7 +39,7 @@ pfProjectProperties = @fProjectProperties
 		tpGeneral.Parent = @tabProperties
 		' tpMake
 		tpMake.Name = "tpMake"
-		tpMake.Text = ML("Make")
+		tpMake.Text = ML("Version")
 		tpMake.TabIndex = 19
 		tpMake.SetBounds 2, 22, 487, 316
 		tpMake.Visible = True
@@ -142,18 +142,6 @@ pfProjectProperties = @fProjectProperties
 		grbVersionInformation.TabIndex = 38
 		grbVersionInformation.SetBounds 9, 136, 469, 211
 		grbVersionInformation.Parent = @tpMake
-		' grbCompilationArguments
-		grbCompilationArguments.Name = "grbCompilationArguments"
-		grbCompilationArguments.Text = ML("Compilation Arguments")
-		grbCompilationArguments.TabIndex = 56
-		grbCompilationArguments.SetBounds 10, 138, 469, 100
-		grbCompilationArguments.Parent = @tpCompile
-		' lblCompilationArguments64
-		lblCompilationArguments64.Name = "lblCompilationArguments64"
-		lblCompilationArguments64.Text = ML("For Windows") & ":"
-		lblCompilationArguments64.TabIndex = 60
-		lblCompilationArguments64.SetBounds 5, 4, 202, 18
-		lblCompilationArguments64.Parent = @picCompilationArguments
 		' lblIcon
 		lblIcon.Name = "lblIcon"
 		lblIcon.Text = ML("Icon") & ":"
@@ -223,12 +211,6 @@ pfProjectProperties = @fProjectProperties
 		cboIconResourceFile.TabIndex = 13
 		cboIconResourceFile.SetBounds 224, 142, 252, 21
 		cboIconResourceFile.Parent = @tpGeneral
-		' lblCompilationArguments64Linux
-		lblCompilationArguments64Linux.Name = "lblCompilationArguments64Linux"
-		lblCompilationArguments64Linux.Text = ML("For *nix/*bsd") & ":"
-		lblCompilationArguments64Linux.TabIndex = 64
-		lblCompilationArguments64Linux.SetBounds 5, 50, 212, 18
-		lblCompilationArguments64Linux.Parent = @picCompilationArguments
 		' lblType
 		lblType.Name = "lblType"
 		lblType.Text = ML("Type") & ":"
@@ -292,37 +274,11 @@ pfProjectProperties = @fProjectProperties
 		cboSubsystem.AddItem ML("GUI")
 		' cmdAdvancedOptions
 		cmdAdvancedOptions.Name = "cmdAdvancedOptions"
-		cmdAdvancedOptions.Text = ML("Advanced Options") & " ..."
+		cmdAdvancedOptions.Text = ML("Compiler Warnings")
 		cmdAdvancedOptions.TabIndex = 55
 		cmdAdvancedOptions.SetBounds 220, 42, 224, 24
 		cmdAdvancedOptions.OnClick = @cmdAdvancedOptions_Click
 		cmdAdvancedOptions.Parent = @tpCompile
-		' lblCompilationArguments321
-		lblCompilationArguments321.Name = "lblCompilationArguments321"
-		lblCompilationArguments321.Text = ML("Command Line Arguments") & ":"
-		lblCompilationArguments321.TabIndex = 71
-		lblCompilationArguments321.SetBounds 16, 80, 172, 18
-		lblCompilationArguments321.Parent = @tpCompile
-		' txtCommandLineArguments
-		txtCommandLineArguments.Name = "txtCommandLineArguments"
-		txtCommandLineArguments.TabIndex = 72
-		txtCommandLineArguments.SetBounds 206, 78, 262, 21
-		txtCommandLineArguments.Text = ""
-		txtCommandLineArguments.Parent = @tpCompile
-		' txtCompilationArguments64Linux
-		With txtCompilationArguments64Linux
-			.Name = "txtCompilationArguments64Linux"
-			.TabIndex = 65
-			.SetBounds 213, 68, 228, 21
-			.Parent = @picCompilationArguments
-		End With
-		' txtCompilationArguments64Windows
-		With txtCompilationArguments64Windows
-			.Name = "txtCompilationArguments64Windows"
-			.TabIndex = 61
-			.SetBounds 213, 22, 228, 21
-			.Parent = @picCompilationArguments
-		End With
 		' lstType
 		With lstType
 			.Name = "lstType"
@@ -412,14 +368,6 @@ pfProjectProperties = @fProjectProperties
 			.SetBounds 16, 155, 450, 181
 			.Parent = @tpMake
 		End With
-		' picCompilationArguments
-		With picCompilationArguments
-			.Name = "picCompilationArguments"
-			.TabIndex = 57
-			.SetBounds 24, 156, 445, 113
-			.Text = ""
-			.Parent = @tpCompile
-		End With
 		' CommandButton1
 		With CommandButton1
 			.Name = "CommandButton1"
@@ -476,45 +424,6 @@ pfProjectProperties = @fProjectProperties
 			.SetBounds 80, 400, 16, 16
 			.Parent = @This
 		End With
-		' lblCompiler
-		With lblCompiler
-			.Name = "lblCompiler"
-			.Text = ML("Compiler") & ":"
-			.TabIndex = 66
-
-			.SetBounds 29, 288, 90, 20
-			.Parent = @tpCompile
-		End With
-		' cboCompiler
-		With cboCompiler
-			.Name = "cboCompiler"
-			.Text = "ComboBoxEdit1"
-			.TabIndex = 67
-			.SetBounds 102, 285, 126, 21
-			.Designer = @This
-			.OnSelected = @cboCompiler_Selected_
-			.Parent = @tpCompile
-		End With
-		' txtCompilerPath
-		With txtCompilerPath
-			.Name = "txtCompilerPath"
-			.Text = ""
-			.TabIndex = 68
-			.SetBounds 236, 285, 198, 20
-			.Designer = @This
-			.OnChange = @txtCompilerPath_Change_
-			.Parent = @tpCompile
-		End With
-		' cmdCompiler
-		With cmdCompiler
-			.Name = "cmdCompiler"
-			.Text = "..."
-			.TabIndex = 69
-			.SetBounds 441, 284, 25, 22
-			.Designer = @This
-			.OnClick = @cmdCompiler_Click_
-			.Parent = @tpCompile
-		End With
 		' chkManifest
 		With chkManifest
 			.Name = "chkManifest"
@@ -544,48 +453,6 @@ pfProjectProperties = @fProjectProperties
 			.ControlIndex = 14
 
 			.SetBounds 11, 147, 192, 22
-			.Designer = @This
-			.Parent = @tpGeneral
-		End With
-		' lblBatchCompilationFileWindows
-		With lblBatchCompilationFileWindows
-			.Name = "lblBatchCompilationFileWindows"
-			.Text = ML("Batch Compilation File") & " (" & ML("For Windows") & "):"
-			.TabIndex = 91
-			.ControlIndex = 9
-
-			.SetBounds 224, 182, 262, 18
-			.Designer = @This
-			.Parent = @tpGeneral
-		End With
-		' cboBatchCompilationFileWindows
-		With cboBatchCompilationFileWindows
-			.Name = "cboBatchCompilationFileWindows"
-			.Text = "cboMainFile1"
-			.TabIndex = 92
-			.ControlIndex = 8
-			.SetBounds 224, 200, 252, 21
-			.Designer = @This
-			.Parent = @tpGeneral
-		End With
-		' lblBatchCompilationFileLinux
-		With lblBatchCompilationFileLinux
-			.Name = "lblBatchCompilationFileLinux"
-			.Text = ML("Batch Compilation File") & " (" & ML("For *nix/*bsd") & "):"
-			.TabIndex = 93
-			.ControlIndex = 12
-			.Caption = ML("Batch Compilation File") & " (" & ML("For *nix/*bsd") & "):"
-			.SetBounds 224, 240, 262, 18
-			.Designer = @This
-			.Parent = @tpGeneral
-		End With
-		' cboBatchCompilationFileLinux
-		With cboBatchCompilationFileLinux
-			.Name = "cboBatchCompilationFileLinux"
-			.Text = "cboResourceFile1"
-			.TabIndex = 94
-			.ControlIndex = 14
-			.SetBounds 224, 258, 252, 21
 			.Designer = @This
 			.Parent = @tpGeneral
 		End With
@@ -794,17 +661,6 @@ pfProjectProperties = @fProjectProperties
 		(*Cast(frmProjectProperties Ptr, Sender.Designer)).chkManifest_Click(Sender)
 	End Sub
 	
-	Private Sub frmProjectProperties.cboCompiler_Selected_(ByRef Designer As My.Sys.Object, ByRef Sender As ComboBoxEdit, ItemIndex As Integer)
-		(*Cast(frmProjectProperties Ptr, Sender.Designer)).cboCompiler_Selected(Sender, ItemIndex)
-	End Sub
-
-	Private Sub frmProjectProperties.txtCompilerPath_Change_(ByRef Designer As My.Sys.Object, ByRef Sender As TextBox)
-		(*Cast(frmProjectProperties Ptr, Sender.Designer)).txtCompilerPath_Change(Sender)
-	End Sub
-	
-	Private Sub frmProjectProperties.cmdCompiler_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-		(*Cast(frmProjectProperties Ptr, Sender.Designer)).cmdCompiler_Click(Sender)
-	End Sub
 
 '#End Region
 
@@ -820,8 +676,6 @@ Private Sub frmProjectProperties.cmdOK_Click(ByRef Designer As My.Sys.Object, By
 		WLet(ppe->MainFileName, .MainFiles.Get(.cboMainFile.Text))
 		WLet(ppe->ResourceFileName, .ResourceFiles.Get(.cboResourceFile.Text))
 		WLet(ppe->IconResourceFileName, .IconResourceFiles.Get(.cboIconResourceFile.Text))
-		WLet(ppe->BatchCompilationFileNameWindows, .BatchCompilationFilesWindows.Get(.cboBatchCompilationFileWindows.Text))
-		WLet(ppe->BatchCompilationFileNameLinux, .BatchCompilationFilesLinux.Get(.cboBatchCompilationFileLinux.Text))
 		ppe->ProjectType = .cboProjectType.ItemIndex
 		ppe->Subsystem = .cboSubsystem.ItemIndex
 		WLet(ppe->ProjectName, .txtProjectName.Text)
@@ -846,10 +700,6 @@ Private Sub frmProjectProperties.cmdOK_Click(ByRef Designer As My.Sys.Object, By
 		WLet(ppe->OriginalFilename, .Types.Get(ML("Original Filename")))
 		WLet(ppe->ProductName, .Types.Get(ML("Product Name")))
 		If .optDevelopment.Checked Then ppe->CompileMode = Development Else ppe->CompileMode = Final
-		' Win64-only fork: 32-bit compile-arg fields have no UI; values round-trip via ProjectElement
-		WLet(ppe->CompilationArguments64Windows, .txtCompilationArguments64Windows.Text)
-		WLet(ppe->CompilationArguments64Linux, .txtCompilationArguments64Linux.Text)
-		WLet(ppe->CompilerPath, .txtCompilerPath.Text)
 		ppe->Components.Clear
 		For i As Integer = 0 To .lstComponents.ItemCount - 1
 			ppe->Components.Add .lstComponents.Item(i)
@@ -862,7 +712,7 @@ Private Sub frmProjectProperties.cmdOK_Click(ByRef Designer As My.Sys.Object, By
 		For i As Integer = 0 To .lstLibraryPaths.ItemCount - 1
 			ppe->LibraryPaths.Add .lstLibraryPaths.Item(i)
 		Next
-		WLet(ppe->CommandLineArguments, .txtCommandLineArguments.Text)
+		WLet(ppe->CommandLineArguments, "")
 		If Not EndsWith(.ProjectTreeNode->Text, "*") Then .ProjectTreeNode->Text &= "*"
 		.CloseForm
 	End With
@@ -882,16 +732,8 @@ Sub AddToCombo(ByRef tn As TreeNode Ptr)
 			.cboIconResourceFile.AddItem tn->Text
 			.IconResourceFiles.Add tn->Text, IIf(ee, *ee->FileName, WStr(""))
 		ElseIf LCase(tn->Text) = "makefile" Then
-			.cboBatchCompilationFileWindows.AddItem tn->Text
-			.BatchCompilationFilesWindows.Add tn->Text, IIf(ee, *ee->FileName, WStr(""))
-			.cboBatchCompilationFileLinux.AddItem tn->Text
-			.BatchCompilationFilesLinux.Add tn->Text, IIf(ee, *ee->FileName, WStr(""))
 		ElseIf EndsWith(LCase(tn->Text), ".bat") Then
-			.cboBatchCompilationFileWindows.AddItem tn->Text
-			.BatchCompilationFilesWindows.Add tn->Text, IIf(ee, *ee->FileName, WStr(""))
 		ElseIf EndsWith(LCase(tn->Text), ".sh") OrElse InStr(tn->Text, ".") = 0 Then
-			.cboBatchCompilationFileLinux.AddItem tn->Text
-			.BatchCompilationFilesLinux.Add tn->Text, IIf(ee, *ee->FileName, WStr(""))
 		Else
 			.cboMainFile.AddItem tn->Text
 			.MainFiles.Add tn->Text, IIf(ee, *ee->FileName, WStr(""))
@@ -909,16 +751,8 @@ Sub AddToComboFileName(ByRef FileName As WString)
 			.cboIconResourceFile.AddItem Text
 			.IconResourceFiles.Add Text, FileName
 		ElseIf LCase(Text) = "makefile" Then
-			.cboBatchCompilationFileWindows.AddItem Text
-			.BatchCompilationFilesWindows.Add Text, FileName
-			.cboBatchCompilationFileLinux.AddItem Text
-			.BatchCompilationFilesLinux.Add Text, FileName
 		ElseIf EndsWith(LCase(Text), ".bat") Then
-			.cboBatchCompilationFileWindows.AddItem Text
-			.BatchCompilationFilesWindows.Add Text, FileName
 		ElseIf EndsWith(LCase(Text), ".sh") OrElse InStr(Text, ".") = 0 Then
-			.cboBatchCompilationFileLinux.AddItem Text
-			.BatchCompilationFilesLinux.Add Text, FileName
 		Else
 			.cboMainFile.AddItem Text
 			.MainFiles.Add Text, FileName
@@ -940,18 +774,12 @@ Public Sub frmProjectProperties.RefreshProperties()
 		.cboMainFile.Clear
 		.cboResourceFile.Clear
 		.cboIconResourceFile.Clear
-		.cboBatchCompilationFileWindows.Clear
-		.cboBatchCompilationFileLinux.Clear
 		.MainFiles.Clear
 		.ResourceFiles.Clear
 		.IconResourceFiles.Clear
-		.BatchCompilationFilesWindows.Clear
-		.BatchCompilationFilesLinux.Clear
 		.cboMainFile.AddItem ML("(not selected)")
 		.cboResourceFile.AddItem ML("(not selected)")
 		.cboIconResourceFile.AddItem ML("(not selected)")
-		.cboBatchCompilationFileWindows.AddItem ML("(not selected)")
-		.cboBatchCompilationFileLinux.AddItem ML("(not selected)")
 		Dim As Boolean bSetted = False
 		If ptn->ImageKey = "Project" OrElse ee AndAlso *ee Is ProjectElement Then
 			.ProjectTreeNode = ptn
@@ -980,8 +808,6 @@ Public Sub frmProjectProperties.RefreshProperties()
 				If .MainFiles.IndexOf(*ppe->MainFileName) > -1 Then .cboMainFile.Text = .MainFiles.Item(.MainFiles.IndexOf(*ppe->MainFileName))->Key Else .cboMainFile.ItemIndex = 0
 				If .ResourceFiles.IndexOf(*ppe->ResourceFileName) > -1 Then .cboResourceFile.Text = .ResourceFiles.Item(.ResourceFiles.IndexOf(*ppe->ResourceFileName))->Key Else .cboResourceFile.ItemIndex = 0
 				If .IconResourceFiles.IndexOf(*ppe->IconResourceFileName) > -1 Then .cboIconResourceFile.Text = .IconResourceFiles.Item(.IconResourceFiles.IndexOf(*ppe->IconResourceFileName))->Key Else .cboIconResourceFile.ItemIndex = 0
-				If .BatchCompilationFilesWindows.IndexOf(*ppe->BatchCompilationFileNameWindows) > -1 Then .cboBatchCompilationFileWindows.Text = .BatchCompilationFilesWindows.Item(.BatchCompilationFilesWindows.IndexOf(*ppe->BatchCompilationFileNameWindows))->Key Else .cboBatchCompilationFileWindows.ItemIndex = 0
-				If .BatchCompilationFilesLinux.IndexOf(*ppe->BatchCompilationFileNameLinux) > -1 Then .cboBatchCompilationFileLinux.Text = .BatchCompilationFilesLinux.Item(.BatchCompilationFilesLinux.IndexOf(*ppe->BatchCompilationFileNameLinux))->Key Else .cboBatchCompilationFileLinux.ItemIndex = 0
 				.txtProjectName.Text = *ppe->ProjectName
 				.txtHelpFileName.Text = *ppe->HelpFileName
 				.txtProjectDescription.Text = *ppe->ProjectDescription
@@ -1009,9 +835,6 @@ Public Sub frmProjectProperties.RefreshProperties()
 				.Types.Set ML("Product Name"), *ppe->ProductName
 				.optDevelopment.Checked = (ppe->CompileMode = Development)
 				.optFinal.Checked = (ppe->CompileMode = Final)
-				.txtCompilationArguments64Windows.Text = *ppe->CompilationArguments64Windows
-				.txtCompilationArguments64Linux.Text = *ppe->CompilationArguments64Linux
-				.txtCompilerPath.Text = *ppe->CompilerPath
 				For i As Integer = 0 To ppe->Components.Count - 1
 					.lstComponents.AddItem ppe->Components.Item(i)
 				Next
@@ -1021,7 +844,6 @@ Public Sub frmProjectProperties.RefreshProperties()
 				For i As Integer = 0 To ppe->LibraryPaths.Count - 1
 					.lstLibraryPaths.AddItem ppe->LibraryPaths.Item(i)
 				Next
-				.txtCommandLineArguments.Text = *ppe->CommandLineArguments
 			End If
 		Else
 			.ProjectTreeNode = ptn
@@ -1032,8 +854,6 @@ Public Sub frmProjectProperties.RefreshProperties()
 			.cboMainFile.ItemIndex = -1
 			.cboResourceFile.ItemIndex = -1
 			.cboIconResourceFile.ItemIndex = -1
-			.cboBatchCompilationFileWindows.ItemIndex = -1
-			.cboBatchCompilationFileLinux.ItemIndex = -1
 			.txtProjectName.Text = ""
 			.txtHelpFileName.Text = ""
 			.txtProjectDescription.Text = ""
@@ -1049,9 +869,6 @@ Public Sub frmProjectProperties.RefreshProperties()
 			.chkManifest.Checked = True
 			.chkRunAsAdministrator.Checked = False
 			.chkManifest_Click(.chkManifest)
-			.txtCompilationArguments64Windows.Text = ""
-			.txtCompilationArguments64Linux.Text = ""
-			.txtCompilerPath.Text = ""
 		End If
 	End With
 End Sub
@@ -1112,31 +929,11 @@ Private Sub frmProjectProperties.CommandButton1_Click(ByRef Sender As Control)
 End Sub
 
 
-Private Sub frmProjectProperties.cmdCompiler_Click(ByRef Sender As Control)
-	OpenD.InitialDir = GetFolderName(txtCompilerPath.Text)
-	If OpenD.Execute Then
-		txtCompilerPath.Text = OpenD.FileName
-	End If
-End Sub
-
-Private Sub frmProjectProperties.txtCompilerPath_Change(ByRef Sender As TextBox)
-	cboCompiler.ItemIndex = IIf(Trim(txtCompilerPath.Text) = "", 0, 1)
-End Sub
-
-Private Sub frmProjectProperties.cboCompiler_Selected(ByRef Sender As ComboBoxEdit, ItemIndex As Integer)
-	If ItemIndex = 0 Then
-		txtCompilerPath.Text = ""
-	End If
-End Sub
-
 Private Sub frmProjectProperties.chkManifest_Click(ByRef Sender As CheckBox)
 	chkRunAsAdministrator.Enabled = chkManifest.Checked
 End Sub
 
 Private Sub frmProjectProperties.Form_Create(ByRef Sender As Control)
-	fProjectProperties.cboCompiler.Clear
-	fProjectProperties.cboCompiler.AddItem ML("Default")
-	fProjectProperties.cboCompiler.AddItem ML("Custom")
 	fProjectProperties.RefreshProperties
 End Sub
 

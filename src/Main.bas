@@ -322,6 +322,29 @@ Sub ClearAnalysisPanels()
 	mLoadToDo = False
 End Sub
 
+Sub SetDebugTabsVisible(bVisible As Boolean)
+	Static As Boolean bAlreadyVisible = True
+	If bVisible = bAlreadyVisible Then Exit Sub
+	bAlreadyVisible = bVisible
+	If bVisible Then
+		ptabBottom->AddTab tpLocals
+		ptabBottom->AddTab tpGlobals
+		ptabBottom->AddTab tpProcedures
+		ptabBottom->AddTab tpThreads
+		ptabBottom->AddTab tpWatches
+		ptabBottom->AddTab tpMemory
+		ptabBottom->AddTab tpProfiler
+	Else
+		ptabBottom->DeleteTab tpLocals
+		ptabBottom->DeleteTab tpGlobals
+		ptabBottom->DeleteTab tpProcedures
+		ptabBottom->DeleteTab tpThreads
+		ptabBottom->DeleteTab tpWatches
+		ptabBottom->DeleteTab tpMemory
+		ptabBottom->DeleteTab tpProfiler
+	End If
+End Sub
+
 ' Locals/Globals/Procedures/Threads/Watches/Memory/Profiler/Immediate only hold
 ' meaningful content during an active debug/profiling run. Cleared when a debug
 ' session ends (Case "End" in VisualFBEditor.bas), and as a backstop on
@@ -341,6 +364,7 @@ Sub ClearDebugPanels()
 	lvMemory.ListItems.Clear
 	lvProfiler.Nodes.Clear
 	txtImmediate.Text = ""
+	SetDebugTabsVisible False
 End Sub
 
 Sub SetCodeVisible(tb As TabWindow Ptr)
@@ -2428,6 +2452,7 @@ Sub ChangeEnabledDebug(bStart As Boolean, bBreak As Boolean, bEnd As Boolean)
 	miAddWatch->Enabled = bEnd
 	miStepOut->Enabled = bEnd
 	miShowNextStatement->Enabled = bEnd
+	If bEnd Then SetDebugTabsVisible True
 End Sub
 
 
@@ -5157,6 +5182,8 @@ Sub LoadTheme
 		If TabPanels.Count > 0 Then UpdateAllTabWindows
 End Sub
 
+Declare Sub UpdateWindowMenu()
+
 Sub UpdateAllTabWindows
 	Dim As TabWindow Ptr tb
 		For jj As Integer = 0 To TabPanels.Count - 1
@@ -5169,6 +5196,31 @@ Sub UpdateAllTabWindows
 				End If
 			Next
 		Next
+	UpdateWindowMenu
+End Sub
+
+Sub UpdateWindowMenu
+	If miWindow = 0 Then Exit Sub
+	Dim As TabWindow Ptr tb, tbActive
+	Dim As MenuItem Ptr miWindowItem
+	Dim As Integer itemCount = miWindow->Count
+	For idx As Integer = itemCount - 1 To 0 Step -1
+		miWindowItem = miWindow->Item(idx)
+		If miWindowItem->Name = "WindowDoc" Then miWindow->Remove miWindowItem
+	Next
+	Var mainTabCode = ptabCode
+	tbActive = Cast(TabWindow Ptr, mainTabCode->SelectedTab)
+	For j As Integer = 0 To TabPanels.Count - 1
+		Var tabCode = @Cast(TabPanel Ptr, TabPanels.Item(j))->tabCode
+		For k As Integer = 0 To tabCode->TabCount - 1
+			tb = Cast(TabWindow Ptr, tabCode->Tabs[k])
+			If tb <> 0 Then
+				miWindowItem = miWindow->Add(WGet(tb->FileName), "", "WindowDoc", @mClickWindow, True, , tb = tbActive)
+				miWindowItem->Tag = tb
+			End If
+		Next
+	Next
+	mnuWindowSeparator->Visible = miWindow->Count > 2
 End Sub
 
 
@@ -5198,7 +5250,7 @@ End Sub
 
 Dim As Double tWidth = Max(8, DefaultFont.Size) * 0.85
 stBar.Align = DockStyle.alBottom
-stBar.Add ML("Press F1 for get more information"), tWidth * 25
+stBar.Add ML("Press F1 for help"), tWidth * 25
 stBar.Add("", tWidth * 50) 'Row +Col 
 stBar.Add ML("IntelliSense fully loaded"), tWidth * 27
 stBar.Add "UTF-8 (BOM)", tWidth * 11
@@ -5598,7 +5650,7 @@ Sub CreateMenusAndToolBars
 	miCompleteWord = miEdit->Add(ML("Complete Word") & HK("CompleteWord", "Ctrl+Space"), "CompleteWord", "CompleteWord", @mClick, , , False)
 	miParameterInfo = miEdit->Add(ML("Parameter Info") & HK("ParameterInfo", "Ctrl+J"), "ParameterInfo", "ParameterInfo", @mClick, , , False)
 	miEdit->Add("-")
-	Var miTry = miEdit->Add(ML("Error Handling"), "", "Try")
+	Var miTry = miEdit->Add(ML("Line Numbering"), "", "Try")
 	PopulateErrorHandlingNumberingMainMenu(miTry)
 	
 	Var miSearch = mnuMain.Add(ML("&Search"), "", "Search")
@@ -5682,7 +5734,7 @@ Sub CreateMenusAndToolBars
 	miProject->Add("-")
 	miProjectProperties = miProject->Add(ML("&Project Properties") & "..." & HK("ProjectProperties"), "", "ProjectProperties", @mClick, , , False)
 	
-	Var miFormFormat = mnuMain.Add(ML("F&ormat"), "", "FormFormat")
+	Var miFormFormat = mnuMain.Add(ML("&Designer"), "", "FormFormat")
 	Var miAlign = miFormFormat->Add(ML("&Align"), "Align", "Align", @mClick)
 	miAlignLefts = miAlign->Add(ML("&Lefts") & HK("AlignLefts"), "AlignLefts", "AlignLefts", @mClick)
 	miAlignCenters = miAlign->Add(ML("&Centers") & HK("AlignLefts"), "AlignCenters", "AlignCenters", @mClick)
@@ -5954,7 +6006,7 @@ Sub CreateMenusAndToolBars
 	tbEdit.Buttons.Add tbsSeparator
 	tbtSyntaxCheck = tbEdit.Buttons.Add(, "SyntaxCheck", , @mClick, "SyntaxCheck", , ML("Syntax Check"), True, ToolButtonState.tstNone)
 	tbtSuggestions = tbEdit.Buttons.Add(, "Suggestions", , @mClick, "Suggestions", , ML("Suggestions"), True, ToolButtonState.tstNone)
-	Var tbButton = tbEdit.Buttons.Add(tbsWholeDropdown, "List", , @mClick, "Try", ML("Error Handling"), ML("Error Handling"), True)
+	Var tbButton = tbEdit.Buttons.Add(tbsWholeDropdown, "List", , @mClick, "Try", ML("Line Numbering"), ML("Line Numbering"), True)
 	'tbButton->DropDownMenu.ImagesList = @imgList
 	PopulateErrorHandlingNumberingToolbarMenu(@tbButton->DropDownMenu)
 	'tbStandard.Buttons.Add tbsSeparator
@@ -5974,7 +6026,7 @@ Sub CreateMenusAndToolBars
 	tbBuild.ImagesList = @imgList
 	tbBuild.HotImagesList = @imgList
 	'tbBuild.DisabledImagesList = @imgListD
-	tbDebug.Name = "Run"
+	tbDebug.Name = "Debug"
 	tbDebug.ImagesList = @imgList
 	tbDebug.HotImagesList = @imgList
 	tbDebug.Flat = True
@@ -6000,13 +6052,13 @@ Sub CreateMenusAndToolBars
 	tbtBreak = tbRun.Buttons.Add( , "Break", , @mClick, "Break", , ML("Break") & HK("Break", "Ctrl+Pause", True), True, ToolButtonState.tstNone)
 	tbtEnd = tbRun.Buttons.Add( , "EndProgram", , @mClick, "End", , ML("End"), True, ToolButtonState.tstNone)
 	'tbStandard.Buttons.Add tbsSeparator
-	tbProject.Name = "Run"
+	tbProject.Name = "Project"
 	tbProject.ImagesList = @imgList
 	tbProject.HotImagesList = @imgList
 	'tbProject.DisabledImagesList = @imgListD
 	tbProject.Flat = True
 	tbProject.List = True
-	tbtNotSetted = tbProject.Buttons.Add(Cast(ToolButtonStyle, tbsAutosize Or tbsCheckGroup), "NotSetted", , @mClick, "NotSetted", , ML("Not Setted"), True)
+	tbtNotSetted = tbProject.Buttons.Add(Cast(ToolButtonStyle, tbsAutosize Or tbsCheckGroup), "NotSetted", , @mClick, "NotSetted", , ML("Not Set"), True)
 	tbtConsole = tbProject.Buttons.Add(Cast(ToolButtonStyle, tbsAutosize Or tbsCheckGroup), "Console", , @mClick, "Console", , ML("Console"), True)
 	tbtGUI = tbProject.Buttons.Add(Cast(ToolButtonStyle, tbsAutosize Or tbsCheckGroup), "Form", , @mClick, "GUI", , ML("GUI"), True)
 	tbProject.Buttons.Add tbsSeparator
@@ -8364,7 +8416,7 @@ pnlBottom.OnResize = @pnlBottom_Resize
 tbBottom.ImagesList = @imgList
 tbBottom.Buttons.Add tbsCheck, "Pinned", , @mClick, "PinBottom", "", ML("Pin"), , Cast(ToolButtonState, tstEnabled Or tstChecked)
 tbBottom.Buttons.Add tbsSeparator
-tbBottom.Buttons.Add , "Eraser", , @mClick, "EraseOutputWindow", "", ML("Erase output window"), , tstEnabled
+tbBottom.Buttons.Add , "Eraser", , @mClick, "EraseOutputWindow", "", ML("Clear Output"), , tstEnabled
 tbBottom.Buttons.Add , "Eraser", , @mClick, "EraseImmediateWindow", "", ML("Erase immediate window"), , tstEnabled
 tbBottom.Buttons.Add , "Add", , @mClick, "AddWatch", "", ML("Add Watch"), , Cast(ToolButtonState, tstEnabled Or tstWrap)
 tbBottom.Buttons.Add , "Remove", , @mClick, "RemoveWatch", "", ML("Remove Watch"), , tstEnabled
@@ -8795,8 +8847,8 @@ Sub frmMain_Create(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		CopyFileW ExePath & "/DebugInfo.log", ExePath & "/DebugInfo.bak", False
 		Kill ExePath & "/DebugInfo.log"
 	End If
-	frmMain.Width = iniSettings.ReadInteger("MainWindow", "Width", 800)
-	frmMain.Height = iniSettings.ReadInteger("MainWindow", "Height", 600)
+	frmMain.Width = iniSettings.ReadInteger("MainWindow", "Width", 1024)
+	frmMain.Height = iniSettings.ReadInteger("MainWindow", "Height", 768)
 	tabLeftWidth = iniSettings.ReadInteger("MainWindow", "LeftWidth", DEFAULT_LEFT_PANEL_WIDTH)
 	If tabLeftWidth < 100 Then tabLeftWidth = DEFAULT_LEFT_PANEL_WIDTH
 	tabRightWidth = iniSettings.ReadInteger("MainWindow", "RightWidth", tabRightWidth)
@@ -9047,7 +9099,7 @@ Sub frmMain_Show(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	End If
 	If Not splBottom.Visible Then CloseBottom
 	bApplyingStartupLayout = False
-	
+	SetDebugTabsVisible False
 End Sub
 
 Sub frmMain_ActivateApp(ByRef Designer As My.Sys.Object, ByRef Sender As Form)

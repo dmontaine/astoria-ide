@@ -54,7 +54,6 @@ Common Shared As Integer oldIndex, newIndex
 		Declare Static Sub cmdForeground_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Static Sub cmdInterfaceFont_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Static Sub TreeView1_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As TreeView, ByRef Item As TreeNode)
-		Declare Static Sub pnlIncludes_ActiveControlChange(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Static Sub cmdMFFPath_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Static Sub cmdFont_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Static Sub lstColorKeys_Change(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
@@ -69,16 +68,12 @@ Common Shared As Integer oldIndex, newIndex
 		Declare Static Sub chkUnderline_Click(ByRef Designer As My.Sys.Object, ByRef Sender As CheckBox)
 		Declare Static Sub cmdAdd_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Static Sub cmdRemove_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-		Declare Static Sub cmdAddMakeTool_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-		Declare Static Sub cmdRemoveMakeTool_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-		Declare Static Sub cmdClearMakeTools_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Static Sub cmdAddTerminal_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Static Sub cmdRemoveTerminal_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Static Sub cmdClearTerminals_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Static Sub cmdFrame_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Static Sub chkFrame_Click(ByRef Designer As My.Sys.Object, ByRef Sender As CheckBox)
 		Declare Static Sub cmdChangeTerminal_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-		Declare Static Sub cmdChangeMakeTool_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Static Sub cmdAddHelp_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Static Sub cmdChangeHelp_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Static Sub cmdRemoveHelp_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
@@ -109,8 +104,6 @@ Common Shared As Integer oldIndex, newIndex
 		Declare Sub lvTerminalPaths_ItemActivate(ByRef Sender As ListView, ByVal ItemIndex As Integer)
 		Declare Static Sub lvHelpPaths_ItemActivate_(ByRef Designer As My.Sys.Object, ByRef Sender As ListView, ByVal ItemIndex As Integer)
 		Declare Sub lvHelpPaths_ItemActivate(ByRef Sender As ListView, ByVal ItemIndex As Integer)
-		Declare Static Sub lvMakeToolPaths_ItemActivate_(ByRef Designer As My.Sys.Object, ByRef Sender As ListView, ByVal ItemIndex As Integer)
-		Declare Sub lvMakeToolPaths_ItemActivate(ByRef Sender As ListView, ByVal ItemIndex As Integer)
 		Declare Static Sub lvCompilerPaths_ItemActivate_(ByRef Designer As My.Sys.Object, ByRef Sender As ListView, ByVal ItemIndex As Integer)
 		Declare Sub lvCompilerPaths_ItemActivate(ByRef Sender As ListView, ByVal ItemIndex As Integer)
 		Declare Static Sub cmdInFolder_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
@@ -127,11 +120,6 @@ Common Shared As Integer oldIndex, newIndex
 		Declare Sub txtColorFrame_KeyPress(ByRef Sender As Control, Key As Integer)
 		Declare Static Sub _txtColorIndicator_KeyPress(ByRef Designer As My.Sys.Object, ByRef Sender As Control, Key As Integer)
 		Declare Sub txtColorIndicator_KeyPress(ByRef Sender As Control, Key As Integer)
-		Declare Sub cmdAddConfiguration_Click(ByRef Sender As Control)
-		Declare Sub cmdChangeConfiguration_Click(ByRef Sender As Control)
-		Declare Sub cmdRemoveConfiguration_Click(ByRef Sender As Control)
-		Declare Sub cmdClearConfigurations_Click(ByRef Sender As Control)
-		Declare Sub lvConfigurations_ItemActivate(ByRef Sender As ListView, ByVal ItemIndex As Integer)
 		Declare Sub cmdAddAIAgent_Click(ByRef Sender As Control)
 		Declare Sub cmdRemoveAIAgent_Click(ByRef Sender As Control)
 		Declare Sub cmdChangeAIAgent_Click(ByRef Sender As Control)
@@ -148,16 +136,16 @@ Common Shared As Integer oldIndex, newIndex
 		Declare Destructor
 		
 		Dim As TreeView tvOptions
-		Dim As CommandButton cmdOK, cmdCancel, cmdApply, cmdMFFPath, cmdAddInclude, cmdRemoveInclude, cmdAddLibrary, cmdRemoveLibrary, cmdChangeTerminal, cmdChangeMakeTool, cmdAdd, cmdRemove, cmdForeground, cmdFont, cmdProjectsPath, cmdBackground, cmdIndicator, cmdAddMakeTool, cmdRemoveMakeTool, cmdClearMakeTools, cmdAddTerminal, cmdRemoveTerminal, cmdClearTerminals, cmdSetShortcut
-		Dim As Label lblBlack, lblCompiler64, lblCompiler64Path, lblCompilerCommandLine, lblTabSize, lblHistoryLimit, lblGridSize, lblFont, lblProjectsPath, lblForeground, lblBackground, lblIndicator, lblOthers, lblShortcut, lblDefaultFileFormat
+		Dim As CommandButton cmdOK, cmdCancel, cmdApply, cmdMFFPath, cmdAddInclude, cmdRemoveInclude, cmdAddLibrary, cmdRemoveLibrary, cmdChangeTerminal, cmdAdd, cmdRemove, cmdForeground, cmdFont, cmdProjectsPath, cmdBackground, cmdIndicator, cmdAddTerminal, cmdRemoveTerminal, cmdClearTerminals, cmdSetShortcut
+		Dim As Label lblBlack, lblCompiler64, lblCompiler64Path, lblTabSize, lblHistoryLimit, lblGridSize, lblFont, lblProjectsPath, lblForeground, lblBackground, lblIndicator, lblOthers, lblShortcut, lblDefaultFileFormat
 		Dim As ScrollControl pnlGeneral, pnlCodeEditor, pnlDesigner, sccColors, sccInterfaceColors
-		Dim As Panel pnlLocalization, pnlThemes, pnlShortcuts, pnlColorsAndFonts, pnlCompiler, pnlMake, pnlDebugger, pnlTerminal, pnlHelp, pnlIncludes, pnlIncludeMFFPath, pnlInterfaceFont, pnlGrid, pnlOtherEditors, pnlLine, pnlLanguage, pnlProjectsPath, pnlSelectShortcut, pnlAutoSaveCharMax, pnlBuildConfigurations, pnlAIAgent, pnlDefaults
-		Dim As HorizontalBox hbxEditors, hbxCompilers, hbxHelp, hbxTerminal, hbxMakeTool, hbxColors, hbxThemeCommands, hbxForeground, hbxBackground, hbxFrame, hbxIndicator, pnlCommands, hbxConfigurations, hbxAIAgent, hbxIncludePaths, hbxLibraryPaths, hbxInterfaceColors, hbxInterfaceThemeCommands, hbxInterfaceColor
+		Dim As Panel pnlLocalization, pnlThemes, pnlShortcuts, pnlColorsAndFonts, pnlCompiler, pnlDebugger, pnlTerminal, pnlHelp, pnlIncludeMFFPath, pnlInterfaceFont, pnlGrid, pnlOtherEditors, pnlLine, pnlLanguage, pnlProjectsPath, pnlSelectShortcut, pnlAutoSaveCharMax, pnlAIAgent, pnlDefaults
+		Dim As HorizontalBox hbxEditors, hbxCompilers, hbxHelp, hbxTerminal, hbxColors, hbxThemeCommands, hbxForeground, hbxBackground, hbxFrame, hbxIndicator, pnlCommands, hbxAIAgent, hbxIncludePaths, hbxLibraryPaths, hbxInterfaceColors, hbxInterfaceThemeCommands, hbxInterfaceColor
 		Dim As Panel pnlChangeKeywordsCase, pnlChangeIdentifiersCase, pnlTreatTabAsSpaces, pnlTabSize, pnlHistoryLimit, pnlIntellisenseLimit, pnlHistoryFileSavingDays, hbxDefaultFileFormat, hbxDefaultNewLineFormat, pnlChangeEndingType, pnlCodeEditorHoverTime
 		Dim As TextBox txtColorForeground, txtColorBackground, txtColorIndicator, txtColorFrame
-		Dim As TextBox txtMFFpath, txtTabSize, txtHistoryLimit, txtGridSize, txtProjectsPath, txtInFolder, txtIntellisenseLimit, txtEnvironmentVariables, txtHistoryCodeDays,  txtFoldsHtml(0), txtFoldsLng, txtAutoSaveCharMax, txtCodeEditorHoverTime, txtInterfaceColor, txtCompiler64Arguments
-		Dim As ComboBoxEdit cboLanguage, cboIdentifiersCase, cboCase, cboTabStyle, cboTheme, cboCompiler64, cboMakeTool, cboTerminal, cboHelp, cboDefaultProjectFile, cboDefaultFileFormat, cboDefaultNewLineFormat, cboOpenedFile, cboConfiguration, cboAIAgent, cboConstructions, cboInterfaceTheme
-		Dim As CheckBox CheckBox1, chkAutoCreateRC, chkAutoSaveCurrentFileBeforeCompiling, chkEnableAutoComplete, chkTabAsSpaces, chkAutoIndentation, chkShowSpaces, chkShowAlignmentGrid, chkSnapToGrid, chkChangeKeywordsCase, chkBold, chkItalic, chkUnderline, chkUseMakeOnStartWithCompile
+		Dim As TextBox txtMFFpath, txtTabSize, txtHistoryLimit, txtGridSize, txtProjectsPath, txtInFolder, txtIntellisenseLimit, txtEnvironmentVariables, txtHistoryCodeDays,  txtFoldsHtml(0), txtFoldsLng, txtAutoSaveCharMax, txtCodeEditorHoverTime, txtInterfaceColor
+		Dim As ComboBoxEdit cboLanguage, cboIdentifiersCase, cboCase, cboTabStyle, cboTheme, cboCompiler64, cboTerminal, cboHelp, cboDefaultProjectFile, cboDefaultFileFormat, cboDefaultNewLineFormat, cboOpenedFile, cboAIAgent, cboConstructions, cboInterfaceTheme
+		Dim As CheckBox chkAutoCreateRC, chkAutoSaveCurrentFileBeforeCompiling, chkEnableAutoComplete, chkTabAsSpaces, chkAutoIndentation, chkShowSpaces, chkShowAlignmentGrid, chkSnapToGrid, chkChangeKeywordsCase, chkBold, chkItalic, chkUnderline
 		Dim As HotKey hkShortcut
 		Dim OpenD As OpenFileDialog
 		Dim BrowsD As FolderBrowserDialog
@@ -175,14 +163,14 @@ Common Shared As Integer oldIndex, newIndex
 		Dim As Boolean HotKeysChanged
 		Dim As Integer LibraryPathsCount
 		Dim As ListControl lstIncludePaths, lstLibraryPaths, lstColorKeys, lstInterfaceColorKeys
-		Dim As GroupBox grbGrid, grbColors, grbThemes, grbFont, grbDefaultCompilers, grbCompilerPaths, grbMakeToolPaths, grbDefaultMakeTool, grbDefaultTerminal, grbTerminalPaths, grbIncludePaths, grbLibraryPaths, grbLanguage, grbDefaultHelp, grbHelpPaths, grbWhenCompiling, grbShortcuts, grbOtherEditors, grbWhenVFBEStarts, grbCommandPromptOptions, grbDefaultConfiguration, grbConfigurations, grbAIAgent, grbAIAgentType, grbDefaultAIAgent, grbDefaults
-		Dim As ListView lvCompilerPaths, lvMakeToolPaths, lvTerminalPaths, lvHelpPaths, lvShortcuts, lvOtherEditors, lvConfigurations, lvAIAgentTypes
+		Dim As GroupBox grbGrid, grbColors, grbThemes, grbFont, grbDefaultCompilers, grbCompilerPaths, grbDefaultTerminal, grbTerminalPaths, grbIncludePaths, grbLibraryPaths, grbLanguage, grbDefaultHelp, grbHelpPaths, grbWhenCompiling, grbShortcuts, grbOtherEditors, grbWhenVFBEStarts, grbCommandPromptOptions, grbAIAgent, grbAIAgentType, grbDefaultAIAgent, grbDefaults, grbDisplay, grbCompletion, grbIntelliSense, grbHistory
+		Dim As ListView lvCompilerPaths, lvTerminalPaths, lvHelpPaths, lvShortcuts, lvOtherEditors, lvAIAgentTypes
 		Dim As Label lblInterfaceFont
 		Dim As CommandButton cmdInterfaceFont
 		Dim As Label lblInterfaceFontLabel
 		Dim As CheckBox chkDisplayIcons, chkShowMainToolbar, chkAutoCreateBakFiles, chkShowToolBoxLocal, chkShowPropLocal
 		Dim As Label lblFrame, lblOpenCommandPromptIn, lblIntellisenseLimit, lblHistoryDay, lblShowMsg, lbAutoSaveCharMax, lblCodeEditorHoverTime, lblDefaultNewLineFormat, lblInterfaceColor
-		Dim As CommandButton cmdFrame, cmdAddHelp, cmdChangeHelp, cmdRemoveHelp, cmdClearHelps, cmdAddEditor, cmdChangeEditor, cmdRemoveEditor, cmdClearEditor, cmdInFolder, cmdUpdateLng,  cmdUpdateLngHTMLFolds(0),  cmdReplaceInFiles(0), cmdClearConfigurations, cmdRemoveConfiguration, cmdChangeConfiguration, cmdAddConfiguration, cmdClearAIAgent, cmdRemoveAIAgent, cmdChangeAIAgent, cmdAddAIAgent, cmdInterfaceThemeAdd, cmdInterfaceThemeRemove, cmdInterfaceColor
+		Dim As CommandButton cmdFrame, cmdAddHelp, cmdChangeHelp, cmdRemoveHelp, cmdClearHelps, cmdAddEditor, cmdChangeEditor, cmdRemoveEditor, cmdClearEditor, cmdInFolder, cmdUpdateLng,  cmdUpdateLngHTMLFolds(0),  cmdReplaceInFiles(0), cmdClearAIAgent, cmdRemoveAIAgent, cmdChangeAIAgent, cmdAddAIAgent, cmdInterfaceThemeAdd, cmdInterfaceThemeRemove, cmdInterfaceColor
 		Dim As CheckBox chkAllLNG, chkFrame, chkForeground, chkBackground, chkIndicator
 		Dim As CheckBox chkHighlightCurrentWord
 		Dim As CheckBox chkHighlightCurrentLine

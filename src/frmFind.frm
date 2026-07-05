@@ -60,6 +60,16 @@ pfFind = @fFind
 			.Designer = @This
 			.Parent = @This
 		End With
+		'lblSearchIn
+		With lblSearchIn
+			.Name = "lblSearchIn"
+			.Text = ML("Search in:")
+			.TabIndex = 19
+			.Alignment = AlignmentConstants.taRight
+			.SetBounds 145, 4, 66, 16
+			.Designer = @This
+			.Parent = @This
+		End With
 		'cboFindRange
 		With cboFindRange
 			.Name = "cboFindRange"
@@ -81,7 +91,7 @@ pfFind = @fFind
 			.TabIndex = 4
 			.Hint = ML("Match Case")
 			.SetBounds 284, 1, 30, 21
-			.Text = "Aa"
+			.Text = ML("Match Case")
 			.Designer = @This
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As CheckBox), @chkBox_Click)
 			.Parent = @This
@@ -89,7 +99,7 @@ pfFind = @fFind
 		'chkMatchWholeWords
 		With chkMatchWholeWords
 			.Name = "chkMatchWholeWords"
-			.Text = "W"
+			.Text = ML("Whole Word")
 			.TabIndex = 5
 			.Hint = ML("Match Whole Words")
 			.SetBounds 316, 1, 30, 21
@@ -100,10 +110,10 @@ pfFind = @fFind
 		'chkUsePatternMatching
 		With chkUsePatternMatching
 			.Name = "chkUsePatternMatching"
-			.Text = ".*"
+			.Text = ML("Regex")
 			.TabIndex = 6
 			.Hint = ML("Use Pattern Matching")
-			.Caption = ".*"
+			.Caption = ML("Regex")
 			.SetBounds 345, 1, 30, 21
 			.Designer = @This
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As CheckBox), @chkBox_Click)
@@ -112,10 +122,10 @@ pfFind = @fFind
 		'btnFindPrev
 		With btnFindPrev
 			.Name = "btnFindPrev"
-			.Text = "<"
+			.Text = ML("Find Previous")
 			.TabIndex = 7
 			.Hint = ML("Find Previous") & " (" & HK("Find Previous", "Shift + F3") & ")"
-			.SetBounds 376, 1, 25, 22
+			.SetBounds 268, 1, 80, 22
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @btnFindPrev_Click)
 			.Designer = @This
 			.Parent = @This
@@ -123,38 +133,12 @@ pfFind = @fFind
 		'btnFind
 		With btnFind
 			.Name = "btnFind"
-			.Text = ">"
+			.Text = ML("Find Next")
 			.Default = True
 			.TabIndex = 8
 			.Hint = ML("Find Next") & " (" & HK("Find Next", "F3") & ")"
-			.SetBounds 403, 1, 25, 22
+			.SetBounds 350, 1, 80, 22
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @btnFind_Click)
-			.Designer = @This
-			.Parent = @This
-		End With
-		'lblTrack
-		With lblTrack
-			.Name = "lblTrack"
-			.TabIndex = 9
-			.Alignment = AlignmentConstants.taCenter
-			.Hint = ML("Find Form Opacity")
-			.SetBounds 4, 30, 16, 11
-			.Designer = @This
-			.Parent = @This
-		End With
-		'TrackBar1
-		
-		With TrackBar1
-			.Name = "TrackBar1"
-			.Text = "TrackBar1"
-			.MinValue = 100
-			.MaxValue = 255
-			.TabIndex = 10
-			.Style = TrackBarOrientation.tbHorizontal
-			.Hint = ML("Find Form Opacity")
-			.SetBounds -2, 42, 27, 10
-			.Position = 210 'This.Opacity
-			.OnChange = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As TrackBar, Position As Integer), @TrackBar1_Change)
 			.Designer = @This
 			.Parent = @This
 		End With
@@ -218,9 +202,9 @@ pfFind = @fFind
 			.Name = "btnCancel"
 			.Text = ML("&Cancel")
 			.TabIndex = 16
-			.SetBounds 250, 500, 100, 30
-			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @btnCancel_Click)
+			.Visible = False
 			.Designer = @This
+			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @btnCancel_Click)
 			.Parent = @This
 		End With
 	End Constructor
@@ -976,11 +960,6 @@ Private Sub frmFind.Form_Create(ByRef Sender As Control)
 	WDeAllocate(tmpStr)
 	SetBounds pfrmMain->Left + pfrmMain->Width - This.Width - 10, pfrmMain->Top + 20, This.Width, This.Height
 		btnReplaceShow.Width = 18
-	Opacity = 230
-	TrackBar1.Position = 230
-	lblTrack.Text = WStr(CUInt(TrackBar1.Position / 2.55))
-	
-	TrackBar1_Change(TrackBar1, TrackBar1.Position)
 End Sub
 
 Private Sub frmFind.Form_Show(ByRef Sender As Form)
@@ -1005,12 +984,6 @@ Private Sub frmFind.Form_Show(ByRef Sender As Form)
 	btnReplaceShow_Click(Sender)
 	txtFind.SetFocus
 	This.BringToFront
-End Sub
-
-Private Sub frmFind.TrackBar1_Change(ByRef Sender As TrackBar, Position As Integer)
-	If Sender.Position < 20 Then Sender.Position = 20
-	Opacity = Sender.Position
-	lblTrack.Text = WStr(CUInt(Sender.Position/2.55))
 End Sub
 
 Private Sub frmFind.btnFindAll_Click(ByRef Sender As Control)

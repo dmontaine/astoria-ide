@@ -1,684 +1,721 @@
-﻿' MDINotepad frmFileSearch.frm
-' Copyright (c) 2024 CM.Wang
+﻿#pragma once
+' Text 文本处理
+' Copyright (c) 2025 CM.Wang
 ' Freeware. Use at your own risk.
 
-'#Region "Form"
-	#if defined(__FB_MAIN__) AndAlso Not defined(__MAIN_FILE__)
-		#define __MAIN_FILE__
-		#ifdef __FB_WIN32__
-			#cmdline "FileSearch.rc"
-		#endif
-		Const _MAIN_FILE_ = __FILE__
-	#endif
-	#include once "mff/Form.bi"
-	#include once "mff/Panel.bi"
-	#include once "mff/CommandButton.bi"
-	#include once "mff/ComboBoxEx.bi"
-	#include once "mff/TextBox.bi"
-	#include once "mff/Dialogs.bi"
-	#include once "mff/ImageList.bi"
-	#include once "mff/TimerComponent.bi"
-	#include once "mff/StatusBar.bi"
-	#include once "mff/Label.bi"
-	#include once "mff/Splitter.bi"
-	
-	#include once "TimeMeter.bi"
-	#include once "FileSearch.bi"
-	#include once "ITL3.bi"
-	#include once "Text.bi"
-	
-	Using My.Sys.Forms
-	
-	Type frmFileSearchType Extends Form
-		Dim ffs As FilesSearch
-		Dim it3 As ITL3
-		Dim tmrFind As TimeMeter
-		Dim tmrSearch As TimeMeter
-		Dim tmrOther As TimeMeter
-		
-		Declare Function zFile2ComboEx Overload (ByRef Sender As ComboBoxEx, Path As Const WString, File As Const WString) As Integer
-		Declare Function zFile2ComboEx Overload (ByRef Sender As ComboBoxEx, Path As Const WString) As Integer
-		Declare Sub zOnFindDone(Owner As Any Ptr)
-		
-		Declare Sub cmbexPath_DblClick(ByRef Sender As Control)
-		Declare Sub cmdFile_Click(ByRef Sender As Control)
-		Declare Sub cmdSearch_Click(ByRef Sender As Control)
-		Declare Sub Form_Close(ByRef Sender As Form, ByRef Action As Integer)
-		Declare Sub Form_Create(ByRef Sender As Control)
-		Declare Sub Form_Destroy(ByRef Sender As Control)
-		Declare Sub Form_Resize(ByRef Sender As Control, NewWidth As Integer, NewHeight As Integer)
-		Declare Sub TimerComponent1_Timer(ByRef Sender As TimerComponent)
-		Declare Sub txtFile_Click(ByRef Sender As Control)
-		Declare Sub txtFile_DblClick(ByRef Sender As Control)
-		Declare Sub txtFile_DropFile(ByRef Sender As Control, ByRef Filename As WString)
-		Declare Sub txtFile_KeyUp(ByRef Sender As Control, Key As Integer, Shift As Integer)
-		Declare Sub txtSearch_Change(ByRef Sender As TextBox)
-		Declare Constructor
-		
-		Dim As Panel Panel1, Panel3, Panel5, Panel4
-		Dim As CommandButton cmdSearch, cmdFileOpen, cmdFileFolder, cmdFileNotepad, cmdFileDelete
-		#ifdef __MDI__
-			Dim As CommandButton cmdFileNew, cmdFileInstAll, cmdFileInstSel, cmdFileInstrCur
-		#endif
-		Dim As ComboBoxEx cmbexPath, cmbexExt
-		Dim As TextBox txtFile, txtSelect, txtSearch
-		Dim As StatusBar StatusBar1
-		Dim As StatusPanel StatusPanel1
-		Dim As FolderBrowserDialog FolderBrowserDialog1
-		Dim As ImageList ImageList1
-		Dim As TimerComponent TimerComponent1, TimerComponent2
-		Dim As OpenFileDialog OpenFileDialog1
-		Dim As Splitter Splitter1
-	End Type
-	
-	Constructor frmFileSearchType
-		' frmFileSearch
-		With This
-			.Name = "frmFileSearch"
-			.Text = "File Search"
-			.Designer = @This
-			#ifdef __USE_GTK__
-				This.Icon.LoadFromFile(ExePath & "\FileSearch.ico")
-			#else
-				This.Icon.LoadFromResourceID(1)
-			#endif
-			#ifdef __FB_64BIT__
-				'...instructions for 64bit OSes...
-				.Caption = "VFBE File Search64"
-			#else
-				'...instructions for other OSes
-				.Caption = "VFBE File Search32"
-			#endif
-			.StartPosition = FormStartPosition.CenterParent
-			.OnCreate = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @Form_Create)
-			.OnResize = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control, NewWidth As Integer, NewHeight As Integer), @Form_Resize)
-			.OnClose = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Form, ByRef Action As Integer), @Form_Close)
-			.SetBounds 0, 0, 640, 480
-		End With
-		' Panel1
-		With Panel1
-			.Name = "Panel1"
-			.Text = "Panel1"
-			.TabIndex = 0
-			.Align = DockStyle.alTop
-			.ExtraMargins.Top = 10
-			.ExtraMargins.Right = 10
-			.ExtraMargins.Left = 10
-			.SetBounds 0, 0, 514, 22
-			.Designer = @This
-			.Parent = @This
-		End With
-		' cmdSearch
-		With cmdSearch
-			.Name = "cmdSearch"
-			.Text = "Search"
-			.TabIndex = 1
-			.Align = DockStyle.alLeft
-			.Caption = "Search"
-			.SetBounds 0, 0, 100, 22
-			.Designer = @This
-			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @cmdSearch_Click)
-			.Parent = @Panel1
-		End With
-		' cmbexPath
-		With cmbexPath
-			.Name = "cmbexPath"
-			.Text = ""
-			.TabIndex = 2
-			.Align = DockStyle.alClient
-			.ExtraMargins.Right = 10
-			.ExtraMargins.Left = 10
-			.Style = ComboBoxEditStyle.cbDropDown
-			.ImagesList = @ImageList1
-			.ControlIndex = 1
-			.SetBounds 110, 0, 354, 22
-			.Designer = @This
-			.OnDblClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @cmbexPath_DblClick)
-			.Parent = @Panel1
-		End With
-		' cmbexExt
-		With cmbexExt
-			.Name = "cmbexExt"
-			.Text = ""
-			.TabIndex = 3
-			.Align = DockStyle.alRight
-			.Style = ComboBoxEditStyle.cbDropDown
-			.ImagesList = @ImageList1
-			.ControlIndex = 2
-			.SetBounds 474, 0, 130, 22
-			.Designer = @This
-			.Parent = @Panel1
-		End With
-		' txtFile
-		With txtFile
-			.Name = "txtFile"
-			.Text = ""
-			.TabIndex = 6
-			.Align = DockStyle.alTop
-			.Multiline = True
-			.ScrollBars = ScrollBarsType.Both
-			.HideSelection = False
-			.ControlIndex = 3
-			.AllowDrop = True
-			.MaxLength = -1
-			.ExtraMargins.Top = 10
-			.ExtraMargins.Right = 10
-			.ExtraMargins.Left = 10
-			.SetBounds 10, 42, 604, 166
-			.Designer = @This
-			.OnKeyUp = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control, Key As Integer, Shift As Integer), @txtFile_KeyUp)
-			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @txtFile_Click)
-			.OnDropFile = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control, ByRef Filename As WString), @txtFile_DropFile)
-			.OnDblClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @txtFile_DblClick)
-			.Parent = @This
-		End With
-		' Splitter1
-		With Splitter1
-			.Name = "Splitter1"
-			.Text = "Splitter1"
-			.Align = SplitterAlignmentConstants.alTop
-			.SetBounds 0, 32, 624, 3
-			.Designer = @This
-			.Parent = @This
-		End With
-		' Panel3
-		With Panel3
-			.Name = "Panel3"
-			.Text = "Panel3"
-			.TabIndex = 7
-			.Align = DockStyle.alClient
-			.ExtraMargins.Top = 10
-			.SetBounds 0, 221, 624, 220
-			.Designer = @This
-			.Parent = @This
-		End With
-		' Panel4
-		With Panel4
-			.Name = "Panel4"
-			.Text = "Panel4"
-			.TabIndex = 16
-			.Align = DockStyle.alClient
-			.SetBounds 0, 0, 520, 198
-			.Designer = @This
-			.Parent = @Panel3
-		End With
-		' txtSearch
-		With txtSearch
-			.Name = "txtSearch"
-			.Text = ""
-			.TabIndex = 17
-			.Align = DockStyle.alTop
-			.ExtraMargins.Right = 10
-			.ExtraMargins.Left = 10
-			.Hint = "Search"
-			.SetBounds 10, 0, 494, 20
-			.Designer = @This
-			.OnChange = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @txtSearch_Change)
-			.Parent = @Panel4
-		End With
-		' txtSelect
-		With txtSelect
-			.Name = "txtSelect"
-			.Text = ""
-			.TabIndex = 8
-			.Align = DockStyle.alClient
-			.Multiline = True
-			.ScrollBars = ScrollBarsType.Both
-			.HideSelection = False
-			.ExtraMargins.Right = 10
-			.ExtraMargins.Left = 10
-			.ExtraMargins.Bottom = 10
-			.ControlIndex = 1
-			.ExtraMargins.Top = 10
-			.MaxLength = -1
-			.SetBounds 10, 30, 494, 158
-			.Designer = @This
-			.OnKeyUp = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control, Key As Integer, Shift As Integer), @txtFile_KeyUp)
-			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @txtFile_Click)
-			.Parent = @Panel4
-		End With
-		' Panel5
-		With Panel5
-			.Name = "Panel5"
-			.Text = "Panel4"
-			.TabIndex = 9
-			.Align = DockStyle.alRight
-			.ExtraMargins.Right = 10
-			.SetBounds 520, 0, 100, 198
-			.Designer = @This
-			.Parent = @Panel3
-		End With
-		' cmdFileOpen
-		With cmdFileOpen
-			.Name = "cmdFileOpen"
-			.Text = "Open"
-			.TabIndex = 10
-			.Caption = "Open"
-			.SetBounds 0, -1, 100, 20
-			.Designer = @This
-			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @cmdFile_Click)
-			.Parent = @Panel5
-		End With
-		' cmdFileFolder
-		With cmdFileFolder
-			.Name = "cmdFileFolder"
-			.Text = "Folder"
-			.TabIndex = 11
-			.Caption = "Folder"
-			.SetBounds 0, 19, 100, 20
-			.Designer = @This
-			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @cmdFile_Click)
-			.Parent = @Panel5
-		End With
-		' cmdFileNotepad
-		With cmdFileNotepad
-			.Name = "cmdFileNotepad"
-			.Text = "Notepad"
-			.TabIndex = 12
-			.Caption = "Notepad"
-			.SetBounds 0, 39, 100, 20
-			.Designer = @This
-			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @cmdFile_Click)
-			.Parent = @Panel5
-		End With
-		' cmdFileDelete
-		With cmdFileDelete
-			.Name = "cmdFileDelete"
-			.Text = "Delete"
-			.TabIndex = 13
-			.Caption = "Delete"
-			.SetBounds 0, 59, 100, 20
-			.Designer = @This
-			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @cmdFile_Click)
-			.Parent = @Panel5
-		End With
-		#ifdef __MDI__
-			' cmdFileNew
-			With cmdFileNew
-				.Name = "cmdFileNew"
-				.Text = "New Open"
-				.TabIndex = 14
-				.Caption = "New Open"
-				.Enabled = True
-				.SetBounds 0, 100, 100, 20
-				.Designer = @This
-				.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @cmdFile_Click)
-				.Parent = @Panel5
-			End With
-			' cmdFileInstAll
-			With cmdFileInstAll
-				.Name = "cmdFileInstAll"
-				.Text = "Insert All"
-				.TabIndex = 15
-				.Caption = "Insert All"
-				.Location = Type<My.Sys.Drawing.Point>(0, 130)
-				.SetBounds 0, 130, 100, 20
-				.Designer = @This
-				.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @cmdFile_Click)
-				.Parent = @Panel5
-			End With
-			' cmdFileInstSel
-			With cmdFileInstSel
-				.Name = "cmdFileInstSel"
-				.Text = "Insert Select"
-				.TabIndex = 16
-				.Caption = "Insert Select"
-				.Location = Type<My.Sys.Drawing.Point>(0, 150)
-				.SetBounds 0, 150, 100, 20
-				.Designer = @This
-				.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @cmdFile_Click)
-				.Parent = @Panel5
-			End With
-			' cmdFileInstrCur
-			With cmdFileInstrCur
-				.Name = "cmdFileInstrCur"
-				.Text = "Insert Current"
-				.TabIndex = 18
-				.Location = Type<My.Sys.Drawing.Point>(0, 170)
-				.Caption = "Insert Current"
-				.SetBounds 0, 170, 100, 20
-				.Designer = @This
-				.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @cmdFile_Click)
-				.Parent = @Panel5
-			End With
-		#endif
-		' StatusBar1
-		With StatusBar1
-			.Name = "StatusBar1"
-			.Text = ""
-			.Align = DockStyle.alBottom
-			.SetBounds 0, 158, 624, 22
-			.Designer = @This
-			.Parent = @Panel3
-		End With
-		' StatusPanel1
-		With StatusPanel1
-			.Name = "StatusPanel1"
-			.Designer = @This
-			.Caption = "Status"
-			.Parent = @StatusBar1
-		End With
-		' FolderBrowserDialog1
-		With FolderBrowserDialog1
-			.Name = "FolderBrowserDialog1"
-			.SetBounds 40, 0, 16, 16
-			.Designer = @This
-			.Parent = @Panel1
-		End With
-		' ImageList1
-		With ImageList1
-			.Name = "ImageList1"
-			.SetBounds 60, 0, 16, 16
-			.Designer = @This
-			.Parent = @Panel1
-		End With
-		' TimerComponent1
-		With TimerComponent1
-			.Name = "TimerComponent1"
-			.Interval = 999
-			.SetBounds 0, 0, 16, 16
-			.Designer = @This
-			.OnTimer = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As TimerComponent), @TimerComponent1_Timer)
-			.Parent = @Panel1
-		End With
-		' TimerComponent2
-		With TimerComponent2
-			.Name = "TimerComponent2"
-			.Interval = 999
-			.SetBounds 0, 0, 16, 16
-			.Designer = @This
-			.OnTimer = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As TimerComponent), @TimerComponent1_Timer)
-			.Parent = @Panel4
-		End With
-		' OpenFileDialog1
-		With OpenFileDialog1
-			.Name = "OpenFileDialog1"
-			.Filter = "All Files (*.*)|*.*"
-			.SetBounds 20, 0, 16, 16
-			.Designer = @This
-			.Parent = @Panel1
-		End With
-	End Constructor
-	
-	Dim Shared frmFileSearch As frmFileSearchType
-	
-	#if _MAIN_FILE_ = __FILE__
-		App.DarkMode = True
-		frmFileSearch.MainForm = True
-		frmFileSearch.Show
-		App.Run
-	#endif
-'#End Region
+#include once "Text.bi"
 
-Private Function frmFileSearchType.zFile2ComboEx(ByRef Sender As ComboBoxEx, Path As Const WString) As Integer
-	Dim i As Integer = Sender.IndexOf("" + Path)
-	If i < 0 Then
-		Dim FileInfo As SHFILEINFO
-		SHGetFileInfo(Path, FILE_ATTRIBUTE_NORMAL Or FILE_ATTRIBUTE_DEVICE Or FILE_ATTRIBUTE_DIRECTORY, @FileInfo, SizeOf(FileInfo), SHGFI_USEFILEATTRIBUTES Or SHGFI_SMALLICON Or SHGFI_SYSICONINDEX)
-		Sender.Items.Add("" + Path, , FileInfo.iIcon, FileInfo.iIcon, FileInfo.iIcon)
-		i = Sender.IndexOf(""+Path)
-	End If
-	Return i
-End Function
-
-Private Function frmFileSearchType.zFile2ComboEx(ByRef Sender As ComboBoxEx, Path As Const WString, File As Const WString) As Integer
-	Dim i As Integer = Sender.IndexOf("" + File)
-	If i < 0 Then
-		Dim FileInfo As SHFILEINFO
-		If Path = "" Then
-			SHGetFileInfo("" + File, FILE_ATTRIBUTE_NORMAL, @FileInfo, SizeOf(FileInfo), SHGFI_USEFILEATTRIBUTES Or SHGFI_SMALLICON Or SHGFI_SYSICONINDEX)
-		Else
-			SHGetFileInfo(Path + "\" + File, FILE_ATTRIBUTE_NORMAL, @FileInfo, SizeOf(FileInfo), SHGFI_USEFILEATTRIBUTES Or SHGFI_SMALLICON Or SHGFI_SYSICONINDEX)
-		End If
-		Sender.Items.Add("" + File, , FileInfo.iIcon, FileInfo.iIcon, FileInfo.iIcon)
-		i = Sender.IndexOf("" + File)
-	End If
-	Return i
-End Function
-
-Private Sub frmFileSearchType.zOnFindDone(Owner As Any Ptr)
-	txtFile.Text = ffs.Files(vbCrLf)
-	it3.SetState(TBPF_NOPROGRESS)
-	TimerComponent1.Enabled = False
-	cmdSearch.Text = "Search"
-	
-	TimerComponent1_Timer(TimerComponent1)
-	TimerComponent1_Timer(TimerComponent2)
-End Sub
-
-Private Sub frmFileSearchType.Form_Create(ByRef Sender As Control)
-	'初始化ITaskbarList3
-	it3.Initial Handle
-	
-	'加载文件图标到imagelist1
-	Dim FileInfo As SHFILEINFO
-	ImageList1.Handle = Cast(Any Ptr, SHGetFileInfo("", 0, @FileInfo, SizeOf(FileInfo), SHGFI_SYSICONINDEX Or SHGFI_ICON Or SHGFI_SMALLICON Or SHGFI_LARGEICON Or SHGFI_PIDL Or SHGFI_DISPLAYNAME Or SHGFI_TYPENAME Or SHGFI_ATTRIBUTES))
-	
+'释放指针数组Subject
+Private Sub ArrayDeallocate(Subject(Any) As Any Ptr)
+	Dim Ub As Integer = UBound(Subject)
+	Dim Lb As Integer = LBound(Subject)
 	Dim i As Integer
-	Dim d As String * MAX_PATH
-	Dim n As WString * MAX_PATH
-	Dim lpVolumeNameBuffer As WString * MAX_PATH
-	Dim lpVolumeSerialNumber As DWORD
-	Dim lpFileSystemNameBuffer As WString * MAX_PATH
-	
-	cmbexPath.Clear
-	GetLogicalDriveStrings MAX_PATH, Cast(WString Ptr, @d)
-	For i = 65 To 90
-		If InStr(d ,Chr(i)) Then
-			n = Chr(i) & ":"
-			GetVolumeInformation @n, @lpVolumeNameBuffer, MAX_PATH, @lpVolumeSerialNumber, 0, 0, @lpFileSystemNameBuffer, MAX_PATH
-			SHGetFileInfo(Chr(i) + ":", FILE_ATTRIBUTE_NORMAL, @FileInfo, SizeOf(FileInfo), SHGFI_USEFILEATTRIBUTES Or SHGFI_SMALLICON Or SHGFI_SYSICONINDEX)
-			zFile2ComboEx(cmbexPath, Chr(i) + ":")
-			'ComboBoxEx9.Items.Add(Chr(i) + ":", , FileInfo.iIcon, FileInfo.iIcon, FileInfo.iIcon)
-			'lpVolumeNameBuffer & "|"  & lpVolumeSerialNumber & "|"  & lpFileSystemNameBuffer
-		End If
-	Next
-	
-	Dim aa() As WString Ptr
-	ReDim aa(cmbexPath.ItemCount - 1)
-	For i = 0 To cmbexPath.ItemCount - 1
-		WLet(aa(i), cmbexPath.Item(i))
-	Next
-	Dim p As WString Ptr
-	JoinWStr(aa(), ";", p)
-	zFile2ComboEx(cmbexPath, *p)
-	zFile2ComboEx(cmbexPath, ExePath)
-	cmbexPath.ItemIndex = cmbexPath.ItemCount - 1
-	
-	cmbexExt.Clear
-	Dim a As String = ".txt|.ini|.log|.txt;.ini;.log|.bas|.bi|.frm|.cls|.vbp|.bas;.bi;.frm;.cls;.vbp|.bat|.cmd|.vbs|.bat;.cmd;.vbs|.c|.cpp|.h|.c;.cpp;.h|.*"
-	Dim j As Integer = SplitWStr(a, "|", aa())
-	For i = 0 To j
-		zFile2ComboEx(cmbexExt, "", *aa(i))
-	Next
-	cmbexExt.ItemIndex = j
-	ArrayDeallocate(aa())
-	If p Then Deallocate(p)
-	StatusPanel1.Caption = Format(Now(), "yyyy/mm/dd hh:mm:ss")
-End Sub
-
-Private Sub frmFileSearchType.TimerComponent1_Timer(ByRef Sender As TimerComponent)
-	Dim st As String
-	Select Case Sender.Name
-	Case "TimerComponent1"
-		st = "File count " & Format(ffs.FileCount + 1, "#,#0") & ", File size " & Bytes2Str(ffs.FileSize) & " (" & Format(ffs.FileSize, "#,#0") & ")"
-		StatusPanel1.Caption = st & ", Take (" & Format(tmrSearch.Passed, "#,#0.000") & " sec.) " & Sec2Time(tmrSearch.Passed, , , "#00.000")
-	Case "TimerComponent2"
-		tmrFind.Start
-		TimerComponent2.Enabled = False
-		If txtSearch.Text = "" Then Exit Sub
-		Dim srs As WString Ptr
-		Dim As Integer fc = FindLinesWStr(txtFile.Text, txtSearch.Text, srs, False)
-		If fc < 0 Then
-			txtSelect.Text = ""
-			st = "[" & txtSearch.Text & "] Not found."
-		Else
-			txtSelect.Text = *srs
-			st = "[" & txtSearch.Text & "] Found: " & fc + 1 & " of " & txtFile.LinesCount
-		End If
-		Deallocate(srs)
-		StatusPanel1.Caption = st & ", Take (" & Format(tmrFind.Passed, "#,#0.000") & " sec.) " & Sec2Time(tmrFind.Passed, , , "#00.000")
-	End Select
-End Sub
-
-Private Sub frmFileSearchType.cmdSearch_Click(ByRef Sender As Control)
-	Select Case Sender.Text
-	Case "Search"
-		tmrSearch.Start
-		it3.SetState(TBPF_INDETERMINATE)
-		Dim a As WString Ptr
-		'ReplaceWStr(cmbexExt.Text, a, ".", "*.")
-		
-		WLet(a, .Replace(cmbexExt.Text, ".", "*."))
-		TimerComponent1.Enabled = True
-		ffs.OnFindDone = Cast(Sub(Owner As Any Ptr), @zOnFindDone)
-		ffs.FindFile(@This, cmbexPath.Text, *a, True)
-		If a Then Deallocate(a)
-		Sender.Text = "Cancel"
-	Case "Cancel"
-		ffs.Cancel = True
-	End Select
-End Sub
-
-Private Sub frmFileSearchType.cmbexPath_DblClick(ByRef Sender As Control)
-	Dim p As WString Ptr
-	Dim i As Integer
-	
-	If FolderBrowserDialog1.Execute Then
-		WLet(p, FolderBrowserDialog1.Directory)
-		If ..Mid(*p, Len(*p), 1) = WStr("\") Then
-			i = zFile2ComboEx(cmbexPath, ..Left(*p, Len(*p) - 1))
-		Else
-			i = zFile2ComboEx(cmbexPath, *p)
-		End If
-		cmbexPath.ItemIndex = i
-		Deallocate(p)
-	End If
-End Sub
-
-Private Sub frmFileSearchType.cmdFile_Click(ByRef Sender As Control)
-	
-	tmrOther.Start
-	Dim As Integer sx, sy, ex, ey
-	txtSelect.GetSel(sy, sx, ey, ex)
-	
-	Dim st As String = Sender.Name
-	Select Case st
-	Case "cmdFileOpen"
-		st = "Open = " & ShellExecute (Handle, "open", txtSelect.Lines(sy), "", "", 1)
-	Case "cmdFileFolder"
-		st = "Folder = " & Exec ("c:\windows\explorer.exe" , "/select," & txtSelect.Lines(sy))
-	Case "cmdFileNotepad"
-		st = "Notepad = " & Exec ("c:\windows\notepad.exe" , txtSelect.Lines(sy))
-	Case "cmdFileDelete"
-		If MsgBox("Delete file?" + vbCrLf + txtSelect.Lines(sy), "Delete File Confirm", mtInfo, btYesNo) = mrYes Then
-			If PathFileExists(txtSelect.Lines(sy)) Then
-				SetFileAttributes(txtSelect.Lines(sy), FILE_ATTRIBUTE_NORMAL)
-				DeleteFile(txtSelect.Lines(sy))
-				st = "Delete: " & txtSelect.Lines(sy)
-			Else
-				st = "Delete not found: " & txtSelect.Lines(sy)
-			End If
-		Else
-			st = "Cancel delete: " & txtSelect.Lines(sy)
-		End If
-		#ifdef __MDI__
-		Case "cmdFileNew"
-			If PathFileExists(txtSelect.Lines(sy)) Then
-				MDIMain.FileOpen(txtSelect.Lines(sy))
-				st = "New: " & txtSelect.Lines(sy)
-			Else
-				st = "New not found: " & txtSelect.Lines(sy)
-			End If
-		Case "cmdFileInstAll"
-			If MDIMain.actMdiChild Then
-				st = "Insert all count: " & txtFile.LinesCount
-				MDIMain.MDIChildInsertText(MDIMain.actMdiChild, txtFile.Text)
-			Else
-				st = "Insert all: NA"
-			End If
-		Case "cmdFileInstSel"
-			If MDIMain.actMdiChild Then
-				st = "Insert all count: " & txtSelect.LinesCount
-				MDIMain.MDIChildInsertText(MDIMain.actMdiChild, txtSelect.Text)
-			Else
-				st = "Insert all: NA"
-			End If
-		Case "cmdFileInstrCur"
-			If MDIMain.actMdiChild Then
-				st = "Insert Select: " & txtSelect.Lines(sy)
-				MDIMain.MDIChildInsertText(MDIMain.actMdiChild, txtSelect.Lines(sy))
-			Else
-				st = "Insert Select: NA"
-			End If
-		#endif
-	End Select
-	StatusPanel1.Caption = st  & ", Take (" & Format(tmrOther.Passed, "#,#0.000") & " sec.) " & Sec2Time(tmrOther.Passed, , , "#00.000")
-End Sub
-
-Private Sub frmFileSearchType.txtFile_KeyUp(ByRef Sender As Control, Key As Integer, Shift As Integer)
-	Dim As Integer sx, sy, ex, ey
-	Dim As Integer s, e
-	Dim As String st
-	
-	Dim txtbox As TextBox Ptr = Cast(TextBox Ptr, VarPtr(Sender))
-	txtbox->GetSel(sy, sx, ey, ex)
-	txtbox->GetSel(s, e)
-	
-	If s <> e Then
-		Dim i As Integer
-		Dim a() As WString Ptr
-		Dim c As WString Ptr
-		Dim j As Integer = ey - sy
-		ReDim a(j)
-		For i = sy To ey
-			WLet(a(i - sy), txtbox->Lines(i))
+	If (Ub - Lb) > 0 Then
+		For i = Lb To Ub
+			If Subject(i) Then Deallocate(Subject(i))
 		Next
-		JoinWStr(a(), vbCrLf, c)
-		If txtbox->Name = "txtFile" Then txtSelect.Text = *c
-		ArrayDeallocate(a())
-		If c Then Deallocate(c)
-		st = "Selected lines: " & ey - sy + 1 & " of " & txtbox->LinesCount
+	End If
+	Erase Subject
+End Sub
+
+'用指定的字符iChr生成指定长度iCount的字符Result,左lw中mw右rw的文字可指定
+Private Sub TitleWStr(ByRef Result As WString Ptr, ByVal iCount As Integer = 80, ByRef iChr As Const WString = " ", ByRef LW As Const WString = "", ByRef MW As Const WString = "" , ByRef RW As Const WString = "")
+	Dim sTL As Integer = iCount
+	Dim sLL As Integer = Len(LW)
+	Dim sRL As Integer = Len(RW)
+	Dim sML As Integer = Len(MW)
+	
+	If sTL < sLL + sML + sRL Then sTL = sLL + sML + sRL
+	
+	WLet(Result, WString(sTL, iChr))
+	
+	If sLL Then Mid(*Result, 1, sLL) = LW
+	If sML Then Mid(*Result, sTL / 2, sML) = MW
+	If sRL Then Mid(*Result, sTL - sRL + 1, sRL) = RW
+End Sub
+
+'查找文字fFind在字符串fSource中的位置(指定开始位置fStartPos), 未找到返回0
+Private Function InWStr Overload (ByVal fStartPos As Integer, ByRef fSource As Const WString, ByRef fFind As Const WString, ByVal MatchCase As Boolean = False) As Integer
+	If fStartPos < 1 Then Return 0
+	Dim lenSource As Integer = Len(fSource)
+	If lenSource = 0 Then Return 0
+	Dim lenFind As Integer = Len(fFind)
+	If lenFind = 0 Then Return 0
+	If fStartPos > lenSource - lenFind Then Return 0
+	
+	Dim i As Integer
+	Dim j As Integer = 0
+	Dim rtn As Integer = 0
+	
+	Dim pSource As WString Ptr
+	Dim pFind As WString Ptr
+	If MatchCase Then
+		pSource = StrPtr(fSource)
+		pFind = StrPtr(fFind)
 	Else
-		If txtbox->Name = "txtFile" Then txtSelect.Text = txtbox->Lines(sy)
-		st = "Selected file: " & txtbox->Lines(sy) & ", " & sy + 1 & " of " & txtbox->LinesCount
+		TextConvert(fSource, pSource, LCMAP_LOWERCASE)
+		TextConvert(fFind, pFind, LCMAP_LOWERCASE)
 	End If
-	StatusPanel1.Caption = st
-End Sub
-
-Private Sub frmFileSearchType.txtFile_Click(ByRef Sender As Control)
-	txtFile_KeyUp(Sender, 0, 0)
-End Sub
-
-Private Sub frmFileSearchType.txtSearch_Change(ByRef Sender As TextBox)
-	TimerComponent2.Enabled = False
-	If txtSearch.Text = "" Then Exit Sub
-	TimerComponent2.Enabled = True
-End Sub
-
-Private Sub frmFileSearchType.txtFile_DropFile(ByRef Sender As Control, ByRef Filename As WString)
-	Dim As Integer fe= -1, nl = -1, cp = -1
-	Dim p As WString Ptr
-	TextFromFile(Filename, p, fe, nl, cp)
-	txtFile.Text = *p
-	If p Then Deallocate(p)
-	StatusPanel1.Caption = Filename & ", Encode: " & fe & ", EOL: " & nl & ", CP: " & cp
-End Sub
-
-Private Sub frmFileSearchType.txtFile_DblClick(ByRef Sender As Control)
-	If OpenFileDialog1.Execute Then
-		txtFile_DropFile(Sender, OpenFileDialog1.FileName)
+	For i = fStartPos - 1 To lenSource - 1
+		If (*pSource)[i] = (*pFind)[j] Then
+			j += 1
+			If j = lenFind Then
+				rtn = i - lenFind + 2
+			End If
+		Else
+			j = 0
+		End If
+		If rtn Then Exit For
+	Next
+	If MatchCase = False Then
+		If pSource Then Deallocate(pSource)
+		If pFind Then Deallocate(pFind)
 	End If
+	Return rtn
+End Function
+
+'查找文字fFind在字符串fSource中的位置, 未找到返回0
+Private Function InWStr Overload (ByRef fSource As Const WString, ByRef fFind As Const WString, ByVal MatchCase As Boolean = False) As Integer
+	Dim lenSource As Integer = Len(fSource)
+	If lenSource = 0 Then Return 0
+	Dim lenFind As Integer = Len(fFind)
+	If lenFind = 0 Then Return 0
+	Dim fStartPos As Integer = 1
+	If fStartPos > lenSource - lenFind Then Return 0
+	
+	Dim i As Integer
+	Dim j As Integer = 0
+	Dim rtn As Integer = 0
+	
+	Dim pSource As WString Ptr
+	Dim pFind As WString Ptr
+	If MatchCase Then
+		pSource = StrPtr(fSource)
+		pFind = StrPtr(fFind)
+	Else
+		TextConvert(fSource, pSource, LCMAP_LOWERCASE)
+		TextConvert(fFind, pFind, LCMAP_LOWERCASE)
+	End If
+	For i = fStartPos - 1 To lenSource - 1
+		If (*pSource)[i] = (*pFind)[j] Then
+			j += 1
+			If j = lenFind Then
+				rtn = i - lenFind + 2
+			End If
+		Else
+			j = 0
+		End If
+		If rtn Then Exit For
+	Next
+	If MatchCase = False Then
+		If pSource Then Deallocate(pSource)
+		If pFind Then Deallocate(pFind)
+	End If
+	Return rtn
+End Function
+
+'反向查找文字fFind在字符串fSource中的位置, 未找到返回0
+Private Function InWStrRev(ByRef fSource As Const WString, ByRef fFind As Const WString, ByVal fStartPos As Integer = -1, ByVal MatchCase As Boolean = False) As Integer
+	Dim lenSource As Integer = Len(fSource)
+	If lenSource = 0 Then Return 0
+	Dim lenFind As Integer = Len(fFind)
+	If lenFind = 0 Then Return 0
+	If fStartPos = -1 Then fStartPos = lenSource
+	If fStartPos < lenFind Then Return 0
+	If fStartPos > lenSource Then Return 0
+	
+	Dim i As Integer
+	Dim j As Integer = lenFind - 1
+	Dim rtn As Integer = 0
+	
+	Dim pSource As WString Ptr
+	Dim pFind As WString Ptr
+	If MatchCase Then
+		pSource = StrPtr(fSource)
+		pFind = StrPtr(fFind)
+	Else
+		TextConvert(fSource, pSource, LCMAP_LOWERCASE)
+		TextConvert(fFind, pFind, LCMAP_LOWERCASE)
+	End If
+	For i = fStartPos - 1 To 0 Step -1
+		If (*pSource)[i] = (*pFind)[j] Then
+			j -= 1
+			If j < 0 Then
+				rtn = i + 1
+			End If
+		Else
+			j = lenFind - 1
+		End If
+		If rtn Then Exit For
+	Next
+	
+	If MatchCase = False Then
+		If pSource Then Deallocate(pSource)
+		If pFind Then Deallocate(pFind)
+	End If
+	Return rtn
+End Function
+
+'寻找文字Finding在字符串Expression中的数量和位置FoundPositions,返回数量(从1开始)0表示没有找到
+Private Function FindCountWStr(ByRef Expression As WString, Finding As Const WString, ByRef FoundPositions As Integer Ptr, ByVal MatchCase As Boolean = False) As Integer
+	Dim lenExpression As Integer = Len(Expression)
+	Dim lenFinding As Integer = Len(Finding)
+	Dim ptrExpression As WString Ptr
+	Dim ptrFinding As WString Ptr
+	Const As Long mGrowSize = 32768
+	
+	Dim i As Integer
+	Dim j As Integer = 0
+	Dim Count As Integer = -1
+	If MatchCase Then
+		ptrExpression = StrPtr(Expression)
+		ptrFinding = StrPtr(Finding)
+	Else
+		TextConvert(Expression, ptrExpression, LCMAP_LOWERCASE)
+		TextConvert(Finding, ptrFinding, LCMAP_LOWERCASE)
+	End If
+	For i = 0 To lenExpression - 1
+		If (*ptrExpression)[i] = (*ptrFinding)[j] Then
+			j += 1
+			If j = lenFinding Then
+				Count += 1
+				If (Count Mod mGrowSize) = 0 Then
+					FoundPositions = Reallocate(FoundPositions, (Count + mGrowSize)*SizeOf(Integer))
+				End If
+				* (FoundPositions + Count) = i - lenFinding + 1
+				j = 0
+			End If
+		Else
+			If j Then
+				If i Then i -= 1
+				j = 0
+			End If
+		End If
+	Next
+	Count += 1
+	FoundPositions = Reallocate(FoundPositions, (Count + 1)*SizeOf(Integer))
+	* (FoundPositions + Count) = lenExpression
+	If MatchCase = False Then
+		If ptrExpression Then Deallocate(ptrExpression)
+		If ptrFinding Then Deallocate(ptrFinding)
+	End If
+	Return Count
+End Function
+
+'返回位置FindPos所在寻找结果FindPositions,FindCount,FindLength的索引
+Private Function FindIndexByPos(ByRef FindPositions As Integer Ptr, FindCount As Integer, FindPos As Integer, ByVal FindWarp As Boolean = True, ByVal FindBack As Boolean = False) As Integer
+	Dim i As Integer
+	If FindBack Then
+		For i = FindCount - 1 To 0 Step -1
+			If * (FindPositions + i) < FindPos Then
+				Return i
+			End If
+		Next
+		If FindWarp Then Return FindCount - 1
+	Else
+		For i = 0 To FindCount - 1
+			If * (FindPositions + i) > FindPos Then
+				Return i
+			End If
+		Next
+		If FindWarp Then Return 0
+	End If
+	Return -1
+End Function
+
+'用文字Delimiter将字符串Subject分离成数组Result,返回数组数
+Private Function SplitWStr(ByRef Subject As WString, ByRef Delimiter As Const WString, Result(Any) As WString Ptr, ByVal MatchCase As Boolean = False) As Integer
+	ArrayDeallocate(Result())
+	Dim FoundPositions As Integer Ptr = 0
+	Dim FindCount As Integer = FindCountWStr(Subject, Delimiter, FoundPositions, MatchCase)
+
+	If FindCount < 1 Then
+		ReDim Result(0)
+		WLet(Result(0), Subject)
+	Else
+		ReDim Result(FindCount)
+		Dim i As Integer
+		Dim lenDelimiter As Integer = Len(Delimiter)
+		
+		Result(0) = CAllocate((* FoundPositions) * 2 + 2)
+		memcpy(Result(0), @Subject, (*FoundPositions) * 2)
+		
+		Dim iSt As Integer
+		Dim iLen As Integer
+		For i = 0 To FindCount - 1
+			iSt = * (FoundPositions + i) + lenDelimiter
+			iLen = * (FoundPositions + i + 1) - iSt
+			Result(i + 1) = CAllocate(iLen * 2 + 2)
+			memcpy(Result(i + 1), @Subject + iSt, iLen * 2)
+		Next
+	End If
+	
+	If FoundPositions Then Deallocate(FoundPositions)
+	Return FindCount
+End Function
+
+'快排（Quick Sort）
+Sub QuickSort(arr() As WString Ptr, ByVal low As Integer, ByVal high As Integer, ByVal Ascending As Boolean)
+	Dim i As Integer = low
+	Dim j As Integer = high
+	Dim pivot As WString Ptr = arr((low + high) \ 2)
+	Dim temp As WString Ptr
+	
+	' 快排核心：根据 pivot 分区
+	Do
+		If Ascending Then
+			While *arr(i) < *pivot: i += 1: Wend
+			While *arr(j) > *pivot: j -= 1: Wend
+		Else
+			While *arr(i) > *pivot: i += 1: Wend
+			While *arr(j) < *pivot: j -= 1: Wend
+		End If
+		
+		If i <= j Then
+			temp = arr(i)
+			arr(i) = arr(j)
+			arr(j) = temp
+			i += 1
+			j -= 1
+		End If
+	Loop While i <= j
+	
+	' 递归调用左右分区
+	If low < j Then QuickSort(arr(), low, j, Ascending)
+	If i < high Then QuickSort(arr(), i, high, Ascending)
 End Sub
 
-Private Sub frmFileSearchType.Form_Resize(ByRef Sender As Control, NewWidth As Integer, NewHeight As Integer)
-	StatusPanel1.Width = ClientWidth
-End Sub
+'快速给字符串数组Subject()按照指定顺序Ordering排序
+Private Function SortArray(Subject() As WString Ptr, ByVal Ordering As SortOrders = SortOrders.Ascending) As Boolean
+	If UBound(Subject) > 0 Then
+		QuickSort(Subject(), 0, UBound(Subject), Ordering)
+		Return True
+	Else
+		Return False
+	End If
+End Function
 
-Private Sub frmFileSearchType.Form_Close(ByRef Sender As Form, ByRef Action As Integer)
-	txtFile.Text = ""
-	txtSelect.Text = ""
-	If ffs.mDone Or ffs.mThread = NULL Then Exit Sub
-	ffs.Cancel = True
-	Action = False
-End Sub
+'字符串数组Subject用文字Delimiter从iStart到iEnd连接合并为Result,返回合并后的字符串长度
+Private Function JoinWStr(Subject(Any) As WString Ptr, ByRef Delimiter As Const WString, ByRef Result As WString Ptr, ByVal iStart As Integer = -1, ByVal iEnd As Integer = -1) As Integer
+	Dim Ub As Integer = UBound(Subject)             '开始索引值
+	Dim Lb As Integer = LBound(Subject)             '结束索引值
+	If iStart >= Lb And iStart <= Ub Then Lb = iStart
+	If iEnd >= Lb And iEnd <= Ub Then Ub = iEnd
+	If Ub < Lb Then Return -1                       '不符合返回-1
+	
+	'长度计算
+	Dim lenResult As Integer = 0                    '返回长度
+	Dim lenDelimiter As Integer = Len(Delimiter)    '分隔字符串长度
+	Dim lenSubject() As Integer                     '每个元素的长度
+	ReDim lenSubject(Lb To Ub)
+	Dim i As Integer
+	For i = Lb To Ub
+		lenSubject(i) = Len(*Subject(i))
+		lenResult += lenSubject(i)
+	Next
+	lenResult += (Ub - Lb)*lenDelimiter
+	
+	'申请返回空间
+	If Result Then Deallocate(Result)
+	Result = CAllocate(lenResult * 2 + 2)
+	
+	'填充返回内容
+	*Result = *Subject(Lb)
+	Dim l As Integer = lenSubject(Lb)
+	For i = Lb + 1 To Ub
+		* (Result + l) = Delimiter
+		l += lenDelimiter
+		* (Result + l) = *Subject(i)
+		l += lenSubject(i)
+	Next
+	
+	'返回长度
+	Return lenResult
+End Function
+
+'寻找文字Finding在字符串Expression所在的所有行LinesFound,返回找到的行数(从0开始)
+Private Function FindLinesWStr(ByRef Expression As WString, ByRef Finding As Const WString, ByRef LinesFound As WString Ptr, ByVal MatchCase As Boolean = False) As Integer
+	Dim Lines(Any) As WString Ptr
+	Dim Founds(Any) As WString Ptr
+	Dim FoundCount As Integer = InWStr(Expression, Finding, MatchCase)
+	If FoundCount < 1 Then Return -1
+	
+	Dim FoundIndex As Integer = -1
+	Dim LineCount As Integer = SplitWStr(Expression, vbCrLf, Lines(), MatchCase)
+	
+	Dim i As Integer
+	For i = 0 To LineCount
+		If InWStr(*Lines(i), Finding, MatchCase) Then
+			FoundIndex += 1
+			ReDim Preserve Founds(FoundIndex)
+			Founds(FoundIndex) = Lines(i)
+		End If
+	Next
+	JoinWStr(Founds(), vbCrLf, LinesFound)
+	ArrayDeallocate(Lines())
+	Erase Founds
+	Return FoundIndex
+End Function
+
+'在Expression中寻找Finding并用Replacing替换成Replaced,返回找到的个数,从1开始,0表示未找到
+Private Function ReplaceWStr Overload(ByRef Expression As WString, ByRef Finding As WString, ByRef Replacing As WString, ByRef Replaced As WString Ptr, ByVal MatchCase As Boolean = False) As Integer
+	Dim FoundPositions As Integer Ptr
+	Dim CountFind As Integer = FindCountWStr(Expression, Finding, FoundPositions, MatchCase)
+	If CountFind Then
+		Dim lenReturn As Integer = 0
+		Dim lenExpression As Integer = Len(Expression)
+		Dim lenFinding As Integer = Len(Finding)
+		Dim lenReplacing As Integer = Len(Replacing)
+		lenReturn = lenExpression - lenFinding * CountFind + lenReplacing * CountFind
+		If Replaced Then Deallocate(Replaced)
+		Replaced = CAllocate(lenReturn *2 + 2)
+		Dim iPos As Integer = *FoundPositions
+		memcpy(Replaced, @Expression, iPos * 2)
+		
+		Dim i As Integer
+		Dim iSt As Integer
+		Dim iLen As Integer
+		
+		For i = 1 To CountFind
+			memcpy(Replaced + iPos, @Replacing, lenReplacing * 2)
+			iPos += lenReplacing
+			iSt = * (FoundPositions + i - 1) + lenFinding
+			iLen = * (FoundPositions + i) - iSt
+			
+			memcpy(Replaced + iPos , @Expression + iSt, iLen * 2)
+			iPos += iLen
+		Next
+	End If
+	Deallocate (FoundPositions)
+	Return CountFind
+End Function
+
+Private Function ReplaceWStr Overload(ByRef Expression As WString, ByRef Finding As WString, ByRef Replacing As WString, ByVal MatchCase As Boolean = False) As UString
+	Dim Replaced As WString Ptr = NULL
+	Dim FoundPositions As Integer Ptr
+	Dim CountFind As Integer = FindCountWStr(Expression, Finding, FoundPositions, MatchCase)
+	If CountFind Then
+		Dim lenReturn As Integer = 0
+		Dim lenExpression As Integer = Len(Expression)
+		Dim lenFinding As Integer = Len(Finding)
+		Dim lenReplacing As Integer = Len(Replacing)
+		lenReturn = lenExpression - lenFinding * CountFind + lenReplacing * CountFind
+		Replaced = CAllocate(lenReturn *2 + 2)
+		Dim iPos As Integer = *FoundPositions
+		memcpy(Replaced, @Expression, iPos * 2)
+		
+		Dim i As Integer
+		Dim iSt As Integer
+		Dim iLen As Integer
+		
+		For i = 1 To CountFind
+			memcpy(Replaced + iPos, @Replacing, lenReplacing * 2)
+			iPos += lenReplacing
+			iSt = * (FoundPositions + i - 1) + lenFinding
+			iLen = * (FoundPositions + i) - iSt
+			
+			memcpy(Replaced + iPos , @Expression + iSt, iLen * 2)
+			iPos += iLen
+		Next
+	Else
+		wlet(Replaced, Expression)
+	End If
+	Deallocate (FoundPositions)
+	Function = *Replaced
+	Deallocate(Replaced)
+End Function
+
+'全路径文件名补全
+Private Function FullNameFromFile(sFileName As WString, ByRef sDefPath As Const WString = "") As UString
+	If Len(sFileName) Then
+		If InStr(sFileName, "\") Then
+			'如果文件名已经包含路径直接返回文件名
+			Return sFileName
+		Else
+			If sDefPath = "" Then
+				'如果没有默认路径就用app路径
+				Return ExePath & "\" & sFileName
+			Else
+				'如果有设置默认路径
+				Return sDefPath & sFileName
+			End If
+		End If
+	Else
+		Return ""
+	End If
+End Function
+
+'取全文件名sFullName的文件名部分
+Private Function FullName2File(sFullName As WString, ByRef sDefPath As Const WString = "\") As UString
+	Dim sSLen As Integer = Len(sFullName)
+	Dim sPLen As Integer
+	Dim sPLoc As Integer
+	
+	Select Case sDefPath
+	Case ""
+		sPLen = Len(ExePath & "\")
+		sPLoc = InStr(sFullName, ExePath & "\")
+	Case "\" 'return only file name
+		sPLen = Len(sDefPath)
+		sPLoc = InStrRev(sFullName, sDefPath)
+	Case Else
+		sPLen = Len(sDefPath)
+		sPLoc = InStr(sFullName, sDefPath)
+	End Select
+	If sSLen Then
+		If sPLoc Then
+			Return Right(sFullName, sSLen - sPLen - sPLoc + 1)
+		Else
+			Return sFullName
+		End If
+	Else
+		Return ""
+	End If
+End Function
+
+'取全文件名sFullName的路径部分
+Private Function FullName2Path(sFullName As WString, ByRef sDefPath As Const WString = "") As UString
+	Dim sSLen As Integer = Len(sFullName)
+	Dim sPLen As Integer
+	Dim sPLoc As Integer
+	
+	If sDefPath = "" Then
+		sPLen = Len(ExePath & "\")
+		sPLoc = InStr(sFullName, ExePath & "\")
+	Else
+		sPLen = Len(sDefPath)
+		sPLoc = InStr(sFullName, sDefPath)
+	End If
+	If sSLen Then
+		If sPLoc Then
+			Return Left(sFullName, sPLoc - 1)
+		Else
+			Return sFullName
+		End If
+	Else
+		Return ""
+	End If
+End Function
+
+'Ansi编码文字pAnsi用指定nCodePage转换为文本pToText
+Private Function TextFromAnsi(ByRef pAnsi As Const String, ByRef pToText As WString Ptr, ByVal nCodePage As Integer = -1) As Long
+	Dim CodePage As Integer = IIf(nCodePage= -1, GetACP(), nCodePage)
+	Dim nLength As LongInt = MultiByteToWideChar(CodePage, 0, StrPtr(pAnsi), -1, NULL, 0) - 1
+	If pToText Then Deallocate(pToText)
+	pToText = CAllocate(nLength * 2 + 2)
+	Return MultiByteToWideChar(CodePage, 0, StrPtr(pAnsi), -1, pToText, nLength)
+End Function
+
+'文本pText用指定nCodePage转换为Ansi编码到pToAnsi
+Private Function TextToAnsi(ByRef pText As Const WString, ByRef pToAnsi As ZString Ptr, ByVal nCodePage As Integer = -1) As Long
+	Dim CodePage As Integer = IIf(nCodePage= -1, GetACP(), nCodePage)
+	Dim nLength As LongInt = WideCharToMultiByte(CodePage, 0, StrPtr(pText), -1, NULL, 0, NULL, NULL) - 1
+	If pToAnsi Then Deallocate(pToAnsi)
+	pToAnsi = CAllocate(nLength * 2 + 2)
+	Return WideCharToMultiByte(CodePage, 0, StrPtr(pText), nLength, pToAnsi, nLength, NULL, NULL)
+End Function
+
+'文本pUtf8从Utf8转换为文本pToText
+Private Function TextFromUtf8(ByRef pUtf8 As Const ZString, ByRef pToText As WString Ptr) As Integer
+	Return TextFromAnsi(pUtf8, pToText, CodePage_UTF8)
+End Function
+
+'文本pText转换为Utf8编码pToUtf8
+Private Function TextToUtf8(ByRef pText As Const WString, ByRef pToUtf8 As ZString Ptr) As Integer
+	Return TextToAnsi(pText, pToUtf8, CodePage_UTF8)
+End Function
+
+'文本pSource指定转换码CnvCode转换为pConverted
+Private Function TextConvert(ByRef pSource As Const WString, ByRef pConverted As WString Ptr, ByVal CnvCode As DWORD) As Long
+	Dim lid As LCID = MAKELCID(MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED), SORT_CHINESE_PRC)
+	Dim nLength As LongInt = LCMapString(lid, CnvCode, StrPtr(pSource), -1, NULL, 0)
+	If pConverted Then Deallocate(pConverted)
+	pConverted = CAllocate(Len(pSource) * 2 + 2)
+	LCMapString(lid, CnvCode, StrPtr(pSource), -1, pConverted, nLength)
+	Return nLength
+End Function
+
+'返回换行SrcEOL编码对应的字符串
+Private Function TextGetEofStr(ByVal SrcEOL As NewLineTypes = OsEol) ByRef As WString
+	Select Case SrcEOL
+	Case NewLineTypes.WindowsCRLF
+		Return WChr(13, 10)
+	Case NewLineTypes.LinuxLF
+		Return WChr(10)
+	Case NewLineTypes.MacOSCR
+		Return WChr(13)
+	End Select
+End Function
+
+'返回文本编码FileEncoding对应的字符串
+Private Function TextGetEncodeStr(FileEncoding As FileEncodings = FileEncodings.Utf8BOM) ByRef As WString
+	Select Case FileEncoding
+	Case FileEncodings.Utf8
+		Return WStr("ascii")
+	Case FileEncodings.PlainText
+		Return WStr("ascii")
+	Case FileEncodings.Utf8BOM
+		Return WStr("utf8")
+	Case FileEncodings.Utf16BOM
+		Return WStr("utf16")
+	Case FileEncodings.Utf32BOM
+		Return WStr("utf32")
+	Case Else
+		Return WStr("")
+	End Select
+End Function
+
+'获取文本文件FileName的文件编码格式FileEncoding和换行格式NewLineType, 并且返回文件的大小
+Private Function TextFileGetFormat(ByRef FileName As Const WString, ByRef FileEncoding As FileEncodings = -1, ByRef NewLineType As NewLineTypes = -1, ByVal LoadSize As Integer = &Hfffff) As LongInt
+	Dim Buff As String
+	Dim Result As LongInt = -1
+	Dim Fn As Integer = FreeFile
+	Dim FileSize As LongInt = 0
+	Dim TempSize As LongInt = 0
+	
+	Result = Open(FileName For Binary Access Read As #Fn)
+	If Result = 0 Then
+		FileSize = LOF(Fn)
+		TempSize = IIf(LoadSize > 0, IIf(LoadSize > FileSize, FileSize, LoadSize), FileSize)
+		Buff = String(TempSize, 0)
+		Get #Fn, , Buff
+		Close(Fn)
+		
+		If FileEncoding < 0 Then
+			If Buff[0] = &HFF AndAlso Buff[1] = &HFE AndAlso Buff[2] = 0 AndAlso Buff[3] = 0 Then 'Utf32BOM
+				FileEncoding = FileEncodings.Utf32BOM
+			ElseIf Buff[0] = &HFF AndAlso Buff[1] = &HFE Then 'Utf16BOM
+				FileEncoding = FileEncodings.Utf16BOM
+			ElseIf Buff[0] = &HEF AndAlso Buff[1] = &HBB AndAlso Buff[2] = &HBF Then 'Utf8BOM
+				FileEncoding = FileEncodings.Utf8BOM
+			Else
+				Dim Buff2 As String
+				Result = Open(FileName For Binary Access Read As #Fn)
+				Buff2 = String(FileSize, 0)
+				Get #Fn, , Buff2
+				Close(Fn)
+				If (CheckUTF8NoBOM(Buff2)) Then 'UTF8
+					FileEncoding = FileEncodings.Utf8
+				Else 'PlainText
+					FileEncoding = FileEncodings.PlainText
+				End If
+			End If
+		End If
+		
+		If NewLineType < 0 Then
+			Dim pText As WString Ptr
+			If FileEncoding < FileEncodings.Utf8BOM Then
+				If FileEncoding = FileEncodings.PlainText Then
+					TextFromAnsi(Buff, pText, GetACP())
+				Else
+					TextFromAnsi(Buff, pText, CodePage_UTF8)
+				End If
+			Else
+				Result = Open(FileName For Input Encoding TextGetEncodeStr(FileEncoding) As #Fn)
+				If Result = 0 Then
+					pText = CAllocate(TempSize* SizeOf(WString) + SizeOf(WString))
+					*pText =  WInput(TempSize, #Fn)
+					Close(Fn)
+				End If
+			End If
+			If InWStr(*pText, WChr(13, 10)) Then
+				NewLineType = NewLineTypes.WindowsCRLF
+			ElseIf InWStr(*pText, WChr(10)) Then
+				NewLineType = NewLineTypes.LinuxLF
+			ElseIf InWStr(*pText, WChr(13)) Then
+				NewLineType = NewLineTypes.MacOSCR
+			Else
+				NewLineType = OsEol
+			End If
+			If pText Then Deallocate(pText)
+		End If
+	End If
+	
+	Return FileSize
+End Function
+
+'从件FileName中读取文本pText, 用指定的编码格式FileEncoding和换行格式NewLineType
+Private Function TextFromFile(ByRef FileName As Const WString, ByRef pText As WString Ptr, ByRef FileEncoding As FileEncodings = FileEncodings.Utf8BOM, ByRef NewLineType As NewLineTypes = OsEol, ByRef nCodePage As Integer = -1, ByVal LoadSize As Integer = 0) As LongInt
+	Dim FileSize As LongInt = TextFileGetFormat(FileName, FileEncoding, NewLineType)
+	If FileSize = 0 Then Return 0
+	
+	Dim TempSize As Integer = IIf(LoadSize > 0, IIf(LoadSize > FileSize, FileSize, LoadSize), FileSize)
+	Dim Result As Integer
+	Dim Fn As Integer = FreeFile
+	If FileEncoding < FileEncodings.Utf8BOM Then
+		Result = Open(FileName For Binary Access Read As #Fn)
+		If Result = 0 Then
+			Dim Buff As String = String(TempSize, 0)
+			Get #Fn, , Buff
+			Close(Fn)
+			Select Case FileEncoding
+			Case FileEncodings.Utf8
+				TextFromAnsi(Buff, pText, CodePage_UTF8)
+			Case FileEncodings.PlainText
+				TextFromAnsi(Buff, pText, IIf(nCodePage= -1, GetACP(), nCodePage))
+			End Select
+		End If
+	Else
+		Result = Open(FileName For Input Encoding TextGetEncodeStr(FileEncoding) As #Fn)
+		If Result = 0 Then
+			If pText Then Deallocate(pText)
+			pText = CAllocate(TempSize* SizeOf(WString) + SizeOf(WString))
+			*pText =  WInput(TempSize, #Fn)
+			Close(Fn)
+		End If
+	End If
+	
+	If NewLineType<>OsEol Then
+		Dim tmp As WString Ptr
+		WLet(tmp, *pText)
+		ReplaceWStr(*tmp, TextGetEofStr(NewLineType), TextGetEofStr(OsEol), pText)
+		Deallocate(tmp)
+	End If
+	
+	Return TempSize
+End Function
+
+'保存文本fSource到文件FileName, 用指定的编码格式FileEncoding,换行符NewLineType
+Private Function TextToFile(ByRef FileName As Const WString, pText As WString, ByVal FileEncoding As FileEncodings = FileEncodings.Utf8BOM, ByVal NewLineType As NewLineTypes = OsEol, ByVal nCodePage As Integer = -1) As Boolean
+	Dim Fn As Integer = FreeFile
+	Dim Result As Integer
+	Dim FileSize As Integer = Len(pText)
+	
+	If FileSize= 0 Then Return False
+	
+	Dim pTmp As WString Ptr
+	If NewLineType <> OsEol Then
+		WLet(pTmp, Replace(pText, TextGetEofStr(OsEol), TextGetEofStr(NewLineType)))
+		FileSize = Len(*pTmp)
+	Else
+		WLet(pTmp, pText)
+	End If
+	
+	If FileEncoding < FileEncodings.Utf8BOM Then
+		Result = Open(FileName For Binary Access Write As #Fn)
+		If Result = 0 Then
+			Dim pData As ZString Ptr
+			If FileEncoding = FileEncodings.PlainText Then
+				TextToAnsi(*pTmp, pData, IIf(nCodePage= -1, GetACP(), nCodePage))
+			Else
+				TextToAnsi(*pTmp, pData, CodePage_UTF8)
+			End If
+			Put #Fn, 0, *pData
+			Close(Fn)
+			If pData Then Deallocate(pData)
+			If pTmp Then Deallocate(pTmp)
+			Return True
+		End If
+	Else
+		Result = Open(FileName For Output Encoding TextGetEncodeStr(FileEncoding) As #Fn)
+		If Result = 0 Then
+			Print #Fn, *pTmp;
+			Close(Fn)
+			If pTmp Then Deallocate(pTmp)
+			Return True
+		End If
+	End If
+	If pTmp Then Deallocate(pTmp)
+	Return False
+End Function
+

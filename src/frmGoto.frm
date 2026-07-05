@@ -40,7 +40,7 @@ pfGoto = @fGoto
 		End With
 		
 		With lblFind
-			.Caption = ML("Line") & ":"
+			.Caption = ML("Go to line:")
 			.Align = DockStyle.alLeft
 			.CenterImage = True
 			.ID = 1095

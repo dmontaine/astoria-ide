@@ -287,7 +287,7 @@ Declare Sub RunHelp(Param As Any Ptr)
 
 Common Shared As Integer tabLeftWidth, tabRightWidth, tabBottomHeight, leftSelectedTabIndex, rightSelectedTabIndex
 Const DEFAULT_LEFT_PANEL_WIDTH As Integer = 350
-Const DEFAULT_BOTTOM_PANEL_HEIGHT As Integer = 200
+Const DEFAULT_BOTTOM_PANEL_HEIGHT As Integer = 150
 Const MIN_BOTTOM_PANEL_HEIGHT As Integer = 80
 Const BOTTOM_PIN_STRIP_WIDTH As Integer = 20
 Declare Sub SetLeftClosedStyle(Value As Boolean, WithClose As Boolean = True)

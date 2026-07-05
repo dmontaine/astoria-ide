@@ -113,35 +113,6 @@ pfOptions = @fOptions
 		pnlCompiler.TabIndex = 67
 		pnlCompiler.SetBounds 188, 4, 427, 400
 		pnlCompiler.Parent = @pplGeneral
-		' pnlBuildConfigurations
-		With pnlBuildConfigurations
-			.Name = "pnlBuildConfigurations"
-			.TabIndex = 234
-			.Align = DockStyle.alClient
-			.ControlIndex = 8
-			.SetBounds 10, 0, 417, 400
-			.Designer = @This
-			.Parent = @pplGeneral
-		End With
-		' pnlIncludes
-		pnlIncludes.Name = "pnlIncludes"
-		pnlIncludes.Align = DockStyle.alClient
-		pnlIncludes.TabIndex = 77
-		pnlIncludes.SetBounds 10, 0, 417, 400
-		pnlIncludes.Text = ""
-		pnlIncludes.ControlIndex = 9
-		pnlIncludes.Parent = @pplGeneral
-		' pnlMake
-		pnlMake.Name = "pnlMake"
-		pnlMake.Text = ""
-		'pnlMake.ExtraMargins.Top = 4
-		'pnlMake.ExtraMargins.Bottom = 9
-		'pnlMake.ExtraMargins.Right = 10
-		'pnlMake.Margins.Left = 10
-		pnlMake.Align = DockStyle.alClient
-		pnlMake.TabIndex = 68
-		pnlMake.SetBounds 188, 4, 427, 400
-		pnlMake.Parent = @pplGeneral
 		' pnlDebugger
 		pnlDebugger.Name = "pnlDebugger"
 		pnlDebugger.Text = ""
@@ -312,15 +283,15 @@ pfOptions = @fOptions
 		With grbDefaultCompilers
 			.Name = "grbDefaultCompilers"
 			.Text = ML("Default Compiler")
-			.AutoSize = False
-			.Align = DockStyle.alClient
+			.AutoSize = True
+			.Align = DockStyle.alTop
 			.ExtraMargins.Left = 0
 			.Margins.Top = 20
 			.Margins.Right = 15
 			.Margins.Left = 15
 			.Margins.Bottom = 15
 			.TabIndex = 84
-			.SetBounds 10, 0, 417, 400
+			'.SetBounds 10, 0, 417, 400
 			.Parent = @pnlCompiler
 		End With
 		' grbDefaults
@@ -590,16 +561,6 @@ pfOptions = @fOptions
 		chkAutoCreateRC.SetBounds 0, 26, 295, 21
 		chkAutoCreateRC.Parent = @vbxGeneral
 		chkAutoCreateRC.ControlIndex = 1
-		' CheckBox1
-		CheckBox1.Name = "CheckBox1"
-		CheckBox1.Text = ML("Auto increment version")
-		CheckBox1.Align = DockStyle.alTop
-		CheckBox1.ExtraMargins.Top = 0
-		CheckBox1.TabIndex = 102
-		CheckBox1.Constraints.Height = 21
-		CheckBox1.AutoSize = True
-		CheckBox1.SetBounds 0, 72, 166, 21
-		CheckBox1.Parent = @vbxGeneral
 		' chkAddRelativePathsToRecent
 		With chkAddRelativePathsToRecent
 			.Name = "chkAddRelativePathsToRecent"
@@ -624,7 +585,7 @@ pfOptions = @fOptions
 			.Margins.Bottom = 15
 			.TabIndex = 104
 			.SetBounds 10, 0, 407, 214
-			.Parent = @pnlIncludes
+			.Parent = @pnlCompiler
 		End With
 		' grbLibraryPaths
 		With grbLibraryPaths
@@ -639,7 +600,7 @@ pfOptions = @fOptions
 			.Margins.Bottom = 15
 			.TabIndex = 105
 			.SetBounds 10, 222, 407, 178
-			.Parent = @pnlIncludes
+			.Parent = @pnlCompiler
 		End With
 		' pnlIncludeMFFPath
 		With pnlIncludeMFFPath
@@ -687,6 +648,50 @@ pfOptions = @fOptions
 			.Designer = @This
 			.Parent = @pnlCodeEditor
 		End With
+		' grbDisplay
+		With grbDisplay
+			.Name = "grbDisplay"
+			.Text = ML("Display")
+			.Align = DockStyle.alTop
+			.AutoSize = True
+			.TabIndex = 260
+			.SetBounds 0, 0, 420, 22
+			.Designer = @This
+			.Parent = @vbxCodeEditor
+		End With
+		' grbCompletion
+		With grbCompletion
+			.Name = "grbCompletion"
+			.Text = ML("Completion")
+			.Align = DockStyle.alTop
+			.AutoSize = True
+			.TabIndex = 261
+			.SetBounds 0, 0, 420, 22
+			.Designer = @This
+			.Parent = @vbxCodeEditor
+		End With
+		' grbIntelliSense
+		With grbIntelliSense
+			.Name = "grbIntelliSense"
+			.Text = ML("IntelliSense")
+			.Align = DockStyle.alTop
+			.AutoSize = True
+			.TabIndex = 262
+			.SetBounds 0, 0, 420, 22
+			.Designer = @This
+			.Parent = @vbxCodeEditor
+		End With
+		' grbHistory
+		With grbHistory
+			.Name = "grbHistory"
+			.Text = ML("History")
+			.Align = DockStyle.alTop
+			.AutoSize = True
+			.TabIndex = 263
+			.SetBounds 0, 0, 420, 22
+			.Designer = @This
+			.Parent = @vbxCodeEditor
+		End With
 		' chkAutoIndentation
 		chkAutoIndentation.Name = "chkAutoIndentation"
 		chkAutoIndentation.Text = ML("Auto Indentation")
@@ -697,7 +702,7 @@ pfOptions = @fOptions
 		chkAutoIndentation.AutoSize = True
 		chkAutoIndentation.SetBounds 0, 2, 137, 21
 		chkAutoIndentation.ControlIndex = 0
-		chkAutoIndentation.Parent = @vbxCodeEditor
+		chkAutoIndentation.Parent = @grbCompletion
 		' chkEnableAutoComplete
 		chkEnableAutoComplete.Name = "chkEnableAutoComplete"
 		chkEnableAutoComplete.Text = ML("Enable Auto Complete")
@@ -708,20 +713,20 @@ pfOptions = @fOptions
 		chkEnableAutoComplete.AutoSize = True
 		chkEnableAutoComplete.SetBounds 0, 23, 161, 21
 		chkEnableAutoComplete.ControlIndex = 1
-		chkEnableAutoComplete.Parent = @vbxCodeEditor
+		chkEnableAutoComplete.Parent = @grbCompletion
 		' chkEnableAutoSuggestions
-		With chkEnableAutoSuggestions
-			.Name = "chkEnableAutoSuggestions"
-			.Text = ML("Enable Auto Suggestions")
-			.TabIndex = 228
-			.Align = DockStyle.alTop
-			.ControlIndex = 1
-			.Constraints.Height = 21
-			.AutoSize = True
-			.SetBounds 0, 23, 174, 21
-			.Designer = @This
-			.Parent = @vbxCodeEditor
-		End With
+	With chkEnableAutoSuggestions
+		.Name = "chkEnableAutoSuggestions"
+		.Text = ML("Enable Auto Suggestions")
+		.TabIndex = 228
+		.Align = DockStyle.alTop
+		.ControlIndex = 1
+		.Constraints.Height = 21
+		.AutoSize = True
+		.SetBounds 0, 23, 174, 21
+		.Designer = @This
+		.Parent = @grbCompletion
+	End With
 		' chkShowSpaces
 		chkShowSpaces.Name = "chkShowSpaces"
 		chkShowSpaces.Text = ML("Show Spaces")
@@ -732,175 +737,175 @@ pfOptions = @fOptions
 		chkShowSpaces.AutoSize = True
 		chkShowSpaces.SetBounds 0, 65, 118, 21
 		chkShowSpaces.ControlIndex = 3
-		chkShowSpaces.Parent = @vbxCodeEditor
+		chkShowSpaces.Parent = @grbDisplay
 		' chkShowHolidayFrame
-		With chkShowHolidayFrame
-			.Name = "chkShowHolidayFrame"
-			.Text = ML("Show Holiday Frame")
-			.TabIndex = 252
-			.Align = DockStyle.alTop
-			.AutoSize = True
-			.ControlIndex = 8
-			.Caption = ML("Show Holiday Frame")
-			.Constraints.Height = 21
-			.SetBounds 0, 86, 152, 21
-			.Designer = @This
-			.Parent = @vbxCodeEditor
-		End With
+	With chkShowHolidayFrame
+		.Name = "chkShowHolidayFrame"
+		.Text = ML("Show Indent Guides")
+		.TabIndex = 252
+		.Align = DockStyle.alTop
+		.AutoSize = True
+		.ControlIndex = 8
+		.Caption = ML("Show Indent Guides")
+		.Constraints.Height = 21
+		.SetBounds 0, 86, 152, 21
+		.Designer = @This
+		.Parent = @grbDisplay
+	End With
 
 		' chkShowKeywordsTooltip
-		With chkShowKeywordsTooltip
-			.Name = "chkShowKeywordsTooltip"
-			.Text = ML("Show Keywords Tooltip")
-			.TabIndex = 114
-			.ExtraMargins.Top = 0
-			.Align = DockStyle.alTop
-			.Constraints.Height = 21
-			.AutoSize = True
-			.SetBounds 0, 86, 166, 21
+	With chkShowKeywordsTooltip
+		.Name = "chkShowKeywordsTooltip"
+		.Text = ML("Show Keywords Tooltip")
+		.TabIndex = 114
+		.ExtraMargins.Top = 0
+		.Align = DockStyle.alTop
+		.Constraints.Height = 21
+		.AutoSize = True
+		.SetBounds 0, 86, 166, 21
 
-			.Parent = @vbxCodeEditor
-		End With
+		.Parent = @grbIntelliSense
+	End With
 		' chkShowTooltipsAtTheTop
-		With chkShowTooltipsAtTheTop
-			.Name = "chkShowTooltipsAtTheTop"
-			.Text = ML("Show Tooltips at the Top")
-			.TabIndex = 115
-			.ExtraMargins.Top = 0
-			.Align = DockStyle.alTop
-			.Constraints.Height = 21
-			.AutoSize = True
-			.SetBounds 0, 107, 174, 21
-			.Designer = @This
-			.Parent = @vbxCodeEditor
-		End With
+	With chkShowTooltipsAtTheTop
+		.Name = "chkShowTooltipsAtTheTop"
+		.Text = ML("Show Tooltips at the Top")
+		.TabIndex = 115
+		.ExtraMargins.Top = 0
+		.Align = DockStyle.alTop
+		.Constraints.Height = 21
+		.AutoSize = True
+		.SetBounds 0, 107, 174, 21
+		.Designer = @This
+		.Parent = @grbIntelliSense
+	End With
 		' chkShowSymbolsTooltipsOnMouseHover
-		With chkShowSymbolsTooltipsOnMouseHover
-			.Name = "chkShowSymbolsTooltipsOnMouseHover"
-			.Text = ML("Show Symbols Tooltips On Mouse Hover")
-			.TabIndex = 114
-			.ExtraMargins.Top = 0
-			.Align = DockStyle.alTop
-			.Constraints.Height = 21
-			.AutoSize = True
-			.SetBounds 0, 86, 166, 21
+	With chkShowSymbolsTooltipsOnMouseHover
+		.Name = "chkShowSymbolsTooltipsOnMouseHover"
+		.Text = ML("Show Symbols Tooltips On Mouse Hover")
+		.TabIndex = 114
+		.ExtraMargins.Top = 0
+		.Align = DockStyle.alTop
+		.Constraints.Height = 21
+		.AutoSize = True
+		.SetBounds 0, 86, 166, 21
 
-			.Parent = @vbxCodeEditor
-		End With
+		.Parent = @grbIntelliSense
+	End With
 		' chkShowSymbolsTooltipsOnMouseHover
-		With chkShowClassesExplorerOnOpenWindow
-			.Name = "ShowClassesExplorerOnOpenWindow"
-			.Text = ML("Show Classes Explorer On Open Window")
-			.TabIndex = 114
-			.ExtraMargins.Top = 0
-			.Align = DockStyle.alTop
-			.Constraints.Height = 21
-			.AutoSize = True
-			.SetBounds 0, 86, 166, 21
+	With chkShowClassesExplorerOnOpenWindow
+		.Name = "ShowClassesExplorerOnOpenWindow"
+		.Text = ML("Show Classes Explorer On Open Window")
+		.TabIndex = 114
+		.ExtraMargins.Top = 0
+		.Align = DockStyle.alTop
+		.Constraints.Height = 21
+		.AutoSize = True
+		.SetBounds 0, 86, 166, 21
 
-			.Parent = @vbxCodeEditor
-		End With
+		.Parent = @grbIntelliSense
+	End With
 		' chkShowHorizontalSeparatorLines
-		With chkShowHorizontalSeparatorLines
-			.Name = "chkShowHorizontalSeparatorLines"
-			.Text = ML("Show Horizontal Separator Lines")
-			.TabIndex = 230
-			.Align = DockStyle.alTop
-			.ControlIndex = 6
+	With chkShowHorizontalSeparatorLines
+		.Name = "chkShowHorizontalSeparatorLines"
+		.Text = ML("Show Horizontal Separator Lines")
+		.TabIndex = 230
+		.Align = DockStyle.alTop
+		.ControlIndex = 6
 
-			.Constraints.Height = 21
-			.AutoSize = True
-			.SetBounds 0, 128, 210, 21
-			.Designer = @This
-			.Parent = @vbxCodeEditor
-		End With
+		.Constraints.Height = 21
+		.AutoSize = True
+		.SetBounds 0, 128, 210, 21
+		.Designer = @This
+		.Parent = @grbDisplay
+	End With
 		' chkUseDirect2D
-		With chkUseDirect2D
-			.Name = "chkUseDirect2D"
-			.Text = ML("Use Direct2D (For Windows)")
-			.TabIndex = 278
-			.Align = DockStyle.alTop
-			.AutoSize = True
-			.ControlIndex = 10
-			.Constraints.Height = 21
-			.SetBounds 0, 212, 117, 21
-			.Designer = @This
-			.Parent = @vbxCodeEditor
-		End With
+	With chkUseDirect2D
+		.Name = "chkUseDirect2D"
+		.Text = ML("Use Direct2D (For Windows)")
+		.TabIndex = 278
+		.Align = DockStyle.alTop
+		.AutoSize = True
+		.ControlIndex = 10
+		.Constraints.Height = 21
+		.SetBounds 0, 212, 117, 21
+		.Designer = @This
+		.Parent = @grbDisplay
+	End With
 		' chkHighlightCurrentWord
-		With chkHighlightCurrentWord
-			.Name = "chkHighlightCurrentWord"
-			.Text = ML("Highlight Current Word")
-			.ExtraMargins.Top = 0
-			.Align = DockStyle.alTop
-			.TabIndex = 116
-			.Constraints.Height = 21
-			.AutoSize = True
-			.SetBounds 0, 149, 165, 21
-			.Parent = @vbxCodeEditor
-		End With
+	With chkHighlightCurrentWord
+		.Name = "chkHighlightCurrentWord"
+		.Text = ML("Highlight Current Word")
+		.ExtraMargins.Top = 0
+		.Align = DockStyle.alTop
+		.TabIndex = 116
+		.Constraints.Height = 21
+		.AutoSize = True
+		.SetBounds 0, 149, 165, 21
+		.Parent = @grbDisplay
+	End With
 		' chkHighlightCurrentLine
-		With chkHighlightCurrentLine
-			.Name = "chkHighlightCurrentLine"
-			.Text = ML("Highlight Current Line")
-			.ExtraMargins.Top = 0
-			.Align = DockStyle.alTop
-			.TabIndex = 117
-			.Constraints.Height = 21
-			.AutoSize = True
-			.SetBounds 0, 170, 158, 21
-			.Parent = @vbxCodeEditor
-		End With
+	With chkHighlightCurrentLine
+		.Name = "chkHighlightCurrentLine"
+		.Text = ML("Highlight Current Line")
+		.ExtraMargins.Top = 0
+		.Align = DockStyle.alTop
+		.TabIndex = 117
+		.Constraints.Height = 21
+		.AutoSize = True
+		.SetBounds 0, 170, 158, 21
+		.Parent = @grbDisplay
+	End With
 		' chkHighlightBrackets
-		With chkHighlightBrackets
-			.Name = "chkHighlightBrackets"
-			.Text = ML("Highlight Brackets")
-			.ExtraMargins.Top = 0
-			.Align = DockStyle.alTop
-			.TabIndex = 118
-			.Constraints.Height = 21
-			.AutoSize = True
-			.SetBounds 0, 191, 140, 21
-			.Parent = @vbxCodeEditor
-		End With
+	With chkHighlightBrackets
+		.Name = "chkHighlightBrackets"
+		.Text = ML("Highlight Brackets")
+		.ExtraMargins.Top = 0
+		.Align = DockStyle.alTop
+		.TabIndex = 118
+		.Constraints.Height = 21
+		.AutoSize = True
+		.SetBounds 0, 191, 140, 21
+		.Parent = @grbDisplay
+	End With
 		' chkAddSpacesToOperators
-		With chkAddSpacesToOperators
-			.Name = "chkAddSpacesToOperators"
-			.Text = ML("Add Spaces To Operators")
-			.TabIndex = 119
-			.ExtraMargins.Top = 0
-			.Align = DockStyle.alTop
-			.Constraints.Height = 21
-			.AutoSize = True
-			.SetBounds 0, 212, 178, 21
+	With chkAddSpacesToOperators
+		.Name = "chkAddSpacesToOperators"
+		.Text = ML("Add Spaces To Operators")
+		.TabIndex = 119
+		.ExtraMargins.Top = 0
+		.Align = DockStyle.alTop
+		.Constraints.Height = 21
+		.AutoSize = True
+		.SetBounds 0, 212, 178, 21
 
-			.Parent = @vbxCodeEditor
-		End With
+		.Parent = @grbCompletion
+	End With
 		' chkSyntaxHighlightingIdentifiers
-		With chkSyntaxHighlightingIdentifiers
-			.Name = "chkSyntaxHighlightingIdentifiers"
-			.Text = ML("Syntax Highlighting Identifiers")
-			.TabIndex = 121
-			.Align = DockStyle.alTop
+	With chkSyntaxHighlightingIdentifiers
+		.Name = "chkSyntaxHighlightingIdentifiers"
+		.Text = ML("Syntax Highlighting Identifiers")
+		.TabIndex = 121
+		.Align = DockStyle.alTop
 
-			.Constraints.Height = 21
-			.AutoSize = True
-			.SetBounds 0, 233, 199, 21
-			.Designer = @This
-			.Parent = @vbxCodeEditor
-		End With
+		.Constraints.Height = 21
+		.AutoSize = True
+		.SetBounds 0, 233, 199, 21
+		.Designer = @This
+		.Parent = @grbIntelliSense
+	End With
 		' pnlChangeIdentifiersCase
-		With pnlChangeIdentifiersCase
-			.Name = "pnlChangeIdentifiersCase"
-			.Text = "Panel1"
-			.AutoSize = True
-			.TabIndex = 206
-			.Align = DockStyle.alTop
-			.AutoSize = True
-			.SetBounds 0, 233, 417, 23
-			.Designer = @This
-			.Parent = @vbxCodeEditor
-		End With
+	With pnlChangeIdentifiersCase
+		.Name = "pnlChangeIdentifiersCase"
+		.Text = "Panel1"
+		.AutoSize = True
+		.TabIndex = 206
+		.Align = DockStyle.alTop
+		.AutoSize = True
+		.SetBounds 0, 233, 417, 23
+		.Designer = @This
+		.Parent = @grbIntelliSense
+	End With
 		' chkChangeIdentifiersCase
 		With chkChangeIdentifiersCase
 			.Name = "chkChangeIdentifiersCase"
@@ -949,7 +954,7 @@ pfOptions = @fOptions
 		cboCase.Parent = @pnlChangeKeywordsCase
 		' chkTabAsSpaces
 		chkTabAsSpaces.Name = "chkTabAsSpaces"
-		chkTabAsSpaces.Text = ML("Treat Tab as Spaces")
+		chkTabAsSpaces.Text = ML("Tab style:")
 		chkTabAsSpaces.ExtraMargins.Top = 0
 		chkTabAsSpaces.Align = DockStyle.alLeft
 		chkTabAsSpaces.ExtraMargins.Right = 0
@@ -1122,106 +1127,6 @@ pfOptions = @fOptions
 		grbFont.TabIndex = 133
 		grbFont.SetBounds 10, 354, 417, 46
 		grbFont.Parent = @pnlColorsAndFonts
-		' grbMakeToolPaths
-		With grbMakeToolPaths
-			.Name = "grbMakeToolPaths"
-			.Text = ML("Make Tool Paths")
-			.Align = DockStyle.alClient
-			.Margins.Top = 22
-			.Margins.Right = 15
-			.Margins.Left = 15
-			.Margins.Bottom = 15
-			.TabIndex = 134
-			.SetBounds 10, 92, 417, 308
-			.Parent = @pnlMake
-		End With
-		' lvMakeToolPaths
-		With lvMakeToolPaths
-			.Name = "lvMakeToolPaths"
-			.Text = "lvMakeToolPaths"
-			.Align = DockStyle.alClient
-			.ExtraMargins.Bottom = 15
-		lvMakeToolPaths.TabIndex = 135
-			.SetBounds 15, 22, 387, 232
-			.Designer = @This
-			.OnItemActivate = @lvMakeToolPaths_ItemActivate_
-			.Parent = @grbMakeToolPaths
-		End With
-		With cmdClearMakeTools
-			.Name = "cmdClearMakeTools"
-			.Text = ML("&Clear")
-			.ExtraMargins.Right = 0
-			.ExtraMargins.Left = 0
-			.ExtraMargins.Bottom = 0
-			.Align = DockStyle.alRight
-			.TabIndex = 8
-			.SetBounds 290, 0, 97, 24
-			.OnClick = @cmdClearMakeTools_Click
-			.Parent = @hbxMakeTool
-		End With
-		' cmdRemoveMakeTool
-		With cmdRemoveMakeTool
-			.Name = "cmdRemoveMakeTool"
-			.Text = ML("&Remove")
-			.ExtraMargins.Right = 0
-			.ExtraMargins.Left = 0
-			.ExtraMargins.Bottom = 0
-			.Align = DockStyle.alRight
-			.TabIndex = 9
-			.SetBounds 193, 0, 97, 24
-			.OnClick = @cmdRemoveMakeTool_Click
-			.Parent = @hbxMakeTool
-		End With
-		' cmdChangeMakeTool
-		cmdChangeMakeTool.Name = "cmdChangeMakeTool"
-		cmdChangeMakeTool.Text = ML("Chan&ge")
-		cmdChangeMakeTool.ExtraMargins.Left = 0
-		cmdChangeMakeTool.ExtraMargins.Right = 0
-		cmdChangeMakeTool.ExtraMargins.Bottom = 0
-		cmdChangeMakeTool.Align = DockStyle.alRight
-		cmdChangeMakeTool.TabIndex = 10
-		cmdChangeMakeTool.SetBounds 96, 0, 97, 24
-		cmdChangeMakeTool.OnClick = @cmdChangeMakeTool_Click
-		cmdChangeMakeTool.Parent = @hbxMakeTool
-		' cmdAddMakeTool
-		With cmdAddMakeTool
-			.Name = "cmdAddMakeTool"
-			.Text = ML("&Add")
-			.ExtraMargins.Left = 0
-			.ExtraMargins.Bottom = 0
-			.ExtraMargins.Right = 0
-			.Align = DockStyle.alRight
-			.TabIndex = 11
-			.SetBounds -1, 0, 97, 24
-			.OnClick = @cmdAddMakeTool_Click
-			.IsChild = True
-			.ID = 1010
-			.Parent = @hbxMakeTool
-		End With
-		' cmdClearMakeTool
-		' grbDefaultMakeTool
-		With grbDefaultMakeTool
-			.Name = "grbDefaultMakeTool"
-			.Text = ML("Default Make Tool")
-			.Align = DockStyle.alTop
-			.Margins.Top = 20
-			.Margins.Right = 15
-			.Margins.Left = 15
-			.Margins.Bottom = 15
-			.AutoSize = True
-			.TabIndex = 136
-			.SetBounds 10, 0, 417, 56
-			.Parent = @pnlMake
-		End With
-		' cboMakeTool
-		With cboMakeTool
-			.Name = "cboMakeTool"
-			.Text = "cboMakeTool"
-			.Align = DockStyle.alTop
-			.TabIndex = 137
-			.SetBounds 15, 20, 387, 21
-			.Parent = @grbDefaultMakeTool
-		End With
 		' cboTheme
 		cboTheme.Name = "cboTheme"
 		cboTheme.Text = "ComboBoxEdit2"
@@ -1497,19 +1402,6 @@ pfOptions = @fOptions
 		cmdIndicator.OnClick = @cmdIndicator_Click
 		cmdIndicator.Parent = @hbxIndicator
 		'
-		' chkUseMakeOnStartWithCompile
-		chkUseMakeOnStartWithCompile.Name = "chkUseMakeOnStartWithCompile"
-		chkUseMakeOnStartWithCompile.Text = ML("Use make on start with compile (if exists makefile)")
-		chkUseMakeOnStartWithCompile.Align = DockStyle.alTop
-		chkUseMakeOnStartWithCompile.ExtraMargins.Top = 10
-		chkUseMakeOnStartWithCompile.ExtraMargins.Bottom = 10
-		chkUseMakeOnStartWithCompile.ExtraMargins.Left = 15
-		chkUseMakeOnStartWithCompile.TabIndex = 140
-		chkUseMakeOnStartWithCompile.Constraints.Height = 21
-		chkUseMakeOnStartWithCompile.AutoSize = True
-		chkUseMakeOnStartWithCompile.SetBounds 25, 66, 293, 21
-		'chkUseMakeOnStartWithCompile.Caption = ML("Use make on start with compile (if exists makefile)")
-		chkUseMakeOnStartWithCompile.Parent = @pnlMake
 		' lvCompilerPaths
 		With lvCompilerPaths
 			.Name = "lvCompilerPaths"
@@ -1541,19 +1433,6 @@ pfOptions = @fOptions
 		lblCompiler64Path.TabIndex = 145
 		lblCompiler64Path.SetBounds 140, 20, 262, 16
 		lblCompiler64Path.Parent = @grbDefaultCompilers
-		' lblCompilerCommandLine
-		lblCompilerCommandLine.Name = "lblCompilerCommandLine"
-		lblCompilerCommandLine.Text = ML("Command line") & ":"
-		lblCompilerCommandLine.TabIndex = 146
-		lblCompilerCommandLine.SetBounds 15, 58, 120, 16
-		lblCompilerCommandLine.Parent = @grbDefaultCompilers
-		' txtCompiler64Arguments
-		With txtCompiler64Arguments
-			.Name = "txtCompiler64Arguments"
-			.TabIndex = 147
-			.SetBounds 140, 56, 262, 21
-			.Parent = @grbDefaultCompilers
-		End With
 		' cboCompiler64
 		With cboCompiler64
 			.Name = "cboCompiler64"
@@ -2063,7 +1942,7 @@ pfOptions = @fOptions
 		' optDoNotNothing
 		With optDoNotNothing
 			.Name = "optDoNotNothing"
-			.Text = ML("Don't Nothing")
+			.Text = ML("Do Nothing")
 			.TabIndex = 174
 			.SetBounds 19, 90, 184, 16
 
@@ -2209,7 +2088,7 @@ pfOptions = @fOptions
 		' lblIntellisenseLimit
 		With lblIntellisenseLimit
 			.Name = "lblIntellisenseLimit"
-			.Text = ML("Intellisense limit") & ":"
+			.Text = ML("Intellisense limit (items)") & ":"
 			.TabIndex = 187
 
 			.ExtraMargins.Top = 2
@@ -2387,16 +2266,16 @@ pfOptions = @fOptions
 			.Parent = @grbShortcuts
 		End With
 		' pnlChangeKeywordsCase
-		With pnlChangeKeywordsCase
-			.Name = "pnlChangeKeywordsCase"
-			.Text = "Panel1"
-			.TabIndex = 206
-			.Align = DockStyle.alTop
-			.AutoSize = True
-			.SetBounds 0, 233, 417, 23
-			.Designer = @This
-			.Parent = @vbxCodeEditor
-		End With
+	With pnlChangeKeywordsCase
+		.Name = "pnlChangeKeywordsCase"
+		.Text = "Panel1"
+		.TabIndex = 206
+		.Align = DockStyle.alTop
+		.AutoSize = True
+		.SetBounds 0, 233, 417, 23
+		.Designer = @This
+		.Parent = @grbIntelliSense
+	End With
 		' lblHistoryDay
 		With lblHistoryDay
 			.Name = "lblHistoryDay"
@@ -2413,77 +2292,77 @@ pfOptions = @fOptions
 			.Parent = @pnlHistoryFileSavingDays
 		End With
 		' pnlChangeEndingType
-		With pnlChangeEndingType
-			.Name = "pnlChangeEndingType"
-			.Text = "Panel1"
-			.AutoSize = True
-			.TabIndex = 266
-			.Align = DockStyle.alTop
-			.ControlIndex = 17
-			.SetBounds 0, 361, 250, 21
-			.Designer = @This
-			.Parent = @vbxCodeEditor
-		End With
+	With pnlChangeEndingType
+		.Name = "pnlChangeEndingType"
+		.Text = "Panel1"
+		.AutoSize = True
+		.TabIndex = 266
+		.Align = DockStyle.alTop
+		.ControlIndex = 17
+		.SetBounds 0, 361, 250, 21
+		.Designer = @This
+		.Parent = @grbCompletion
+	End With
 		' pnlTreatTabAsSpaces
-		With pnlTreatTabAsSpaces
-			.Name = "pnlTreatTabAsSpaces"
-			.Text = "Panel1"
-			.AutoSize = True
-			.TabIndex = 207
-			.Align = DockStyle.alTop
-			.AutoSize = True
-			.SetBounds 0, 256, 417, 23
-			.Designer = @This
-			.Parent = @vbxCodeEditor
-		End With
+	With pnlTreatTabAsSpaces
+		.Name = "pnlTreatTabAsSpaces"
+		.Text = "Panel1"
+		.AutoSize = True
+		.TabIndex = 207
+		.Align = DockStyle.alTop
+		.AutoSize = True
+		.SetBounds 0, 256, 417, 23
+		.Designer = @This
+		.Parent = @grbHistory
+	End With
 		' pnlTabSize
-		With pnlTabSize
-			.Name = "pnlTabSize"
-			.Text = "Panel1"
-			.AutoSize = True
-			.TabIndex = 208
-			.Align = DockStyle.alTop
-			.AutoSize = True
-			.SetBounds 0, 279, 417, 20
-			.Designer = @This
-			.Parent = @vbxCodeEditor
-		End With
+	With pnlTabSize
+		.Name = "pnlTabSize"
+		.Text = "Panel1"
+		.AutoSize = True
+		.TabIndex = 208
+		.Align = DockStyle.alTop
+		.AutoSize = True
+		.SetBounds 0, 279, 417, 20
+		.Designer = @This
+		.Parent = @grbHistory
+	End With
 		' pnlHistoryLimit
-		With pnlHistoryLimit
-			.Name = "pnlHistoryLimit"
-			.Text = "Panel1"
-			.AutoSize = True
-			.TabIndex = 211
-			.Align = DockStyle.alTop
-			.AutoSize = True
-			.SetBounds 0, 299, 417, 20
-			.Designer = @This
-			.Parent = @vbxCodeEditor
-		End With
+	With pnlHistoryLimit
+		.Name = "pnlHistoryLimit"
+		.Text = "Panel1"
+		.AutoSize = True
+		.TabIndex = 211
+		.Align = DockStyle.alTop
+		.AutoSize = True
+		.SetBounds 0, 299, 417, 20
+		.Designer = @This
+		.Parent = @grbHistory
+	End With
 		' pnlIntellisenseLimit
-		With pnlIntellisenseLimit
-			.Name = "pnlIntellisenseLimit"
-			.Text = "Panel1"
-			.AutoSize = True
-			.TabIndex = 215
-			.Align = DockStyle.alTop
-			.AutoSize = True
-			.SetBounds 0, 319, 417, 20
-			.Designer = @This
-			.Parent = @vbxCodeEditor
-		End With
+	With pnlIntellisenseLimit
+		.Name = "pnlIntellisenseLimit"
+		.Text = "Panel1"
+		.AutoSize = True
+		.TabIndex = 215
+		.Align = DockStyle.alTop
+		.AutoSize = True
+		.SetBounds 0, 319, 417, 20
+		.Designer = @This
+		.Parent = @grbHistory
+	End With
 		' pnlHistoryFileSavingDays
-		With pnlHistoryFileSavingDays
-			.Name = "pnlHistoryFileSavingDays"
-			.Text = "Panel1"
-			.AutoSize = True
-			.TabIndex = 218
-			.Align = DockStyle.alTop
-			.AutoSize = True
-			.SetBounds 0, 339, 417, 20
-			.Designer = @This
-			.Parent = @vbxCodeEditor
-		End With
+	With pnlHistoryFileSavingDays
+		.Name = "pnlHistoryFileSavingDays"
+		.Text = "Panel1"
+		.AutoSize = True
+		.TabIndex = 218
+		.Align = DockStyle.alTop
+		.AutoSize = True
+		.SetBounds 0, 339, 417, 20
+		.Designer = @This
+		.Parent = @grbHistory
+	End With
 		lvShortcuts.Columns.Add ML("Action"), , 250
 		lvShortcuts.Columns.Add ML("Shortcut"), , 100
 		lvOtherEditors.Columns.Add ML("Version"), , 126
@@ -2493,9 +2372,6 @@ pfOptions = @fOptions
 		lvCompilerPaths.Columns.Add ML("Version"), , 190
 		lvCompilerPaths.Columns.Add ML("Path"), , 190
 		lvCompilerPaths.Columns.Add ML("Command line"), , 80
-		lvMakeToolPaths.Columns.Add ML("Version"), , 190
-		lvMakeToolPaths.Columns.Add ML("Path"), , 190
-		lvMakeToolPaths.Columns.Add ML("Command line"), , 80
 		lvTerminalPaths.Columns.Add ML("Version"), , 190
 		lvTerminalPaths.Columns.Add ML("Path"), , 190
 		lvTerminalPaths.Columns.Add ML("Command line"), , 80
@@ -2563,16 +2439,6 @@ pfOptions = @fOptions
 			.Designer = @This
 			.Parent = @grbTerminalPaths
 		End With
-		' hbxMakeTool
-		With hbxMakeTool
-			.Name = "hbxMakeTool"
-			.Text = "HorizontalBox1"
-			.TabIndex = 216
-			.Align = DockStyle.alBottom
-			.SetBounds 15, 269, 387, 24
-			.Designer = @This
-			.Parent = @grbMakeToolPaths
-		End With
 		' hbxColors
 		With hbxColors
 			.Name = "hbxColors"
@@ -2615,17 +2481,17 @@ pfOptions = @fOptions
 			.Parent = @hbxColors
 		End With
 		' pnlAutoSaveCharMax
-		With pnlAutoSaveCharMax
-			.Name = "pnlAutoSaveCharMax"
-			.Text = "Panel1"
-			.TabIndex = 230
-			.Align = DockStyle.alTop
-			.AutoSize = True
-			.ControlIndex = 18
-			.SetBounds 0, 337, 420, 20
-			.Designer = @This
-			.Parent = @vbxCodeEditor
-		End With
+	With pnlAutoSaveCharMax
+		.Name = "pnlAutoSaveCharMax"
+		.Text = "Panel1"
+		.TabIndex = 230
+		.Align = DockStyle.alTop
+		.AutoSize = True
+		.ControlIndex = 18
+		.SetBounds 0, 337, 420, 20
+		.Designer = @This
+		.Parent = @grbHistory
+	End With
 		' lbAutoSaveCharMax
 		With lbAutoSaveCharMax
 			.Name = "lbAutoSaveCharMax"
@@ -2665,127 +2531,18 @@ pfOptions = @fOptions
 			'.ExtraMargins.Right = 10
 			'.ExtraMargins.Bottom = 9
 			'.Margins.Left = 10
-		' grbDefaultConfiguration
-		With grbDefaultConfiguration
-			.Name = "grbDefaultConfiguration"
-			.Text = ML("Default Configuration")
-			.Align = DockStyle.alTop
-			.Margins.Top = 22
-			.Margins.Left = 15
-			.Margins.Bottom = 18
-			.Margins.Right = 15
-			.TabIndex = 155
-
-			.SetBounds 10, 0, 417, 61
-			.Parent = @pnlBuildConfigurations
-		End With
-		' cboConfiguration
-		With cboConfiguration
-			.Name = "cboConfiguration"
-			.Text = ""
-			.TabIndex = 236
-			.Align = DockStyle.alTop
-			.SetBounds 15, 22, 387, 21
-			.Designer = @This
-			.Parent = @grbDefaultConfiguration
-			.AddItem ML("No options")
-		End With
-		' grbConfigurations
-		With grbConfigurations
-			.Name = "grbConfigurations"
-			.Text = ML("Configurations")
-			.TabIndex = 237
-			.Align = DockStyle.alClient
-			.ExtraMargins.Top = 5
-			.Margins.Top = 22
-			.Margins.Right = 15
-			.Margins.Left = 15
-			.Margins.Bottom = 15
-
-			.SetBounds 10, 66, 417, 334
-			.Designer = @This
-			.Parent = @pnlBuildConfigurations
-		End With
-		' lvConfigurations
-		With lvConfigurations
-			.Name = "lvConfigurations"
-			.Text = "lvTerminalPaths1"
-			.TabIndex = 238
-			.ExtraMargins.Bottom = 15
-			.Align = DockStyle.alClient
-			.SetBounds 15, 22, 387, 258
-			.Designer = @This
-			.Parent = @grbConfigurations
-			.Columns.Add ML("Name"), , 190
-			.OnItemActivate = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As ListView, ByVal ItemIndex As Integer), @lvConfigurations_ItemActivate)
-			.Columns.Add ML("Switches"), , 190
-		End With
-		' hbxConfigurations
-		With hbxConfigurations
-			.Name = "hbxConfigurations"
-			.Text = "HorizontalBox1"
-			.TabIndex = 239
-			.Align = DockStyle.alBottom
-			.SetBounds 15, 295, 387, 24
-			.Designer = @This
-			.Parent = @grbConfigurations
-		End With
-		' cmdClearConfigurations
-		With cmdClearConfigurations
-			.Name = "cmdClearConfigurations"
-			.Text = ML("&Clear")
-			.TabIndex = 240
-			.Align = DockStyle.alRight
-			.SetBounds 290, 0, 97, 24
-			.Designer = @This
-			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @cmdClearConfigurations_Click)
-			.Parent = @hbxConfigurations
-		End With
-		' cmdRemoveConfiguration
-		With cmdRemoveConfiguration
-			.Name = "cmdRemoveConfiguration"
-			.Text = ML("&Remove")
-			.TabIndex = 241
-			.Align = DockStyle.alRight
-			.SetBounds 193, 0, 97, 24
-			.Designer = @This
-			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @cmdRemoveConfiguration_Click)
-			.Parent = @hbxConfigurations
-		End With
-		' cmdChangeConfiguration
-		With cmdChangeConfiguration
-			.Name = "cmdChangeConfiguration"
-			.Text = ML("Chan&ge")
-			.TabIndex = 242
-			.Align = DockStyle.alRight
-			.SetBounds 96, 0, 97, 24
-			.Designer = @This
-			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @cmdChangeConfiguration_Click)
-			.Parent = @hbxConfigurations
-		End With
-		' cmdAddConfiguration
-		With cmdAddConfiguration
-			.Name = "cmdAddConfiguration"
-			.Text = ML("&Add")
-			.TabIndex = 243
-			.Align = DockStyle.alRight
-			.SetBounds -1, 0, 97, 24
-			.Designer = @This
-			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @cmdAddConfiguration_Click)
-			.Parent = @hbxConfigurations
-		End With
 		' pnlCodeEditorHoverTime
-		With pnlCodeEditorHoverTime
-			.Name = "pnlCodeEditorHoverTime"
-			.Text = "Panel1"
-			.AutoSize = True
-			.TabIndex = 254
-			.Align = DockStyle.alTop
-			.ControlIndex = 18
-			.SetBounds 0, 384, 72, 20
-			.Designer = @This
-			.Parent = @vbxCodeEditor
-		End With
+	With pnlCodeEditorHoverTime
+		.Name = "pnlCodeEditorHoverTime"
+		.Text = "Panel1"
+		.AutoSize = True
+		.TabIndex = 254
+		.Align = DockStyle.alTop
+		.ControlIndex = 18
+		.SetBounds 0, 384, 72, 20
+		.Designer = @This
+		.Parent = @grbHistory
+	End With
 		' lblCodeEditorHoverTime
 		With lblCodeEditorHoverTime
 			.Name = "lblCodeEditorHoverTime"
@@ -2872,11 +2629,11 @@ pfOptions = @fOptions
 		' chkChangeEndingType
 		With chkChangeEndingType
 			.Name = "chkChangeEndingType"
-			.Text = ML("Change Ending Type") & ":"
+			.Text = ML("Auto-insert End blocks") & ":"
 			.TabIndex = 267
 			.Align = DockStyle.alLeft
 			.AutoSize = True
-			.Caption = ML("Change Ending Type") & ":"
+			.Caption = ML("Auto-insert End blocks") & ":"
 			.Constraints.Height = 21
 			.SetBounds 0, 0, 172, 15
 			.Designer = @This
@@ -3285,7 +3042,6 @@ Sub frmOptions.LoadSettings()
 		.chkChangeKeywordsCase.Checked = ChangeKeyWordsCase
 		.chkChangeEndingType.Checked = ChangeEndingType
 		.chkAddSpacesToOperators.Checked = AddSpacesToOperators
-		.chkUseMakeOnStartWithCompile.Checked = UseMakeOnStartWithCompile
 		.chkLimitDebug.Checked = LimitDebug
 		.chkTurnOnEnvironmentVariables.Checked = TurnOnEnvironmentVariables
 		.txtEnvironmentVariables.Text = *EnvironmentVariables
@@ -3297,7 +3053,6 @@ Sub frmOptions.LoadSettings()
 		.txtMFFpath.Text = *MFFPath
 		.chkIncludeMFFPath.Checked = IncludeMFFPath
 		.txtProjectsPath.Text = *ProjectsPath
-		.CheckBox1.Checked = AutoIncrement
 		.chkEnableAutoComplete.Checked = AutoComplete
 		.chkEnableAutoSuggestions.Checked = AutoSuggestions
 		.chkAutoIndentation.Checked = AutoIndentation
@@ -3441,16 +3196,6 @@ Sub frmOptions.LoadSettings()
 			.cboAIAgent.AddItem pAIAgents->Item(i)->Key
 		Next
 		.cboAIAgent.ItemIndex = Max(0, .cboAIAgent.IndexOf(*DefaultAIAgent))
-		.cboMakeTool.Clear
-		.lvMakeToolPaths.ListItems.Clear
-		.cboMakeTool.AddItem ML("(not selected)")
-		For i As Integer = 0 To pMakeTools->Count - 1
-			.lvMakeToolPaths.ListItems.Add pMakeTools->Item(i)->Key
-			.lvMakeToolPaths.ListItems.Item(i)->Text(1) = pMakeTools->Item(i)->Text
-			.lvMakeToolPaths.ListItems.Item(i)->Text(2) = Cast(ToolType Ptr, pMakeTools->Item(i)->Object)->Parameters
-			.cboMakeTool.AddItem pMakeTools->Item(i)->Key
-		Next
-		.cboMakeTool.ItemIndex = Max(0, .cboMakeTool.IndexOf(*DefaultMakeTool))
 		.cboTerminal.Clear
 		.lvTerminalPaths.ListItems.Clear
 		.cboTerminal.AddItem ML("(not selected)")
@@ -3478,16 +3223,6 @@ Sub frmOptions.LoadSettings()
 		Next
 		.cboHelp.ItemIndex = Max(0, .cboHelp.IndexOf(*DefaultHelp))
 		.lblCompiler64Path.Text = "./" & BUNDLED_COMPILER_FOLDER & "/" & BUNDLED_COMPILER_EXE
-		.txtCompiler64Arguments.Text = *Compiler64Arguments
-		.cboConfiguration.Clear
-		.lvConfigurations.ListItems.Clear
-		.cboConfiguration.AddItem ML("No options")
-		For i As Integer = 0 To BuildConfigurations.Count - 1
-			.lvConfigurations.ListItems.Add BuildConfigurations.Item(i)->Key
-			.lvConfigurations.ListItems.Item(i)->Text(1) = BuildConfigurations.Item(i)->Text
-			.cboConfiguration.AddItem BuildConfigurations.Item(i)->Key
-		Next
-		.cboConfiguration.ItemIndex = Max(0, .cboConfiguration.IndexOf(*DefaultBuildConfiguration))
 		.lstIncludePaths.Clear
 		For i As Integer = 0 To pIncludePaths->Count - 1
 			.lstIncludePaths.AddItem pIncludePaths->Item(i)
@@ -3667,9 +3402,6 @@ Private Sub frmOptions.Form_Create(ByRef Designer As My.Sys.Object, ByRef Sender
 		tnEditor->Nodes.Add(ML("Colors And Fonts"), "ColorsAndFonts")
 		tnEditor->Nodes.Add(ML("Other Editors"), "OtherEditors")
 		tnEditor->Nodes.Add(ML("Defaults"), "Defaults")
-		tnCompiler->Nodes.Add(ML("Build Configurations"), "BuildConfigurations")
-		tnCompiler->Nodes.Add(ML("Includes"), "Includes")
-		tnCompiler->Nodes.Add(ML("Make Tool"), "MakeTool")
 		tnDebugger->Nodes.Add(ML("Terminal"), "Terminal")
 		Var tnHelp = .tvOptions.Nodes.Add(ML("Help"), "Help")
 		tnHelp->Nodes.Add(ML("AI Agent"), "AIAgent")
@@ -3810,26 +3542,6 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 	Dim As UString tempStr
 	With fOptions
 		SetBundledCompilerPath()
-		WLet(Compiler64Arguments, .txtCompiler64Arguments.Text)
-		For i As Integer = 0 To pMakeTools->Count - 1
-			_Delete(Cast(ToolType Ptr, pMakeTools->Item(i)->Object))
-		Next
-		pMakeTools->Clear
-		For i As Integer = 0 To .lvMakeToolPaths.ListItems.Count - 1
-			tempStr = .lvMakeToolPaths.ListItems.Item(i)->Text(0)
-			Tool = _New(ToolType)
-			Tool->Name = tempStr
-			Tool->Path = .lvMakeToolPaths.ListItems.Item(i)->Text(1)
-			Tool->Parameters = .lvMakeToolPaths.ListItems.Item(i)->Text(2)
-			pMakeTools->Add tempStr, .lvMakeToolPaths.ListItems.Item(i)->Text(1), Tool
-		Next
-		If CInt(*DefaultMakeTool <> IIf(.cboMakeTool.ItemIndex = 0, WStr(""), .cboMakeTool.Text)) OrElse CInt(Not pMakeTools->ContainsKey(*CurrentMakeTool1)) OrElse CInt(Not pMakeTools->ContainsKey(*CurrentMakeTool2)) Then
-			WLet(DefaultMakeTool, IIf(.cboMakeTool.ItemIndex = 0, WStr(""), .cboMakeTool.Text))
-			WLet(CurrentMakeTool1, *DefaultMakeTool)
-			WLet(CurrentMakeTool2, *DefaultMakeTool)
-		End If
-		WLet(MakeToolPath1, pMakeTools->Get(*CurrentMakeTool1))
-		WLet(MakeToolPath2, pMakeTools->Get(*CurrentMakeTool2))
 		For i As Integer = 0 To pTerminals->Count - 1
 			_Delete(Cast(ToolType Ptr, pTerminals->Item(i)->Object))
 		Next
@@ -3869,16 +3581,6 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		Next
 		WLet(DefaultHelp, IIf(.cboHelp.ItemIndex = 0, "", .cboHelp.Text))
 		WLet(HelpPath, pHelps->Get(*DefaultHelp))
-		BuildConfigurations.Clear
-		pcboBuildConfiguration->Clear
-		pcboBuildConfiguration->AddItem ML("No options")
-		For i As Integer = 0 To .lvConfigurations.ListItems.Count - 1
-			tempStr = .lvConfigurations.ListItems.Item(i)->Text(0)
-			BuildConfigurations.Add tempStr, .lvConfigurations.ListItems.Item(i)->Text(1)
-			pcboBuildConfiguration->AddItem tempStr
-		Next
-		WLet(DefaultBuildConfiguration, IIf(.cboConfiguration.ItemIndex = 0, "", .cboConfiguration.Text))
-		pcboBuildConfiguration->ItemIndex = Max(0, pcboBuildConfiguration->IndexOf(*DefaultBuildConfiguration))
 		For i As Integer = 0 To pAIAgents->Count - 1
 			_Delete(Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object))
 		Next
@@ -3927,12 +3629,10 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 			HistoryCodeDays = Val(.txtHistoryCodeDays.Text)
 		End If
 		AutoSaveCharMax = Val(.txtAutoSaveCharMax.Text)
-		UseMakeOnStartWithCompile = .chkUseMakeOnStartWithCompile.Checked
 		LimitDebug = .chkLimitDebug.Checked
 		DisplayWarningsInDebug = .chkDisplayWarningsInDebug.Checked
 		TurnOnEnvironmentVariables = .chkTurnOnEnvironmentVariables.Checked
 		WLet(EnvironmentVariables, .txtEnvironmentVariables.Text)
-		AutoIncrement = .CheckBox1.Checked
 		AutoIndentation = .chkAutoIndentation.Checked
 		AutoComplete = .chkEnableAutoComplete.Checked
 		AutoSuggestions = .chkEnableAutoSuggestions.Checked
@@ -4125,17 +3825,6 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		Do Until piniSettings->KeyExists("Helps", "Version_" & WStr(i)) = -1
 			piniSettings->KeyRemove "Helps", "Version_" & WStr(i)
 			piniSettings->KeyRemove "Helps", "Path_" & WStr(i)
-			i += 1
-		Loop
-		piniSettings->WriteString "BuildConfigurations", "DefaultBuildConfiguration", *DefaultBuildConfiguration
-		For i As Integer = 0 To BuildConfigurations.Count - 1
-			piniSettings->WriteString "BuildConfigurations", "Name_" & WStr(i), BuildConfigurations.Item(i)->Key
-			piniSettings->WriteString "BuildConfigurations", "Switches_" & WStr(i), BuildConfigurations.Item(i)->Text
-		Next
-		i = BuildConfigurations.Count
-		Do Until piniSettings->KeyExists("BuildConfigurations", "Name_" & WStr(i)) = -1
-			piniSettings->KeyRemove "BuildConfigurations", "Name_" & WStr(i)
-			piniSettings->KeyRemove "BuildConfigurations", "Switches_" & WStr(i)
 			i += 1
 		Loop
 		For i As Integer = 0 To pIncludePaths->Count - 1
@@ -4501,12 +4190,9 @@ Private Sub frmOptions.TreeView1_SelChange(ByRef Designer As My.Sys.Object, ByRe
 		.pnlColorsAndFonts.Visible = Key = "ColorsAndFonts"
 		.pnlOtherEditors.Visible = Key = "OtherEditors"
 		.pnlCompiler.Visible = Key = "Compiler"
-		.pnlBuildConfigurations.Visible = Key = "BuildConfigurations"
-		.pnlMake.Visible = Key = "MakeTool"
 		.pnlDebugger.Visible = Key = "Debugger"
 		.pnlTerminal.Visible = Key = "Terminal"
 		.pnlDesigner.Visible = Key = "Designer"
-		.pnlIncludes.Visible = Key = "Includes"
 		.pnlLocalization.Visible = Key = "Localization"
 		.pnlHelp.Visible = Key = "Help"
 		.pnlAIAgent.Visible = Key = "AIAgent"
@@ -4769,64 +4455,6 @@ Private Sub frmOptions.cmdRemove_Click(ByRef Designer As My.Sys.Object, ByRef Se
 		.cboTheme_Change(Designer, Sender)
 	End With
 End Sub
-
-Private Sub frmOptions.cmdAddMakeTool_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-	pfPath->txtVersion.Text = ""
-	pfPath->txtPath.Text = ""
-	pfPath->txtCommandLine.Text = ""
-	If pfPath->ShowModal(fOptions) = ModalResults.OK Then
-		With fOptions
-			If .cboMakeTool.IndexOf(pfPath->txtVersion.Text) = -1 Then
-				.lvMakeToolPaths.ListItems.Add pfPath->txtVersion.Text
-				.lvMakeToolPaths.ListItems.Item(.lvMakeToolPaths.ListItems.Count - 1)->Text(1) = pfPath->txtPath.Text
-				.lvMakeToolPaths.ListItems.Item(.lvMakeToolPaths.ListItems.Count - 1)->Text(2) = pfPath->txtCommandLine.Text
-				.cboMakeTool.AddItem pfPath->txtVersion.Text
-			Else
-				MsgBox ML("This version is exists!")
-			End If
-		End With
-	End If
-End Sub
-
-Private Sub frmOptions.cmdChangeMakeTool_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-	With fOptions
-		If .lvMakeToolPaths.SelectedItem = 0 Then Exit Sub
-		pfPath->txtVersion.Text = .lvMakeToolPaths.SelectedItem->Text(0)
-		pfPath->txtPath.Text = .lvMakeToolPaths.SelectedItem->Text(1)
-		pfPath->txtCommandLine.Text = .lvMakeToolPaths.SelectedItem->Text(2)
-		If pfPath->ShowModal(fOptions) = ModalResults.OK Then
-			If .lvMakeToolPaths.SelectedItem->Text(0) = pfPath->txtVersion.Text OrElse .cboMakeTool.IndexOf(pfPath->txtVersion.Text) = -1 Then
-				Var i = .cboTerminal.IndexOf(.lvMakeToolPaths.SelectedItem->Text(0))
-				.cboMakeTool.Item(i) = pfPath->txtVersion.Text
-				.lvMakeToolPaths.SelectedItem->Text(0) = pfPath->txtVersion.Text
-				.lvMakeToolPaths.SelectedItem->Text(1) = pfPath->txtPath.Text
-				.lvMakeToolPaths.SelectedItem->Text(2) = pfPath->txtCommandLine.Text
-			Else
-				MsgBox ML("This version is exists!")
-			End If
-		End If
-	End With
-End Sub
-
-Private Sub frmOptions.cmdRemoveMakeTool_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-	With fOptions
-		If .lvMakeToolPaths.SelectedItem = 0 Then Exit Sub
-		Var iIndex = .cboMakeTool.IndexOf(.lvMakeToolPaths.SelectedItem->Text(0))
-		If iIndex > -1 Then .cboMakeTool.RemoveItem iIndex
-		If .cboMakeTool.ItemIndex = -1 Then .cboMakeTool.ItemIndex = 0
-		.lvMakeToolPaths.ListItems.Remove .lvMakeToolPaths.SelectedItemIndex
-	End With
-End Sub
-
-Private Sub frmOptions.cmdClearMakeTools_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-	With fOptions
-		.lvMakeToolPaths.ListItems.Clear
-		.cboMakeTool.Clear
-		.cboMakeTool.AddItem ML("(not selected)")
-		.cboMakeTool.ItemIndex = 0
-	End With
-End Sub
-
 
 Private Sub frmOptions.cmdAddTerminal_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	pfPath->txtVersion.Text = ""
@@ -5231,13 +4859,6 @@ Private Sub frmOptions.lvHelpPaths_ItemActivate_(ByRef Designer As My.Sys.Object
 End Sub
 Private Sub frmOptions.lvHelpPaths_ItemActivate(ByRef Sender As ListView, ByVal ItemIndex As Integer)
 	cmdChangeHelp_Click *cmdChangeHelp.Designer, cmdChangeHelp
-End Sub
-
-Private Sub frmOptions.lvMakeToolPaths_ItemActivate_(ByRef Designer As My.Sys.Object, ByRef Sender As ListView, ByVal ItemIndex As Integer)
-	(*Cast(frmOptions Ptr, Sender.Designer)).lvMakeToolPaths_ItemActivate(Sender, ItemIndex)
-End Sub
-Private Sub frmOptions.lvMakeToolPaths_ItemActivate(ByRef Sender As ListView, ByVal ItemIndex As Integer)
-	cmdChangeMakeTool_Click *cmdChangeMakeTool.Designer, cmdChangeMakeTool
 End Sub
 
 Private Sub frmOptions.lvCompilerPaths_ItemActivate_(ByRef Designer As My.Sys.Object, ByRef Sender As ListView, ByVal ItemIndex As Integer)
@@ -6072,67 +5693,6 @@ Private Sub frmOptions.txtColorIndicator_KeyPress(ByRef Sender As Control, Key A
 		chkIndicator.Checked = False
 		Colors(i, 3) = txtColorIndicator.BackColor
 	End If
-End Sub
-
-Private Sub frmOptions.cmdAddConfiguration_Click(ByRef Sender As Control)
-	pfPath->txtVersion.Text = ""
-	pfPath->txtPath.Text = ""
-	pfPath->ForConfiguration = True
-	pfPath->WithoutCommandLine = True
-	If pfPath->ShowModal(*pfrmMain) = ModalResults.OK Then
-		With fOptions
-			If .cboConfiguration.IndexOf(pfPath->txtVersion.Text) = -1 Then
-				.lvConfigurations.ListItems.Add pfPath->txtVersion.Text
-				.lvConfigurations.ListItems.Item(.lvConfigurations.ListItems.Count - 1)->Text(1) = pfPath->txtPath.Text
-				.cboConfiguration.AddItem pfPath->txtVersion.Text
-			Else
-				MsgBox ML("This name is exists!")
-			End If
-		End With
-	End If
-End Sub
-
-Private Sub frmOptions.cmdChangeConfiguration_Click(ByRef Sender As Control)
-	With fOptions
-		If .lvConfigurations.SelectedItem = 0 Then Exit Sub
-		pfPath->txtVersion.Text = .lvConfigurations.SelectedItem->Text(0)
-		pfPath->txtPath.Text = .lvConfigurations.SelectedItem->Text(1)
-		pfPath->ForConfiguration = True
-		pfPath->WithoutCommandLine = True
-		If pfPath->ShowModal(*pfrmMain) = ModalResults.OK Then
-			If .lvConfigurations.SelectedItem->Text(0) = pfPath->txtVersion.Text OrElse .cboConfiguration.IndexOf(pfPath->txtVersion.Text) = -1 Then
-				Var i = .cboConfiguration.IndexOf(.lvConfigurations.SelectedItem->Text(0))
-				.cboConfiguration.Item(i) = pfPath->txtVersion.Text
-				.lvConfigurations.SelectedItem->Text(0) = pfPath->txtVersion.Text
-				.lvConfigurations.SelectedItem->Text(1) = pfPath->txtPath.Text
-			Else
-				MsgBox ML("This name is exists!")
-			End If
-		End If
-	End With
-End Sub
-
-Private Sub frmOptions.cmdRemoveConfiguration_Click(ByRef Sender As Control)
-	With fOptions
-		If .lvConfigurations.SelectedItem = 0 Then Exit Sub
-		Var iIndex = .cboConfiguration.IndexOf(.lvConfigurations.SelectedItem->Text(0))
-		If iIndex > -1 Then .cboConfiguration.RemoveItem iIndex
-		If .cboConfiguration.ItemIndex = -1 Then .cboConfiguration.ItemIndex = 0
-		.lvConfigurations.ListItems.Remove .lvConfigurations.SelectedItemIndex
-	End With
-End Sub
-
-Private Sub frmOptions.cmdClearConfigurations_Click(ByRef Sender As Control)
-	With fOptions
-		.lvConfigurations.ListItems.Clear
-		.cboConfiguration.Clear
-		.cboConfiguration.AddItem ML("No options")
-		.cboConfiguration.ItemIndex = 0
-	End With
-End Sub
-
-Private Sub frmOptions.lvConfigurations_ItemActivate(ByRef Sender As ListView, ByVal ItemIndex As Integer)
-	cmdChangeConfiguration_Click cmdChangeConfiguration
 End Sub
 
 Private Sub frmOptions.lvAIAgentTypes_ItemActivate(ByRef Sender As ListView, ByVal ItemIndex As Integer)

@@ -1,6 +1,5 @@
 '#Region "Form"
 	#include once "frmSave.bi"
-	Dim Shared As Double SaveTime
 	Constructor frmSave
 		' frmSave
 		With This
@@ -70,21 +69,9 @@
 			.OnClick = @cmdCancel_Click_
 			.Parent = @This
 		End With
-		' TimerComponent1
-		With TimerComponent1
-			.Name = "TimerComponent1"
-			.Interval = 200
-			.SetBounds 330, 120, 16, 16
-			.Designer = @This
-			.OnTimer = @_TimerComponent1_Timer
-			.Parent = @This
-		End With
+
 	End Constructor
-	
-	Private Sub frmSave._TimerComponent1_Timer(ByRef Designer As My.Sys.Object, ByRef Sender As TimerComponent)
-		(*Cast(frmSave Ptr, Sender.Designer)).TimerComponent1_Timer(Sender)
-	End Sub
-	
+
 	Dim Shared fSave As frmSave
 	pfSave = @fSave
 '#End Region
@@ -123,7 +110,6 @@ Private Sub frmSave.Form_Show_(ByRef Designer As My.Sys.Object, ByRef Sender As 
 	(*Cast(frmSave Ptr, Sender.Designer)).Form_Show(Sender)
 End Sub
 Private Sub frmSave.Form_Show(ByRef Sender As Form)
-	SaveTime = Timer
 End Sub
 
 Private Sub frmSave.Form_Create_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
@@ -131,16 +117,5 @@ Private Sub frmSave.Form_Create_(ByRef Designer As My.Sys.Object, ByRef Sender A
 End Sub
 Private Sub frmSave.Form_Create(ByRef Sender As Control)
 	SelectedItems.Clear
-	lstFiles.SelectAll
-End Sub
-
-Private Sub frmSave.TimerComponent1_Timer(ByRef Sender As TimerComponent)
-	If Timer - SaveTime > 10 Then 
-		cmdYes_Click(cmdYes)
-		SaveTime = Timer
-	Else
-		This.Text = "Visual FB Editor - Count down" & Str(10 - Timer + SaveTime) 
-	End If
-	
 End Sub
 

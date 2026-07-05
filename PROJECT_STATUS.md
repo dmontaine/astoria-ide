@@ -597,6 +597,7 @@ Includes:
 - Close running IDE before rebuild
 - `set NOPAUSE=1` for agent compile runs
 - Prefer `Compile.bat` over ad-hoc `fbc64` unless debugging
+- **Compile logs** (added 2026-07-05) — all compile log output goes to `Logs/<name>.txt`; delete contents of `Logs/` at the end of each session. `Logs/` is in `.gitignore`.
 
 ---
 

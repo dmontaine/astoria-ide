@@ -22,6 +22,20 @@
 			.SetBounds 0, 371, 641, 30
 			.Parent = @This
 		End With
+		' cmdBrowse
+		With cmdBrowse
+			.Name = "cmdBrowse"
+			.Text = ML("Browse") & "..."
+			.Align = DockStyle.alLeft
+			.ExtraMargins.Left = 10
+			.ExtraMargins.Top = 0
+			.ExtraMargins.Bottom = 10
+			.TabIndex = 5
+			.SetBounds 10, 0, 88, 20
+			.Designer = @This
+			.OnClick = @cmdBrowse_Click_
+			.Parent = @pnlBottom
+		End With
 		' cmdCancel
 		With cmdCancel
 			.Name = "cmdCancel"
@@ -51,20 +65,24 @@
 			.OnClick = @cmdOK_Click_
 			.Parent = @pnlBottom
 		End With
-		' OpenFileControl1
-		With OpenFileControl1
-			.Name = "OpenFileControl1"
-			.Text = "OpenFileControl1"
+		' lvProjects
+		With lvProjects
+			.Name = "lvProjects"
+			.Text = "ListView1"
+			.View = ViewStyle.vsDetails
 			.Align = DockStyle.alClient
 			.ExtraMargins.Top = 10
 			.ExtraMargins.Right = 10
 			.ExtraMargins.Left = 10
 			.ExtraMargins.Bottom = 10
+			.Images = @imgList
+			.SmallImages = @imgList
 			.TabIndex = 1
 			.SetBounds 10, 10, 621, 361
 			.Designer = @This
-			.Filter = ML("VisualFBEditor Project") & " (*.vfp)|*.vfp|" & ML("All Files") & "|*.*|"
-			.OnFileActivate = @OpenFileControl1_FileActivate_
+			.Columns.Add ML("File"), , 150
+			.Columns.Add ML("Path"), , 450
+			.OnItemActivate = @lvProjects_ItemActivate_
 			.Parent = @This
 		End With
 	End Constructor
@@ -76,13 +94,31 @@ Private Sub frmOpenProject.cmdOK_Click_(ByRef Designer As My.Sys.Object, ByRef S
 End Sub
 Private Sub frmOpenProject.cmdOK_Click(ByRef Sender As Control)
 	SelectedFile = ""
-	If OpenFileControl1.FileName <> "" Then
-		SelectedFile = OpenFileControl1.FileName
+	If lvProjects.SelectedItemIndex > -1 Then
+		SelectedFile = WinOsPath(ProjectFiles.Item(lvProjects.SelectedItemIndex))
 		ModalResult = ModalResults.OK
 		Me.CloseForm
 	Else
-		MsgBox ML("Select file!")
+		MsgBox ML("Select project!")
 		Me.BringToFront
+	End If
+End Sub
+
+Private Sub frmOpenProject.cmdBrowse_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
+	(*Cast(frmOpenProject Ptr, Sender.Designer)).cmdBrowse_Click(Sender)
+End Sub
+Private Sub frmOpenProject.cmdBrowse_Click(ByRef Sender As Control)
+	Dim As FolderBrowserDialog BrowseD
+	BrowseD.InitialDir = GetFullPath(*ProjectsPath)
+	If BrowseD.Execute Then
+		SelectedFile = FindProjectVfpInFolder(WinOsPath(BrowseD.Directory))
+		If SelectedFile = "" Then
+			MsgBox ML("No project file (.vfp) found in the selected folder."), , mtWarning
+			Me.BringToFront
+			Exit Sub
+		End If
+		ModalResult = ModalResults.OK
+		Me.CloseForm
 	End If
 End Sub
 
@@ -94,10 +130,10 @@ Private Sub frmOpenProject.cmdCancel_Click(ByRef Sender As Control)
 	Me.CloseForm
 End Sub
 
-Private Sub frmOpenProject.OpenFileControl1_FileActivate_(ByRef Designer As My.Sys.Object, ByRef Sender As OpenFileControl)
-	(*Cast(frmOpenProject Ptr, Sender.Designer)).OpenFileControl1_FileActivate(Sender)
+Private Sub frmOpenProject.lvProjects_ItemActivate_(ByRef Designer As My.Sys.Object, ByRef Sender As ListView, ByVal ItemIndex As Integer)
+	(*Cast(frmOpenProject Ptr, Sender.Designer)).lvProjects_ItemActivate(Sender, ItemIndex)
 End Sub
-Private Sub frmOpenProject.OpenFileControl1_FileActivate(ByRef Sender As OpenFileControl)
+Private Sub frmOpenProject.lvProjects_ItemActivate(ByRef Sender As ListView, ByVal ItemIndex As Integer)
 	cmdOK_Click cmdOK
 End Sub
 
@@ -107,11 +143,18 @@ End Sub
 Private Sub frmOpenProject.Form_Create(ByRef Sender As Control)
 	ModalResult = ModalResults.Cancel
 	SelectedFile = ""
-	OpenFileControl1.FileName = ""
-End Sub
-
-Sub frmOpenProject.ApplyProjectsInitialDir()
-	Dim As WString * MAX_PATH projectsDir
-	projectsDir = GetFullPath(*ProjectsPath)
-	OpenFileControl1.InitialDir = projectsDir
+	lvProjects.ListItems.Clear
+	ProjectFiles.Clear
+	PruneMissingMRUProjects()
+	Dim sTmp As WString * 1024
+	Dim As WString * MAX_PATH fullPath
+	For i As Integer = 0 To MRUProjects.Count - 1
+		sTmp = MRUProjects.Item(i)
+		If Not EndsWith(LCase(sTmp), ".vfp") Then Continue For
+		fullPath = GetFullPath(sTmp)
+		If Not FileExistsU(fullPath) Then Continue For
+		ProjectFiles.Add fullPath
+		lvProjects.ListItems.Add GetFileName(fullPath), GetIconName(fullPath)
+		lvProjects.ListItems.Item(lvProjects.ListItems.Count - 1)->Text(1) = fullPath
+	Next
 End Sub

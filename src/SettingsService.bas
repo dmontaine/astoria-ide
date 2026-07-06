@@ -267,8 +267,8 @@ Sub LoadSettings
 	AddRelativePathsToRecent = iniSettings.ReadBool("Options", "AddRelativePathsToRecent", True)
 	WhenVisualFBEditorStarts = iniSettings.ReadInteger("Options", "WhenVisualFBEditorStarts", 0)
 	WLet(DefaultProjectFile, iniSettings.ReadString("Options", "DefaultProjectFile", "Files/Form.frm"))
-	DefaultFileFormat = iniSettings.ReadInteger("Options", "DefaultFileFormat", FileEncodings.Utf8BOM)
-		DefaultNewLineFormat = iniSettings.ReadInteger("Options", "DefaultNewLineFormat", NewLineTypes.WindowsCRLF)
+	DefaultFileFormat = FileEncodings.Utf8
+	DefaultNewLineFormat = NewLineTypes.WindowsCRLF
 	LastOpenedFileType = iniSettings.ReadInteger("Options", "LastOpenedFileType", 0)
 	AutoComplete = iniSettings.ReadBool("Options", "AutoComplete", True)
 		AutoSuggestions = iniSettings.ReadBool("Options", "AutoSuggestions", True)

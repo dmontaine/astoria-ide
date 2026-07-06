@@ -1766,7 +1766,7 @@ Namespace My.Sys.Forms
 			WLet(FECLine->Text, "")
 			Content.Lines.Add(FECLine)
 		End If
-		ChangeText "", 0, "Matn almashtirildi"
+		ChangeText "", 0, "Matn almashtirildi", , , True
 		Exit Sub
 		ErrL:
 		MsgBox ErrDescription(Err) & " (" & Err & ") " & _

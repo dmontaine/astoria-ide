@@ -82,7 +82,6 @@ Common Shared As TabControl Ptr ptabCode, ptabLeft, ptabBottom, ptabRight
 Common Shared As TreeView Ptr ptvExplorer
 Common Shared As IniFile Ptr piniSettings, piniTheme
 Common Shared As MenuItem Ptr mnuUseDebugger, mnuUseProfiler, miHelps, miXizmat, miWindow
-Common Shared As MenuItem Ptr miPlainText, miUtf8, miUtf8BOM, miUtf16BOM, miUtf32BOM, miWindowsCRLF, miLinuxLF, miMacOSCR
 Common Shared As HTTPConnection Ptr pHTTPAIAgent
 Common Shared As FileEncodings DefaultFileFormat
 Common Shared As NewLineTypes DefaultNewLineFormat
@@ -210,7 +209,6 @@ Declare Sub OpenProject
 Declare Sub OpenRecentProject
 Declare Sub NewFile
 Declare Sub OpenEditorFile
-Declare Sub OpenRecentFiles
 Declare Sub CloseEditorFile
 Declare Sub DeleteEditorFile
 Declare Sub SaveEditorFile
@@ -219,6 +217,7 @@ Declare Sub AddNew(ByRef Template As WString = "")
 Declare Sub AddMRUFile(ByRef FileName As WString)
 Declare Sub AddMRUProject(ByRef FileName As WString) '
 Declare Sub AddMRUFolder(ByRef FolderName As WString)
+Declare Sub PruneMissingMRUProjects()
 Declare Sub AddFromTemplates
 Declare Sub AddFilesToProject
 Declare Sub RemoveFileFromProject
@@ -235,11 +234,13 @@ Declare Function AddFolderU(FolderName As UString) As TreeNode Ptr
 Declare Function PrepareForAnotherProjectU(NewProjectPath As UString = "") As Boolean
 Declare Sub AddNewU(Template As UString)
 Declare Function GetOpenProjectNode() As TreeNode Ptr
+Declare Function GetProjectDirectory() As UString
+Declare Sub AddNewProjectFile(ByRef Template As WString, ByRef ItemName As WString)
+Declare Function ContainsFileName(tn As TreeNode Ptr, ByRef FileName As WString) As Boolean
 Declare Function PrepareForAnotherProject(ByRef NewProjectPath As WString = "") As Boolean
 Declare Sub SaveWorkspace()
 Declare Function LoadWorkspace() As Boolean
 Declare Function CloseAllDocuments() As Boolean
-Declare Sub OpenProgram()
 Declare Sub PrintThis()
 Declare Sub PrintPreview()
 Declare Sub PageSetup()
@@ -293,6 +294,13 @@ Declare Sub LoadOnlyFilePathOverwriteWithContent(Param As Any Ptr)
 Declare Sub LoadOnlyIncludeFiles(Param As Any Ptr)
 Declare Sub LoadToolBox(ForLibrary As Library Ptr = 0)
 Declare Function IsMyFbFrameworkLibrary(ByRef Path As UString) As Boolean
+Declare Function GetMyFbFrameworkLibrary() As Library Ptr
+Declare Sub RunDeferredFormDesign()
+Common Shared As Boolean mApplyingWorkspaceLoad
+Common Shared As Boolean mApplyingDeferredFormDesign
+Common Shared As Boolean mApplyingFormTabView
+Common Shared As Boolean mAddingTab
+Common Shared As Library Ptr MFFCtlLibrary
 Declare Sub RemoveToolBoxLibraryNodes(CtlLibrary As Library Ptr)
 Declare Sub InitToolBoxTree()
 Declare Sub CloseAllTabs(WithoutCurrent As Boolean = False)

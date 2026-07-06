@@ -407,7 +407,7 @@ Private Sub frmTemplates.tvTemplates_SelChanged(ByRef Sender As TreeView, ByRef 
 		While f <> ""
 			TemplateName = ..Left(f, IfNegative(InStr(f, ".") - 1, Len(f)))
 			If EndsWith(LCase(f), ".frm") Then
-				IconName = IIf(InStr(TemplateName, "3D") > 0, "Form3D32", "Form32")
+				IconName = "Form32"
 			ElseIf f = "User Control.bas" Then
 				IconName = "UserControl32"
 			ElseIf EndsWith(LCase(f), ".bas") Then
@@ -534,12 +534,8 @@ Private Sub frmTemplates.cmdClear_Click(ByRef Sender As Control)
 	Dim NodeIdx As Integer = -1
 	If tvRecent.SelectedNode <> 0 Then NodeIdx = tvRecent.SelectedNode->Index
 	If NodeIdx = 0 Then
-		miRecentFolders->Clear
-		miRecentFolders->Enabled = False
 		MRUFolders.Clear
 	ElseIf NodeIdx = 1 Then
-		miRecentProjects->Clear
-		miRecentProjects->Enabled = False
 		MRUProjects.Clear
 	ElseIf NodeIdx = 2 Then
 		miRecentFiles->Clear
@@ -556,10 +552,8 @@ Private Sub frmTemplates.cmdRemove_Click(ByRef Sender As Control)
 	If tvRecent.SelectedNode <> 0 Then NodeIdx = tvRecent.SelectedNode->Index
 	If Idx <> -1 Then
 		If NodeIdx = 0 Then
-			miRecentFolders->Remove miRecentFolders->Item(Idx)
 			MRUFolders.Remove Idx
 		ElseIf NodeIdx = 1 Then
-			miRecentProjects->Remove miRecentProjects->Item(Idx)
 			MRUProjects.Remove Idx
 		ElseIf NodeIdx = 2 Then
 			miRecentFiles->Remove miRecentFiles->Item(Idx)
@@ -589,10 +583,8 @@ Private Sub frmTemplates.cmdChange_Click(ByRef Sender As Control)
 		End If
 		If StartsWith(Path, "." & Slash) Then Path = Mid(Path, 3)
 		If NodeIdx = 0 Then
-			miRecentFolders->Item(Idx)->Caption = Path
 			MRUFolders.Item(Idx) = Path
 		ElseIf NodeIdx = 1 Then
-			miRecentProjects->Item(Idx)->Caption = Path
 			MRUProjects.Item(Idx) = Path
 		ElseIf NodeIdx = 2 Then
 			miRecentFiles->Item(Idx)->Caption = Path
@@ -622,10 +614,8 @@ Private Sub frmTemplates.cmdAdd_Click(ByRef Sender As Control)
 	End If
 	If StartsWith(Path, "." & Slash) Then Path = Mid(Path, 3)
 	If NodeIdx = 0 Then
-		miRecentFolders->Add Path, "", , @mClickMRU, , 0
 		MRUFolders.Insert 0, Path
 	ElseIf NodeIdx = 1 Then
-		miRecentProjects->Add Path, "", , @mClickMRU, , 0
 		MRUProjects.Insert 0, Path
 	ElseIf NodeIdx = 2 Then
 		miRecentFiles->Add Path, "", , @mClickMRU, , 0

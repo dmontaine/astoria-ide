@@ -2586,6 +2586,7 @@ pfOptions = @fOptions
 			.Name = "hbxDefaultFileFormat"
 			.Text = "HorizontalBox1"
 			.AutoSize = True
+			.Visible = False
 			.TabIndex = 276
 			.Align = DockStyle.alTop
 			.ControlIndex = 2
@@ -2598,6 +2599,7 @@ pfOptions = @fOptions
 			.Name = "hbxDefaultNewLineFormat"
 			.Text = "HorizontalBox1"
 			.AutoSize = True
+			.Visible = False
 			.TabIndex = 278
 			.Align = DockStyle.alTop
 			.ControlIndex = 3
@@ -3052,28 +3054,6 @@ Sub frmOptions.LoadSettings()
 		Wend
 		.cboTheme.ItemIndex = .cboTheme.IndexOf(*CurrentTheme)
 		LoadTheme
-		.cboDefaultFileFormat.Clear
-		.cboDefaultFileFormat.AddItem ML("Plain text")
-		.cboDefaultFileFormat.AddItem ML("Utf8")
-		.cboDefaultFileFormat.AddItem ML("Utf8 (BOM)")
-		.cboDefaultFileFormat.AddItem ML("Utf16 (BOM)")
-		.cboDefaultFileFormat.AddItem ML("Utf32 (BOM)")
-		.cboDefaultNewLineFormat.Clear
-		.cboDefaultNewLineFormat.AddItem ML("Windows (CRLF)")
-		.cboDefaultNewLineFormat.AddItem ML("Linux (LF)")
-		.cboDefaultNewLineFormat.AddItem ML("MacOS (CR)")
-		Select Case DefaultFileFormat
-		Case FileEncodings.PlainText: .cboDefaultFileFormat.ItemIndex = 0
-		Case FileEncodings.Utf8: .cboDefaultFileFormat.ItemIndex = 1
-		Case FileEncodings.Utf8BOM: .cboDefaultFileFormat.ItemIndex = 2
-		Case FileEncodings.Utf16BOM: .cboDefaultFileFormat.ItemIndex = 3
-		Case FileEncodings.Utf32BOM: .cboDefaultFileFormat.ItemIndex = 4
-		End Select
-		Select Case DefaultNewLineFormat
-		Case NewLineTypes.WindowsCRLF: .cboDefaultNewLineFormat.ItemIndex = 0
-		Case NewLineTypes.LinuxLF: .cboDefaultNewLineFormat.ItemIndex = 1
-		Case NewLineTypes.MacOSCR: .cboDefaultNewLineFormat.ItemIndex = 2
-		End Select
 		.cboAIAgent.Clear
 		.lvAIAgentTypes.ListItems.Clear
 		.cboAIAgent.AddItem ML("(not selected)")
@@ -3546,18 +3526,6 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		CreateFormTypesWithoutTypeWord = .chkCreateFormTypesWithoutTypeWord.Checked
 		OpenCommandPromptInMainFileFolder = .optMainFileFolder.Checked
 		WLet(CommandPromptFolder, .txtInFolder.Text)
-		Select Case .cboDefaultFileFormat.ItemIndex
-		Case 0: DefaultFileFormat = FileEncodings.PlainText
-		Case 1: DefaultFileFormat = FileEncodings.Utf8
-		Case 2: DefaultFileFormat = FileEncodings.Utf8BOM
-		Case 3: DefaultFileFormat = FileEncodings.Utf16BOM
-		Case 4: DefaultFileFormat = FileEncodings.Utf32BOM
-		End Select
-		Select Case .cboDefaultNewLineFormat.ItemIndex
-		Case 0: DefaultNewLineFormat = NewLineTypes.WindowsCRLF
-		Case 1: DefaultNewLineFormat = NewLineTypes.LinuxLF
-		Case 2: DefaultNewLineFormat = NewLineTypes.MacOSCR
-		End Select
 		AutoSaveBeforeCompiling = IIf(.optSaveCurrentFile.Checked, 1, IIf(.optSaveAllFiles.Checked, 2, IIf(.optPromptToSave.Checked, 3, 0)))
 		ShowSpaces = .chkShowSpaces.Checked
 		ShowKeywordsToolTip = .chkShowKeywordsTooltip.Checked
@@ -3758,8 +3726,6 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		piniSettings->WriteBool "Options", "AutoCreateBakFiles", AutoCreateBakFiles
 		piniSettings->WriteBool "Options", "AddRelativePathsToRecent", AddRelativePathsToRecent
 		piniSettings->WriteString "Options", "DefaultProjectFile", WGet(DefaultProjectFile)
-		piniSettings->WriteInteger "Options", "DefaultFileFormat", DefaultFileFormat
-		piniSettings->WriteInteger "Options", "DefaultNewLineFormat", DefaultNewLineFormat
 		piniSettings->WriteInteger "Options", "AutoSaveBeforeCompiling", AutoSaveBeforeCompiling
 		piniSettings->WriteBool "Options", "ShowSpaces", ShowSpaces
 		piniSettings->WriteBool "Options", "ShowKeywordsTooltip", ShowKeywordsToolTip

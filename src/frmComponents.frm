@@ -253,7 +253,7 @@ Private Sub frmComponentsType.cmdApply_Click(ByRef Sender As Control)
 		bChanged = False
 		For j As Integer = 0 To ControlLibraries.Count - 1
 			CtlLibrary = ControlLibraries.Item(j)
-			If GetFullPath(CtlLibrary->Path) = Paths.Item(i) Then
+			If GetFullPath(CtlLibrary->Path) = GetFullPath(Paths.Item(i)) Then
 				bFinded = True
 				bChanged = CtlLibrary->Enabled <> chlControls.Checked(i)
 				CtlLibrary->Enabled = chlControls.Checked(i)
@@ -319,16 +319,19 @@ Private Sub frmComponentsType.Form_Create(ByRef Sender As Control)
 				ini.Load ExePath & Slash & "Controls" & Slash & f & Slash & "Settings.ini"
 				Dim FileName As UString = ini.ReadString("Setup", LibKey)
 				If FileName <> "" Then
+					Dim As UString libPath = GetFullPath(ExePath & Slash & "Controls" & Slash & f & Slash & FileName)
 					chlControls.AddItem ini.ReadString("Setup", "Name")
-					Paths.Add ExePath & Slash & "Controls" & Slash & f & Slash & FileName
+					Paths.Add libPath
 					Dim As Library Ptr CtlLibrary
+					Dim As Boolean bEnabled = ini.ReadBool("Setup", "Enabled", False)
 					For i As Integer = 0 To ControlLibraries.Count - 1
 						CtlLibrary = ControlLibraries.Item(i)
-						If CtlLibrary->Path = "Controls" & Slash & f & Slash & FileName Then
-							If CtlLibrary->Enabled Then chlControls.Checked(chlControls.ItemCount - 1) = True
+						If GetFullPath(CtlLibrary->Path) = libPath Then
+							bEnabled = CtlLibrary->Enabled
 							Exit For
 						End If
 					Next
+					If bEnabled Then chlControls.Checked(chlControls.ItemCount - 1) = True
 				End If
 			End If
 		End If
@@ -386,9 +389,9 @@ Private Sub frmComponentsType.chkSelectedItemsOnly_Click(ByRef Sender As CheckBo
 					ini.Load ExePath & Slash & "Controls" & Slash & f & Slash & "Settings.ini"
 					Dim FileName As UString = ini.ReadString("Setup", LibKey)
 					If FileName <> "" Then
-						If Not Paths.Contains(ExePath & Slash & "Controls" & Slash & f & Slash & FileName) Then
+						If Not Paths.Contains(GetFullPath(ExePath & Slash & "Controls" & Slash & f & Slash & FileName)) Then
 							chlControls.AddItem ini.ReadString("Setup", "Name")
-							Paths.Add ExePath & Slash & "Controls" & Slash & f & Slash & FileName
+							Paths.Add GetFullPath(ExePath & Slash & "Controls" & Slash & f & Slash & FileName)
 						End If
 					End If
 				End If

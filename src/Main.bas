@@ -110,7 +110,7 @@ Dim Shared As Label lblLeft
 Dim Shared As Panel pnlLeft, pnlRight, pnlBottom, pnlBottomTab, pnlLeftPin, pnlRightPin, pnlBottomPin, pnlPropertyValue, pnlColor
 Dim Shared As TrackBar trLeft
 Dim Shared As MainMenu mnuMain
-Dim Shared As MenuItem Ptr mnuStartWithCompile, mnuStart, mnuContinue, mnuBreak, mnuEnd, mnuRestart, mnuStandardToolBar, mnuEditToolBar, mnuProjectToolBar, mnuFormatToolBar, mnuBuildToolBar, mnuDebugToolBar, mnuRunToolBar, mnuSplit, mnuSplitHorizontally, mnuSplitVertically, mnuWindowSeparator, miRecentProjects, miRecentFiles, miRecentFolders, miSetAsMain, miClearStartUp, miTabSetAsMain, miTabReloadHistoryCode, miRemoveFiles, miToolBars
+Dim Shared As MenuItem Ptr mnuStartWithCompile, mnuStart, mnuContinue, mnuBreak, mnuEnd, mnuRestart, mnuStandardToolBar, mnuEditToolBar, mnuProjectToolBar, mnuFormatToolBar, mnuBuildToolBar, mnuDebugToolBar, mnuRunToolBar, mnuSplit, mnuSplitHorizontally, mnuSplitVertically, mnuWindowSeparator, miRecentFiles, miSetAsMain, miClearStartUp, miTabSetAsMain, miTabReloadHistoryCode, miRemoveFiles, miToolBars
 Dim Shared As MenuItem Ptr miRecentAIChat,  miFileAIChat
 Dim Shared As MenuItem Ptr miSaveProject, miSaveProjectAs, miCloseProject, miDeleteProject, miNewFile, miOpenFile, miCloseFile, miDeleteFile, miSaveFile, miSaveFileAs, miPrint, miPrintPreview, miPageSetup, miOpenProjectFolder, miProjectProperties, miExplorerOpenProjectFolder, miExplorerRename, miExplorerProjectProperties, miExplorerCloseProject, miRename, miRemoveFileFromProject
 Dim Shared As MenuItem Ptr miUndo, miRedo, miCutCurrentLine, miCut, miCopy, miPaste, miSingleComment, miBlockComment, miUncommentBlock, miDuplicate, miSelectAll, miIndent, miOutdent, miFormat, miUnformat, miFormatProject, miUnformatProject, miAddSpaces, miDeleteBlankLines, miSuggestions, miCompleteWord, miParameterInfo, miStepInto, miStepOver, miStepOut, miRunToCursor, miGDBCommand, miAddWatch, miToggleBreakpoint, miClearAllBreakpoints, miSetNextStatement, miShowNextStatement
@@ -160,7 +160,7 @@ Dim Shared As TabPage Ptr tpProject, tpToolbox, tpProperties, tpEvents, tpOutput
 Dim Shared As Form frmMain
 Dim Shared As Integer tabItemHeight
 Dim Shared As Integer miRecentMax =20 'David Changed
-Dim Shared As Boolean mLoadLog, mLoadToDo, mChangeLogEdited, mApplyingWorkspaceLoad = False, ManifestIcoCopy
+Dim Shared As Boolean mLoadLog, mLoadToDo, mChangeLogEdited, ManifestIcoCopy
 Dim Shared As WString * MAX_PATH mChangelogName  'David Changed
 pApp = @VisualFBEditorApp
 pfrmMain = @frmMain
@@ -221,6 +221,7 @@ LoadSettings
 #include once "frmNewFile.bi"
 #include once "frmOpenProject.bi"
 #include once "frmRecentProjects.bi"
+#include once "frmOpenProjectFile.bi"
 #include once "frmParameters.bi"
 #include once "frmProjectProperties.bi"
 #include once "frmSave.bi"
@@ -760,7 +761,7 @@ Function AddProject(ByRef FileName As WString, pFilesList As WStringList Ptr, tn
 	Else
 		If FileName <> "" AndAlso Not bNew Then
 			If Not FileExists(FileName) Then
-				MsgBox ML("File not found") & ": " & FileName
+				MsgBox ML("File not found") & ":" & WChr(13, 10) & WChr(13, 10) & FormatMsgPath(FileName)
 				Return tn
 			End If
 			AddMRUProject FileName
@@ -979,29 +980,33 @@ Function AddProject(ByRef FileName As WString, pFilesList As WStringList Ptr, tn
 					Dim As Library Ptr CtlLibrary
 					Dim As Boolean bFinded, bChanged
 					Dim As UString LibraryPath = Mid(Buff, Pos1 + 2, Len(Buff) - Pos1 - 2)
-					ppe->Components.Add LibraryPath
-					For i As Integer = 0 To ControlLibraries.Count - 1
-						CtlLibrary = ControlLibraries.Item(i)
-						If Replace(GetFolderName(CtlLibrary->Path, False), "\", "/") = LibraryPath Then
-							bFinded = True
-							Exit For
-						End If
-					Next
-					If bFinded Then
-						If Not CtlLibrary->Enabled Then
-							CtlLibrary->Enabled = True
-							LoadToolBox CtlLibrary
-							bChanged = True
-						End If
+					Dim As UString LibraryVfpPath = GetControlLibraryVfpPath(LibraryPath)
+					Dim As UString LibraryFolder = GetControlLibraryFolder(LibraryPath)
+					If LibraryVfpPath = "" OrElse LibraryFolder = "" Then
+						MsgBox ML("Control library must be in the editor Controls folder.") & ":" & WChr(13, 10) & WChr(13, 10) & FormatMsgPathU(LibraryPath), , mtWarning
 					Else
-						If LibraryPath <> "" Then
+						ppe->Components.Add LibraryVfpPath
+						For i As Integer = 0 To ControlLibraries.Count - 1
+							CtlLibrary = ControlLibraries.Item(i)
+							If GetControlLibraryVfpPath(CtlLibrary->Path) = LibraryVfpPath Then
+								bFinded = True
+								Exit For
+							End If
+						Next
+						If bFinded Then
+							If Not CtlLibrary->Enabled Then
+								CtlLibrary->Enabled = True
+								LoadToolBox CtlLibrary
+								bChanged = True
+							End If
+						Else
 							Dim LibKey As String = GetLibKey
 							Dim As IniFile ini
-							ini.Load GetRelativePath(LibraryPath) & Slash & "Settings.ini"
+							ini.Load LibraryFolder & Slash & "Settings.ini"
 							Var CtlLibrary = _New(Library)
 							CtlLibrary->Name = ini.ReadString("Setup", "Name")
 							CtlLibrary->Tips = ini.ReadString("Setup", "Tips")
-							CtlLibrary->Path = LibraryPath & Slash & ini.ReadString("Setup", LibKey, " ")
+							CtlLibrary->Path = WinOsPath(GetFullPath(LibraryFolder & Slash & ini.ReadString("Setup", LibKey, " "), ""))
 							CtlLibrary->HeadersFolder = ini.ReadString("Setup", "HeadersFolder")
 							CtlLibrary->SourcesFolder = ini.ReadString("Setup", "SourcesFolder")
 							CtlLibrary->IncludeFolder = GetFullPath(GetFullPath(ini.ReadString("Setup", "IncludeFolder"), CtlLibrary->Path))
@@ -1010,11 +1015,11 @@ Function AddProject(ByRef FileName As WString, pFilesList As WStringList Ptr, tn
 							LoadToolBox CtlLibrary
 							bChanged = True
 						End If
-					End If
-					If bChanged Then
-						pnlToolBox.RequestAlign
-						pnlToolBox_Resize *pnlToolBox.Designer, pnlToolBox, pnlToolBox.Width, pnlToolBox.Height
-						pnlToolBox.RequestAlign
+						If bChanged Then
+							pnlToolBox.RequestAlign
+							pnlToolBox_Resize *pnlToolBox.Designer, pnlToolBox, pnlToolBox.Width, pnlToolBox.Height
+							pnlToolBox.RequestAlign
+						End If
 					End If
 				End If
 			Loop
@@ -1057,7 +1062,6 @@ End Sub
 Sub OpenProject()
 	Dim fOpenProject As frmOpenProject
 	pfOpenProject = @fOpenProject
-	fOpenProject.ApplyProjectsInitialDir()
 	If pfOpenProject->ShowModal(frmMain) = ModalResults.OK Then
 		If pfOpenProject->SelectedFile <> "" Then
 			OpenFiles pfOpenProject->SelectedFile
@@ -1077,21 +1081,41 @@ Sub OpenRecentProject()
 End Sub
 
 Sub NewFile()
+	If GetOpenProjectNode() = 0 Then
+		MsgBox ML("Open a project first."), , mtWarning
+		Return
+	End If
 	Dim fNewFile As frmNewFile
 	pfNewFile = @fNewFile
 	If pfNewFile->ShowModal(frmMain) = ModalResults.OK Then
-		If pfNewFile->SelectedTemplate <> "" Then
-			AddNew pfNewFile->SelectedTemplate
+		If pfNewFile->SelectedTemplate <> "" AndAlso pfNewFile->SelectedName <> "" Then
+			Dim As WString Ptr templatePtr
+			Dim As WString Ptr namePtr
+			WLet(templatePtr, pfNewFile->SelectedTemplate)
+			WLet(namePtr, pfNewFile->SelectedName)
+			AddNewProjectFile *templatePtr, *namePtr
+			WDeAllocate(templatePtr)
+			WDeAllocate(namePtr)
 		End If
 	End If
 End Sub
 
 Sub OpenEditorFile()
-	OpenProgram
-End Sub
-
-Sub OpenRecentFiles()
-	' TODO: frmRecentFiles dialog (same pattern as OpenRecentProject)
+	If GetOpenProjectNode() = 0 Then
+		MsgBox ML("Open a project first."), , mtWarning
+		Return
+	End If
+	Dim fOpenProjectFile As frmOpenProjectFile
+	pfOpenProjectFile = @fOpenProjectFile
+	If pfOpenProjectFile->ShowModal(frmMain) = ModalResults.OK Then
+		If pfOpenProjectFile->SelectedFile <> "" Then
+			Dim As WString Ptr filePtr
+			WLet(filePtr, pfOpenProjectFile->SelectedFile)
+			OpenFiles *filePtr
+			WDeAllocate(filePtr)
+		End If
+	End If
+	tpProject->SelectTab
 End Sub
 
 Sub CloseEditorFile()
@@ -1130,6 +1154,73 @@ Function GetOpenProjectNode() As TreeNode Ptr
 	Next
 	Return 0
 End Function
+
+Function GetProjectDirectory() As UString
+	Dim tnP As TreeNode Ptr = GetOpenProjectNode()
+	If tnP = 0 OrElse tnP->Tag = 0 Then Return ""
+	Dim ppe As ProjectElement Ptr = Cast(ProjectElement Ptr, tnP->Tag)
+	If ppe = 0 Then Return ""
+	Return GetFolderNameU(WGet(ppe->FileName))
+End Function
+
+Sub AddNewProjectFile(ByRef Template As WString, ByRef ItemName As WString)
+	Dim tnP As TreeNode Ptr = GetOpenProjectNode()
+	If tnP = 0 Then
+		MsgBox ML("Open a project first."), , mtWarning
+		Return
+	End If
+	Dim ppe As ProjectElement Ptr = Cast(ProjectElement Ptr, tnP->Tag)
+	If ppe = 0 Then Return
+	Dim As UString itemBaseName = Trim(ItemName, Any !" \t" + Chr(10) + Chr(13))
+	If Not IsValidProjectItemName(itemBaseName) Then
+		MsgBox ML("Enter a valid name without paths or file extensions."), , mtWarning
+		Return
+	End If
+	Dim As UString projectDir = GetProjectDirectory()
+	If projectDir = "" Then
+		MsgBox ML("Project folder not found."), , mtWarning
+		Return
+	End If
+	Dim As UString templateFile = GetFileNameU(Template)
+	Dim As UString fileExt = ""
+	Dim extPos As Integer = InStrRev(templateFile, ".")
+	If extPos > 0 Then fileExt = Mid(templateFile, extPos)
+	Dim As UString destPath = WinOsPath(projectDir & Slash & itemBaseName & fileExt)
+	If FileExistsU(destPath) Then
+		MsgBox ML("File already exists") & ":" & WChr(13, 10) & WChr(13, 10) & FormatMsgPathU(destPath), , mtWarning
+		Return
+	End If
+	If Not CopyFileU(Template, destPath) Then
+		MsgBox ML("Create file failure!") & ":" & WChr(13, 10) & WChr(13, 10) & FormatMsgPathU(destPath), , mtWarning
+		Return
+	End If
+	Dim tn1 As TreeNode Ptr = GetTreeNodeChild(tnP, destPath)
+	Dim As WString Ptr destPathPtr
+	WLet(destPathPtr, destPath)
+	If ContainsFileName(tn1, *destPathPtr) Then
+		WDeAllocate(destPathPtr)
+		MsgBox ML("This path is exists!"), , mtWarning
+		Return
+	End If
+	Dim As String IconName = GetIconName(destPath)
+	Dim As ExplorerElement Ptr ee = _New(ExplorerElement)
+	WLet(ee->FileName, destPath)
+	WLet(ee->TemplateFileName, "")
+	Dim As UString treeLabel = itemBaseName & fileExt & "*"
+	Dim tn3 As TreeNode Ptr = tn1->Nodes.Add(treeLabel, , , IconName, IconName, True)
+	tn3->Tag = ee
+	If Not EndsWith(tnP->Text, "*") Then tnP->Text &= "*"
+	If Not tnP->IsExpanded Then tnP->Expand
+	If Not tn1->IsExpanded Then tn1->Expand
+	tn3->SelectItem
+	AddTab *destPathPtr, EndsWith(LCase(fileExt), ".frm"), tn3
+	WDeAllocate(destPathPtr)
+	If EndsWith(LCase(fileExt), ".bas") OrElse EndsWith(LCase(fileExt), ".frm") OrElse EndsWith(LCase(fileExt), ".bi") OrElse EndsWith(LCase(fileExt), ".inc") Then
+		ppe->Files_.Add destPath
+		If Not LoadPaths.Contains(destPath) Then LoadPaths.Add destPath
+		ThreadCounter(ThreadCreate_(@LoadOnlyFilePath, @LoadPaths.Item(LoadPaths.IndexOf(destPath))))
+	End If
+End Sub
 
 Function PrepareForAnotherProject(ByRef NewProjectPath As WString) As Boolean
 	Dim tnCur As TreeNode Ptr = GetOpenProjectNode()
@@ -1252,24 +1343,27 @@ Function LoadWorkspace() As Boolean
 	Return CBool(bProjectLoaded) OrElse (ptabCode->TabCount > 0)
 End Function
 
-Sub AddMRU(ByRef FileFolderName As WString, ByRef MRUFilesFolders As WStringList, miRecentFilesFolders As MenuItem Ptr, ByRef MRUType As String)
+Sub AddMRUListOnly(ByRef FileFolderName As WString, ByRef MRUList As WStringList)
 	Dim As UString FileFolderName_
 	If AddRelativePathsToRecent Then
 		FileFolderName_ = GetShortFileName(FileFolderName, ExePath & Slash & Slash)
 	Else
 		FileFolderName_ = FileFolderName
 	End If
-	Dim As Integer i = MRUFilesFolders.IndexOf(FileFolderName_)
-	If i <> -1 Then MRUFilesFolders.Remove i
-	MRUFilesFolders.Add FileFolderName_
+	Dim As Integer i = MRUList.IndexOf(FileFolderName_)
+	If i <> -1 Then MRUList.Remove i
+	MRUList.Add FileFolderName_
+End Sub
+
+Sub AddMRU(ByRef FileFolderName As WString, ByRef MRUFilesFolders As WStringList, miRecentFilesFolders As MenuItem Ptr, ByRef MRUType As String)
+	AddMRUListOnly FileFolderName, MRUFilesFolders
 	miRecentFilesFolders->Clear
-	For i = 0 To MRUFilesFolders.Count - 1
+	For i As Integer = 0 To MRUFilesFolders.Count - 1
 		miRecentFilesFolders->Add(MRUFilesFolders.Item(i), "", MRUFilesFolders.Item(i), @mClickMRU, , i)
 	Next
 	miRecentFilesFolders->Add("-")
 	miRecentFilesFolders->Add(ML("Clear Recently Opened"), "", "Clear" & MRUType, @mClickMRU)
 	If miRecentFilesFolders->Enabled = False Then miRecentFilesFolders->Enabled = True
-	
 End Sub
 
 Sub AddMRUAIChat(ByRef FileName As WString)
@@ -1296,11 +1390,23 @@ Sub AddMRUFile(ByRef FileName As WString)
 End Sub
 
 Sub AddMRUProject(ByRef FileName As WString)
-	AddMRU FileName, MRUProjects, miRecentProjects, "Projects"
+	AddMRUListOnly FileName, MRUProjects
 End Sub
 
 Sub AddMRUFolder(ByRef FolderName As WString)
-	AddMRU FolderName, MRUFolders, miRecentFolders, "Folders"
+	AddMRUListOnly FolderName, MRUFolders
+End Sub
+
+Sub PruneMissingMRUProjects()
+	Dim As Boolean changed = False
+	For i As Integer = MRUProjects.Count - 1 To 0 Step -1
+		Dim As UString path = MRUProjects.Item(i)
+		If Trim(path) = "" OrElse (EndsWith(LCase(path), ".vfp") AndAlso Not FileExistsU(GetFullPath(path))) Then
+			MRUProjects.Remove i
+			changed = True
+		End If
+	Next
+	If changed Then SaveMRU
 End Sub
 
 Function FolderCopy(FromDir As UString, ToDir As UString) As Integer
@@ -1340,7 +1446,7 @@ Sub AddNew(ByRef Template As WString)
 		Dim tn As TreeNode Ptr = AddProject(Template, , , True)
 		If tn <> tnPrev Then ChangeUseDebugger False, 1
 	Else
-		AddTab Template, True
+		MsgBox ML("Open a project first."), , mtWarning
 	End If
 End Sub
 
@@ -1360,21 +1466,6 @@ Sub OpenFiles(ByRef FileName As WString)
 		WLet(RecentFile, FileName)
 	End If
 	WLet(RecentFiles, FileName)
-End Sub
-
-Sub OpenProgram()
-	Dim As OpenFileDialog OpenD
-	If WGet(LastOpenPath) <> "" Then
-		OpenD.InitialDir = *LastOpenPath
-	Else
-		OpenD.InitialDir = GetFullPath(*ProjectsPath)
-	End If
-	OpenD.Filter = ML("FreeBasic Files") & " (*.bas, *.frm, *.bi, *.inc, *.rc)|*.bas;*.frm;*.bi;*.inc;*.rc|" & ML("FreeBasic Module") & " (*.bas)|*.bas|" & ML("FreeBasic Form Module") & " (*.frm)|*.frm|" & ML("FreeBasic Include File") & " (*.bi)|*.bi|" & ML("Other Include File") & " (*.inc)|*.inc|" & ML("Resource File") & " (*.rc)|*.rc|" & ML("All Files") & "|*.*|"
-	If OpenD.Execute Then
-		WLet(LastOpenPath, GetFolderName(OpenD.FileName))
-		OpenFiles(GetFullPath(OpenD.FileName))
-	End If
-	tpProject->SelectTab
 End Sub
 
 Sub SetSaveDialogParameters(ByRef FileName As WString)
@@ -1569,7 +1660,8 @@ Function SaveProject(ByRef tnP As TreeNode Ptr, bWithQuestion As Boolean = False
 	Print #Fn, "AndroidNDKLocation=""" & *ppe->AndroidNDKLocation & """"
 	Print #Fn, "JDKLocation=""" & *ppe->JDKLocation & """"
 	For i As Integer = 0 To ppe->Components.Count - 1
-		Print #Fn, "ControlLibrary=""" & Replace(ppe->Components.Item(i), "\", "/") & """"
+		Dim As UString ComponentPath = GetControlLibraryVfpPath(ppe->Components.Item(i))
+		If ComponentPath <> "" Then Print #Fn, "ControlLibrary=""" & ComponentPath & """"
 	Next
 	For i As Integer = 0 To ppe->IncludePaths.Count - 1
 		Print #Fn, "IncludePath=""" & Replace(ppe->IncludePaths.Item(i), "\", "/") & """"
@@ -1966,7 +2058,9 @@ Sub AddFromTemplate(ByRef Template As WString)
 			AddTab *ee->TemplateFileName, True, tn3
 		End If
 	End If
-	If tn3 = 0 Then AddNew Template
+	If tn3 = 0 Then
+		If GetOpenProjectNode() = 0 Then MsgBox ML("Open a project first."), , mtWarning
+	End If
 End Sub
 
 Sub AddFromTemplates
@@ -2119,6 +2213,8 @@ Sub ReloadHistoryCode()
 	If OpenD.Execute AndAlso Trim(OpenD.FileName) <> "" Then
 		tb->txtCode.Changing "Reload"
 		tb->txtCode.LoadFromFile(OpenD.FileName, tb->FileEncoding, tb->NewLineType)
+		tb->FileEncoding = FileEncodings.Utf8
+		tb->NewLineType = NewLineTypes.WindowsCRLF
 		tb->txtCode.Changed "Reload"
 			tb->DateFileTime = GetFileLastWriteTime(tb->FileName)
 		tb->txtCode.Modified = True
@@ -2466,37 +2562,11 @@ Sub ChangeLockControls(bLockControls As Boolean, ChangeObject As Integer = -1)
 End Sub
 
 Sub ChangeFileEncoding(FileEncoding As FileEncodings)
-	If miPlainText <> 0 Then miPlainText->Checked = FileEncoding = FileEncodings.PlainText
-	If miUtf8 <> 0 Then miUtf8->Checked = FileEncoding = FileEncodings.Utf8
-	If miUtf8BOM <> 0 Then miUtf8BOM->Checked = FileEncoding = FileEncodings.Utf8BOM
-	If miUtf16BOM <> 0 Then miUtf16BOM->Checked = FileEncoding = FileEncodings.Utf16BOM
-	If miUtf32BOM <> 0 Then miUtf32BOM->Checked = FileEncoding = FileEncodings.Utf32BOM
-	If stBar.Count > 3 Then
-		With *stBar.Panels[3]
-			Select Case FileEncoding
-			Case FileEncodings.PlainText: .Caption = "ASCII"
-			Case FileEncodings.Utf8: .Caption = "UTF-8"
-			Case FileEncodings.Utf8BOM: .Caption = "UTF-8 (BOM)"
-			Case FileEncodings.Utf16BOM: .Caption = "UTF-16 (BOM)"
-			Case FileEncodings.Utf32BOM: .Caption = "UTF-32 (BOM)"
-			End Select
-		End With
-	End If
+	If stBar.Count > 3 Then stBar.Panels[3]->Caption = "UTF-8"
 End Sub
 
 Sub ChangeNewLineType(NewLineType As NewLineTypes)
-	If miWindowsCRLF <> 0 Then miWindowsCRLF->Checked = NewLineType = NewLineTypes.WindowsCRLF
-	If miLinuxLF <> 0 Then miLinuxLF->Checked = NewLineType = NewLineTypes.LinuxLF
-	If miMacOSCR <> 0 Then miMacOSCR->Checked = NewLineType = NewLineTypes.MacOSCR
-	If stBar.Count > 4 Then
-		With *stBar.Panels[4]
-			Select Case NewLineType
-			Case NewLineTypes.WindowsCRLF: .Caption = "CR+LF"
-			Case NewLineTypes.LinuxLF: .Caption = "LF"
-			Case NewLineTypes.MacOSCR: .Caption = "CR"
-			End Select
-		End With
-	End If
+	If stBar.Count > 4 Then stBar.Panels[4]->Caption = "CR+LF"
 End Sub
 
 Sub ChangeEnabledDebug(bStart As Boolean, bBreak As Boolean, bEnd As Boolean)
@@ -2861,6 +2931,15 @@ Sub tvToolBox_NodeActivate(ByRef Designer As My.Sys.Object, ByRef Sender As Tree
 		End If
 	End If
 End Sub
+
+Function IsExcludedToolBoxControl(ControlName As String) As Boolean
+	Select Case LCase(ControlName)
+	Case "animate", "webbrowser", "listviewex", "searchbar"
+		Return True
+	Case Else
+		Return False
+	End Select
+End Function
 
 Function GetTypeControl(ControlType As String) As Integer
 	If Comps.Contains(ControlType) Then
@@ -4682,6 +4761,43 @@ Function IsMyFbFrameworkLibrary(ByRef Path As UString) As Boolean
 	Return InStr(pathText, "myfbframework") > 0 AndAlso Right(pathText, 9) = "mff64.dll"
 End Function
 
+Function GetMyFbFrameworkLibrary() As Library Ptr
+	If MFFCtlLibrary <> 0 Then Return MFFCtlLibrary
+	For i As Integer = 0 To ControlLibraries.Count - 1
+		Dim As Library Ptr ctlLib = ControlLibraries.Item(i)
+		If ctlLib <> 0 AndAlso ctlLib->Enabled Then
+			If IsMyFbFrameworkLibrary(ctlLib->Path) Then
+				MFFCtlLibrary = ctlLib
+				Return ctlLib
+			End If
+		End If
+	Next
+	Return 0
+End Function
+
+Sub RunDeferredFormDesign()
+	mApplyingDeferredFormDesign = True
+	Dim As TabControl Ptr pTabCodeWnd
+	For j As Integer = 0 To TabPanels.Count - 1
+		pTabCodeWnd = @Cast(TabPanel Ptr, TabPanels.Item(j))->tabCode
+		For i As Integer = 0 To pTabCodeWnd->TabCount - 1
+			Dim As TabWindow Ptr tb = Cast(TabWindow Ptr, pTabCodeWnd->Tabs[i])
+			If tb = 0 Then Continue For
+			If tb->FormNeedDesign Then
+				tb->FormNeedDesign = False
+				If pApp = 0 Then pApp = @VisualFBEditorApp
+				If pApp->MainForm = 0 Then pApp->MainForm = @frmMain
+				tb->FormDesign
+				ApplyFormTabView(tb)
+			End If
+		Next
+	Next
+	mApplyingDeferredFormDesign = False
+	If ptabCode <> 0 AndAlso ptabCode->SelectedTabIndex >= 0 Then
+		tabCode_SelChange *ptabCode->Designer, *ptabCode, ptabCode->SelectedTabIndex
+	End If
+End Sub
+
 Sub LoadToolBox(ForLibrary As Library Ptr = 0)
 	Dim As String f
 	Dim As Integer i, j
@@ -4689,7 +4805,6 @@ Sub LoadToolBox(ForLibrary As Library Ptr = 0)
 	Dim As String IncludePath
 	Dim As UString MFF, Temp
 	Dim As UInteger Attr
-	Dim As Library Ptr MFFCtlLibrary
 			MFF = IIf(i = 0, "Controls\MyFbFramework\mff64.dll", "")
 	If ForLibrary = 0 AndAlso ControlLibraries.Count = 0 Then
 		IncludeMFFPath = iniSettings.ReadBool("Options", "IncludeMFFPath", True)
@@ -4709,7 +4824,7 @@ Sub LoadToolBox(ForLibrary As Library Ptr = 0)
 							Var CtlLibrary = _New(Library)
 							CtlLibrary->Name = ini.ReadString("Setup", "Name")
 							CtlLibrary->Tips = ini.ReadString("Setup", "Tips")
-							CtlLibrary->Path = Temp
+							CtlLibrary->Path = GetFullPath(Temp)
 							CtlLibrary->HeadersFolder = ini.ReadString("Setup", "HeadersFolder")
 							CtlLibrary->SourcesFolder = ini.ReadString("Setup", "SourcesFolder")
 							CtlLibrary->IncludeFolder = GetFullPath(GetFullPath(ini.ReadString("Setup", "IncludeFolder"), Temp))
@@ -4740,7 +4855,7 @@ Sub LoadToolBox(ForLibrary As Library Ptr = 0)
 				Var CtlLibrary = _New(Library)
 				CtlLibrary->Name = ini.ReadString("Setup", "Name")
 				CtlLibrary->Tips = ini.ReadString("Setup", "Tips")
-				CtlLibrary->Path = Temp
+				CtlLibrary->Path = GetFullPath(Temp)
 				CtlLibrary->HeadersFolder = ini.ReadString("Setup", "HeadersFolder")
 				CtlLibrary->SourcesFolder = ini.ReadString("Setup", "SourcesFolder")
 				CtlLibrary->IncludeFolder = GetFullPath(GetFullPath(ini.ReadString("Setup", "IncludeFolder"), Temp))
@@ -4774,12 +4889,13 @@ Sub LoadToolBox(ForLibrary As Library Ptr = 0)
 				If IsMyFbFrameworkLibrary(CtlLibrary->Path) Then Continue For
 			End If
 			If ForLibrary <> 0 AndAlso CtlLibrary <> ForLibrary Then Continue For
-			If CtlLibrary->Handle <> 0 Then Continue For
-			CtlLibrary->Handle = DyLibLoad(GetFullPath(CtlLibrary->Path))
-			If Not FileExists(GetFullPath(CtlLibrary->Path)) Then
-				MsgBox ML("File not found") & ": " & WChr(13, 10) & WChr(13, 10) & GetFullPath(CtlLibrary->Path) & WChr(13, 10) & WChr(13, 10) & ML("Can not load control to toolbox")
-			ElseIf CtlLibrary->Handle = 0 Then
-				MsgBox ML("File not loaded") & ": " & WChr(13, 10) & WChr(13, 10) & GetFullPath(CtlLibrary->Path) & WChr(13, 10) & WChr(13, 10) & ML("Can not load control to toolbox")
+			If CtlLibrary->Handle = 0 Then
+				CtlLibrary->Handle = DyLibLoad(GetFullPath(CtlLibrary->Path))
+				If Not FileExists(GetFullPath(CtlLibrary->Path)) Then
+					MsgBox ML("File not found") & ":" & WChr(13, 10) & WChr(13, 10) & FormatMsgPathU(CtlLibrary->Path) & WChr(13, 10) & WChr(13, 10) & ML("Can not load control to toolbox")
+				ElseIf CtlLibrary->Handle = 0 Then
+					MsgBox ML("File not loaded") & ":" & WChr(13, 10) & WChr(13, 10) & FormatMsgPathU(CtlLibrary->Path) & WChr(13, 10) & WChr(13, 10) & ML("Can not load control to toolbox")
+				End If
 			End If
 			If Not CtlLibrary->Enabled Then Continue For
 			IncludePath = GetFullPath(GetFullPath(CtlLibrary->HeadersFolder, CtlLibrary->Path))
@@ -4815,6 +4931,7 @@ Sub LoadToolBox(ForLibrary As Library Ptr = 0)
 		iNew = GetTypeControl(Comps.Item(i))
 		tbi->ControlType = iNew
 		If iNew = 0 Then Continue For
+		If IsExcludedToolBoxControl(Comps.Item(i)) Then Continue For
 		it = Comps.Item(i)
 			Dim As Any Ptr LibHandle
 			LibHandle = Cast(Library Ptr, tbi->Tag)->Handle
@@ -5511,7 +5628,7 @@ Sub CreateMenusAndToolBars
 	Var miFile = mnuMain.Add(ML("&File"), "", "File")
 	miFile->Add(ML("&New Project") & HK("NewProject", "Ctrl+Shift+N"), "Project", "NewProject", @mClick)
 	miFile->Add(ML("&Open Project") & "...", "", "OpenProject", @mClick)
-	miFile->Add(ML("&Recent Project") & "...", "", "RecentProject", @mClick)
+	miFile->Add(ML("&Recent Projects") & "...", "", "RecentProject", @mClick)
 	miCloseProject = miFile->Add(ML("Close Project") & HK("CloseProject", "Ctrl+Shift+F4"), "", "CloseProject", @mClick, , , False)
 	miDeleteProject = miFile->Add(ML("Delete Project"), "", "DeleteProject", @mClick, , , False)
 	miFile->Add("-")
@@ -5520,7 +5637,6 @@ Sub CreateMenusAndToolBars
 	miFile->Add("-")
 	miNewFile = miFile->Add(ML("&New File") & HK("NewFile", "Ctrl+N"), "New", "NewFile", @mClick)
 	miOpenFile = miFile->Add(ML("&Open File") & "..." & HK("OpenFile", "Ctrl+O"), "Open", "OpenFile", @mClick)
-	miFile->Add(ML("&Recent Files") & "...", "", "RecentFiles", @mClick)
 	miCloseFile = miFile->Add(ML("Close File") & HK("CloseFile", "Ctrl+F4"), "Close", "CloseFile", @mClick, , , False)
 	miDeleteFile = miFile->Add(ML("Delete File"), "", "DeleteFile", @mClick, , , False)
 	miFile->Add("-")
@@ -5530,38 +5646,15 @@ Sub CreateMenusAndToolBars
 	miPrint = miFile->Add(ML("&Print") & HK("Print", "Ctrl+P"), "Print", "Print", @mClick, , , False)
 	miPrintPreview = miFile->Add(ML("Print P&review") & HK("PrintPreview"), "PrintPreview", "PrintPreview", @mClick, , , False)
 	miPageSetup = miFile->Add(ML("Page Set&up") & "..." & HK("PageSetup"), "", "PageSetup", @mClick, , , False)
-	miFile->Add("-")
-	Var miFileFormat = miFile->Add(ML("File format"))
-	miPlainText = miFileFormat->Add(ML("Encoding") & ": " & ML("Plain text") & HK("PlainText"), "", "PlainText", @mClick, True)
-	miUtf8 = miFileFormat->Add(ML("Encoding") & ": " & ML("Utf8") & HK("Utf8"), "", "Utf8", @mClick, True)
-	miUtf8BOM = miFileFormat->Add(ML("Encoding") & ": " & ML("Utf8 (BOM)") & HK("Utf8BOM"), "", "Utf8BOM", @mClick, True)
-	miUtf16BOM = miFileFormat->Add(ML("Encoding") & ": " & ML("Utf16 (BOM)") & HK("Utf16BOM"), "", "Utf16BOM", @mClick, True)
-	miUtf32BOM = miFileFormat->Add(ML("Encoding") & ": " & ML("Utf32 (BOM)") & HK("Utf32BOM"), "", "Utf32BOM", @mClick, True)
-	miFileFormat->Add("-")
-	miWindowsCRLF = miFileFormat->Add(ML("Newline") & ": " & ML("Windows (CRLF)") & HK("WindowsCRLF"), "", "WindowsCRLF", @mClick, True)
-	miLinuxLF = miFileFormat->Add(ML("Newline") & ": " & ML("Linux (LF)") & HK("LinuxLF"), "", "LinuxLF", @mClick, True)
-	miMacOSCR = miFileFormat->Add(ML("Newline") & ": " & ML("MacOS (CR)") & HK("MacOSCR"), "", "MacOSCR", @mClick, True)
-	miUtf8BOM->Checked = True
-	miWindowsCRLF->Checked = True
-	miFile->Add("-")
-	
-	miRecentFolders = miFile->Add(ML("Recent Folders"), "", "RecentFolders", @mClick)
+
 	Dim sTmp As WString * 1024
-	For i As Integer = 0 To miRecentMax
-		sTmp = iniSettings.ReadString("MRUFolders", "MRUFolder_0" & WStr(i), "")
-		If Trim(sTmp) <> "" Then
-			MRUFolders.Add sTmp
-			miRecentFolders->Add(sTmp, "", sTmp, @mClickMRU)
-		End If
-	Next
-	miRecentFolders->Add("-")
-	miRecentFolders->Add(ML("Clear Recently Opened"),"","ClearFolders", @mClickMRU)
-	
-	miRecentProjects = miFile->Add(ML("Recent Projects"), "", "RecentProjects", @mClick)
-	miRecentProjects->Visible = False
 	For i As Integer = 0 To miRecentMax
 		sTmp = iniSettings.ReadString("MRUProjects", "MRUProject_0" & WStr(i), "")
 		If Trim(sTmp) <> "" Then MRUProjects.Add sTmp
+	Next
+	For i As Integer = 0 To miRecentMax
+		sTmp = iniSettings.ReadString("MRUFolders", "MRUFolder_0" & WStr(i), "")
+		If Trim(sTmp) <> "" Then MRUFolders.Add sTmp
 	Next
 
 	miRecentFiles = miFile->Add(ML("Recent Files"), "", "RecentFilesMRU", @mClick)
@@ -7003,7 +7096,7 @@ Else
 	WLet(AIPostDataPtr_1st, "You are an expert FreeBasic programming assistant specializing in the MyFbFramework (MFF) GUI library. Following Is MyFbFramework GUI Forms guidelines." & _
 	"When writing GUI form code, you MUST strictly adhere to the template provided below. Do not invent your own structure, do not use VB.NET specific syntax (use MFF equivalents like CommandButton instead of Button), and ensure all preprocessor directives start with a hash (#)." & _
 	" When working with GUI, strictly follow MyFbFramework GUI forms guidelines. If NO GUI is involved: 1. Ignore all reference constraints  2. Perform regular analysis 3. Apply standard procedures. " & _
-	" The MyFbFramework framework includes 39 controls: Animate, Chart, CheckBox, CheckedListBox, ComboBoxEdit, ComboBoxEx, CommandButton, DateTimePicker, Grid, Header, HotKey, HScrollBar, ImageBox, IPAddress, Label, LinkLabel, ListControl, ListView, MonthCalendar, NumericUpDown, OpenFileControl, PrintPreviewControl, ProgressBar, RadioButton, RichTextBox, ScrollBarControl, SearchBox, Splitter, StatusBar, TextBox, ToolBar, ToolPalette, ToolTips, TrackBar, TreeListView, TreeView, UpDown, VScrollBar, WebBrowser," & _
+	" The MyFbFramework framework includes 35 controls: Chart, CheckBox, CheckedListBox, ComboBoxEdit, ComboBoxEx, CommandButton, DateTimePicker, Grid, Header, HotKey, HScrollBar, ImageBox, IPAddress, Label, LinkLabel, ListControl, ListView, MonthCalendar, NumericUpDown, OpenFileControl, PrintPreviewControl, ProgressBar, RadioButton, RichTextBox, ScrollBarControl, SearchBox, Splitter, StatusBar, TextBox, ToolBar, ToolPalette, ToolTips, TrackBar, TreeListView, TreeView, UpDown, VScrollBar," & _
 	" includes 13 Containers: Form, GroupBox, HorizontalBox, PagePanel, PageScroller, Panel, Picture, ReBar, ScrollControl, TabControl, TabPage, VerticalBox, UserControl," & _
 	" includes 10 Components: HTTPConnection, HTTPServer, ImageList, MainMenu, PopUpMenu, PrintDocument, Printer, SQLite3Component, TimerComponent," & _
 	" includes 8 Dialogs: ColorDialog, FolderBrowserDialog, FontDialog, OpenFileDialog, PageSetupDialog, PrintDialog, PrintPreviewDialog, SaveFileDialog." & _
@@ -7996,12 +8089,15 @@ Sub tabCode_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As TabContro
 	Else
 		lvProperties.Nodes.Clear
 		lvEvents.Nodes.Clear
-		miForm->Enabled = False
-		miCodeAndForm->Enabled = False
-		miGotoCodeForm->Enabled = False
-		tb->tbrTop.Buttons.Item("Form")->Enabled = False
-		tb->tbrTop.Buttons.Item("CodeAndForm")->Enabled = False
-		tb->tbrTop.Buttons.Item("Code")->Checked = True: tbrTop_ButtonClick *tb->tbrTop.Designer, tb->tbrTop, *tb->tbrTop.Buttons.Item("Code")
+		Dim As Boolean bFormFile = EndsWith(LCase(tb->FileName), ".frm") OrElse EndsWith(LCase(tb->FileName), ".bas")
+		miForm->Enabled = bFormFile
+		miCodeAndForm->Enabled = bFormFile
+		miGotoCodeForm->Enabled = bFormFile
+		tb->tbrTop.Buttons.Item("Form")->Enabled = bFormFile
+		tb->tbrTop.Buttons.Item("CodeAndForm")->Enabled = bFormFile
+		If mApplyingDeferredFormDesign = False AndAlso mApplyingFormTabView = False Then
+			tb->tbrTop.Buttons.Item("Code")->Checked = True: tbrTop_ButtonClick *tb->tbrTop.Designer, tb->tbrTop, *tb->tbrTop.Buttons.Item("Code")
+		End If
 		'SetRightClosedStyle True, True
 	End If
 	If tb->FileName = "" Then
@@ -9026,6 +9122,7 @@ Sub frmMain_Show(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		mApplyingWorkspaceLoad = True
 		LoadWorkspace()
 		mApplyingWorkspaceLoad = False
+		RunDeferredFormDesign()
 	End If
 	'	Var FILE = Command(-1)
 	'	Var Pos1 = InStr(file, "2>CON")
@@ -9069,6 +9166,8 @@ Sub frmMain_ActivateApp(ByRef Designer As My.Sys.Object, ByRef Sender As Form)
 					If MsgBox(tb->FileName & !"\r" & ML("File was changed by another application. Reload it?"), ML("File Changed"), mtQuestion, btYesNo) = mrYes Then
 						tb->txtCode.Changing "Reload"
 						tb->txtCode.LoadFromFile(tb->FileName, tb->FileEncoding, tb->NewLineType)
+						tb->FileEncoding = FileEncodings.Utf8
+						tb->NewLineType = NewLineTypes.WindowsCRLF
 						tb->txtCode.Changed "Reload"
 					End If
 				End If

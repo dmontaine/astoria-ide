@@ -112,12 +112,14 @@ Private Sub frmRecentProjects.Form_Create(ByRef Sender As Control)
 	ModalResult = ModalResults.Cancel
 	SelectedFile = ""
 	lvRecent.ListItems.Clear
+	PruneMissingMRUProjects()
 	Dim sTmp As WString * 1024
 	Dim As WString * MAX_PATH fullPath
 	For i As Integer = 0 To MRUProjects.Count - 1
 		sTmp = MRUProjects.Item(i)
 		If Not EndsWith(LCase(sTmp), ".vfp") Then Continue For
 		fullPath = GetFullPath(sTmp)
+		If Not FileExistsU(fullPath) Then Continue For
 		lvRecent.ListItems.Add GetFileName(fullPath), GetIconName(fullPath)
 		lvRecent.ListItems.Item(lvRecent.ListItems.Count - 1)->Text(1) = fullPath
 	Next

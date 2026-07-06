@@ -174,6 +174,8 @@ Sub FormatProject(UnFormat As Any Ptr)
 							ptxt = @tb->txtCode
 						End If
 						If UnFormat Then ptxt->UnformatCode(True) Else ptxt->FormatCode(True)
+						FileEncoding = FileEncodings.Utf8
+						NewLineType = NewLineTypes.WindowsCRLF
 						If tb = 0 Then ptxt->SaveToFile(*ee->FileName, FileEncoding, NewLineType)
 					End If
 				End If
@@ -187,6 +189,8 @@ Sub FormatProject(UnFormat As Any Ptr)
 				ptxt = @tb->txtCode
 			End If
 			If UnFormat Then ptxt->UnformatCode(True) Else ptxt->FormatCode(True)
+			FileEncoding = FileEncodings.Utf8
+			NewLineType = NewLineTypes.WindowsCRLF
 			If tb = 0 Then ptxt->SaveToFile(*ee->FileName, FileEncoding, NewLineType)
 		End If
 	Next
@@ -239,6 +243,8 @@ Sub ChangeMenuItemsEnabled
 	Dim As TreeNode Ptr ptn = GetParentNode(tvExplorer.SelectedNode)
 	Dim bEnabled As Boolean = tvExplorer.Nodes.Count > 0
 	Dim bEnabledTab As Boolean = miWindow->Count > 3
+	Dim bHasProject As Boolean = GetOpenProjectNode() <> 0
+	Dim bHasProjectFile As Boolean = bHasProject AndAlso bEnabledTab
 	Dim bEnabledProject As Boolean = ptn AndAlso (ptn->ImageKey = "Project" OrElse ptn->ImageKey = "MainProject")
 	Dim bEnabledFolderProject As Boolean = ptn AndAlso ((ptn->ImageKey = "Project") OrElse (ptn->ImageKey = "MainProject")) AndAlso CInt(ProjectNameSameWithFolder(ptn))
 	Dim bEnabledProjectAndFolder As Boolean = ptn AndAlso ((ptn->ImageKey = "Project") OrElse (ptn->ImageKey = "MainProject") OrElse (ptn->ImageKey = "Opened"))
@@ -261,22 +267,24 @@ Sub ChangeMenuItemsEnabled
 	miAddType->Enabled = bEnabledTab
 	mnuSplitHorizontally->Enabled = bEnabledTab
 	mnuSplitVertically->Enabled = bEnabledTab
-	miSaveFile->Enabled = bEnabled
-	tbtSave->Enabled = bEnabled
-	miSaveFileAs->Enabled = bEnabled
-	tbtSaveAll->Enabled = bEnabled
-	miCloseFile->Enabled = bEnabled
-	miDeleteFile->Enabled = bEnabled
-	miPrint->Enabled = bEnabled
-	miPrintPreview->Enabled = bEnabled
-	miPageSetup->Enabled = bEnabled
-	miOpenProjectFolder->Enabled = bEnabled
-	miExplorerOpenProjectFolder->Enabled = bEnabled
-	miImageManager->Enabled = bEnabled
-	miRename->Enabled = bEnabled
-	miExplorerRename->Enabled = bEnabled
-	miRemoveFileFromProject->Enabled = bEnabled
-	tbtRemoveFileFromProject->Enabled = bEnabled
+	miNewFile->Enabled = bHasProject
+	miOpenFile->Enabled = bHasProject
+	miSaveFile->Enabled = bHasProjectFile
+	tbtSave->Enabled = bHasProjectFile
+	miSaveFileAs->Enabled = bHasProjectFile
+	tbtSaveAll->Enabled = bHasProjectFile
+	miCloseFile->Enabled = bHasProjectFile
+	miDeleteFile->Enabled = bHasProjectFile
+	miPrint->Enabled = bHasProjectFile
+	miPrintPreview->Enabled = bHasProjectFile
+	miPageSetup->Enabled = bHasProjectFile
+	miOpenProjectFolder->Enabled = bHasProject
+	miExplorerOpenProjectFolder->Enabled = bHasProject
+	miImageManager->Enabled = bHasProjectFile
+	miRename->Enabled = bEnabled AndAlso bHasProject
+	miExplorerRename->Enabled = bEnabled AndAlso bHasProject
+	miRemoveFileFromProject->Enabled = bEnabled AndAlso bHasProject
+	tbtRemoveFileFromProject->Enabled = bEnabled AndAlso bHasProject
 	miFind->Enabled = bEnabled
 	miFindNext->Enabled = bEnabled
 	miFindPrevious->Enabled = bEnabled
@@ -302,11 +310,53 @@ Sub ChangeMenuItemsEnabled
 	ChangeEnabledDebug bEnabled, False, False
 End Sub
 
+Sub RefreshDesignSurface(tb As TabWindow Ptr)
+	If tb = 0 OrElse tb->Des = 0 OrElse tb->Des->DesignControl = 0 Then Return
+	Dim As SymbolsType Ptr st = tb->Des->Symbols(tb->Des->DesignControl)
+	If st = 0 OrElse st->WritePropertyFunc = 0 Then Return
+	Dim As Boolean bTrue = True
+	st->WritePropertyFunc(tb->Des->DesignControl, "Visible", @bTrue)
+	If tb->pnlForm.Handle <> 0 AndAlso st->ReadPropertyFunc <> 0 Then
+		Dim As HWND Ptr dcHandle = st->ReadPropertyFunc(tb->Des->DesignControl, "Handle")
+		If dcHandle <> 0 AndAlso *dcHandle Then
+			SetParent *dcHandle, tb->pnlForm.Handle
+			tb->Des->Dialog = *dcHandle
+		End If
+	End If
+	If st->ControlRepaintSub Then st->ControlRepaintSub(tb->Des->DesignControl)
+	tb->pnlForm.RequestAlign
+	tb->RequestAlign
+End Sub
+
+Sub ApplyFormTabView(tb As TabWindow Ptr)
+	If tb = 0 Then Return
+	Dim As Boolean bFormFile = EndsWith(LCase(tb->FileName), ".frm") OrElse EndsWith(LCase(tb->FileName), ".bas")
+	mApplyingFormTabView = True
+	If tb->cboClass.Items.Count < 2 Then
+		miForm->Enabled = bFormFile
+		miCodeAndForm->Enabled = bFormFile
+		miGotoCodeForm->Enabled = bFormFile
+		tb->tbrTop.Buttons.Item("Form")->Enabled = bFormFile
+		tb->tbrTop.Buttons.Item("CodeAndForm")->Enabled = bFormFile
+		tb->tbrTop.Buttons.Item("Code")->Checked = True: tbrTop_ButtonClick *tb->tbrTop.Designer, tb->tbrTop, *tb->tbrTop.Buttons.Item("Code")
+	Else
+		miForm->Enabled = True
+		miCodeAndForm->Enabled = True
+		miGotoCodeForm->Enabled = True
+		tb->tbrTop.Buttons.Item("Form")->Enabled = True
+		tb->tbrTop.Buttons.Item("CodeAndForm")->Enabled = True
+		tb->tbrTop.Buttons.Item("CodeAndForm")->Checked = True: tbrTop_ButtonClick *tb->tbrTop.Designer, tb->tbrTop, *tb->tbrTop.Buttons.Item("CodeAndForm")
+		RefreshDesignSurface(tb)
+	End If
+	mApplyingFormTabView = False
+End Sub
+
 Function AddTab(ByRef FileName As WString, bNew As Boolean, TreeN As TreeNode Ptr, bNoActivate As Boolean) As TabWindow Ptr
 	Static As Boolean TabAdding
 	If TabAdding Then Return 0
 	On Error Goto ErrorHandler
 	TabAdding = True
+	mAddingTab = True
 	MouseHoverTimerVal = Timer
 	Dim bFind As Boolean
 	Dim As WString * MAX_PATH FileNameNew
@@ -327,6 +377,7 @@ Function AddTab(ByRef FileName As WString, bNew As Boolean, TreeN As TreeNode Pt
       	         	     tb = Cast(TabWindow Ptr, ptabCode->Tabs[i])
                 	     If Not bNoActivate Then tb->SelectTab
                      	     TabAdding = False
+		             mAddingTab = False
 		             Return tb
 		                End If
 	            	Next i
@@ -349,6 +400,7 @@ Function AddTab(ByRef FileName As WString, bNew As Boolean, TreeN As TreeNode Pt
 		If tb = 0 Then
 			MsgBox ML("Memory was not allocated")
 			TabAdding = False
+			mAddingTab = False
 			Return 0
 		End If
 		With *tb
@@ -364,13 +416,14 @@ Function AddTab(ByRef FileName As WString, bNew As Boolean, TreeN As TreeNode Pt
 				ptabCode->Add(@.btnClose)
 			tb->ImageKey = GetIconName(FileNameNew)
 			If Not bNoActivate Then .SelectTab Else .Visible = True: ptabCode->RequestAlign: .Visible = False
-			.tbrTop.Buttons.Item(1)->Checked = True
 			If FileNameNew <> "" Then
 				pApp = @VisualFBEditorApp
 				pApp->MainForm = @frmMain
 				pstBar->Panels[1]->Caption = ML("Elapsed time") & ": Loading " & Format((Timer - timeElapse), "0.000s")
 				timeElapse = Timer
 				.txtCode.LoadFromFile(FileNameNew, tb->FileEncoding, tb->NewLineType, True)
+				tb->FileEncoding = FileEncodings.Utf8
+				tb->NewLineType = NewLineTypes.WindowsCRLF
 				pstBar->Panels[1]->Caption = pstBar->Panels[1]->Caption & " / " & Format((Timer - timeElapse), "0.000s")
 				timeElapse = Timer
 				If bNew Then
@@ -444,20 +497,25 @@ Function AddTab(ByRef FileName As WString, bNew As Boolean, TreeN As TreeNode Pt
 					Next
 				End If
 			Else
-				tb->NewLineType = DefaultNewLineFormat
-				tb->FileEncoding = DefaultFileFormat
+				tb->FileEncoding = FileEncodings.Utf8
+				tb->NewLineType = NewLineTypes.WindowsCRLF
 			End If
 			ChangeFileEncoding tb->FileEncoding
 			ChangeNewLineType tb->NewLineType
 			pstBar->Panels[1]->Caption = pstBar->Panels[1]->Caption & " FormDesign: " & Format((Timer - timeElapse), "0.000s")
 			timeElapse = Timer
-			.FormDesign '(bNoActivate)
+			If mApplyingWorkspaceLoad Then
+				.FormNeedDesign = True
+			Else
+				.FormDesign '(bNoActivate)
+			End If
 			pstBar->Panels[1]->Caption = pstBar->Panels[1]->Caption & " / " & Format((Timer - timeElapse), "0.000s")
 			If CBool(FileName <> "") AndAlso CBool(tb->Project <> 0) AndAlso (EndsWith(FileName, "Form.frm") OrElse EndsWith(FileName, "UserControl.bas")) Then
 				If Not tb->Project->Components.Contains("Controls/MyFbFramework") Then tb->Project->Components.Add "Controls/MyFbFramework"
 			End If
 			pApp->MainForm = @frmMain
 			If FileName <> "" Then
+				TextChanged = False
 				.txtCode.ClearUndo
 				.Modified = bNew
 			End If
@@ -467,21 +525,10 @@ Function AddTab(ByRef FileName As WString, bNew As Boolean, TreeN As TreeNode Pt
 			tb->txtCode.Visible = True
 		End With
 		If tb->cboClass.Items.Count < 2 Then
-			miForm->Enabled = False
-			miCodeAndForm->Enabled = False
-			miGotoCodeForm->Enabled = False
-			tb->tbrTop.Buttons.Item("Form")->Enabled = False
-			tb->tbrTop.Buttons.Item("CodeAndForm")->Enabled = False
-			tb->tbrTop.Buttons.Item("Code")->Checked = True: tbrTop_ButtonClick *tb->tbrTop.Designer, tb->tbrTop, *tb->tbrTop.Buttons.Item("Code")
+			If Not mApplyingWorkspaceLoad Then ApplyFormTabView(tb)
 			'SetRightClosedStyle True, True
 		Else
-			'SetRightClosedStyle False, False
-			miForm->Enabled = True
-			miCodeAndForm->Enabled = True
-			miGotoCodeForm->Enabled = True
-			tb->tbrTop.Buttons.Item("Form")->Enabled = True
-			tb->tbrTop.Buttons.Item("CodeAndForm")->Enabled = True
-			tb->tbrTop.Buttons.Item("CodeAndForm")->Checked = True: tbrTop_ButtonClick *tb->tbrTop.Designer, tb->tbrTop, *tb->tbrTop.Buttons.Item("CodeAndForm")
+			ApplyFormTabView(tb)
 			'tpProperties->SelectTab
 		End If
 		TabCtl.MoveCloseButtons ptabCode
@@ -494,6 +541,7 @@ Function AddTab(ByRef FileName As WString, bNew As Boolean, TreeN As TreeNode Pt
 	'ptabCode->Update
 	TextChanged = False
 	TabAdding = False
+	mAddingTab = False
 	Return tb
 	Exit Function
 	ErrorHandler:
@@ -2595,8 +2643,10 @@ Sub DesignerInsertControl(ByRef Sender As Designer, ByRef ClassName As String, C
 	Dim As SymbolsType Ptr stCopied = tb->Des->Symbols(CopiedCtrl)
 	If stDesignControl = 0 OrElse stDesignControl->ReadPropertyFunc = 0 Then Exit Sub
 	If st = 0 OrElse st->ReadPropertyFunc = 0 Then Exit Sub
-	Dim As UString LibraryPath = Replace(GetRelative(GetFolderName(st->Path, False), ExePath), "\", "/")
-	If tb->Project <> 0 AndAlso Not tb->Project->Components.Contains(LibraryPath) Then tb->Project->Components.Add LibraryPath
+	Dim As UString LibraryPath = GetControlLibraryVfpPath(Replace(GetRelative(GetFolderName(st->Path, False), ExePath), "\", "/"))
+	If LibraryPath <> "" AndAlso tb->Project <> 0 Then
+		If tb->Project->Components.Contains(LibraryPath) = False Then tb->Project->Components.Add LibraryPath
+	End If
 	Dim NewName As String = WGet(st->ReadPropertyFunc(Ctrl, "Name"))
 	tb->cboClass.Items.Add NewName, Ctrl, ClassName, ClassName, , 1, tb->FindControlIndex(NewName)
 	'tb->txtCode.SaveToFile(GetBakFileName(tb->FileName), tb->FileEncoding, tb->NewLineType)
@@ -3044,6 +3094,9 @@ Sub OnLineChangeEdit(ByRef Designer As My.Sys.Object, ByRef Sender As Control, B
 			ecl->OldConstructionPart = ecl->ConstructionPart
 		End If
 		If TextChanged Then
+			If mAddingTab OrElse mApplyingWorkspaceLoad OrElse mApplyingDeferredFormDesign OrElse mApplyingFormTabView Then
+				TextChanged = False
+			Else
 			With tb->txtCode
 				'If Not .Focused Then bNotFunctionChange = False: Exit Sub
 				If OldLine > -1 AndAlso OldLine < .Content.Lines.Count Then
@@ -3189,6 +3242,7 @@ Sub OnLineChangeEdit(ByRef Designer As My.Sys.Object, ByRef Sender As Control, B
 				tb->FormDesign bNotDesignForms OrElse tb->tbrTop.Buttons.Item("Code")->Checked OrElse (CBool(OldLine < tb->ConstructorStart) AndAlso CBool(OldLine <> -1)) OrElse CBool(OldLine > tb->ConstructorEnd) 'Not EndsWith(tb->cboFunction.Text, " [Constructor]")
 			End With
 			TextChanged = False
+			End If
 		End If
 	End If
 	'    If tb->cboClass.ItemIndex <> 0 Then
@@ -8309,8 +8363,10 @@ End Function
 
 Sub TabWindow.FormDesign(NotForms As Boolean = False)
 	On Error Goto ErrorHandler
+	If pApp = 0 Then pApp = @VisualFBEditorApp
+	If pApp->MainForm = 0 Then pApp->MainForm = @frmMain
 	If bNotDesign OrElse FormClosing OrElse txtCode.LinesCount > 50000 Then Exit Sub
-	If Not txtCode.SyntaxEdit Then 
+	If Not txtCode.SyntaxEdit Then
 		If cboClass.Items.Count = 0 Then
 			cboClass.Items.Clear
 			cboClass.Items.Add "(" & ML("General") & ")" & Chr(0), , "DropDown", "DropDown"
@@ -9541,7 +9597,7 @@ Sub TabWindow.FormDesign(NotForms As Boolean = False)
 						This.Visible = True
 						pnlForm.Visible = True
 						splForm.Visible = True
-						If Not tbrTop.Buttons.Item(3)->Checked Then tbrTop.Buttons.Item(3)->Checked = True
+						If Not tbrTop.Buttons.Item("CodeAndForm")->Checked Then tbrTop.Buttons.Item("CodeAndForm")->Checked = True
 							If pnlForm.Handle = 0 Then pnlForm.CreateWnd
 						Des = _New( My.Sys.Forms.Designer(@pnlForm))
 						If Des = 0 Then FLine= 0: bNotDesign = False: pfrmMain->UpdateUnLock: Exit Sub
@@ -9583,7 +9639,13 @@ Sub TabWindow.FormDesign(NotForms As Boolean = False)
 							Else
 								.DesignControl = .CreateControl("Form", frmName, frmName, 0, 0, 0, 350, 300, True)
 							End If
-							If .DesignControl = 0 Then  FLine = 0: bNotDesign = False: pfrmMain->UpdateUnLock: Exit Sub
+							If .DesignControl = 0 Then
+								FLine = 0
+								bNotDesign = False
+								pfrmMain->UpdateUnLock
+								SetQuitThread Project, @This, False
+								Exit Sub
+							End If
 							'MFF = DyLibLoad(*MFFDll)
 							'.FLibs.Add *MFFDll, MFF
 							'ReadPropertyFunc = DylibSymbol(MFF, "ReadProperty")
@@ -9883,6 +9945,7 @@ Sub TabWindow.FormDesign(NotForms As Boolean = False)
 			End If
 		Next i
 		'FillAllProperties
+		RefreshDesignSurface(@This)
 	End If
 	'Functions.Sort 'Already sorted while add items
 	If cboClass.ItemIndex = 0 Then
@@ -10005,6 +10068,10 @@ Sub TabWindow.FormDesign(NotForms As Boolean = False)
 	Exit Sub
 	ErrorHandler:
 	FLine= 0
+	bNotDesign = False
+	If Des <> 0 Then Des->Loading = False
+	pfrmMain->UpdateUnLock
+	SetQuitThread Project, @This, False
 	MsgBox ErrDescription(Err) & " (" & Err & ") " & _
 	"in line " & Erl() & " (Handler line: " & __LINE__ & ") " & _
 	"in function " & ZGet(Erfn()) & " (Handler function: " & __FUNCTION__ & ") " & _
@@ -10029,7 +10096,12 @@ Sub tbrTop_ButtonClick(ByRef Designer As My.Sys.Object, ByRef Sender As ToolBar,
 			.pnlForm.Visible = True
 			.splForm.Visible = False
 			.LastButton = Button.Name
-			If (.bNotDesign = False) AndAlso tb->FormNeedDesign Then .FormDesign: tb->FormNeedDesign = False
+			If .bNotDesign = False AndAlso mApplyingFormTabView = False Then
+				If tb->FormNeedDesign Then
+					.FormDesign
+					tb->FormNeedDesign = False
+				End If
+			End If
 			tpToolbox->SelectTab
 		Case "CodeAndForm"
 			'If tb->cboClass.Items.Count < 2 Then Exit Sub
@@ -10039,7 +10111,12 @@ Sub tbrTop_ButtonClick(ByRef Designer As My.Sys.Object, ByRef Sender As ToolBar,
 			.splForm.Visible = True
 			.pnlCode.Visible = True
 			.LastButton = Button.Name
-			If (.bNotDesign = False) AndAlso tb->FormNeedDesign Then .FormDesign: tb->FormNeedDesign = False
+			If .bNotDesign = False AndAlso mApplyingFormTabView = False Then
+				If tb->FormNeedDesign Then
+					.FormDesign
+					tb->FormNeedDesign = False
+				End If
+			End If
 			tpToolbox->SelectTab
 		End Select
 		.RequestAlign

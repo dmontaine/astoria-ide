@@ -1,11 +1,145 @@
 # VFBE Win64 Fork — Project Status & Handoff
 
-**Last updated:** 2026-07-05 (GDB debugger fixes + bottom tab captions verified)  
+**Last updated:** 2026-07-06 (form designer grey-panel bug — RESOLVED)  
 **Repository:** [codeberg.org/bigriverguy/VFBEWin64](https://codeberg.org/bigriverguy/VFBEWin64)  
 **Local path:** `C:\Users\dmont\VisualFBEditor`  
 **Owner:** bigriverguy (`dmontaine@gmail.com`)
 
 This document captures project history, completed work, open items, and workflow rules for continuing development (e.g. in Claude Code) without re-discovering context.
+
+---
+
+## RESOLVED — Form designer grey-panel bug (Opus session, 2026-07-06)
+
+**Status:** FIXED, compile-clean (release), user-verified across multiple sequential project opens. Committed and pushed.
+
+### Actual root cause (verified by live file-logging, not the earlier Bugbot hypothesis)
+
+The grey panel had **nothing** to do with duplicate `FormDesign`, the workspace-defer logic, or the `RefreshDesignSurface` reparent — all were ruled out by tracing every `FormDesign` caller and exit. The real chain, established by logging inside `FormDesign` → `Designer.CreateControl` → `Designer.Symbols`:
+
+1. `Designer.CreateControl("Form", …)` returned 0, so `FormDesign` bailed at `If .DesignControl = 0 Then Exit Sub` → empty `pnlForm` = grey (the "flash" is the Designer canvas appearing before the control-create fails).
+2. `CreateControl` returned 0 because `Designer.Symbols("Form")` returned 0.
+3. `Symbols` returned 0 because it called `DyLibLoad` on the MyFbFramework `Library.Path`, which was the **folder** `Controls\MyFbFramework` (no `mff64.dll`) — even though the DLL was already loaded (valid `Handle`). `DyLibLoad` on a directory returns 0.
+
+The `"Form"` component's `Comps` entry binds its `Tag` to an MFF `Library` object whose `Path` is the raw `.vfp` component string `Controls/MyFbFramework` (a folder), **distinct** from the toolbox library that carries the real DLL path. So MFF ends up with multiple `Library` objects with inconsistent path representations, and `Comps["Form"].Tag` points at the folder-path one.
+
+### Fixes shipped
+
+1. **`src/Designer.bas` `Designer.Symbols`** — when `DyLibLoad(Path)` fails but the library has a live `Handle`, recover the real on-disk DLL path via `GetModuleFileNameW(Handle)` and `DyLibLoad` **that**. This both works around the folder-`Path` and keeps the module refcount balanced. (A first attempt that simply borrowed `CtlLib->Handle` without a matching `DyLibLoad` made the *first* designer work but under-flowed the refcount — the Designer destructor's `DyLibFree(st->Handle)` at `Designer.bas` ~2905 then unloaded `mff64.dll` after the first project closed, breaking every subsequent project. The `GetModuleFileNameW` + `DyLibLoad` form is the correct, refcount-safe fix.)
+2. **`src/PathUtils.bas` `GetControlLibraryVfpPath`** — normalize to forward slashes before the `"/controls/"` scan. It previously ran `WinOsPath` (backslashes) then searched for a forward-slash substring, returning `""` for every absolute library path. That broke the project-open "already loaded" match (`bFinded` stayed false), causing duplicate library objects.
+
+Also in this session: the `ClearUndo → OnLineChangeEdit → FormDesign` teardown chain from the old Bugbot writeup is **already dead** — the `WithoutShow=True` change to `ClearUndo` (`EditControl.bas`) stops `ClearUndo` from raising `OnLineChange` at all, so the `mAddingTab` guard debate was chasing a path that can no longer fire.
+
+### Still open (non-fatal, deferred)
+
+The underlying wart — MFF getting **multiple `Library` objects with inconsistent `Path` representations** (absolute-backslash DLL path from the toolbox loader vs. relative-forward-slash folder path from the `.vfp` component string), with `Comps["Form"].Tag` binding to the folder one — was not fully cleaned up. The two fixes make it harmless (the module is loaded and now resolves correctly), but the refactored library-loading path (`LoadToolBox` INI/dir-scan branches + `AddProject`'s `ControlLibrary` block + `GetControlLibraryVfpPath`/`GetControlLibraryFolder`) deserves a consolidation pass so one DLL maps to exactly one `Library` object with one canonical path. Low priority; captured here for a future session.
+
+### Original bug summary (historical investigation record below)
+
+### Bug summary
+
+Opening a `.frm` file: code editor loads and works; design surface **briefly flashes** (form HWND visible) then settles to an **empty grey `pnlForm`**. Behavior worked in the original download; broke during recent workspace/defer/LoadToolBox work. The **LoadToolBox HWND fix** enabled the brief flash (design control gets a valid parent HWND), but a **second `FormDesign` call tears down** the design surface that the first call built.
+
+### Symptom timeline
+
+1. **Original download** — `.frm` opens; code + design surface both work.
+2. **After recent changes** — `.frm` would not open at all (HWND/parent issues).
+3. **After expert fixes** — file opens; code editor OK; design surface **flash then grey `pnlForm`**.
+
+### Root cause (Bugbot finding)
+
+`AddTab` calls `.FormDesign` (line ~510), then later `.txtCode.ClearUndo` (line ~519). `ClearUndo` → `ChangeText` → `OnLineChangeEdit` with `TextChanged=True` → **`tb->FormDesign(...)`** at line ~3242. That **re-enters `TabWindow.FormDesign`** while `Des->DesignControl` already exists, hitting the teardown block at **lines 8407–8438** (`UnHook`, remove child controls, `DeleteComponentFunc`, clear `Objects`/`Components`/`Controls`). Guards for `mApplyingWorkspaceLoad`, `mApplyingDeferredFormDesign`, `mApplyingFormTabView`, and `mAddingTab` in `OnLineChangeEdit` (~3097) **did not fix** the issue per user — likely because `mAddingTab` is cleared at line ~544 **before** `ClearUndo` side-effects propagate, or `TextChanged` is set again on the `OnLineChange` path.
+
+**Key call chain (AddTab open path):**
+```
+AddTab → .FormDesign (builds design surface)
+       → .txtCode.ClearUndo → ChangeText → OnLineChangeEdit
+       → tb->FormDesign (TEARDOWN when Des already set)
+       → ApplyFormTabView → RefreshDesignSurface (HWND reparent, but surface already gutted)
+```
+
+**`TabWindow.FormDesign` teardown zone:** `src/TabWindow.bas` lines **8364–8455** (teardown at **8407–8438** when `Des->DesignControl` exists).
+
+### Files modified (uncommitted — from `git status` / `git diff --stat`)
+
+**Core bug surface (413 lines changed in these 6 files):**
+
+| File | Diff |
+|------|------|
+| `src/Main.bas` | +365/- (workspace defer, `RunDeferredFormDesign`, `LoadToolBox`, `tabCode_SelChange` guards) |
+| `src/TabWindow.bas` | +155/- (`AddTab`, `ApplyFormTabView`, `RefreshDesignSurface`, `OnLineChangeEdit` guards, `FormNeedDesign`) |
+| `src/Main.bi` | +14/- (`mApplying*`, `mAddingTab`, `RunDeferredFormDesign` declare) |
+| `src/TabWindow.bi` | +3/- |
+| `src/Designer.bas` | +90/- |
+| `src/EditControl.bas` | +2/- |
+
+**Other modified (32 files total, 1484 insertions / 1376 deletions):**
+
+- `src/PathUtils.bas`, `src/PathUtils.bi`, `src/SettingsService.bas`, `src/VisualFBEditor.bas`
+- `src/frmComponents.frm`, `src/frmNewFile.{bi,frm}`, `src/frmOpenProject.{bi,frm}`, `src/frmOptions.frm`, `src/frmProjectProperties.frm`, `src/frmRecentProjects.frm`, `src/frmTemplates.frm`
+- `Settings/VisualFBEditor64.ini`, `Settings/Others/HotKeys.txt`
+- Binaries: `VisualFBEditor64.exe`, `Controls/MyFbFramework/mff64.dll`
+- Example temps, deleted `Projects/*`, `Templates/Files/Form_3D.frm`
+
+**Untracked (not in diff):** `src/frmOpenProjectFile.{bi,frm}`, `src/VisualFBEditor.vfp`, `Settings/Workspace.ini`, `Project/`, example temps/exes.
+
+### Fixes attempted
+
+- **LoadToolBox HWND fix** (`Main.bas` ~4801) — ensures `pApp->MainForm = @frmMain` before toolbox load; design HWND gets valid parent → **flash visible** (partial win).
+- **`mApplyingWorkspaceLoad`** — skip immediate `FormDesign` in `AddTab` during `LoadWorkspace`; set `FormNeedDesign=True`; defer via `RunDeferredFormDesign()` after workspace load (`Main.bas` ~9122–9125).
+- **`RunDeferredFormDesign`** (`Main.bas` ~4778) — batch deferred design for tabs with `FormNeedDesign`; calls `FormDesign` + `ApplyFormTabView`; ends with `tabCode_SelChange`.
+- **`FormNeedDesign` flag** — defer design to `tbrTop_ButtonClick` Form/CodeAndForm paths (`TabWindow.bas` ~508, ~10100–10117).
+- **`RefreshDesignSurface`** (`TabWindow.bas` ~313) — `SetParent` design HWND to `pnlForm`, `Des->Dialog`, repaint.
+- **`ApplyFormTabView`** refactor (`TabWindow.bas` ~331) — centralize form-tab view setup; `mApplyingFormTabView` guard.
+- **`mApplyingDeferredFormDesign` / `mApplyingFormTabView` guards** in `tabCode_SelChange` (`Main.bas` ~8098) — skip toolbar click during deferred apply.
+- **`mAddingTab` + re-entrancy guards** in `OnLineChangeEdit` (`TabWindow.bas` ~3097) — suppress `FormDesign` when adding tab; **user reports still broken**.
+- **`mAddingTab` lifecycle** in `AddTab` (`TabWindow.bas` ~359, ~544) — set True at start, False before return.
+
+### Opus next steps (narrow scope)
+
+1. **Trace ALL `FormDesign` callers** during `.frm` open via logging or static breakpoint reasoning:
+   - `AddTab` ~510
+   - `OnLineChangeEdit` ~3242
+   - `RunDeferredFormDesign` ~4790
+   - `tbrTop_ButtonClick` ~10101/10116
+   - `tabCode_SelChange` side-effects
+   - Any `OnUndoEdit` / undo paths that set `TextChanged`
+2. **`ClearUndo` / `OnLineChangeEdit` / `OnUndoEdit` paths** — confirm whether `ClearUndo` after first `FormDesign` is necessary; consider moving `ClearUndo` before `FormDesign`, skipping `OnLineChange` during `ClearUndo` (`WithoutShow` already True but `ShowCaretPos` may still fire `OnLineChange`), or guarding `FormDesign` when `Des->DesignControl` is valid and tab is initializing.
+3. **`TabWindow.FormDesign` teardown (~8407–8438)** — when `DesignControl` already exists during tab init, **skip teardown** or **skip re-entry** entirely (early `Exit Sub` if design surface is fresh/valid).
+4. **`RunDeferredFormDesign`**, **`ApplyFormTabView`**, **`tabCode_SelChange`** — verify no duplicate `FormDesign` after deferred batch; check interaction with `mAddingTab=False` timing vs `ClearUndo`.
+5. **Revert experiment:** `git checkout --` workspace-defer changes (`RunDeferredFormDesign`, `FormNeedDesign`, `mApplyingWorkspaceLoad` paths) while **keeping LoadToolBox fix only** — isolate whether defer logic introduced the double-call or only exposed it.
+
+### Revert guidance
+
+**Do NOT commit** current broken state. User may roll back to last known good:
+
+```powershell
+# Revert specific files
+git checkout -- src/Main.bas src/Main.bi src/TabWindow.bas src/TabWindow.bi src/Designer.bas
+
+# Or stash everything (including untracked — use with care)
+git stash push -u -m "WIP form designer bug"
+
+# Or restore entire working tree to origin/main
+git checkout -- .
+```
+
+Binaries (`VisualFBEditor64.exe`, `mff64.dll`) and `Settings/VisualFBEditor64.ini` have local runtime changes — revert separately if needed.
+
+### Last compile
+
+`CompileDebug.bat` — **0 errors** (2026-07-06, end of session). Rebuild after any fix.
+
+### User test checklist (form designer surface)
+
+- [ ] Cold start IDE (no workspace) → open `.frm` from File → design surface shows form (not grey `pnlForm`)
+- [ ] Cold start with saved workspace containing `.frm` tabs → all form tabs restore with design surface
+- [ ] Switch Code / Form / Code+Form toolbar on open `.frm` — no flash-to-grey
+- [ ] Open second `.frm` tab — both design surfaces work
+- [ ] Edit code line in constructor region → design surface updates (no spurious teardown)
+- [ ] Toolbox populates; drag control onto form works
+- [ ] Save/reopen `.frm` — design surface persists
+- [ ] Non-form `.bas` — Code-only view; no Form toolbar errors
 
 ---
 

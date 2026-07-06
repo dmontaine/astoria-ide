@@ -31,36 +31,36 @@ End Function
 Function GetFullPath(ByRef Path As WString, ByRef FromFile As WString) As UString
 	If CInt(InStr(Path, ":") > 0) OrElse CInt(StartsWith(Path, "/")) OrElse CInt(StartsWith(Path, "\")) Then
 		If EndsWith(Path, "\..") OrElse EndsWith(Path, "/..") Then
-			Return GetFolderName(GetFolderName(Path))
+			Return WinOsPath(GetFolderName(GetFolderName(Path)))
 		Else
-			Return Path
+			Return WinOsPath(Path)
 		End If
 	ElseIf StartsWith(Path, "./") OrElse StartsWith(Path, ".\") Then
 		If FromFile = "" Then
 			If EndsWith(ExePath, "\..") OrElse EndsWith(ExePath, "/..") Then
-				Return GetFolderName(GetFolderName(ExePath)) & Mid(Path, 3)
+				Return WinOsPath(GetFolderName(GetFolderName(ExePath)) & Mid(Path, 3))
 			Else
-				Return ExePath & Slash & Mid(Path, 3)
+				Return WinOsPath(ExePath & Slash & Mid(Path, 3))
 			End If
 		Else
-			Return GetFolderName(FromFile) & Mid(Path, 3)
+			Return WinOsPath(GetFolderName(FromFile) & Mid(Path, 3))
 		End If
 	ElseIf StartsWith(Path, "../") OrElse StartsWith(Path, "..\") Then
 		If FromFile = "" Then
-			Return GetFolderName(ExePath) & Mid(Path, 4)
+			Return WinOsPath(GetFolderName(ExePath) & Mid(Path, 4))
 		Else
-			Return GetFolderName(GetFolderName(FromFile)) & Mid(Path, 4)
+			Return WinOsPath(GetFolderName(GetFolderName(FromFile)) & Mid(Path, 4))
 		End If
 	Else
 		If FromFile = "" Then
 			Dim As UString Path_ = GetFullPathInSystem(Path)
 			If Path_ <> "" Then
-				Return Path_
+				Return WinOsPath(Path_)
 			Else
-				Return ExePath & Slash & Path
+				Return WinOsPath(ExePath & Slash & Path)
 			End If
 		Else
-			Return GetFolderName(FromFile) & Path
+			Return WinOsPath(GetFolderName(FromFile) & Path)
 		End If
 	End If
 End Function
@@ -78,6 +78,96 @@ End Function
 
 Function WinOsPath(path As UString) As UString
 	Return Replace(path, BackSlash, Slash)
+End Function
+
+Function FormatMsgPath(ByRef Path As WString) As UString
+	Dim As UString p = WinOsPath(Path)
+	If p = "" Then Return ""
+	Return Replace(p, "\", "\" & WChr(13, 10))
+End Function
+
+Function FormatMsgPathU(path As UString) As UString
+	Dim As WString Ptr pathPtr
+	WLet(pathPtr, path)
+	Dim As UString result = FormatMsgPath(*pathPtr)
+	WDeAllocate(pathPtr)
+	Return result
+End Function
+
+' Control libraries live only under ExePath/Controls. Returns canonical "Controls/Name" for .vfp storage.
+Function GetControlLibraryVfpPath(path As UString) As UString
+	'' Normalize to forward slashes up front: the "/controls/" scan below is forward-slash
+	'' based, but absolute library paths arrive with backslashes (WinOsPath), which made this
+	'' return "" for every already-loaded library and broke the project-open "already loaded"
+	'' match (bFinded stayed false, causing duplicate library creation).
+	path = Replace(Trim(path, Any !" \t" + Chr(10) + Chr(13)), "\", "/")
+	If path = "" Then Return ""
+	If Right(LCase(path), 4) = ".dll" Then
+		path = GetFolderNameU(path, False)
+	End If
+	Dim As UString lower = LCase(path)
+	Dim As Integer ctrlPos = InStr(lower, "/controls/")
+	If ctrlPos > 0 Then
+		path = Mid(path, ctrlPos + 1)
+	ElseIf StartsWith(lower, "controls/") OrElse StartsWith(lower, "controls\") Then
+		' already under Controls
+	ElseIf InStr(path, ":") = 0 AndAlso Not StartsWith(path, "..") AndAlso InStr(path, "/") = 0 AndAlso InStr(path, "\") = 0 Then
+		path = "Controls/" & path
+	Else
+		Return ""
+	End If
+	path = Replace(path, "\", "/")
+	lower = LCase(path)
+	While StartsWith(lower, "controls/controls/")
+		path = "Controls/" & Mid(path, Len("Controls/Controls/") + 1)
+		lower = LCase(path)
+	Wend
+	Return path
+End Function
+
+Function GetControlLibraryFolder(path As UString) As UString
+	Dim As UString vfpPath = GetControlLibraryVfpPath(path)
+	If vfpPath = "" Then Return ""
+	Return WinOsPath(GetFullPathU(vfpPath))
+End Function
+
+Function IsValidProjectItemName(itemName As UString) As Boolean
+	itemName = Trim(itemName, Any !" \t" + Chr(10) + Chr(13))
+	If itemName = "" Then Return False
+	If InStr(itemName, "\") > 0 OrElse InStr(itemName, "/") > 0 OrElse InStr(itemName, ":") > 0 Then Return False
+	If InStr(itemName, ".") > 0 Then Return False
+	Return True
+End Function
+
+Function IsProjectOpenFileType(ByRef FileName As WString) As Boolean
+	Dim extPos As Integer = InStrRev(LCase(FileName), ".")
+	If extPos <= 0 Then Return False
+	Select Case LCase(Mid(FileName, extPos))
+	Case ".bi", ".bas", ".frm"
+		Return True
+	Case Else
+		Return False
+	End Select
+End Function
+
+Function FindProjectVfpInFolder(folder As UString) As UString
+	folder = WinOsPath(Trim(folder, Any !" \t" + Chr(10) + Chr(13)))
+	If folder = "" OrElse Not FolderExistsU(folder) Then Return ""
+	Dim As UString folderName = GetFileNameU(GetFolderNameU(folder, False))
+	Dim As UString preferred = WinOsPath(folder & Slash & folderName & ".vfp")
+	If FileExistsU(preferred) Then Return preferred
+	Dim As WStringList matches
+	Dim As WString * MAX_PATH entry = Dir(folder & Slash & "*.vfp")
+	While entry <> ""
+		matches.Add WinOsPath(folder & Slash & entry)
+		entry = Dir()
+	Wend
+	If matches.Count = 1 Then Return matches.Item(0)
+	If matches.Count > 1 Then
+		matches.Sort
+		Return matches.Item(0)
+	End If
+	Return ""
 End Function
 
 Function FolderExistsU(path As UString) As Boolean
@@ -231,9 +321,13 @@ Function GetRelativePath(ByRef Path As WString, ByRef FromFile As WString) As US
 			Return GetOSPath(GetFolderName(FromFile) & Mid(Path, 3))
 		End If
 	ElseIf StartsWith(Path, "../") OrElse StartsWith(Path, "..\") Then
-		Return GetOSPath(GetFolderName(GetFolderName(FromFile)) & Mid(Path, 4))
+		If FromFile = "" Then
+			Return WinOsPath(GetFolderName(ExePath) & Mid(Path, 4))
+		Else
+			Return WinOsPath(GetFolderName(GetFolderName(FromFile)) & Mid(Path, 4))
+		End If
 	End If
-	Dim Result As UString = GetOSPath(GetFolderName(FromFile) & Path)
+	Dim Result As UString = WinOsPath(GetFolderName(FromFile) & Path)
 	If GetFolderName(FromFile) <> "" AndAlso FileExists(Result) Then
 		Return Result
 	Else

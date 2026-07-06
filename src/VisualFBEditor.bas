@@ -210,14 +210,6 @@ Sub mClickMRU(ByRef Designer As My.Sys.Object, Sender As My.Sys.Object)
 		miRecentFiles->Clear
 		miRecentFiles->Enabled = False
 		MRUFiles.Clear
-	Case "ClearProjects"
-		miRecentProjects->Clear
-		miRecentProjects->Enabled = False
-		MRUProjects.Clear
-	Case "ClearFolders"
-		miRecentFolders->Clear
-		miRecentFolders->Enabled = False
-		MRUFolders.Clear
 	Case Else
 		OpenFiles GetFullPath(Sender.ToString)
 	End Select
@@ -309,7 +301,6 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 	Case "CloseProject":                        CloseProject GetParentNode(ptvExplorer->SelectedNode)
 	Case "NewFile":                             NewFile
 	Case "OpenFile":                            OpenEditorFile
-	Case "RecentFiles":                         OpenRecentFiles
 	Case "CloseFile":                           CloseEditorFile
 	Case "DeleteFile":                          DeleteEditorFile
 	Case "SaveFile":                            SaveEditorFile
@@ -678,34 +669,6 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 	Case "AddUserControl":                  AddFromTemplate ExePath + "/Templates/Files/User Control.bas"
 	Case "AddResource":                     AddFromTemplate ExePath + "/Templates/Files/Resource.rc"
 	Case "AddManifest":                     AddFromTemplate ExePath + "/Templates/Files/Manifest.xml"
-	Case "PlainText", "Utf8", "Utf8BOM", "Utf16BOM", "Utf32BOM"
-		Dim tb As TabWindow Ptr = Cast(TabWindow Ptr, ptabCode->SelectedTab)
-		Dim FileEncoding As FileEncodings
-		Select Case Sender.ToString
-		Case "PlainText": FileEncoding = FileEncodings.PlainText
-		Case "Utf8": FileEncoding = FileEncodings.Utf8
-		Case "Utf8BOM": FileEncoding = FileEncodings.Utf8BOM
-		Case "Utf16BOM": FileEncoding = FileEncodings.Utf16BOM
-		Case "Utf32BOM": FileEncoding = FileEncodings.Utf32BOM
-		End Select
-		ChangeFileEncoding FileEncoding
-		If tb <> 0 Then
-			tb->FileEncoding = FileEncoding
-			tb->Modified = True
-		End If
-	Case "WindowsCRLF", "LinuxLF", "MacOSCR"
-		Dim tb As TabWindow Ptr = Cast(TabWindow Ptr, ptabCode->SelectedTab)
-		Dim NewLineType As NewLineTypes
-		Select Case Sender.ToString
-		Case "WindowsCRLF": NewLineType = NewLineTypes.WindowsCRLF
-		Case "LinuxLF": NewLineType = NewLineTypes.LinuxLF
-		Case "MacOSCR": NewLineType = NewLineTypes.MacOSCR
-		End Select
-		ChangeNewLineType NewLineType
-		If tb <> 0 Then
-			tb->NewLineType = NewLineType
-			tb->Modified = True
-		End If
 	Case "Undo", "Redo", "CutCurrentLine", "Cut", "Copy", "Paste", "SelectAll", "Duplicate", "SingleComment", "BlockComment", "UnComment", _
 		"Indent", "Outdent", "Format", "Unformat", "AddSpaces", "Breakpoint", "ToggleBookmark", "CollapseAll", "UnCollapseAll", "CollapseAllProcedures", "UnCollapseAllProcedures", _
 		"CollapseCurrent", "UnCollapseCurrent", "CompleteWord", "ParameterInfo", "Define", _

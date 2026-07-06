@@ -1224,52 +1224,74 @@ Namespace My.Sys.Forms
 			Dim As TypeElement Ptr te = Comps.Object(Idx)
 			If te <> 0 AndAlso te->Tag <> 0 Then
 				If OldLibrary = te->Tag Then Return OldSymbols
-				If FLibs.Contains(te->Tag, Idx) Then
+				Dim As Integer libIdx = -1
+				If FLibs.Contains(te->Tag, libIdx) Then
 					OldClassName = AClassName
 					OldLibrary = te->Tag
-					OldSymbols = FSymbols.Item(Idx)
+					OldSymbols = FSymbols.Item(libIdx)
 					Return OldSymbols
 				Else
 					Dim As Library Ptr CtlLib = te->Tag
+					Dim As UString dllPath = GetFullPath(CtlLib->Path)
+					Dim As Any Ptr libHandle = DyLibLoad(dllPath)
+					If libHandle = 0 AndAlso CtlLib->Handle <> 0 Then
+						'' CtlLib->Path can be a folder (not the .dll) after a project opens, so
+						'' DyLibLoad fails even though the module is already loaded. Re-load it by its
+						'' real on-disk path (recovered from the live handle) so the refcount stays
+						'' balanced: the Designer destructor DyLibFree's st->Handle, and borrowing the
+						'' handle without a matching DyLibLoad would unload mff64.dll after the first
+						'' designer closes and break every project opened afterwards.
+						Dim As WString * (MAX_PATH + 1) modPath
+						If GetModuleFileNameW(Cast(HMODULE, CtlLib->Handle), @modPath, MAX_PATH) > 0 Then
+							dllPath = modPath
+							libHandle = DyLibLoad(dllPath)
+						End If
+					End If
+					If libHandle = 0 Then Goto SymbolsFailed
+					If CtlLib->Handle = 0 Then CtlLib->Handle = libHandle
 					Var st = _New(SymbolsType)
-					st->Handle = DyLibLoad(GetFullPath(CtlLib->Path))
-					st->Path = GetFullPath(CtlLib->Path)
-					st->CreateControlFunc = DyLibSymbol(st->Handle, "CreateControl")
-					st->CreateComponentFunc = DyLibSymbol(st->Handle, "CreateComponent")
-					st->ReadPropertyFunc = DyLibSymbol(st->Handle, "ReadProperty")
-					st->WritePropertyFunc = DyLibSymbol(st->Handle, "WriteProperty")
-					st->DeleteComponentFunc = DyLibSymbol(st->Handle, "DeleteComponent")
-					st->DeleteAllObjectsFunc = DyLibSymbol(st->Handle, "DeleteAllObjects")
-					st->RemoveControlSub = DyLibSymbol(st->Handle, "RemoveControl")
-					st->ControlByIndexFunc = DyLibSymbol(st->Handle, "ControlByIndex")
-					st->Q_ComponentFunc = DyLibSymbol(st->Handle, "Q_Component")
-					st->ComponentGetBoundsSub = DyLibSymbol(st->Handle, "ComponentGetBounds")
-					st->ComponentSetBoundsSub = DyLibSymbol(st->Handle, "ComponentSetBounds")
-					st->ControlIsContainerFunc = DyLibSymbol(st->Handle, "ControlIsContainer")
-					st->IsControlFunc = DyLibSymbol(st->Handle, "IsControl")
-					st->IsComponentFunc = DyLibSymbol(st->Handle, "IsComponent")
-					st->ControlSetFocusSub = DyLibSymbol(st->Handle, "ControlSetFocus")
-					st->ControlFreeWndSub = DyLibSymbol(st->Handle, "ControlFreeWnd")
-					st->ControlRepaintSub = DyLibSymbol(st->Handle, "ControlRepaint")
-					st->ToStringFunc = DyLibSymbol(st->Handle, "ToString")
-					st->CreateObjectFunc = DyLibSymbol(st->Handle, "CreateObject")
-					st->ObjectDeleteFunc = DyLibSymbol(st->Handle, "ObjectDelete")
-					st->MenuByIndexFunc = DyLibSymbol(st->Handle, "MenuByIndex")
-					st->MenuItemByIndexFunc = DyLibSymbol(st->Handle, "MenuItemByIndex")
-					st->MenuFindByCommandFunc = DyLibSymbol(st->Handle, "MenuFindByCommand")
-					st->MenuRemoveSub = DyLibSymbol(st->Handle, "MenuRemove")
-					st->MenuItemRemoveSub = DyLibSymbol(st->Handle, "MenuItemRemove")
-					st->ToolBarButtonByIndexFunc = DyLibSymbol(st->Handle, "ToolBarButtonByIndex")
-					st->ToolBarRemoveButtonSub = DyLibSymbol(st->Handle, "ToolBarRemoveButton")
-					st->StatusBarPanelByIndexFunc = DyLibSymbol(st->Handle, "StatusBarPanelByIndex")
-					st->StatusBarRemovePanelSub = DyLibSymbol(st->Handle, "StatusBarRemovePanel")
-					st->GraphicTypeLoadFromFileFunc = DyLibSymbol(st->Handle, "GraphicTypeLoadFromFile")
-					st->BitmapTypeLoadFromFileFunc = DyLibSymbol(st->Handle, "BitmapTypeLoadFromFile")
-					st->IconLoadFromFileFunc = DyLibSymbol(st->Handle, "IconLoadFromFile")
-					st->CursorLoadFromFileFunc = DyLibSymbol(st->Handle, "CursorLoadFromFile")
-					st->ImageListAddFromFileSub = DyLibSymbol(st->Handle, "ImageListAddFromFile")
-					st->ImageListIndexOfFunc = DyLibSymbol(st->Handle, "ImageListIndexOf")
-					st->ImageListClearSub = DyLibSymbol(st->Handle, "ImageListClear")
+					st->Handle = libHandle
+					st->Path = dllPath
+					st->CreateControlFunc = DyLibSymbol(libHandle, "CreateControl")
+					st->CreateComponentFunc = DyLibSymbol(libHandle, "CreateComponent")
+					st->ReadPropertyFunc = DyLibSymbol(libHandle, "ReadProperty")
+					st->WritePropertyFunc = DyLibSymbol(libHandle, "WriteProperty")
+					st->DeleteComponentFunc = DyLibSymbol(libHandle, "DeleteComponent")
+					st->DeleteAllObjectsFunc = DyLibSymbol(libHandle, "DeleteAllObjects")
+					st->RemoveControlSub = DyLibSymbol(libHandle, "RemoveControl")
+					st->ControlByIndexFunc = DyLibSymbol(libHandle, "ControlByIndex")
+					st->Q_ComponentFunc = DyLibSymbol(libHandle, "Q_Component")
+					st->ComponentGetBoundsSub = DyLibSymbol(libHandle, "ComponentGetBounds")
+					st->ComponentSetBoundsSub = DyLibSymbol(libHandle, "ComponentSetBounds")
+					st->ControlIsContainerFunc = DyLibSymbol(libHandle, "ControlIsContainer")
+					st->IsControlFunc = DyLibSymbol(libHandle, "IsControl")
+					st->IsComponentFunc = DyLibSymbol(libHandle, "IsComponent")
+					st->ControlSetFocusSub = DyLibSymbol(libHandle, "ControlSetFocus")
+					st->ControlFreeWndSub = DyLibSymbol(libHandle, "ControlFreeWnd")
+					st->ControlRepaintSub = DyLibSymbol(libHandle, "ControlRepaint")
+					st->ToStringFunc = DyLibSymbol(libHandle, "ToString")
+					st->CreateObjectFunc = DyLibSymbol(libHandle, "CreateObject")
+					st->ObjectDeleteFunc = DyLibSymbol(libHandle, "ObjectDelete")
+					st->MenuByIndexFunc = DyLibSymbol(libHandle, "MenuByIndex")
+					st->MenuItemByIndexFunc = DyLibSymbol(libHandle, "MenuItemByIndex")
+					st->MenuFindByCommandFunc = DyLibSymbol(libHandle, "MenuFindByCommand")
+					st->MenuRemoveSub = DyLibSymbol(libHandle, "MenuRemove")
+					st->MenuItemRemoveSub = DyLibSymbol(libHandle, "MenuItemRemove")
+					st->ToolBarButtonByIndexFunc = DyLibSymbol(libHandle, "ToolBarButtonByIndex")
+					st->ToolBarRemoveButtonSub = DyLibSymbol(libHandle, "ToolBarRemoveButton")
+					st->StatusBarPanelByIndexFunc = DyLibSymbol(libHandle, "StatusBarPanelByIndex")
+					st->StatusBarRemovePanelSub = DyLibSymbol(libHandle, "StatusBarRemovePanel")
+					st->GraphicTypeLoadFromFileFunc = DyLibSymbol(libHandle, "GraphicTypeLoadFromFile")
+					st->BitmapTypeLoadFromFileFunc = DyLibSymbol(libHandle, "BitmapTypeLoadFromFile")
+					st->IconLoadFromFileFunc = DyLibSymbol(libHandle, "IconLoadFromFile")
+					st->CursorLoadFromFileFunc = DyLibSymbol(libHandle, "CursorLoadFromFile")
+					st->ImageListAddFromFileSub = DyLibSymbol(libHandle, "ImageListAddFromFile")
+					st->ImageListIndexOfFunc = DyLibSymbol(libHandle, "ImageListIndexOf")
+					st->ImageListClearSub = DyLibSymbol(libHandle, "ImageListClear")
+					If st->CreateControlFunc = 0 Then
+						_Delete(st)
+						Goto SymbolsFailed
+					End If
 					FSymbols.Add st
 					FLibs.Add CtlLib
 					OldClassName = AClassName
@@ -1279,6 +1301,7 @@ Namespace My.Sys.Forms
 				End If
 			End If
 		End If
+SymbolsFailed:
 		OldClassName = AClassName
 		OldLibrary = 0
 		OldSymbols = 0

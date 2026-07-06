@@ -272,6 +272,9 @@ Declare Function GetTabFromTn(tn As TreeNode Ptr) As TabWindow Ptr
 
 Declare Function AddTab(ByRef FileName As WString = "", bNew As Boolean = False, TreeN As TreeNode Ptr = 0, bNoActivate As Boolean = False) As TabWindow Ptr
 
+Declare Sub ApplyFormTabView(tb As TabWindow Ptr)
+Declare Sub RefreshDesignSurface(tb As TabWindow Ptr)
+
 Const SingleConstructions = "else,#else,next,do,loop,wend"
 
 Declare Sub ClearMessages() '...'

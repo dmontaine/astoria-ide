@@ -702,7 +702,8 @@ Private Sub frmProjectProperties.cmdOK_Click(ByRef Designer As My.Sys.Object, By
 		If .optDevelopment.Checked Then ppe->CompileMode = Development Else ppe->CompileMode = Final
 		ppe->Components.Clear
 		For i As Integer = 0 To .lstComponents.ItemCount - 1
-			ppe->Components.Add .lstComponents.Item(i)
+			Dim As UString ComponentPath = GetControlLibraryVfpPath(.lstComponents.Item(i))
+			If ComponentPath <> "" Then ppe->Components.Add ComponentPath
 		Next
 		ppe->IncludePaths.Clear
 		For i As Integer = 0 To .lstOtherIncludes.ItemCount - 1
@@ -836,7 +837,8 @@ Public Sub frmProjectProperties.RefreshProperties()
 				.optDevelopment.Checked = (ppe->CompileMode = Development)
 				.optFinal.Checked = (ppe->CompileMode = Final)
 				For i As Integer = 0 To ppe->Components.Count - 1
-					.lstComponents.AddItem ppe->Components.Item(i)
+					Dim As UString ComponentPath = GetControlLibraryVfpPath(ppe->Components.Item(i))
+					If ComponentPath <> "" Then .lstComponents.AddItem ComponentPath
 				Next
 				For i As Integer = 0 To ppe->IncludePaths.Count - 1
 					.lstOtherIncludes.AddItem ppe->IncludePaths.Item(i)
@@ -938,11 +940,22 @@ Private Sub frmProjectProperties.Form_Create(ByRef Sender As Control)
 End Sub
 
 Private Sub frmProjectProperties.cmdAddComponent_Click(ByRef Sender As Control)
-	pfPath->txtPath.Text = ""
+	pfPath->txtPath.Text = ExePath & Slash & "Controls"
 	pfPath->ChooseFolder = True
 	If pfPath->ShowModal(Me) = ModalResults.OK Then
-		If Not lstComponents.Items.Contains(pfPath->txtPath.Text) Then
-			lstComponents.AddItem pfPath->txtPath.Text
+		Dim As UString controlsRoot = WinOsPath(ExePath & Slash & "Controls")
+		Dim As UString selected = WinOsPath(pfPath->txtPath.Text)
+		If Not StartsWith(LCase(selected), LCase(controlsRoot)) Then
+			MsgBox ML("Control libraries must be in the editor Controls folder.") & ":" & WChr(13, 10) & WChr(13, 10) & FormatMsgPathU(selected), , mtWarning
+			Return
+		End If
+		Dim As UString vfpPath = GetControlLibraryVfpPath(selected)
+		If vfpPath = "" Then
+			MsgBox ML("Control library must be a subfolder of Controls."), , mtWarning
+			Return
+		End If
+		If Not lstComponents.Items.Contains(vfpPath) Then
+			lstComponents.AddItem vfpPath
 		Else
 			MsgBox ML("This path is exists!")
 		End If

@@ -22,5 +22,12 @@ Declare Function FileExistsU(path As UString) As Boolean
 Declare Function GetFolderNameU(path As UString, WithSlash As Boolean = True) As UString
 Declare Function GetFileNameU(path As UString, WithExtension As Boolean = True) As UString
 Declare Function WinOsPath(path As UString) As UString
+Declare Function FormatMsgPath(ByRef Path As WString) As UString
+Declare Function FormatMsgPathU(path As UString) As UString
+Declare Function GetControlLibraryVfpPath(path As UString) As UString
+Declare Function GetControlLibraryFolder(path As UString) As UString
+Declare Function IsValidProjectItemName(itemName As UString) As Boolean
+Declare Function IsProjectOpenFileType(ByRef FileName As WString) As Boolean
+Declare Function FindProjectVfpInFolder(folder As UString) As UString
 Declare Function CopyFileU(src As UString, dest As UString) As Boolean
 

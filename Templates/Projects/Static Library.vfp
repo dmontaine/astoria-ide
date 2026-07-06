@@ -18,6 +18,7 @@ LegalTrademarks=""
 OriginalFilename=""
 ProductName="{ProjectName}"
 CompileToGCC=false
+CompileMode=0
 OptimizationLevel=0
 OptimizationFastCode=false
 OptimizationSmallCode=false

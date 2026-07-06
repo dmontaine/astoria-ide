@@ -15,4 +15,12 @@ Declare Function GetFullPathInSystem(ByRef Path As WString) As UString
 Declare Function GetFullPath(ByRef Path As WString, ByRef FromFile As WString = "") As UString
 Declare Function GetRelative(ByRef FileName As WString, ByRef FromFile As WString) As UString
 Declare Function GetRelativePath(ByRef Path As WString, ByRef FromFile As WString = "") As UString
+Declare Function EnsureDirectoryExists(FolderPath As UString) As Boolean
+Declare Function GetFullPathU(FolderPath As UString) As UString
+Declare Function FolderExistsU(path As UString) As Boolean
+Declare Function FileExistsU(path As UString) As Boolean
+Declare Function GetFolderNameU(path As UString, WithSlash As Boolean = True) As UString
+Declare Function GetFileNameU(path As UString, WithExtension As Boolean = True) As UString
+Declare Function WinOsPath(path As UString) As UString
+Declare Function CopyFileU(src As UString, dest As UString) As Boolean
 

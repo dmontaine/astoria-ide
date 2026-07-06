@@ -450,9 +450,9 @@ Function Compile(Parameter As String, bAll As Boolean) As Integer
 			ThreadsLeave()
 			If Parameter = "Run" Then
 				If Project <> 0 Then
-					RunPr , *Project->FileName, *Project->CommandLineArguments, *ctx.MainFile, CompileLine, *ctx.FirstLine
+					RunPr "", *Project->FileName, *Project->CommandLineArguments, *ctx.MainFile, CompileLine, *ctx.FirstLine
 				Else
-					RunPr , "", "", *ctx.MainFile, CompileLine, *ctx.FirstLine
+					RunPr "", "", "", *ctx.MainFile, CompileLine, *ctx.FirstLine
 				End If
 			ElseIf Parameter = "RunWithDebug" Then
 				If Project <> 0 Then

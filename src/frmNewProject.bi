@@ -19,6 +19,7 @@
 		Declare Sub lvTemplates_SelectedItemChanged(ByRef Sender As ListView, ByVal ItemIndex As Integer)
 		Declare Static Sub Form_Create_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Sub Form_Create(ByRef Sender As Control)
+		Declare Sub AddProjectTemplateItem(ByRef TemplateName As String)
 		Declare Constructor
 		
 		Dim As ListView lvTemplates
@@ -27,7 +28,7 @@
 		Dim As TextBox txtProjectName
 		Dim As Panel pnlProjectName, pnlBottom
 		Dim As WStringList TemplateNames
-		Dim As UString SelectedTemplate, SelectedFolder
+		Dim As UString SelectedTemplate, SelectedFolder, SelectedProjectFile
 	End Type
 	
 	Common Shared pfNewProject As frmNewProject Ptr

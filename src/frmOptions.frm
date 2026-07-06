@@ -2864,7 +2864,7 @@ pfOptions = @fOptions
 
 Private Sub frmOptions.cmdOK_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	cmdApply_Click(Designer, Sender)
-	fOptions.CloseForm
+	If fOptions.LastApplySucceeded Then fOptions.CloseForm
 End Sub
 
 Private Sub frmOptions.cmdCancel_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
@@ -3426,9 +3426,21 @@ End Sub
 
 Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	On Error Goto ErrorHandler
+	fOptions.LastApplySucceeded = True
 	Dim As ToolType Ptr Tool
 	Dim As UString tempStr
 	With fOptions
+		Dim As UString projectsPathInput = Trim(.txtProjectsPath.Text, Any !" \t" + Chr(10) + Chr(13))
+		If projectsPathInput <> "" Then
+			Dim As UString projectsDir = GetFullPathU(projectsPathInput)
+			If Not FolderExistsU(projectsDir) Then
+				If Not EnsureDirectoryExists(projectsPathInput) AndAlso Not FolderExistsU(projectsDir) Then
+					MsgBox ML("New Projects Directory Could Not Be Created")
+					fOptions.LastApplySucceeded = False
+					Exit Sub
+				End If
+			End If
+		End If
 		SetBundledCompilerPath()
 		For i As Integer = 0 To pTerminals->Count - 1
 			_Delete(Cast(ToolType Ptr, pTerminals->Item(i)->Object))
@@ -4042,6 +4054,7 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 	End With
 	Exit Sub
 	ErrorHandler:
+	fOptions.LastApplySucceeded = False
 	MsgBox ErrDescription(Err) & " (" & Err & ") " & _
 	"in line " & Erl() & " (Handler line: " & __LINE__ & ") " & _
 	"in function " & ZGet(Erfn()) & " (Handler function: " & __FUNCTION__ & ") " & _

@@ -306,7 +306,6 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 	Case "OpenFolder":                          OpenFolder
 	Case "SaveProject":                         SaveProject ptvExplorer->SelectedNode
 	Case "SaveProjectAs":                       SaveProject ptvExplorer->SelectedNode, True
-	Case "CloseFolder":                         CloseFolder GetParentNode(ptvExplorer->SelectedNode)
 	Case "CloseProject":                        CloseProject GetParentNode(ptvExplorer->SelectedNode)
 	Case "NewFile":                             NewFile
 	Case "OpenFile":                            OpenEditorFile
@@ -367,8 +366,9 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 	Case "Debug":                               ShowDebugToolBar = Not ShowDebugToolBar: MainReBar.Bands.Item(4)->Visible = ShowDebugToolBar: mnuDebugToolBar->Checked = ShowDebugToolBar: pfrmMain->RequestAlign
 	Case "Run":                                 ShowRunToolBar = Not ShowRunToolBar: MainReBar.Bands.Item(5)->Visible = ShowRunToolBar: mnuRunToolBar->Checked = ShowRunToolBar: pfrmMain->RequestAlign
 	Case "TBUseDebugger":                       ChangeUseDebugger tbtUseDebugger->Checked, 0
-	Case "UseDebugger":                         ChangeUseDebugger Not mnuUseDebugger->Checked, 1
-	Case "UseProfiler":                         mnuUseProfiler->Checked = Not mnuUseProfiler->Checked
+	Case "UseDebugger":                         ChangeUseDebugger Not UseDebugger, 1
+	Case "UseProfiler":                         If UseDebugger Then ChangeUseProfiler Not mnuUseProfiler->Checked, 1
+	Case "ClearAllBreakpoints":                 ClearAllBreakpoints
 	Case "ShowWithFolders":                     ChangeFolderType ProjectFolderTypes.ShowWithFolders
 	Case "ShowWithoutFolders":                  ChangeFolderType ProjectFolderTypes.ShowWithoutFolders
 	Case "ShowAsFolder":                        ChangeFolderType ProjectFolderTypes.ShowAsFolder
@@ -380,17 +380,6 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 	Case "Suggestions":                         Suggestions
 	Case "FormatProject":                       ThreadCounter(ThreadCreate_(@FormatProject)) 'FormatProject 0
 	Case "UnformatProject":                     ThreadCounter(ThreadCreate_(@FormatProject, Cast(Any Ptr, 1))) 'FormatProject Cast(Any Ptr, 1)
-	Case "ProjectNumberOn":                     ThreadCounter(ThreadCreate_(@NumberingProject, @Sender))
-	Case "ProjectMacroNumberOn":                ThreadCounter(ThreadCreate_(@NumberingProject, @Sender))
-	Case "ProjectMacroNumberOnStartsOfProcs":ThreadCounter(ThreadCreate_(@NumberingProject, @Sender))
-	Case "ProjectNumberOff":            ThreadCounter(ThreadCreate_(@NumberingProject, @Sender))
-	Case "ProjectPreprocessorNumberOn": ThreadCounter(ThreadCreate_(@NumberingProject, @Sender))
-	Case "ProjectPreprocessorNumberOff": ThreadCounter(ThreadCreate_(@NumberingProject, @Sender))
-	Case "ModuleMacroNumberOn":        ThreadCounter(ThreadCreate_(@NumberingModule, @Sender))
-	Case "ModuleMacroNumberOnStartsOfProcs": ThreadCounter(ThreadCreate_(@NumberingModule, @Sender))
-	Case "ModuleNumberOff":            ThreadCounter(ThreadCreate_(@NumberingModule, @Sender))
-	Case "ModulePreprocessorNumberOn": ThreadCounter(ThreadCreate_(@NumberingModule, @Sender))
-	Case "ModulePreprocessorNumberOff": ThreadCounter(ThreadCreate_(@NumberingModule, @Sender))
 	Case "Parameters":                          pfParameters->ShowModal *pfrmMain : pfParameters->CenterToParent
 	Case "GDBCommand":                          GDBCommand
 	Case "StartWithCompile"
@@ -406,10 +395,10 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 					ThreadCounter(ThreadCreate_(@CompileAndRun))
 				End If
 			Else
-				continue_debug
+				continue_debug()
 			End If
 		End If
-	Case "Start"
+	Case "Start", "Continue"
 		ClearThreadsWindow
 		If iFlagStartDebug = 0 Then
 			If UseDebugger Then
@@ -424,9 +413,9 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 			continue_debug()
 		End If
 	Case "Break":
-			' Pause-while-running was only ever wired up for the Integrated debugger
-			' (now removed); GDB has no equivalent interrupt path yet. Pre-existing
-			' gap, not a regression -- see PROJECT_STATUS.md.
+		If iFlagStartDebug = 1 Then
+			break_debug()
+		End If
 	Case "End":
 		If Running Then
 			kill_debug()
@@ -439,7 +428,6 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 		command_debug("r")
 	Case "StepInto":
 		ClearThreadsWindow
-		ptabBottom->TabIndex = 6 'David Changed
 		If iFlagStartDebug = 0 Then
 			runtype = RTSTEP
 			CurrentTimer = SetTimer(0, 0, 1, Cast(Any Ptr, @TimerProcGDB))
@@ -592,7 +580,7 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 			If iFlagStartDebug = 0 Then
 				ThreadCounter(ThreadCreate_(@StartDebugging))
 			Else
-				step_debug("n")
+				step_debug("finish")
 			End If
 		Case "RunToCursor":
 			ClearThreadsWindow
@@ -719,9 +707,8 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 			tb->Modified = True
 		End If
 	Case "Undo", "Redo", "CutCurrentLine", "Cut", "Copy", "Paste", "SelectAll", "Duplicate", "SingleComment", "BlockComment", "UnComment", _
-		"Indent", "Outdent", "Format", "Unformat", "AddSpaces", "NumberOn", "MacroNumberOn", "NumberOff", "ProcedureNumberOn", "ProcedureMacroNumberOn", "ProcedureNumberOff", _
-		"PreprocessorNumberOn", "PreprocessorNumberOff", "Breakpoint", "ToggleBookmark", "CollapseAll", "UnCollapseAll", "CollapseAllProcedures", "UnCollapseAllProcedures", _
-		"CollapseCurrent", "UnCollapseCurrent", "CompleteWord", "ParameterInfo", "OnErrorGoto", "OnErrorGotoResumeNext", "OnLocalErrorGoto", "OnLocalErrorGotoResumeNext", "RemoveErrorHandling", "Define", _
+		"Indent", "Outdent", "Format", "Unformat", "AddSpaces", "Breakpoint", "ToggleBookmark", "CollapseAll", "UnCollapseAll", "CollapseAllProcedures", "UnCollapseAllProcedures", _
+		"CollapseCurrent", "UnCollapseCurrent", "CompleteWord", "ParameterInfo", "Define", _
 		"AlignLefts", "AlignCenters", "AlignRights", "AlignTops", "AlignMiddles", "AlignBottoms", "AlignToGrid", "MakeSameSizeWidth", "MakeSameSizeHeight", "MakeSameSizeBoth", "SizeToGrid", _
 		"HorizontalSpacingMakeEqual", "HorizontalSpacingIncrease", "HorizontalSpacingDecrease", "HorizontalSpacingRemove", "VerticalSpacingMakeEqual", "VerticalSpacingIncrease", "VerticalSpacingDecrease", _
 		"VerticalSpacingRemove", "CenterInParentHorizontally", "CenterInParentVertically", "SendToBack", "BringToFront", "LockControls", "TBLockControls"
@@ -814,20 +801,6 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 				Case "ParameterInfo":               ParameterInfo 0
 				Case "ToggleBookmark":              ec->Bookmark
 				Case "Define":                      tb->Define
-				Case "NumberOn":        	        tb->NumberOn
-				Case "MacroNumberOn":        	    tb->NumberOn , , True
-				Case "NumberOff":                   tb->NumberOff
-				Case "ProcedureNumberOn":           tb->ProcedureNumberOn
-				Case "ProcedureMacroNumberOn":      tb->ProcedureNumberOn True
-				Case "ProcedureNumberOff":          tb->ProcedureNumberOff
-				Case "PreprocessorNumberOn":        tb->PreprocessorNumberOn
-				Case "PreprocessorNumberOff":       tb->PreprocessorNumberOff
-					'Case "OnErrorResumeNext":       tb->SetErrorHandling "On Error Resume Next", ""
-				Case "OnErrorGoto":                 tb->SetErrorHandling "On Error Goto ErrorHandler", ""
-				Case "OnErrorGotoResumeNext":       tb->SetErrorHandling "On Error Goto ErrorHandler", "Resume Next"
-				Case "OnLocalErrorGoto":            tb->SetErrorHandling "On Local Error Goto ErrorHandler", ""
-				Case "OnLocalErrorGotoResumeNext":  tb->SetErrorHandling "On Local Error Goto ErrorHandler", "Resume Next"
-				Case "RemoveErrorHandling":         tb->RemoveErrorHandling
 				End Select
 			End If
 		End If

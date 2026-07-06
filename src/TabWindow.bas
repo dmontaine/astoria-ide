@@ -1,4 +1,4 @@
-'#########################################################
+﻿'#########################################################
 '#  TabWindow.bas                                        #
 '#  This file is part of VisualFBEditor                  #
 '#  Authors: Xusinboy Bekchanov (bxusinboy@mail.ru)      #
@@ -198,106 +198,6 @@ Sub FormatProject(UnFormat As Any Ptr)
 	ThreadsLeave()
 End Sub
 
-Sub NumberingModule(pSender As Any Ptr)
-	Dim As Boolean bMacro = StartsWith(Cast(My.Sys.Object Ptr, pSender)->ToString, "ModuleMacroNumberOn")
-	Dim As Boolean bStartsOfProcedures = EndsWith(Cast(My.Sys.Object Ptr, pSender)->ToString, "StartsOfProcs")
-	Dim As Boolean bPreprocessor = StartsWith(Cast(My.Sys.Object Ptr, pSender)->ToString, "ModulePreprocessor")
-	Dim As Boolean bRemove = Cast(My.Sys.Object Ptr, pSender)->ToString = "ModuleNumberOff"
-	Dim As Boolean bRemovePreprocessor = Cast(My.Sys.Object Ptr, pSender)->ToString = "ModulePreprocessorNumberOff"
-	Dim As EditControl Ptr ptxt
-	Dim As TabWindow Ptr tbCurrent = Cast(TabWindow Ptr, ptabCode->SelectedTab)
-	If tbCurrent <> 0 Then tbCurrent->txtCode.UpdateLock Else Exit Sub
-	pfrmMain->Enabled = False
-	StartProgress
-	ptxt = @tbCurrent->txtCode
-	If bPreprocessor Then
-		If bRemovePreprocessor Then PreprocessorNumberingOff(*ptxt, True) Else PreprocessorNumberingOn(*ptxt, tbCurrent->FileName, True)
-	Else
-		Dim As Integer ehStart, ehEnd
-		Dim As Integer iSelStartLine, iSelEndLine, iSelStartChar, iSelEndChar, k, Pos1
-		ptxt->GetSelection iSelStartLine, iSelEndLine, iSelStartChar, iSelEndChar
-		If iSelStartLine> 0 AndAlso iSelStartLine <> iSelEndLine Then
-			ehStart = iSelStartLine : ehEnd = iSelEndLine
-		Else
-			ehStart = 0 : ehEnd = ptxt->LinesCount - 1
-		End If
-		If bRemove Then NumberingOff(ehStart, ehEnd, *ptxt, True) Else NumberingOn(0, ptxt->LinesCount - 1, bMacro, *ptxt, True, bStartsOfProcedures)
-	End If
-	StopProgress
-	pfrmMain->Enabled = True
-	If tbCurrent <> 0 Then tbCurrent->txtCode.UpdateUnLock
-End Sub
-
-Sub NumberingProject(pSender As Any Ptr)
-	Dim As TreeNode Ptr tn, tn1, tn2 = ptvExplorer->SelectedNode
-	Dim As ExplorerElement Ptr ee
-	Dim As Boolean bMacro = StartsWith(Cast(My.Sys.Object Ptr, pSender)->ToString, "ProjectMacroNumberOn")
-	Dim As Boolean bStartsOfProcedures = EndsWith(Cast(My.Sys.Object Ptr, pSender)->ToString, "StartsOfProcs")
-	Dim As Boolean bPreprocessor = StartsWith(Cast(My.Sys.Object Ptr, pSender)->ToString, "ProjectPreprocessor")
-	Dim As Boolean bRemove = Cast(My.Sys.Object Ptr, pSender)->ToString = "ProjectNumberOff"
-	Dim As Boolean bRemovePreprocessor = Cast(My.Sys.Object Ptr, pSender)->ToString = "ProjectPreprocessorNumberOff"
-	Dim As EditControl txt
-	Dim As EditControl Ptr ptxt
-	Dim As TabWindow Ptr tb, tbCurrent = Cast(TabWindow Ptr, ptabCode->SelectedTab)
-	Dim FileEncoding As FileEncodings, NewLineType As NewLineTypes
-	If tn2 <> 0 Then tn2 = GetParentNode(tn2)
-	If tn2 = 0 OrElse tn2->ImageKey <> "Project" Then Exit Sub
-	If tbCurrent <> 0 Then tbCurrent->txtCode.UpdateLock
-	pfrmMain->Enabled = False
-	StartProgress
-	For i As Integer = 0 To tn2->Nodes.Count - 1
-		tn = tn2->Nodes.Item(i)
-		ee = tn->Tag
-		If ee = 0 Then
-			For j As Integer = 0 To tn->Nodes.Count - 1
-				tn1 = tn->Nodes.Item(j)
-				If tn1 <> 0 Then
-					ee = tn1->Tag
-					If ee <> 0 AndAlso (EndsWith(LCase(*ee->FileName), ".bas") OrElse EndsWith(LCase(*ee->FileName), ".bi") OrElse EndsWith(LCase(*ee->FileName), ".inc") OrElse EndsWith(LCase(*ee->FileName), ".frm")) Then
-						tb = GetTab(*ee->FileName)
-						If tb = 0 Then
-							txt.LoadFromFile(*ee->FileName, FileEncoding, NewLineType)
-							ptxt = @txt
-						Else
-							ptxt = @tb->txtCode
-						End If
-						If bPreprocessor Then
-							If bRemovePreprocessor Then PreprocessorNumberingOff(*ptxt, True) Else PreprocessorNumberingOn(*ptxt, *ee->FileName, True)
-						Else
-							If bRemove Then NumberingOff(0, ptxt->LinesCount - 1, *ptxt, True) Else NumberingOn(0, ptxt->LinesCount - 1, bMacro, *ptxt, True, bStartsOfProcedures)
-						End If
-						If tb = 0 Then
-							FileCopy  *ee->FileName, GetBakFileName(*ee->FileName)
-							ptxt->SaveToFile(*ee->FileName, FileEncoding, NewLineType)
-						End If
-					End If
-				End If
-			Next
-		ElseIf (EndsWith(LCase(*ee->FileName), ".bas") OrElse EndsWith(LCase(*ee->FileName), ".bi") OrElse EndsWith(LCase(*ee->FileName), ".inc") OrElse EndsWith(LCase(*ee->FileName), ".frm")) Then
-			tb = GetTab(*ee->FileName)
-			If tb = 0 Then
-				txt.LoadFromFile(*ee->FileName, FileEncoding, NewLineType)
-				ptxt = @txt
-			Else
-				ptxt = @tb->txtCode
-			End If
-			If bPreprocessor Then
-				If bRemovePreprocessor Then PreprocessorNumberingOff(*ptxt, True) Else PreprocessorNumberingOn(*ptxt, *ee->FileName, True)
-			Else
-				If bRemove Then NumberingOff(0, ptxt->LinesCount - 1, *ptxt, True) Else NumberingOn(0, ptxt->LinesCount - 1, bMacro, *ptxt, True, bStartsOfProcedures)
-			End If
-			If tb = 0 Then
-				FileCopy  *ee->FileName, GetBakFileName(*ee->FileName)
-				ptxt->SaveToFile(*ee->FileName, FileEncoding, NewLineType)
-			End If
-		End If
-	Next
-	StopProgress
-	pfrmMain->Enabled = True
-	If tbCurrent <> 0 Then tbCurrent->txtCode.UpdateUnLock
-	MsgBox ML("Done") & "!"
-End Sub
-
 Function GetTab(ByRef FileName As WString) As TabWindow Ptr
 	Dim As TabWindow Ptr tb
 	For j As Integer = 0 To TabPanels.Count - 1
@@ -335,6 +235,7 @@ Function ProjectNameSameWithFolder(ptn As TreeNode Ptr) As Boolean
 End Function
 
 Sub ChangeMenuItemsEnabled
+	If iFlagStartDebug = 1 Then Exit Sub
 	Dim As TreeNode Ptr ptn = GetParentNode(tvExplorer.SelectedNode)
 	Dim bEnabled As Boolean = tvExplorer.Nodes.Count > 0
 	Dim bEnabledTab As Boolean = miWindow->Count > 3
@@ -349,7 +250,6 @@ Sub ChangeMenuItemsEnabled
 	miSaveProjectAs->Enabled = bEnabledProjectAndFolder
 	miCloseProject->Enabled = bEnabledProjectAndFolder
 	miDeleteProject->Enabled = bEnabledProjectAndFolder
-	miCloseFolder->Enabled = bEnabledProjectAndFolder
 	miExplorerCloseProject->Enabled = bEnabledProjectAndFolder
 	miProjectProperties->Enabled = bEnabledProjectAndFolder
 	miExplorerProjectProperties->Enabled = bEnabledProjectAndFolder
@@ -385,11 +285,7 @@ Sub ChangeMenuItemsEnabled
 	miPreviousBookmark->Enabled = bEnabled
 	miClearAllBookmarks->Enabled = bEnabled
 	miClearAllBreakpoints->Enabled = bEnabled
-	mnuStart->Enabled = bEnabled
-	mnuStartWithCompile->Enabled = bEnabled
 	tbtFind->Enabled = bEnabled
-	tbtStart->Enabled = bEnabled
-	tbtStartWithCompile->Enabled = bEnabled
 	miSyntaxCheck->Enabled = bEnabled
 	tbtSyntaxCheck->Enabled = bEnabled
 	tbtSuggestions->Enabled = bEnabled
@@ -403,21 +299,10 @@ Sub ChangeMenuItemsEnabled
 	dmiMakeClean->Enabled = bEnabled
 	miFormatProject->Enabled = bEnabled
 	miUnformatProject->Enabled = bEnabled
-	miProjectMacroNumbering->Enabled = bEnabled
-	miProjectMacroNumberingStartsOfProcedures->Enabled = bEnabled
-	miRemoveProjectNumbering->Enabled = bEnabled
-	miProjectPreprocessorNumbering->Enabled = bEnabled
-	miRemoveProjectPreprocessorNumbering->Enabled = bEnabled
-	SetMenuItemPairEnabled(miModuleMacroNumbering, dmiModuleMacroNumbering, bEnabled)
-	SetMenuItemPairEnabled(miModuleMacroNumberingStartsOfProcedures, dmiModuleMacroNumberingStartsOfProcedures, bEnabled)
-	SetMenuItemPairEnabled(miRemoveModuleNumbering, dmiRemoveModuleNumbering, bEnabled)
-	SetMenuItemPairEnabled(miModulePreprocessorNumbering, dmiModulePreprocessorNumbering, bEnabled)
-	SetMenuItemPairEnabled(miRemoveModulePreprocessorNumbering, dmiRemoveModulePreprocessorNumbering, bEnabled)
-	miStepInto->Enabled = bEnabled
-	miStepOver->Enabled = bEnabled
+	ChangeEnabledDebug bEnabled, False, False
 End Sub
 
-Function AddTab(ByRef FileName As WString = "", bNew As Boolean = False, TreeN As TreeNode Ptr = 0, bNoActivate As Boolean = False) As TabWindow Ptr
+Function AddTab(ByRef FileName As WString, bNew As Boolean, TreeN As TreeNode Ptr, bNoActivate As Boolean) As TabWindow Ptr
 	Static As Boolean TabAdding
 	If TabAdding Then Return 0
 	On Error Goto ErrorHandler
@@ -2014,7 +1899,7 @@ Sub DesignerDeleteControl(ByRef Sender As Designer, Ctrl As Any Ptr)
 	bNotDesignForms = False
 End Sub
 
-Function ChangeControl(ByRef Sender As Designer, Cpnt As Any Ptr, ByRef PropertyName As WString = "", BeforeCtrl As Any Ptr = 0, AfterCtrl As Any Ptr = 0, iLeft As Integer = -1, iTop As Integer = -1, iWidth As Integer = -1, iHeight As Integer = -1) As Integer
+Function ChangeControl(ByRef Sender As Designer, Cpnt As Any Ptr, ByRef PropertyName As WString, BeforeCtrl As Any Ptr, AfterCtrl As Any Ptr, iLeft As Integer, iTop As Integer, iWidth As Integer, iHeight As Integer) As Integer
 	On Error Goto ErrorHandler
 	Dim tb As TabWindow Ptr = Sender.Tag
 	If tb = 0 Then Return 0
@@ -2666,7 +2551,7 @@ Sub PropertyChanged(ByRef Sender As Control, ByRef Sender_Text As WString, IsCom
 	End With
 End Sub
 
-Sub DesignerModified(ByRef Sender As Designer, Ctrl As Any Ptr, PropertyName As String = "", BeforeCtrl As Any Ptr = 0, AfterCtrl As Any Ptr = 0, iLeft As Integer = -1, iTop As Integer = -1, iWidth As Integer = -1, iHeight As Integer = -1)
+Sub DesignerModified(ByRef Sender As Designer, Ctrl As Any Ptr, PropertyName As String, BeforeCtrl As Any Ptr, AfterCtrl As Any Ptr, iLeft As Integer, iTop As Integer, iWidth As Integer, iHeight As Integer)
 	Dim tb As TabWindow Ptr = Sender.Tag
 	If tb = 0 Then Exit Sub
 	With tb->txtCode
@@ -3990,7 +3875,7 @@ Sub FillFromConstructionBlock(cb As ConstructionBlock Ptr, ByRef Text As String)
 	FillFromConstructionBlock(cb->InConstructionBlock, Text)
 End Sub
 
-Sub FillAllIntellisenses(ByRef Starts As WString = "")
+Sub FillAllIntellisenses(ByRef Starts As WString)
 	Var tb = Cast(TabWindow Ptr, ptabCode->SelectedTab)
 	If tb = 0 Then Exit Sub
 		tb->txtCode.cboIntellisense.Items.Clear
@@ -4105,7 +3990,7 @@ Sub FillAllIntellisenses(ByRef Starts As WString = "")
 	Next
 End Sub
 
-Sub FillTypeIntellisenses(ByRef Starts As WString = "")
+Sub FillTypeIntellisenses(ByRef Starts As WString)
 	Var tb = Cast(TabWindow Ptr, ptabCode->SelectedTab)
 	If tb = 0 Then Exit Sub
 		tb->txtCode.cboIntellisense.Items.Clear
@@ -4313,7 +4198,7 @@ Sub FindComboIndex(tb As TabWindow Ptr, ByRef sLine As WString, iEndChar As Inte
 	WDeAllocate(sTempRight)
 End Sub
 
-Sub FillIntellisenseByName(Value As String, TypeName As String, Starts As String = "", bLocal As Boolean = False, bAll As Boolean = False, NotClear As Boolean = False, TypesOnly As Boolean = False, Oldte As TypeElement Ptr = 0)
+Sub FillIntellisenseByName(Value As String, TypeName As String, Starts As String, bLocal As Boolean, bAll As Boolean, NotClear As Boolean, TypesOnly As Boolean, Oldte As TypeElement Ptr)
 	Var tb = Cast(TabWindow Ptr, ptabCode->SelectedTab)
 	If tb = 0 Then Exit Sub
 	Dim As Integer iSelStartLine, iSelEndLine, iSelStartChar, iSelEndChar
@@ -5008,7 +4893,7 @@ Function GetParameters(sWord As String, te As TypeElement Ptr, teOld As TypeElem
 	Return Parameters
 End Function
 
-Sub ParameterInfo(Key As Integer = Asc(","), SelStartChar As Integer = -1, SelEndChar As Integer = -1, sWordAt As String = "")
+Sub ParameterInfo(Key As Integer, SelStartChar As Integer, SelEndChar As Integer, sWordAt As String)
 	If FormClosing Then Exit Sub
 	Dim tb As TabWindow Ptr = Cast(TabWindow Ptr, ptabCode->SelectedTab)
 	If tb = 0 Then Exit Sub
@@ -5132,7 +5017,7 @@ Sub OnSelChangeEdit(ByRef Designer As My.Sys.Object, ByRef Sender As Control, By
 		End If
 		WLetEx(Lines(i), ..Left(*Lines(i), iPos - 1) & *LinkParse(2) & Mid(*Lines(i), iPos2 + 4))
 		If Lines(i) = 0 Then Return
-		Split GetChangedCommas(Replace(*Lines(i), """", "”"), True), ",", Params()
+		Split GetChangedCommas(Replace(*Lines(i), """", "â€"), True), ",", Params()
 		For j As Integer = 0 To UBound(Params)
 			WLetEx(Params(j), Replace(Replace(*Params(j), ";", ","), "`", "="))
 			iPos = InStr(*Params(j), "(")
@@ -10428,7 +10313,7 @@ Constructor TabPanel
 	This.Add @tabCode
 End Constructor
 
-Constructor TabWindow(ByRef wFileName As WString = "", bNew As Boolean = False, TreeN As TreeNode Ptr = 0)
+Constructor TabWindow(ByRef wFileName As WString, bNewForm As Boolean, TreeN As TreeNode Ptr)
 	WLet(FCaption, "Visual FB Editor")
 	WLet(FFileName, "")
 	txtCode.Font.Name = *EditorFontName
@@ -10542,8 +10427,8 @@ Constructor TabWindow(ByRef wFileName As WString = "", bNew As Boolean = False, 
 	pnlForm.Visible = False
 	pnlForm.OnMessage = @pnlForm_Message
 	splForm.Visible = False
-	If CInt(wFileName <> "") And CInt(bNew = False OrElse TreeN <> 0) Then
-		If bNew Then
+	If CInt(wFileName <> "") And CInt(bNewForm = False OrElse TreeN <> 0) Then
+		If bNewForm Then
 			If TreeN > 0 Then FileName = TreeN->Text
 			If EndsWith(FileName, "*") Then FileName = ..Left(FileName, Len(FileName) - 1)
 		Else
@@ -10554,7 +10439,7 @@ Constructor TabWindow(ByRef wFileName As WString = "", bNew As Boolean = False, 
 	Else
 		This.Caption = ML("Untitled") & WStr(untitledCounter) & "*"
 	End If
-	IsNew = bNew OrElse wFileName = ""
+	IsNew = bNewForm OrElse wFileName = ""
 	pnlForm.Top = -500
 		pnlForm.Style = pnlForm.Style Or WS_HSCROLL Or WS_VSCROLL
 	pnlCode.Add @txtCode
@@ -11059,7 +10944,7 @@ Function GetMainFile(bSaveTab As Boolean = False, ByRef Project As ProjectElemen
 	Return ""
 End Function
 
-Function GetResourceFile(WithoutMainNode As Boolean = False, ByRef FirstLine As WString = "", ProjectNode_ As TreeNode Ptr = 0) As UString
+Function GetResourceFile(WithoutMainNode As Boolean, ByRef FirstLine As WString, ProjectNode_ As TreeNode Ptr) As UString
 	Dim As WString * MAX_PATH ResourceFile, MainFile, sFirstLine
 	Dim As UString CompileLine
 	Dim As ProjectElement Ptr Project
@@ -11433,9 +11318,6 @@ Function GetFirstCompileLine(ByRef FileName As WString, ByRef Project As Project
 	End If
 	If CInt(UseDebugger) OrElse CInt(CInt(Project) AndAlso CInt(Project->CompileMode = Development)) Then Result += " -g"
 	If CInt(mnuUseProfiler->Checked) Then Result += " -profgen fb"
-	If CInt(InStr(Result, " -v ") = 0)  Then
-		Result += " -v "
-	End If
 	If Project Then
 		If InStr(Result, " -s ") = 0 Then
 			Select Case Project->Subsystem
@@ -11445,6 +11327,7 @@ Function GetFirstCompileLine(ByRef FileName As WString, ByRef Project As Project
 			End Select
 		End If
 		Result += " -gen gcc"
+		If InStr(LCase(Result), " -mt") = 0 Then Result += " -mt"
 		If Project->CompileMode = Final Then
 			Result += " -Wc -O2"
 		End If
@@ -11938,7 +11821,7 @@ Sub CheckProfiler(ByRef WorkDir As WString, ByRef ExeName As WString)
 	lvProfiler.UpdateUnLock
 End Sub
 
-Sub RunPr(Debugger As String = "", ByRef ProjectFileName As WString, ByRef ProjectCommandLineArguments As WString, ByRef MainFile As WString, ByRef CompileLine As WString, ByRef FirstLine As WString)
+Sub RunPr(Debugger As String, ByRef ProjectFileName As WString, ByRef ProjectCommandLineArguments As WString, ByRef MainFile As WString, ByRef CompileLine As WString, ByRef FirstLine As WString)
 	On Error Goto ErrorHandler
 	Dim Result As Integer
 	Dim ExeFileName As WString Ptr
@@ -12239,9 +12122,9 @@ Sub RunProgram(Param As Any Ptr)
 	Dim As UString CompileLine, MainFile = GetMainFile(, Project, ProjectNode)
 	Dim As UString FirstLine = GetFirstCompileLine(MainFile, Project, CompileLine)
 	If Project <> 0 Then
-		RunPr , *Project->FileName, *Project->CommandLineArguments, MainFile, CompileLine, FirstLine
+		RunPr "", *Project->FileName, *Project->CommandLineArguments, MainFile, CompileLine, FirstLine
 	Else
-		RunPr , "", "", MainFile, CompileLine, FirstLine
+		RunPr "", "", "", MainFile, CompileLine, FirstLine
 	End If
 End Sub
 
@@ -12304,374 +12187,6 @@ Sub TabWindow.AddSpaces(ByVal StartLine As Integer = -1, ByVal EndLine As Intege
 	End With
 End Sub
 
-Sub NumberingOn(ByVal StartLine As Integer = -1, ByVal EndLine As Integer = -1, bMacro As Boolean = False, ByRef txtCode As EditControl, WithoutUpdate As Boolean = False, StartsOfProcs As Boolean = False)
-	With txtCode
-		If Not WithoutUpdate Then .UpdateLock
-		.Changing("Raqamlash")
-		If StartLine = -1 Or EndLine = -1 Then
-			Dim As Integer iSelStartLine, iSelEndLine, iSelStartChar, iSelEndChar
-			.GetSelection iSelStartLine, iSelEndLine, iSelStartChar, iSelEndChar
-			StartLine = iSelStartLine
-			EndLine = iSelEndLine - IIf(iSelEndChar = 0, 1, 0)
-		End If
-		Dim As EditControlLine Ptr FECLine, FECLinePre
-		Dim As Integer n, NotNumberingScopesCount, NamespacesCount
-		Dim As Boolean bNotNumberNext, bNotNumberThis, bInFunction, bInType, bFunctionStart, bChanged
-		If StartLine> 0 Then
-			FECLinePre = .Content.Lines.Items[StartLine-1]
-		Else
-			FECLinePre = .Content.Lines.Items[0]
-		End If
-		For i As Integer = StartLine To EndLine
-			FECLine = .Content.Lines.Items[i]
-			bChanged = False
-			bNotNumberThis = bNotNumberNext
-			bNotNumberNext = False
-			If EndsWith(RTrim(*FECLine->Text, Any !"\t "), " _") OrElse EndsWith(RTrim(*FECLine->Text, Any !"\t "), ",_") Then
-				bNotNumberNext = True
-			End If
-			If EndsWith(RTrim(*FECLinePre->Text, Any !"\t "), " _") OrElse EndsWith(RTrim(*FECLinePre->Text, Any !"\t "), ",_") Then
-				bNotNumberNext = True
-			End If
-			If CBool(Trim(*FECLine->Text, Any !"\t ") = "") OrElse StartsWith(LTrim(*FECLine->Text, Any !"\t "), "'") OrElse StartsWith(LTrim(*FECLine->Text, Any !"\t "), "#") Then
-				Continue For
-			ElseIf StartsWith(LTrim(LCase(*FECLine->Text), Any !"\t "), "select case ") Then
-				bNotNumberNext = True
-			ElseIf FECLine->ConstructionIndex = C_Namespace Then
-				If FECLine->ConstructionPart = 0 Then
-					NamespacesCount += 1
-				ElseIf FECLine->ConstructionPart = 2 Then
-					NamespacesCount -= 1
-				End If
-				Continue For
-			ElseIf FECLine->ConstructionIndex = C_Extern OrElse FECLine->ConstructionIndex = C_Asm OrElse FECLine->ConstructionIndex >= C_Enum AndAlso FECLine->ConstructionIndex <= C_Union Then
-				If FECLine->ConstructionPart = 0 Then
-					NotNumberingScopesCount += 1
-				ElseIf FECLine->ConstructionPart = 2 Then
-					NotNumberingScopesCount -= 1
-				End If
-				Continue For
-			ElseIf FECLine->ConstructionIndex >= C_Sub Then
-				bInFunction = FECLine->ConstructionPart <> 2
-				If bInFunction Then bFunctionStart = False
-				Continue For
-			ElseIf FECLine->ConstructionIndex >= C_Namespace AndAlso Constructions(FECLine->ConstructionIndex).Collapsible Then
-				Continue For
-			ElseIf (NamespacesCount > 0 AndAlso Not bInFunction) OrElse NotNumberingScopesCount > 0 Then
-				Continue For
-			End If
-			If StartsOfProcs Then
-				If bInFunction AndAlso Not bFunctionStart Then
-					bFunctionStart = True
-				Else
-					Continue For
-				End If
-			End If
-			n = Len(*FECLine->Text) - Len(LTrim(*FECLine->Text))
-			If StartsWith(LTrim(*FECLine->Text), "?") Then
-				Var Pos1 = InStr(LTrim(*FECLine->Text), ":")
-				If IsNumeric(Mid(..Left(LTrim(*FECLine->Text), Pos1 - 1), 2)) Then
-					WLetEx(FECLine->Text, Space(n) & Mid(LTrim(*FECLine->Text), Pos1 + 1))
-					bChanged = True
-				End If
-			ElseIf bMacro AndAlso StartsWith(LTrim(*FECLine->Text, Any !"\t "), "_L ") Then 'OrElse StartsWith(LTrim(LCase(*FECLine->Text), Any !"\t "), "dim ") Then
-				bNotNumberThis = True
-			ElseIf StartsWith(LTrim(*FECLine->Text, Any !"\t "), "_L ") AndAlso Not bMacro Then 'OrElse StartsWith(LTrim(LCase(*FECLine->Text), Any !"\t "), "dim ") Then
-				WLetEx(FECLine->Text, Space(n) & Mid(LTrim(*FECLine->Text), 4))
-				bChanged = True
-				'			ElseIf StartsWith(LTrim(*FECLine->Text, Any !"\t "), "debugprint") Then
-				'				bNotNumberThis = True
-				'			ElseIf StartsWith(LTrim(*FECLine->Text, Any !"\t "), "?") Then
-				'				bNotNumberThis = True
-			ElseIf IsLabel(*FECLine->Text) Then
-				bNotNumberThis = True
-			ElseIf Right(Trim(*FECLine->Text), 2) = " _" Then
-				bNotNumberThis = True
-			ElseIf FECLine->InConstructionIndex = C_Asm OrElse FECLine->InConstructionIndex = C_Select_Case AndAlso FECLine->InConstructionPart = 0 OrElse _
-				FECLine->InConstructionIndex >= C_Namespace AndAlso FECLine->InConstructionIndex <= C_Union Then
-				bNotNumberThis = True
-			End If
-			If Not bNotNumberThis Then
-				If bMacro Then
-					WLetEx(FECLine->Text, "_L " & *FECLine->Text) '& IIf(StartsWith(*FECLine->Text, " ") OrElse StartsWith(*FECLine->Text, !"\t"), "", " ")
-				Else
-					WLetEx(FECLine->Text, "?" & WStr(i + 1) & ":" & *FECLine->Text)
-					'WLet FECLine->Text, "DebugPrint(__FILE__ & " & Chr(34) & " Line " & Chr(34) & " & __LINE__, True, False) : " & Trim(*FECLine->Text, Any !" \t ")
-				End If
-				bChanged = True
-			End If
-			If bChanged Then
-				FECLine->Ends.Clear
-				FECLine->EndsCompleted = False
-				.ChangeCollapsibility i
-			End If
-			FECLinePre= FECLine
-		Next i
-		.Changed("Raqamlash")
-		If Not WithoutUpdate Then .UpdateUnLock
-		.PaintControl True
-		'.ShowCaretPos True
-	End With
-End Sub
-
-Sub TabWindow.NumberOn(ByVal StartLine As Integer = -1, ByVal EndLine As Integer = -1, bMacro As Boolean = False)
-	Var tb = Cast(TabWindow Ptr, ptabCode->SelectedTab)
-	If tb = 0 Then Exit Sub
-	NumberingOn StartLine, EndLine, bMacro, tb->txtCode
-End Sub
-
-Sub PreprocessorNumberingOn(ByRef txtCode As EditControl, ByRef FileName As WString, WithoutUpdate As Boolean = False)
-	With txtCode
-		If Not WithoutUpdate Then .UpdateLock
-		.Changing("Preprocessor Numbering")
-		Dim As EditControlLine Ptr FECLine, FECLineOld
-		For i As Integer = .LinesCount - 1 To 0 Step -1
-			FECLine = .Content.Lines.Items[i]
-			If i > 0 Then
-				FECLineOld = .Content.Lines.Items[i - 1]
-				If EndsWith(RTrim(*FECLineOld->Text, Any !"\t "), " _") Then Continue For
-				If StartsWith(LTrim(LCase(*FECLineOld->Text), Any !"\t "), "#print __line__") Then Continue For
-			End If
-			If Trim(*FECLine->Text, Any !"\t ") = "" Then Continue For
-			If StartsWith(LTrim(LCase(*FECLine->Text), Any !"\t "), "#print __line__") Then Continue For
-			If StartsWith(LTrim(*FECLine->Text, Any !"\t "), "'") Then Continue For
-			.InsertLine i, "#print __LINE__ - " & FileName
-		Next i
-		.Changed("Preprocessor Numbering")
-		If Not WithoutUpdate Then .UpdateUnLock
-		'.ShowCaretPos True
-	End With
-End Sub
-
-Sub TabWindow.PreprocessorNumberOn()
-	Var tb = Cast(TabWindow Ptr, ptabCode->SelectedTab)
-	If tb = 0 Then Exit Sub
-	PreprocessorNumberingOn tb->txtCode, tb->FileName
-End Sub
-
-Sub GetProcedureLines(ByRef ehStart As Integer, ByRef ehEnd As Integer)
-	Var tb = Cast(TabWindow Ptr, ptabCode->SelectedTab)
-	If tb = 0 Then Exit Sub
-	With tb->txtCode
-		Dim As Integer iSelStartLine, iSelEndLine, iSelStartChar, iSelEndChar, i
-		.GetSelection iSelStartLine, iSelEndLine, iSelStartChar, iSelEndChar
-		Dim As EditControlLine Ptr FECLine
-		For i = iSelStartLine To 0 Step -1
-			FECLine = .Content.Lines.Items[i]
-			If FECLine->ConstructionIndex >= C_Sub  Then
-				If FECLine->ConstructionPart = 0 Then
-					ehStart = i + 1
-					Exit For
-				Else
-					ehEnd = .Content.Lines.Count - 1
-					Exit Sub
-				End If
-			End If
-		Next i
-		Dim As Boolean t
-		For i = iSelStartLine To .Content.Lines.Count - 1
-			FECLine = .Content.Lines.Items[i]
-			If FECLine->ConstructionIndex >= C_Sub Then
-				t = True
-				ehEnd = i - 1
-				Exit For
-			End If
-		Next i
-		If Not t Then ehEnd = i - 1
-	End With
-End Sub
-
-Sub TabWindow.SetErrorHandling(StartLine As String, EndLine As String)
-	Var tb = Cast(TabWindow Ptr, ptabCode->SelectedTab)
-	If tb = 0 Then Exit Sub
-	With tb->txtCode
-		.UpdateLock
-		.Changing("Error handling")
-		Dim As Integer iSelStartLine, iSelEndLine, iSelStartChar, iSelEndChar
-		.GetSelection iSelStartLine, iSelEndLine, iSelStartChar, iSelEndChar
-		Dim As EditControlLine Ptr FECLine
-		Dim As Integer ehStart, ehEnd
-		Dim Bosh As Boolean
-		Dim n As Integer
-		Dim As String ExitLine, LeftSpace
-		For i As Integer = iSelStartLine To 0 Step -1
-			FECLine = .Content.Lines.Items[i]
-			If FECLine->ConstructionIndex >= C_Sub  Then
-				If FECLine->ConstructionPart = 0 Then
-					ehStart = i + 1
-					Select Case FECLine->ConstructionIndex
-					Case C_Sub: ExitLine = "Exit Sub"
-					Case C_Function: ExitLine = "Exit Function"
-					Case C_Property: ExitLine = "Exit Property"
-					Case C_Operator: ExitLine = "Exit Operator"
-					Case C_Constructor: ExitLine = "Exit Constructor"
-					Case C_Destructor: ExitLine = "Exit Destructor"
-					End Select
-					n = Len(*FECLine->Text) - Len(LTrim(*FECLine->Text, Any !"\t "))
-					LeftSpace = ..Left(*FECLine->Text, n)
-					Exit For
-				Else
-					Bosh = True
-					If StartsWith(Trim(.Lines(0), Any "\t "), "'#Compile ") Then
-						ehStart = 1
-					Else
-						ehStart = 0
-					End If
-					ExitLine = "End"
-					n = 0
-					Exit For
-				End If
-			End If
-		Next i
-		If ExitLine <> "" Then
-			If CInt(.Content.Lines.Count - 1 >= ehStart) AndAlso (CInt(StartsWith(LTrim(.Lines(ehStart), Any !"\t "), "On Error ")) OrElse CInt(StartsWith(LTrim(.Lines(ehStart), Any !"\t "), "On Local Error "))) Then
-				If StartLine <> "" Then
-					.ReplaceLine ehStart, LeftSpace & !"\t" & StartLine
-				Else
-					.DeleteLine ehStart
-					If iSelStartLine > ehStart Then iSelStartLine -= 1
-				End If
-			ElseIf StartLine <> "" Then
-				.InsertLine ehStart, LeftSpace & !"\t" & StartLine
-				iSelStartLine += 1
-			End If
-			Dim t As Boolean
-			If Bosh Then
-				ehEnd = .Content.Lines.Count - 1
-			Else
-				Dim i As Integer
-				For i = iSelStartLine To .Content.Lines.Count - 1
-					FECLine = .Content.Lines.Items[i]
-					If FECLine->ConstructionIndex >= C_Sub  Then
-						If FECLine->ConstructionPart = 2 Then
-							t = True
-							ehEnd = i - 1
-							Exit For
-						Else
-							t = True
-							ehEnd = i - 1
-							Exit For
-						End If
-					End If
-				Next i
-				If Not t Then
-					ehEnd = i
-				End If
-			End If
-			t = False
-			Dim p As Integer
-			For i As Integer = ehEnd - 1 To ehStart Step -1
-				FECLine = .Content.Lines.Items[i]
-				If FECLine->ConstructionIndex >= C_Sub Then
-					p = i
-					Exit For
-				ElseIf StartsWith(Trim(.Lines(i), Any !"\t "),  ExitLine) Then
-					p = i
-					t = True
-					Exit For
-				End If
-			Next i
-			If t Then
-				FECLine = .Content.Lines.Items[ehEnd]
-				If FECLine->ConstructionIndex >= C_Sub Then
-					ehEnd -= 1
-				End If
-				For j As Integer = ehEnd To p Step -1
-					.DeleteLine j
-					ehEnd -= 1
-				Next j
-			End If
-			If StartsWith(Trim(.Lines(ehEnd), Any !"\t "),  "On Local Error Goto 0") Then
-				.DeleteLine ehEnd
-				ehEnd -= 1
-			End If
-			If StartLine <> "" And StartLine <> "On Error Resume Next" Then
-				If StartLine = "On Local Error Goto ErrorHandler" Then .InsertLine ehEnd + 1, LeftSpace & !"\t" & "On Local Error Goto 0": ehEnd += 1
-				.InsertLine ehEnd + 1, LeftSpace & !"\t" & ExitLine
-				.InsertLine ehEnd + 2, LeftSpace & "ErrorHandler:"
-				.InsertLine ehEnd + 3, LeftSpace & !"\t" & "MsgBox ErrDescription(Err) & "" ("" & Err & "") "" & _"
-				.InsertLine ehEnd + 4, LeftSpace & !"\t\t" & """in line "" & Erl() & "" (Handler line: "" & __LINE__ & "") "" & _"
-				.InsertLine ehEnd + 5, LeftSpace & !"\t\t" & """in function "" & ZGet(Erfn()) & "" (Handler function: "" & __FUNCTION__ & "") "" & _"
-				.InsertLine ehEnd + 6, LeftSpace & !"\t\t" & """in module "" & ZGet(Ermn()) & "" (Handler file: "" & __FILE__ & "") """
-				If EndLine <> "" Then .InsertLine ehEnd + 7, LeftSpace & !"\t" & EndLine
-			End If
-		End If
-		.Changed("Error handling")
-		.UpdateUnLock
-		'.ShowCaretPos True
-	End With
-End Sub
-
-Sub TabWindow.RemoveErrorHandling()
-	SetErrorHandling "", ""
-End Sub
-
-Sub NumberingOff(ByVal StartLine As Integer = -1, ByVal EndLine As Integer = -1, ByRef txtCode As EditControl, WithoutUpdate As Boolean = False)
-	With txtCode
-		If Not WithoutUpdate Then .UpdateLock
-		.Changing("Raqamlarni olish")
-		If StartLine = -1 Or EndLine = -1 Then
-			Dim As Integer iSelStartLine, iSelEndLine, iSelStartChar, iSelEndChar
-			.GetSelection iSelStartLine, iSelEndLine, iSelStartChar, iSelEndChar
-			StartLine = iSelStartLine
-			EndLine = iSelEndLine - IIf(iSelEndChar = 0, 1, 0)
-		End If
-		Dim As EditControlLine Ptr FECLine
-		Dim As Integer n
-		For i As Integer = StartLine To EndLine
-			FECLine = .Content.Lines.Items[i]
-			n = Len(*FECLine->Text) - Len(LTrim(*FECLine->Text))
-			If StartsWith(LTrim(*FECLine->Text, Any !"\t "), "?") Then
-				Var Pos1 = InStr(LTrim(*FECLine->Text), ":")
-				If IsNumeric(Mid(..Left(LTrim(*FECLine->Text), Pos1 - 1), 2)) Then
-					WLetEx(FECLine->Text, Space(n) & Mid(LTrim(*FECLine->Text), Pos1 + 1))
-					FECLine->Ends.Clear
-					FECLine->EndsCompleted = False
-					.ChangeCollapsibility i
-				End If
-			ElseIf StartsWith(LTrim(*FECLine->Text, Any !"\t "), "_L ") Then
-				WLetEx(FECLine->Text, Mid(LTrim(*FECLine->Text), 4))
-				FECLine->Ends.Clear
-				FECLine->EndsCompleted = False
-				.ChangeCollapsibility i
-			End If
-		Next i
-		.Changed("Raqamlarni olish")
-		If Not WithoutUpdate Then .UpdateUnLock
-		'.ShowCaretPos True
-		.PaintControl True
-	End With
-End Sub
-
-Sub TabWindow.NumberOff(ByVal StartLine As Integer = -1, ByVal EndLine As Integer = -1)
-	Var tb = Cast(TabWindow Ptr, ptabCode->SelectedTab)
-	If tb = 0 Then Exit Sub
-	NumberingOff StartLine, EndLine, tb->txtCode
-End Sub
-
-Sub PreprocessorNumberingOff(ByRef txtCode As EditControl, WithoutUpdate As Boolean = False)
-	With txtCode
-		If Not WithoutUpdate Then .UpdateLock
-		.Changing("Remove Preprocessor Numbering")
-		Dim As EditControlLine Ptr FECLine
-		Dim As Integer n
-		For i As Integer = .LinesCount - 1 To 0 Step -1
-			FECLine = .Content.Lines.Items[i]
-			If StartsWith(LTrim(LCase(*FECLine->Text), Any !"\t "), "#print __line__") Then
-				.DeleteLine i
-			End If
-		Next i
-		.Changed("Remove Preprocessor Numbering")
-		If Not WithoutUpdate Then .UpdateUnLock
-		'.ShowCaretPos True
-	End With
-End Sub
-
-Sub TabWindow.PreprocessorNumberOff()
-	Var tb = Cast(TabWindow Ptr, ptabCode->SelectedTab)
-	If tb = 0 Then Exit Sub
-	PreprocessorNumberingOff tb->txtCode
-End Sub
 
 Sub TabWindow.ProcessMessage(ByRef msg As Message)
 		Select Case msg.Msg
@@ -13184,24 +12699,6 @@ Sub TabWindow.ConvertToUppercaseFirstLetter(ByVal StartLine As Integer = -1, ByV
 		.Changed("ConvertToUppercaseFirstLetter")
 		.UpdateUnLock
 	End With
-End Sub
-
-Sub TabWindow.ProcedureNumberOn(bMacro As Boolean = False)
-	Dim As Integer ehStart, ehEnd
-	Dim As Integer iSelStartLine, iSelEndLine, iSelStartChar, iSelEndChar, k, Pos1
-	txtCode.GetSelection iSelStartLine, iSelEndLine, iSelStartChar, iSelEndChar
-	If iSelStartLine> 0 AndAlso iSelStartLine <> iSelEndLine Then
-		ehStart = iSelStartLine : ehEnd =iSelEndLine
-	Else
-	GetProcedureLines ehStart, ehEnd
-	End If
-	NumberOn ehStart, ehEnd, bMacro
-End Sub
-
-Sub TabWindow.ProcedureNumberOff
-	Dim As Integer ehStart, ehEnd
-	GetProcedureLines ehStart, ehEnd
-	NumberOff ehStart, ehEnd
 End Sub
 
 Sub TabWindow.Define

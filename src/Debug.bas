@@ -317,6 +317,39 @@ Sub DeleteDebugCursor
 	End If
 End Sub
 
+Const DEBUG_CMD_QUEUE_SIZE = 32
+Dim Shared As String DebugCommandQueue(0 To DEBUG_CMD_QUEUE_SIZE - 1)
+Dim Shared As Integer DebugCommandQueueHead = 0
+Dim Shared As Integer DebugCommandQueueCount = 0
+
+Sub EnqueueDebugCommand(cmd As String)
+	MutexLock tlockGDB
+	If DebugCommandQueueCount < DEBUG_CMD_QUEUE_SIZE Then
+		Dim As Integer tail = (DebugCommandQueueHead + DebugCommandQueueCount) Mod DEBUG_CMD_QUEUE_SIZE
+		DebugCommandQueue(tail) = cmd
+		DebugCommandQueueCount += 1
+	End If
+	MutexUnlock tlockGDB
+End Sub
+
+Sub ClearDebugCommandQueue()
+	MutexLock tlockGDB
+	DebugCommandQueueHead = 0
+	DebugCommandQueueCount = 0
+	MutexUnlock tlockGDB
+End Sub
+
+' Caller must already hold tlockGDB.
+Function DequeueDebugCommandLocked() As String
+	Dim As String cmd = ""
+	If DebugCommandQueueCount > 0 Then
+		cmd = DebugCommandQueue(DebugCommandQueueHead)
+		DebugCommandQueueHead = (DebugCommandQueueHead + 1) Mod DEBUG_CMD_QUEUE_SIZE
+		DebugCommandQueueCount -= 1
+	End If
+	Return cmd
+End Function
+
 	Dim Shared As Long pIn, pOut
 	
 	Declare Function readpipe(WithoutAnswer As Boolean = False, WithoutShowing As Boolean = False) As String
@@ -337,13 +370,14 @@ End Sub
 	
 	Dim Shared As Long iVersionGdb
 	
-	Dim Shared As String CurrentFile, NewCommand
+	Dim Shared As String CurrentFile
 	
 	Dim Shared As Integer iPosStartLast, iPosEndLast, iCurselLast, TimerID, WatchIndex
 	
 	Declare Function timer_data() As Integer
 	
 	Declare Sub continue_debug()
+	Declare Sub break_debug()
 	
 		Dim Shared As HANDLE hReadPipe, hWritePipe
 		
@@ -353,7 +387,8 @@ End Sub
 	
 	Dim Shared As Long iFlagThreadSignal, iFlagUpdateVariables
 	
-	Dim Shared As Long iCounterUpdateVariables, iFlagStartDebug, iStateMenu = 1
+	Dim Shared As Long iCounterUpdateVariables, iStateMenu = 1
+	Dim Shared As Boolean bPendingDebugPanelRefresh
 	
 	
 	Function GetPartPath(sPath As String) As String
@@ -1910,6 +1945,22 @@ End Sub
 		If StartsWith(Result, "{") Then lvWatches.Nodes.Item(WatchIndex)->Nodes.Add Else lvWatches.Nodes.Item(WatchIndex)->Nodes.Clear
 	End Sub
 	
+	Sub RefreshDebugPanelsAfterStop()
+		info_loc_variables_debug
+		If iStateMenu = 2 Then
+			info_all_variables_debug
+		End If
+		info_threads_debug
+		ThreadsEnter
+		For i As Integer = 0 To lvWatches.Nodes.Count - 1
+			If Trim(lvWatches.Nodes.Item(i)->Text(0)) = "" Then Continue For
+			writepipe "print " & UCase(lvWatches.Nodes.Item(i)->Text(0)) & !"\n"
+			Dim As String watchResult = readpipe(, True)
+			UpdateWatch i, watchResult
+		Next
+		ThreadsLeave
+	End Sub
+	
 	Sub run_debug(iFlag As Long)
 		
 		iFlagThreadSignal = 0
@@ -1960,15 +2011,33 @@ End Sub
 			MutexLock tlockGDB
 			Dim As String Result
 			Dim As Boolean bGetPid = True
+			Dim As Boolean bGDBLocked = True
 			Var Pos1 = 0
 			Running = True
 			Do
-				'memset(@szDataForPipe , 0 , 200000)
-				
-				'get_read_data(1)
-				
-				If Running Then
+				Dim As String cmd = DequeueDebugCommandLocked()
+				If cmd <> "" Then
+					If Not bGDBLocked Then MutexLock tlockGDB: bGDBLocked = True
+					If cmd = !"q\n" Then
+						ThreadsEnter
+						ShowMessages ML("Debugging finished.")
+						If bGDBLocked Then MutexUnlock tlockGDB: bGDBLocked = False
+						deinit
+						ThreadsLeave
+						Exit Do
+					Else
+						writepipe(cmd)
+					End If
+					Running = True
+				ElseIf bPendingDebugPanelRefresh Then
+					bPendingDebugPanelRefresh = False
+					If Not bGDBLocked Then MutexLock tlockGDB: bGDBLocked = True
+					RefreshDebugPanelsAfterStop()
+					If bGDBLocked Then MutexUnlock tlockGDB: bGDBLocked = False
+				ElseIf Running Then
+					If bGDBLocked Then MutexUnlock tlockGDB: bGDBLocked = False
 					Result = readpipe(True)
+					If Not bGDBLocked Then MutexLock tlockGDB: bGDBLocked = True
 					If bGetPid Then
 							
 							'Updateinfoxserver(10)
@@ -2026,34 +2095,16 @@ End Sub
 					Else
 						fcurlig = -2
 						line_highlight iStateMenu
-						If iFlagStartDebug = 0 Then Exit Do
-						info_loc_variables_debug
-						If iStateMenu = 2 Then
-							info_all_variables_debug
+						If iFlagStartDebug = 0 Then
+							If bGDBLocked Then MutexUnlock tlockGDB: bGDBLocked = False
+							Exit Do
 						End If
-						info_threads_debug
-						ThreadsEnter
-						For i As Integer = 0 To lvWatches.Nodes.Count - 1
-							If Trim(lvWatches.Nodes.Item(i)->Text(0)) = "" Then Continue For
-							writepipe "print " & UCase(lvWatches.Nodes.Item(i)->Text(0)) & !"\n"
-							Result = readpipe(, True)
-							UpdateWatch i, Result
-						Next
-						ThreadsLeave
+						Updateinfoxserver(100)
+						bPendingDebugPanelRefresh = True
 					End If
-					MutexLock tlockGDB
-				ElseIf NewCommand <> "" Then
-					If NewCommand = !"q\n" Then
-						ThreadsEnter
-						ShowMessages ML("Debugging finished.")
-						deinit
-						ThreadsLeave
-						Exit Do
-					Else
-						writepipe(NewCommand)
-					End If
-					NewCommand = ""
-					Running = True
+					If bGDBLocked Then MutexUnlock tlockGDB: bGDBLocked = False
+				Else
+					Sleep(1, 1)
 				End If
 			Loop
 			
@@ -2074,13 +2125,15 @@ End Sub
 		
 		DeleteDebugCursor
 		
-		NewCommand = !"c\n"
+		EnqueueDebugCommand !"c\n"
 		
+	End Sub
+	
+	Sub break_debug()
+		
+		MutexLock tlockGDB
+		writepipe(!"interrupt\n")
 		MutexUnlock tlockGDB
-		
-		'	run_pipe_write(!"continue\n")
-		'
-		'	get_read_data(1)
 		
 	End Sub
 	
@@ -2104,13 +2157,7 @@ End Sub
 		
 		'run_pipe_write(sCom & !"\n")
 		
-		NewCommand = sCom & !"\n"
-		
-		'memset(@szDataForPipe , 0 , 200000)
-		
-		'get_read_data(1)
-		
-		MutexUnlock tlockGDB
+		EnqueueDebugCommand sCom & !"\n"
 		
 	End Sub
 	
@@ -2134,7 +2181,7 @@ End Sub
 		'
 		'	Else
 		
-		NewCommand = s & !"\n"
+		EnqueueDebugCommand s & !"\n"
 		'writepipefast(s & !"\n" , iSleep)
 		
 		'EndIf
@@ -2142,8 +2189,6 @@ End Sub
 		'	memset(@szDataForPipe , 0 , 200000)
 		'
 		'	get_read_data(1 , iStateMenu)
-		
-		MutexUnlock tlockGDB
 		
 	End Sub
 	
@@ -2264,7 +2309,10 @@ End Sub
 		'EndIf
 		MutexUnlock tlockGDB
 		
+		ClearDebugCommandQueue()
+		
 		iFlagStartDebug = 0
+		bPendingDebugPanelRefresh = False
 		
 		iFlagUpdateVariables = 0
 		

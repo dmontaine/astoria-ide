@@ -1,21 +1,26 @@
 @echo off
 REM Release build: MyFbFramework (mff64.dll) then VisualFBEditor64.exe.
-REM Flags: -gen gcc -Wc -O2 -v. Close running IDE before linking the exe.
+REM Flags: -gen gcc -mt -Wc -O2. Skips mff when sources are older than mff64.dll.
+REM Env: VERBOSE=1 (fbc -v), FORCE_MFF=1, SKIP_MFF=1, NOPAUSE=1. Close running IDE before linking.
 
-set FBC64=%~dp0Compiler\fbc64.exe
+call "%~dp0BuildCommon.bat"
 
-echo [%time%] Building mff64.dll...
-cd Controls\MyFbFramework\mff
-"%FBC64%" -b "mff.bi" "mff.rc" -dll -gen gcc -Wc -O2 -x "../mff64.dll" -v
-if errorlevel 1 exit /b 1
+if "%BUILD_MFF%"=="1" (
+	echo [%time%] Building mff64.dll...
+	cd /d "%MFF_DIR%"
+	"%FBC64%" -b "mff.bi" "mff.rc" -dll -gen gcc -mt -Wc -O2 -x "../mff64.dll" %FBC_VERBOSE%
+	if errorlevel 1 exit /b 1
+) else (
+	echo [%time%] Skipping mff64.dll ^(up to date; set FORCE_MFF=1 to rebuild^).
+)
 
 echo [%time%] Building VisualFBEditor64.exe...
-cd ..\..\..\src
-"%FBC64%" "VisualFBEditor.bas" -s gui -gen gcc -Wc -O2 -x "../VisualFBEditor64.exe" "VisualFBEditor.rc" -i "..\Controls\MyFbFramework" -v
+cd /d "%SRC_DIR%"
+"%FBC64%" "VisualFBEditor.bas" -s gui -gen gcc -mt -Wc -O2 -x "../VisualFBEditor64.exe" "VisualFBEditor.rc" -i "..\Controls\MyFbFramework" %FBC_VERBOSE%
 if errorlevel 1 exit /b 1
 
 echo [%time%] Release build complete.
-cd ..\
+cd /d "%ROOT%"
 
 if "%NOPAUSE%"=="" pause
 exit /b 0

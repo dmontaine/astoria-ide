@@ -1,6 +1,6 @@
 # VFBE Win64 Fork — Project Status & Handoff
 
-**Last updated:** 2026-07-05  
+**Last updated:** 2026-07-05 (GDB debugger fixes + bottom tab captions verified)  
 **Repository:** [codeberg.org/bigriverguy/VFBEWin64](https://codeberg.org/bigriverguy/VFBEWin64)  
 **Local path:** `C:\Users\dmont\VisualFBEditor`  
 **Owner:** bigriverguy (`dmontaine@gmail.com`)
@@ -383,6 +383,47 @@ With `gas64` confirmed dead and Clang/LLVM never bundled, all code and UI that e
 - [ ] `DeleteEditorFile()` — stub.
 - [ ] `frmNewProject` template icons — `@imgList32` may not be populated at form creation time.
 
+### Session 2026-07-05 (part 3): Run menu consolidation & GDB debug UX
+
+**Goal:** One **Run** menu for all run/debug commands; no duplicate Debug menubar; reliable enable/disable when **Use Debugger** is toggled.
+
+**Run menu structure (menubar: Build → Run → Tools):**
+
+1. **Session** — Start With Compile, Start, Continue, Break, End, Restart  
+2. **Stepping** — Step Into/Over/Out, Run To Cursor  
+3. **Debugger options** — Use Debugger, Use Profiler  
+4. **Breakpoints** — Toggle Breakpoint, Clear All Breakpoints  
+5. **Advanced** — GDB Command, Add Watch  
+6. **Execution point** — Set Next Statement, Show Next Statement  
+
+The separate **Debug** menubar item was removed. The **Debug toolbar** (View → Toolbars → Debug) is unchanged.
+
+**Fixes in this session:**
+
+- **GDB mutex deadlock** at breakpoint stop — debug thread no longer self-deadlocks on `tlockGDB`; Step/Continue work after stop (`Debug.bas`).
+- **Debug tabs** — show/hide tied to **Use Debugger**; `DetachTab`/`AddTab` pattern preserved; no heap corruption on hide.
+- **Use Debugger toggle** — menu check items don't auto-toggle in MFF; handler uses `Not UseDebugger` and syncs menu + toolbar checked state.
+- **Menu enable state** — `ChangeMenuItemsEnabled` and `frmMain_ActiveControlChanged` call `ChangeEnabledDebug` instead of overriding run/step items; **Use Profiler** gated on debugger; **Clear All Breakpoints** implemented (`EditControl.ClearAllBreakpoints`, `ClearAllBreakpoints()`).
+- **Set Next Statement / Run To Cursor** — editor-focus and idle-vs-stopped enable logic corrected.
+
+**Key files:** `src/Main.bas`, `src/VisualFBEditor.bas`, `src/Debug.bas`, `src/TabWindow.bas`, `src/EditControl.bas`, `Controls/MyFbFramework/mff/TabControl.bas`.
+
+**Compile:** `CompileDebug.bat` — 0 errors (2026-07-05).
+
+**Owner sign-off:** Run menu complete (2026-07-05).
+
+### Session 2026-07-05 (part 4): GDB debugger fixes & bottom tab captions
+
+**Owner sign-off:** Bottom panel tab-caption regression fixed (2026-07-05).
+
+**GDB debugger fixes:**
+
+1. **Step Out** — `step_debug("finish")` instead of `"n"` (`VisualFBEditor.bas`).
+2. **Command dispatch queue** — replaced single `NewCommand` string with a 32-slot ring buffer (`EnqueueDebugCommand`, `DequeueDebugCommandLocked` in `Debug.bas`); `continue_debug`, `step_debug`, `command_debug`, and close-all-documents quit path use the queue.
+3. **Break while running** — `break_debug()` sends GDB `interrupt`; debug thread releases `tlockGDB` during blocking `readpipe` so the UI thread can inject the interrupt.
+
+**Compile:** `CompileDebug.bat` — 0 errors (2026-07-05).
+
 ---
 
 ## 5. Bottom panel — intended behavior (reference)
@@ -464,8 +505,9 @@ State model mirrors **left/right** panels:
 - [x] **Automatic workspace** — `.vfs` sessions removed from UX; `Settings/Workspace.ini` save/restore on exit/startup; single-project switch via `PrepareForAnotherProject()` — see §4
 - [x] **File menu (part 2)** — Project vs File sections; `frmNewFile`, `frmOpenProject`, `frmRecentProjects`; WinAPI handler rename — see §4
 - [x] **Bottom panel tab captions** — `DetachTab`, hide debug tabs before HWND init, INI index `-1` guard — see §4
+- [x] **Run menu consolidation** — all run/debug commands under **Run**; Debug menubar removed; Use Debugger / profiler / breakpoints grouped; GDB session enable fixes; owner verified complete (2026-07-05) — see §4
 - [ ] **frmNewProject icons** — template icons not displaying on new form (icon name derivation matches frmTemplates pattern but `@imgList32` may not be populated at form creation time); deferred
-- [ ] **Bottom panel regression (tab captions + debug hide/show)** — owner to run at start of next session; checklist in §7
+- [x] **Bottom panel regression (tab captions + debug hide/show)** — owner verified fixed (2026-07-05) — see §4, §7
 
 ---
 
@@ -486,12 +528,14 @@ Run a full pass on **latest** `VisualFBEditor64.exe` after `Compile.bat`. Check 
 - [x] ~~Restart-while-debugging and normal stop/exit — no hang or crash~~ — superseded by the two bugs found below; IDE itself never froze, stayed usable throughout.
 - [ ] **Gas64 vs GCC backend check** (resolves the open §4 decision point) — still open, deferred along with the bugs below
 
-**Two real bugs found during this testing — confirmed pre-existing (not introduced by any cleanup), deferred, not blocking:**
+**Two real bugs found during earlier testing — fixed 2026-07-05:**
 
-1. **Step Out sends the wrong GDB command.** `src/VisualFBEditor.bas`, `Case "StepOut"` (~line 705) calls `step_debug("n")` — `"n"` is GDB's *next* (step-over) command, not `"finish"` (proper step-out: run until the current function returns). So Step Out currently behaves identically to Step Over instead of leaving the current function. Confirmed via `git log -L` on this exact line range: present since `bbfa399` (initial fork import), never touched by any commit since — this is inherited from upstream, not something this fork's cleanup work caused.
-2. **Command dispatch race condition between debug actions.** The mechanism that hands a command to the background GDB-communication thread (`NewCommand`, a single shared string set by `step_debug()`/`continue_debug()` and cleared by the reader loop in `Debug.bas`) is not a real queue. Firing multiple debug actions in quick succession (e.g. Step Over, then Step Out, then Step Into, then Continue) can silently overwrite an earlier pending command before the background thread ever reads it — some clicks do nothing not because anything hung, but because a later click clobbered them first. Also confirmed pre-existing via `git log -L` (`readpipe()`, `continue_debug()`, `set_bp()` all untouched since `bbfa399`; the one function touched by cleanup, `step_debug()`, only had a dead comment block removed — the live logic is byte-identical to before).
+1. ~~**Step Out sends the wrong GDB command.**~~ Fixed: `Case "StepOut"` now calls `step_debug("finish")`.
+2. ~~**Command dispatch race condition between debug actions.**~~ Fixed: 32-slot command queue under `tlockGDB` replaces the single `NewCommand` string.
 
-**Owner's call (2026-07-03, 8 AM Portland time):** defer both. Neither makes the IDE unusable — basic breakpoint + Step Into + variable inspection all work correctly at a normal (non-rapid-clicking) pace, which covers ordinary debugging use. **Revisit if:** future manual testing specifically needs reliable Step Over/Step Out, or needs firing debug actions in fast succession. Until then, the practical guidance for using the debugger is: click one debug action at a time and wait for it to visibly take effect before clicking the next, and treat Step Out as equivalent to Step Over for now.
+**Also fixed 2026-07-05:** **Break while running** — `break_debug()` sends GDB `interrupt`; mutex released during blocking `readpipe` so the UI can inject it.
+
+**Owner's call (2026-07-03):** defer Step Out + command race — **superseded** by fixes above (2026-07-05).
 
 ### Startup
 
@@ -509,17 +553,29 @@ Run a full pass on **latest** `VisualFBEditor64.exe` after `Compile.bat`. Check 
 - [x] Single-click collapse when expanded — **owner verified**
 - [x] Resize height persists (≥ 80px) — **owner verified**
 
-### Bottom panel — tab captions & debug tabs (added 2026-07-05, **pending owner verification**)
+### Bottom panel — tab captions & debug tabs (added 2026-07-05, **owner verified complete**)
 
-Run at the **start of the next session** on latest `VisualFBEditor64.exe` after `CompileDebug.bat`:
+- [x] Cold start — always-visible tabs show correct names (Output, Problems, Suggestions, Find, ToDo, Change Log, Immediate), not all "Globals"
+- [x] Debug tabs (Locals, Globals, Procedures, Threads, Watches, Memory, Profiler) hidden at startup
+- [x] Start debugging — debug tabs appear with correct names; end debugging — they hide again
+- [x] Start/end debug multiple times — no duplicate tabs, no caption corruption
+- [x] Close project — no crash; bottom tab captions remain correct
+- [x] Restart IDE — bottom tab order persists (no scrambled order from saved `-1` indices)
+- [x] Pin/collapse bottom panel — tab labels stay correct in both modes
 
-- [ ] Cold start — always-visible tabs show correct names (Output, Problems, Suggestions, Find, ToDo, Change Log, Immediate), not all "Globals"
-- [ ] Debug tabs (Locals, Globals, Procedures, Threads, Watches, Memory, Profiler) hidden at startup
-- [ ] Start debugging — debug tabs appear with correct names; end debugging — they hide again
-- [ ] Start/end debug multiple times — no duplicate tabs, no caption corruption
-- [ ] Close project — no crash; bottom tab captions remain correct
-- [ ] Restart IDE — bottom tab order persists (no scrambled order from saved `-1` indices)
-- [ ] Pin/collapse bottom panel — tab labels stay correct in both modes
+### GDB debugger — Step Out, Break, command queue (added 2026-07-05, **pending owner verification**)
+
+- [ ] Step Out — runs until current function returns (not same as Step Over)
+- [ ] Rapid step/continue clicks — each enqueued command executes (no silent drops)
+- [ ] Break while running — program stops; can inspect state; Continue resumes
+
+### Run menu — debug & run commands (added 2026-07-05, **owner verified complete**)
+
+- [x] **Run** menu contains session, stepping, Use Debugger/Profiler, breakpoints, GDB/watch, set/show next statement — no separate Debug menubar
+- [x] **Use Debugger** checks/unchecks; debug tabs show/hide; step/run commands enable when debugger on + project open
+- [x] **Use Profiler** disabled when debugger off; unchecks when debugger turned off
+- [x] Start / Continue / Step / Run To Cursor / Set Next Statement enable states at startup and with editor focus
+- [x] Clear All Breakpoints clears markers across open tabs
 
 ### Regression (Batch 2.75.2 + adjacent areas)
 
@@ -545,7 +601,7 @@ All items above passed **before** the owner separately found the critical `_WIN3
 - ~~Stray dead-code comments from GTK era~~ — **done**, see §3a
 - `src/makefile` still references GTK defines (not used by `Compile.bat`) — still open, low priority
 - `src/THREADING.md` mentions GTK UI wrapping (historical) — still open, low priority
-- **Debugger: Step Out sends wrong GDB command, and debug-action command dispatch has a race condition** — found during this session's debugger smoke test (see above), confirmed pre-existing/inherited from upstream, deferred per owner's call. Good candidate example for the §13.2 structured-programming/tech-debt pass when that's picked up.
+- ~~**Debugger: Step Out sends wrong GDB command, and debug-action command dispatch has a race condition**~~ — **fixed** 2026-07-05 (see §4 session part 4, §7 GDB checklist)
 
 ### Optional / housekeeping
 

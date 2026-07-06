@@ -14,6 +14,7 @@
 #include once "Main.bi"
 
 Declare Sub DeleteDebugCursor
+Declare Sub EnqueueDebugCommand(cmd As String)
 
 'Enum 'type of running
 '	RTRUN
@@ -144,6 +145,7 @@ End Enum
 Const   SRCMAX=1000		   ''max source file
 
 Common Shared As Integer fcurlig
+Common Shared As Long iFlagStartDebug
 
 #define KSTYLBREAK      1
 #define KSTYLBREAKTEMPO 2

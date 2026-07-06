@@ -9,6 +9,7 @@ PowerShell Expand-Archive -LiteralPath "7za920.zip" -DestinationPath ".\7z" -For
 curl -L -O https://sourceforge.net/projects/fbc/files/FreeBASIC-1.10.0/Binaries-Windows/FreeBASIC-1.10.0-winlibs-gcc-9.3.0.7z
 
 set FBC64=%~dp0..\..\Compiler\fbc64.exe
+set FORCE_MFF=1
 
 curl -L -O https://github.com/XusinboyBekchanov/MyFbFramework/archive/master.zip
 
@@ -22,13 +23,13 @@ Rename MyFbFramework-master MyFbFramework
 
 cd MyFbFramework\mff
 
-"%FBC64%" -b "mff.bi" "mff.rc" -dll -x "../mff64.dll" -v
+"%FBC64%" -b "mff.bi" "mff.rc" -dll -gen gcc -mt -x "../mff64.dll"
 
 if not exist ../mff64.dll exit 1
 
 cd ..\..\..\src
 
-"%FBC64%" "VisualFBEditor.bas" -s gui -x "../VisualFBEditor64.exe" "VisualFBEditor.rc" -i "..\Controls\MyFbFramework" -v
+"%FBC64%" "VisualFBEditor.bas" -s gui -gen gcc -mt -Wc -O2 -x "../VisualFBEditor64.exe" "VisualFBEditor.rc" -i "..\Controls\MyFbFramework"
 
 if not exist ../VisualFBEditor64.exe exit 1
 

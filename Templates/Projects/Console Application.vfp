@@ -20,6 +20,7 @@ LegalTrademarks=""
 OriginalFilename=""
 ProductName="{ProjectName}"
 CompileTo=0
+CompileMode=0
 OptimizationLevel=0
 OptimizationFastCode=false
 OptimizationSmallCode=false

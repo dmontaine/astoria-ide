@@ -172,6 +172,7 @@ Common Shared As Integer oldIndex, newIndex
 		Dim As CheckBox chkHighlightCurrentLine
 		Dim As CheckBox chkHighlightBrackets, chkIncludeMFFPath, chkLimitDebug, chkDisplayWarningsInDebug, chkCreateNonStaticEventHandlers, chkShowKeywordsTooltip, chkShowSymbolsTooltipsOnMouseHover, chkShowClassesExplorerOnOpenWindow, chkAddSpacesToOperators, chkCreateFormTypesWithoutTypeWord, chkTurnOnEnvironmentVariables, chkDarkMode, chkPlaceStaticEventHandlersAfterTheConstructor, chkCreateStaticEventHandlersWithAnUnderscoreAtTheBeginning, chkAddRelativePathsToRecent, chkShowTooltipsAtTheTop, chkChangeIdentifiersCase, chkSyntaxHighlightingIdentifiers, chkEnableAutoSuggestions, chkShowHorizontalSeparatorLines, chkCreateEventHandlersWithoutStaticEventHandlerIfEventAllowsIt, chkShowHolidayFrame, ShowClassesExplorerOnOpenWindow, chkChangeEndingType, chkUseDirect2D, chkInterfaceColor
 		Dim As Boolean oldDisplayMenuIcons
+		Dim As Boolean LastApplySucceeded = True
 		Dim As RadioButton optSaveCurrentFile, optDoNotSave, optSaveAllFiles, optPromptToSave, optMainFileFolder, optInFolder
 		Dim As VerticalBox vbxCodeEditor, vbxGeneral, vbxColors
 		Dim As VerticalBox vbxTheme, vbxDefaults, vbxIncludePaths, vbxLibraryPaths, vbxInterfaceTheme, vbxInterfaceColors

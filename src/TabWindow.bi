@@ -232,15 +232,7 @@ Public:
 	Declare Function ReadObjProperty(ByRef Obj As Any Ptr, ByRef PropertyName As String, Cpnt As Any Ptr = 0) ByRef As WString
 	Declare Function WriteObjProperty(ByRef Obj As Any Ptr, ByRef PropertyName As String, ByRef Value As WString, FromText As Boolean = False, Cpnt As Any Ptr = 0) As Boolean
 	Declare Function GetFormattedPropertyValue(ByRef Obj As Any Ptr, ByRef PropertyName As String, Cpnt As Any Ptr = 0) ByRef As WString
-	Declare Sub SetErrorHandling(StartLine As String, EndLine As String)
-	Declare Sub RemoveErrorHandling
 	Declare Sub AddSpaces(ByVal StartLine As Integer = -1, ByVal EndLine As Integer = -1)
-	Declare Sub NumberOn(ByVal StartLine As Integer = -1, ByVal EndLine As Integer = -1, bMacro As Boolean = False)
-	Declare Sub NumberOff(ByVal StartLine As Integer = -1, ByVal EndLine As Integer = -1)
-	Declare Sub ProcedureNumberOn(bMacro As Boolean = False)
-	Declare Sub ProcedureNumberOff
-	Declare Sub PreprocessorNumberOn
-	Declare Sub PreprocessorNumberOff
 	Declare Sub SplitLines(ByVal StartLine As Integer = -1, ByVal EndLine As Integer = -1)
 	Declare Sub CombineLines(ByVal StartLine As Integer = -1, ByVal EndLine As Integer = -1)
 	Declare Sub SortLines(ByVal StartLine As Integer = -1, ByVal EndLine As Integer = -1)
@@ -410,20 +402,11 @@ Declare Sub SetCodeVisible(tb As TabWindow Ptr)
 
 Declare Sub Versioning(ByRef FileName As WString, ByRef sFirstLine As WString, ByRef Project As ProjectElement Ptr = 0, ByRef ProjectNode As TreeNode Ptr = 0)
 
-Declare Sub RunPr(Debugger As String = "", ByRef ProjectFileName As WString, ByRef ProjectCommandLineArguments As WString, ByRef MainFile As WString, ByRef CompileLine As WString, ByRef FirstLine As WString)
+Declare Sub RunPr(Debugger As String, ByRef ProjectFileName As WString, ByRef ProjectCommandLineArguments As WString, ByRef MainFile As WString, ByRef CompileLine As WString, ByRef FirstLine As WString)
 
 Declare Sub RunProgram(Param As Any Ptr)
 
-Declare Sub GetProcedureLines(ByRef ehStart As Integer, ByRef ehEnd As Integer)
 Declare Sub SelectSearchResult(ByRef FileName As WString, iLine As Integer, ByVal iSelStart As Integer =-1, ByVal iSelLength As Integer =-1, tabw As TabWindow Ptr = 0, ByRef SearchText As WString = WStr(""))
-
-Declare Sub NumberingOn(ByVal StartLine As Integer = -1, ByVal EndLine As Integer = -1, bMacro As Boolean = False, ByRef txtCode As EditControl, WithoutUpdate As Boolean = False, StartsOfProcs As Boolean = False)
-
-Declare Sub NumberingOff(ByVal StartLine As Integer = -1, ByVal EndLine As Integer = -1, ByRef txtCode As EditControl, WithoutUpdate As Boolean = False)
-
-Declare Sub PreprocessorNumberingOn(ByRef txtCode As EditControl, ByRef FileName As WString, WithoutUpdate As Boolean = False)
-
-Declare Sub PreprocessorNumberingOff(ByRef txtCode As EditControl, WithoutUpdate As Boolean = False)
 
 Declare Sub ParameterInfo(Key As Integer = Asc(","), SelStartChar As Integer = -1, SelEndChar As Integer = -1, sWordAt As String = "")
 

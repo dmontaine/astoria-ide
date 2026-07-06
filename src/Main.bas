@@ -110,12 +110,11 @@ Dim Shared As Label lblLeft
 Dim Shared As Panel pnlLeft, pnlRight, pnlBottom, pnlBottomTab, pnlLeftPin, pnlRightPin, pnlBottomPin, pnlPropertyValue, pnlColor
 Dim Shared As TrackBar trLeft
 Dim Shared As MainMenu mnuMain
-Dim Shared As MenuItem Ptr mnuStartWithCompile, mnuStart, mnuBreak, mnuEnd, mnuRestart, mnuStandardToolBar, mnuEditToolBar, mnuProjectToolBar, mnuFormatToolBar, mnuBuildToolBar, mnuDebugToolBar, mnuRunToolBar, mnuSplit, mnuSplitHorizontally, mnuSplitVertically, mnuWindowSeparator, miRecentProjects, miRecentFiles, miRecentFolders, miSetAsMain, miClearStartUp, miTabSetAsMain, miTabReloadHistoryCode, miRemoveFiles, miToolBars
+Dim Shared As MenuItem Ptr mnuStartWithCompile, mnuStart, mnuContinue, mnuBreak, mnuEnd, mnuRestart, mnuStandardToolBar, mnuEditToolBar, mnuProjectToolBar, mnuFormatToolBar, mnuBuildToolBar, mnuDebugToolBar, mnuRunToolBar, mnuSplit, mnuSplitHorizontally, mnuSplitVertically, mnuWindowSeparator, miRecentProjects, miRecentFiles, miRecentFolders, miSetAsMain, miClearStartUp, miTabSetAsMain, miTabReloadHistoryCode, miRemoveFiles, miToolBars
 Dim Shared As MenuItem Ptr miRecentAIChat,  miFileAIChat
-Dim Shared As MenuItem Ptr miSaveProject, miSaveProjectAs, miCloseProject, miDeleteProject, miCloseFolder, miNewFile, miOpenFile, miCloseFile, miDeleteFile, miSaveFile, miSaveFileAs, miPrint, miPrintPreview, miPageSetup, miOpenProjectFolder, miProjectProperties, miExplorerOpenProjectFolder, miExplorerRename, miExplorerProjectProperties, miExplorerCloseProject, miRename, miRemoveFileFromProject
+Dim Shared As MenuItem Ptr miSaveProject, miSaveProjectAs, miCloseProject, miDeleteProject, miNewFile, miOpenFile, miCloseFile, miDeleteFile, miSaveFile, miSaveFileAs, miPrint, miPrintPreview, miPageSetup, miOpenProjectFolder, miProjectProperties, miExplorerOpenProjectFolder, miExplorerRename, miExplorerProjectProperties, miExplorerCloseProject, miRename, miRemoveFileFromProject
 Dim Shared As MenuItem Ptr miUndo, miRedo, miCutCurrentLine, miCut, miCopy, miPaste, miSingleComment, miBlockComment, miUncommentBlock, miDuplicate, miSelectAll, miIndent, miOutdent, miFormat, miUnformat, miFormatProject, miUnformatProject, miAddSpaces, miDeleteBlankLines, miSuggestions, miCompleteWord, miParameterInfo, miStepInto, miStepOver, miStepOut, miRunToCursor, miGDBCommand, miAddWatch, miToggleBreakpoint, miClearAllBreakpoints, miSetNextStatement, miShowNextStatement
-Dim Shared As MenuItem Ptr miNumbering, miMacroNumbering, miRemoveNumbering, miProcedureNumbering, miProcedureMacroNumbering, miRemoveProcedureNumbering, miProjectMacroNumbering, miProjectMacroNumberingStartsOfProcedures, miRemoveProjectNumbering, miModuleMacroNumbering, miModuleMacroNumberingStartsOfProcedures, miRemoveModuleNumbering, miPreprocessorNumbering, miRemovePreprocessorNumbering, miProjectPreprocessorNumbering, miRemoveProjectPreprocessorNumbering, miModulePreprocessorNumbering, miRemoveModulePreprocessorNumbering, miOnErrorResumeNext, miOnErrorGoto, miOnErrorGotoResumeNext, miOnLocalErrorGoto, miOnLocalErrorGotoResumeNext, miRemoveErrorHandling
-Dim Shared As MenuItem Ptr dmiNumbering, dmiMacroNumbering, dmiRemoveNumbering, dmiProcedureNumbering, dmiProcedureMacroNumbering, dmiRemoveProcedureNumbering, dmiModuleMacroNumbering, dmiModuleMacroNumberingStartsOfProcedures, dmiRemoveModuleNumbering, dmiPreprocessorNumbering, dmiRemovePreprocessorNumbering, dmiModulePreprocessorNumbering, dmiRemoveModulePreprocessorNumbering, dmiOnErrorResumeNext, dmiOnErrorGoto, dmiOnErrorGotoResumeNext, dmiOnLocalErrorGoto, dmiOnLocalErrorGotoResumeNext, dmiRemoveErrorHandling, dmiMake, dmiMakeClean
+Dim Shared As MenuItem Ptr dmiMake, dmiMakeClean
 Dim Shared As MenuItem Ptr miCode, miForm, miCodeAndForm, miGotoCodeForm, miCollapseCurrent, miCollapseAllProcedures, miCollapseAll, miUnCollapseCurrent, miUnCollapseAllProcedures, miUnCollapseAll, miImageManager, miAddProcedure, miAddType, miFind, miReplace, miFindNext, miFindPrevious, miGoto, miDefine, miToggleBookmark, miNextBookmark, miPreviousBookmark, miClearAllBookmarks, miSyntaxCheck, miCompile, miCompileAll, miMake, miMakeClean
 Dim Shared As MenuItem Ptr miAlignLefts, miAlignCenters, miAlignRights, miAlignTops, miAlignMiddles, miAlignBottoms, miAlignToGrid, miMakeSameSizeWidth, miMakeSameSizeHeight, miMakeSameSizeBoth, miSizeToGrid, miHorizontalSpacingMakeEqual, miHorizontalSpacingIncrease, miHorizontalSpacingDecrease, miHorizontalSpacingRemove, miVerticalSpacingMakeEqual, miVerticalSpacingIncrease, miVerticalSpacingDecrease, miVerticalSpacingRemove, miCenterInParentHorizontally, miCenterInParentVertically, miOrderBringToFront, miOrderSendToBack, miLockControls
 Dim Shared As MenuItem Ptr miShowWithFolders, miShowWithoutFolders, miShowAsFolder
@@ -161,7 +160,7 @@ Dim Shared As TabPage Ptr tpProject, tpToolbox, tpProperties, tpEvents, tpOutput
 Dim Shared As Form frmMain
 Dim Shared As Integer tabItemHeight
 Dim Shared As Integer miRecentMax =20 'David Changed
-Dim Shared As Boolean mLoadLog, mLoadToDo, mChangeLogEdited, mApplyingWorkspaceLoad = True, ManifestIcoCopy
+Dim Shared As Boolean mLoadLog, mLoadToDo, mChangeLogEdited, mApplyingWorkspaceLoad = False, ManifestIcoCopy
 Dim Shared As WString * MAX_PATH mChangelogName  'David Changed
 pApp = @VisualFBEditorApp
 pfrmMain = @frmMain
@@ -378,7 +377,7 @@ Sub ClearDebugPanels()
 	lvMemory.ListItems.Clear
 	lvProfiler.Nodes.Clear
 	txtImmediate.Text = ""
-	SetDebugTabsVisible False
+	If Not UseDebugger Then SetDebugTabsVisible False
 End Sub
 
 Sub SetCodeVisible(tb As TabWindow Ptr)
@@ -677,32 +676,6 @@ Sub SelectControlTreeNode(cte As ControlTreeElement Ptr)
 	DesignerChangeSelection *tb->Des, Ctrl
 End Sub
 
-Sub CloseFolder(ByRef tn As TreeNode Ptr)
-	Dim As TabWindow Ptr tb
-	For jj As Integer = 0 To TabPanels.Count - 1
-		Var ptabCode = @Cast(TabPanel Ptr, TabPanels.Item(jj))->tabCode
-		For i As Integer = 0 To ptabCode->TabCount - 1
-			tb = Cast(TabWindow Ptr, ptabCode->Tab(i))
-			If tb->ptn = tn Then
-				If Not CloseTab(tb, True) Then Return
-				Exit For
-			End If
-		Next i
-	Next jj
-	ClearTreeNode tn
-	'miSaveProject->Enabled = False
-	'miSaveProjectAs->Enabled = False
-	'miCloseProject->Enabled = False
-	'miCloseFolder->Enabled = False
-	'miExplorerCloseProject->Enabled = False
-	'miProjectProperties->Enabled = False
-	'miExplorerProjectProperties->Enabled = False
-	Var Index = tvExplorer.Nodes.IndexOf(tn)
-	If Index <> -1 Then tvExplorer.Nodes.Remove Index
-	ChangeMenuItemsEnabled
-	'Delete tn
-End Sub
-
 Function AddFolder(ByRef FolderName As WString) As TreeNode Ptr
 	Dim As TreeNode Ptr tn
 	If FolderName <> "" Then
@@ -734,6 +707,36 @@ Function AddFolder(ByRef FolderName As WString) As TreeNode Ptr
 	End If
 	Return tn
 End Function
+
+Function PrepareForAnotherProjectU(NewProjectPath As UString) As Boolean
+	Dim As WString Ptr pathPtr
+	WLet(pathPtr, NewProjectPath)
+	Dim As Boolean result = PrepareForAnotherProject(*pathPtr)
+	WDeAllocate(pathPtr)
+	Return result
+End Function
+
+Function AddFolderU(FolderName As UString) As TreeNode Ptr
+	Dim As WString Ptr pathPtr
+	WLet(pathPtr, FolderName)
+	Dim As TreeNode Ptr tn = AddFolder(*pathPtr)
+	WDeAllocate(pathPtr)
+	Return tn
+End Function
+
+Sub OpenFilesU(FileName As UString)
+	Dim As WString Ptr pathPtr
+	WLet(pathPtr, FileName)
+	OpenFiles *pathPtr
+	WDeAllocate(pathPtr)
+End Sub
+
+Sub AddNewU(Template As UString)
+	Dim As WString Ptr pathPtr
+	WLet(pathPtr, Template)
+	AddNew *pathPtr
+	WDeAllocate(pathPtr)
+End Sub
 
 Function IfNegative(Value As Integer, NonNegative As Integer) As Integer
 	If Value < 0 Then
@@ -1164,6 +1167,7 @@ Sub SaveWorkspace()
 			Print #Fn, "*File=" & Replace(WGet(ppe->FileName), "\", "/")
 		End If
 	End If
+	Print #Fn, "UseDebugger=" & IIf(UseDebugger, "1", "0")
 	Print #Fn, "[Tabs]"
 	Dim As TabWindow Ptr tb
 	Dim Zv As String
@@ -1194,12 +1198,20 @@ Function LoadWorkspace() As Boolean
 	Dim bMain As Boolean, bTabs As Boolean
 	Dim Pos1 As Integer, n As Integer = 0
 	Dim bProjectLoaded As Boolean = False
+	Dim bUseDebuggerSaved As Boolean = False
+	Dim bHasUseDebuggerSaved As Boolean = False
 	MainNode = 0
 	Do Until EOF(Fn)
 		Line Input #Fn, Buff
 		If StartsWith(LCase(Buff), "[tabs]") Then
 			bTabs = True
 			n = 0
+		ElseIf StartsWith(LCase(Buff), "usedebugger=") Then
+			Pos1 = InStr(Buff, "=")
+			If Pos1 <> 0 Then
+				bUseDebuggerSaved = (Val(Mid(Buff, Pos1 + 1)) <> 0)
+				bHasUseDebuggerSaved = True
+			End If
 		ElseIf StartsWith(LCase(Buff), "file=") OrElse StartsWith(LCase(Buff), "*file=") Then
 			Pos1 = InStr(Buff, "=")
 			If Pos1 <> 0 Then
@@ -1236,6 +1248,7 @@ Function LoadWorkspace() As Boolean
 		Next
 	End If
 	CloseFile_(Fn)
+	If bHasUseDebuggerSaved Then ChangeUseDebugger bUseDebuggerSaved, 1
 	Return CBool(bProjectLoaded) OrElse (ptabCode->TabCount > 0)
 End Function
 
@@ -1322,8 +1335,10 @@ End Function
 
 Sub AddNew(ByRef Template As WString)
 	If EndsWith(LCase(Template), ".vfp") Then
+		Dim tnPrev As TreeNode Ptr = GetOpenProjectNode()
 		If Not PrepareForAnotherProject("") Then Return
-		AddProject Template, , , True
+		Dim tn As TreeNode Ptr = AddProject(Template, , , True)
+		If tn <> tnPrev Then ChangeUseDebugger False, 1
 	Else
 		AddTab Template, True
 	End If
@@ -1331,8 +1346,10 @@ End Sub
 
 Sub OpenFiles(ByRef FileName As WString)
 	If EndsWith(LCase(FileName), ".vfp") Then
+		Dim tnPrev As TreeNode Ptr = GetOpenProjectNode()
 		If Not PrepareForAnotherProject(FileName) Then Return
-		AddProject FileName
+		Dim tn As TreeNode Ptr = AddProject(FileName)
+		If tn <> tnPrev Then ChangeUseDebugger False, 1
 		WLet(RecentProject, FileName)
 	ElseIf FolderExists(FileName) Then
 		AddFolder FileName
@@ -1711,8 +1728,7 @@ Function CloseAllDocuments() As Boolean
 	Dim tnP As TreeNode Ptr
 	Dim Index As Integer
 		If iFlagStartDebug = 1 Then
-			NewCommand = !"q\n"
-			MutexUnlock tlockGDB
+			EnqueueDebugCommand !"q\n"
 		End If
 	With *pfSave
 		.lstFiles.Clear
@@ -1853,8 +1869,16 @@ Sub RunHelp(Param As Any Ptr)
 End Sub
 
 Sub OpenProjectTemplate(ByVal TabIndex As Integer = 0)
+	Dim As String templateTitle
+	If TabIndex = 0 Then
+		templateTitle = "New Project"
+	ElseIf TabIndex = 1 Then
+		templateTitle = "Open Project"
+	Else
+		templateTitle = "Recent Project"
+	End If
 	pfTemplates->DialogMode = IIf(TabIndex = 0, 1, TabIndex)
-	pfTemplates->Text = ML(IIf(TabIndex = 0, "New Project", IIf(TabIndex = 1, "Open Project", "Recent Project")))
+	pfTemplates->Text = ML(templateTitle)
 	If pfTemplates->ShowModal(frmMain) = ModalResults.OK Then
 		If pfTemplates->SelectedFolder <> "" Then
 			AddFolder pfTemplates->SelectedFolder
@@ -1870,13 +1894,16 @@ Sub NewProject()
 	Dim fNewProject As frmNewProject
 	pfNewProject = @fNewProject
 	If pfNewProject->ShowModal(frmMain) = ModalResults.OK Then
-		If pfNewProject->SelectedFolder <> "" Then
-			AddFolder pfNewProject->SelectedFolder
+		If pfNewProject->SelectedProjectFile <> "" Then
+			If Not PrepareForAnotherProjectU(pfNewProject->SelectedProjectFile) Then Return
+			OpenFilesU pfNewProject->SelectedProjectFile
+		ElseIf pfNewProject->SelectedFolder <> "" Then
+			AddFolderU pfNewProject->SelectedFolder
 		ElseIf pfNewProject->SelectedTemplate <> "" Then
 			If EndsWith(LCase(pfNewProject->SelectedTemplate), ".vfp") Then
-				If Not PrepareForAnotherProject("") Then Return
+				If Not PrepareForAnotherProjectU("") Then Return
 			End If
-			AddNew pfNewProject->SelectedTemplate
+			AddNewU pfNewProject->SelectedTemplate
 		End If
 	End If
 End Sub
@@ -2332,13 +2359,13 @@ Function CloseProject(tn As TreeNode Ptr, WithoutMessage As Boolean = False) As 
 	'miSaveProject->Enabled = False
 	'miSaveProjectAs->Enabled = False
 	'miCloseProject->Enabled = False
-	'miCloseFolder->Enabled = False
 	'miExplorerCloseProject->Enabled = False
 	'miProjectProperties->Enabled = False
 	'miExplorerProjectProperties->Enabled = False
 	If tvExplorer.Nodes.IndexOf(tn) <> -1 Then tvExplorer.Nodes.Remove tvExplorer.Nodes.IndexOf(tn)
 	ClearAnalysisPanels()
 	ClearDebugPanels()
+	ChangeUseDebugger False, 1
 	ChangeMenuItemsEnabled
 	Return True
 End Function
@@ -2408,10 +2435,28 @@ Sub ClearAllBookmarks
 	Next
 End Sub
 
+Sub ClearAllBreakpoints
+	For j As Integer = 0 To TabPanels.Count - 1
+		Var ptabCode = @Cast(TabPanel Ptr, TabPanels.Item(j))->tabCode
+		For i As Integer = 0 To ptabCode->TabCount - 1
+			Cast(TabWindow Ptr, ptabCode->Tabs[i])->txtCode.ClearAllBreakpoints
+		Next
+	Next
+End Sub
+
+Sub ChangeUseProfiler(bUseProfiler As Boolean, ChangeObject As Integer = -1)
+	If Not UseDebugger Then bUseProfiler = False
+	If mnuUseProfiler <> 0 AndAlso mnuUseProfiler->Checked <> bUseProfiler Then mnuUseProfiler->Checked = bUseProfiler
+End Sub
+
 Sub ChangeUseDebugger(bUseDebugger As Boolean, ChangeObject As Integer = -1)
 	UseDebugger = bUseDebugger
-	If ChangeObject <> 0 Then tbtUseDebugger->Checked = bUseDebugger
-	If ChangeObject <> 1 AndAlso mnuUseDebugger->Checked <> UseDebugger Then mnuUseDebugger->Checked = bUseDebugger
+	If ChangeObject <> 0 AndAlso tbtUseDebugger <> 0 Then tbtUseDebugger->Checked = bUseDebugger
+	If mnuUseDebugger <> 0 AndAlso mnuUseDebugger->Checked <> bUseDebugger Then mnuUseDebugger->Checked = bUseDebugger
+	SetDebugTabsVisible bUseDebugger
+	If Not bUseDebugger Then ChangeUseProfiler False
+	If mnuUseProfiler <> 0 Then mnuUseProfiler->Enabled = bUseDebugger
+	If iFlagStartDebug = 0 Then ChangeEnabledDebug True, False, False
 End Sub
 
 Sub ChangeLockControls(bLockControls As Boolean, ChangeObject As Integer = -1)
@@ -2455,20 +2500,34 @@ Sub ChangeNewLineType(NewLineType As NewLineTypes)
 End Sub
 
 Sub ChangeEnabledDebug(bStart As Boolean, bBreak As Boolean, bEnd As Boolean)
+	Dim As Boolean bStopped = UseDebugger AndAlso bEnd
+	Dim As Boolean bDebugCommands = UseDebugger AndAlso (bStopped OrElse (bStart AndAlso Not bBreak))
 	tbtStartWithCompile->Enabled = bStart
-	tbtStart->Enabled = bStart
+	tbtStart->Enabled = bStart OrElse bEnd
 	tbtBreak->Enabled = bBreak
 	tbtEnd->Enabled = bEnd
 	mnuStartWithCompile->Enabled = bStart
-	mnuStart->Enabled = bStart
+	mnuStart->Enabled = bStart OrElse bEnd
+	mnuContinue->Enabled = bStopped
 	mnuBreak->Enabled = bBreak
 	mnuEnd->Enabled = bEnd
-	mnuRestart->Enabled = bStart
-	miGDBCommand->Enabled = bEnd
-	miAddWatch->Enabled = bEnd
-	miStepOut->Enabled = bEnd
-	miShowNextStatement->Enabled = bEnd
-	If bEnd Then SetDebugTabsVisible True
+	mnuRestart->Enabled = UseDebugger AndAlso bStart AndAlso bStopped
+	miStepInto->Enabled = bDebugCommands
+	miStepOver->Enabled = bDebugCommands
+	miStepOut->Enabled = bDebugCommands
+	miRunToCursor->Enabled = bDebugCommands
+	miGDBCommand->Enabled = bDebugCommands
+	miAddWatch->Enabled = bDebugCommands
+	miShowNextStatement->Enabled = bDebugCommands
+	miSetNextStatement->Enabled = bDebugCommands
+	tbtStepInto->Enabled = bDebugCommands
+	tbtStepOver->Enabled = bDebugCommands
+	tbtStepOut->Enabled = bDebugCommands
+	tbtRunToCursor->Enabled = bDebugCommands
+	tbtSetNextStatement->Enabled = bDebugCommands
+	tbtToggleBreakpoint->Enabled = True
+	If mnuUseProfiler <> 0 Then mnuUseProfiler->Enabled = UseDebugger
+	SetDebugTabsVisible UseDebugger
 End Sub
 
 
@@ -5295,74 +5354,6 @@ Sub GDBCommand
 	End If
 End Sub
 
-' Populates Edit → Error Handling numbering/error items on the main menu (mi* pointers).
-Sub PopulateErrorHandlingNumberingMainMenu(parent As MenuItem Ptr)
-	miNumbering = parent->Add(ML("Numbering") & HK("NumberOn"), "Numbering", "NumberOn", @mClick, , , False)
-	miMacroNumbering = parent->Add(ML("Macro numbering") & HK("MacroNumberOn"), "", "MacroNumberOn", @mClick, , , False)
-	miRemoveNumbering = parent->Add(ML("Remove Numbering") & HK("NumberOff"), "", "NumberOff", @mClick, , , False)
-	parent->Add("-")
-	miPreprocessorNumbering = parent->Add(ML("Preprocessor numbering") & HK("PreprocessorNumberOn"), "Numbering", "PreprocessorNumberOn", @mClick, , , False)
-	miRemovePreprocessorNumbering = parent->Add(ML("Remove Preprocessor numbering") & HK("PreprocessorNumberOff"), "", "PreprocessorNumberOff", @mClick, , , False)
-	parent->Add("-")
-	miProcedureNumbering = parent->Add(ML("Procedure numbering") & HK("ProcedureNumberOn"), "Numbering", "ProcedureNumberOn", @mClick, , , False)
-	miProcedureMacroNumbering = parent->Add(ML("Procedure macro numbering") & HK("ProcedureMacroNumberOn"), "", "ProcedureMacroNumberOn", @mClick, , , False)
-	miRemoveProcedureNumbering = parent->Add(ML("Remove Procedure numbering") & HK("ProcedureNumberOff"), "", "ProcedureNumberOff", @mClick, , , False)
-	parent->Add("-")
-	miModuleMacroNumbering = parent->Add(ML("Module macro numbering") & HK("ModuleMacroNumberOn"), "Numbering", "ModuleMacroNumberOn", @mClick, , , False)
-	miModuleMacroNumberingStartsOfProcedures = parent->Add(ML("Module macro numbering: Starts of procedures") & HK("ModuleMacroNumberOnStartsOfProcs"), "", "ModuleMacroNumberOnStartsOfProcs", @mClick, , , False)
-	miRemoveModuleNumbering = parent->Add(ML("Remove Module numbering") & HK("ModuleNumberOff"), "", "ModuleNumberOff", @mClick, , , False)
-	parent->Add("-")
-	miModulePreprocessorNumbering = parent->Add(ML("Module preprocessor numbering") & HK("ModulePreprocessorNumberOn"), "Numbering", "ModulePreprocessorNumberOn", @mClick, , , False)
-	miRemoveModulePreprocessorNumbering = parent->Add(ML("Remove Module preprocessor numbering") & HK("ModulePreprocessorNumberOff"), "", "ModulePreprocessorNumberOff", @mClick, , , False)
-	parent->Add("-")
-	miProjectMacroNumbering = parent->Add(ML("Project macro numbering") & HK("ProjectMacroNumberOn"), "Numbering", "ProjectMacroNumberOn", @mClick, , , False)
-	miProjectMacroNumberingStartsOfProcedures = parent->Add(ML("Project macro numbering: Starts of procedures") & HK("ProjectMacroNumberOnStartsOfProcs"), "", "ProjectMacroNumberOnStartsOfProcs", @mClick, , , False)
-	miRemoveProjectNumbering = parent->Add(ML("Remove Project numbering") & HK("ProjectNumberOff"), "", "ProjectNumberOff", @mClick, , , False)
-	parent->Add("-")
-	miProjectPreprocessorNumbering = parent->Add(ML("Project preprocessor numbering") & HK("ProjectPreprocessorNumberOn"), "Numbering", "ProjectPreprocessorNumberOn", @mClick, , , False)
-	miRemoveProjectPreprocessorNumbering = parent->Add(ML("Remove Project preprocessor numbering") & HK("ProjectPreprocessorNumberOff"), "", "ProjectPreprocessorNumberOff", @mClick, , , False)
-	parent->Add("-")
-	'miOnErrorResumeNext = parent->Add("On Error Resume Next" & HK("OnErrorResumeNext"), "", "OnErrorResumeNext", @mClick, , , False)
-	miOnErrorGoto = parent->Add("On Error Goto ..." & HK("OnErrorGoto"), "", "OnErrorGoto", @mClick, , , False)
-	miOnErrorGotoResumeNext = parent->Add("On Error Goto ... Resume Next" & HK("OnErrorGotoResumeNext"), "", "OnErrorGotoResumeNext", @mClick, , , False)
-	miOnLocalErrorGoto = parent->Add("On Local Error Goto ..." & HK("OnLocalErrorGoto"), "", "OnLocalErrorGoto", @mClick, , , False)
-	miOnLocalErrorGotoResumeNext = parent->Add("On Local Error Goto ... Resume Next" & HK("OnLocalErrorGotoResumeNext"), "", "OnLocalErrorGotoResumeNext", @mClick, , , False)
-	miRemoveErrorHandling = parent->Add(ML("Remove Error Handling") & HK("RemoveErrorHandling"), "", "RemoveErrorHandling", @mClick, , , False)
-End Sub
-
-' Populates Edit toolbar Error Handling dropdown (dmi* pointers; no project-wide items).
-Sub PopulateErrorHandlingNumberingToolbarMenu(parent As Menu Ptr)
-	dmiNumbering = parent->Add(ML("Numbering"), "Numbering", "NumberOn", @mClick, , , False)
-	dmiMacroNumbering = parent->Add(ML("Macro numbering"), "", "MacroNumberOn", @mClick, , , False)
-	dmiRemoveNumbering = parent->Add(ML("Remove Numbering"), "", "NumberOff", @mClick, , , False)
-	parent->Add("-")
-	dmiPreprocessorNumbering = parent->Add(ML("Preprocessor Numbering"), "Numbering", "PreprocessorNumberOn", @mClick, , , False)
-	dmiRemovePreprocessorNumbering = parent->Add(ML("Remove Preprocessor Numbering"), "", "PreprocessorNumberOff", @mClick, , , False)
-	parent->Add("-")
-	dmiProcedureNumbering = parent->Add(ML("Procedure numbering"), "Numbering", "ProcedureNumberOn", @mClick, , , False)
-	dmiProcedureMacroNumbering = parent->Add(ML("Procedure macro numbering"), "", "ProcedureMacroNumberOn", @mClick, , , False)
-	dmiRemoveProcedureNumbering = parent->Add(ML("Remove Procedure numbering"), "", "ProcedureNumberOff", @mClick, , , False)
-	parent->Add("-")
-	dmiModuleMacroNumbering = parent->Add(ML("Module macro numbering"), "Numbering", "ModuleMacroNumberOn", @mClick, , , False)
-	dmiModuleMacroNumberingStartsOfProcedures = parent->Add(ML("Module macro numbering: Starts of procedures"), "", "ModuleMacroNumberOnStartsOfProcs", @mClick, , , False)
-	dmiRemoveModuleNumbering = parent->Add(ML("Remove Module numbering"), "", "ModuleNumberOff", @mClick, , , False)
-	parent->Add("-")
-	dmiModulePreprocessorNumbering = parent->Add(ML("Module preprocessor numbering"), "Numbering", "ModulePreprocessorNumberOn", @mClick, , , False)
-	dmiRemoveModulePreprocessorNumbering = parent->Add(ML("Remove Module preprocessor numbering"), "", "ModulePreprocessorNumberOff", @mClick, , , False)
-	parent->Add("-")
-	'dmiOnErrorResumeNext = parent->Add("On Error Resume Next", "", "OnErrorResumeNext", @mClick, , , False)
-	dmiOnErrorGoto = parent->Add("On Error Goto ...", "", "OnErrorGoto", @mClick, , , False)
-	dmiOnErrorGotoResumeNext = parent->Add("On Error Goto ... Resume Next", "", "OnErrorGotoResumeNext", @mClick, , , False)
-	dmiOnLocalErrorGoto = parent->Add("On Local Error Goto ...", "", "OnLocalErrorGoto", @mClick, , , False)
-	dmiOnLocalErrorGotoResumeNext = parent->Add("On Local Error Goto ... Resume Next", "", "OnLocalErrorGotoResumeNext", @mClick, , , False)
-	dmiRemoveErrorHandling = parent->Add(ML("Remove Error Handling"), "", "RemoveErrorHandling", @mClick, , , False)
-End Sub
-
-Sub SetMenuItemPairEnabled(mi_ As MenuItem Ptr, dmi_ As MenuItem Ptr, bEnabled As Boolean)
-	If mi_ Then mi_->Enabled = bEnabled
-	If dmi_ Then dmi_->Enabled = bEnabled
-End Sub
-
 Sub CreateMenusAndToolBars
 	pfSplash->lblProcess.Text = ML("Load On Startup") & ": " & ML("Create Menus And ToolBars")
 	imgList.Name = "imgList"
@@ -5389,10 +5380,8 @@ Sub CreateMenusAndToolBars
 	imgList.Add "MainForm", "MainForm"
 	imgList.Add "Format", "Format"
 	imgList.Add "Unformat", "Unformat"
-	imgList.Add "Numbering", "Numbering"
 	imgList.Add "CodeAndForm", "CodeAndForm"
 	imgList.Add "SyntaxCheck", "SyntaxCheck"
-	imgList.Add "List", "List"
 	imgList.Add "UseDebugger", "UseDebugger"
 	imgList.Add "Compile", "Compile"
 	imgList.Add "Make", "Make"
@@ -5525,7 +5514,6 @@ Sub CreateMenusAndToolBars
 	miFile->Add(ML("&Recent Project") & "...", "", "RecentProject", @mClick)
 	miCloseProject = miFile->Add(ML("Close Project") & HK("CloseProject", "Ctrl+Shift+F4"), "", "CloseProject", @mClick, , , False)
 	miDeleteProject = miFile->Add(ML("Delete Project"), "", "DeleteProject", @mClick, , , False)
-	miCloseFolder = miFile->Add(ML("Close Folder") & HK("CloseFolder", "Alt+F4"), "", "CloseFolder", @mClick, , , False)
 	miFile->Add("-")
 	miSaveProject = miFile->Add(ML("Save Project") & "..." & HK("SaveProject", "Ctrl+Shift+S"), "SaveAll", "SaveProject", @mClick, , , False)
 	miSaveProjectAs = miFile->Add(ML("Save Project As") & "..." & HK("SaveProjectAs"), "", "SaveProjectAs", @mClick, , , False)
@@ -5639,9 +5627,8 @@ Sub CreateMenusAndToolBars
 	miCompleteWord = miEdit->Add(ML("Complete Word") & HK("CompleteWord", "Ctrl+Space"), "CompleteWord", "CompleteWord", @mClick, , , False)
 	miParameterInfo = miEdit->Add(ML("Parameter Info") & HK("ParameterInfo", "Ctrl+J"), "ParameterInfo", "ParameterInfo", @mClick, , , False)
 	miEdit->Add("-")
-	Var miTry = miEdit->Add(ML("Line Numbering"), "", "Try")
-	PopulateErrorHandlingNumberingMainMenu(miTry)
-	
+	miAddProcedure = miEdit->Add(ML("Add &Procedure") & "..." & HK("AddProcedure"), "", "AddProcedure", @mClick, , , False)
+	miAddType = miEdit->Add(ML("Add &Type") & "..." & HK("AddType"), "", "AddType", @mClick, , , False)
 	Var miSearch = mnuMain.Add(ML("&Search"), "", "Search")
 	miFind = miSearch->Add(ML("&Find") & "..." & HK("Find", "Ctrl+F"), "Find", "Find", @mClick, , , False)
 	miReplace = miSearch->Add(ML("&Replace") & "..."  & HK("Replace", "Ctrl+H"), "", "Replace", @mClick, , , False)
@@ -5773,35 +5760,32 @@ Sub CreateMenusAndToolBars
 	miBuild->Add("-")
 	miBuild->Add(ML("&Parameters") & HK("Parameters"), "Parameters", "Parameters", @mClick)
 	
-	Var miDebug = mnuMain.Add(ML("&Debug"), "", "Debug")
-	mnuUseDebugger = miDebug->Add(ML("&Use Debugger") & HK("UseDebugger"), "", "UseDebugger", @mClick, True)
-	mnuUseProfiler = miDebug->Add(ML("Use &Profiler") & HK("UseProfiler"), "", "UseProfiler", @mClick, True)
-	miDebug->Add("-")
-	miStepInto = miDebug->Add(ML("Step &Into") & HK("StepInto", "F8"), "StepInto", "StepInto", @mClick, , , False)
-	miStepOver = miDebug->Add(ML("Step &Over") & HK("StepOver", "Shift+F8"), "StepOver", "StepOver", @mClick, , , False)
-	miStepOut = miDebug->Add(ML("Step O&ut") & HK("StepOut", "Ctrl+Shift+F8"), "StepOut", "StepOut", @mClick, , , False)
-	miRunToCursor = miDebug->Add(ML("&Run To Cursor") & HK("RunToCursor", "Ctrl+F8"), "RunToCursor", "RunToCursor", @mClick, , , False)
-	miDebug->Add("-")
-	miGDBCommand = miDebug->Add(ML("&GDB Command") & HK("GDBCommand"), "", "GDBCommand", @mClick, , , False)
-	miAddWatch = miDebug->Add(ML("&Add Watch") & HK("AddWatch"), "", "AddWatch", @mClick, , , False)
-	miDebug->Add("-")
-	miToggleBreakpoint = miDebug->Add(ML("&Toggle Breakpoint") & HK("Breakpoint", "F9"), "Breakpoint", "Breakpoint", @mClick, , , False)
-	miClearAllBreakpoints = miDebug->Add(ML("&Clear All Breakpoints") & HK("ClearAllBreakpoints", "Ctrl+Shift+F9"), "", "ClearAllBreakpoints", @mClick, , , False)
-	miDebug->Add("-")
-	miSetNextStatement = miDebug->Add(ML("Set &Next Statement") & HK("SetNextStatement"), "SetNextStatement", "SetNextStatement", @mClick, , , False)
-	miShowNextStatement = miDebug->Add(ML("Show Ne&xt Statement") & HK("ShowNextStatement"), "ShowNextStatement", "ShowNextStatement", @mClick, , , False)
-	
 	Var miRun = mnuMain.Add(ML("&Run"), "", "Run")
 	mnuStartWithCompile = miRun->Add(ML("Start With &Compile") & HK("StartWithCompile", "F5"), "StartWithCompile", "StartWithCompile", @mClick, , , False)
 	mnuStart = miRun->Add(ML("&Start") & HK("Start", "Ctrl+F5"), "Start", "Start", @mClick, , , False)
+	mnuContinue = miRun->Add(ML("&Continue") & HK("Continue", "Ctrl+F5"), "Continue", "Continue", @mClick, , , False)
 	mnuBreak = miRun->Add(ML("&Break") & HK("Break", "Ctrl+Break"), "Break", "Break", @mClick, , , False)
 	mnuEnd = miRun->Add(ML("&End") & HK("End"), "EndProgram", "End", @mClick, , , False)
 	mnuRestart = miRun->Add(ML("&Restart") & HK("Restart", "Shift+F5"), "", "Restart", @mClick, , , False)
+	miRun->Add("-")
+	miStepInto = miRun->Add(ML("Step &Into") & HK("StepInto", "F8"), "StepInto", "StepInto", @mClick, , , False)
+	miStepOver = miRun->Add(ML("Step &Over") & HK("StepOver", "Shift+F8"), "StepOver", "StepOver", @mClick, , , False)
+	miStepOut = miRun->Add(ML("Step O&ut") & HK("StepOut", "Ctrl+Shift+F8"), "StepOut", "StepOut", @mClick, , , False)
+	miRunToCursor = miRun->Add(ML("&Run To Cursor") & HK("RunToCursor", "Ctrl+F8"), "RunToCursor", "RunToCursor", @mClick, , , False)
+	miRun->Add("-")
+	mnuUseDebugger = miRun->Add(ML("&Use Debugger") & HK("UseDebugger"), "", "UseDebugger", @mClick, True)
+	mnuUseProfiler = miRun->Add(ML("Use &Profiler") & HK("UseProfiler"), "", "UseProfiler", @mClick, True)
+	miRun->Add("-")
+	miToggleBreakpoint = miRun->Add(ML("&Toggle Breakpoint") & HK("Breakpoint", "F9"), "Breakpoint", "Breakpoint", @mClick, , , False)
+	miClearAllBreakpoints = miRun->Add(ML("&Clear All Breakpoints") & HK("ClearAllBreakpoints", "Ctrl+Shift+F9"), "", "ClearAllBreakpoints", @mClick, , , False)
+	miRun->Add("-")
+	miGDBCommand = miRun->Add(ML("&GDB Command") & HK("GDBCommand"), "", "GDBCommand", @mClick, , , False)
+	miAddWatch = miRun->Add(ML("&Add Watch") & HK("AddWatch"), "", "AddWatch", @mClick, , , False)
+	miRun->Add("-")
+	miSetNextStatement = miRun->Add(ML("Set &Next Statement") & HK("SetNextStatement"), "SetNextStatement", "SetNextStatement", @mClick, , , False)
+	miShowNextStatement = miRun->Add(ML("Show Ne&xt Statement") & HK("ShowNextStatement"), "ShowNextStatement", "ShowNextStatement", @mClick, , , False)
 	
 	miXizmat = mnuMain.Add(ML("&Tools"), "", "Service")
-	miAddProcedure = miXizmat->Add(ML("Add &Procedure") & "..." & HK("AddProcedure"), "", "AddProcedure", @mClick, , , False)
-	miAddType = miXizmat->Add(ML("Add &Type") & "..." & HK("AddType"), "", "AddType", @mClick, , , False)
-	miXizmat->Add("-")
 	miXizmat->Add(ML("&Add-Ins") & "..." & HK("AddIns"), "", "AddIns", @mClick)
 	miXizmat->Add("-")
 	miXizmat->Add(ML("&External Tools") & "..." & HK("Tools"), "", "Tools", @mClick)
@@ -5818,9 +5802,11 @@ Sub CreateMenusAndToolBars
 		Do Until EOF(Fn)
 			Line Input #Fn, Buff
 			If StartsWith(Buff, "Path=") Then
-				tt = _New( UserToolType)
-				tt->Path = Mid(Buff, 6)
-				Tools.Add tt
+				tt = 0
+				If FileExistsU(GetFullPathU(Mid(Buff, 6))) Then
+					tt = _New( UserToolType)
+					tt->Path = Mid(Buff, 6)
+				End If
 			ElseIf tt <> 0 Then
 				If StartsWith(Buff, "Name=") Then
 					tt->Name = Mid(Buff, 6)
@@ -5830,17 +5816,19 @@ Sub CreateMenusAndToolBars
 					tt->WorkingFolder = Mid(Buff, 15)
 				ElseIf StartsWith(Buff, "Accelerator=") Then
 					tt->Accelerator = Mid(Buff, 13)
-						Dim As HICON IcoHandle
-						ExtractIconEx(GetFullPath(tt->Path), NULL, NULL, @IcoHandle, 1)
-						Bitm = IcoHandle
-						DestroyIcon IcoHandle
-					mi = miXizmat->Add(tt->Name & !"\t" & tt->Accelerator, Bitm, "Tools", @mClickTool)
-					Bitm.Handle = 0
-					mi->Tag = tt
 				ElseIf StartsWith(Buff, "LoadType=") Then
 					tt->LoadType = Cast(LoadTypes, Val(Mid(Buff, 10)))
 				ElseIf StartsWith(Buff, "WaitComplete=") Then
 					tt->WaitComplete = Cast(Boolean, Mid(Buff, 14))
+					Tools.Add tt
+					Dim As HICON IcoHandle
+					ExtractIconEx(GetFullPath(tt->Path), NULL, NULL, @IcoHandle, 1)
+					Bitm = IcoHandle
+					DestroyIcon IcoHandle
+					mi = miXizmat->Add(tt->Name & !"\t" & tt->Accelerator, Bitm, "Tools", @mClickTool)
+					Bitm.Handle = 0
+					mi->Tag = tt
+					tt = 0
 				End If
 			End If
 		Loop
@@ -5995,9 +5983,6 @@ Sub CreateMenusAndToolBars
 	tbEdit.Buttons.Add tbsSeparator
 	tbtSyntaxCheck = tbEdit.Buttons.Add(, "SyntaxCheck", , @mClick, "SyntaxCheck", , ML("Syntax Check"), True, ToolButtonState.tstNone)
 	tbtSuggestions = tbEdit.Buttons.Add(, "Suggestions", , @mClick, "Suggestions", , ML("Suggestions"), True, ToolButtonState.tstNone)
-	Var tbButton = tbEdit.Buttons.Add(tbsWholeDropdown, "List", , @mClick, "Try", ML("Line Numbering"), ML("Line Numbering"), True)
-	'tbButton->DropDownMenu.ImagesList = @imgList
-	PopulateErrorHandlingNumberingToolbarMenu(@tbButton->DropDownMenu)
 	'tbStandard.Buttons.Add tbsSeparator
 	tbBuild.Name = "Build"
 	tbBuild.ImagesList = @imgList
@@ -6051,7 +6036,7 @@ Sub CreateMenusAndToolBars
 	tbtConsole = tbProject.Buttons.Add(Cast(ToolButtonStyle, tbsAutosize Or tbsCheckGroup), "Console", , @mClick, "Console", , ML("Console"), True)
 	tbtGUI = tbProject.Buttons.Add(Cast(ToolButtonStyle, tbsAutosize Or tbsCheckGroup), "Form", , @mClick, "GUI", , ML("GUI"), True)
 	tbProject.Buttons.Add tbsSeparator
-	tbButton = tbProject.Buttons.Add(tbsCustom)
+	Var tbButton = tbProject.Buttons.Add(tbsCustom)
 	tbButton->Width = 170
 	tbButton->Child = @cboBuildConfiguration
 	tbFormat.Name = "Format"
@@ -6600,7 +6585,6 @@ Sub tvExplorer_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As TreeVi
 			'miSaveProject->Enabled = False
 			'miSaveProjectAs->Enabled = False
 			'miCloseProject->Enabled = False
-			'miCloseFolder->Enabled = False
 			'miExplorerCloseProject->Enabled = False
 			'miProjectProperties->Enabled = False
 			'miExplorerProjectProperties->Enabled = False
@@ -6610,7 +6594,6 @@ Sub tvExplorer_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As TreeVi
 			'miSaveProject->Enabled = True
 			'miSaveProjectAs->Enabled = True
 			'miCloseProject->Enabled = True
-			'miCloseFolder->Enabled = True
 			'miExplorerCloseProject->Enabled = True
 			'miProjectProperties->Enabled = True
 			'miExplorerProjectProperties->Enabled = True
@@ -7041,10 +7024,10 @@ If Dir(ExePath & "\Help\AI prompt\KnowledgeBase\VisualFBEditor IDE Environment.m
 Else
 	WAdd(AIPostDataPtr_2nd, "The VisualFBEditor (commonly abbreviated as `VFBE`) IDE's main window includes a title bar, menu bar, and toolbar at the top; Project Explorer, Toolbox, and AI agent panels on the left; a message output panels at the bottom; and Properties and Events panels on the right." & _
 	" **title bar** The title bar displays the current project name, application name, and working status. VisualFBEditor operates in three states:" & _
-	" * Operational: Activated by selecting ""Run"" or ""Debug"" menu. Displays the project's runtime results. Returns to the design state via the ""Stop Debugging"" button." & _
+	" * Operational: Activated by selecting ""Run"" menu. Displays the project's runtime results. Returns to the design state via the ""Stop Debugging"" button." & _
 	" * Interrupted: Indicates a program interruption. Returns to the design state via the ""Stop Debugging"" button." & _
 	" **Message Output panels** The Message Output panels provide access to key functionalities through TabControl with the following components: ""Output"", ""Problems"", ""Suggestions"", ""Find"", ""ToDo"", ""Change Log"", ""Immediate"", ""Locals"", ""Globals"", ""Procedures"", ""Threads"",  ""Watches"", ""Memory"" and ""Profiler""." & _
-	" **menu bar** The menu bar provides access to key functionalities through menus such as ""File"", ""Edit"", ""Search"", ""View"", ""Project"", ""Build"", ""Debug"", ""Run"", ""Service"", ""Window"" and ""Help.""" & _
+	" **menu bar** The menu bar provides access to key functionalities through menus such as ""File"", ""Edit"", ""Search"", ""View"", ""Project"", ""Build"", ""Run"", ""Service"", ""Window"" and ""Help.""" & _
 	"  * File: Manages projects and files (create, open, save, recent projects)." & _
 	"  * Edit: Provides source code editing features (cut, copy, paste, find, replace)." & _
 	"  * View: Opens various panes (Project Explorer, Class View, Properties, Events, Image Manager, Toolbox)." & _
@@ -8572,7 +8555,10 @@ Sub frmMain_ActiveControlChanged(ByRef Designer As My.Sys.Object, ByRef sender A
 		If tb->txtCode.MouseHoverToolTipShowed Then tb->txtCode.CloseMouseHoverToolTip
 	End If
 	Dim As Form Ptr ActiveForm = Cast(Form Ptr, pApp->ActiveForm)
-	If ActiveForm = 0 OrElse ActiveForm->ActiveControl = 0 Then Exit Sub
+	If ActiveForm = 0 OrElse ActiveForm->ActiveControl = 0 Then
+		If iFlagStartDebug = 0 Then ChangeEnabledDebug tvExplorer.Nodes.Count > 0, False, False
+		Exit Sub
+	End If
 	Dim As Boolean bEnabled, bEnabledEditControl, bEnabledPanel, bEnabledIndentAndOutdent
 	Select Case ActiveForm->ActiveControl->ClassName
 	Case "EditControl"
@@ -8631,29 +8617,23 @@ Sub frmMain_ActiveControlChanged(ByRef Designer As My.Sys.Object, ByRef sender A
 	tbtCompleteWord->Enabled = bEnabledEditControl
 	miParameterInfo->Enabled = bEnabledEditControl
 	tbtParameterInfo->Enabled = bEnabledEditControl
-	SetMenuItemPairEnabled(miNumbering, dmiNumbering, bEnabledEditControl)
-	SetMenuItemPairEnabled(miMacroNumbering, dmiMacroNumbering, bEnabledEditControl)
-	SetMenuItemPairEnabled(miRemoveNumbering, dmiRemoveNumbering, bEnabledEditControl)
-	SetMenuItemPairEnabled(miProcedureNumbering, dmiProcedureNumbering, bEnabledEditControl)
-	SetMenuItemPairEnabled(miProcedureMacroNumbering, dmiProcedureMacroNumbering, bEnabledEditControl)
-	SetMenuItemPairEnabled(miRemoveProcedureNumbering, dmiRemoveProcedureNumbering, bEnabledEditControl)
-	SetMenuItemPairEnabled(miPreprocessorNumbering, dmiPreprocessorNumbering, bEnabledEditControl)
-	SetMenuItemPairEnabled(miRemovePreprocessorNumbering, dmiRemovePreprocessorNumbering, bEnabledEditControl)
-	'miOnErrorResumeNext->Enabled = bEnabledEditControl
-	'dmiOnErrorResumeNext->Enabled = bEnabledEditControl
-	SetMenuItemPairEnabled(miOnErrorGoto, dmiOnErrorGoto, bEnabledEditControl)
-	SetMenuItemPairEnabled(miOnErrorGotoResumeNext, dmiOnErrorGotoResumeNext, bEnabledEditControl)
-	SetMenuItemPairEnabled(miOnLocalErrorGoto, dmiOnLocalErrorGoto, bEnabledEditControl)
-	SetMenuItemPairEnabled(miOnLocalErrorGotoResumeNext, dmiOnLocalErrorGotoResumeNext, bEnabledEditControl)
-	SetMenuItemPairEnabled(miRemoveErrorHandling, dmiRemoveErrorHandling, bEnabledEditControl)
 	miCollapseCurrent->Enabled = bEnabledEditControl
 	miCollapseAllProcedures->Enabled = bEnabledEditControl
 	miCollapseAll->Enabled = bEnabledEditControl
 	miUnCollapseCurrent->Enabled = bEnabledEditControl
 	miUnCollapseAllProcedures->Enabled = bEnabledEditControl
 	miUnCollapseAll->Enabled = bEnabledEditControl
-	miSetNextStatement->Enabled = bEnabledEditControl AndAlso mnuEnd->Enabled AndAlso Not mnuBreak->Enabled
-	miRunToCursor->Enabled = bEnabledEditControl
+	If iFlagStartDebug = 0 Then
+		ChangeEnabledDebug tvExplorer.Nodes.Count > 0, False, False
+		If Not bEnabledEditControl Then
+			miSetNextStatement->Enabled = False
+			tbtSetNextStatement->Enabled = False
+		End If
+	Else
+		Dim As Boolean bCanSetNext = bEnabledEditControl AndAlso mnuEnd->Enabled AndAlso Not mnuBreak->Enabled
+		miSetNextStatement->Enabled = bCanSetNext
+		tbtSetNextStatement->Enabled = bCanSetNext
+	End If
 	miToggleBookmark->Enabled = bEnabledEditControl
 	miToggleBreakpoint->Enabled = bEnabledEditControl
 End Sub
@@ -8866,7 +8846,7 @@ Sub frmMain_Create(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		miShowWithoutFolders->RadioItem = True
 	End If
 	tbForm.Buttons.Item(0)->Checked = iniSettings.ReadBool("MainWindow", "ToolLabels", True)
-	ChangeUseDebugger iniSettings.ReadBool("MainWindow", "UseDebugger", True)
+	ChangeUseDebugger iniSettings.ReadBool("MainWindow", "UseDebugger", False)
 	WLet(RecentFiles, iniSettings.ReadString("MainWindow", "RecentFiles", ""))
 	WLet(RecentFile, iniSettings.ReadString("MainWindow", "RecentFile", ""))
 	WLet(RecentProject, iniSettings.ReadString("MainWindow", "RecentProject", ""))
@@ -9040,12 +9020,13 @@ Sub frmMain_Show(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	End If
 	If bFileOpening Then
 		OpenFiles GetFullPath(File)
-	ElseIf CBool(bSharedFind) AndAlso (WhenVisualFBEditorStarts = 1 OrElse WhenVisualFBEditorStarts = 2) Then
+	ElseIf bSharedFind AndAlso CBool(WhenVisualFBEditorStarts = 1 OrElse WhenVisualFBEditorStarts = 2) Then
 		AddNew ExePath & Slash & "Templates" & Slash & WGet(DefaultProjectFile)
 	Else
+		mApplyingWorkspaceLoad = True
 		LoadWorkspace()
+		mApplyingWorkspaceLoad = False
 	End If
-	mApplyingWorkspaceLoad = False
 	'	Var FILE = Command(-1)
 	'	Var Pos1 = InStr(file, "2>CON")
 	'	If Pos1 > 0 Then file = Left(file, Pos1 - 1)
@@ -9070,7 +9051,8 @@ Sub frmMain_Show(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	End If
 	If Not splBottom.Visible Then CloseBottom
 	bApplyingStartupLayout = False
-	SetDebugTabsVisible False
+	SetDebugTabsVisible UseDebugger
+	ChangeEnabledDebug tvExplorer.Nodes.Count > 0, False, False
 End Sub
 
 Sub frmMain_ActivateApp(ByRef Designer As My.Sys.Object, ByRef Sender As Form)

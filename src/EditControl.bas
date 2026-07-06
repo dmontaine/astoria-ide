@@ -257,6 +257,16 @@ Namespace My.Sys.Forms
 		PaintControl
 	End Sub
 	
+	Sub EditControl.ClearAllBreakpoints
+		For i As Integer = 0 To Content.Lines.Count - 1
+			FECLine = Content.Lines.Items[i]
+			If FECLine->Breakpoint Then
+				FECLine->Breakpoint = False
+			End If
+		Next
+		PaintControl
+	End Sub
+	
 	Private Property EditControl.SplittedVertically As Boolean
 		Return bDividedX
 	End Property

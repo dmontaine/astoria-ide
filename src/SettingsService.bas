@@ -331,7 +331,7 @@ Sub LoadSettings
 	mnuMain.ImagesList = IIf(DisplayMenuIcons, @imgList, 0)
 	MainReBar.Visible = ShowMainToolBar
 	
-	WLet(Compiler64Arguments, iniSettings.ReadString("Parameters", "Compiler64Arguments", "-b {S} -exx"))
+	WLet(Compiler64Arguments, iniSettings.ReadString("Parameters", "Compiler64Arguments", "-b {S} -exx -mt"))
 	WLet(Make1Arguments, iniSettings.ReadString("Parameters", "Make1Arguments", ""))
 	WLet(Make2Arguments, iniSettings.ReadString("Parameters", "Make2Arguments", "clean"))
 	WLet(RunArguments, iniSettings.ReadString("Parameters", "RunArguments", ""))

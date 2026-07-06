@@ -230,6 +230,10 @@ Declare Function CloseProject(tn As TreeNode Ptr, WithoutMessage As Boolean = Fa
 Declare Sub SetMainNode(tn As TreeNode Ptr)
 Declare Sub OpenProjectFolder
 Declare Sub OpenFiles(ByRef FileName As WString)
+Declare Sub OpenFilesU(FileName As UString)
+Declare Function AddFolderU(FolderName As UString) As TreeNode Ptr
+Declare Function PrepareForAnotherProjectU(NewProjectPath As UString = "") As Boolean
+Declare Sub AddNewU(Template As UString)
 Declare Function GetOpenProjectNode() As TreeNode Ptr
 Declare Function PrepareForAnotherProject(ByRef NewProjectPath As WString = "") As Boolean
 Declare Sub SaveWorkspace()
@@ -250,13 +254,13 @@ Declare Sub ChangeEnabledDebug(bStart As Boolean, bBreak As Boolean, bEnd As Boo
 Declare Sub ClearThreadsWindow() ' Defined in VisualFBEditor.bas; forward-declared here since Main.bi pulls in Main.bas before VisualFBEditor.bas defines it
 Declare Sub ChangeLockControls(bLockControls As Boolean, ChangeObject As Integer = -1)
 Declare Sub ChangeUseDebugger(bUseDebugger As Boolean, ChangeObject As Integer = -1)
+Declare Sub ChangeUseProfiler(bUseProfiler As Boolean, ChangeObject As Integer = -1)
 Declare Sub ChangeFileEncoding(FileEncoding As FileEncodings)
 Declare Sub ChangeNewLineType(NewLineType As NewLineTypes)
 	Common Shared As UINT_PTR CurrentTimer, CurrentTimerData
 Declare Function WithoutPointers(ByRef e As String) As String
 Declare Function WithoutQuotes(ByRef e As UString) As UString
 Declare Sub ChangeFolderType(Value As ProjectFolderTypes)
-Declare Sub SetMenuItemPairEnabled(mi_ As MenuItem Ptr, dmi_ As MenuItem Ptr, bEnabled As Boolean)
 Declare Function FolderCopy(FromDir As UString, ToDir As UString) As Integer
 Declare Sub Save
 Declare Function SaveAllBeforeCompile() As Boolean
@@ -267,6 +271,7 @@ Declare Sub MakeClean(Param As Any Ptr)
 Declare Sub SyntaxCheck(Param As Any Ptr)
 Declare Sub NextBookmark(iTo As Integer = 1)
 Declare Sub ClearAllBookmarks
+Declare Sub ClearAllBreakpoints
 Declare Sub SaveAll()
 Declare Sub FormatProject(UnFormat As Any Ptr)
 Declare Sub SetSaveDialogParameters(ByRef FileName As WString)

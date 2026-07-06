@@ -72,6 +72,94 @@ Function GetFolderName(ByRef FileName As WString, WithSlash As Boolean = True) A
 	Return Left(FileName, Posi)
 End Function
 
+Function NormalizeOsPath(path As UString) As UString
+	Return Replace(path, BackSlash, Slash)
+End Function
+
+Function WinOsPath(path As UString) As UString
+	Return Replace(path, BackSlash, Slash)
+End Function
+
+Function FolderExistsU(path As UString) As Boolean
+	path = WinOsPath(Trim(path, Any !" \t" + Chr(10) + Chr(13)))
+	If path = "" Then Return False
+	Dim As WString Ptr pathPtr
+	WLet(pathPtr, path)
+	Dim As DWORD attrs = GetFileAttributesW(*pathPtr)
+	WDeAllocate(pathPtr)
+	If attrs = INVALID_FILE_ATTRIBUTES Then Return False
+	Return (attrs And FILE_ATTRIBUTE_DIRECTORY) <> 0
+End Function
+
+Function FileExistsU(path As UString) As Boolean
+	path = WinOsPath(Trim(path, Any !" \t" + Chr(10) + Chr(13)))
+	If path = "" Then Return False
+	Dim As WString Ptr pathPtr
+	WLet(pathPtr, path)
+	Dim As DWORD attrs = GetFileAttributesW(*pathPtr)
+	WDeAllocate(pathPtr)
+	If attrs = INVALID_FILE_ATTRIBUTES Then Return False
+	Return (attrs And FILE_ATTRIBUTE_DIRECTORY) = 0
+End Function
+
+Function CopyFileU(src As UString, dest As UString) As Boolean
+	src = WinOsPath(Trim(src, Any !" \t" + Chr(10) + Chr(13)))
+	dest = WinOsPath(Trim(dest, Any !" \t" + Chr(10) + Chr(13)))
+	If src = "" OrElse dest = "" Then Return False
+	Dim As WString Ptr srcPtr
+	Dim As WString Ptr destPtr
+	WLet(srcPtr, src)
+	WLet(destPtr, dest)
+	Dim As Boolean result = (CopyFileW(*srcPtr, *destPtr, 0) <> 0)
+	WDeAllocate(srcPtr)
+	WDeAllocate(destPtr)
+	Return result
+End Function
+
+Function GetFolderNameU(path As UString, WithSlash As Boolean = True) As UString
+	Dim As WString Ptr pathPtr
+	WLet(pathPtr, WinOsPath(path))
+	Dim As UString result = GetFolderName(*pathPtr, WithSlash)
+	WDeAllocate(pathPtr)
+	Return result
+End Function
+
+Function GetFileNameU(path As UString, WithExtension As Boolean = True) As UString
+	Dim As WString Ptr pathPtr
+	WLet(pathPtr, WinOsPath(path))
+	Dim As UString result = GetFileName(*pathPtr, WithExtension)
+	WDeAllocate(pathPtr)
+	Return result
+End Function
+
+Function EnsureDirectoryExistsImpl(path As UString) As Boolean
+	path = WinOsPath(Trim(path, Any !" \t" + Chr(10) + Chr(13)))
+	If path = "" Then Return False
+	If FolderExistsU(path) Then Return True
+	Dim As WString Ptr pathPtr
+	WLet(pathPtr, path)
+	Dim As Long dirErr = SHCreateDirectoryExW(0, *pathPtr, 0)
+	WDeAllocate(pathPtr)
+	If dirErr = 0 OrElse dirErr = ERROR_ALREADY_EXISTS Then Return True
+	If CreateDirectoryW(path, NULL) <> 0 Then Return True
+	If GetLastError() = ERROR_ALREADY_EXISTS Then Return True
+	Return FolderExistsU(path)
+End Function
+
+Function GetFullPathU(FolderPath As UString) As UString
+	Dim As WString Ptr pathPtr
+	WLet(pathPtr, FolderPath)
+	Dim As UString result = GetFullPath(*pathPtr)
+	WDeAllocate(pathPtr)
+	Return result
+End Function
+
+Function EnsureDirectoryExists(FolderPath As UString) As Boolean
+	Dim As UString pathSetting = Trim(FolderPath, Any !" \t" + Chr(10) + Chr(13))
+	If pathSetting = "" Then Return False
+	Return EnsureDirectoryExistsImpl(GetFullPathU(pathSetting))
+End Function
+
 Function GetFileName(ByRef FileName As WString, WithExtension As Boolean = True) As UString
 	Dim As Long nPos, Posi = InStrRev(FileName, Any "\/:")
 	nPos = InStrRev(FileName, ".")

@@ -8,30 +8,65 @@
 			.Text = ML("New Project")
 				.Icon.LoadFromResourceID(1)
 			.Designer = @This
-			.BorderStyle = FormBorderStyle.Sizable
+			.BorderStyle = FormBorderStyle.FixedDialog
+			.MaximizeBox = False
+			.MinimizeBox = False
 			.OnCreate = @Form_Create_
-			.SetBounds 0, 0, 657, 440
+			.SetBounds 0, 0, 657, 400
 			.StartPosition = FormStartPosition.CenterParent
 		End With
-		' pnlBottom
+		' pnlBottom — footer (project name row + OK/Cancel)
 		With pnlBottom
 			.Name = "pnlBottom"
 			.Text = ""
 			.Align = DockStyle.alBottom
 			.TabIndex = 6
-			.SetBounds 0, 371, 641, 30
+			.SetBounds 0, 0, 641, 68
 			.Parent = @This
+		End With
+		' pnlProjectName — top row inside footer
+		With pnlProjectName
+			.Name = "pnlProjectName"
+			.Text = ""
+			.Align = DockStyle.alTop
+			.TabIndex = 5
+			.ExtraMargins.Left = 10
+			.ExtraMargins.Right = 10
+			.SetBounds 0, 0, 641, 32
+			.Parent = @pnlBottom
+		End With
+		' lblProjectName
+		With lblProjectName
+			.Name = "lblProjectName"
+			.Text = ML("Project Name") & ":"
+			.Align = DockStyle.alLeft
+			.TabIndex = 4
+			.ExtraMargins.Top = 8
+			.ExtraMargins.Bottom = 8
+			.SetBounds 0, 0, 110, 32
+			.Parent = @pnlProjectName
+		End With
+		' txtProjectName
+		With txtProjectName
+			.Name = "txtProjectName"
+			.Text = ""
+			.Align = DockStyle.alClient
+			.ExtraMargins.Top = 5
+			.ExtraMargins.Bottom = 5
+			.TabIndex = 3
+			.SetBounds 110, 0, 501, 32
+			.Parent = @pnlProjectName
 		End With
 		' cmdCancel
 		With cmdCancel
 			.Name = "cmdCancel"
 			.Text = ML("Cancel")
 			.Align = DockStyle.alRight
-			.ExtraMargins.Bottom = 10
-			.ExtraMargins.Top = 0
+			.ExtraMargins.Bottom = 8
+			.ExtraMargins.Top = 4
 			.ExtraMargins.Right = 10
 			.TabIndex = 8
-			.SetBounds 527, 0, 88, 20
+			.SetBounds 527, 36, 88, 20
 			.Designer = @This
 			.OnClick = @cmdCancel_Click_
 			.Parent = @pnlBottom
@@ -41,43 +76,15 @@
 			.Name = "cmdOK"
 			.Text = ML("OK")
 			.Align = DockStyle.alRight
-			.ExtraMargins.Top = 0
+			.ExtraMargins.Top = 4
 			.ExtraMargins.Right = 10
-			.ExtraMargins.Bottom = 10
+			.ExtraMargins.Bottom = 8
 			.TabIndex = 7
-			.SetBounds 430, 0, 88, 20
+			.SetBounds 430, 36, 88, 20
 			.Default = True
 			.Designer = @This
 			.OnClick = @cmdOK_Click_
 			.Parent = @pnlBottom
-		End With
-		' pnlProjectName
-		With pnlProjectName
-			.Name = "pnlProjectName"
-			.Text = ""
-			.Align = DockStyle.alBottom
-			.TabIndex = 5
-			.SetBounds 10, 335, 621, 30
-			.Parent = @This
-		End With
-		' lblProjectName
-		With lblProjectName
-			.Name = "lblProjectName"
-			.Text = ML("Project Name") & ":"
-			.Align = DockStyle.alLeft
-			.TabIndex = 4
-			.SetBounds 0, 4, 110, 21
-			.Parent = @pnlProjectName
-		End With
-		' txtProjectName
-		With txtProjectName
-			.Name = "txtProjectName"
-			.Text = ""
-			.Align = DockStyle.alClient
-			.ExtraMargins.Right = 10
-			.TabIndex = 3
-			.SetBounds 110, 4, 501, 21
-			.Parent = @pnlProjectName
 		End With
 		' lvTemplates
 		With lvTemplates
@@ -116,6 +123,7 @@ End Sub
 Private Sub frmNewProject.cmdOK_Click(ByRef Sender As Control)
 	SelectedTemplate = ""
 	SelectedFolder = ""
+	SelectedProjectFile = ""
 	If lvTemplates.SelectedItemIndex = -1 Then
 		MsgBox ML("Select template!")
 		Me.BringToFront
@@ -128,21 +136,35 @@ Private Sub frmNewProject.cmdOK_Click(ByRef Sender As Control)
 		Exit Sub
 	End If
 	Dim As String TemplateName = TemplateNames.Item(lvTemplates.SelectedItemIndex)
-	SelectedTemplate = ExePath & "/Templates/Projects/" & TemplateName & ".vfp"
-	SelectedFolder = GetFullPath(*ProjectsPath & "/" & ProjectName)
-	If FolderExists(SelectedFolder) Then
-		MsgBox ML("Selected folder exists, change the project name!")
-		Me.BringToFront
-		Exit Sub
-	ElseIf Not FolderExists(GetFolderName(SelectedFolder, False)) Then
+	Dim As UString projectsPathInput = Trim(*ProjectsPath, Any !" \t" + Chr(10) + Chr(13))
+	SelectedTemplate = WinOsPath(ExePath & "/Templates/Projects/" & TemplateName & ".vfp")
+	SelectedFolder = WinOsPath(GetFullPathU(projectsPathInput & "/" & ProjectName))
+	SelectedProjectFile = SelectedFolder & Slash & GetFileNameU(SelectedFolder) & ".vfp"
+	If Not FolderExistsU(GetFullPathU(projectsPathInput)) Then
 		MsgBox ML("Parent folder not exists, change the parent folder!")
 		Me.BringToFront
 		Exit Sub
+	ElseIf FolderExistsU(SelectedFolder) Then
+		MsgBox ML("Selected folder exists, change the project name!")
+		Me.BringToFront
+		Exit Sub
 	End If
-	Dim As UString TemplateFolder = ExePath & "/Templates/Projects/" & TemplateName
-	If FolderExists(TemplateFolder) Then FolderCopy TemplateFolder, SelectedFolder
-	If FileExists(SelectedTemplate) Then
-		FileCopy SelectedTemplate, SelectedFolder & "/" & GetFileName(SelectedFolder) & ".vfp"
+	If Not EnsureDirectoryExists(SelectedFolder) Then
+		MsgBox ML("Could not create project folder!")
+		Me.BringToFront
+		Exit Sub
+	End If
+	Dim As UString TemplateFolder = WinOsPath(ExePath & "/Templates/Projects/" & TemplateName)
+	If FolderExistsU(TemplateFolder) Then FolderCopy TemplateFolder, SelectedFolder
+	If Not FileExistsU(SelectedTemplate) Then
+		MsgBox ML("Template not found!")
+		Me.BringToFront
+		Exit Sub
+	End If
+	If Not CopyFileU(SelectedTemplate, SelectedProjectFile) Then
+		MsgBox ML("Could not create project file!")
+		Me.BringToFront
+		Exit Sub
 	End If
 	ModalResult = ModalResults.OK
 	Me.CloseForm
@@ -177,23 +199,31 @@ Private Sub frmNewProject.Form_Create(ByRef Sender As Control)
 	ModalResult = ModalResults.Cancel
 	lvTemplates.ListItems.Clear
 	TemplateNames.Clear
-	Dim As String f = Dir(ExePath & "/Templates/Projects/*.vfp")
-	While f <> ""
-		If EndsWith(LCase(f), ".vfp") Then
-			Dim As String TemplateName = ..Left(f, IfNegative(InStr(f, ".") - 1, Len(f)))
-			Dim As String ImageName = "App" & ..Left(TemplateName, IfNegative(InStr(TemplateName, " ") - 1, Len(TemplateName)))
-			If imgList32.IndexOf(ImageName) < 0 Then ImageName = "AppGUI"
-			lvTemplates.ListItems.Add ML(TemplateName), ImageName
-			TemplateNames.Add TemplateName
+	Dim As String PreferredTemplates(4)
+	PreferredTemplates(0) = "Windows Application"
+	PreferredTemplates(1) = "Console Application"
+	PreferredTemplates(2) = "Dynamic Library"
+	PreferredTemplates(3) = "Static Library"
+	PreferredTemplates(4) = "Control Library"
+	For i As Integer = 0 To UBound(PreferredTemplates)
+		If FileExistsU(ExePath & "/Templates/Projects/" & PreferredTemplates(i) & ".vfp") Then
+			AddProjectTemplateItem(PreferredTemplates(i))
 		End If
-		f = Dir()
-	Wend
+	Next
+	lvTemplates.View = ViewStyle.vsIcon
 	Var n = 0
 	Dim As String ProjectName = "Project"
 	Dim NewName As String
 	Do
 		n = n + 1
 		NewName = ProjectName & Str(n)
-	Loop While FolderExists(GetFullPath(*ProjectsPath & "/" & NewName))
+	Loop While FolderExistsU(GetFullPathU(*ProjectsPath & "/" & NewName))
 	txtProjectName.Text = NewName
+End Sub
+
+Private Sub frmNewProject.AddProjectTemplateItem(ByRef TemplateName As String)
+	Dim As String ImageName = "App" & ..Left(TemplateName, IfNegative(InStr(TemplateName, " ") - 1, Len(TemplateName)))
+	If imgList32.IndexOf(ImageName) < 0 Then ImageName = "AppGUI"
+	lvTemplates.ListItems.Add ML(TemplateName), ImageName
+	TemplateNames.Add TemplateName
 End Sub

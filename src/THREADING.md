@@ -41,7 +41,6 @@ ThreadCounter(ThreadCreate_(@WorkerSub, optionalParam))
 |------|-------------|------------|-------|
 | Compile | Build menu | `CompileProgram`, `CompileAll`, `SyntaxCheck`, `MakeExecute`, … | All call `Compile()` in `Main.bas` |
 | Format | Edit menu | `FormatProject` (`TabWindow.bas`) | Project-wide beautify/unformat |
-| Numbering | Edit → Error Handling | `NumberingProject`, `NumberingModule` | Macro/line numbering |
 | Find/Replace | Search dialogs | `FindSub`, `ReplaceSub` | Search in files |
 | Help | F1 / help menu | `RunHelp` | Fetches help content |
 | Command prompt | Tools | `RunCmd` | Spawns external shell |

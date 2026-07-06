@@ -321,6 +321,7 @@ Namespace My.Sys.Forms
 		Declare Sub CollapseAll
 		Declare Sub UnCollapseAll
 		Declare Sub ClearAllBookmarks
+		Declare Sub ClearAllBreakpoints
 		Declare Sub SelectAll
 		Declare Sub ScrollToCaret
 		Declare Sub LoadFromFile(ByRef File As WString, ByRef FileEncoding As FileEncodings, ByRef NewLineType As NewLineTypes)

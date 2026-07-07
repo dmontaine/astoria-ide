@@ -238,7 +238,6 @@ Private Sub frmTools.cmdOK_Click(ByRef Designer As My.Sys.Object, ByRef Sender A
 	Var Fn = FreeFile_
 	Dim As UserToolType Ptr Tool, tt
 	Dim As MenuItem Ptr mi
-	Dim As Integer ToolsIndex
 		Open ExePath & "/Tools/Tools.ini" For Output Encoding "utf8" As #Fn
 	With fTools
 		For i As Integer = 0 To Tools.Count - 1
@@ -247,12 +246,16 @@ Private Sub frmTools.cmdOK_Click(ByRef Designer As My.Sys.Object, ByRef Sender A
 		pTools->Clear
 		For i As Integer = miXizmat->Count - 1 To 0 Step -1
 			mi = miXizmat->Item(i)
-			If mi->Name = "Tools" Then ToolsIndex = i
 			If mi->OnClick = @mClickTool Then
 				miXizmat->Remove mi
 				'Delete mi
 			End If
 		Next
+		'' 13.3.A: "External Tools..." moved into the Tools > Advanced submenu, so it's no longer
+		'' a direct sibling of the loaded custom-tool items and can't be located by Name lookup
+		'' anymore. The trailing separator + "Options" are always the last 2 direct children of
+		'' miXizmat, so insert new tool items right before them instead.
+		Dim As Integer ToolsInsertBase = miXizmat->Count - 2
 		For i As Integer = 0 To .lvTools.ListItems.Count - 1
 			tt = .lvTools.ListItems.Item(i)->Tag
 			If tt = 0 Then Continue For
@@ -271,7 +274,7 @@ Private Sub frmTools.cmdOK_Click(ByRef Designer As My.Sys.Object, ByRef Sender A
 				ExtractIconEx(GetFullPath(tt->Path), NULL, NULL, @IcoHandle, 1)
 				Bitm = IcoHandle
 				DestroyIcon IcoHandle
-			mi = miXizmat->Add(tt->Name & !"\t" & tt->Accelerator, Bitm, "Tools", @mClickTool, , i + ToolsIndex + 2)
+			mi = miXizmat->Add(tt->Name & !"\t" & tt->Accelerator, Bitm, "Tools", @mClickTool, , ToolsInsertBase + i)
 			Bitm.Handle = 0
 			mi->Tag = tt
 			Print #Fn, "Path=" & tt->Path

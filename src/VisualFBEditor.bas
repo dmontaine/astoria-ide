@@ -352,10 +352,10 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 	Case "Standard":                            ShowStandardToolBar = Not ShowStandardToolBar: MainReBar.Bands.Item(0)->Visible = ShowStandardToolBar: mnuStandardToolBar->Checked = ShowStandardToolBar: pfrmMain->RequestAlign
 	Case "Edit":                                ShowEditToolBar = Not ShowEditToolBar: MainReBar.Bands.Item(1)->Visible = ShowEditToolBar: mnuEditToolBar->Checked = ShowEditToolBar: pfrmMain->RequestAlign
 	Case "Project":                             ShowProjectToolBar = Not ShowProjectToolBar: MainReBar.Bands.Item(2)->Visible = ShowProjectToolBar: mnuProjectToolBar->Checked = ShowProjectToolBar: pfrmMain->RequestAlign
-	Case "FormFormat":                          ShowFormatToolBar = Not ShowFormatToolBar: MainReBar.Bands.Item(6)->Visible = ShowFormatToolBar: mnuFormatToolBar->Checked = ShowFormatToolBar: pfrmMain->RequestAlign
-	Case "Build":                               ShowBuildToolBar = Not ShowBuildToolBar: MainReBar.Bands.Item(3)->Visible = ShowBuildToolBar: mnuBuildToolBar->Checked = ShowBuildToolBar: pfrmMain->RequestAlign
-	Case "Debug":                               ShowDebugToolBar = Not ShowDebugToolBar: MainReBar.Bands.Item(4)->Visible = ShowDebugToolBar: mnuDebugToolBar->Checked = ShowDebugToolBar: pfrmMain->RequestAlign
-	Case "Run":                                 ShowRunToolBar = Not ShowRunToolBar: MainReBar.Bands.Item(5)->Visible = ShowRunToolBar: mnuRunToolBar->Checked = ShowRunToolBar: pfrmMain->RequestAlign
+	'' 13.3.A O3: Build/Debug toolbars folded into Run; bands are now Standard(0), Edit(1),
+	'' Project(2), Run(3), Format(4).
+	Case "Run":                                 ShowRunToolBar = Not ShowRunToolBar: MainReBar.Bands.Item(3)->Visible = ShowRunToolBar: mnuRunToolBar->Checked = ShowRunToolBar: pfrmMain->RequestAlign
+	Case "FormFormat":                          ShowFormatToolBar = Not ShowFormatToolBar: MainReBar.Bands.Item(4)->Visible = ShowFormatToolBar: mnuFormatToolBar->Checked = ShowFormatToolBar: pfrmMain->RequestAlign
 	Case "TBUseDebugger":                       ChangeUseDebugger tbtUseDebugger->Checked, 0
 	Case "UseDebugger":                         ChangeUseDebugger Not UseDebugger, 1
 	Case "UseProfiler":                         If UseDebugger Then ChangeUseProfiler Not mnuUseProfiler->Checked, 1

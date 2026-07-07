@@ -1,6 +1,6 @@
 ﻿# VFBE Win64 Fork — Project Status & Handoff
 
-**Last updated:** 2026-07-06 (Edit menu owner-approved; Search → Define F2 reliability pass; File/Open Project + path fixes)  
+**Last updated:** 2026-07-07 (13.3.A approachability plan S1–S4 **Opus-reviewed, S3 INI-migration gap fixed, compiled clean, committed**; Edit menu owner-approved; Search → Define F2 reliability pass; File/Open Project + path fixes)  
 **Repository:** [codeberg.org/bigriverguy/VFBEWin64](https://codeberg.org/bigriverguy/VFBEWin64)  
 **Local path:** `C:\Users\dmont\VisualFBEditor`  
 **Owner:** bigriverguy (`dmontaine@gmail.com`)
@@ -19,13 +19,70 @@ This document captures project history, completed work, open items, and workflow
 | **Form Designer** | Working — grey-panel bug root-caused and fixed (2026-07-06); per-form control tree + PagePanel layer navigation shipped |
 | **Dark mode** | Stable and enabled — title bar, menus, toolbars, tabs, central area all render dark; popup menus deferred (§13.10) |
 | **Dead code** | GTK/Linux/32-bit code physically deleted across `src/` and `mff/`; Integrated (stabs) debugger + alt-compiler backends removed; only `-gen gcc` remains |
-| **UI review** | In progress — **File** menu owner-approved (incl. Open Project); **Edit** menu owner-approved (all 25 items); **Search** → Define (F2) reliability improved (uncommitted); Run menu consolidated and verified |
+| **UI review** | In progress — **File** menu owner-approved (incl. Open Project); **Edit** menu owner-approved (all 25 items); **Search** → Define (F2) reliability improved (committed with S1–S4); **13.3.A approachability plan (all menus + toolbars + one dead field) S1–S4 Opus-reviewed and committed; S5–S7 queued for Sonnet** (see §13.3.A execution below) |
 | **Panels** | Left/right/bottom panel pin/collapse/persistence all fixed and verified |
 | **Debugger** | GDB-only; Step, Continue, Break, Step Out, command queue, and debug-tab show/hide all working; 3 GDB items pending owner smoke test (§7) |
 | **Build** | `Compile.bat` for release, `CompileDebug.bat` for debug; `NOPAUSE=1` for agent runs |
 
-**Active work:** §13.3 step-by-step UI review — **Search menu** Define (F2) reliability pass done (uncommitted); **View menu** is next after Search sign-off (File + Edit complete).  
+**Active work:** 13.3.A S1–S4 are **committed** (Opus-reviewed 2026-07-07, S3 INI-migration gap fixed). Next up: **S5–S7 queued for Sonnet** (S5 confirm dialogs on Delete Project/File; S6 O4 Options-dialog edits; S7 docs GTK-ref cleanup). Underneath that, §13.3 step-by-step UI review continues: **View menu** is next after Search sign-off (File + Edit complete; Search → Define reliability pass shipped with S1–S4).  
 **Open items consolidated:** see [Open Items](#open-items) below.
+
+---
+
+## 13.3.A execution — S1–S4 done (Sonnet 2026-07-06), Opus-reviewed & committed (2026-07-07)
+
+Executes the Opus-designed plan in [ROADMAP.md §13.3.A](ROADMAP.md#1333a-approachability-pass--full-plan-designed-2026-07-06-opus-session). **Committed to `main` 2026-07-07 after Opus O4 review (see "O4 review outcome" below).**
+
+### O4 review outcome (Opus, 2026-07-07)
+
+Reviewed the full S1–S4 diff against the plan, focusing on the two areas the plan flagged as compile-clean-hides-a-break (§9 dormant-reference wiring; toolbar/band/INI mechanics). **No correctness bugs found.** Verified: all 5-band indices agree across `frmMain_Create`, the `mClick` toggle cases, and the ReBar add order; the `Bands.Count - 2` Maximize bound preserves "all but Format"; every `mi*`/`mnu*`/`tbt*` enable-state pointer is reassigned in the new structure; `git grep` for all removed symbols returns zero stale references; the `tbtToggleBreakpoint` double-assign fix and `tbtShowNextStatement` target are correct; toolbar captions sit in the correct `FCaption` positional arg (arg 6) with `tbsAutosize`; the frmTools insertion fix is sound (Tools menu has two separators bracketing the tool list, `-`+`Options` always last two children); and both Window-menu count translations (`>3`→`>1`, `>2`→`>0`) are faithful (subtract the 2 removed static items).
+
+**One plan-mandated gap found and fixed before commit:** S3's ROADMAP gotcha required migrating the retired `ShowBuildToolbar`/`ShowDebugToolbar` INI keys into `ShowRunToolbar` ("if either was true, Run visible"); Sonnet's S3 did the default changes but not the migration, so a pre-13.3.A user who had hidden the old Run toolbar while keeping Build visible would have lost all toolbar access to Build/Stop/debug (menus still worked). Fixed in `frmMain_Create` (`Main.bas` ~9029): `ShowRunToolBar = ReadBool("ShowRunToolbar", True) OrElse ReadBool("ShowBuildToolbar", False) OrElse ReadBool("ShowDebugToolbar", False)` — only ever turns Run on, retired keys read once and never re-written. Compiled clean (0 errors; same 4 pre-existing `frmFindInFiles.frm` warnings). Toolbar text captions (Run/Build/Stop) confirmed rendering in a live owner screenshot.
+
+**Owner follow-ups (non-blocking, carried forward):** (1) Help ▸ GitHub kept VFBE-repo + VFBE-wiki; plan text said VFBE-repo + FreeBASIC-wiki — owner to confirm. (2) Still needs owner eyes: does "Show Main Toolbar" reclaim editor space, and does Project Properties ▸ General lay out OK with the `*nix` icon field gone. See Deferred list below for the rest.
+
+### S1 — Menu structure (all menus)
+
+Reorganized every menu per the O1/O2 taxonomy: File (Advanced submenu for Print Preview/Page Setup), Edit (Advanced submenu for Unformat/Format Project/Add Spaces/Merge Blank Lines), View (merged Collapse+Uncollapse into one **Fold** submenu; split **Other Windows** into user windows vs. a new **Debug Windows** submenu; folded Window's Split Horizontally/Vertically into View, leaving Window holding only its open-document list), Project (Advanced submenu for Add User Control/Resource File/Manifest File), Tools (Command Prompt promoted to top-level, Add-Ins/External Tools moved to Advanced), Help (GitHub submenu trimmed to VisualFBEditor repo+wiki, rest moved to Advanced — **ambiguous spec wording, flagged for confirmation**, see Issues below). Biggest piece: **Build + Debug + Run menus merged into one Run menu** with **More Build Options** / **More Debug Options** submenus, preserving every `ChangeMenuItemsEnabled`/`ChangeEnabledDebug` pointer so enable-state wiring kept working across the move.
+
+### S2 — Relabeling
+
+Search: "Define" → "Go to Definition". Run menu: Start With Compile→**Run**, Compile→**Build**, End→**Stop**, Start→**Run Without Building**, Compile All→**Rebuild All**, Make Clean→**Clean**. Only `ML()` caption text changed — every dispatch `Key` string and hotkey stayed the same, so `HotKeys.txt` customizations and localization data aren't orphaned by a rename (deferred concern below).
+
+### S3 — Toolbar consolidation
+
+Build+Debug+Run toolbars merged into one Run toolbar (ReBar: 7 bands → 5: Standard, Edit, Project, Run, Format). Added visible **text-beside-icon captions** to the primaries (Run, Build, Stop, Save, Open) — `TBSTYLE_LIST` was already enabled on every toolbar but no button had ever passed a caption, so the capability was live but unused. Set **minimal defaults: Standard + Run visible, Edit/Project/Format hidden** — verified this only changes behavior for fresh installs (`ReadBool(key, default)` only applies the new default when the INI key is absent; existing users' saved toolbar visibility is untouched).
+
+### S4 — Dead field removal
+
+Removed the "Icon Resource File (For \*nix/\*bsd)" label + combobox from Project Properties ▸ General (`frmProjectProperties.frm`/`.bi`) — dead cross-platform UI in a Win64-only fork. Deliberately **kept** the underlying `ppe->IconResourceFileName` field, since it's auto-populated whenever a `.xpm` file is added to a project and used elsewhere (`Main.bas`/`TabWindow.bas`) for file-rename tracking — unrelated to the removed picker. Preserved the `.xpm` branch in `AddToCombo`/`AddToComboFileName` as an intentional no-op (matching the existing `.bat`/`makefile` pattern) so `.xpm` files don't fall through and get miscategorized as "Main File" now that their combobox is gone.
+
+### Issues found and fixed along the way
+
+1. **Startup crash (introduced by S3, caught before reporting complete):** `frmMain_Create` had a hardcoded `For i = 0 To 5 : MainReBar.Bands.Item(i)->Maximize : Next`, assuming the old 7-band layout (loop deliberately excluded the last band, Format). Once S3 dropped the ReBar to 5 bands, `Bands.Item(5)` returned null and `->Maximize` on it caused a `SIGSEGV` — app terminated right after the splash screen. Found via `CompileDebug.bat` + the bundled GDB in batch mode (exact backtrace on the first try: `ReBarBand.Maximize` with `THIS=0x0`, from `Main.bas:9073`). Fixed by computing the bound from `MainReBar.Bands.Count - 2` instead of a literal, so it can't silently go stale again. Re-verified via GDB (20s observation, zero signals) and a real release-build launch (8s alive check, correct window title).
+2. **Pre-existing bug found and fixed (unrelated to my changes, hit while rewriting the same code):** the old toolbar code assigned `tbtToggleBreakpoint` twice — once for the real Toggle Breakpoint button, then again (copy-paste) for the Show Next Statement button, silently losing the real button's pointer. `ChangeEnabledDebug`'s `tbtToggleBreakpoint->Enabled = True` was therefore managing the wrong button. Fixed using `tbtShowNextStatement`, which was already declared but never used — clearly the original intent.
+3. **Regression I introduced and caught before it shipped:** moving "External Tools..." into Tools ▸ Advanced broke `frmTools.frm`'s save handler, which located where to re-insert saved custom tools by finding that item as a direct sibling (`mi->Name = "Tools"`). Since it's no longer a direct child of the Tools menu, the lookup would have silently placed newly-saved tools at the wrong position. Fixed by computing the insertion point from the stable trailing separator+Options pair instead of a Name-based lookup.
+4. **Two hardcoded gaps fixed while already touching this code (not part of the original ask, but directly adjacent and zero-risk):** `ShowFormatToolBar` was never being persisted to INI (only read) — added the missing `WriteBool`. `ChangeMenuItemsEnabled`/`Main.bas`'s Window-menu item-count checks (`miWindow->Count > 3`, `> 2`, loop starting at index 3) assumed 3 static Window-menu items (Split H/V/separator); now that Split H/V moved to View, Window holds only the separator, so these were updated to `> 1`/`> 0`/loop-from-1 to match.
+
+### Deferred (flagged, not guessed at)
+
+- **Comment/Block Comment/Uncomment → "Toggle Comment" merge** (owner-approved in the plan) — real behavior change (detecting current comment state to decide comment-vs-uncomment), and `CommentSingle`/`CommentBlock`/`UnComment`'s internals weren't verified well enough to merge safely blind.
+- **Moving Bubble Help/Suggest Options/Parameter Info from Edit into the Options dialog**, and **moving Recent AI Chat from File into the AI Agent panel** — both cross into UI subsystems (`frmOptions.frm`, the AI Agent panel) not reviewed as part of this pass; scoped out rather than guessed at.
+- **Designer menu disable-when-no-form-open** (O1's "only refinement" for the Designer menu) — would touch `tabCode_SelChange`, an area with a documented fragility history (this is the same code path implicated in the form-designer grey-panel bug earlier this session).
+- **GitHub submenu's "VFBE repo + FB Wiki" reduction** — the ROADMAP spec's wording is ambiguous about which exact 2 items should remain. Kept VisualFBEditor's own repo+wiki as the safest reading (the only unambiguous "repo + its own wiki" pairing available); cheap to adjust if that's not what was meant.
+- **Localization (`.lng`) files** — `ML()` keys on the exact English source string (`Settings/Languages/*.lng`, 15+ languages shipped, inherited from upstream). Renaming a caption (S2) breaks that language's translation lookup for the renamed string until its `.lng` file gets a matching new entry — not something a mechanical relabel pass can safely do across 15 languages. English (the default/base language) is entirely unaffected. Flagged for the owner to decide whether these language files are still meant to be actively maintained for this fork.
+
+### Verification performed
+
+- Compile: 0 errors at every phase gate (after S1, after S2, after S3, after S3's crash fix, after S4) — same 4 pre-existing warnings throughout (`frmFindInFiles.frm`, from Cursor's uncommitted Search-menu work, not introduced by this pass).
+- Grepped `src/` after every symbol move/removal for stale references (the §9 "clean compile is not sufficient" rule) — caught issues #1 and #3 above this way, both before they were reported as done.
+- Release build: fresh launch + process-alive check after the crash fix and again after S4 — window opens, correct title, stays running.
+
+### Not verified (no GUI/computer-use access this session)
+
+- Visual click-through of every moved menu item in each run-state (stopped/running/paused) — the gate explicitly calls for this and it needs a human or a computer-use-capable session.
+- Whether "Show Main Toolbar" (Options ▸ General) actually reclaims the editor's vertical space when toggled off — traced the code (it does call `pfrmMain->RequestAlign`) but couldn't visually confirm; this project has a documented history of "last-mile" docking-space gaps (see the bottom-panel fix history below).
+- Project Properties dialog's visual layout after S4's field removal — nothing sat directly below/adjacent to the removed controls in a way that looked wrong from reading the code, but there's now an unclosed blank rectangle where they were (every control on that page uses absolute `SetBounds`, nothing reflows).
 
 ---
 
@@ -546,7 +603,7 @@ All items above passed **before** the owner separately found the critical `_WIN3
 
 ### Unscheduled / future planning
 
-- [ ] **13.3 UI review** - File + Edit owner-approved; Search → Define (F2) reliability improved (uncommitted); **View menu** is next after Search sign-off. **Full designed approachability plan for all remaining menus + toolbars + Options now in [ROADMAP.md](ROADMAP.md) §13.3.A** (progressive-disclosure model, no easy/advanced mode; O1–O4 owner-approved 2026-07-06; execution queued as S1–S7, with S1+S3 needing an Opus diff review before commit).
+- [ ] **13.3 UI review** - File + Edit owner-approved; Search → Define (F2) reliability improved (uncommitted); **View menu** is next after Search sign-off. **Full designed approachability plan in [ROADMAP.md](ROADMAP.md) §13.3.A** (progressive-disclosure model, no easy/advanced mode; O1–O4 owner-approved 2026-07-06). **S1–S4 executed (Sonnet, 2026-07-06) — see [13.3.A execution](#133a-execution--s1s4-done-sonnet-session-2026-07-06--not-committed-awaiting-opus-review) above for full detail, issues found/fixed, and deferred items; uncommitted, awaiting Opus diff review before commit/push.** S5–S7 (Delete confirm dialogs, Options-dialog audit, docs cleanup) remain queued in ROADMAP.
 - [ ] **13.2.1.1 Standardize indentation** — convert mixed tabs/spaces across all source files (§13.2)
 - [ ] **13.4 Rename the project** (e.g. "ABStudio") — deeper than cosmetic; dedicated pass needed (§13.4)
 - [ ] **13.5 Standard Windows installer** — Inno Setup or WiX; depends on project rename decision (§13.5)

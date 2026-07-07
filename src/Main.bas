@@ -99,7 +99,7 @@ Dim Shared As VisualFBEditor.Application VisualFBEditorApp
 Dim Shared As ComboBoxEdit cboBuildConfiguration, cboAIAgentModels
 Dim Shared As IniFile iniSettings, iniTheme, iniInterfaceTheme
 Dim Shared As SearchBox txtExplorer, txtForm, txtProperties, txtEvents
-Dim Shared As ToolBar tbStandard, tbEdit, tbBuild, tbDebug, tbRun, tbProject, tbExplorer, tbForm, tbAIAgent, tbProperties, tbEvents, tbBottom, tbLeft, tbRight, tbFormat
+Dim Shared As ToolBar tbStandard, tbEdit, tbRun, tbProject, tbExplorer, tbForm, tbAIAgent, tbProperties, tbEvents, tbBottom, tbLeft, tbRight, tbFormat
 Dim Shared As StatusBar stBar
 Dim Shared As Splitter splLeft, splRight, splBottom, splAIAgent, splProperties, splEvents
 Dim Shared As ListControl lstLeft
@@ -110,7 +110,7 @@ Dim Shared As Label lblLeft
 Dim Shared As Panel pnlLeft, pnlRight, pnlBottom, pnlBottomTab, pnlLeftPin, pnlRightPin, pnlBottomPin, pnlPropertyValue, pnlColor
 Dim Shared As TrackBar trLeft
 Dim Shared As MainMenu mnuMain
-Dim Shared As MenuItem Ptr mnuStartWithCompile, mnuStart, mnuContinue, mnuBreak, mnuEnd, mnuRestart, mnuStandardToolBar, mnuEditToolBar, mnuProjectToolBar, mnuFormatToolBar, mnuBuildToolBar, mnuDebugToolBar, mnuRunToolBar, mnuSplit, mnuSplitHorizontally, mnuSplitVertically, mnuWindowSeparator, miRecentFiles, miSetAsMain, miClearStartUp, miTabSetAsMain, miTabReloadHistoryCode, miRemoveFiles, miToolBars
+Dim Shared As MenuItem Ptr mnuStartWithCompile, mnuStart, mnuContinue, mnuBreak, mnuEnd, mnuRestart, mnuStandardToolBar, mnuEditToolBar, mnuProjectToolBar, mnuFormatToolBar, mnuRunToolBar, mnuSplit, mnuSplitHorizontally, mnuSplitVertically, mnuWindowSeparator, miRecentFiles, miSetAsMain, miClearStartUp, miTabSetAsMain, miTabReloadHistoryCode, miRemoveFiles, miToolBars
 Dim Shared As MenuItem Ptr miRecentAIChat,  miFileAIChat
 Dim Shared As MenuItem Ptr miSaveProject, miSaveProjectAs, miCloseProject, miDeleteProject, miNewFile, miOpenFile, miCloseFile, miDeleteFile, miSaveFile, miSaveFileAs, miPrint, miPrintPreview, miPageSetup, miOpenProjectFolder, miProjectProperties, miExplorerOpenProjectFolder, miExplorerRename, miExplorerProjectProperties, miExplorerCloseProject, miRename, miRemoveFileFromProject
 Dim Shared As MenuItem Ptr miUndo, miRedo, miCutCurrentLine, miCut, miCopy, miPaste, miSingleComment, miBlockComment, miUncommentBlock, miDuplicate, miSelectAll, miIndent, miOutdent, miFormat, miUnformat, miFormatProject, miUnformatProject, miAddSpaces, miDeleteBlankLines, miSuggestions, miCompleteWord, miParameterInfo, miStepInto, miStepOver, miStepOut, miRunToCursor, miGDBCommand, miAddWatch, miToggleBreakpoint, miClearAllBreakpoints, miSetNextStatement, miShowNextStatement
@@ -5476,7 +5476,7 @@ Sub UpdateWindowMenu
 			End If
 		Next
 	Next
-	mnuWindowSeparator->Visible = miWindow->Count > 2
+	mnuWindowSeparator->Visible = miWindow->Count > 0 '' only static item now is the separator itself (index 0); Split H/V moved to View (13.3.A)
 End Sub
 
 
@@ -5708,8 +5708,6 @@ Sub CreateMenusAndToolBars
 	miSaveFileAs = miFile->Add(ML("Save File &As") & "..." & HK("SaveFileAs"), "", "SaveFileAs", @mClick, , , False)
 	miFile->Add("-")
 	miPrint = miFile->Add(ML("&Print") & HK("Print", "Ctrl+P"), "Print", "Print", @mClick, , , False)
-	miPrintPreview = miFile->Add(ML("Print P&review") & HK("PrintPreview"), "PrintPreview", "PrintPreview", @mClick, , , False)
-	miPageSetup = miFile->Add(ML("Page Set&up") & "..." & HK("PageSetup"), "", "PageSetup", @mClick, , , False)
 
 	Dim sTmp As WString * 1024
 	For i As Integer = 0 To miRecentMax
@@ -5750,7 +5748,9 @@ Sub CreateMenusAndToolBars
 	miRecentAIChat->Add(ML("Clear Recently Opened"), "", "ClearAIChat", @mClickAIChat)
 	
 	miFile->Add("-")
-	miFile->Add(ML("&Command Prompt") & HK("CommandPrompt", "Alt+C"), "Console", "CommandPrompt", @mClick)
+	Var miFileAdvanced = miFile->Add(ML("Advanced"), "", "FileAdvanced")
+	miPrintPreview = miFileAdvanced->Add(ML("Print P&review") & HK("PrintPreview"), "PrintPreview", "PrintPreview", @mClick, , , False)
+	miPageSetup = miFileAdvanced->Add(ML("Page Set&up") & "..." & HK("PageSetup"), "", "PageSetup", @mClick, , , False)
 	miFile->Add("-")
 	miFile->Add(ML("&Exit") & HK("Exit", "Alt+F4"), "Exit", "Exit", @mClick)
 	
@@ -5775,11 +5775,13 @@ Sub CreateMenusAndToolBars
 	miOutdent = miEdit->Add(ML("&Outdent") & HK("Outdent", "Shift+Tab"), "", "Outdent", @mClick, , , False)
 	miEdit->Add("-")
 	miFormat = miEdit->Add(ML("&Format") & HK("Format", "Ctrl+Tab"), "Format", "Format", @mClick, , , False)
-	miUnformat = miEdit->Add(ML("&Unformat") & HK("Unformat", "Ctrl+Shift+Tab"), "Unformat", "Unformat", @mClick, , , False)
-	miFormatProject = miEdit->Add(ML("&Format Project") & HK("FormatProject"), "", "FormatProject", @mClick, , , False)
-	miUnformatProject = miEdit->Add(ML("&Unformat Project") & HK("UnformatProject"), "", "UnformatProject", @mClick, , , False)
-	miAddSpaces = miEdit->Add(ML("Add &Spaces") & HK("AddSpaces"), "", "AddSpaces", @mClick, , , False)
-	miDeleteBlankLines = miEdit->Add(ML("Merge Multiple Blank Lines"), "", "DeleteBlankLines", @mClick)
+	miEdit->Add("-")
+	Var miEditAdvanced = miEdit->Add(ML("Advanced"), "", "EditAdvanced")
+	miUnformat = miEditAdvanced->Add(ML("&Unformat") & HK("Unformat", "Ctrl+Shift+Tab"), "Unformat", "Unformat", @mClick, , , False)
+	miFormatProject = miEditAdvanced->Add(ML("&Format Project") & HK("FormatProject"), "", "FormatProject", @mClick, , , False)
+	miUnformatProject = miEditAdvanced->Add(ML("&Unformat Project") & HK("UnformatProject"), "", "UnformatProject", @mClick, , , False)
+	miAddSpaces = miEditAdvanced->Add(ML("Add &Spaces") & HK("AddSpaces"), "", "AddSpaces", @mClick, , , False)
+	miDeleteBlankLines = miEditAdvanced->Add(ML("Merge Multiple Blank Lines"), "", "DeleteBlankLines", @mClick)
 	miEdit->Add("-")
 	miSuggestions = miEdit->Add(ML("Code - Bubble Help") & HK("Suggestions"), "", "Suggestions", @mClick, True)
 	miCompleteWord = miEdit->Add(ML("Code - Suggest Options"), "", "SuggestOptions", @mClick, True)
@@ -5798,7 +5800,7 @@ Sub CreateMenusAndToolBars
 	miSearch->Add("-")
 	miGoto = miSearch->Add(ML("&Goto") & HK("Goto", "Ctrl+G"), "", "Goto", @mClick, , , False)
 	miSearch->Add("-")
-	miDefine = miSearch->Add(ML("&Define") & HK("Define", "F2"), "", "Define", @mClick, , , False)
+	miDefine = miSearch->Add(ML("Go to &Definition") & HK("Define", "F2"), "", "Define", @mClick, , , False)
 	Var miBookmark = miSearch->Add(ML("Bookmarks"), "", "Bookmarks")
 	miToggleBookmark = miBookmark->Add(ML("Toggle Bookmark") & HK("ToggleBookmark", "F6"), "Bookmark", "ToggleBookmark", @mClick, , , False)
 	miNextBookmark = miBookmark->Add(ML("Next Bookmark") & HK("NextBookmark", "Ctrl+F6"), "", "NextBookmark", @mClick, , , False)
@@ -5812,14 +5814,18 @@ Sub CreateMenusAndToolBars
 	miView->Add("-")
 	miGotoCodeForm = miView->Add(ML("Goto Code/Form") & HK("GotoCodeForm", "F7"), "GotoCodeForm", "GotoCodeForm", @mClick, , , False)
 	miView->Add("-")
-	Var miCollapse = miView->Add(ML("Collapse") & HK("Collapse"), "", "Collapse", @mClick)
-	miCollapseCurrent = miCollapse->Add(ML("Current") & HK("CollapseCurrent"), "", "CollapseCurrent", @mClick, , , False)
-	miCollapseAllProcedures = miCollapse->Add(ML("All procedures") & HK("CollapseAllProcedures"), "", "CollapseAllProcedures", @mClick, , , False)
-	miCollapseAll = miCollapse->Add(ML("All") & HK("CollapseAll"), "", "CollapseAll", @mClick, , , False)
-	Var miUnCollapse = miView->Add(ML("Uncollapse") & HK("UnCollapse"), "", "UnCollapse", @mClick)
-	miUnCollapseCurrent = miUnCollapse->Add(ML("Current") & HK("UnCollapseCurrent"), "", "UnCollapseCurrent", @mClick, , , False)
-	miUnCollapseAllProcedures = miUnCollapse->Add(ML("All procedures") & HK("UnCollapseAllProcedures"), "", "UnCollapseAllProcedures", @mClick, , , False)
-	miUnCollapseAll = miUnCollapse->Add(ML("All") & HK("UnCollapseAll"), "", "UnCollapseAll", @mClick, , , False)
+	mnuSplitHorizontally = miView->Add(ML("Split &Horizontally") & HK("SplitHorizontally"), "", "SplitHorizontally", @mClick, True, , False)
+	mnuSplitVertically = miView->Add(ML("Split &Vertically") & HK("SplitVertically"), "", "SplitVertically", @mClick, True, , False)
+	miView->Add("-")
+	Var miFold = miView->Add(ML("Fold"), "", "Fold")
+	miCollapseAll = miFold->Add(ML("Collapse All") & HK("CollapseAll"), "", "CollapseAll", @mClick, , , False)
+	miUnCollapseAll = miFold->Add(ML("Expand All") & HK("UnCollapseAll"), "", "UnCollapseAll", @mClick, , , False)
+	miFold->Add("-")
+	Var miFoldAdvanced = miFold->Add(ML("Advanced"), "", "FoldAdvanced")
+	miCollapseCurrent = miFoldAdvanced->Add(ML("Collapse Current") & HK("CollapseCurrent"), "", "CollapseCurrent", @mClick, , , False)
+	miCollapseAllProcedures = miFoldAdvanced->Add(ML("Collapse All Procedures") & HK("CollapseAllProcedures"), "", "CollapseAllProcedures", @mClick, , , False)
+	miUnCollapseCurrent = miFoldAdvanced->Add(ML("Expand Current") & HK("UnCollapseCurrent"), "", "UnCollapseCurrent", @mClick, , , False)
+	miUnCollapseAllProcedures = miFoldAdvanced->Add(ML("Expand All Procedures") & HK("UnCollapseAllProcedures"), "", "UnCollapseAllProcedures", @mClick, , , False)
 	miView->Add("-")
 	miView->Add(ML("Project Explorer") & HK("ProjectExplorer", "Ctrl+R"), "Project", "ProjectExplorer", @mClick)
 	miView->Add(ML("Properties Window") & HK("PropertiesWindow", "F4"), "Property", "PropertiesWindow", @mClick)
@@ -5833,11 +5839,12 @@ Sub CreateMenusAndToolBars
 	miOtherWindows->Add(ML("ToDo Window") & HK("ToDoWindow"), "", "ToDoWindow", @mClick)
 	miOtherWindows->Add(ML("Change Log Window") & HK("ChangeLogWindow"), "", "ChangeLogWindow", @mClick)
 	miOtherWindows->Add(ML("Immediate Window") & HK("ImmediateWindow"), "", "ImmediateWindow", @mClick)
-	miOtherWindows->Add(ML("Locals Window") & HK("LocalsWindow"), "", "LocalsWindow", @mClick)
-	miOtherWindows->Add(ML("Globals Window") & HK("GlobalsWindow"), "", "GlobalsWindow", @mClick)
-	'miOtherWindows->Add(ML("Procedures Window") & HK("ProceduresWindow"), "", "ProceduresWindow", @mclick)
-	miOtherWindows->Add(ML("Threads Window") & HK("ThreadsWindow"), "", "ThreadsWindow", @mClick)
-	miOtherWindows->Add(ML("Watch Window") & HK("WatchWindow"), "", "WatchWindow", @mClick)
+	Var miDebugWindows = miView->Add(ML("Debug Windows"))
+	miDebugWindows->Add(ML("Locals Window") & HK("LocalsWindow"), "", "LocalsWindow", @mClick)
+	miDebugWindows->Add(ML("Globals Window") & HK("GlobalsWindow"), "", "GlobalsWindow", @mClick)
+	'miDebugWindows->Add(ML("Procedures Window") & HK("ProceduresWindow"), "", "ProceduresWindow", @mclick)
+	miDebugWindows->Add(ML("Threads Window") & HK("ThreadsWindow"), "", "ThreadsWindow", @mClick)
+	miDebugWindows->Add(ML("Watch Window") & HK("WatchWindow"), "", "WatchWindow", @mClick)
 	miView->Add("-")
 	miImageManager = miView->Add(ML("Image Manager") & HK("ImageManager"), "", "ImageManager", @mClick, , , False)
 	miView->Add("-")
@@ -5846,19 +5853,19 @@ Sub CreateMenusAndToolBars
 	mnuEditToolBar = miToolBars->Add(ML("Edit") & HK("Edit"), "", "Edit", @mClick, True)
 	mnuProjectToolBar = miToolBars->Add(ML("Project") & HK("Project"), "", "Project", @mClick, True)
 	mnuFormatToolBar = miToolBars->Add(ML("Format") & HK("FormFormat"), "", "FormFormat", @mClick, True)
-	mnuBuildToolBar = miToolBars->Add(ML("Build") & HK("Build"), "", "Build", @mClick, True)
-	mnuDebugToolBar = miToolBars->Add(ML("Debug") & HK("Debug"), "", "Debug", @mClick, True)
 	mnuRunToolBar = miToolBars->Add(ML("Run") & HK("Run"), "", "Run", @mClick, True)
 	
 	Var miProject = mnuMain.Add(ML("&Project"), "", "Project")
 	miProject->Add(ML("Add &Form") & HK("AddForm", "Ctrl+Alt+N"), "Form", "AddForm", @mClick)
 	miProject->Add(ML("Add &Module") & HK("AddModule","Ctrl+Alt+M"), "Module", "AddModule", @mClick)
 	miProject->Add(ML("Add &Include File") & HK("AddIncludeFile",""), "File", "AddIncludeFile", @mClick)
-	miProject->Add(ML("Add &User Control") & HK("AddUserControl", "Ctrl+Alt+U"), "UserControl", "AddUserControl", @mClick)
-	miProject->Add(ML("Add &Resource File") & HK("AddResoureFile",""), "Resource", "AddResourceFile", @mClick)
-	miProject->Add(ML("Add Ma&nifest File") & HK("AddManifestFile",""), "File", "AddManifestFile", @mClick)
 	miProject->Add(ML("Add From Templates") & "..." & HK("AddFromTemplates"), "Add", "AddFromTemplates", @mClick)
 	miProject->Add(ML("Add Files") & "..." & HK("AddFilesToProject"), "Add", "AddFilesToProject", @mClick)
+	miProject->Add("-")
+	Var miProjectAdvanced = miProject->Add(ML("Advanced"), "", "ProjectAdvanced")
+	miProjectAdvanced->Add(ML("Add &User Control") & HK("AddUserControl", "Ctrl+Alt+U"), "UserControl", "AddUserControl", @mClick)
+	miProjectAdvanced->Add(ML("Add &Resource File") & HK("AddResoureFile",""), "Resource", "AddResourceFile", @mClick)
+	miProjectAdvanced->Add(ML("Add Ma&nifest File") & HK("AddManifestFile",""), "File", "AddManifestFile", @mClick)
 	miProject->Add("-")
 	miRename = miProject->Add(ML("R&ename") & HK("Rename"), "Rename", "Rename", @mClick, , , False)
 	miRemoveFileFromProject = miProject->Add(ML("&Remove") & HK("RemoveFileFromProject"), "Remove", "RemoveFileFromProject", @mClick, , , False)
@@ -5907,46 +5914,49 @@ Sub CreateMenusAndToolBars
 	miFormFormat->Add("-")
 	miLockControls = miFormFormat->Add(ML("&Lock Controls") & HK("LockControls"), "LockControls", "LockControls", @mClick)
 	
-	Var miBuild = mnuMain.Add(ML("&Build"), "", "Build")
-	miSyntaxCheck = miBuild->Add(ML("&Syntax Check") & HK("SyntaxCheck"), "SyntaxCheck", "SyntaxCheck", @mClick, , , False)
-	miBuild->Add("-")
-	miCompile = miBuild->Add(ML("&Compile") & HK("Compile", "Ctrl+F9"), "Compile", "Compile", @mClick, , , False)
-	miCompileAll = miBuild->Add(ML("Compile &All") & HK("CompileAll", "Ctrl+Alt+F9"), "", "CompileAll", @mClick, , , False)
-	miBuild->Add("-")
-	miMake = miBuild->Add(ML("&Make") & HK("Make"), "Make", "Make", @mClick, , , False)
-	miMakeClean = miBuild->Add(ML("Make Clea&n") & HK("MakeClean"), "", "MakeClean", @mClick, , , False)
-	miBuild->Add("-")
-	miBuild->Add(ML("&Parameters") & HK("Parameters"), "Parameters", "Parameters", @mClick)
-	
+	'' 13.3.A O2: Build + Debug + Run consolidated into one Run menu. "Build" survives as a command,
+	'' not a menu. Top-level = the 90% path; the rest lives in the two "More ... Options" submenus.
+	'' Captions are relabeled in the S2 pass; this pass only changes structure/grouping.
 	Var miRun = mnuMain.Add(ML("&Run"), "", "Run")
-	mnuStartWithCompile = miRun->Add(ML("Start With &Compile") & HK("StartWithCompile", "F5"), "StartWithCompile", "StartWithCompile", @mClick, , , False)
-	mnuStart = miRun->Add(ML("&Start") & HK("Start", "Ctrl+F5"), "Start", "Start", @mClick, , , False)
-	mnuContinue = miRun->Add(ML("&Continue") & HK("Continue", "Ctrl+F5"), "Continue", "Continue", @mClick, , , False)
-	mnuBreak = miRun->Add(ML("&Break") & HK("Break", "Ctrl+Break"), "Break", "Break", @mClick, , , False)
-	mnuEnd = miRun->Add(ML("&End") & HK("End"), "EndProgram", "End", @mClick, , , False)
-	mnuRestart = miRun->Add(ML("&Restart") & HK("Restart", "Shift+F5"), "", "Restart", @mClick, , , False)
+	mnuStartWithCompile = miRun->Add(ML("&Run") & HK("StartWithCompile", "F5"), "StartWithCompile", "StartWithCompile", @mClick, , , False)
+	miCompile = miRun->Add(ML("&Build") & HK("Compile", "Ctrl+F9"), "Compile", "Compile", @mClick, , , False)
+	miRun->Add("-")
+	mnuEnd = miRun->Add(ML("&Stop") & HK("End"), "EndProgram", "End", @mClick, , , False)
+	mnuRestart = miRun->Add(ML("R&estart") & HK("Restart", "Shift+F5"), "", "Restart", @mClick, , , False)
 	miRun->Add("-")
 	miStepInto = miRun->Add(ML("Step &Into") & HK("StepInto", "F8"), "StepInto", "StepInto", @mClick, , , False)
 	miStepOver = miRun->Add(ML("Step &Over") & HK("StepOver", "Shift+F8"), "StepOver", "StepOver", @mClick, , , False)
-	miStepOut = miRun->Add(ML("Step O&ut") & HK("StepOut", "Ctrl+Shift+F8"), "StepOut", "StepOut", @mClick, , , False)
-	miRunToCursor = miRun->Add(ML("&Run To Cursor") & HK("RunToCursor", "Ctrl+F8"), "RunToCursor", "RunToCursor", @mClick, , , False)
+	miToggleBreakpoint = miRun->Add(ML("&Toggle Breakpoint") & HK("Breakpoint", "F9"), "Breakpoint", "Breakpoint", @mClick, , , False)
 	miRun->Add("-")
 	mnuUseDebugger = miRun->Add(ML("&Use Debugger") & HK("UseDebugger"), "", "UseDebugger", @mClick, True)
-	mnuUseProfiler = miRun->Add(ML("Use &Profiler") & HK("UseProfiler"), "", "UseProfiler", @mClick, True)
 	miRun->Add("-")
-	miToggleBreakpoint = miRun->Add(ML("&Toggle Breakpoint") & HK("Breakpoint", "F9"), "Breakpoint", "Breakpoint", @mClick, , , False)
-	miClearAllBreakpoints = miRun->Add(ML("&Clear All Breakpoints") & HK("ClearAllBreakpoints", "Ctrl+Shift+F9"), "", "ClearAllBreakpoints", @mClick, , , False)
-	miRun->Add("-")
-	miGDBCommand = miRun->Add(ML("&GDB Command") & HK("GDBCommand"), "", "GDBCommand", @mClick, , , False)
-	miAddWatch = miRun->Add(ML("&Add Watch") & HK("AddWatch"), "", "AddWatch", @mClick, , , False)
-	miRun->Add("-")
-	miSetNextStatement = miRun->Add(ML("Set &Next Statement") & HK("SetNextStatement"), "SetNextStatement", "SetNextStatement", @mClick, , , False)
-	miShowNextStatement = miRun->Add(ML("Show Ne&xt Statement") & HK("ShowNextStatement"), "ShowNextStatement", "ShowNextStatement", @mClick, , , False)
-	
+	Var miMoreBuildOptions = miRun->Add(ML("&More Build Options"), "", "MoreBuildOptions")
+	miCompileAll = miMoreBuildOptions->Add(ML("&Rebuild All") & HK("CompileAll", "Ctrl+Alt+F9"), "", "CompileAll", @mClick, , , False)
+	miMakeClean = miMoreBuildOptions->Add(ML("&Clean") & HK("MakeClean"), "", "MakeClean", @mClick, , , False)
+	miSyntaxCheck = miMoreBuildOptions->Add(ML("&Syntax Check") & HK("SyntaxCheck"), "SyntaxCheck", "SyntaxCheck", @mClick, , , False)
+	miMake = miMoreBuildOptions->Add(ML("&Make") & HK("Make"), "Make", "Make", @mClick, , , False)
+	miMoreBuildOptions->Add(ML("&Parameters") & HK("Parameters"), "Parameters", "Parameters", @mClick)
+	mnuStart = miMoreBuildOptions->Add(ML("Run Without &Building") & HK("Start", "Ctrl+F5"), "Start", "Start", @mClick, , , False)
+	Var miMoreDebugOptions = miRun->Add(ML("More &Debug Options"), "", "MoreDebugOptions")
+	miStepOut = miMoreDebugOptions->Add(ML("Step O&ut") & HK("StepOut", "Ctrl+Shift+F8"), "StepOut", "StepOut", @mClick, , , False)
+	miRunToCursor = miMoreDebugOptions->Add(ML("&Run To Cursor") & HK("RunToCursor", "Ctrl+F8"), "RunToCursor", "RunToCursor", @mClick, , , False)
+	mnuContinue = miMoreDebugOptions->Add(ML("&Continue") & HK("Continue", "Ctrl+F5"), "Continue", "Continue", @mClick, , , False)
+	mnuBreak = miMoreDebugOptions->Add(ML("&Break") & HK("Break", "Ctrl+Break"), "Break", "Break", @mClick, , , False)
+	miMoreDebugOptions->Add("-")
+	miClearAllBreakpoints = miMoreDebugOptions->Add(ML("&Clear All Breakpoints") & HK("ClearAllBreakpoints", "Ctrl+Shift+F9"), "", "ClearAllBreakpoints", @mClick, , , False)
+	miAddWatch = miMoreDebugOptions->Add(ML("&Add Watch") & HK("AddWatch"), "", "AddWatch", @mClick, , , False)
+	miSetNextStatement = miMoreDebugOptions->Add(ML("Set &Next Statement") & HK("SetNextStatement"), "SetNextStatement", "SetNextStatement", @mClick, , , False)
+	miShowNextStatement = miMoreDebugOptions->Add(ML("Show Ne&xt Statement") & HK("ShowNextStatement"), "ShowNextStatement", "ShowNextStatement", @mClick, , , False)
+	miMoreDebugOptions->Add("-")
+	mnuUseProfiler = miMoreDebugOptions->Add(ML("Use &Profiler") & HK("UseProfiler"), "", "UseProfiler", @mClick, True)
+	miGDBCommand = miMoreDebugOptions->Add(ML("&GDB Command") & HK("GDBCommand"), "", "GDBCommand", @mClick, , , False)
+
 	miXizmat = mnuMain.Add(ML("&Tools"), "", "Service")
-	miXizmat->Add(ML("&Add-Ins") & "..." & HK("AddIns"), "", "AddIns", @mClick)
+	miXizmat->Add(ML("&Command Prompt") & HK("CommandPrompt", "Alt+C"), "Console", "CommandPrompt", @mClick)
 	miXizmat->Add("-")
-	miXizmat->Add(ML("&External Tools") & "..." & HK("Tools"), "", "Tools", @mClick)
+	Var miToolsAdvanced = miXizmat->Add(ML("Advanced"), "", "ToolsAdvanced")
+	miToolsAdvanced->Add(ML("&Add-Ins") & "..." & HK("AddIns"), "", "AddIns", @mClick)
+	miToolsAdvanced->Add(ML("&External Tools") & "..." & HK("Tools"), "", "Tools", @mClick)
 	miXizmat->Add("-")
 	Dim As My.Sys.Drawing.BitmapType Bitm
 	Dim As WString * 1024 Buff
@@ -5996,8 +6006,6 @@ Sub CreateMenusAndToolBars
 	miXizmat->Add(ML("&Options") & HK("Options"), "Tools", "Options", @mClick)
 	
 	miWindow = mnuMain.Add(ML("&Window"), "", "Window")
-	mnuSplitHorizontally = miWindow->Add(ML("Split &Horizontally") & HK("SplitHorizontally"), "", "SplitHorizontally", @mClick, True, , False)
-	mnuSplitVertically = miWindow->Add(ML("Split &Vertically") & HK("SplitVertically"), "", "SplitVertically", @mClick, True, , False)
 	mnuWindowSeparator = miWindow->Add("-")
 	mnuWindowSeparator->Visible = False
 	
@@ -6016,15 +6024,15 @@ Sub CreateMenusAndToolBars
 	miHelp->Add(ML("FreeBasic WiKi") & HK("FreeBasicWiKi"), "Book", "FreeBasicWiKi", @mClick)
 	miHelp->Add(ML("FreeBasic Forums") & HK("FreeBasicForums"), "Forum", "FreeBasicForums", @mClick)
 	Var miGitHub = miHelp->Add(ML("GitHub"))
-	miGitHub->Add(ML("FreeBasic Repository") & HK("FreeBasicRepository"), "", "FreeBasicRepository", @mClick)
-	miGitHub->Add("-")
 	miGitHub->Add(ML("VisualFBEditor Repository") & HK("VisualFBEditorRepository"), "", "VisualFBEditorRepository", @mClick)
 	miGitHub->Add(ML("VisualFBEditor WiKi") & HK("VisualFBEditorWiKi"), "Book", "VisualFBEditorWiKi", @mClick)
-	miGitHub->Add(ML("VisualFBEditor Discussions") & HK("VisualFBEditorDiscussions"), "Forum", "VisualFBEditorDiscussions", @mClick)
 	miGitHub->Add("-")
-	miGitHub->Add(ML("MyFbFramework Repository") & HK("MyFbFrameworkRepository"), "", "MyFbFrameworkRepository", @mClick)
-	miGitHub->Add(ML("MyFbFramework WiKi") & HK("MyFbFrameworkWiKi"), "Book", "MyFbFrameworkWiKi", @mClick)
-	miGitHub->Add(ML("MyFbFramework Discussions") & HK("MyFbFrameworkDiscussions"), "Forum", "MyFbFrameworkDiscussions", @mClick)
+	Var miGitHubAdvanced = miGitHub->Add(ML("Advanced"), "", "GitHubAdvanced")
+	miGitHubAdvanced->Add(ML("FreeBasic Repository") & HK("FreeBasicRepository"), "", "FreeBasicRepository", @mClick)
+	miGitHubAdvanced->Add(ML("VisualFBEditor Discussions") & HK("VisualFBEditorDiscussions"), "Forum", "VisualFBEditorDiscussions", @mClick)
+	miGitHubAdvanced->Add(ML("MyFbFramework Repository") & HK("MyFbFrameworkRepository"), "", "MyFbFrameworkRepository", @mClick)
+	miGitHubAdvanced->Add(ML("MyFbFramework WiKi") & HK("MyFbFrameworkWiKi"), "Book", "MyFbFrameworkWiKi", @mClick)
+	miGitHubAdvanced->Add(ML("MyFbFramework Discussions") & HK("MyFbFrameworkDiscussions"), "Forum", "MyFbFrameworkDiscussions", @mClick)
 	miHelp->Add("-")
 	miHelp->Add(ML("Tip of the Day"), "Book", "TipoftheDay", @mClick)
 	miHelp->Add("-")
@@ -6106,8 +6114,8 @@ Sub CreateMenusAndToolBars
 	tbStandard.Flat = True
 	tbStandard.List = True
 	tbStandard.Buttons.Add tbsAutosize, "New", , @mClick, "New", , ML("New") & HK("New", "Ctrl+N", True), True
-	tbStandard.Buttons.Add , "Open", , @mClick, "Open", , ML("Open") & HK("Open", "Ctrl+O", True), True
-	tbtSave = tbStandard.Buttons.Add(, "Save", , @mClick, "Save", , ML("Save") & "..." & HK("Save", "Ctrl+S", True), True, ToolButtonState.tstNone)
+	tbStandard.Buttons.Add tbsAutosize, "Open", , @mClick, "Open", ML("Open"), ML("Open") & HK("Open", "Ctrl+O", True), True
+	tbtSave = tbStandard.Buttons.Add(tbsAutosize, "Save", , @mClick, "Save", ML("Save"), ML("Save") & "..." & HK("Save", "Ctrl+S", True), True, ToolButtonState.tstNone)
 	tbtSaveAll = tbStandard.Buttons.Add(, "SaveAll", , @mClick, "SaveAll", , ML("Save &All") & HK("SaveAll", "Ctrl+Alt+Shift+S", True), True, ToolButtonState.tstNone)
 	tbStandard.Buttons.Add tbsSeparator
 	tbtUndo = tbStandard.Buttons.Add(, "Undo", , @mClick, "Undo", , ML("Undo") & HK("Undo", "Ctrl+Z", True), True, ToolButtonState.tstNone)
@@ -6142,47 +6150,42 @@ Sub CreateMenusAndToolBars
 	tbtSyntaxCheck = tbEdit.Buttons.Add(, "SyntaxCheck", , @mClick, "SyntaxCheck", , ML("Syntax Check"), True, ToolButtonState.tstNone)
 	tbtSuggestions = tbEdit.Buttons.Add(, "Suggestions", , @mClick, "AnalyzeSuggestions", , ML("Suggestions"), True, ToolButtonState.tstNone)
 	'tbStandard.Buttons.Add tbsSeparator
-	tbBuild.Name = "Build"
-	tbBuild.ImagesList = @imgList
-	tbBuild.HotImagesList = @imgList
-	'tbBuild.DisabledImagesList = @imgListD
-	tbBuild.Flat = True
-	tbBuild.List = True
-	tbtUseDebugger = tbBuild.Buttons.Add(Cast(ToolButtonStyle, tbsCheck Or tbsAutosize), "UseDebugger", , @mClick, "TBUseDebugger", , ML("Use Debugger"), True)
-	tbtCompile = tbBuild.Buttons.Add(, "Compile", , @mClick, "Compile", , ML("Compile") & HK("Compile", "Ctrl+F9", True), True, ToolButtonState.tstNone)
-	Var tbMake = tbBuild.Buttons.Add(Cast(ToolButtonStyle, tbsAutosize Or tbsWholeDropdown), "Make", , @mClick, "Make", , ML("Make"), True)
-	dmiMake = tbMake->DropDownMenu.Add("Make", "", "Make", @mClick, , , False)
-	dmiMakeClean = tbMake->DropDownMenu.Add("Make clean", "", "MakeClean", @mClick, , , False)
-	tbBuild.Buttons.Add , "Parameters", , @mClick, "Parameters", , ML("Parameters"), True
-	tbBuild.Name = "Build"
-	tbBuild.ImagesList = @imgList
-	tbBuild.HotImagesList = @imgList
-	'tbBuild.DisabledImagesList = @imgListD
-	tbDebug.Name = "Debug"
-	tbDebug.ImagesList = @imgList
-	tbDebug.HotImagesList = @imgList
-	tbDebug.Flat = True
-	tbDebug.List = True
-	tbtStepInto = tbDebug.Buttons.Add(, "StepInto", , @mClick, "StepInto", , ML("Step Into") & HK("StepInto", "F8", True), True)
-	tbtStepOver = tbDebug.Buttons.Add(, "StepOver", , @mClick, "StepOver", , ML("Step Over") & HK("StepOver", "Shift+F8", True), True)
-	tbtStepOut = tbDebug.Buttons.Add(, "StepOut", , @mClick, "StepOut", , ML("Step Out") & HK("StepOut", "Ctrl+Shift+F8", True), True)
-	tbtRunToCursor = tbDebug.Buttons.Add(, "RunToCursor", , @mClick, "RunToCursor", , ML("Run To Cursor") & HK("RunToCursor", "Ctrl+F8", True), True)
-	tbDebug.Buttons.Add tbsSeparator
-	tbtToggleBreakpoint = tbDebug.Buttons.Add(, "Breakpoint", , @mClick, "ToggleBreakpoint", , ML("Toggle Breakpoint") & HK("ToggleBreakpoint", "F9", True), True)
-	tbDebug.Buttons.Add tbsSeparator
-	tbtSetNextStatement = tbDebug.Buttons.Add(, "SetNextStatement", , @mClick, "SetNextStatement", , ML("Set Next Statement") & HK("SetNextStatement", , True), True)
-	tbtToggleBreakpoint = tbDebug.Buttons.Add(, "ShowNextStatement", , @mClick, "ShowNextStatement", , ML("Show Next Statement") & HK("ShowNextStatement", , True), True)
-	'tbStandard.Buttons.Add tbsSeparator
+	'' 13.3.A O3: Build + Debug + Run toolbars consolidated into one Run toolbar (mirrors the O2
+	'' Run-menu consolidation and drops the ReBar from 7 bands to 5). Primary buttons (Run, Build,
+	'' Stop) get a visible caption -- every toolbar already had TBSTYLE_LIST (.List = True) enabled,
+	'' but no button had ever passed a Caption, so the "text beside icon" style was silently unused.
+	'' Secondary/advanced buttons stay icon-only. Order mirrors the Run menu's own top-level-then-
+	'' advanced grouping. Bug fix along the way: the old code assigned the "ShowNextStatement" button
+	'' to tbtToggleBreakpoint a second time (copy/paste), silently losing the real Toggle Breakpoint
+	'' button's pointer; tbtShowNextStatement (declared, never used) is the correct target.
 	tbRun.Name = "Run"
 	tbRun.ImagesList = @imgList
 	tbRun.HotImagesList = @imgList
-	'tbRun.DisabledImagesList = @imgListD
 	tbRun.Flat = True
 	tbRun.List = True
-	tbtStartWithCompile = tbRun.Buttons.Add( , "StartWithCompile", , @mClick, "StartWithCompile", , ML("Start With Compile") & HK("StartWithCompile", "F5", True), True, ToolButtonState.tstNone)
-	tbtStart = tbRun.Buttons.Add( , "Start", , @mClick, "Start", , ML("Start") & HK("Start", "Ctrl+F5", True), True, ToolButtonState.tstNone)
-	tbtBreak = tbRun.Buttons.Add( , "Break", , @mClick, "Break", , ML("Break") & HK("Break", "Ctrl+Pause", True), True, ToolButtonState.tstNone)
-	tbtEnd = tbRun.Buttons.Add( , "EndProgram", , @mClick, "End", , ML("End"), True, ToolButtonState.tstNone)
+	tbtStartWithCompile = tbRun.Buttons.Add(tbsAutosize, "StartWithCompile", , @mClick, "StartWithCompile", ML("Run"), ML("Run") & HK("StartWithCompile", "F5", True), True, ToolButtonState.tstNone)
+	tbtCompile = tbRun.Buttons.Add(tbsAutosize, "Compile", , @mClick, "Compile", ML("Build"), ML("Build") & HK("Compile", "Ctrl+F9", True), True, ToolButtonState.tstNone)
+	tbRun.Buttons.Add tbsSeparator
+	tbtEnd = tbRun.Buttons.Add(tbsAutosize, "EndProgram", , @mClick, "End", ML("Stop"), ML("Stop") & HK("End", , True), True, ToolButtonState.tstNone)
+	tbRun.Buttons.Add tbsSeparator
+	tbtStepInto = tbRun.Buttons.Add(, "StepInto", , @mClick, "StepInto", , ML("Step Into") & HK("StepInto", "F8", True), True)
+	tbtStepOver = tbRun.Buttons.Add(, "StepOver", , @mClick, "StepOver", , ML("Step Over") & HK("StepOver", "Shift+F8", True), True)
+	tbtToggleBreakpoint = tbRun.Buttons.Add(, "Breakpoint", , @mClick, "ToggleBreakpoint", , ML("Toggle Breakpoint") & HK("Breakpoint", "F9", True), True)
+	tbRun.Buttons.Add tbsSeparator
+	tbtUseDebugger = tbRun.Buttons.Add(Cast(ToolButtonStyle, tbsCheck Or tbsAutosize), "UseDebugger", , @mClick, "TBUseDebugger", , ML("Use Debugger") & HK("UseDebugger", , True), True)
+	tbRun.Buttons.Add tbsSeparator
+	tbtStart = tbRun.Buttons.Add(, "Start", , @mClick, "Start", , ML("Run Without Building") & HK("Start", "Ctrl+F5", True), True, ToolButtonState.tstNone)
+	tbtBreak = tbRun.Buttons.Add(, "Break", , @mClick, "Break", , ML("Break") & HK("Break", "Ctrl+Pause", True), True, ToolButtonState.tstNone)
+	tbtStepOut = tbRun.Buttons.Add(, "StepOut", , @mClick, "StepOut", , ML("Step Out") & HK("StepOut", "Ctrl+Shift+F8", True), True)
+	tbtRunToCursor = tbRun.Buttons.Add(, "RunToCursor", , @mClick, "RunToCursor", , ML("Run To Cursor") & HK("RunToCursor", "Ctrl+F8", True), True)
+	tbRun.Buttons.Add tbsSeparator
+	tbtSetNextStatement = tbRun.Buttons.Add(, "SetNextStatement", , @mClick, "SetNextStatement", , ML("Set Next Statement") & HK("SetNextStatement", , True), True)
+	tbtShowNextStatement = tbRun.Buttons.Add(, "ShowNextStatement", , @mClick, "ShowNextStatement", , ML("Show Next Statement") & HK("ShowNextStatement", , True), True)
+	tbRun.Buttons.Add tbsSeparator
+	Var tbMake = tbRun.Buttons.Add(Cast(ToolButtonStyle, tbsAutosize Or tbsWholeDropdown), "Make", , @mClick, "Make", , ML("Make"), True)
+	dmiMake = tbMake->DropDownMenu.Add("Make", "", "Make", @mClick, , , False)
+	dmiMakeClean = tbMake->DropDownMenu.Add("Make clean", "", "MakeClean", @mClick, , , False)
+	tbRun.Buttons.Add , "Parameters", , @mClick, "Parameters", , ML("Parameters"), True
 	'tbStandard.Buttons.Add tbsSeparator
 	tbProject.Name = "Project"
 	tbProject.ImagesList = @imgList
@@ -8117,7 +8120,7 @@ Sub tabCode_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As TabContro
 	'	pLocalFunctionsOthers = @tb->FunctionsOthers
 	'	pLocalArgs = @tb->Args
 	If tb->tn Then tb->tn->SelectItem
-	For i As Integer = 3 To miWindow->Count - 1
+	For i As Integer = 1 To miWindow->Count - 1 '' index 0 is now the only static item (separator); Split H/V moved to View (13.3.A)
 		If miWindow->Item(i) > 0 AndAlso tb->mi > 0 Then miWindow->Item(i)->Checked = miWindow->Item(i) = tb->mi
 	Next
 	If tb->Des <> 0 Then
@@ -9014,30 +9017,34 @@ Sub frmMain_Create(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	WLet(RecentFile, SanitizeIniOptionalPath(iniSettings.ReadString("MainWindow", "RecentFile", "")))
 	WLet(RecentProject, SanitizeIniOptionalPath(iniSettings.ReadString("MainWindow", "RecentProject", "")))
 	WLet(RecentFolder, SanitizeIniOptionalPath(iniSettings.ReadString("MainWindow", "RecentFolder", "")))
+	'' 13.3.A O3: minimal default-visible toolbar set is Standard + Run only; Edit/Project default to
+	'' hidden (Format already defaulted to hidden). This only changes behavior for a FRESH install --
+	'' ReadBool's default only applies when the INI key is absent, so an existing user's saved
+	'' Edit/Project toolbar visibility is preserved untouched. Build/Debug toolbars are retired
+	'' (folded into Run); bands are now Standard(0), Edit(1), Project(2), Run(3), Format(4).
 	ShowStandardToolBar = iniSettings.ReadBool("MainWindow", "ShowStandardToolBar", True)
-	ShowEditToolBar = iniSettings.ReadBool("MainWindow", "ShowEditToolBar", True)
-	ShowProjectToolBar = iniSettings.ReadBool("MainWindow", "ShowProjectToolbar", True)
+	ShowEditToolBar = iniSettings.ReadBool("MainWindow", "ShowEditToolBar", False)
+	ShowProjectToolBar = iniSettings.ReadBool("MainWindow", "ShowProjectToolbar", False)
 	ShowFormatToolBar = iniSettings.ReadBool("MainWindow", "ShowFormatToolbar", False)
-	ShowBuildToolBar = iniSettings.ReadBool("MainWindow", "ShowBuildToolbar", True)
-	ShowDebugToolBar = iniSettings.ReadBool("MainWindow", "ShowDebugToolbar", False)
-	ShowRunToolBar = iniSettings.ReadBool("MainWindow", "ShowRunToolbar", True)
+	'' 13.3.A O3 migration: Build + Debug toolbars were folded into Run. Carry a pre-13.3.A user's
+	'' visibility forward -- if they had the old Run, Build, OR Debug toolbar visible, show the merged
+	'' Run toolbar so its Build/Stop/debug buttons don't silently vanish. Only ever turns Run ON, never
+	'' off, so an existing saved ShowRunToolbar=True is untouched. The retired keys are read once here
+	'' and never written again (see frmMain_Close), so they don't linger as live settings.
+	ShowRunToolBar = iniSettings.ReadBool("MainWindow", "ShowRunToolbar", True) _
+		OrElse iniSettings.ReadBool("MainWindow", "ShowBuildToolbar", False) _
+		OrElse iniSettings.ReadBool("MainWindow", "ShowDebugToolbar", False)
 	ShowTipoftheDay = iniSettings.ReadBool("MainWindow", "ShowTipoftheDay", True)
 	ShowTipoftheDayIndex = iniSettings.ReadInteger("MainWindow", "ShowTipoftheDayIndex", 0)
 	MainReBar.Bands.Item(0)->Visible = ShowStandardToolBar
 	MainReBar.Bands.Item(1)->Visible = ShowEditToolBar
 	MainReBar.Bands.Item(2)->Visible = ShowProjectToolBar
-	'rbBottom.Bands.Item(0)->Visible = ShowFormatToolBar
-	MainReBar.Bands.Item(3)->Visible = ShowBuildToolBar
-	MainReBar.Bands.Item(4)->Visible = ShowDebugToolBar
-	MainReBar.Bands.Item(5)->Visible = ShowRunToolBar
-	'MainReBar.Bands.Item(5)->FixedSize = True
-	MainReBar.Bands.Item(6)->Visible = ShowFormatToolBar
+	MainReBar.Bands.Item(3)->Visible = ShowRunToolBar
+	MainReBar.Bands.Item(4)->Visible = ShowFormatToolBar
 	mnuStandardToolBar->Checked = ShowStandardToolBar
 	mnuEditToolBar->Checked = ShowEditToolBar
 	mnuProjectToolBar->Checked = ShowProjectToolBar
 	mnuFormatToolBar->Checked = ShowFormatToolBar
-	mnuBuildToolBar->Checked = ShowBuildToolBar
-	mnuDebugToolBar->Checked = ShowDebugToolBar
 	mnuRunToolBar->Checked = ShowRunToolBar
 	'Dim As Integer Subsystem = iniSettings.ReadInteger("MainWindow", "Subsystem", 0)
 	tbtNotSetted->Checked = True
@@ -9069,7 +9076,12 @@ Sub frmMain_Create(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	
 	gLocalProperties = True
 	
-		For i As Integer = 0 To 5
+		'' 13.3.A: was a hardcoded "0 To 5" assuming 7 bands (maximize all but the last, Format).
+		'' Band count is now 5 after the O3 toolbar consolidation; compute the upper bound from
+		'' Bands.Count instead of a literal so this can't silently go stale again if the band count
+		'' ever changes. Bands.Item(i) on an out-of-range i returns a null pointer, and the old
+		'' hardcoded "5" crashed on startup (SIGSEGV in ReBarBand.Maximize) once bands dropped to 5.
+		For i As Integer = 0 To MainReBar.Bands.Count - 2
 			MainReBar.Bands.Item(i)->Maximize
 		Next
 	'frmMain.RequestAlign
@@ -9304,7 +9316,7 @@ Sub frmMain_Close(ByRef Designer As My.Sys.Object, ByRef Sender As Form, ByRef A
 	iniSettings.WriteBool("MainWindow", "ShowStandardToolBar", ShowStandardToolBar)
 	iniSettings.WriteBool("MainWindow", "ShowEditToolBar", ShowEditToolBar)
 	iniSettings.WriteBool("MainWindow", "ShowProjectToolBar", ShowProjectToolBar)
-	iniSettings.WriteBool("MainWindow", "ShowBuildToolBar", ShowBuildToolBar)
+	iniSettings.WriteBool("MainWindow", "ShowFormatToolBar", ShowFormatToolBar) '' was never persisted before 13.3.A; harmless pre-existing gap fixed while touching this block
 	iniSettings.WriteBool("MainWindow", "ShowRunToolBar", ShowRunToolBar)
 	iniSettings.WriteInteger("MainWindow", "MainHeight", frmMain.Height)
 	iniSettings.WriteInteger("MainWindow", "ShowTipoftheDayIndex", ShowTipoftheDayIndex)
@@ -9372,8 +9384,6 @@ tbStandard.OnMouseUp = @ToolBar_MouseUp
 tbEdit.OnMouseUp = @ToolBar_MouseUp
 tbProject.OnMouseUp = @ToolBar_MouseUp
 tbFormat.OnMouseUp = @ToolBar_MouseUp
-tbBuild.OnMouseUp = @ToolBar_MouseUp
-tbDebug.OnMouseUp = @ToolBar_MouseUp
 tbRun.OnMouseUp = @ToolBar_MouseUp
 
 
@@ -9405,11 +9415,12 @@ frmMain.OnClose = @frmMain_Close
 frmMain.OnDropFile = @frmMain_DropFile
 frmMain.OnMessage = @frmMain_Message
 frmMain.Menu = @mnuMain
+'' 13.3.A O3: bands are now Standard(0), Edit(1), Project(2), Run(3), Format(4) -- Build/Debug
+'' folded into Run, so the ReBar drops from 7 bands to 5. See the matching Item(N) updates in
+'' VisualFBEditor.bas's toolbar-toggle Cases and this Sub's own visibility/save code below.
 MainReBar.Add @tbStandard
 MainReBar.Add @tbEdit
 MainReBar.Add @tbProject
-MainReBar.Add @tbBuild
-MainReBar.Add @tbDebug
 MainReBar.Add @tbRun
 MainReBar.Add @tbFormat
 'rbBottom.Add @tbFormat

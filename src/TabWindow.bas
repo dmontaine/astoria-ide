@@ -242,7 +242,7 @@ Sub ChangeMenuItemsEnabled
 	If iFlagStartDebug = 1 Then Exit Sub
 	Dim As TreeNode Ptr ptn = GetParentNode(tvExplorer.SelectedNode)
 	Dim bEnabled As Boolean = tvExplorer.Nodes.Count > 0
-	Dim bEnabledTab As Boolean = miWindow->Count > 3
+	Dim bEnabledTab As Boolean = miWindow->Count > 1 '' Window menu now holds only the separator (index 0) as a static item; Split H/V moved to View (13.3.A)
 	Dim bHasProject As Boolean = GetOpenProjectNode() <> 0
 	Dim bHasProjectFile As Boolean = bHasProject AndAlso bEnabledTab
 	Dim bEnabledProject As Boolean = ptn AndAlso (ptn->ImageKey = "Project" OrElse ptn->ImageKey = "MainProject")
@@ -12779,16 +12779,46 @@ Sub TabWindow.ConvertToUppercaseFirstLetter(ByVal StartLine As Integer = -1, ByV
 	End With
 End Sub
 
+Private Function DefineOverlapsCaretWord(te As TypeElement Ptr, iWordStartChar As Integer, iWordEndChar As Integer) As Boolean
+	If te = 0 Then Return False
+	Dim defEnd As Integer = te->StartChar + Len(Trim(te->Name))
+	Return te->StartChar < iWordEndChar AndAlso defEnd > iWordStartChar
+End Function
+
 Sub TabWindow.Define
-	Dim As Integer iSelStartLine, iSelEndLine, iSelStartChar, iSelEndChar, k, Pos1
+	If TextChanged Then
+		FormDesign(True)
+		TextChanged = False
+	End If
+	Dim As Integer iSelStartLine, iSelEndLine, iSelStartChar, iSelEndChar, k, Pos1, posL, posR
 	txtCode.GetSelection iSelStartLine, iSelEndLine, iSelStartChar, iSelEndChar
 	Dim As EditControlLine Ptr ECLine = txtCode.Content.Lines.Item(iSelStartLine)
 	Dim As String FromClassName
 	Dim sLine As WString Ptr = @txtCode.Lines(iSelEndLine)
-	If sLine= 0 OrElse Trim(*sLine) = "" Then Return
-	Dim As String TypeName, OldTypeName, Parameters, sWord = txtCode.GetWordAt(iSelEndLine, iSelEndChar)
+	If sLine= 0 OrElse Trim(*sLine) = "" Then
+		pstBar->Panels[0]->Caption = ML("No word at cursor")
+		Exit Sub
+	End If
+	posR = 0
+	k = 0
+	Do
+		posR = InStr(posR + 1, *sLine, """")
+		If posR >= iSelEndChar OrElse posR < 1 Then Exit Do
+		k += 1
+	Loop
+	If k Mod 2 = 1 Then Exit Sub
+	k = InStrRev(*sLine, "'", iSelEndChar)
+	If k > 0 Then
+		posL = InStrRev(*sLine, """", k) : posR = InStr(k, *sLine, """")
+		If Not (posL > 0 AndAlso (posL < k AndAlso posR > k)) Then Exit Sub
+	End If
+	Dim As Integer iWordStartChar, iWordEndChar
+	Dim As String TypeName, OldTypeName, Parameters, sWord = txtCode.GetWordAt(iSelEndLine, iSelEndChar, False, False, iWordStartChar, iWordEndChar)
 	Dim As TypeElement Ptr te, te1, te2, teOld, teTypeOld
-	If sWord = "" Then Exit Sub
+	If sWord = "" Then
+		pstBar->Panels[0]->Caption = ML("No word at cursor")
+		Exit Sub
+	End If
 	If ECLine Then
 		If ECLine->InConstruction > 0 Then
 			te = ECLine->InConstruction
@@ -12823,7 +12853,7 @@ Sub TabWindow.Define
 				For i As Integer = 0 To teOld->Elements.Count - 1
 					te = teOld->Elements.Object(i)
 					If te <> 0 AndAlso LCase(Trim(te->Name)) = LCase(sWord) Then
-						If te->StartLine = iSelEndLine Then Continue For
+						If te->StartLine = iSelEndLine AndAlso DefineOverlapsCaretWord(te, iWordStartChar, iWordEndChar) Then Continue For
 						.Add te->DisplayName
 						.Item(.Count - 1)->Text(1) = te->Parameters
 						.Item(.Count - 1)->Text(2) = WStr(te->StartLine + 1)
@@ -12849,7 +12879,7 @@ Sub TabWindow.Define
 			For i As Integer = 0 To FListItems.Count - 1
 				te = FListItems.Object(i)
 				If te <> 0 AndAlso LCase(Trim(te->Name)) = LCase(sWord) Then
-					If te->StartLine = iSelEndLine Then Continue For
+					If te->StartLine = iSelEndLine AndAlso DefineOverlapsCaretWord(te, iWordStartChar, iWordEndChar) Then Continue For
 					.Add te->DisplayName
 					.Item(.Count - 1)->Text(1) = te->Parameters
 					.Item(.Count - 1)->Text(2) = WStr(te->StartLine + 1)
@@ -12862,7 +12892,7 @@ Sub TabWindow.Define
 			For i As Integer = 0 To txtCode.Content.Functions.Count - 1
 				te = txtCode.Content.Functions.Object(i)
 				If te <> 0 AndAlso LCase(Trim(te->Name)) = LCase(sWord) Then
-					If te->StartLine = iSelEndLine Then Continue For
+					If te->StartLine = iSelEndLine AndAlso DefineOverlapsCaretWord(te, iWordStartChar, iWordEndChar) Then Continue For
 					'Var Pos1 = InStr(te->FullName, ".")
 					If (Len(te->OwnerTypeName) > 0) AndAlso IsBase(TypeName, te->OwnerTypeName, @This) Then
 						.Add te->DisplayName
@@ -12878,7 +12908,7 @@ Sub TabWindow.Define
 			For i As Integer = pGlobalTypeProcedures->Count - 1 To 0 Step -1
 				te = pGlobalTypeProcedures->Object(i)
 				If te <> 0 AndAlso LCase(Trim(te->Name)) = LCase(sWord) Then
-					If te->StartLine = iSelEndLine Then Continue For
+					If te->StartLine = iSelEndLine AndAlso DefineOverlapsCaretWord(te, iWordStartChar, iWordEndChar) Then Continue For
 					'Var Pos1 = InStr(te->FullName, ".")
 					If CBool(Len(te->OwnerTypeName) > 0) AndAlso CBool(te->FileName <> FileName) AndAlso IsBase(TypeName, te->OwnerTypeName, @This) Then
 						.Add te->DisplayName
@@ -12892,7 +12922,7 @@ Sub TabWindow.Define
 				End If
 			Next
 		Else
-			If te2 <> 0 AndAlso (Not (te2->FileName = FileName AndAlso te2->StartLine = iSelEndLine)) Then
+			If te2 <> 0 AndAlso (CBool(te2->FileName <> FileName) OrElse CBool(te2->StartLine <> iSelEndLine) OrElse Not DefineOverlapsCaretWord(te2, iWordStartChar, iWordEndChar)) Then
 				.Add te2->DisplayName
 				.Item(.Count - 1)->Text(1) = te2->Parameters
 				.Item(.Count - 1)->Text(2) = WStr(te2->StartLine + 1)
@@ -12907,7 +12937,7 @@ Sub TabWindow.Define
 					FillFromConstructionBlock ECLine->InConstructionBlock, sWord
 					For i As Integer = 0 To FListItems.Count - 1
 						te = FListItems.Object(i)
-						If te->StartLine = iSelEndLine Then Continue For
+						If te->StartLine = iSelEndLine AndAlso DefineOverlapsCaretWord(te, iWordStartChar, iWordEndChar) Then Continue For
 						.Add te->DisplayName
 						.Item(.Count - 1)->Text(1) = te->Parameters
 						.Item(.Count - 1)->Text(2) = WStr(te->StartLine + 1)
@@ -12920,7 +12950,7 @@ Sub TabWindow.Define
 			End If
 			If cboFunction.ItemIndex > -1 Then te1 = cboFunction.Items.Item(cboFunction.ItemIndex)->Object
 			If te1 Then 
-				If Len(te->OwnerTypeName) > 0 Then TypeName = te->OwnerTypeName
+				If Len(te1->OwnerTypeName) > 0 Then TypeName = te1->OwnerTypeName
 				'Pos1 = InStr(te1->DisplayName, "["): If Pos1 > 0 Then TypeName = Trim(..Left(te1->DisplayName, Pos1 - 1))
 				'Pos1 = InStr(te1->FullName, "."): If Pos1 > 0 Then TypeName = Trim(..Left(te1->FullName, Pos1 - 1))
 			End If
@@ -12928,7 +12958,7 @@ Sub TabWindow.Define
 				For i As Integer = 0 To te1->Elements.Count - 1
 					te = te1->Elements.Object(i)
 					If te <> 0 AndAlso LCase(Trim(te->Name)) = LCase(sWord) Then
-						If te->StartLine = iSelEndLine Then Continue For
+						If te->StartLine = iSelEndLine AndAlso DefineOverlapsCaretWord(te, iWordStartChar, iWordEndChar) Then Continue For
 						If te = te2 Then Continue For
 						.Add te->DisplayName
 						.Item(.Count - 1)->Text(1) = te->Parameters
@@ -12956,7 +12986,7 @@ Sub TabWindow.Define
 					For i As Integer = 0 To FListItems.Count - 1
 						te = FListItems.Object(i)
 						If te <> 0 AndAlso LCase(Trim(te->Name)) = LCase(sWord) Then
-							If te->StartLine = iSelEndLine Then Continue For
+							If te->StartLine = iSelEndLine AndAlso DefineOverlapsCaretWord(te, iWordStartChar, iWordEndChar) Then Continue For
 							If te = te2 Then Continue For
 							.Add te->DisplayName
 							.Item(.Count - 1)->Text(1) = te->Parameters
@@ -12973,7 +13003,7 @@ Sub TabWindow.Define
 			For i As Integer = 0 To txtCode.Content.Functions.Count - 1
 				te = txtCode.Content.Functions.Object(i)
 				If te <> 0 AndAlso LCase(Trim(te->Name)) = LCase(sWord) Then
-					If te->StartLine = iSelEndLine Then Continue For
+					If te->StartLine = iSelEndLine AndAlso DefineOverlapsCaretWord(te, iWordStartChar, iWordEndChar) Then Continue For
 					If te = te2 Then Continue For
 					.Add te->DisplayName
 					.Item(.Count - 1)->Text(1) = te->Parameters
@@ -12987,7 +13017,7 @@ Sub TabWindow.Define
 			For i As Integer = 0 To txtCode.Content.LineLabels.Count - 1
 				te = txtCode.Content.LineLabels.Object(i)
 				If te <> 0 AndAlso LCase(Trim(te->Name)) = LCase(sWord) Then
-					If te->StartLine = iSelEndLine Then Continue For
+					If te->StartLine = iSelEndLine AndAlso DefineOverlapsCaretWord(te, iWordStartChar, iWordEndChar) Then Continue For
 					If te = te2 Then Continue For
 					.Add te->DisplayName
 					.Item(.Count - 1)->Text(1) = te->Parameters
@@ -13001,7 +13031,35 @@ Sub TabWindow.Define
 			For i As Integer = 0 To txtCode.Content.Args.Count - 1
 				te = txtCode.Content.Args.Object(i)
 				If te <> 0 AndAlso LCase(Trim(te->Name)) = LCase(sWord) Then
-					If te->StartLine = iSelEndLine Then Continue For
+					If te->StartLine = iSelEndLine AndAlso DefineOverlapsCaretWord(te, iWordStartChar, iWordEndChar) Then Continue For
+					If te = te2 Then Continue For
+					.Add te->DisplayName
+					.Item(.Count - 1)->Text(1) = te->Parameters
+					.Item(.Count - 1)->Text(2) = WStr(te->StartLine + 1)
+					.Item(.Count - 1)->Text(3) = WStr(te->StartChar)
+					.Item(.Count - 1)->Text(4) = te->FileName
+					.Item(.Count - 1)->Text(5) = te->Comment
+					.Item(.Count - 1)->Tag = te->Tag
+				End If
+			Next
+			For i As Integer = 0 To txtCode.Content.Defines.Count - 1
+				te = txtCode.Content.Defines.Object(i)
+				If te <> 0 AndAlso LCase(Trim(te->Name)) = LCase(sWord) Then
+					If te->StartLine = iSelEndLine AndAlso DefineOverlapsCaretWord(te, iWordStartChar, iWordEndChar) Then Continue For
+					If te = te2 Then Continue For
+					.Add te->DisplayName
+					.Item(.Count - 1)->Text(1) = te->Parameters
+					.Item(.Count - 1)->Text(2) = WStr(te->StartLine + 1)
+					.Item(.Count - 1)->Text(3) = WStr(te->StartChar)
+					.Item(.Count - 1)->Text(4) = te->FileName
+					.Item(.Count - 1)->Text(5) = te->Comment
+					.Item(.Count - 1)->Tag = te->Tag
+				End If
+			Next
+			For i As Integer = 0 To pGlobalDefines->Count - 1
+				te = pGlobalDefines->Object(i)
+				If te <> 0 AndAlso LCase(Trim(te->Name)) = LCase(sWord) Then
+					If te->FileName = FileName Then Continue For
 					If te = te2 Then Continue For
 					.Add te->DisplayName
 					.Item(.Count - 1)->Text(1) = te->Parameters
@@ -13108,9 +13166,11 @@ Sub TabWindow.Define
 			Next
 		End If
 		If .Count = 0 Then
+			pstBar->Panels[0]->Caption = ML("No definition found for") & " '" & sWord & "'"
 		ElseIf .Count = 1 Then
 			SelectSearchResult .Item(0)->Text(4), Val(.Item(0)->Text(2)), IIf(.Item(0)->Text(3) = "0", -1, Val(.Item(0)->Text(3))), , .Item(0)->Tag, sWord
 		Else
+			pfTrek->Text = ML("Definitions for") & " '" & sWord & "' (" & WStr(.Count) & ")"
 			If pfTrek->ShowModal(frmMain) = ModalResults.OK Then
 				Var item = pfTrek->SelectedItem
 				If item <> 0 Then

@@ -59,15 +59,15 @@ Using My.Sys.Forms
 		Dim As TabControl tabProperties
 		Dim As TabPage tpGeneral, tpMake, tpCompile, tpIncludes
 		Dim As CommandButton cmdOK, cmdCancel, cmdAdvancedOptions, CommandButton1, cmdAddComponent, cmdRemoveComponent, cmdAddOtherInclude, cmdRemoveOtherInclude, cmdAddLibrary, cmdRemoveLibrary
-		Dim As Label lblProjectType, lblMainFile, lblProjectName, lblProjectDescription, lblIcon, lblTitle, lblMajor, lblMinor, lblRevision, lblBuild, lblResourceFile, lblIconResourceFile, lblType, lblValue, lblHelpFileName, lblSubsystem, lblComponents, lblOthers
+		Dim As Label lblProjectType, lblMainFile, lblProjectName, lblProjectDescription, lblIcon, lblTitle, lblMajor, lblMinor, lblRevision, lblBuild, lblResourceFile, lblType, lblValue, lblHelpFileName, lblSubsystem, lblComponents, lblOthers
 		Dim As Picture picVersionNumber, picApplication, picVersionInformation, picComponents, picOtherIncludes
-		Dim As ComboBoxEdit cboProjectType, cboMainFile, cboResourceFile, cboIconResourceFile, cboSubsystem
+		Dim As ComboBoxEdit cboProjectType, cboMainFile, cboResourceFile, cboSubsystem
 		Dim As TextBox txtProjectName, txtProjectDescription, txtIcon, txtTitle, txtMajor, txtMinor, txtRevision, txtBuild, txtValue, txtHelpFileName
 		Dim As GroupBox grbVersionNumber, grbApplication, grbVersionInformation, grbCompileMode, grbIncludePaths, grbLibraryPaths
 		Dim As CheckBox chkAutoIncrementVersion, chkPassAllModuleFilesToCompiler, chkManifest, chkRunAsAdministrator, chkOpenProjectAsFolder
 		Dim As ListControl lstType, lstComponents, lstOtherIncludes, lstLibraryPaths
 		Dim As RadioButton optDevelopment, optFinal
-		Dim As Dictionary Types, MainFiles, ResourceFiles, IconResourceFiles
+		Dim As Dictionary Types, MainFiles, ResourceFiles
 		Dim As TreeNode Ptr ProjectTreeNode
 		Dim As ImageBox imgIcon
 		Dim As FolderBrowserDialog BrowseD

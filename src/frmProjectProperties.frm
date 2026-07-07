@@ -198,19 +198,6 @@ pfProjectProperties = @fProjectProperties
 		lblResourceFile.TabIndex = 8
 		lblResourceFile.SetBounds 224, 66, 262, 18
 		lblResourceFile.Parent = @tpGeneral
-		' lblIconResourceFile
-		lblIconResourceFile.Name = "lblIconResourceFile"
-		lblIconResourceFile.Text = ML("Icon Resource File") & " (" & ML("For *nix/*bsd") & "):"
-		lblIconResourceFile.TabIndex = 12
-		lblIconResourceFile.SetBounds 224, 124, 262, 18
-		lblIconResourceFile.Parent = @tpGeneral
-		' cboIconResourceFile
-		cboIconResourceFile.Name = "cboIconResourceFile"
-		cboIconResourceFile.Text = "cboResourceFile1"
-		cboIconResourceFile.Sort = False
-		cboIconResourceFile.TabIndex = 13
-		cboIconResourceFile.SetBounds 224, 142, 252, 21
-		cboIconResourceFile.Parent = @tpGeneral
 		' lblType
 		lblType.Name = "lblType"
 		lblType.Text = ML("Type") & ":"
@@ -675,7 +662,6 @@ Private Sub frmProjectProperties.cmdOK_Click(ByRef Designer As My.Sys.Object, By
 		End If
 		WLet(ppe->MainFileName, .MainFiles.Get(.cboMainFile.Text))
 		WLet(ppe->ResourceFileName, .ResourceFiles.Get(.cboResourceFile.Text))
-		WLet(ppe->IconResourceFileName, .IconResourceFiles.Get(.cboIconResourceFile.Text))
 		ppe->ProjectType = .cboProjectType.ItemIndex
 		ppe->Subsystem = .cboSubsystem.ItemIndex
 		WLet(ppe->ProjectName, .txtProjectName.Text)
@@ -730,8 +716,6 @@ Sub AddToCombo(ByRef tn As TreeNode Ptr)
 			.cboResourceFile.AddItem tn->Text
 			.ResourceFiles.Add tn->Text, IIf(ee, *ee->FileName, WStr(""))
 		ElseIf EndsWith(LCase(tn->Text), ".xpm") Then
-			.cboIconResourceFile.AddItem tn->Text
-			.IconResourceFiles.Add tn->Text, IIf(ee, *ee->FileName, WStr(""))
 		ElseIf LCase(tn->Text) = "makefile" Then
 		ElseIf EndsWith(LCase(tn->Text), ".bat") Then
 		ElseIf EndsWith(LCase(tn->Text), ".sh") OrElse InStr(tn->Text, ".") = 0 Then
@@ -749,8 +733,6 @@ Sub AddToComboFileName(ByRef FileName As WString)
 			.cboResourceFile.AddItem Text
 			.ResourceFiles.Add Text, FileName
 		ElseIf EndsWith(LCase(Text), ".xpm") Then
-			.cboIconResourceFile.AddItem Text
-			.IconResourceFiles.Add Text, FileName
 		ElseIf LCase(Text) = "makefile" Then
 		ElseIf EndsWith(LCase(Text), ".bat") Then
 		ElseIf EndsWith(LCase(Text), ".sh") OrElse InStr(Text, ".") = 0 Then
@@ -774,13 +756,10 @@ Public Sub frmProjectProperties.RefreshProperties()
 		.lstLibraryPaths.Clear
 		.cboMainFile.Clear
 		.cboResourceFile.Clear
-		.cboIconResourceFile.Clear
 		.MainFiles.Clear
 		.ResourceFiles.Clear
-		.IconResourceFiles.Clear
 		.cboMainFile.AddItem ML("(not selected)")
 		.cboResourceFile.AddItem ML("(not selected)")
-		.cboIconResourceFile.AddItem ML("(not selected)")
 		Dim As Boolean bSetted = False
 		If ptn->ImageKey = "Project" OrElse ee AndAlso *ee Is ProjectElement Then
 			.ProjectTreeNode = ptn
@@ -808,7 +787,6 @@ Public Sub frmProjectProperties.RefreshProperties()
 				.cboSubsystem.ItemIndex = ppe->Subsystem
 				If .MainFiles.IndexOf(*ppe->MainFileName) > -1 Then .cboMainFile.Text = .MainFiles.Item(.MainFiles.IndexOf(*ppe->MainFileName))->Key Else .cboMainFile.ItemIndex = 0
 				If .ResourceFiles.IndexOf(*ppe->ResourceFileName) > -1 Then .cboResourceFile.Text = .ResourceFiles.Item(.ResourceFiles.IndexOf(*ppe->ResourceFileName))->Key Else .cboResourceFile.ItemIndex = 0
-				If .IconResourceFiles.IndexOf(*ppe->IconResourceFileName) > -1 Then .cboIconResourceFile.Text = .IconResourceFiles.Item(.IconResourceFiles.IndexOf(*ppe->IconResourceFileName))->Key Else .cboIconResourceFile.ItemIndex = 0
 				.txtProjectName.Text = *ppe->ProjectName
 				.txtHelpFileName.Text = *ppe->HelpFileName
 				.txtProjectDescription.Text = *ppe->ProjectDescription
@@ -855,7 +833,6 @@ Public Sub frmProjectProperties.RefreshProperties()
 			.cboSubsystem.ItemIndex = -1
 			.cboMainFile.ItemIndex = -1
 			.cboResourceFile.ItemIndex = -1
-			.cboIconResourceFile.ItemIndex = -1
 			.txtProjectName.Text = ""
 			.txtHelpFileName.Text = ""
 			.txtProjectDescription.Text = ""

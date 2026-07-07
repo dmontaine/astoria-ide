@@ -1,6 +1,6 @@
 ﻿# VFBE Win64 Fork — Project Status & Handoff
 
-**Last updated:** 2026-07-06 (Edit menu review owner-approved complete; File/Open Project + path fixes in same pass)  
+**Last updated:** 2026-07-06 (Edit menu owner-approved; Search → Define F2 reliability pass; File/Open Project + path fixes)  
 **Repository:** [codeberg.org/bigriverguy/VFBEWin64](https://codeberg.org/bigriverguy/VFBEWin64)  
 **Local path:** `C:\Users\dmont\VisualFBEditor`  
 **Owner:** bigriverguy (`dmontaine@gmail.com`)
@@ -19,12 +19,12 @@ This document captures project history, completed work, open items, and workflow
 | **Form Designer** | Working — grey-panel bug root-caused and fixed (2026-07-06); per-form control tree + PagePanel layer navigation shipped |
 | **Dark mode** | Stable and enabled — title bar, menus, toolbars, tabs, central area all render dark; popup menus deferred (§13.10) |
 | **Dead code** | GTK/Linux/32-bit code physically deleted across `src/` and `mff/`; Integrated (stabs) debugger + alt-compiler backends removed; only `-gen gcc` remains |
-| **UI review** | In progress - **File** menu owner-approved (incl. Open Project); **Edit** menu owner-approved (all 25 items); Run menu consolidated and verified |
+| **UI review** | In progress — **File** menu owner-approved (incl. Open Project); **Edit** menu owner-approved (all 25 items); **Search** → Define (F2) reliability improved (uncommitted); Run menu consolidated and verified |
 | **Panels** | Left/right/bottom panel pin/collapse/persistence all fixed and verified |
 | **Debugger** | GDB-only; Step, Continue, Break, Step Out, command queue, and debug-tab show/hide all working; 3 GDB items pending owner smoke test (§7) |
 | **Build** | `Compile.bat` for release, `CompileDebug.bat` for debug; `NOPAUSE=1` for agent runs |
 
-**Active work:** §13.3 step-by-step UI review - **View menu** is next (File + Edit complete).  
+**Active work:** §13.3 step-by-step UI review — **Search menu** Define (F2) reliability pass done (uncommitted); **View menu** is next after Search sign-off (File + Edit complete).  
 **Open items consolidated:** see [Open Items](#open-items) below.
 
 ---
@@ -99,6 +99,37 @@ Bug #3 was the root cause of MDINotepad not appearing in the Examples list — `
 **Edit menu review status:** Complete — owner-approved all items (2026-07-06); flat menu checkmark toggles and handler routing verified; compile-clean.
 
 **Parameter Info gating:** `ParameterInfoShow` is now user-togglable (was effectively always on); `ChangeParameterInfoShow` in `Main.bas` mirrors the Use Debugger / Bubble Help checkmark pattern.
+
+---
+
+## Search menu — Define (F2) reliability (2026-07-06)
+
+Part of the §13.3 step-by-step UI review. **Search menu is not yet owner-approved**; this pass targets **Search → Define** (F2 / `TabWindow.Define`) only. Remaining Search items (Find, Find In Files, Replace, etc.) are pending review.
+
+### Reliability issues identified and fixed
+
+| # | Issue | Symptom | Fix |
+|---|-------|---------|-----|
+| 1 | Stale symbol tables | F2 after edits found nothing or wrong targets | When `TextChanged`, call `FormDesign(True)` and clear flag before lookup so symbol tables match the editor |
+| 2 | Silent failure | No feedback when lookup failed or cursor had no word | Status bar panel 0: `No word at cursor`; `No definition found for 'Foo'` |
+| 3 | String/comment false positives | F2 inside strings or comments could match spurious symbols | Silent skip using the same string/comment guard as `CompleteWord` |
+| 4 | Missing `#define` / `#macro` | Preprocessor symbols not in lookup | Search `Content.Defines` and project-wide `pGlobalDefines` |
+| 5 | Same-line self-match | F2 on a definition line skipped *all* same-line matches | `DefineOverlapsCaretWord` — StartChar-aware overlap check; skip only the definition under the caret, not every symbol on the line |
+| 6 | Procedure scoping typo | Type-member Define missed when scoped via `cboFunction` | `te` → `te1` for procedure `OwnerTypeName` / `Elements` walk |
+| 7 | Ambiguous multiple matches | `frmTrek` title gave no match count | Title: `Definitions for 'word' (N)` |
+
+### Implementation
+
+- **`DefineOverlapsCaretWord`** — private helper in `TabWindow.bas`; returns true when a symbol's `[StartChar, StartChar+Len(Name))` overlaps the caret word bounds.
+- **`TabWindow.Define`** — symbol refresh, string/comment guard, define/macro lists, caret-aware same-line skip, status-bar messages, `frmTrek` title with count.
+
+### Files modified (uncommitted)
+
+- `src/TabWindow.bas` — `Define`, `DefineOverlapsCaretWord`
+
+### Search menu review status
+
+**In progress** — Define (F2) reliability pass complete (uncommitted); remaining Search menu entries pending owner review.
 
 *(Form designer grey-panel investigation continues below for historical reference; see RESOLVED section above.)*
 
@@ -337,7 +368,7 @@ Full detail archived in [HISTORY.md](HISTORY.md). All 33 examples audited for GT
 
 Complete session-by-session history archived in [HISTORY.md](HISTORY.md). Major milestones:
 
-- **2026-07-06:** Form designer grey-panel fixed; File menu (incl. Open Project) and Edit menu step-by-step reviews owner-approved
+- **2026-07-06:** Form designer grey-panel fixed; File menu (incl. Open Project) and Edit menu step-by-step reviews owner-approved; Search → Define (F2) reliability pass (uncommitted)
 - **2026-07-05:** Automatic workspace (.vfs removed); File menu restructure; Run menu consolidation; GDB fixes (Step Out, command queue, Break); bottom panel tab captions fixed
 - **2026-07-04:** Dark mode crash #3 fixed (WM_THEMECHANGED recursion); per-form control tree; PagePanel layer navigation
 - **2026-07-03:** _WIN32_WINNT header fix (116 locations); dark mode reimplemented; Integrated debugger + alt-compiler backends removed; Tier 3 compiler swap closed (no viable 1.10.3 binary)
@@ -515,7 +546,7 @@ All items above passed **before** the owner separately found the critical `_WIN3
 
 ### Unscheduled / future planning
 
-- [ ] **13.3 UI review** - File + Edit owner-approved; **View menu** is next; remaining menus pending (§13.3)
+- [ ] **13.3 UI review** - File + Edit owner-approved; Search → Define (F2) reliability improved (uncommitted); **View menu** is next after Search sign-off. **Full designed approachability plan for all remaining menus + toolbars + Options now in [ROADMAP.md](ROADMAP.md) §13.3.A** (progressive-disclosure model, no easy/advanced mode; O1–O4 owner-approved 2026-07-06; execution queued as S1–S7, with S1+S3 needing an Opus diff review before commit).
 - [ ] **13.2.1.1 Standardize indentation** — convert mixed tabs/spaces across all source files (§13.2)
 - [ ] **13.4 Rename the project** (e.g. "ABStudio") — deeper than cosmetic; dedicated pass needed (§13.4)
 - [ ] **13.5 Standard Windows installer** — Inno Setup or WiX; depends on project rename decision (§13.5)
@@ -742,7 +773,7 @@ Full enhancement specs archived in [ROADMAP.md](ROADMAP.md). Quick reference:
 |----|-------------|--------|
 | 13.1 | Evaluate later GCC version | **Closed** — evaluated, declined |
 | 13.2 | Structured programming pass (4 phases) | Phases 1-4 mostly complete; 2.1.1 indentation + 2.2.3 file splits deferred |
-| 13.3 | UI evaluation & modernization | **In progress** - View menu is next (File + Edit complete) |
+| 13.3 | UI evaluation & modernization | **In progress** — File + Edit owner-approved; Search → Define (F2) reliability improved (uncommitted); View menu next |
 | 13.4 | Rename project ("ABStudio") | Unscheduled — dedicated pass needed |
 | 13.5 | Standard Windows installer | Unscheduled — depends on 13.4 |
 | 13.6 | Full review/expansion of Examples/ | Unscheduled — doc/polish phase |

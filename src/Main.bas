@@ -1124,7 +1124,26 @@ Sub CloseEditorFile()
 End Sub
 
 Sub DeleteEditorFile()
-	' TODO: delete file from disk and project explorer
+	'' 13.3.A S5: was a total no-op stub (TODO comment only). Mirrors DeleteProject's confirm
+	'' pattern: MsgBox Yes/No, then close-and-detach, then remove from disk.
+	Dim tb As TabWindow Ptr = Cast(TabWindow Ptr, ptabCode->SelectedTab)
+	If tb = 0 Then Exit Sub
+	Dim As TreeNode Ptr tn = tb->tn
+	If tn = 0 Then Exit Sub
+	'' Capture the file path and whether tn is nested under a project BEFORE calling CloseTab.
+	'' CloseTab already detaches+frees root-level ("Opened"/loose-file) nodes internally
+	'' (TreeNodeCollection.Remove calls _Delete on the node), so tn may already be a dangling
+	'' pointer afterward for that case -- must not dereference tn post-CloseTab unless it was
+	'' nested under a project (which CloseTab leaves untouched, since normal "Close File" is not
+	'' supposed to remove a project member from the explorer tree).
+	Dim As WString * 1024 sFilePath = tb->FileName
+	Dim As Boolean bNestedInProject = (tn->ParentNode <> 0)
+	If MsgBox(ML("Are you sure you want to delete the file") & " """ & tn->Text & """?", "Visual FB Editor", mtWarning, btYesNo) <> mrYes Then Exit Sub
+	If Not CloseTab(tb, True) Then Exit Sub
+	If bNestedInProject Then
+		If tn->ParentNode->Nodes.IndexOf(tn) <> -1 Then tn->ParentNode->Nodes.Remove tn->ParentNode->Nodes.IndexOf(tn)
+	End If
+	If sFilePath <> "" AndAlso Dir(sFilePath) <> "" Then Kill sFilePath
 End Sub
 
 Sub SaveEditorFile()
@@ -5694,7 +5713,6 @@ Sub CreateMenusAndToolBars
 	miFile->Add(ML("&Open Project") & "...", "", "OpenProject", @mClick)
 	miFile->Add(ML("&Recent Projects") & "...", "", "RecentProject", @mClick)
 	miCloseProject = miFile->Add(ML("Close Project") & HK("CloseProject", "Ctrl+Shift+F4"), "", "CloseProject", @mClick, , , False)
-	miDeleteProject = miFile->Add(ML("Delete Project"), "", "DeleteProject", @mClick, , , False)
 	miFile->Add("-")
 	miSaveProject = miFile->Add(ML("Save Project") & "..." & HK("SaveProject", "Ctrl+Shift+S"), "SaveAll", "SaveProject", @mClick, , , False)
 	miSaveProjectAs = miFile->Add(ML("Save Project As") & "..." & HK("SaveProjectAs"), "", "SaveProjectAs", @mClick, , , False)
@@ -5702,7 +5720,6 @@ Sub CreateMenusAndToolBars
 	miNewFile = miFile->Add(ML("&New File") & HK("NewFile", "Ctrl+N"), "New", "NewFile", @mClick)
 	miOpenFile = miFile->Add(ML("&Open File") & "..." & HK("OpenFile", "Ctrl+O"), "Open", "OpenFile", @mClick)
 	miCloseFile = miFile->Add(ML("Close File") & HK("CloseFile", "Ctrl+F4"), "Close", "CloseFile", @mClick, , , False)
-	miDeleteFile = miFile->Add(ML("Delete File"), "", "DeleteFile", @mClick, , , False)
 	miFile->Add("-")
 	miSaveFile = miFile->Add(ML("Save File") & "..." & HK("SaveFile", "Ctrl+S"), "Save", "SaveFile", @mClick, , , False)
 	miSaveFileAs = miFile->Add(ML("Save File &As") & "..." & HK("SaveFileAs"), "", "SaveFileAs", @mClick, , , False)
@@ -5747,6 +5764,11 @@ Sub CreateMenusAndToolBars
 	miRecentAIChat->Add("-")
 	miRecentAIChat->Add(ML("Clear Recently Opened"), "", "ClearAIChat", @mClickAIChat)
 	
+	miFile->Add("-")
+	'' 13.3.A S5: Delete Project/Delete File regrouped into their own bracketed group, well away
+	'' from Close Project/Close File (safety -- a misclick on Delete is destructive, on Close is not).
+	miDeleteProject = miFile->Add(ML("Delete Project"), "", "DeleteProject", @mClick, , , False)
+	miDeleteFile = miFile->Add(ML("Delete File"), "", "DeleteFile", @mClick, , , False)
 	miFile->Add("-")
 	Var miFileAdvanced = miFile->Add(ML("Advanced"), "", "FileAdvanced")
 	miPrintPreview = miFileAdvanced->Add(ML("Print P&review") & HK("PrintPreview"), "PrintPreview", "PrintPreview", @mClick, , , False)
@@ -9026,14 +9048,19 @@ Sub frmMain_Create(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	ShowEditToolBar = iniSettings.ReadBool("MainWindow", "ShowEditToolBar", False)
 	ShowProjectToolBar = iniSettings.ReadBool("MainWindow", "ShowProjectToolbar", False)
 	ShowFormatToolBar = iniSettings.ReadBool("MainWindow", "ShowFormatToolbar", False)
-	'' 13.3.A O3 migration: Build + Debug toolbars were folded into Run. Carry a pre-13.3.A user's
-	'' visibility forward -- if they had the old Run, Build, OR Debug toolbar visible, show the merged
-	'' Run toolbar so its Build/Stop/debug buttons don't silently vanish. Only ever turns Run ON, never
-	'' off, so an existing saved ShowRunToolbar=True is untouched. The retired keys are read once here
-	'' and never written again (see frmMain_Close), so they don't linger as live settings.
-	ShowRunToolBar = iniSettings.ReadBool("MainWindow", "ShowRunToolbar", True) _
-		OrElse iniSettings.ReadBool("MainWindow", "ShowBuildToolbar", False) _
-		OrElse iniSettings.ReadBool("MainWindow", "ShowDebugToolbar", False)
+	'' 13.3.A O3 migration (corrected 2026-07-07): Build + Debug toolbars were folded into Run.
+	'' On the FIRST launch after upgrade (ShowRunToolbar key absent), seed Run's visibility from the
+	'' retired ShowBuildToolbar/ShowDebugToolbar keys so the merged bar's Build/Stop/debug buttons
+	'' don't vanish for someone who had those bars up. Crucially this is a ONE-TIME carry-forward:
+	'' the earlier form OR-ed the retired keys on every load, which permanently latched Run visible
+	'' (the stale ShowBuildToolbar is never rewritten, so it stayed True forever) and made "hide the
+	'' Run toolbar" impossible. ReadBool ignores its default when the key exists, so an existing
+	'' saved ShowRunToolbar wins; the retired keys are only consulted as that default. Then remove
+	'' them (KeyRemove flushes on the next Write in frmMain_Close) so they can't re-latch or linger.
+	ShowRunToolBar = iniSettings.ReadBool("MainWindow", "ShowRunToolbar", _
+		iniSettings.ReadBool("MainWindow", "ShowBuildToolbar", True) OrElse iniSettings.ReadBool("MainWindow", "ShowDebugToolbar", False))
+	iniSettings.KeyRemove("MainWindow", "ShowBuildToolbar")
+	iniSettings.KeyRemove("MainWindow", "ShowDebugToolbar")
 	ShowTipoftheDay = iniSettings.ReadBool("MainWindow", "ShowTipoftheDay", True)
 	ShowTipoftheDayIndex = iniSettings.ReadInteger("MainWindow", "ShowTipoftheDayIndex", 0)
 	MainReBar.Bands.Item(0)->Visible = ShowStandardToolBar

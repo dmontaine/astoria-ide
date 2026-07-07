@@ -322,21 +322,12 @@ pfOptions = @fOptions
 			.SetBounds 10, 0, 417, 400
 			.Parent = @pnlShortcuts
 		End With
-		' grbCompilerPaths
-		With grbCompilerPaths
-			.Name = "grbCompilerPaths"
-			.Text = ML("Compiler Paths")
-			.ExtraMargins.Left = 0
-			.Align = DockStyle.alClient
-			.ExtraMargins.Top = 5
-			.Margins.Top = 20
-			.Margins.Right = 15
-			.Margins.Left = 15
-			.Margins.Bottom = 15
-			.TabIndex = 86
-			.SetBounds 10, 128, 417, 272
-			.Parent = @pnlCompiler
-		End With
+		'' 13.3.A S6 O4: "Compiler Paths" (register alternative compiler installations) removed --
+		'' was already permanently hidden (grbCompilerPaths.Visible=False below this constructor),
+		'' had no Add/Remove/Change buttons wired to it (empty hbxCompilers, empty ItemActivate
+		'' handler), and its own Save routine unconditionally purged the "Compilers" INI section on
+		'' every save. Project->CompilerPath (per-project override, set only via hand-edited .vfp
+		'' files) and BuildService.bas's bundled-compiler fallback are untouched.
 		' lblShortcut
 		lblShortcut.Name = "lblShortcut"
 		lblShortcut.Text = ML("Select shortcut") & ":"
@@ -1389,24 +1380,6 @@ pfOptions = @fOptions
 		cmdIndicator.OnClick = @cmdIndicator_Click
 		cmdIndicator.Parent = @hbxIndicator
 		'
-		' lvCompilerPaths
-		With lvCompilerPaths
-			.Name = "lvCompilerPaths"
-			.Text = "ListView1"
-			.Align = DockStyle.alClient
-			.ExtraMargins.Left = 0
-			.ExtraMargins.Right = 0
-			.ExtraMargins.Bottom = 15
-			.ExtraMargins.Top = 15
-		lvCompilerPaths.TabIndex = 141
-			.SetBounds 15, 57, 387, 161
-			.Images = @imgList
-			'.StateImages = @imgList
-			.SmallImages = @imgList
-			.Designer = @This
-			.OnItemActivate = @lvCompilerPaths_ItemActivate_
-			.Parent = @grbCompilerPaths
-		End With
 		' lblCompiler64
 		lblCompiler64.Name = "lblCompiler64"
 		lblCompiler64.Text = ML("Compiler 64-bit:") 
@@ -1420,15 +1393,9 @@ pfOptions = @fOptions
 		lblCompiler64Path.TabIndex = 145
 		lblCompiler64Path.SetBounds 140, 20, 262, 16
 		lblCompiler64Path.Parent = @grbDefaultCompilers
-		' cboCompiler64
-		With cboCompiler64
-			.Name = "cboCompiler64"
-			.Text = "ComboBoxEdit21"
-			.Visible = False
-			.TabIndex = 145
-			.SetBounds 15, 38, 387, 21
-			.Parent = @grbDefaultCompilers
-		End With
+		'' 13.3.A S6 O4: Default Compiler reduced to a read-only info line. cboCompiler64 was
+		'' already permanently hidden and had no Load/Save wiring anywhere in this form -- the
+		'' visible "Compiler 64-bit: ./Compiler/fbc64.exe" label pair above is the entire feature.
 		' pnlInterfaceFont
 		With pnlInterfaceFont
 			.Name = "pnlInterfaceFont"
@@ -1883,51 +1850,12 @@ pfOptions = @fOptions
 		cmdProjectsPath.SetBounds 394, -1, 24, 22
 		cmdProjectsPath.OnClick = @cmdProjectsPath_Click
 		cmdProjectsPath.Parent = @pnlProjectsPath
-		' lblDefaultFileFormat
-		With lblDefaultFileFormat
-			.Name = "lblDefaultFileFormat"
-			.Text = ML("File format") & ":"
-			.TabIndex = 276
-			.Parent = @hbxDefaultFileFormat
-			.ControlIndex = 0
-			.ID = 13557
-			.Align = DockStyle.alLeft
-			.Caption = ML("File format") & ":"
-			.SetBounds 0, 0, 130, 21
-			.Designer = @This
-			.Parent = @hbxDefaultFileFormat
-		End With
-		' cboDefaultFileFormat
-		With cboDefaultFileFormat
-			.Name = "cboDefaultFileFormat"
-			.Text = "cboDefaultFileFormat"
-			.TabIndex = 175
-			.Align = DockStyle.alClient
-			.SetBounds 100, 0, 287, 21
-			.Parent = @hbxDefaultFileFormat
-		End With
-		' lblDefaultNewLineFormat
-		With lblDefaultNewLineFormat
-			.Name = "lblDefaultNewLineFormat"
-			.Text = ML("New line format") & ":"
-			.TabIndex = 277
-			.Caption = ML("New line format") & ":"
-			.ControlIndex = 0
-			.Align = DockStyle.alLeft
-			.SetBounds 0, 0, 130, 21
-			.Designer = @This
-			.Parent = @hbxDefaultNewLineFormat
-		End With
-		' cboDefaultNewLineFormat
-		With cboDefaultNewLineFormat
-			.Name = "cboDefaultNewLineFormat"
-			.Text = "cboDefaultNewLineFormat"
-			.TabIndex = 175
-			.ControlIndex = 1
-			.Align = DockStyle.alClient
-			.SetBounds 100, 0, 287, 21
-			.Parent = @hbxDefaultNewLineFormat
-		End With
+		'' 13.3.A S6 O4: Default file-format/new-line-format pickers removed -- confirmed vestigial.
+		'' Both rows were already permanently hidden (hbxDefaultFileFormat/hbxDefaultNewLineFormat
+		'' .Visible=False below), never populated with any AddItem calls, and never read from or
+		'' saved to any global/INI state anywhere in this form. ChangeFileEncoding/ChangeNewLineType
+		'' (Main.bas) already ignore their parameter and unconditionally show "UTF-8"/"CR+LF" on the
+		'' status bar, matching AddTab forcing UTF-8+CRLF for every file.
 		' optPromptToSave
 		With optPromptToSave
 			.Name = "optPromptToSave"
@@ -2029,32 +1957,12 @@ pfOptions = @fOptions
 			.SetBounds 198, 0, 72, 18
 			.Parent = @pnlIntellisenseLimit
 		End With
-		' chkTurnOnEnvironmentVariables
-		With chkTurnOnEnvironmentVariables
-			.Name = "chkTurnOnEnvironmentVariables"
-			.Text = ML("Turn on Environment variables") & ":"
-			.TabIndex = 191
-
-			.ExtraMargins.Top = 5
-			.Align = DockStyle.alTop
-			.ExtraMargins.Right = 170
-			.Constraints.Height = 21
-			.AutoSize = True
-			.SetBounds 10, 180, 219, 21
-			.Parent = @pnlDebugger
-		End With
-		' txtEnvironmentVariables
-		With txtEnvironmentVariables
-			.Name = "txtEnvironmentVariables"
-			.Text = ""
-			.TabIndex = 189
-			.Align = DockStyle.alTop
-			.ExtraMargins.Top = -18
-			.ExtraMargins.Left = 230
-			.ExtraMargins.Right = 15
-			.SetBounds 240, 178, 172, 21
-			.Parent = @pnlDebugger
-		End With
+		'' 13.3.A S6 O4: "Turn on Environment variables" removed -- confirmed non-functional. The
+		'' debuggee is launched via CreateProcess in Debug.bas with lpEnvironment=0 (inherits the
+		'' parent's environment unchanged); EnvironmentVariables/TurnOnEnvironmentVariables were
+		'' saved to/loaded from INI but never applied anywhere. The globals + their INI round-trip
+		'' are left in place (harmless, matches the S4 precedent of keeping a dead-but-referenced
+		'' field) in case a future session wires up real env-var injection for the debuggee.
 		' chkDarkMode
 		With chkDarkMode
 			.Name = "chkDarkMode"
@@ -2286,9 +2194,6 @@ pfOptions = @fOptions
 		lvOtherEditors.Columns.Add ML("Extensions"), , 126
 		lvOtherEditors.Columns.Add ML("Path"), , 126
 		lvOtherEditors.Columns.Add ML("Command line"), , 80
-		lvCompilerPaths.Columns.Add ML("Version"), , 190
-		lvCompilerPaths.Columns.Add ML("Path"), , 190
-		lvCompilerPaths.Columns.Add ML("Command line"), , 80
 		lvTerminalPaths.Columns.Add ML("Version"), , 190
 		lvTerminalPaths.Columns.Add ML("Path"), , 190
 		lvTerminalPaths.Columns.Add ML("Command line"), , 80
@@ -2315,16 +2220,6 @@ pfOptions = @fOptions
 			.SetBounds 15, 361, 387, 24
 			.Designer = @This
 			.Parent = @grbOtherEditors
-		End With
-		' hbxCompilers
-		With hbxCompilers
-			.Name = "hbxCompilers"
-			.Text = "HorizontalBox1"
-			.TabIndex = 210
-			.Align = DockStyle.alBottom
-			.SetBounds 15, 233, 387, 24
-			.Designer = @This
-			.Parent = @grbCompilerPaths
 		End With
 		' hbxHelp
 		With hbxHelp
@@ -2581,32 +2476,6 @@ pfOptions = @fOptions
 			.Designer = @This
 			.Parent = @grbDefaults
 		End With
-		' hbxDefaultFileFormat
-		With hbxDefaultFileFormat
-			.Name = "hbxDefaultFileFormat"
-			.Text = "HorizontalBox1"
-			.AutoSize = True
-			.Visible = False
-			.TabIndex = 276
-			.Align = DockStyle.alTop
-			.ControlIndex = 2
-			.SetBounds 0, 42, 387, 21
-			.Designer = @This
-			.Parent = @vbxDefaults
-		End With
-		' hbxDefaultNewLineFormat
-		With hbxDefaultNewLineFormat
-			.Name = "hbxDefaultNewLineFormat"
-			.Text = "HorizontalBox1"
-			.AutoSize = True
-			.Visible = False
-			.TabIndex = 278
-			.Align = DockStyle.alTop
-			.ControlIndex = 3
-			.SetBounds 0, 63, 387, 21
-			.Designer = @This
-			.Parent = @vbxDefaults
-		End With
 		' vbxIncludePaths
 		With vbxIncludePaths
 			.Name = "vbxIncludePaths"
@@ -2648,16 +2517,6 @@ pfOptions = @fOptions
 			.SetBounds 15, 20, 383, 136
 			.Designer = @This
 			.Parent = @grbLibraryPaths
-		End With
-		' cboDefaultNewLineFormat
-		With cboDefaultNewLineFormat
-			.Name = "cboDefaultNewLineFormat"
-			.Text = "cboDefaultNewLineFormat"
-			.TabIndex = 175
-			.ControlIndex = 1
-			.SetBounds 100, 0, 287, 21
-			.Designer = @This
-			.Parent = @hbxDefaultNewLineFormat
 		End With
 		' hbxInterfaceColors
 		With hbxInterfaceColors
@@ -2812,7 +2671,6 @@ pfOptions = @fOptions
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @cmdInterfaceColor_Click)
 			.Parent = @hbxInterfaceColor
 		End With
-		grbCompilerPaths.Visible = False
 		' Move interface settings to General; hide broken interface theme UI
 		pnlInterfaceFont.Parent = @vbxGeneral
 		pnlInterfaceFont.Align = DockStyle.alTop
@@ -2962,8 +2820,6 @@ Sub frmOptions.LoadSettings()
 		.chkChangeEndingType.Checked = ChangeEndingType
 		.chkAddSpacesToOperators.Checked = AddSpacesToOperators
 		.chkLimitDebug.Checked = LimitDebug
-		.chkTurnOnEnvironmentVariables.Checked = TurnOnEnvironmentVariables
-		.txtEnvironmentVariables.Text = *EnvironmentVariables
 		.txtTabSize.Text = Str(TabWidth)
 		.txtHistoryLimit.Text = Str(HistoryLimit)
 		.txtIntellisenseLimit.Text = Str(IntellisenseLimit)
@@ -3511,8 +3367,6 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		AutoSaveCharMax = Val(.txtAutoSaveCharMax.Text)
 		LimitDebug = .chkLimitDebug.Checked
 		DisplayWarningsInDebug = .chkDisplayWarningsInDebug.Checked
-		TurnOnEnvironmentVariables = .chkTurnOnEnvironmentVariables.Checked
-		WLet(EnvironmentVariables, .txtEnvironmentVariables.Text)
 		AutoIndentation = .chkAutoIndentation.Checked
 		AutoComplete = .chkEnableAutoComplete.Checked
 		ChangeAutoComplete AutoComplete, 0
@@ -4696,12 +4550,6 @@ Private Sub frmOptions.lvHelpPaths_ItemActivate_(ByRef Designer As My.Sys.Object
 End Sub
 Private Sub frmOptions.lvHelpPaths_ItemActivate(ByRef Sender As ListView, ByVal ItemIndex As Integer)
 	cmdChangeHelp_Click *cmdChangeHelp.Designer, cmdChangeHelp
-End Sub
-
-Private Sub frmOptions.lvCompilerPaths_ItemActivate_(ByRef Designer As My.Sys.Object, ByRef Sender As ListView, ByVal ItemIndex As Integer)
-	(*Cast(frmOptions Ptr, Sender.Designer)).lvCompilerPaths_ItemActivate(Sender, ItemIndex)
-End Sub
-Private Sub frmOptions.lvCompilerPaths_ItemActivate(ByRef Sender As ListView, ByVal ItemIndex As Integer)
 End Sub
 
 Private Sub frmOptions.cmdInFolder_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)

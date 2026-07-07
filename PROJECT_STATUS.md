@@ -1,6 +1,6 @@
 ﻿# VFBE Win64 Fork — Project Status & Handoff
 
-**Last updated:** 2026-07-07 (13.3.A approachability plan S1–S4 **Opus-reviewed, S3 INI-migration gap fixed, compiled clean, committed**; Edit menu owner-approved; Search → Define F2 reliability pass; File/Open Project + path fixes)  
+**Last updated:** 2026-07-07 (13.3.A S1–S7 **all Opus-reviewed & committed**; owner-found Run-toolbar persistence regression fixed; Edit menu owner-approved; Search → Define F2 reliability pass; File/Open Project + path fixes)  
 **Repository:** [codeberg.org/bigriverguy/VFBEWin64](https://codeberg.org/bigriverguy/VFBEWin64)  
 **Local path:** `C:\Users\dmont\VisualFBEditor`  
 **Owner:** bigriverguy (`dmontaine@gmail.com`)
@@ -19,12 +19,12 @@ This document captures project history, completed work, open items, and workflow
 | **Form Designer** | Working — grey-panel bug root-caused and fixed (2026-07-06); per-form control tree + PagePanel layer navigation shipped |
 | **Dark mode** | Stable and enabled — title bar, menus, toolbars, tabs, central area all render dark; popup menus deferred (§13.10) |
 | **Dead code** | GTK/Linux/32-bit code physically deleted across `src/` and `mff/`; Integrated (stabs) debugger + alt-compiler backends removed; only `-gen gcc` remains |
-| **UI review** | In progress — **File** menu owner-approved (incl. Open Project); **Edit** menu owner-approved (all 25 items); **Search** → Define (F2) reliability improved (committed with S1–S4); **13.3.A approachability plan (all menus + toolbars + one dead field) S1–S4 Opus-reviewed and committed; S5–S7 queued for Sonnet** (see §13.3.A execution below) |
+| **UI review** | In progress — **File** menu owner-approved (incl. Open Project); **Edit** menu owner-approved (all 25 items); **Search** → Define (F2) reliability improved (committed with S1–S4); **13.3.A S1–S7 all Opus-reviewed and committed** (see §13.3.A execution below); **View menu** is the next step-by-step target |
 | **Panels** | Left/right/bottom panel pin/collapse/persistence all fixed and verified |
 | **Debugger** | GDB-only; Step, Continue, Break, Step Out, command queue, and debug-tab show/hide all working; 3 GDB items pending owner smoke test (§7) |
 | **Build** | `Compile.bat` for release, `CompileDebug.bat` for debug; `NOPAUSE=1` for agent runs |
 
-**Active work:** 13.3.A S1–S4 are **committed** (Opus-reviewed 2026-07-07, S3 INI-migration gap fixed). Next up: **S5–S7 queued for Sonnet** (S5 confirm dialogs on Delete Project/File; S6 O4 Options-dialog edits; S7 docs GTK-ref cleanup). Underneath that, §13.3 step-by-step UI review continues: **View menu** is next after Search sign-off (File + Edit complete; Search → Define reliability pass shipped with S1–S4).  
+**Active work:** 13.3.A S1–S7 are **all committed** (Opus-reviewed). A Run-toolbar persistence regression the owner found post-S4 (my own S3 migration latching Run permanently visible) was root-caused and fixed 2026-07-07 — see the S5–S7 review outcome below. Next: §13.3 step-by-step UI review continues with the **View menu** (File + Edit complete; Search → Define reliability pass shipped with S1–S4).  
 **Open items consolidated:** see [Open Items](#open-items) below.
 
 ---
@@ -83,6 +83,71 @@ Removed the "Icon Resource File (For \*nix/\*bsd)" label + combobox from Project
 - Visual click-through of every moved menu item in each run-state (stopped/running/paused) — the gate explicitly calls for this and it needs a human or a computer-use-capable session.
 - Whether "Show Main Toolbar" (Options ▸ General) actually reclaims the editor's vertical space when toggled off — traced the code (it does call `pfrmMain->RequestAlign`) but couldn't visually confirm; this project has a documented history of "last-mile" docking-space gaps (see the bottom-panel fix history below).
 - Project Properties dialog's visual layout after S4's field removal — nothing sat directly below/adjacent to the removed controls in a way that looked wrong from reading the code, but there's now an unclosed blank rectangle where they were (every control on that page uses absolute `SetBounds`, nothing reflows).
+
+---
+
+## 13.3.A execution — S5–S7 done (Sonnet 2026-07-07), Opus-reviewed & committed (2026-07-07)
+
+Continues from the S1–S4 commit (`0eaa880`). Committed after Opus O4 review (see "O4 review outcome (S5–S7)" below).
+
+### O4 review outcome (S5–S7) + owner-found regression (Opus, 2026-07-07)
+
+Reviewed the full S5–S7 diff and two runtime issues the owner found while exercising the S1–S4 build.
+
+**Owner issue #1 — toolbar visibility choices didn't persist (Run toolbar).** Root cause was **my own S3 INI-migration line, not S5–S7.** The migration OR-ed the retired `ShowBuildToolbar`/`ShowDebugToolbar` keys into `ShowRunToolBar` on *every* load; since S1–S4 stopped writing those keys but never removed them, `ShowBuildToolbar=true` stayed frozen in the INI and permanently latched Run visible — "hide the Run toolbar" could never survive a restart. The INI is case-insensitive (`IniFile.KeyExists` compares `UCase`) and `WriteBool` flushes immediately, so Standard/Edit/Project/Format were never affected — only Run. **Fixed** (`Main.bas` ~9056): retired keys are now consulted *only as the default* for `ReadBool("ShowRunToolbar", …)` (so a saved value always wins — `ReadBool` ignores its default when the key exists), making the carry-forward genuinely one-time; then `KeyRemove` deletes the two retired keys so they can't re-latch or linger (satisfies the §9 "migrate retired keys, don't orphan" rule the original migration violated). Compiles clean. **Needs owner re-test** (toggle needs the GUI): hide Run → close via window X → relaunch → should stay hidden, and `ShowBuildToolBar` should be gone from `Settings/VisualFBEditor64.ini`.
+
+**Owner issue #2 — most toolbar buttons have no beside-icon text.** Working as designed, not a bug: O3 deliberately labels only the 5 primaries (Run/Build/Stop/Open/Save) to keep one short bar; the other ~33 buttons are icon-only *with* hover tooltips (all wired). **Owner decision (2026-07-07): keep the 5 primaries as-is** — no change.
+
+**S5–S7 verdict: no correctness bugs.**
+- **S5** — `DeleteEditorFile` memory-safety verified against `CloseTab`: that Sub frees `tn` only when `ptvExplorer->Nodes.IndexOf(tn) <> -1` (a direct root child), and root children always have `ParentNode = 0`, so "CloseTab frees tn" ⟹ `bNestedInProject = False` ⟹ the post-close re-touch is skipped in exactly the freeing case. No use-after-free. **One functional follow-up (not a blocker), see Open Items:** deleting a *project-member* file removes the tree node + disk file but doesn't mark the project dirty / update the `.vfp` the way `RemoveFileFromProject` does, so the deleted file may still be listed in the `.vfp` until the next save.
+- **S6** — clean; compiler confirms zero dangling references to the removed controls, and Sonnet correctly *deferred* Terminal + Other Editors after tracing them to live functionality (the plan's "candidate for removal" wording was wrong for both). Env-vars/encoding/compiler-paths removals were all genuinely dead.
+- **S7** — correctly a no-op; targets already removed by commit `6b3200a`.
+
+**Working tree at review time (before commit):** `src/Main.bas` (S5 + Run-migration fix), `src/frmOptions.frm`, `src/frmOptions.bi` (S6), plus `PROJECT_STATUS.md`.
+
+### S5 — Delete Project/Delete File confirm + regroup
+
+`DeleteProject` already had a proper Yes/No `MsgBox` confirm (pre-existing, not new). `DeleteEditorFile` (`Main.bas`) was a **complete no-op stub** — just a `' TODO: delete file from disk and project explorer` comment, no confirm, no deletion, despite being wired to a live "Delete File" menu item. Since the S5 ask ("add a confirm dialog") assumes something to confirm, and a confirm dialog wrapping a no-op would be actively misleading (user clicks Yes, nothing happens), implemented it for real:
+
+- Mirrors `DeleteProject`'s confirm pattern (`MsgBox` Yes/No, `mtWarning`).
+- Closes the active tab via the existing `CloseTab(tb, True)` (`WithoutMessage=True` — matches `DeleteProject`'s own choice to suppress the redundant "save before closing?" prompt, since the user already confirmed permanent deletion).
+- Detaches the file's tree node from its project parent, then deletes the file from disk (`Kill`), guarded by `Dir(...)<>""` so an already-missing file doesn't crash.
+- **Memory-safety subtlety traced before writing this:** `TreeNodeCollection.Remove` (`mff/TreeView.bas:395-398`) calls `_Delete` on the node — it frees it, doesn't just detach it. `CloseTab`'s own internal cleanup (`TabWindow.bas:1042-1051`) already does this for root-level/"Opened" (loose, non-project) file nodes, meaning `tn` can already be a dangling pointer by the time `CloseTab` returns for that case. Nested project-member nodes are left untouched by `CloseTab` (that's "Close File"'s normal, correct behavior — it shouldn't strip a file from the project tree). So `DeleteEditorFile` captures `tn->ParentNode <> 0` **before** calling `CloseTab`, and only re-touches `tn` afterward when it was nested (never for the root-level case, where it may already be freed).
+- Regrouped both `Delete Project` and `Delete File` out of their old positions (previously each sat with zero separator directly below its own Close item) into their own bracketed group near the bottom of the File menu, right before the Advanced submenu/Exit — well away from Close Project/Close File.
+
+Compiled clean; grepped for stale `miDeleteProject`/`miDeleteFile`/`DeleteEditorFile` references — all consistent (enable-state wiring in `TabWindow.bas` and the `mClick` dispatch are position-independent, unaffected by the reorder).
+
+### S6 — Options dialog (O4) edits
+
+**Executed, all confirmed dead/vestigial before removal — nothing here changes any currently-reachable behavior:**
+
+- **Default Compiler → read-only info line.** Removed `cboCompiler64` (was already `.Visible = False`, had zero Load/Save wiring anywhere in the form). The existing `lblCompiler64`/`lblCompiler64Path` label pair ("Compiler 64-bit: ./Compiler/fbc64.exe") already *is* the read-only info line the plan asked for.
+- **Compiler Paths removed.** `grbCompilerPaths`/`lvCompilerPaths` was already `.Visible = False`; its Add/Remove/Change button row (`hbxCompilers`) was empty (no buttons ever added to it) and its `ItemActivate` handler was an empty stub. Its own Save routine already unconditionally purged the "Compilers" INI section on every save (not just cleaned stale entries — nuked the section outright), so the feature was already fully inert. Traced `Project->CompilerPath` (the per-project field `BuildService.bas` actually consults for the fbc path) end-to-end: no UI anywhere sets it (not `frmProjectProperties.frm`, not this list) — it can only ever be non-empty via hand-edited `.vfp` files. Removing the dead registration UI doesn't touch `Project->CompilerPath` or `BuildService.bas`'s bundled-compiler fallback at all.
+- **"Turn on Environment Variables" removed.** Confirmed non-functional by tracing the debuggee launch path: `Debug.bas`'s `CreateProcess` call passes `0` for `lpEnvironment` (line 436) — the debuggee always inherits the parent's environment unchanged. `TurnOnEnvironmentVariables`/`EnvironmentVariables` were read from INI, editable in Options, written back to INI — and never consulted anywhere else. Removed the checkbox+textbox; **left the backing globals and their INI load/save alone** (same precedent as S4 keeping `IconResourceFileName` — harmless orphaned state, trivial to fully purge later if wanted).
+- **Code Editor ▸ Defaults encoding/line-ending pickers removed.** `hbxDefaultFileFormat`/`hbxDefaultNewLineFormat` (and their `cboDefaultFileFormat`/`cboDefaultNewLineFormat` combos) were already `.Visible = False`, never populated with a single `AddItem`, and never read from/written to any global or INI key anywhere in the form. Confirmed `ChangeFileEncoding`/`ChangeNewLineType` (`Main.bas`) already ignore their passed-in parameter entirely and unconditionally show "UTF-8"/"CR+LF" on the status bar — matching the plan's premise that `AddTab` forces UTF-8+CRLF for every file.
+
+**Deferred (flagged, not guessed at) — both turned out to be real, working features, contradicting the plan's tentative wording:**
+
+- **Debugger ▸ Terminal sub-page** — plan said "Remove; pick a sensible default terminal." Traced `TerminalPath`/`CurrentTerminal` and found them **genuinely consumed** at `TabWindow.bas:12042-12054`: when set, the compiled program launches inside the user's chosen terminal emulator instead of the default console. This is live, working, user-configurable functionality, not dead code — removing it is a deliberate feature reduction the plan explicitly wants, but doing it safely means also verifying the empty/default fallback path stays correct and re-touching an "Add/Change/Remove Terminal" browse-dialog flow, which is more surgery than could be done carefully in the remaining scope of this session. Left entirely untouched.
+- **Code Editor ▸ Other Editors** — plan said "candidate for removal." Traced `pOtherEditors` and found it **genuinely consumed** in `Main.bas` (`NodeActivate`/`OpenTreeNodeOnSingleClick`, ~lines 6629-6684): double-clicking a file whose extension is registered launches the configured external editor instead of opening it in VFBE. Real, useful feature — the plan's "candidate for removal" phrasing turns out to be wrong once verified. Left entirely untouched.
+- **Designer ▸ "Create non-static event handlers"** — not touched at all. This checkbox gates the `Enabled` state of three other checkboxes (`chkPlaceStaticEventHandlersAfterTheConstructor`, `chkCreateStaticEventHandlersWithAnUnderscoreAtTheBeginning`, `chkCreateEventHandlersWithoutStaticEventHandlerIfEventAllowsIt`) and affects the Designer's actual **generated event-handler code** for every control a user adds going forward. Picking the wrong default here could silently change codegen behavior project-wide. This is a real design decision about FreeBASIC event-handler generation conventions, not mechanical cleanup — needs owner input on what the sensible default actually is, same bar as S1's Comment-merge deferral.
+
+### S7 — Docs GTK cleanup
+
+**Already resolved — nothing to do.** `src/makefile` doesn't exist in the repo at all (confirmed via `find`/`Glob`), and `src/THREADING.md` has zero GTK references (confirmed via grep). Both must have been cleaned up in an earlier session (likely Batch 2.75.3) without the Open Items entry being removed. Cleared the stale entry from Open Items below. The only remaining "gtk" hits in `src/` are `src/BUILD.md`'s accurate "Linux, GTK, and 32-bit IDE builds are not supported in this fork" (correct, current documentation, not a stale reference) and two string-literal filters in `TabWindow.bas` (`"gtkwidget"`, excluding a legacy field name from a property-grid listing — functional code, not a doc reference, out of scope for a docs pass).
+
+### Verification performed
+
+- Compile: 0 errors after S5, after S6's four removals — same 4 pre-existing `frmFindInFiles.frm` warnings throughout.
+- Grepped `src/frmOptions.frm`/`frmOptions.bi` for every removed symbol after S6 — zero stale references (only my own explanatory comments mention the old names).
+- Grepped to confirm the three deferred/untouched features (`TurnOnEnvironmentVariables`/`EnvironmentVariables` globals, `pTerminals`/`CurrentTerminal`/`TerminalPath` in `TabWindow.bas`, `pOtherEditors` in `Main.bas`) are byte-for-byte unaffected by the S6 edits.
+- Release build: fresh launch + process-alive check after all S5+S6 changes (6s observation) — window opens, stays running.
+
+### Not verified (no GUI/computer-use access this session)
+
+- Visual layout of the Options dialog's Compiler/Debugger/Code-Editor pages after S6's removals — the removed controls were already invisible or (for Compiler Paths) filled remaining client space via `DockStyle.alClient`, so removing them shouldn't visibly change anything, but this needs a human or computer-use session to actually confirm the pages still lay out correctly (no leftover blank gaps, no other control unexpectedly reflowing into the freed space).
+- Delete File end-to-end: confirm dialog appearance, actual disk deletion, and tree-node detachment for both a root-level ("Opened"/loose) file and a nested project-member file — traced carefully against `CloseTab`'s and `TreeNodeCollection.Remove`'s exact behavior, but not exercised interactively.
+- Delete Project/Delete File's new menu position — visual confirmation that the regrouping reads clearly in the running File menu.
 
 ---
 
@@ -581,13 +646,13 @@ All items above passed **before** the owner separately found the critical `_WIN3
 
 - [ ] **frmNewProject icons** — template icons not displaying on new form (`@imgList32` may not be populated at form creation time)
 - [ ] **`OpenRecentFiles()`** — stub; needs `frmRecentFiles` dialog
-- [ ] **`DeleteEditorFile()`** — stub
+- [ ] **`DeleteEditorFile` project-member `.vfp` sync** — S5 implemented real Delete File (confirm + disk delete + tree-node removal), but for a *project-member* file it doesn't mark the project dirty / update the `.vfp` the way `RemoveFileFromProject` does; the deleted file may still be listed in the `.vfp` until the next save. Mirror `RemoveFileFromProject`'s dirty-mark. Low priority; found in Opus S5 review 2026-07-07.
+- [ ] **Toolbar persistence re-test** — confirm the Run-toolbar fix (2026-07-07): hide Run → close via window X → relaunch → stays hidden; `ShowBuildToolBar` gone from INI. Needs GUI.
 - [ ] **GDB smoke test** — Step Out, rapid step/continue queue, Break while running — pending owner verification (§7)
 
 ### Low-priority cleanup
 
-- [ ] **`src/makefile`** — still references GTK defines (not used by `Compile.bat`)
-- [ ] **`src/THREADING.md`** — mentions GTK UI wrapping (historical)
+*(`src/makefile` and `src/THREADING.md` GTK-reference entries removed 2026-07-07 — both were already resolved by commit `6b3200a`; the Open Items entries had just gone stale. See §13.3.A S5–S7 execution.)*
 
 ### Queued for Cursor
 

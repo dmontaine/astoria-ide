@@ -5,7 +5,9 @@
 '#  Windows version functions based on WinFBX/Afx/AfxWin.inc                   #
 '###############################################################################
 
-		#define UNICODE
+		#ifndef UNICODE
+			#define UNICODE
+		#endif
 	#include once "windows.bi"
 
 Namespace My

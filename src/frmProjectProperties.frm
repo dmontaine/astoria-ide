@@ -1,4 +1,4 @@
-'#########################################################
+﻿'#########################################################
 '#  frmProjectProperties.bas                             #
 '#  This file is part of VisualFBEditor                  #
 '#  Authors: Xusinboy Bekchanov (bxusinboy@mail.ru)      #
@@ -940,10 +940,10 @@ Private Sub frmProjectProperties.Form_Create(ByRef Sender As Control)
 End Sub
 
 Private Sub frmProjectProperties.cmdAddComponent_Click(ByRef Sender As Control)
-	pfPath->txtPath.Text = ExePath & Slash & "Controls"
+	pfPath->txtPath.Text = ExePath & WindowsSlash & "Controls"
 	pfPath->ChooseFolder = True
 	If pfPath->ShowModal(Me) = ModalResults.OK Then
-		Dim As UString controlsRoot = WinOsPath(ExePath & Slash & "Controls")
+		Dim As UString controlsRoot = WinOsPath(ExePath & WindowsSlash & "Controls")
 		Dim As UString selected = WinOsPath(pfPath->txtPath.Text)
 		If Not StartsWith(LCase(selected), LCase(controlsRoot)) Then
 			MsgBox ML("Control libraries must be in the editor Controls folder.") & ":" & WChr(13, 10) & WChr(13, 10) & FormatMsgPathU(selected), , mtWarning

@@ -4144,7 +4144,7 @@ End Function
 Function AddPaths(tb As TabWindow Ptr, ByRef Path As WString, ByRef Starts As WString = "", ByRef c As Integer = 0) As Boolean
 	Dim As WString * 1024 f
 	Dim As UInteger Attr
-	f = Dir(Path & Slash & "*", fbReadOnly Or fbHidden Or fbSystem Or fbDirectory Or fbArchive, Attr)
+	f = Dir(Path & WindowsSlash & "*", fbReadOnly Or fbHidden Or fbSystem Or fbDirectory Or fbArchive, Attr)
 	While f <> ""
 		If (Attr And fbDirectory) <> 0 Then
 			If Not AddFileSorted(tb, f, Starts, c, "Folder") Then Return False
@@ -4948,6 +4948,7 @@ Function GetParameters(sWord As String, te As TypeElement Ptr, teOld As TypeElem
 End Function
 
 Sub ParameterInfo(Key As Integer, SelStartChar As Integer, SelEndChar As Integer, sWordAt As String)
+	If Not ParameterInfoShow Then Exit Sub
 	If FormClosing Then Exit Sub
 	Dim tb As TabWindow Ptr = Cast(TabWindow Ptr, ptabCode->SelectedTab)
 	If tb = 0 Then Exit Sub
@@ -5515,14 +5516,14 @@ Sub OnKeyDownEdit(ByRef Designer As My.Sys.Object, ByRef Sender As Control, Key 
 		Dim sLine As WString Ptr = @tb->txtCode.Lines(iSelEndLine)
 		If sLine= 0 OrElse Trim(*sLine) = "" Then Return
 		Select Case Mid(*sLine, iSelEndChar, 1)
-		Case Slash, BackSlash
+		Case WindowsSlash, UnixSlash
 			If StartsWith(LCase(Trim(*sLine, Any !"\t ")), "#include") Then
 				Dim sTemp As WString * 2048
 				Var Pos1 = InStr(Left(*sLine, iSelEndChar - 1), """")
 				If Pos1 = 0 Then Exit Sub
 				sTemp = Mid(*sLine, Pos1 + 1, iSelEndChar - Pos1 - 1)
-				Var Pos2 = InStrRev(sTemp, Slash)
-				Var Pos3 = InStrRev(sTemp, BackSlash)
+				Var Pos2 = InStrRev(sTemp, WindowsSlash)
+				Var Pos3 = InStrRev(sTemp, UnixSlash)
 				If Pos3 > Pos2 Then Pos2 = Pos3
 				If Pos2 = 0 Then
 					WLet(tb->txtCode.DropDownPath, "")
@@ -5686,7 +5687,7 @@ Sub OnKeyPressEdit(ByRef Designer As My.Sys.Object, ByRef Sender As Control, Key
 		Else
 			ParameterInfo Key
 		End If
-	ElseIf CInt(Key = Asc("""")) OrElse CInt(Key = Asc(Slash)) OrElse CInt(Key = Asc(BackSlash)) Then
+	ElseIf CInt(Key = Asc("""")) OrElse CInt(Key = Asc(WindowsSlash)) OrElse CInt(Key = Asc(UnixSlash)) Then
 		Dim As Integer iSelStartLine, iSelEndLine, iSelStartChar, iSelEndChar, k
 		tb->txtCode.GetSelection iSelStartLine, iSelEndLine, iSelStartChar, iSelEndChar
 		Dim sLine As WString Ptr = @tb->txtCode.Lines(iSelEndLine)
@@ -11052,7 +11053,7 @@ Function GetResourceFile(WithoutMainNode As Boolean, ByRef FirstLine As WString,
 					FolderNameRes = GetFolderName(ResourceFile)
 					If FolderNameRes = "" Then
 						If Len(FolderName) = 0 Then
-							ResourceFile = ExePath & Slash & "Projects" & Slash & ResourceFile
+							ResourceFile = ExePath & WindowsSlash & "Projects" & WindowsSlash & ResourceFile
 						Else
 							ResourceFile = FolderName & ResourceFile
 						End If
@@ -11073,7 +11074,7 @@ Function GetResourceFile(WithoutMainNode As Boolean, ByRef FirstLine As WString,
 		FolderNameRes = GetFolderName(ResourceFile)
 		If FolderNameRes = "" Then
 			If Len(FolderName) = 0 Then
-				ResourceFile = ExePath & Slash & "Projects" & Slash & ResourceFile
+				ResourceFile = ExePath & WindowsSlash & "Projects" & WindowsSlash & ResourceFile
 			Else
 				ResourceFile = FolderName & ResourceFile
 			End If
@@ -12035,12 +12036,12 @@ Sub RunPr(Debugger As String, ByRef ProjectFileName As WString, ByRef ProjectCom
 			Else
 				WLet(CmdL, """" & *ExeFileName & """ " & *RunArguments)
 				If ProjectCommandLineArguments <> "" Then WAdd(CmdL, " " & ProjectCommandLineArguments)
-				Var Pos1 = InStrRev(*ExeFileName, Slash)
+				Var Pos1 = InStrRev(*ExeFileName, WindowsSlash)
 				If Pos1 = 0 Then Pos1 = Len(*ExeFileName)
 				WLet(Workdir, Left(*ExeFileName, Pos1))
 				'			If WGet(TerminalPath) <> "" Then
 				'				WLet CmdL, """" & WGet(TerminalPath) & """ /K ""cd /D """ & *Workdir & """ & " & *CmdL & """"
-				'				wLet ExeFileName, Replace(WGet(TerminalPath), BackSlash, Slash)
+				'				wLet ExeFileName, Replace(WGet(TerminalPath), UnixSlash, WindowsSlash)
 				'			End If
 				If WGet(TerminalPath) <> "" Then
 					Dim As ToolType Ptr Tool
@@ -12050,7 +12051,7 @@ Sub RunPr(Debugger As String, ByRef ProjectFileName As WString, ByRef ProjectCom
 						WLet(CmdL, Tool->GetCommand(*ExeFileName) & " " & *RunArguments)
 					End If
 					'WLetEx CmdL, " /K ""cd /D """ & *Workdir & """ & " & *CmdL & """", True
-					WLet(ExeFileName, Replace(WGet(TerminalPath), BackSlash, Slash))
+					WLet(ExeFileName, Replace(WGet(TerminalPath), UnixSlash, WindowsSlash))
 				End If
 			End If
 			ShowMessages(Time & ": " & ML("Run") & ": " & *CmdL + " ...")

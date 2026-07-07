@@ -1,4 +1,4 @@
-	'#Compile -exx "Form1.rc"
+﻿	'#Compile -exx "Form1.rc"
 '#Region "Form"
 	#include once "frmNewProject.bi"
 	
@@ -139,7 +139,7 @@ Private Sub frmNewProject.cmdOK_Click(ByRef Sender As Control)
 	Dim As UString projectsPathInput = Trim(*ProjectsPath, Any !" \t" + Chr(10) + Chr(13))
 	SelectedTemplate = WinOsPath(ExePath & "/Templates/Projects/" & TemplateName & ".vfp")
 	SelectedFolder = WinOsPath(GetFullPathU(projectsPathInput & "/" & ProjectName))
-	SelectedProjectFile = SelectedFolder & Slash & GetFileNameU(SelectedFolder) & ".vfp"
+	SelectedProjectFile = SelectedFolder & WindowsSlash & GetFileNameU(SelectedFolder) & ".vfp"
 	If Not FolderExistsU(GetFullPathU(projectsPathInput)) Then
 		MsgBox ML("Parent folder not exists, change the parent folder!")
 		Me.BringToFront

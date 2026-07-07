@@ -1,4 +1,4 @@
-'#########################################################
+﻿'#########################################################
 '#  PathUtils.bas                                        #
 '#  This file is part of VisualFBEditor                  #
 '#  Authors: Xusinboy Bekchanov (bxusinboy@mail.ru)      #
@@ -40,7 +40,7 @@ Function GetFullPath(ByRef Path As WString, ByRef FromFile As WString) As UStrin
 			If EndsWith(ExePath, "\..") OrElse EndsWith(ExePath, "/..") Then
 				Return WinOsPath(GetFolderName(GetFolderName(ExePath)) & Mid(Path, 3))
 			Else
-				Return WinOsPath(ExePath & Slash & Mid(Path, 3))
+				Return WinOsPath(ExePath & WindowsSlash & Mid(Path, 3))
 			End If
 		Else
 			Return WinOsPath(GetFolderName(FromFile) & Mid(Path, 3))
@@ -57,7 +57,7 @@ Function GetFullPath(ByRef Path As WString, ByRef FromFile As WString) As UStrin
 			If Path_ <> "" Then
 				Return WinOsPath(Path_)
 			Else
-				Return WinOsPath(ExePath & Slash & Path)
+				Return WinOsPath(ExePath & WindowsSlash & Path)
 			End If
 		Else
 			Return WinOsPath(GetFolderName(FromFile) & Path)
@@ -72,12 +72,61 @@ Function GetFolderName(ByRef FileName As WString, WithSlash As Boolean = True) A
 	Return Left(FileName, Posi)
 End Function
 
-Function NormalizeOsPath(path As UString) As UString
-	Return Replace(path, BackSlash, Slash)
+' Canonical Windows path: normalizes to backslashes for Win32 API calls.
+Function CanonicalWinPath(path As UString) As UString
+	path = Trim(path, Any !" \t" + Chr(10) + Chr(13))
+	If path = "" Then Return ""
+	Return Replace(path, UnixSlash, WindowsSlash)
+End Function
+
+Private Function CollapseRepeatedSlashes(path As UString) As UString
+	While InStr(path, "//") > 0
+		path = Replace(path, "//", "/")
+	Wend
+	Return path
+End Function
+
+' Normalize a filesystem path read from INI (slashes, trim, collapse duplicates).
+Function SanitizeIniPath(path As UString) As UString
+	Return CollapseRepeatedSlashes(CanonicalWinPath(path))
+End Function
+
+' True when path is relative, UNC, or its drive root responds to GetFileAttributesW.
+Function IsIniPathDriveAvailable(path As UString) As Boolean
+	path = SanitizeIniPath(path)
+	If path = "" Then Return True
+	If Len(path) < 2 OrElse Mid(path, 2, 1) <> ":" Then Return True
+	Dim As UString driveRoot = UCase(Left(path, 1)) & ":/"
+	Dim As WString Ptr rootPtr
+	WLet(rootPtr, driveRoot)
+	Dim As DWORD attrs = GetFileAttributesW(*rootPtr)
+	WDeAllocate(rootPtr)
+	Return attrs <> INVALID_FILE_ATTRIBUTES
+End Function
+
+' Critical Options paths: canonicalize and fall back when the drive is unavailable.
+Function SanitizeIniCriticalPath(path As UString, defaultPath As UString) As UString
+	path = SanitizeIniPath(path)
+	If path = "" Then Return SanitizeIniPath(defaultPath)
+	If Not IsIniPathDriveAvailable(path) Then Return SanitizeIniPath(defaultPath)
+	Return path
+End Function
+
+' Optional/tool/MRU paths: canonicalize; clear when the drive is unavailable.
+Function SanitizeIniOptionalPath(path As UString) As UString
+	path = SanitizeIniPath(path)
+	If path = "" Then Return ""
+	If Not IsIniPathDriveAvailable(path) Then Return ""
+	Return path
 End Function
 
 Function WinOsPath(path As UString) As UString
-	Return Replace(path, BackSlash, Slash)
+	Return CanonicalWinPath(path)
+End Function
+
+' Win32 Dir() needs backslashes; normalize before building scan patterns.
+Function OsPathForDir(path As UString) As UString
+	Return CanonicalWinPath(path)
 End Function
 
 Function FormatMsgPath(ByRef Path As WString) As UString
@@ -96,7 +145,7 @@ End Function
 
 ' Control libraries live only under ExePath/Controls. Returns canonical "Controls/Name" for .vfp storage.
 Function GetControlLibraryVfpPath(path As UString) As UString
-	'' Normalize to forward slashes up front: the "/controls/" scan below is forward-slash
+	'' Normalize to forward slashes up front: the "/controls/" scan below is forward-WindowsSlash
 	'' based, but absolute library paths arrive with backslashes (WinOsPath), which made this
 	'' return "" for every already-loaded library and broke the project-open "already loaded"
 	'' match (bFinded stayed false, causing duplicate library creation).
@@ -151,19 +200,26 @@ Function IsProjectOpenFileType(ByRef FileName As WString) As Boolean
 End Function
 
 Function FindProjectVfpInFolder(folder As UString) As UString
-	folder = WinOsPath(Trim(folder, Any !" \t" + Chr(10) + Chr(13)))
-	If folder = "" OrElse Not FolderExistsU(folder) Then Return ""
-	Dim As UString folderName = GetFileNameU(GetFolderNameU(folder, False))
-	Dim As UString preferred = WinOsPath(folder & Slash & folderName & ".vfp")
-	If FileExistsU(preferred) Then Return preferred
+	folder = OsPathForDir(folder)
+	If folder = "" Then Return ""
+	If Not FolderExistsU(folder) Then Return ""
+	Dim As UString folderName = GetFileNameU(folder, False)
+	Dim As UString preferredPath = folder & WindowsSlash & folderName & ".vfp"
+	If FileExistsU(preferredPath) Then Return CanonicalWinPath(preferredPath)
 	Dim As WStringList matches
-	Dim As WString * MAX_PATH entry = Dir(folder & Slash & "*.vfp")
+	Dim As WString * MAX_PATH folderPath = folder
+	Dim As WString * MAX_PATH vfpPattern = folderPath & WindowsSlash & "*.vfp"
+	Dim As WString * MAX_PATH entry = Dir(vfpPattern)
 	While entry <> ""
-		matches.Add WinOsPath(folder & Slash & entry)
+		matches.Add CanonicalWinPath(folder & WindowsSlash & entry)
 		entry = Dir()
 	Wend
 	If matches.Count = 1 Then Return matches.Item(0)
 	If matches.Count > 1 Then
+		' Prefer <foldername>.vfp when multiple .vfp files exist in the same directory
+		For i As Integer = 0 To matches.Count - 1
+			If GetFileNameU(matches.Item(i), True) = folderName & ".vfp" Then Return matches.Item(i)
+		Next
 		matches.Sort
 		Return matches.Item(0)
 	End If
@@ -252,10 +308,11 @@ End Function
 
 Function GetFileName(ByRef FileName As WString, WithExtension As Boolean = True) As UString
 	Dim As Long nPos, Posi = InStrRev(FileName, Any "\/:")
-	nPos = InStrRev(FileName, ".")
-	If nPos < 1 OrElse nPos < Posi Then nPos = Len(FileName)
+	Dim As Long dotPos = InStrRev(FileName, ".")
+	Dim As Boolean hasExt = (dotPos > 0 AndAlso dotPos > Posi)
+	nPos = IIf(hasExt, dotPos, Len(FileName))
 	If Posi > 0 Then
-		Return IIf(WithExtension, Mid(FileName, Posi + 1), Mid(FileName, Posi + 1, nPos - Posi - 1))
+		Return IIf(WithExtension, Mid(FileName, Posi + 1), Mid(FileName, Posi + 1, nPos - Posi - IIf(hasExt, 1, 0)))
 	Else
 		Return IIf(WithExtension, FileName, Mid(FileName, 1, nPos - 1))
 	End If
@@ -275,8 +332,8 @@ Function GetBakFileName(ByRef FileName As WString) As UString
 End Function
 
 Function GetExeFileName(ByRef FileName As WString, ByRef sLine As WString) As UString
-	Dim As UString CompileWith = " " & Replace(LTrim(sLine), BackSlash, Slash)
-	Dim As UString pFileName = Replace(FileName, BackSlash, Slash)
+	Dim As UString CompileWith = " " & Replace(LTrim(sLine), UnixSlash, WindowsSlash)
+	Dim As UString pFileName = Replace(FileName, UnixSlash, WindowsSlash)
 	Dim As UString ExeFileName
 	Dim As String SearchChar
 	Dim As Long Pos1, Pos2
@@ -294,7 +351,7 @@ Function GetExeFileName(ByRef FileName As WString, ByRef sLine As WString) As US
 		Else
 			ExeFileName = Mid(CompileWith, Pos1 + 5)
 		End If
-		If CInt(InStr(ExeFileName, ":") = 0) AndAlso CInt(Not StartsWith(ExeFileName, Slash)) Then
+		If CInt(InStr(ExeFileName, ":") = 0) AndAlso CInt(Not StartsWith(ExeFileName, WindowsSlash)) Then
 			Return GetFolderName(pFileName) + ExeFileName
 		Else
 			Return ExeFileName
@@ -308,7 +365,7 @@ Function GetExeFileName(ByRef FileName As WString, ByRef sLine As WString) As US
 End Function
 
 Function GetOSPath(ByRef Path As WString) As UString
-	Return Replace(Path, BackSlash, Slash)
+	Return Replace(Path, UnixSlash, WindowsSlash)
 End Function
 
 Function GetRelativePath(ByRef Path As WString, ByRef FromFile As WString) As UString
@@ -331,7 +388,7 @@ Function GetRelativePath(ByRef Path As WString, ByRef FromFile As WString) As US
 	If GetFolderName(FromFile) <> "" AndAlso FileExists(Result) Then
 		Return Result
 	Else
-		Dim Result As UString = GetOSPath(ExePath & Slash & Path)
+		Dim Result As UString = GetOSPath(ExePath & WindowsSlash & Path)
 		If FileExists(Result) Then
 			Return Result
 		Else
@@ -339,7 +396,7 @@ Function GetRelativePath(ByRef Path As WString, ByRef FromFile As WString) As US
 			For i As Integer = 0 To ControlLibraries.Count - 1
 				CtlLibrary = ControlLibraries.Item(i)
 				If Not CtlLibrary->Enabled Then Continue For
-				Result = GetOSPath(GetFullPath(GetFullPath(CtlLibrary->IncludeFolder, CtlLibrary->Path)) & IIf(EndsWith(CtlLibrary->IncludeFolder, "\") OrElse EndsWith(CtlLibrary->IncludeFolder, "/"), "", Slash) & Path)
+				Result = GetOSPath(GetFullPath(GetFullPath(CtlLibrary->IncludeFolder, CtlLibrary->Path)) & IIf(EndsWith(CtlLibrary->IncludeFolder, "\") OrElse EndsWith(CtlLibrary->IncludeFolder, "/"), "", WindowsSlash) & Path)
 				If FileExists(Result) Then Return Result
 			Next
 			Result = GetOSPath(GetFolderName(GetFullPath(*Compiler64Path)) & "inc\" & Path)
@@ -347,7 +404,7 @@ Function GetRelativePath(ByRef Path As WString, ByRef FromFile As WString) As US
 				Return Result
 			Else
 				For i As Integer = 0 To pIncludePaths->Count - 1
-					Result = GetOSPath(pIncludePaths->Item(i) & IIf(EndsWith(pIncludePaths->Item(i), "\") OrElse EndsWith(pIncludePaths->Item(i), "/"), "", Slash) & Path)
+					Result = GetOSPath(pIncludePaths->Item(i) & IIf(EndsWith(pIncludePaths->Item(i), "\") OrElse EndsWith(pIncludePaths->Item(i), "/"), "", WindowsSlash) & Path)
 					If FileExists(Result) Then Return Result
 				Next
 				Return GetOSPath(Path)

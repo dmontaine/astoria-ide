@@ -1,17 +1,106 @@
-# VFBE Win64 Fork — Project Status & Handoff
+﻿# VFBE Win64 Fork — Project Status & Handoff
 
-**Last updated:** 2026-07-06 (form designer grey-panel bug — RESOLVED)  
+**Last updated:** 2026-07-06 (Edit menu review owner-approved complete; File/Open Project + path fixes in same pass)  
 **Repository:** [codeberg.org/bigriverguy/VFBEWin64](https://codeberg.org/bigriverguy/VFBEWin64)  
 **Local path:** `C:\Users\dmont\VisualFBEditor`  
 **Owner:** bigriverguy (`dmontaine@gmail.com`)
 
-This document captures project history, completed work, open items, and workflow rules for continuing development (e.g. in Claude Code) without re-discovering context.
+This document captures project history, completed work, open items, and workflow rules for continuing development without re-discovering context.
 
 ---
 
-## RESOLVED — Form designer grey-panel bug (Opus session, 2026-07-06)
+## Current State (2026-07-06)
 
-**Status:** FIXED, compile-clean (release), user-verified across multiple sequential project opens. Committed and pushed.
+**The IDE compiles clean (0 errors, 0 warnings), runs stable, and is under active UX polish.**
+
+| Area | Status |
+|------|--------|
+| **Core IDE** | Win64-only, compiles clean, self-hosted with bundled compiler (FBC 1.10.1) and GDB debugger |
+| **Form Designer** | Working — grey-panel bug root-caused and fixed (2026-07-06); per-form control tree + PagePanel layer navigation shipped |
+| **Dark mode** | Stable and enabled — title bar, menus, toolbars, tabs, central area all render dark; popup menus deferred (§13.10) |
+| **Dead code** | GTK/Linux/32-bit code physically deleted across `src/` and `mff/`; Integrated (stabs) debugger + alt-compiler backends removed; only `-gen gcc` remains |
+| **UI review** | In progress - **File** menu owner-approved (incl. Open Project); **Edit** menu owner-approved (all 25 items); Run menu consolidated and verified |
+| **Panels** | Left/right/bottom panel pin/collapse/persistence all fixed and verified |
+| **Debugger** | GDB-only; Step, Continue, Break, Step Out, command queue, and debug-tab show/hide all working; 3 GDB items pending owner smoke test (§7) |
+| **Build** | `Compile.bat` for release, `CompileDebug.bat` for debug; `NOPAUSE=1` for agent runs |
+
+**Active work:** §13.3 step-by-step UI review - **View menu** is next (File + Edit complete).  
+**Open items consolidated:** see [Open Items](#open-items) below.
+
+---
+
+## RESOLVED — Form designer grey-panel bug
+
+**Status:** FIXED (2026-07-06). Full root-cause analysis, fix details, and original investigation record archived in [HISTORY.md](HISTORY.md).
+
+---
+
+## File menu — Open Project (owner-approved, 2026-07-06)
+
+Part of the File menu step-by-step review. **Open Project** (`frmOpenProject`) was expanded: browse-for-`.vfp`, Examples tree, and MRU-style discovery with **PathUtils** fixes (`GetFileName` for extensionless folder names, `FindProjectVfpInFolder`, slash normalization) so Examples such as MDINotepad resolve correctly.
+
+---
+
+## Edit menu review & Suggestions lockup (2026-07-06)
+
+### Edit menu audit
+
+All 25 Edit menu entries were traced to their handlers. Every entry dispatches to a live implementation — no stale references, no dead code, no removed-feature stubs.
+
+### Three path-evaluation bugs found and fixed
+
+| # | Bug | Root cause | Fix |
+|---|-----|-----------|-----|
+| 1 | `GetControlLibraryVfpPath` returning "" for absolute paths | Mixed-slash search | Normalize to forward slashes before scan |
+| 2 | Slash naming confusion (`Slash`/`BackSlash` reversed) | Names opposite to values | Renamed `WindowsSlash`/`UnixSlash` (20 files) |
+| 3 | `GetFileName` dropping last character of extensionless names | Length formula assumed `.` always present | Guard on extension existence |
+
+Bug #3 was the root cause of MDINotepad not appearing in the Examples list — `GetFileName("MDINotepad", False)` returned "MDINotepa", so `<dirname>.vfp` was never found.
+
+### Suggestions lockup — fixed (2026-07-06)
+
+**Symptom:** Edit → Suggestions froze the IDE. Root cause: menu handler called `Sub Suggestions` in `TabWindow.bas`, which loaded every project file synchronously on the main thread and ran `AnalyzeTab`.
+
+**Wrong fix (Deepseek, reverted):** Background thread + toggle on the same menu key. Caused file-not-found on close (relative project paths) and broken checkmark toggle.
+
+**Edit menu (flat):** **Code - Bubble Help**, **Code - Suggest Options**, and **Code - Parameter Info** are direct items under Edit (no Code submenu). Bubble Help toggles `GlobalSettings.ShowSymbolsTooltipsOnMouseHover`; Suggest Options toggles `AutoComplete`; Parameter Info toggles `ParameterInfoShow`.
+
+**Fix (2026-07-06):** Flattened Edit menu (removed `miEditCode` submenu) so checkable toggles route through `WM_COMMAND` → `mClick` like **Use Debugger**. Submenu nesting caused checkmark-only toggles without updating globals. `ChangeShowSymbolsTooltipsOnMouseHover` closes open hover tooltips when disabled.
+
+**Correct behavior (user-confirmed):** Edit → **Code - Bubble Help** toggles **bubble help** (`GlobalSettings.ShowSymbolsTooltipsOnMouseHover`) on/off — same setting as Options → IntelliSense → “Show Symbols Tooltips On Mouse Hover”. It does **not** run project-wide analysis.
+
+**Edit → Suggest Options** (renamed from Complete Word menu item) toggles **auto-complete** (`AutoComplete` / Options → “Enable Auto Complete”) — enables/disables the intellisense dropdown while typing. **Ctrl+Space** and the toolbar Complete Word button still invoke `CompleteWord` manually.
+
+**Edit → Code - Parameter Info** toggles **parameter hints** (`ParameterInfoShow` / `Options/ParameterInfoShow`) — enables/disables automatic parameter tooltips while typing `(`, `,`, `?`, etc. **Ctrl+J** (with Ctrl held) and the toolbar Parameter Info button still invoke `ParameterInfo` manually when enabled. Menu click without Ctrl toggles the setting.
+
+**Implementation:**
+- `ChangeShowSymbolsTooltipsOnMouseHover` in `Main.bas` (mirrors `ChangeUseDebugger`): updates global, syncs `miSuggestions->Checked`, persists INI, closes active hover tooltips when off.
+- `ChangeAutoComplete` in `Main.bas` (same pattern): updates `AutoComplete`, syncs `miCompleteWord->Checked`, persists `Options/AutoComplete` to INI.
+- `ChangeParameterInfoShow` in `Main.bas` (same pattern): updates `ParameterInfoShow`, syncs Parameter Info menu checkmark, persists `Options/ParameterInfoShow` to INI.
+- Flat Edit items: `ML("Code - Bubble Help")` command `"Suggestions"`; `ML("Code - Suggest Options")` command `"SuggestOptions"`; both checkable, empty image key.
+- Menu `Case "Suggestions"` toggles bubble help; menu `Case "SuggestOptions"` toggles auto-complete; toolbar `tbtSuggestions` uses key `AnalyzeSuggestions` → still calls `Sub Suggestions` for project analysis; toolbar/hotkey `CompleteWord` still calls `CompleteWord`.
+- `frmOptions` Apply syncs both menu checkmarks when options change from the dialog.
+
+**Note:** Toolbar Suggestions button still runs synchronous project analysis (may block on large projects); only the Edit menu item is the bubble-help toggle.
+
+### Files modified this session
+
+- `src/PathUtils.bas` — `GetFileName` fix, `FindProjectVfpInFolder` fallback fix, `CanonicalWinPath` comment
+- `src/Main.bi` — `WindowsSlash`/`UnixSlash` defines, `SanitizeMRUListsOnLoad` declare, `ChangeShowSymbolsTooltipsOnMouseHover` declare
+- `src/Main.bas` — `ChangeShowSymbolsTooltipsOnMouseHover`, checkable `miSuggestions`, toolbar key split, startup sync
+- `src/VisualFBEditor.bas` — menu vs toolbar handler split
+- `src/frmOptions.frm` — sync menu checkmark on Apply
+- `src/TabWindow.bi` — slash rename
+- 17 other `src/` files — slash rename only
+- `Controls/MyFbFramework/mff/UString.bi`, `SysUtils.bi`, `Sys.bas` — `#ifndef UNICODE` guards
+
+---
+
+**Edit menu review status:** Complete — owner-approved all items (2026-07-06); flat menu checkmark toggles and handler routing verified; compile-clean.
+
+**Parameter Info gating:** `ParameterInfoShow` is now user-togglable (was effectively always on); `ChangeParameterInfoShow` in `Main.bas` mirrors the Use Debugger / Bubble Help checkmark pattern.
+
+*(Form designer grey-panel investigation continues below for historical reference; see RESOLVED section above.)*
 
 ### Actual root cause (verified by live file-logging, not the earlier Bugbot hypothesis)
 
@@ -32,7 +121,7 @@ Also in this session: the `ClearUndo → OnLineChangeEdit → FormDesign` teardo
 
 ### Still open (non-fatal, deferred)
 
-The underlying wart — MFF getting **multiple `Library` objects with inconsistent `Path` representations** (absolute-backslash DLL path from the toolbox loader vs. relative-forward-slash folder path from the `.vfp` component string), with `Comps["Form"].Tag` binding to the folder one — was not fully cleaned up. The two fixes make it harmless (the module is loaded and now resolves correctly), but the refactored library-loading path (`LoadToolBox` INI/dir-scan branches + `AddProject`'s `ControlLibrary` block + `GetControlLibraryVfpPath`/`GetControlLibraryFolder`) deserves a consolidation pass so one DLL maps to exactly one `Library` object with one canonical path. Low priority; captured here for a future session.
+The underlying wart — MFF getting **multiple `Library` objects with inconsistent `Path` representations** (absolute-backslash DLL path from the toolbox loader vs. relative-forward-slash folder path from the `.vfp` component string), with `Comps["Form"].Tag` binding to the folder one — was not fully cleaned up. The two fixes make it harmless (the module is loaded and now resolves correctly), but the refactored library-loading path (`LoadToolBox` INI/dir-scan branches + `AddProject`'s `ControlLibrary` block + `GetControlLibraryVfpPath`/`GetControlLibraryFolder`) deserves a consolidation pass so one DLL maps to exactly one `Library` object with one canonical path. Low priority; captured here for a future session. **Queued for Cursor in §8 ("Queued for Cursor").**
 
 ### Original bug summary (historical investigation record below)
 
@@ -118,30 +207,6 @@ AddTab → .FormDesign (builds design surface)
 git checkout -- src/Main.bas src/Main.bi src/TabWindow.bas src/TabWindow.bi src/Designer.bas
 
 # Or stash everything (including untracked — use with care)
-git stash push -u -m "WIP form designer bug"
-
-# Or restore entire working tree to origin/main
-git checkout -- .
-```
-
-Binaries (`VisualFBEditor64.exe`, `mff64.dll`) and `Settings/VisualFBEditor64.ini` have local runtime changes — revert separately if needed.
-
-### Last compile
-
-`CompileDebug.bat` — **0 errors** (2026-07-06, end of session). Rebuild after any fix.
-
-### User test checklist (form designer surface)
-
-- [ ] Cold start IDE (no workspace) → open `.frm` from File → design surface shows form (not grey `pnlForm`)
-- [ ] Cold start with saved workspace containing `.frm` tabs → all form tabs restore with design surface
-- [ ] Switch Code / Form / Code+Form toolbar on open `.frm` — no flash-to-grey
-- [ ] Open second `.frm` tab — both design surfaces work
-- [ ] Edit code line in constructor region → design surface updates (no spurious teardown)
-- [ ] Toolbox populates; drag control onto form works
-- [ ] Save/reopen `.frm` — design surface persists
-- [ ] Non-form `.bas` — Code-only view; no Form toolbar errors
-
----
 
 ## 1. Project overview
 
@@ -188,6 +253,7 @@ Common thread: **approachability and cohesion over power-user configurability.**
 
 ---
 
+
 ## 2. Repository & toolchain
 
 ### Git remote
@@ -223,6 +289,7 @@ See also `src/BUILD.md` and `README.md`.
 
 ---
 
+
 ## 3. Roadmap: Tier 2.75 dead-code removal
 
 Work is organized in batches.
@@ -251,314 +318,41 @@ Evaluates `#If` / `#Else` / `#EndIf` with Win64 defines (`__USE_WINAPI__`, `__FB
 
 ---
 
+
+
 ## 3a. Batch 2.75.3 — what actually happened
 
-Beyond the originally-scoped "strip commented GTK markers," this batch also caught and fixed a **shipped-broken Designer** and expanded to a broader dead-legacy-code pass at the owner's explicit direction ("also remove old dead legacy code" encountered along the way, not just GTK-tagged code).
 
-**Root-cause fix — Form Designer never activated for any `.frm` file:**
-`Tools/strip_gtk_preprocessor.ps1` didn't recognize the `__EXPORT_PROCS__` macro and silently deleted the entire `#ifdef __EXPORT_PROCS__` export-dispatcher block from `mff.bi` plus per-file `Export` functions in ~14 `mff/*.bas` files, so `mff64.dll` shipped with **zero exports**. Fixed the strip tool and manually restored the missing blocks (2 `ToolBar.bas` functions deliberately deferred — restoring them hits an unresolved FreeBASIC "Illegal specification" compiler quirk on a `Private Enum` parameter; not called anywhere in the IDE itself). Commit `bef9267`.
-
-**Dark mode — replaced, not removed:**
-The undocumented-API dark-mode implementation (ordinal-resolved `uxtheme.dll` calls, `ntdll` version probing, IAT hooking) was flagged by the owner as unreliable and untrusted. Replaced with an inert stub (`mff/DarkMode/DarkMode.bi`/`.bas`) that preserves the exact public interface as no-ops, so every call site still compiles and behaves as before (dark mode was already forced off). This intentionally leaves a clean seam for a trustworthy reimplementation later rather than deleting the integration points. `mff/DarkMode/IatHook.bi` (zero references) deleted outright; `UAHMenuBar.bi` kept (still used by `Form.bas`, unrelated to the ordinal/IAT fragility). Commit `56f6d18`.
-
-**Dark mode — reimplemented with documented APIs (2026-07-03):** the seam left above was filled in. `DarkMode.bi`/`.bas` now use only documented, stable Win32 APIs: `SetWindowTheme` (uxtheme), `DwmSetWindowAttribute` (dwmapi, declared by hand with an explicit `Alias` since FB's default linkage would otherwise mangle the symbol and fail to link), `RtlGetVersion` (ntdll, documented WDK API, gives the true build number unlike `GetVersionEx`), a registry read of `HKCU...Personalize\AppsUseLightTheme` for the live system preference, and `WM_SETTINGCHANGE`/`"ImmersiveColorSet"` for change notification. No ordinals, no IAT hooking, no internal-structure probing. Every existing `SetDark`/`AllowDarkModeForWindow`/etc. call site across ~25 control files was already intact and needed no changes — only the 11 functions in `DarkMode.bas` had to be rewritten. The Dark Mode checkbox (previously force-hidden and force-disabled) is un-hidden — reparented onto the General options page since its old home (`grbThemes`/`pnlThemes`) turned out to be an orphaned page with no tree node pointing to it, not reachable from the UI at all — and now actually persists to/from the INI instead of being hardcoded off in three separate places (`Main.bas`, `SettingsService.bas`, `frmOptions.frm`'s save path). The broken interface color/theme picker on that same orphaned page stays hidden — separate, still-broken feature, out of scope here.
-
-**Dark mode — crash history (2026-07-04, ALL RESOLVED — see the "crash #3 root-caused and fixed" entry below):** the checkbox and persistence are correct, and the app runs fine with the setting off. But turning it on genuinely crashed the app — confirmed via repeated reproduction, not a one-off. Two real bugs were found and fixed in the first investigation session, and a third remained open until the follow-up session the same day:
-
-1. **Fixed:** `SetDarkMode`'s `WM_SETTINGCHANGE` broadcast passed `StrPtr("ImmersiveColorSet")` — an ANSI string pointer — as the lParam, which the Win32 API contract requires to be a wide (UTF-16) string. Every window on the desktop that received the broadcast (not just ours) read past the buffer trying to interpret it as wide, and this reproducibly crashed inside `UxTheme.dll` (`0xc0000005`, confirmed via Windows Event Viewer). Fixed with a `Static As WString * 32` so the pointer is both correctly encoded and has a guaranteed lifetime.
-2. **Fixed:** `SetDarkMode` was being called (via `SettingsService.LoadSettings`, applying the saved INI setting) very early in startup, while only the splash screen exists, and still performed the full desktop-wide broadcast every time — pointless that early (nothing of ours exists yet to refresh) and needless risk. Added a `DoBroadcast As Boolean = True` parameter; the startup call site now bypasses the `App.DarkMode` property (which always broadcasts) and calls `SetDarkMode` directly with broadcast suppressed. The live Options-dialog Apply-button path is unchanged and still broadcasts, since that's the case that actually needs it.
-3. **Still open:** even with both of the above fixed, enabling dark mode still crashes — confirmed by two separate repro runs, both `0xc0000005` inside `UxTheme.dll` at the same faulting offset as bug #1, but the *symptom's timing varies*: one run crashed during a splash-screen label repaint, another got further and crashed at main-form load. This points at `SetWindowTheme`/`AllowDarkModeForWindow` itself being unsafe to call this early in the control-creation sequence (`g_darkModeEnabled` is now `True` from very early in startup, so *every* control's first `WM_PAINT` tries to theme it, immediately, including ones created before whatever Windows normally expects to be initialized first) — not a string/encoding issue this time. Leading hypothesis for next session: defer actually enabling dark mode (setting `g_darkModeEnabled`/calling `SetDark` on existing controls) until after the main form and its full control tree exist, rather than applying it while only the splash screen is up.
-
-**Crash #3 root-caused and FIXED (2026-07-04, follow-up session, via live GDB debugging):** the "unsafe to theme controls early" hypothesis above turned out to be wrong. A debug build (`CompileDebug.bat`, `-g -exx -O0`) run under the bundled GDB (`Debuggers/gdb-11.2.90.20220320-x86_64/bin/gdb.exe -batch -ex run -ex bt`) caught the crash live with a symbolic backtrace: **infinite recursion → stack overflow.** `SetWindowTheme` synchronously sends `WM_THEMECHANGED` back to the window it themes (observed wParam=-1, lParam=0x80000001 — the system-generated signature, decimal msg 794), and five control classes' `WM_THEMECHANGED` handlers (`Form`, `Grid`, `ListView`, `TreeListView`, `TreeView`) respond by calling `AllowDarkModeForWindow` → `SetWindowTheme` again → unbounded mutual recursion until the stack guard page is hit. Every earlier observation now fits: the "same UxTheme.dll faulting offset" was just where the guard page happened to be hit inside the recursion cycle's frames, and the variable crash timing (splash label vs. main-form load) was whichever themed window received the message first. **Fix:** one same-window re-entrancy guard (a `Static As HWND` slot) inside `AllowDarkModeForWindow` itself (`DarkMode.bas`) — the single choke point all five handlers share — rather than five per-class guards; nested calls for a *different* window (e.g. a ListView theming its header from inside its own handler) still pass. **This also fixed a latent crash-on-system-theme-change:** those handlers are gated on `g_darkModeSupported` only (not `g_darkModeEnabled`), so the same recursion would have fired even with dark mode off the moment the user toggled Windows' own light/dark setting while the IDE ran.
-
-**Dark mode visual completion (same session):** with the crash gone, dark mode rendered only partially (light menu bar/toolbars on some activation states, light tab strips, big white central area). Findings and fixes:
-- **Menu bar / toolbars needed no code changes** — the full adzm-style UAH owner-drawn dark menu bar (`Form.bas` `WM_UAHDRAWMENU`/`WM_UAHDRAWMENUITEM`/`WM_NCPAINT` handlers, structs in `mff/DarkMode/UAHMenuBar.bi`) and the ToolBar/ReBar `NM_CUSTOMDRAW` dark paths were already present and working; GDB breakpoint instrumentation confirmed 8 bar paints × 12 items all executing the dark path. An early screenshot showing them light was a transient corrected by a window-activation cycle.
-- **`TabControl` (`TabControl.bas`) was the real gap**: its dark custom paint existed only for `tpLeft`/`tpRight` (rotated side captions); all three visible strips (`tabLeft` Project/Toolbox/AI Agent, `tabBottom` Output/... , and each editor `tabCode`) are `tpTop` (the constructor default — the `tpBottom`/`tpRight` assignments in `Main.bas` are commented out), where `TCS_OWNERDRAWFIXED` is deliberately switched off, so the native control painted them light. Added a horizontal-tab dark-paint branch mirroring the vertical one (strip fill, `hbrHlBkgnd` selected-tab highlight, `ImageList_Draw` icon, caption via `DrawText`).
-- **The big central white area was `WM_ERASEBKGND` claiming "erased" while painting nothing** (`Message.Result = -1` with no `FillRect`), so the default white showed through the empty `tabCode` body. Now fills with `hbrBkgnd` before claiming handled.
-
-**Current state:** `DarkMode=true` is enabled in the owner's INI and stable — title bar, menu bar, toolbars, tab strips, central area, panels, trees, output, and status bar all render dark. **Known remaining gaps (deferred, see §13.10):** popup/dropdown menus are still light — Windows has no documented API for dark Win32 popup menus; the framework's owner-draw scaffolding exists (`Menu.Style` flips items to `MFT_OWNERDRAW`) but its `WM_DRAWITEM ODT_MENU` handler is empty, so enabling it today would draw blank menus. Also minor: input-field faces (search box, combo edit areas) stay light-ish under the `DarkMode_CFD` theme.
-
-**Post-merge regression #2 found and fixed (2026-07-03) — General options page checkbox overlap:** un-hiding Dark Mode surfaced a second, independent, pre-existing bug (not caused by tonight's work, just never noticed since nobody had looked closely at this exact page before): `pnlInterfaceFont`/`chkDisplayIcons`/`chkShowMainToolbar`/`chkShowPropLocal`/`chkDarkMode` are relocated into `vbxGeneral` at runtime (`frmOptions.frm`'s Constructor, "Move interface settings to General" block) *after* they were already constructed — and originally only `pnlInterfaceFont` got an explicit `.ControlIndex` to pin its stacking position; the other four didn't. Fixed by giving all four explicit sequential `ControlIndex` values (1–4), matching the pattern the file already uses elsewhere (`chkAutoCreateRC.ControlIndex = 1`, etc.) — Add(), Component.bas.
-
-That fix alone wasn't sufficient: a second, deeper issue meant these same 5 relocated controls' on-screen positions got reset back to their pre-relocation absolute coordinates the first time the General page became visible, landing on top of the five controls that were always native to `vbxGeneral`. Root-caused via three rounds of temporary instrumentation (removed afterward) added directly to `Control.RequestAlign`/`Component.Move`/`Component.SetBounds` in the shared framework, logging every call `vbxGeneral` and its children made during a live run — confirmed `RequestAlign` always computes the correct stacked position on every pass, but something in a native-window-recreation cascade re-applies stale pre-relocation bounds afterward, specifically for controls that had already been constructed (with a window) under their old parent before being reparented. The exact trigger point wasn't pinned to one line even with this instrumentation. Rather than risk a deeper change to this 20+-year-old inherited docking engine on partial understanding, applied a safe, targeted fix: `frmOptions.frm`'s `TreeView1_SelChange` now forces one more explicit `vbxGeneral.RequestAlign` right after the General page becomes visible, guaranteeing the final on-screen layout is always the correct computed stack regardless of what the earlier reset does. Verified visually (screenshot) — all rows render cleanly, Dark Mode checkbox shows on its own line, unchecked.
-
-**Confirmed-dead subtree deletion:** `mff/gir_headers/`, `mff/WebView/`, `mff/fbsound/`, `SoundPlayer.bas`/`.bi` — 109 files, ~104k lines, zero references anywhere, verified via clean rebuild. Commit `c494207`.
-
-**Compile warnings:** all resolved (WString default-parameter fixes, `AndAlso`-chained boolean/pointer-property comparisons isolated into explicit `Boolean` locals). Commits `53d8e47` + `56f6d18` (first pass under-verified due to a UTF-16 log encoding gotcha with raw `grep`; corrected in the second commit).
-
-**Physical dead-code deletion** (the literal instruction: delete, don't hide) across:
-- `src/Debug.bas` — dead conditional-breakpoint UI functions, a dead `get_main_file_from_exe`/`get_name_files_from_exe` pair, a duplicate ~300-line dead 32-bit stabs-parsing branch, misc stray markers. Commit `7baebd1`.
-- `src/Designer.bas`/`.bi`, `src/Main.bas`/`.bi`, `src/TabWindow.bas`, `src/VisualFBEditor.bas` — dead WM_KEYDOWN/GTK popup-menu branches, a ~300-line dead GTK VTE-terminal integration block, a dead ListView-based property-panel implementation (superseded by the current `TreeListView`-based one), dead debugger-UI branches. Commit `add4642`.
-- `Controls/MyFbFramework/mff/*.bas` (16 files) — dead GTK-only branches, dead sort/alignment/tooltip logic, dead PNG-loading functions; `NativeFontControl.bas`/`.bi` deleted outright (100% commented out, confirmed unreferenced anywhere). Commit `76abaa5`.
-
-**Verification:** every commit above passed a clean `Compile.bat` rebuild (0 warnings, 0 errors — checked with the `Read` tool, since the log is UTF-16 and raw `grep` silently false-negatives on it). A final repo-wide sweep confirms only one GTK/32-bit marker remains anywhere in `src/` or `mff/`: `TabWindow.bas`'s `CheckCondition()`, which evaluates `#if` conditions in the *user's* FreeBASIC code being edited — a legitimate IDE feature, correctly left alone.
-
-**Git-tracking policy change:** `Compiler/` and `Debuggers/` are now tracked in git (previously vendored/gitignored) — this is intentionally a fully self-contained fork going forward. Commit `b555406`. 32-bit compiler binaries (`Compiler/bin/win32`) removed as out of scope. Commit `15e66cc`.
+Full detail archived in [HISTORY.md](HISTORY.md). Key outcomes: Form Designer fix, dark-mode reimplementation with documented APIs, dead-subtree deletion, physical dead-code deletion across src/ and mff/, compile-warning resolution, _WIN32_WINNT header fix, and git-tracking policy change (self-contained fork).
 
 ---
 
-## 3b. Examples/ GTK/Linux/Win32-only audit (2026-07-03) — result: nothing to remove
+## 3b. Examples/ audit — result: nothing to remove
 
-**Premise checked and rejected:** went through all 33 `Examples/` subdirectories looking for GTK-dependent, Linux-only, or Win32-only (non-64-bit-compatible) example projects to remove as leftover cross-platform cruft. **None qualified.** The `#ifdef __USE_GTK__` blocks present in ~15 `.frm` files are harmless MyFbFramework designer boilerplate (an icon-loading fallback that resolves to the Windows `#else` branch) — not real GTK dependencies. `__FB_WIN32__`/`__FB_LINUX__`/`__FB_UNIX__` checks found are standard FreeBASIC "which OS" conditionals that correctly fall through to Windows-appropriate code. Every example either has valid 64-bit `.vfp` compile args already, or has source that's fully Win64-portable regardless of a missing project file.
-
-**Follow-up work done as a result of the audit, instead:**
-
-- **Fixed a real bug found incidentally:** `Examples/Add-In/Module1.bas` and `Examples/Add-In/My Add-In.bas` both called `mff.MenuFindByName(mnuMenu, "Service")` — the top-level menu commit `ae74b31` renamed from "Service" to "Tools". Both files fixed (string and the `mnuService`→`mnuTools` variable rename for clarity). `Module1.bas` is the more complete/current of the two duplicate implementations (has an extra `OnBeforeCompile` handler `My Add-In.bas` lacks) and is now the file wired into the new `.vfp`; `My Add-In.bas` is left in place, fixed, but not part of the compiled project.
-- **Created missing `.vfp` project files** for examples that had none (a project-hygiene gap, not a platform issue): `Add-In`, `Graphics`, `Web Page`, `WellCOM Example` (two projects: `WellCOM.vfp` the COM server DLL, `Test_WellCOM.vfp` the console test client), and three of four `Game` subfolders (`Calculator`, `FiveInARow`, `Maze` — `Sudoku` already had one). Also created missing `Manifest.xml`/resource `.rc` files where a `.frm`'s embedded `#cmdline "Form1.rc"` designer directive pointed at a file that didn't exist (`Web Page`, `Maze`, `FiveInARow`'s manifest).
-- **Verified by direct compilation** (same technique as the `_WIN32_WINNT` fix verification, §4): every new project was compiled directly with `fbc64.exe` using IDE-equivalent flags before being considered done. Confirmed compiling clean: `Add-In`, `Web Page`, `Maze`, `Calculator`, `FiveInARow`, `Test_WellCOM`, `Graphics` (see below).
-
-**`Examples/Graphics/CanvasDraw.bas` — fixed (2026-07-03).** Investigated before assuming a rewrite was needed, and it turned out to be three small, well-evidenced fixes rather than an open-ended API-drift rewrite:
-- `CreateDoubleBuffer`/`TransferDoubleBuffer` calls (4 total) simply don't exist anymore in `mff/Canvas.bi` — no replacement needed, since double-buffering is now handled internally by the framework (the old manual buffer-blit logic in `Canvas.bas` is commented out, `Control.bi` now exposes a `DoubleBuffered` property instead). Deleted the dead calls.
-- `.Pen.Style = 3` / `.Pen.Style = 0` (bare integers) failed against the now strictly-typed `PenStyle` enum property. The original author had already left themselves the answer in a comment (`'PenStyle.psDashDot`) — swapped the magic numbers for the named constants (`psDashDot = 3`, `psSolid = 0`, confirmed against the enum).
-- `.StretchImage = StretchMode.smStretchProportional` was ambiguous, not wrong — `My.Sys.Forms` (`Control.bi`) and `My.Sys.Drawing` (`Graphic.bi`) each independently define an identical `StretchMode` enum for their own purposes, and the example has `Using` for both namespaces in scope. `Picture.StretchImage` specifically expects the `My.Sys.Forms` one; fully-qualifying the reference resolved it with no framework changes needed.
-
-Verified via direct `fbc64` compile — clean, 0 errors.
-
-**`Examples/WellCOM Example/WellCOM.bas` doesn't compile with the bundled FreeBASIC 1.10.1 — still open, flagged for a decision, not fixed.** It defines its own `Function DllMain(...) As Boolean`, which conflicts at the C level with FreeBASIC's auto-generated `DllMain` entry point when compiling with `-dll` (`error 42: conflicting types for 'DllMain'`). This means the shipped `WellCOM.dll` (currently a 32-bit binary, itself a leftover gap) can't simply be recompiled for 64-bit with today's toolchain — the source itself needs a fix for how it defines the DLL entry point, which requires FreeBASIC-internals understanding to get right without silently breaking COM initialization behavior. Left as a known, documented issue rather than guessed at.
+Full detail archived in [HISTORY.md](HISTORY.md). All 33 examples audited for GTK/Linux/Win32-only content — none qualified for removal. Fixed Graphics/CanvasDraw.bas API drift and created missing .vfp project files. WellCOM DllMain still open.
 
 ---
 
 ## 4. Session history (chronological)
 
-### Infrastructure
-
-- Fork initialized; Codeberg repo `bigriverguy/VFBEWin64` configured
-- Initial commit: `bbfa399` — *Initial Win64 fork import*
-- SSH to Codeberg verified (`Hi there, bigriverguy!`)
-
-### Batch 2.75.2 fallout — startup freeze
-
-**Symptom:** Splash stuck; invisible “ghost” Find region.
-
-**Cause:** GTK strip + form autolaunch blocks. `frmSplash.frm` and 13 other `frm*.frm` files had module-level `Form.Show` + `App.Run`. During `Main.bas` includes, `frmFind` autolaunched and blocked startup.
-
-**Fix:**
-
-- Removed standalone `Form.Show` / `App.Run` from splash + 13 forms
-- `VisualFBEditor.bas` defines `_NOT_AUTORUN_FORMS_` before includes
-
-### UI fixes (post–2.75.2)
-
-| Issue | Fix |
-|-------|-----|
-| Tab close button showed `Ã—` | `TabWindow.bas`: `Caption = WChr(&HD7)` (×), Segoe UI 8pt |
-| Bottom panel UX regressions (pin, collapse, overlap, two-click minimize, startup focus) | `Main.bas`, `Main.bi`, `VisualFBEditor.bas` — state machine aligned with left/right panels |
-| `BottomHeight=19` in INI broke layout | Clamp: `MIN_BOTTOM_PANEL_HEIGHT=80`, `DEFAULT=200`; INI corrected |
-
-### Bottom panel — persistence vs layout (iterative)
-
-Several fix cycles addressed bottom panel **save/restore** vs **collapse layout**:
-
-1. **Wrong save key:** `BottomClosed` was derived from pin checkbox instead of layout (`TabPosition`) — fixed to match left/right.
-2. **Added `BottomCollapsed` INI key** and `IsBottomCollapsed()`.
-3. **`ShowBottom` / `CloseBottom` changed `TabPosition`** unlike left/right — refactored so only `SetBottomClosedStyle` changes `TabPosition`.
-4. **State not retained on restart:** Focus changes during **exit** collapsed the panel before INI save; **startup** `ActivateMainWindow()` collapsed restored auto-hide panels.
-   - `SaveMainWindowPanelLayout()` at **start** of `frmMain_Close`
-   - Skip auto-collapse in `frmMain_ActiveControlChanged` when `FormClosing` or `bApplyingStartupLayout`
-   - Re-expand bottom after `ActivateMainWindow` in `frmMain_Show` when INI says expanded
-5. **Collapse did not reclaim editor space:** `CloseBottom` left `ptabBottom->Height` at expanded size; pin click used `SetBottomClosedStyle(True, False)` without `CloseBottom`
-   - Reset both `pnlBottom` and `ptabBottom` heights on collapse
-   - Pin click while expanded: `SetBottomClosedStyle(True, True)`
-6. **First cold start collapsed — editor gap:** `CloseBottom` in `frmMain_Create` ran before the form was shown; dock layout kept full `pnlBottom` height until manual collapse
-   - `frmMain_Show` re-applies `CloseBottom` once the main window is visible (and again after startup focus restore)
-
-**Status: bottom panel code issues — FIXED** (persistence, collapse/reclaim, first-start layout). See §7 for remaining **manual test plan** items.
-
-### Left/right panel Pin click not collapsing
-
-Same root pattern as bottom panel item 5 above, found independently in each: Pin click while the panel was expanded called `SetLeftClosedStyle`/`SetRightClosedStyle(Value, WithClose:=False)`, relying on `frmMain_ActiveControlChanged`'s focus-loss detection to actually collapse — unreliable, especially when focus stayed inside a Form Designer. Fixed both to mirror the already-correct bottom-panel pattern: `WithClose:=True` when collapsing from an expanded state. Right panel: commit `c267284`. Left panel: commit `64daa66`.
-
-### Form Designer never activating (root-caused during 2.75.3)
-
-See §3a — this was actually a fallout of the Batch 2.75.2 GTK strip tool, not a new regression, but wasn't caught until this session. Fixed in commit `bef9267`.
-
-### Critical fix: bundled Windows headers silently dropped Windows-8.1+ APIs for every user project (2026-07-03)
-
-**Discovered when the owner tried to compile the `MDINotepad` example project and got 11 errors in `Controls/MyFbFramework/mff/Control.bas`** (`WM_POINTERDOWN`/`POINTER_INFO`/`GetPointerInfo`/`PT_MOUSE` all "not declared"). This turned out to be a serious, longstanding bug — not something introduced by tonight's session — that likely blocked **any** standard GUI project from compiling through the IDE, not just this one example.
-
-**Root cause:** `src/Main.bi` defines `TARGET_COMPILE_DEFINE = "__USE_WINAPI__ -d _WIN32_WINNT=&h0A00"` (Windows 10), unconditionally appended to every user-project compile command (`TabWindow.bas:11378`). The bundled compiler's Windows headers (`Compiler/inc/win/*.bi`) gate all "Windows 8.1 and later" API declarations behind **exact-equality** version checks — `#if _WIN32_WINNT = &h0602` — instead of the correct minimum-version form (`#if _WIN32_WINNT >= &h0602`). Since the project explicitly targets Windows 10 (`&h0A00 ≠ &h0602`), every one of those blocks was silently excluded, even though Windows 10 is a strict superset of Windows 8.1 and should include all of it. `Control.bas` (the base class for every MyFbFramework control, pulled in by the default `Form.frm` template used by GUI/Windows Application projects) hits this via its pointer-input handling — meaning essentially any new GUI project with a form would fail the same way.
-
-**Verified via the original download too:** the owner confirmed the same `MDINotepad` project also fails on the unmodified upstream project (different failure signature — fails earlier, before producing a detailed error list — consistent with the upstream toolchain not even being fully set up). This confirms the defect predates this fork and Tier 2.75 cleanup entirely.
-
-**Scope confirmed systemic, not isolated:** grepped the whole `Compiler/inc/win/` tree — the same exact-equality anti-pattern (`_WIN32_WINNT = &h0602`) appears **116 times across 18 files** (`aclui.bi`, `authz.bi`, `combaseapi.bi`, `commctrl.bi`, `ncrypt.bi`, `ntddndis.bi`, `shellapi.bi`, `shldisp.bi`, `shlobj.bi`, `shobjidl.bi`, `userenv.bi`, `winbase.bi`, `wincrypt.bi`, `windot11.bi`, `wingdi.bi`, `winnls.bi`, `winnt.bi`, `winuser.bi`) — a single consistent spelling, no case/spacing variants. This is almost certainly a FreeBASIC header-porting bug: Microsoft's own SDK headers use "at least this version" semantics (`NTDDI_VERSION >= NTDDI_WIN8`), not exact equality.
-
-**Safety verified before fixing:** confirmed (via cross-referencing every declared symbol name against the rest of each file, including `#elseif` chains) that no file has a competing higher-version guard (`>= &h0603`, `&h0A00`, etc.) for the same symbols — so widening `=` to `>=` cannot cause duplicate-definition conflicts anywhere. All 116 occurrences are either standalone `#if`/`#endif` blocks or the terminal branch of an `#elseif` chain with nothing after them.
-
-**Fix:** mechanical find-and-replace, `_WIN32_WINNT = &h0602` → `_WIN32_WINNT >= &h0602`, across all 18 files. Purely additive — for the IDE's own self-build (which doesn't force `_WIN32_WINNT`, so `Control.bi`'s own `#ifndef` fallback sets it to exactly `&h0602`), behavior is unchanged; for user projects (`&h0A00`), the correct Windows-8.1+ API set now compiles.
-
-**Verified:**
-- IDE self-build (`Compile.bat`) still compiles clean, 0 errors/0 warnings, after the header fix.
-- Direct reproduction: compiled `Examples/MDINotepad/MDIMain.frm` with the exact flags the IDE uses (`-d __USE_WINAPI__ -d _WIN32_WINNT=&h0A00`, etc.) — failed before the fix (matching the owner's screenshot), succeeds cleanly after, producing a working executable.
-
-**Not yet done:** full regression pass compiling other example projects to confirm no other examples relied on the old (buggy) exclusion behavior. (The "does 1.10.3 already fix this" question is now moot — Tier 3's compiler swap was attempted and closed 2026-07-03, staying on 1.10.1; see §4's compiler-version-decision section.)
-
-### Ad-hoc addition: stale bottom-panel content on project close (2026-07-03)
-
-**Not part of any planned tier — arose from the owner noticing the Output/Problems tabs kept a closed project's content after opening a different project.** Investigated all 14 bottom-panel tabs (`src/Main.bas` ~line 8200) and found they split into two groups with different natural lifetimes:
-
-- **Analysis tabs (6): Output, Problems, Suggestions, Find, ToDo, Change Log** — hold scan/compile results scoped to whichever project or file produced them (confirmed `Change Log` is explicitly keyed to the current tree node via `mChangelogName`). Stale content here is actively misleading once a different project is open.
-- **Debug/profiler tabs (8): Locals, Globals, Procedures, Threads, Watches, Memory, Profiler, Immediate** — only ever have content during an active debug/profiling run, which can't exist without a project open.
-
-**Fix:** two new Subs in `src/Main.bas` (next to the existing `ClearMessages()`):
-- `ClearAnalysisPanels()` — clears the 6 analysis tabs, called from `CloseProject` (Main.bas).
-- `ClearDebugPanels()` — clears the 8 debug/profiler tabs, called from the `Case "End"` debug-stop handler in `src/VisualFBEditor.bas` (so it fires when a debug session ends, not just on project close), and also from `CloseProject` as a backstop.
-
-**Gotcha hit along the way, worth remembering for any future cross-file Sub call:** `Main.bi` `#include`s `Main.bas` near its own end (line ~316), and `VisualFBEditor.bas` pulls in `Main.bi` near its top (line 36) — before it reaches its own Sub definitions further down (e.g. `ClearThreadsWindow` at line 299). So a Sub defined in `VisualFBEditor.bas` is **not** visible to code in `Main.bas` without an explicit forward `Declare` in `Main.bi` (added one for `ClearThreadsWindow`, following the existing `ChangeEnabledDebug`-style pattern) — even though calling in the other direction (`VisualFBEditor.bas` calling a `Main.bas` Sub) works fine, since `Main.bas`'s content is textually inlined before `VisualFBEditor.bas` continues past line 36.
-
-Compiled clean (0 errors/0 warnings) after the fix. Not yet manually smoke-tested in the running IDE.
-
-### FreeBASIC compiler version decision (Tier 3 — attempted 2026-07-03, reversed: staying on 1.10.1)
-
-Owner plans to replace the bundled `Compiler/` tree and eventually vendor the compiler's own source for future AI-assisted review. Compared 1.10.1 (currently bundled), 1.10.3, 1.10.4 (unreleased), and 1.20 (unreleased) — **originally decided on 1.10.3** from the `fbc-1.10` maintenance branch. 1.20 was ruled out for now: it removes null-termination from fixed-length strings (`STRING*N`/`WSTRING*N`), a breaking change that would need an audit of this codebase's fixed-string usage first. Owner specified a preferred binary source: community continuous builds at `users.freebasic-portal.de/stw/builds/` (maintainer "stw", trusted long-time contributor) over the "official" release, since stw's build is expected to be equal-or-better quality.
-
-**Tier 3 was started 2026-07-03 and immediately hit a dead end: no viable 1.10.3 Windows binary exists anywhere, from any source.** What was found:
-- **stw's portal build #875** (`fbc_win64_mingw_0875_2025-04-21.zip`) was the specific build the plan pointed at — its changelog entry cites the exact right commit (`8708d1a`, confirmed on GitHub to be the real `1.10.3` tag). But the downloaded binary itself reports `--version` as **1.20.0**, and its bundled `changelog.txt` confirms large 1.20-era features already present (the same breaking `STRING*N` change, a WIP Clang backend, Android support). Root cause: stw's `win64/` build series is one continuous numbered stream tracking **trunk**, not a separate frozen maintenance branch — the "1.10.3 Release" commit is just a changelog-update commit that appears in trunk's shared history at that point, not a marker that trunk itself was in a 1.10.3 state. Trunk had already moved well past it by build #875.
-- **No official binary exists either.** Checked GitHub Releases (`freebasic/fbc/releases`) — only goes up to 1.10.1 with attached Windows assets, nothing for 1.10.2/1.10.3. Checked SourceForge (`sourceforge.net/projects/fbc/files/`) — same story, no 1.10.2 or 1.10.3 release folder exists at all. A web search turned up nothing beyond 1.10.1 on any mirror either.
-- **Getting an actual 1.10.3 binary would require building FreeBASIC from source** at the `1.10.3` git tag — a real undertaking, since FreeBASIC is self-hosting (needs an existing `fbc` to bootstrap a new one) plus a full MinGW-w64/GCC toolchain, not a quick task.
-
-**Decided (owner, 2026-07-03): stay on the currently-bundled 1.10.1 rather than build from source for one point-release's worth of bugfixes.** Tier 3's "replace the compiler" work is closed for now, not deferred to "later in this same form" — if a genuine prebuilt point-release binary ever surfaces, or if the source-build effort becomes worthwhile for other reasons (e.g. paired with the already-planned "vendor the compiler's own source" work), this can be revisited then.
-
-**This unblocks something:** the gas64-vs-GDB debugging check (below) was explicitly sequenced to wait for Tier 3 to land first, since a compiler swap could have invalidated the result. With Tier 3 now closed (staying on 1.10.1), **that sequencing reason no longer applies — the gas64/GDB check can proceed directly against the current toolchain whenever it's picked up**, no need to wait.
-
-### Debugger backend decision: GDB, not gas64/Integrated
-
-VFBE already supports two debugger paths for **user projects** (not the IDE itself) as a per-project setting (`ToGAS`/`ToGCC` in `src/BuildService.bas`/`src/TabWindow.bas`): the "Integrated IDE Debugger" in `src/Debug.bas` (requires the user's project compiled with `-gen gas/gas64 -g`, reads FreeBASIC's native stabs debug format directly) versus the "Integrated GDB Debugger" (requires `-gen gcc` + gcc debug flags, standard GDB). These are matched pairs, not interchangeable — `Debug.bas` explicitly errors if the wrong backend/debug-format combination is used.
-
-**Decided: GDB is the project's debugger.** Settled by what's actually bundled: `Debuggers/gdb-11.2.90.20220320-x86_64/` contains only `gdb.exe`/`gdbserver.exe` — there's no separate gas64-native debugger tool anywhere in this repo, so the practical toolchain already implies GDB. This also matched the research-backed recommendation from the same session (Tiko, a comparable FreeBASIC IDE, recently reversed its own default away from gas64 back to GCC for 64-bit builds).
-
-**RESOLVED 2026-07-03: `gas64` is dead. `-gen gcc` is the only compile backend, for both Development and Final.** The empirical check flagged above as a hard precondition was run and came back conclusively negative — not "GDB can't read gas64's format," but **gas64 doesn't emit usable debug information at all**:
-- Compiled a small test program with `-gen gas64 -g` and inspected every layer: the raw generated `.asm`, the assembled `.o`, and the final linked `.exe`.
-- The `.asm` output contains exactly one debug-related directive — `.file "test.bas"` (just names the source file) — and **zero `.loc` directives anywhere** (the directives that map machine instructions to source line numbers; without them there is no line-level information for any debugger to use). No `.stabs` directives either, despite `Debug.bas`'s Integrated debugger expecting stabs format from this exact backend/flag combination.
-- The final `.exe` does contain DWARF sections (`.debug_info`, `.debug_line`, etc.), but they belong entirely to the statically-linked C runtime startup code (`crt2.o`/`crtbegin.o`/`fbrt0.o`), not to the user's own compiled program — confirmed by checking `info sources` in GDB, which lists only mingw-w64/libgcc C runtime paths, never the user's `.bas` file.
-- Confirmed with two different program structures (a bare top-level script and a `Sub`-based structure closer to how real VFBE projects are written) — identical result both times.
-- Net effect: `break test.bas:3` fails with "No source file named test.bas," and no variable can be inspected, because there is nothing for *any* debugger (GDB or the Integrated stabs-parser) to read. This isn't a GDB integration gap fixable from VFBE's side — the compiler backend itself doesn't produce debuggable output in this FreeBASIC version.
-
-**Decided: `gas64` is removed from consideration entirely, per the contingency already agreed on.** `-gen gcc` + GDB is the only compile/debug path going forward. This also resolves the tradeoff that motivated considering `gas64` in the first place (fast compiles for the edit/compile/run loop) — there's no way to get that benefit from `gas64` without giving up debuggability, so it's not a real tradeoff anymore, just a dead end.
-
-**Consequence: the Integrated (stabs) Debugger in `Debug.bas` is now confirmed dead code, not just "a candidate for future pruning."** It exists specifically to pair with `-gen gas/gas64 -g` output, which has just been shown not to contain the stabs data that debugger expects. See the code-stripping section below.
-
-**Already decided and unaffected by this: Clang/LLVM (owner discussion, 2026-07-03).** MinGW isn't actually a distinct option here — the bundled `gcc.exe` under `Compiler/bin/win64/` is already a MinGW-w64 build; that's what makes it produce native Windows PE executables at all. Clang/LLVM is more interesting but not worth pursuing: `TabWindow.bas`'s `CompileTo` project setting exposed **four** backend choices in Project Properties — `ToGAS`, `ToGCC`, `ToLLVM`, `ToCLANG` — but `Compiler/bin/win64/` only ships GCC/binutils; there's no bundled `clang.exe` or LLVM tooling at all, so selecting Clang or LLVM would just fail. Not worth bundling a second full toolchain for a speculative benefit when FreeBASIC's own GCC backend is far more battle-tested. **With `gas64` now also dead, `ToGCC` is the only surviving backend** — all three others (`ToGAS`, `ToLLVM`, `ToCLANG`) are removed in the code-stripping pass below, not just deprioritized.
-
-### Concrete design: Development/Final compile-mode toggle (owner decision, 2026-07-03)
-
-**Decision: fully opinionated, no exposed compiler flags of any kind.** Per the owner's stance: don't surface compiler internals to this audience at all — pick the best default for the ~99% of users who don't care, and let the ~1% who do go find a different tool. This collapses what's currently **six separate Project Properties controls** into **one two-state choice**:
-
-- Compile tab today: `optCompileToGas` / `optCompileToGcc` / `optCompileToLLVM` (backend radios) plus `optOptimizationFastCode` / `optOptimizationLevel` / `optOptimizationSmallCode` (three more controls, meaningful only for GCC)
-- Debugging tab today: `chkCreateDebugInfo` (separate checkbox, disconnected from the compile-backend choice even though they're really the same decision)
-
-**FINALIZED 2026-07-03: `gas64` is confirmed dead (see the gas64/GDB finding above) — both modes now use `-gen gcc`.** The two-state choice survives, just with a narrower meaning than originally hoped:
-- **Development:** `-gen gcc`, debug info on, no optimization (`-O0`, the compiler default) — matches how the IDE's own `Compile.bat` already builds itself. Fastest of the two, immediately debuggable. Default for day-to-day edit/compile/run.
-- **Final:** `-gen gcc`, debug info off, one fixed optimization level chosen by the project itself, never the user (`-O2` is a reasonable, uncontroversial default for typical hobbyist-scale programs — no need to expose the `-Ofast`-vs-`-Os` tradeoff to anyone). Produces the smaller/faster executable to hand out.
-
-**`ToGAS`/`ToLLVM`/`ToCLANG` are all fully removed** — `ToGCC` is the only surviving backend. See the code-stripping section below for what this means in `Debug.bas`, `TabWindow.bas`, `VisualFBEditor.bas`, and `frmProjectProperties.frm`.
-
-**Related cleanup found and done while investigating this (2026-07-03): leftover 32-bit GCC internals removed.** `Compiler/bin/libexec/gcc/i686-w64-mingw32/9.3.0/` was a complete parallel 32-bit GCC toolchain (its own `cc1.exe`, `as.exe`, `ld.exe`, plus 9 dependency DLLs — 31 MB, 12 files) sitting next to the real 64-bit one (`bin/libexec/gcc/x86_64-w64-mingw32/9.3.0/`). The earlier 32-bit-removal commit (`15e66cc`) only caught the top-level `Compiler/bin/win32/` folder and missed this deeper one. Confirmed zero references anywhere in build scripts or source before deleting; verified `-gen gcc` (IDE self-build via `Compile.bat`) still compiles clean afterward.
-
-**Alternative worth a future conversation, not decided:** rather than a persisted per-project setting the user has to remember to toggle, "Development vs Final" could instead be modeled as two different **actions** — e.g. the existing "Run" (implying the fast/debuggable path) versus a separate "Build Release"/"Publish" command (implying the optimized path) — with *no* settings UI at all, since the mode would be implied by which command is invoked rather than a stored radio state. That pushes "don't expose it" one step further than even two radio buttons. Flagged here because it's in the spirit of today's discussion, but the two-radio design above is the one actually decided; this is offered as a possible refinement for later, not a competing plan.
-
-### Code-stripping pass: remove dead alternative-debugger/compiler-backend support (2026-07-03, complete)
-
-With `gas64` confirmed dead and Clang/LLVM never bundled, all code and UI that existed only to support them has been physically removed (not hidden), per this project's established dead-code discipline (§3a). Executed in two compile-gated passes, per owner instruction:
-
-**Pass 1 — the Integrated (stabs) debugger engine and its dispatch branches:**
-- `Debug.bas`: removed the entire Integrated debugger engine (breakpoint injection via `WriteProcessMemory`, stabs-format debug-info parsing, the DWARF-parser cluster, duplicate `cutup_*` chain, `elf_extract`, `proc_newfast`, `brkv_test`) — 12,059 → 2,409 lines. `RunWithDebug` rewritten from a ~130-line function branching on custom-tool-path vs. GDB down to a ~40-line GDB-only function. The `DebuggerTypes` enum and `DefaultDebuggerType64`/`CurrentDebuggerType64` removed.
-- `VisualFBEditor.bas`: collapsed all debug-dispatch `Case` branches (`Start`, `End`, `Restart`, `StepInto`, `StepOver`, `SetNextStatement`, `StepOut`, `RunToCursor`, `Breakpoint`, etc.) from `If CurrentDebugger = IntegratedGDBDebugger Then <GDB> Else <Integrated> End If` down to the GDB body only. Removed `"ShowVar"`/`"LocateProcedure"`/`"EnableDisable"`/`"VariableDump"`/`"PointedDataDump"`/`"MemoryDumpWatch"`/`"ShowStringWatch"`/`"ShowExpandVariableWatch"`/`"ShowString"`/`"ShowExpandVariable"` cases (Integrated-only, no GDB equivalent). `"AddWatch"` reimplemented on the existing GDB watch mechanism. `"Break"` (pause-while-running) left as a documented no-op — it was only ever wired for the Integrated debugger; GDB has no equivalent yet. This is a pre-existing gap, not a regression.
-- `Main.bas`: removed `TimerProc` (only reachable from the deleted engine), a dead `shwtab`/`proc_sh` handler, emptied `tvPrc_NodeActivate`/`tvVar_Message` bodies (widgets kept for now, pending the UI sweep below).
-
-**Pass 2 — the compile-backend choice and the debugger-choice/custom-external-debugger-tool feature:**
-- `TabWindow.bi`/`TabWindow.bas`/`BuildService.bas`: `CompileToVariants` enum reduced to `ByDefault, ToGCC`; all `ToGAS`/`ToLLVM`/`ToCLANG` branches removed from compile-line construction.
-- `frmProjectProperties.frm`/`.bi`: removed `optCompileToGas`/`optCompileToLLVM`/`optCompileToClang` radio buttons and their handlers; renamed the shared enable/disable handler to `UpdateOptimizationControlsEnabled`. Kept the optimization-level controls (independent setting, out of scope).
-- Per owner decision ("Remove everything") the debugger-*choice* mechanism was removed together with the separate custom-external-debugger-tool feature it was entangled with, since neither has a reason to exist with GDB as the only debugger: `Main.bi`/`Main.bas` (`pDebuggers` Dictionary, `Debugger64Path`/`GDBDebugger64Path` settings; added `BUNDLED_GDB_PATH` constant so GDB's path is hardcoded like the bundled compiler), `SettingsService.bas` (removed the corresponding INI-loading blocks), `frmParameters.frm`/`.bi` (removed the `cboDebug64` debugger-choice combo; kept the unrelated `txtDebug64` extra-debug-arguments field), `frmOptions.frm`/`.bi` (removed the whole `grbDefaultDebuggers`/`grbDebuggerPaths` group — combos, `lvDebuggerPaths` ListView, Add/Remove/Change/Clear buttons and their handlers — 249 lines. Kept the rest of the "Debugger" options page: `chkLimitDebug`, `chkDisplayWarningsInDebug`, `chkTurnOnEnvironmentVariables`/`txtEnvironmentVariables`, which are general debug preferences unrelated to debugger choice).
-- Two example `.vfp` files needed a `CompileTo=` ordinal migration since the enum shrank: `Examples/ChineseCalendar/ChineseCalendar.vfp` (old `ToGAS`=1 → `ByDefault`=0) and `Examples/gdipClock/gdipClock.vfp` (old `ToGCC`=3 → new `ToGCC`=1). Repo-wide grep confirmed no other `.vfp`/template needed migration.
-
-**Result:** 14 source files changed, 146 insertions(+), 10,360 deletions(-) — `Debug.bas` alone accounts for -9,812 net lines. Verified via a final clean Release compile (0 errors/warnings) and a repo-wide grep confirming no removed identifier remains referenced anywhere in `.bas`/`.bi`/`.frm` files. Every intermediate compile error was resolved by tracing the exact error back to its definition/callers (never guessed) — stragglers the original mapping missed included `kill_process`, `re_ini`, `get_var_value`, `proc_loc`/`proc_enable`, `var_dump`/`string_sh`/`shwexp_new`, `check_bitness`, `reinit()`, all confirmed genuinely Integrated-only before removal, except `kill_process` which was restored with just its Integrated-only inner branch trimmed since `CloseSession` has a legitimate unconditional caller.
-
-**Deferred (not part of this pass):** the child TreeView widgets `tvPrc`/`tvVar`/`tvThd`/`tvWch` in the Debug panel are now fully inert (their handlers were emptied, not removed, since the widgets themselves still exist) — folding them into the still-open **UI/settings sweep** noted under §13.2 is the natural next step, along with any other GTK/Linux/alt-compiler/alt-debugger remnants visible in the UI but not yet touched by this code-level pass.
-
-**Post-merge regression found and fixed (2026-07-03):** this pass's `SettingsService.bas` edit removed the `"Debuggers"` section from `NoMoreIndexedSettingsKeys`'s multi-section key-existence check (8 sections remain) but left the function's termination condition at `Return keySum = -9` — a magic number that was never updated to match the new count (should be `-8`). Since `keySum` can now reach at most `-8`, the condition could never be true, and `LoadSettings`' `Do ... Loop Until NoMoreIndexedSettingsKeys(i)` (line ~225) never terminated — a genuine infinite loop, not a deadlock, burning 100% CPU on every startup. The commit compiled clean and passed the dead-identifier grep sweep, but nobody actually *launched* the app afterward, so this shipped to Codeberg undetected until the next session's dark-mode work prompted an actual smoke test. Found by binary-bisecting between this commit and the previous known-good commit (`e139c2c`), then narrowing file-by-file until the exact function was implicated. Fixed by correcting the constant to `-8`. **Lesson: a clean compile + grep sweep is necessary but not sufficient for large removals — launch the app at least once afterward, especially after touching loop-termination logic.**
-
-### Session 2026-07-05 (part 2): automatic workspace, File menu, bottom panel tab captions
-
-**Automatic workspace (replaces `.vfs` sessions in UX):**
-
-- Removed session menus, MRU sessions, `.vfs` filters, and `RenameProject` from the File menu.
-- Internal workspace at `Settings/Workspace.ini` via `SaveWorkspace()` / `LoadWorkspace()` — saves open project + editor tabs on exit; restores on cold start unless a command-line file is opened or Options create-default-project applies.
-- Single-project model: opening another project calls `PrepareForAnotherProject()` → `CloseProject()` with save prompt.
-- Renamed `CloseSession` → `CloseAllDocuments()`; removed `AutoSaveSession` and session-related INI keys from `SettingsService.bas`.
-
-**File menu restructure:**
-
-- **Project section:** New Project, Open Project, Recent Projects, Close/Delete Project, Close Folder, Save Project / Save Project As.
-- **File section (new):** New File, Open File, Recent Files (stub), Close File, Delete File (stub), Save File, Save File As.
-- Removed ambiguous Save/Save As/Save All/Close/Close All items and Rename Project.
-- WinAPI name clashes (`OpenFile`, `DeleteFile`) resolved: menu commands keep short names; internal subs are `OpenEditorFile()`, `CloseEditorFile()`, etc.
-- **New forms:** `frmNewFile` (file templates from `Templates/Files/`), `frmOpenProject` (`.vfp` only), `frmRecentProjects`.
-- Filter fixes: Open File no longer offers `.vfp`; New Project lists `Templates/Projects/*.vfp` only.
-
-**Bottom panel tab caption bug (found + fixed same session):**
-
-**Symptom:** All always-visible bottom tabs showed "Globals" instead of Output, Problems, etc.
-
-**Root cause:** `SetDebugTabsVisible(False)` (added in prior commit) called `DeleteTab` on tabs created by `InsertTab`, which marks them `FDynamic`. `DeleteTab` then **destroyed** the `TabPage` objects while global pointers (`tpGlobals`, etc.) remained. `ClearDebugPanels` also wrote captions to freed tabs after project close → heap corruption. Debug tabs were hidden **after** the tab-control HWND was created, so Win32 labels were built for all 14 tabs first. Saved INI indices of `-1` (from detached tabs) caused every tab to insert at index 0 on next load.
-
-**Fix:**
-
-- `TabControl.DetachTab()` — removes a tab from the strip without destroying the page (mirrors `AddTab`'s FDynamic guard).
-- `SetDebugTabsVisible` uses `DetachTab` / guarded `AddTab`; `ClearDebugPanels` only updates captions when `Parent <> 0`.
-- Hide debug tabs **before** `ptabBottom->Parent` assignment so `HandleIsAllocated` only registers the 7 always-visible tabs.
-- `AddToTabControl`: treat saved index `-1` as default index; `SaveTabPagePlacement`: guard `Parent = 0`.
-
-**Compile:** `CompileDebug.bat` — 0 errors (2026-07-05).
-
-**Deferred to next session (owner):**
-
-- [ ] **Bottom panel manual test checklist** — startup tab names, debug show/hide, project close, tab order persistence (checklist prepared in agent handoff).
-- [ ] `OpenRecentFiles()` — stub; needs `frmRecentFiles` dialog.
-- [ ] `DeleteEditorFile()` — stub.
-- [ ] `frmNewProject` template icons — `@imgList32` may not be populated at form creation time.
-
-### Session 2026-07-05 (part 3): Run menu consolidation & GDB debug UX
-
-**Goal:** One **Run** menu for all run/debug commands; no duplicate Debug menubar; reliable enable/disable when **Use Debugger** is toggled.
-
-**Run menu structure (menubar: Build → Run → Tools):**
-
-1. **Session** — Start With Compile, Start, Continue, Break, End, Restart  
-2. **Stepping** — Step Into/Over/Out, Run To Cursor  
-3. **Debugger options** — Use Debugger, Use Profiler  
-4. **Breakpoints** — Toggle Breakpoint, Clear All Breakpoints  
-5. **Advanced** — GDB Command, Add Watch  
-6. **Execution point** — Set Next Statement, Show Next Statement  
-
-The separate **Debug** menubar item was removed. The **Debug toolbar** (View → Toolbars → Debug) is unchanged.
-
-**Fixes in this session:**
-
-- **GDB mutex deadlock** at breakpoint stop — debug thread no longer self-deadlocks on `tlockGDB`; Step/Continue work after stop (`Debug.bas`).
-- **Debug tabs** — show/hide tied to **Use Debugger**; `DetachTab`/`AddTab` pattern preserved; no heap corruption on hide.
-- **Use Debugger toggle** — menu check items don't auto-toggle in MFF; handler uses `Not UseDebugger` and syncs menu + toolbar checked state.
-- **Menu enable state** — `ChangeMenuItemsEnabled` and `frmMain_ActiveControlChanged` call `ChangeEnabledDebug` instead of overriding run/step items; **Use Profiler** gated on debugger; **Clear All Breakpoints** implemented (`EditControl.ClearAllBreakpoints`, `ClearAllBreakpoints()`).
-- **Set Next Statement / Run To Cursor** — editor-focus and idle-vs-stopped enable logic corrected.
-
-**Key files:** `src/Main.bas`, `src/VisualFBEditor.bas`, `src/Debug.bas`, `src/TabWindow.bas`, `src/EditControl.bas`, `Controls/MyFbFramework/mff/TabControl.bas`.
-
-**Compile:** `CompileDebug.bat` — 0 errors (2026-07-05).
-
-**Owner sign-off:** Run menu complete (2026-07-05).
-
-### Session 2026-07-05 (part 4): GDB debugger fixes & bottom tab captions
-
-**Owner sign-off:** Bottom panel tab-caption regression fixed (2026-07-05).
-
-**GDB debugger fixes:**
-
-1. **Step Out** — `step_debug("finish")` instead of `"n"` (`VisualFBEditor.bas`).
-2. **Command dispatch queue** — replaced single `NewCommand` string with a 32-slot ring buffer (`EnqueueDebugCommand`, `DequeueDebugCommandLocked` in `Debug.bas`); `continue_debug`, `step_debug`, `command_debug`, and close-all-documents quit path use the queue.
-3. **Break while running** — `break_debug()` sends GDB `interrupt`; debug thread releases `tlockGDB` during blocking `readpipe` so the UI thread can inject the interrupt.
-
-**Compile:** `CompileDebug.bat` — 0 errors (2026-07-05).
+Complete session-by-session history archived in [HISTORY.md](HISTORY.md). Major milestones:
+
+- **2026-07-06:** Form designer grey-panel fixed; File menu (incl. Open Project) and Edit menu step-by-step reviews owner-approved
+- **2026-07-05:** Automatic workspace (.vfs removed); File menu restructure; Run menu consolidation; GDB fixes (Step Out, command queue, Break); bottom panel tab captions fixed
+- **2026-07-04:** Dark mode crash #3 fixed (WM_THEMECHANGED recursion); per-form control tree; PagePanel layer navigation
+- **2026-07-03:** _WIN32_WINNT header fix (116 locations); dark mode reimplemented; Integrated debugger + alt-compiler backends removed; Tier 3 compiler swap closed (no viable 1.10.3 binary)
+- **2026-07-02:** GTK strip + dead-code deletion (Batch 2.75.3); bottom panel fixes; Form Designer export fix
 
 ---
+
+
+
+
+
+
+
+---
+
 
 ## 5. Bottom panel — intended behavior (reference)
 
@@ -593,55 +387,13 @@ State model mirrors **left/right** panels:
 
 ---
 
-## 6. Completed work checklist
+## 6. Completed work
 
-- [x] Win64-only fork scope documented (`README.md`, `BUILD.md`)
-- [x] `Compile.bat` / `CompileDebug.bat` two-step build (mff + IDE)
-- [x] Batch 2.75.1 panel/layout cleanup
-- [x] Batch 2.75.2 GTK preprocessor strip + compile fix
-- [x] Startup freeze fix (autolaunch removal, `_NOT_AUTORUN_FORMS_`)
-- [x] Tab close button glyph (×)
-- [x] Bottom panel pin/collapse/expand behavior (multi-iteration) — **fixed**
-- [x] Bottom panel INI persistence (save timing + startup restore) — **fixed**
-- [x] Bottom panel collapse reclaims editor height — **fixed**
-- [x] First-start collapsed layout reclaims editor space (`frmMain_Show` re-apply) — **fixed**
-- [x] Codeberg remote + SSH
-- [x] `ActivateMainWindow()` at end of `frmMain_Show` (editor foreground on startup)
-- [x] Right panel Pin click not collapsing — **fixed** (`c267284`)
-- [x] Left panel Pin click not collapsing — **fixed** (`64daa66`)
-- [x] Form Designer never activating for any `.frm` file — **fixed**, root-caused to strip-tool `__EXPORT_PROCS__` blind spot (`bef9267`)
-- [x] `Compiler/`, `Debuggers/` tracked in git (self-contained fork) (`b555406`)
-- [x] 32-bit compiler binaries removed (`Compiler/bin/win32`) (`15e66cc`); missed leftover found and removed 2026-07-03 — `Compiler/bin/libexec/gcc/i686-w64-mingw32/9.3.0/` (31 MB, 12 files), verified both `-gen gcc` and `-gen gas64` still compile clean afterward
-- [x] All compile warnings resolved, 0 warnings/0 errors (`53d8e47`, `56f6d18`)
-- [x] Dark-mode implementation replaced with inert stub (interface preserved) (`56f6d18`)
-- [x] Confirmed-dead subtrees deleted: `gir_headers/`, `WebView/`, `fbsound/`, `SoundPlayer.*` (`c494207`)
-- [x] Batch 2.75.3 — physical dead-code deletion across `Debug.bas`, `Designer.bas`/`.bi`, `Main.bas`/`.bi`, `TabWindow.bas`, `VisualFBEditor.bas`, ~15 `mff/*.bas` files, `NativeFontControl.bas`/`.bi` deleted outright (`7baebd1`, `add4642`, `76abaa5`)
-- [x] AI KnowledgeBase path bug fixed — `VisualFBEditor IDE Environment.md` was never loading due to a missing `\KnowledgeBase\` path segment in `Main.bas` (found via second-AI audit verification, §4)
-- [x] Ad-hoc: bottom-panel analysis/debug tabs now clear on project close and debug-session-end instead of retaining stale cross-project content — see §4
-- [x] Form Designer capability gap, part (a): per-form control tree in the project Explorer, with panel-aware icons and consistent single-click-open behavior — see §8
-- [x] Bug fix: File > Close All left an empty project's tree entry behind — see §8
-- [x] Form Designer capability gap, part (b): PagePanel layer/page navigation from the control tree, the Designer's right-click menu, and Ctrl+PageUp/PageDown; fixed a real right-click-never-selects bug and a load-time page-visibility bug along the way — see §8 (one known cosmetic gap deferred, §13.9)
-- [x] Dark mode crash #3 root-caused (WM_THEMECHANGED ↔ SetWindowTheme infinite recursion → stack overflow, caught live under GDB) and fixed with a re-entrancy guard in `AllowDarkModeForWindow`; also fixed a latent crash-on-system-theme-change — see §4
-- [x] Dark mode visual completion: horizontal (tpTop) tab-strip dark painting + real dark background fill in `TabControl` — dark mode now stable and enabled; popup menus deferred to §13.10 — see §4
-- [x] **2.1.3 Audit and fix magic numbers** — named constants added for: `INDEXED_SETTINGS_SECTION_COUNT` (-8 count-sum), `DEFAULT_AI_PORT`/`TEMPERATURE`/`CONTENTSIZE_KB` (duplicated AI defaults), `MAX_PREPROCESSOR_DEPTH` (array+bound sync), `SAVED_FIELD_COUNT` (shared dim), `PROJECT_FOLDER_*`/`SAVE_FILTER_*` (folder/filter indices); ASCII ranges replaced with `Asc("X")` for readability — see §4
-- [x] **2.1.2 Remove dead/comment-cruft and empty handlers** — 342 lines removed: 3 dead Declares (CompileWithDebugger, LoadFromTabWindow, LoadInterfaceTheme), 15 empty event handlers + wirings across 10 .frm files, 57 lines of commented-out code blocks, ~75 `.Caption` migration vestiges, dead `__USE_GTK__` markers — see §4
-- [x] **2.2.1 Standardize variable naming** — fixed typos (`bPreprocesssor`→`bPreprocessor`, `bStartsOfProcs`→`bStartsOfProcedures` in TabWindow.bas; Turkish `Yaratilmadi`→`WasNotCreated`, `Band`→`Blocked` in BuildService.bas; misleading `pClass`→`iClass` in VisualFBEditor.bas + TabWindow.bas); `bInThingk`/`bInNOTThingk` deferred (cross-file globals) — see §4
-- [x] **2.3.2 UI/settings sweep — orphaned controls** — 5 dead compiler-management buttons + 1 label removed from frmOptions (and .bi, Temp.bas); dead `cmdHelp` removed from frmProjectProperties; theme picker page (`grbThemes`/`hbxInterfaceColors`, ~20 controls) identified as unreachable but left in place — see §4
-- [x] **2.3.1 Development/Final compile-mode toggle** — replaced CompileToVariants enum with CompileModeVariants (Development/Final), replaced 6 Project Properties controls (compile-backend radio, 4 optimization radios, debug-info checkbox, optimization combo) with single radio pair; pipeline: Development = `-gen gcc -O0 -g`, Final = `-gen gcc -O2`; all old serialization keys migrated — see §4
-- [x] **2.2.2 DRY pass (conservative)** — `SaveTabPagePlacement()` replaced 19 WriteString/Integer pairs in Main.bas — see §4
-- [x] **2.4.1/2.4.2 Final audit + docs cleanup** — `src/makefile` deleted (unused Linux/GTK build system, 239 lines); `src/THREADING.md` GTK reference removed; only remaining artifact is intentional `TabWindow.bas:CheckCondition()` handling `__fb_linux__` for IDE's user-code preprocessor evaluator — see §4
-- [x] **13.3 UI evaluation** — comprehensive review of all IDE surfaces; 28 fixes applied (menu labels, dialog cleanup, defaults, orphaned controls, find dialog overhaul, save dialog auto-timer, Code Editor grouped, Project Properties simplified, Options→Compiler simplified) — see §4
-- [x] **File menu restructured** — project items grouped (New/Open/Recent/Rename/Close/Delete Project), template adapted per menu item, `frmNewProject` as simplified New Project form
-- [x] **Debug tabs** — 7 debug tabs hidden when not debugging via `SetDebugTabsVisible`
-- [x] **Window menu doc list** — all open documents listed with active checked
-- [x] **MRU fixed** — frmTemplates reads from memory not stale INI; duplicate "Recent Projects" removed from File menu
-- [x] **Startup simplified** — no template dialog on startup; default is Do Nothing; startup options removed from Options dialog
-- [x] **Automatic workspace** — `.vfs` sessions removed from UX; `Settings/Workspace.ini` save/restore on exit/startup; single-project switch via `PrepareForAnotherProject()` — see §4
-- [x] **File menu (part 2)** — Project vs File sections; `frmNewFile`, `frmOpenProject`, `frmRecentProjects`; WinAPI handler rename — see §4
-- [x] **Bottom panel tab captions** — `DetachTab`, hide debug tabs before HWND init, INI index `-1` guard — see §4
-- [x] **Run menu consolidation** — all run/debug commands under **Run**; Debug menubar removed; Use Debugger / profiler / breakpoints grouped; GDB session enable fixes; owner verified complete (2026-07-05) — see §4
+All completed items have been archived to [CHANGELOG.md](CHANGELOG.md). See that file for the full chronological record of shipped work with commit hashes.
+
+**Still open from this section:**
+
 - [ ] **frmNewProject icons** — template icons not displaying on new form (icon name derivation matches frmTemplates pattern but `@imgList32` may not be populated at form creation time); deferred
-- [x] **Bottom panel regression (tab captions + debug hide/show)** — owner verified fixed (2026-07-05) — see §4, §7
 
 ---
 
@@ -726,17 +478,6 @@ All items above passed **before** the owner separately found the critical `_WIN3
 
 **Regression validation is now complete**, aside from the still-open gas64-vs-GCC backend check above (§4/§8). Compiler-header robustness work (the `_WIN32_WINNT` fix, §4) happened in parallel/after this pass and doesn't need to be re-validated here — it's covered by its own verification in §4.
 
-### Known deferred cleanup (not blocking unless touched)
-
-> **Doc-hygiene note (audit flag, 2026-07-03, deferred):** this list overlaps with §8's "Low-priority cleanup" (both list `src/makefile` and `src/THREADING.md`). Worth consolidating into one canonical deferred-items list eventually — not urgent, noting so it doesn't silently drift out of sync.
-
-- ~~Commented `#IfNDef __USE_GTK__` blocks in source~~ — **done**, see §3a
-- ~~`mff/DarkMode/` directory~~ — **done** (replaced with inert stub, not removed — see §3a for why)
-- ~~Stray dead-code comments from GTK era~~ — **done**, see §3a
-- `src/makefile` still references GTK defines (not used by `Compile.bat`) — still open, low priority
-- `src/THREADING.md` mentions GTK UI wrapping (historical) — still open, low priority
-- ~~**Debugger: Step Out sends wrong GDB command, and debug-action command dispatch has a race condition**~~ — **fixed** 2026-07-05 (see §4 session part 4, §7 GDB checklist)
-
 ### Optional / housekeeping
 
 - `docompile.bat` — gitignored local helper at repo root (owner convenience)
@@ -744,7 +485,49 @@ All items above passed **before** the owner separately found the critical `_WIN3
 
 ---
 
-## 8. Planned next steps
+## Open Items
+
+*All open/deferred items consolidated from across the document. Ordered by priority/readiness.*
+
+### Immediate (stubs & bugs)
+
+- [ ] **frmNewProject icons** — template icons not displaying on new form (`@imgList32` may not be populated at form creation time)
+- [ ] **`OpenRecentFiles()`** — stub; needs `frmRecentFiles` dialog
+- [ ] **`DeleteEditorFile()`** — stub
+- [ ] **GDB smoke test** — Step Out, rapid step/continue queue, Break while running — pending owner verification (§7)
+
+### Low-priority cleanup
+
+- [ ] **`src/makefile`** — still references GTK defines (not used by `Compile.bat`)
+- [ ] **`src/THREADING.md`** — mentions GTK UI wrapping (historical)
+
+### Queued for Cursor
+
+- [ ] **MFF control library path consolidation** — one DLL → one `Library` object with one canonical path; retire `GetModuleFileNameW` workaround in `Designer.Symbols` (§8)
+
+### Deferred enhancements (nice to have, not blocking)
+
+- [ ] **2.2.3 Split oversized files** — `TabWindow.bas` (576 KB), `Main.bas` (412 KB), `EditControl.bas` (316 KB) (§13.2)
+- [ ] **13.9 Blank Designer page on cold-open** — `PagePanel` page shows blank until a control is selected; cosmetic only (§13.9)
+- [ ] **13.10 Dark mode: owner-drawn popup menus + input-field polish** — `WM_DRAWITEM ODT_MENU` handler is an empty stub; input-field faces stay light (§13.10)
+- [ ] **13.11 Dark mode: dark dialog backgrounds** — `WM_ERASEBKGND` not filled with dark brush; gate on window class (§13.11)
+- [ ] **13.8 Design-workspace status bar** — three-cell status bar docked to `pnlForm`; researched, non-trivial (§13.8)
+
+### Unscheduled / future planning
+
+- [ ] **13.3 UI review** - File + Edit owner-approved; **View menu** is next; remaining menus pending (§13.3)
+- [ ] **13.2.1.1 Standardize indentation** — convert mixed tabs/spaces across all source files (§13.2)
+- [ ] **13.4 Rename the project** (e.g. "ABStudio") — deeper than cosmetic; dedicated pass needed (§13.4)
+- [ ] **13.5 Standard Windows installer** — Inno Setup or WiX; depends on project rename decision (§13.5)
+- [ ] **13.6 Full review/expansion of Examples/** — re-verify all examples compile; fix `WellCOM` DllMain; add appealing demos (§13.6)
+- [ ] **13.7 Enhance AI integration** — deeper codebase-aware context, AI-assisted debugging, inline suggestions (§13.7)
+- [ ] **Upstream sync strategy** — this fork intentionally diverges; merge only with explicit plan
+- [ ] **Wiki/docs** — fork-specific documentation
+- [ ] **Basic CI** — run `Compile.bat` on push
+
+---
+
+## 8. Planned next steps (historical design & research)
 
 ### Form Designer panel/layer navigation (part b) — shipped 2026-07-04, one known cosmetic gap left
 
@@ -779,36 +562,11 @@ Owner reported: after File > Close or File > Close All, everything else reset (t
 
 **Fix:** `CloseAllTabs` (`Main.bas`) now does the same sweep after closing tabs, via a new `ProjectHasOpenTabs` helper (checks `tb->ptn` — a `TabWindow` field set once at construction via `GetParentNode`, already used the same way by `CloseProject`/`CloseSession`) that gates the sweep so a project is only auto-closed once *nothing* is left open under it — this correctly skips projects kept open via `WithoutCurrent`, or where the user hit Cancel on a per-tab unsaved-changes prompt, rather than force-closing over a deliberate Cancel. File > Close (single tab) deliberately still leaves the project tree alone otherwise — standard IDE convention (Visual Studio/VS Code don't remove a project from Explorer just because you closed one of its files) — only Close All now also closes empty projects.
 
-### Immediate
+*Planning items consolidated into [Open Items](#open-items) above. The historical design research and bug analyses below are preserved for reference.*
 
-1. ~~**Regression validation** — complete §7 manual test plan~~ — **done** (2026-07-03), all items passed except the still-open gas64-vs-GCC backend check (§4)
-2. **Low-priority cleanup** (optional, not blocking): `src/makefile` GTK defines, `src/THREADING.md` GTK mentions
-3. ~~**Examples/ GTK/Linux/Win32-only audit**~~ — **done** (2026-07-03)
+### Tier 3 — compiler toolchain (closed)
 
-### Active (2026-07-05 session)
-
-4. ~~**2.1.3 Magic numbers**~~ — **done**
-5. ~~**2.1.2 Dead code/comments**~~ — **done**
-6. ~~**2.2.1 Variable naming**~~ — **done**
-7. ~~**2.3.2 UI sweep**~~ — **done**
-8. ~~**2.3.1 Dev/Final compile toggle**~~ — **done**
-9. ~~**2.2.2 DRY pass**~~ — **done** (3 conservative extractions)
-10. ~~**Automatic workspace + File menu part 2 + bottom panel tab captions**~~ — **done** (see §4 session 2026-07-05 part 2)
-11. **Bottom panel tab-caption regression** — owner checklist in §7; run first thing next session
-12. **2.2.3 Split oversized files** — deferred (highest risk)
-13. **Stubs:** `OpenRecentFiles()`, `DeleteEditorFile()`; **frmNewProject icons**
-
-### Tier 3 — compiler toolchain (attempted 2026-07-03, closed for now — see §4)
-
-4. ~~**Verify a compiled `fbc64` is available for 1.10.3**~~ — **done** (2026-07-03): no viable 1.10.3 Windows binary exists anywhere (stw's portal build #875 is mislabeled — it's actually trunk/1.20, not a frozen 1.10.3 build; no official binary exists on GitHub Releases or SourceForge either). Full writeup in §4.
-5. ~~**Replace `Compiler/` tree** with the 1.10.3 build~~ — **not happening** (2026-07-03): staying on the currently-bundled 1.10.1 rather than building FreeBASIC from source for one point-release's worth of fixes. Removed cleanly from the immediate plan, not silently dropped — see §4 for the reasoning and what would need to be true to revisit it.
-6. **Longer term:** vendor the FreeBASIC compiler's own source into the repo tree, in preparation for future AI-assisted review/modification of the compiler itself (owner-flagged as upcoming, no timeline yet). If this happens, it's the natural point to reconsider building a newer FreeBASIC version from source too, rather than doing that build effort as a one-off just for a point release.
-
-### Longer term / unscheduled
-
-7. Upstream sync strategy (if any) — this fork intentionally diverges (Win64-only); merge upstream only with an explicit plan
-8. Wiki/docs for fork-specific behavior
-9. Basic CI (e.g. run `Compile.bat` on push) — flagged by a second-AI audit (2026-07-03, deferred) as worth adding once the project outgrows one-person manual verification; not urgent today since compile-clean-before-commit is already enforced by convention (§9).
+Tier 3 (compiler swap to 1.10.3) was attempted 2026-07-03 and closed: no viable 1.10.3 Windows binary exists anywhere. Staying on bundled FBC 1.10.1. Full writeup in §4. Longer term: vendor FreeBASIC compiler source into repo for AI-assisted review — natural point to revisit building a newer FBC from source.
 
 ---
 
@@ -948,140 +706,67 @@ Includes:
 | `7baebd1` | Physically delete dead GTK/32-bit/Linux code and legacy comment cruft in `Debug.bas` |
 | `add4642` | Physically delete dead GTK/32-bit/Linux code in `Designer`/`Main`/`TabWindow`/`VisualFBEditor.bas` |
 | `76abaa5` | Physically delete remaining dead GTK/32-bit code across `MyFbFramework` and `src` headers |
+| `4cf7275` | Fix critical `_WIN32_WINNT` header bug blocking user-project compiles; bottom-panel tab clearing on project close |
+| `4bd0289` | Add missing example `.vfp` project files; audit Examples/ for GTK/Linux/Win32-only; add "no unnecessary options" guiding principle |
+| `51441d7` | Fix `Graphics/CanvasDraw.bas` example against current `mff` API |
+| `e139c2c` | Remove leftover 32-bit GCC internals (`i686-w64-mingw32`); clarify gas64/gcc relationship |
+| `5021314` | Lock in decision: implement both gas64 and gcc backends, remove gas64 if GDB debugging fails |
+| `59cd42c` | Close Tier 3 (compiler swap): no viable 1.10.3 binary exists, staying on 1.10.1 |
+| `0934416` | Finalize gas64/GDB decision: gas64 is dead, Development/Final both use `-gen gcc` |
+| `3886f3d` | Add note: UI/settings sweep for GTK/Linux/alt-compiler/alt-debugger remnants |
+| `5fa5cf2` | Remove Integrated (stabs) debugger engine and alt-compiler-backend/debugger-choice code (~10,360 lines deleted) |
+| `b3633bc` | Reimplement dark mode with documented Win32 APIs; fix startup-hang regression from `SettingsService` infinite loop |
+| `a7c7839` | Fix General-options checkbox overlap (`ControlIndex` + `RequestAlign` on page visibility); flag Form Designer multi-page scalability concern |
+| `f371d21` | Fix two real dark-mode crash bugs (`WM_SETTINGCHANGE` ANSI string + early-startup broadcast); document third still-open crash |
+| `fd33a05` | Characterize and scope the Form Designer navigation gap; confirmed salvageable with additive scope, not a rewrite |
+| `f292db0` | Add per-form control tree to project Explorer; fix File > Close All leaving empty project tree behind |
+| `0c08fe5` | Add PagePanel layer/page navigation (tree + right-click menu + Ctrl+PageUp/PageDown); fix right-click-never-selects and load-time page-visibility bugs |
+| `389f3ce` | Fix dark mode crash #3 (WM_THEMECHANGED ↔ SetWindowTheme infinite recursion → stack overflow); complete tab/body dark rendering |
+| `d877cef` | Safe dark popup menus scaffolding; right panel pin fix |
+| `7261267` | Phase 2 cleanup: magic numbers, dead code, naming fixes, orphaned UI, Development/Final compile toggle |
+| `d7608ae` | 2.2.2 DRY: `SaveTabPagePlacement()` extraction (19 WriteString/Integer pairs → helper) |
+| `6b3200a` | 2.4.1/2.4.2: delete `src/makefile` (Linux/GTK build system); fix `THREADING.md` GTK reference; remove final `__USE_GTK__` comment |
+| `49ec5cc` | UI evaluation fixes: menu labels, dialog cleanup, debug tabs, Code Editor grouping, compiler options simplification, editor defaults |
+| `37ba31e` | UI evaluation: File menu restructure, `frmNewProject`, debug tabs, startup options, MRU fix, editor defaults |
+| `b9735e8` | Replace `.vfs` sessions with automatic workspace; restructure File menu; fix bottom panel tab captions |
+| `ec42ea8` | Win64 IDE cleanup: simplify menus (Run menu consolidation), projects, build, and debugger (GDB fixes: Step Out, command queue, Break) |
+| `cc9e7dd` | Fix form designer grey panel: resolve MFF control library by live module handle via `GetModuleFileNameW` |
 
 ---
 
-## 13. Future enhancements (owner-added, unscheduled)
+## 13. Future enhancements
 
-These are **enhancements, not bugs** — added by the owner after Tier 3 was scoped. No committed order yet; see the owner's own numbering below. None of this work has started.
+Full enhancement specs archived in [ROADMAP.md](ROADMAP.md). Quick reference:
 
-**Read §13.4's context note before scoping any of this section.** This is a hobby project with no timeline pressure, and the underlying goal across all of §13 — not just the rename — is to avoid the original upstream project's failure mode (too much scope, too little central attention, eventual collapse to one maintainer). Favor depth and coherence over speed or breadth when picking this up.
+| ID | Enhancement | Status |
+|----|-------------|--------|
+| 13.1 | Evaluate later GCC version | **Closed** — evaluated, declined |
+| 13.2 | Structured programming pass (4 phases) | Phases 1-4 mostly complete; 2.1.1 indentation + 2.2.3 file splits deferred |
+| 13.3 | UI evaluation & modernization | **In progress** - View menu is next (File + Edit complete) |
+| 13.4 | Rename project ("ABStudio") | Unscheduled — dedicated pass needed |
+| 13.5 | Standard Windows installer | Unscheduled — depends on 13.4 |
+| 13.6 | Full review/expansion of Examples/ | Unscheduled — doc/polish phase |
+| 13.7 | Enhance AI integration | Unscheduled — not yet scoped |
+| 13.8 | Design-workspace status bar | Deferred — non-trivial |
+| 13.9 | Blank Designer page on cold-open | Deferred — cosmetic only |
+| 13.10 | Dark mode popup menus + input polish | Deferred |
+| 13.11 | Dark mode dialog backgrounds | Deferred |
 
-### 13.1 Evaluate a later GCC version — **CLOSED (2026-07-04): evaluated, declined**
+---
 
-Current: GCC 9.3.0 (MinGW-W64, posix-sjlj), Binutils 2.34. No actual problem exists — the IDE and all examples compile cleanly. A standalone GCC swap carries high ABI risk (FreeBASIC 1.10.1's bundled `crt*.o`, `libgcc.a`, and `libfbmt.a` were built against this specific GCC; mismatched exception models between `sjlj` and `seh` can silently corrupt the stack at runtime). Marginal benefits (10-20% faster compiles, 5-10% better -O2 output) don't justify the testing burden and risk. Revisit only if a specific, concrete problem attributable to the GCC version surfaces.
+## Document maintenance
 
-### 13.2 Structured programming, consistency, and legacy-tech-debt removal
+This document is the project's primary handoff artifact. To keep it navigable:
 
-**Owner's stated goal:** this codebase carries the accumulated effect of many independent programmers working on it over many years with minimal communication between them. The point of this pass isn't cosmetic formatting — it's to impose one consistent set of conventions and structure over code that currently has as many styles as it had contributors, so the system becomes legible and maintainable going forward rather than an archaeology exercise every time someone touches it.
-
-**Codebase size:** ~277 files, ~5 MB total. Largest files: `TabWindow.bas` (576 KB), `Main.bas` (412 KB), `EditControl.bas` (316 KB), `Chart.bas` (114 KB), `Designer.bas` (117 KB).
-
-#### Phase 1 — Safe mechanical cleanup (low risk, scriptable)
-
-- **2.1.1 Standardize indentation (whitespace only):** convert mixed tabs/spaces to one consistent scheme across all `.bas`/`.bi`/`.frm`. Scriptable in bulk, zero logic changes. Gate: `CompileDebug.bat` clean.
-- **2.1.2 Remove dead/comment-cruft and empty handlers:** sweep for commented-out code blocks, dead `Declare` forwards with no implementation, empty no-op event handlers. Clean `src/Temp.bas` (238 KB of designer-generated scratch). Gate: compile clean + grep for removed identifiers.
-- **2.1.3 Audit and fix magic numbers:** hunt for unnamed numeric literals standing in for counts/sizes/flags. Known example: `SettingsService.bas` `NoMoreIndexedSettingsKeys` `Return keySum = -9` (already fixed, but the pattern repeats). Gate: compile clean + spot-check constant values.
-
-#### Phase 2 — Codebase readability (moderate risk, file-by-file)
-
-- **2.2.1 Standardize variable naming conventions:** pick one convention and apply uniformly. Rename file-by-file (not cross-file), avoids breaking `Alias`/`Export`/`Declare` bindings. Gate: `CompileDebug.bat` after each file.
-- **2.2.2 DRY pass — extract repeated code within files:** identify duplicated logic patterns within single files and extract into `Private Function`/`Sub`. Gate: compile after each extraction.
-- **2.2.3 Split oversized files by logical domain:** `TabWindow.bas` (Editor/Designer/Debug/Project/Build), `Main.bas` (panels/settings/toolbars/project tree), `EditControl.bas` (highlighting/folding/intellisense). Gate: compile after each split, verify `Export`/`Alias` bindings.
-
-#### Phase 3 — Architecture improvements (high value, high risk)
-
-- **2.3.1 Development/Final compile-mode toggle:** replace 6 Project Properties controls with one "Development"/"Final" radio pair. Both use `-gen gcc`. Gate: compile clean + compile a test project in both modes.
-- **2.3.2 UI/settings sweep — remove orphaned controls:** audit `frmOptions.frm`, `frmProjectProperties.frm` for GTK/Linux controls, alt-compiler radios, alt-debugger references, orphaned theme pickers whose underlying code was deleted in Tier 2.75.3. Gate: compile clean + visual verification.
-- **2.3.3 Extract shared framework utilities:** move common patterns into shared modules. Candidates: INI key migration, GDB command construction, panel-size clamping, DPI scaling helpers. Gate: compile after each extraction.
-
-#### Phase 4 — Legacy tech debt (lowest priority)
-
-- **2.4.1 Final audit for remaining GTK/Linux/32-bit artifacts:** verify nothing new was introduced since Tier 2.75.3. Gate: `grep -rn "GTK\|__USE_GTK__\|__FB_LINUX__\|32bit\|i686" src/ mff/` returns zero (except intentional `CheckCondition()` in `TabWindow.bas`).
-- **2.4.2 Clean `src/makefile` and `src/THREADING.md`:** remove GTK references. Gate: docs-only, compile not affected.
-
-#### Recommended execution order
-
-```
-2.1.1 → 2.1.3 → 2.1.2   (mechanical, safe, quick wins)
-2.2.1 → 2.3.2            (variable naming + UI sweep — user-facing)
-2.3.1                     (compile toggle — immediate user value)
-2.2.2 → 2.2.3            (DRY + file splits — the real structural work, highest risk)
-2.3.3 → 2.4.1 → 2.4.2   (final cleanup)
-
-### 13.3 UI evaluation and modernization
-
-Owner asked whether this review needs a different AI trained specifically on front-end/UX practices, or whether it can be done here.
-
-**Answer:** This can be done in this same environment. The relevant knowledge — Windows desktop UX conventions (Fluent Design / WinUI spacing, typography, and interaction patterns; conventions from comparable dev tools like VS Code and Visual Studio, since VFBE is a code editor, not a general consumer app), accessibility basics (contrast ratios, keyboard navigation, focus indicators), and layout/information-hierarchy heuristics — isn't a separate specialized model; it's general knowledge any capable model has, not something that requires a different AI trained on it. The Claude Code preview tooling can drive the actual built app, take screenshots, and inspect computed styles directly, which is what a review needs. There isn't a categorically "better-suited" different AI for this — the limiting factor is doing the review carefully (screenshot-driven, one panel/dialog at a time) rather than which model does it.
-What **would** add value beyond any AI review: a human with fresh eyes and no context on the app's history, and/or usability testing with an actual end-user developer completing a real task — those catch friction an AI reviewer working from screenshots tends to miss.
-Recommended approach when this is scheduled: run the built IDE, screenshot each major surface (main window, Designer, dialogs, Toolbox, Find/Replace, Settings), evaluate against Fluent/WinUI conventions and basic accessibility, and produce a scoped list of concrete changes rather than a vague "modernize" pass.
-
-**Design against the target audience (§1), not against power users:** the primary audiences (returning Basic programmers, desktop-focused hobbyists, students) value approachability and a cohesive single tool over configurability or professional-IDE feature depth. UI evaluation should weight "is this discoverable and non-intimidating to someone who hasn't touched an IDE in 20 years, or ever" above "does this match what VS Code/Visual Studio power users expect." Avoid recommending changes that add configuration surface or professional-IDE conventions (command palettes, complex multi-pane customization) purely because they're modern — that cuts against the actual audience.
-
-### 13.4 Rename the project (e.g. "ABStudio" — Astoria Basic Studio)
-
-**Owner's context (important — shapes how all of Tier 4 should be approached):** this is a hobby project, and the owner is explicitly willing to spend months building an elegant system from the source-code level up — timeline is not a constraint. The owner's diagnosis of what went wrong with the original upstream project: it tried to do too much, with too little central guidance or attention to detail, and eventually its contributor base collapsed to a single person doing peripheral maintenance because the system had become too difficult to manage as a whole.
-
-That history is the actual reason the rename matters, beyond a cosmetic label: it's meant to mark a deliberate, disciplined fresh start distinct from that trajectory — one with central direction and attention to detail, paired with the structural cleanup in §13.2. Given that framing, this fork should explicitly avoid repeating the original failure mode: **resist scope creep, keep changes centrally reviewed, and prioritize depth/coherence in one area over breadth across many.** Worth keeping in mind for how all of §13 (not just the rename) gets sequenced and scoped as it's picked up.
-
-Flagging the rename itself as a **larger mechanical undertaking than it looks**, not a reason to avoid it — a rename this deep should be a dedicated pass with its own compile-and-test cycle, not folded into other work. Known touch points:
-- Output binaries: `VisualFBEditor64.exe`, `mff64.dll` — filenames referenced throughout `Compile.bat`, `.gitignore`, this doc, `README.md`, `BUILD.md`
-- Window class names / mutex or single-instance-detection strings (if any) in `src/VisualFBEditor.bas` / `Main.bas` — renaming these changes on-disk identity, not just cosmetics
-- Splash screen, About dialog, title bar text, `App.Title` (`src/Main.bas` per §3a warnings-fix notes)
-- INI file name/path (`Settings/VisualFBEditor64.ini`) — needs a migration story if existing users' settings shouldn't be silently orphaned; see the INI key migration convention in §9
-- Repository name on Codeberg (`VFBEWin64`) — a rename here changes clone URLs for anyone already tracking it
-- Every doc file (`README.md`, `PROJECT_STATUS.md`, `src/BUILD.md`, `src/THREADING.md`) and likely dozens of in-code comments/strings referencing "VisualFBEditor" or "VFBE"
-- Decide scope up front: cosmetic rename only (title/About/docs) vs. full identity rename (binaries, repo, INI, window classes) — the second is much larger and should be scheduled as its own tier.
-
-### 13.5 Standard Windows installer for end-user developers
-
-Distinct audience from the current git-clone-and-compile workflow: an end-user developer who wants to *write FreeBASIC programs in the IDE*, not modify the IDE's own source — this is the audience described in §1 (returning Basic programmers, desktop-focused hobbyists, students). Implies a second distribution artifact alongside the source repo, not a replacement for it:
-- Real installer/uninstaller (Inno Setup or WiX are the standard choices for a WinAPI-native app like this; both produce a proper uninstall entry in Windows Settings)
-- Pre-built binaries only — `VisualFBEditor64.exe`, `mff64.dll`, the bundled `fbc64` compiler and GDB debugger — no IDE source tree
-- Examples centralized and included (currently under `Examples/` per the key-files map, §10) — bundle as part of the installer, not a separate download
-- Source, if offered at all to this audience, as a single centralized zip rather than the live dev tree (keeps the installer surface small and avoids exposing `Compiler/`/`Debuggers/` internals meant for the fork's own maintainers)
-- Needs a decision on installer scope before starting: does this ship the bundled compiler (making it a fully standalone IDE+compiler), or does it assume the end user already has FreeBASIC installed? Given this fork bundles its own `Compiler/` tree already (§3a), standalone is the more consistent choice.
-- Depends on Tier 3 (compiler swap) being done first, so the installer ships the final intended compiler version rather than needing a re-package immediately after.
-
-### 13.6 Full review and expansion of Examples/ (added 2026-07-03)
-
-**Sequencing:** owner-specified — do this in a **testing/fine-tuning or documentation phase**, after the core work (Tier 3 compiler swap, §13.2 structural pass) is done, not now. Noted here so it isn't forgotten, not to be picked up immediately.
-
-**Why this is on the list:** the 2026-07-03 GTK/Linux/Win32-only audit (§3b) went through all 33 `Examples/` folders and found the premise (remove GTK/Linux/Win32-only examples) didn't hold, but surfaced real gaps along the way: several examples had no `.vfp` project file at all, two had genuine API-drift bugs from being written against an older `mff` version (one fixed — `Graphics/CanvasDraw.bas`, §3b — one still open — `WellCOM Example/WellCOM.bas`'s `DllMain` conflict), and this was only found because someone happened to try compiling them. That's a sign `Examples/` hasn't had a systematic pass in a while.
-
-**Scope for that future pass:**
-- Re-verify every example still compiles clean against the *then-current* `mff` API (will have moved again after §13.2's structural pass) — same direct-`fbc64`-compile verification technique used in §3b/§4, not just visual inspection.
-- Finish the `WellCOM Example` `DllMain` fix left open in §3b.
-- Consider whether new examples are worth adding — the target audience (§1) benefits from seeing approachable, appealing demos (graphics/drawing examples in particular resonate with returning Basic programmers per the discussion that led to this item); a documentation/polish phase is a natural time to ask "what's missing" rather than only "what's broken."
-- Natural pairing with §13.5 (installer) — examples get bundled with the installer, so this pass and that one should probably be sequenced together or at least cross-checked.
-
-### 13.7 Enhance AI integration in the IDE (added 2026-07-03)
-
-**Secondary audience note that motivated this:** beyond the core §1 audience (returning Basic programmers, desktop hobbyists, students), the owner observed that some business users might be drawn to VFBE for a different reason — a robust, no-nonsense IDE focused on getting work done, with strong AI integration, rather than for BASIC nostalgia specifically. This doesn't change the §1 audience-driven minimalism principle (still don't add configuration surface just because a power-user audience might want it) — it's specifically about the AI feature area being worth investing in further, since a good AI-integrated workflow is something both audiences would value.
-
-**Starting point:** the AI system (`src/AIService.bas`, ~810 lines) already supports multiple providers (OpenAI, DeepSeek, Claude, Mistral, Ollama, OpenRouter) with streaming and context management — per the 2026-07-03 complexity audit, this is reasonably-scoped code, not bloated. The AI Agent also just had a real bug fixed this session (§4 note elsewhere in this doc / see the `_WIN32_WINNT`-adjacent fix list): `VisualFBEditor IDE Environment.md`, a 2,874-line reference of every IDE menu/feature, was silently failing to load into AI context due to a wrong path in `Main.bas` — now fixed, so the AI Agent should have meaningfully richer IDE-awareness going forward than it did before this session.
-
-**Not yet scoped** — no specific feature list decided. Candidate areas to consider when this is picked up: deeper codebase-aware context (not just the static IDE-environment reference now correctly loading, but live awareness of the user's actual open project); AI-assisted debugging or error-message explanation; inline code suggestions beyond the existing `Suggestions` tab. Should be scoped deliberately when picked up rather than growing organically — same anti-scope-creep discipline as the rest of §13.
-
-### 13.8 Design-workspace status bar (deferred 2026-07-04 — "nice to have, not critical")
-
-Owner spec, captured verbatim for whenever this is picked up: a status bar docked to the bottom of the Form Designer's visual workspace (`TabWindow.pnlForm`), full width of that panel specifically (not the whole tab — must track `pnlForm`'s width as the Code/Form splitter moves), three cells:
-1. Name of the form being edited.
-2. Name of the control currently being edited/selected.
-3. Layer info — "none" when the selection isn't inside a `PagePanel`, otherwise "Layer N of Total" plus two left/right buttons (only enabled in layer mode) to move between layers, reusing the `Designer.MovePanelLayer` added this session.
-
-Cells 1 and 2 should update live as the user renames the form or the selected control via the property grid.
-
-**Why deferred, not just "todo":** researched 2026-07-04 and confirmed genuinely non-trivial — `pnlForm` itself docks normally via the framework's Align system, but the *design control* (the form being edited) inside it is positioned via raw HWND math independent of that docking (its `ParentHandle` is set directly, sized to match the form's own declared bounds, scaled for DPI) — specifically in `pnlForm_Message`'s `WM_SIZE` handler (scrollbar-range math against `Des->GetControlBounds(...)` vs. `pnl->ClientWidth`/`ClientHeight`, `TabWindow.bas` ~10227-10286) and `Designer.HookDialogProc`'s `WM_NCCALCSIZE` case (`Designer.bas` ~2253-2261, which already reserves space at the *top* for the form's own menu bar via `TopMenuHeight` — the model to mirror for a *bottom* reservation). This is the exact same layout-engine territory as the docking-engine bug that's already this project's most expensive-to-debug area (see the recurring "sound design, unfinished last mile" pattern noted throughout §8) — worth doing carefully in a dedicated session, not squeezed in alongside other work.
-
-There's no native "embed a control inside a status bar panel" API in `mff/StatusBar.bi` (`StatusPanel` reserves width/caption only) — the existing global status bar (`pstBar`, `Main.bas` ~5206-5223) works around this by parenting a plain control (a progress bar, in that case) over a reserved panel's x-offset manually; the same trick would be needed for cells 3's left/right layer buttons.
-
-For the live-update wiring: every property-grid commit (including "Name") funnels through `Sub PropertyChanged` (`TabWindow.bas` ~2555-2667), which already special-cases `PropertyName = "Name"` (~2588-2596) to call `TabWindow.ChangeName` — that's the one choke point to hook for keeping cells 1/2 in sync, regardless of whether the edit came from the property grid's cell editor, its textbox, or its combo.
-
-### 13.9 Blank Designer page on cold-open until a control is selected (deferred 2026-07-04 — "nice to have, not critical")
-
-See §8's panel/layer navigation write-up for full context. A `PagePanel` page (e.g. `frmOptions.frm`'s "General" page) shows blank the moment the file is opened, even though `SelectedPanelIndex`/`Visible` are (as of this session's fixes) correctly set — it only renders once a control inside that page is actually selected. Added `Controls[i]->RequestAlign` to `PagePanel.SelectedPanelIndex`'s real setter (the architecturally-obvious fix — force a layout pass the moment a page becomes visible) but confirmed via testing this wasn't sufficient; the real trigger that makes it render (selecting a control *inside* the page) does something beyond what `RequestAlign` alone captures. Owner explicitly deprioritized further chasing this — all of the actual navigation (tree, right-click menu, Ctrl+PageUp/PageDown) works correctly the moment any selection has happened, so this is purely a cold-open-frame cosmetic issue, not a functional blocker. Next session starting here should re-open with fresh eyes on what specifically differs between "becoming visible via `SelectedPanelIndex`'s setter" and "becoming visible via selecting a control inside it" (`Designer.MoveDots`/`DesignerChangeSelection` are the obvious next things to diff against `RequestAlign`).
-
-### 13.10 Dark mode: owner-drawn popup menus + input-field polish (deferred 2026-07-04)
-
-Dark mode is stable and near-complete (see §4), but popup/dropdown menus remain light. Windows provides **no documented API** for dark Win32 popup menus — the choices are the undocumented uxtheme-ordinal route (rejected on principle for this fork) or fully owner-drawn menu items. The framework already has the opt-in switch (`Menus.bas` `Menu.Style` property → `TraverseItems` flips every item to `MFT_OWNERDRAW`, `Menus.bi:205`) and the item data is already threaded through (`MENUITEMINFO.dwItemData` carries the `MenuItem Ptr`, `Menus.bas:120`), but the actual renderer is missing: `WM_DRAWITEM ODT_MENU` in `Control.bas:1257-1260` (and `Form.bas:990-992`) is an empty stub with only a commented-out `ImageList_Draw`. Do NOT just enable `Menu.Style` — menus render blank without the drawer.
-
-Scope when picked up: implement `WM_MEASUREITEM`/`WM_DRAWITEM` for `ODT_MENU` — item text, right-aligned accelerator text (caption already stores the accelerator after a tab), icons (`FImage`/`ImagesList`), checkmarks/radio marks, separators, submenu arrows, disabled/hot states — using the existing dark palette (`hbrBkgndMenu`/`darkBkColorMenu` in `Brush.bi/bas` were created for exactly this and are currently unused). Test exhaustively: menus are the most-used surface in the IDE. Optionally in the same pass: darken input-field faces (search `TextBox`, `ComboBoxEdit`/`ComboBoxEx` edit areas) beyond what the `DarkMode_CFD` theme provides, via `WM_CTLCOLOREDIT`-style handling.
-
-### 13.11 Dark mode: dark dialog/modal backgrounds (nice to have, not essential)
-
-Modal dialogs and secondary forms (Find/Replace, About, GoTo, etc.) currently render with a white background in dark mode. The `WM_ERASEBKGND` handler in `Control.bas:862-868` does not fill with a dark brush — the dark fill only happens in `WM_PAINT`, leaving a white flash or persistent white background when `WM_ERASEBKGND` fires without a subsequent `WM_PAINT`. A naive dark-fill in `WM_ERASEBKGND` was attempted and reverted (2026-07-04) because it caused white borders around owner-drawn popup menus — indicating `WM_ERASEBKGND` is sent to multiple window classes including menu windows, and a blanket fill would need to be scoped more carefully (e.g. only for form/dialog class names, not the `#32768` menu class). Additionally, the `WM_CTLCOLORBTN`/`WM_CTLCOLORSTATIC` handler at `Control.bas:925-987` applies dark colors but is gated on `FDefaultBackColor = FBackColor` — any control with an explicit `BackColor` set will not go dark, which may affect some dialog controls. Investigation scope when picked up: gate the `WM_ERASEBKGND` dark fill on the window class (exclude menu windows), and audit dialog `.frm` files for controls with non-default `BackColor`.
+- **Add new content chronologically** within the relevant section rather than always at the top.
+- **When a section exceeds ~100 lines of dense prose**, consider whether the new content justifies a new subsection or should replace older detail.
+- **Remove, don't strike-through.** Once a bug is fixed and committed, strip its in-progress investigation notes — the root-cause analysis and fix description are worth keeping; the chronological debugging log usually isn't.
+- **Update the [Current State](#current-state-2026-07-06) table** whenever a major area's status changes (bug fixed, feature shipped, new active work item).
+- **Consolidate deferred items into [Open Items](#open-items)** rather than letting them drift across §7, §8, and §13.
+- **Update the commit log (§12)** at the end of each session — it's the canonical chronological index of what shipped.
+- **Cross-reference with `[section name](#anchor)` links** rather than bare "see §N" — anchors survive section renumbering better.
+- **Target length:** aim to keep this document under ~800 lines (currently 708). If it grows past that, move content to the companion files listed below rather than expanding this file.
+- **Companion files:** [CHANGELOG.md](CHANGELOG.md) (completed work + commit log), [HISTORY.md](HISTORY.md) (session history + bug investigations), [ROADMAP.md](ROADMAP.md) (full enhancement specs).
 
 ---
 

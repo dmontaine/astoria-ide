@@ -534,22 +534,22 @@ Sub ExpandFolder(ByRef tn As TreeNode Ptr)
 	While f <> ""
 		If (Attr And fbDirectory) <> 0 Then
 			If f <> "." AndAlso f <> ".." Then
-				If FileExists(f & Slash & f & ".vfp") Then
+				If FileExists(f & WindowsSlash & f & ".vfp") Then
 					IconName = "Project"
 					tn1 = tn->Nodes.Add(GetFileName(f), , f, IconName, IconName)
-					AddProject f & Slash & f & ".vfp", , tn1
-					WLet(Cast(ExplorerElement Ptr, tn1->Tag)->FileName, *ee->FileName & Slash & f)
+					AddProject f & WindowsSlash & f & ".vfp", , tn1
+					WLet(Cast(ExplorerElement Ptr, tn1->Tag)->FileName, *ee->FileName & WindowsSlash & f)
 				Else
 					IconName = "Opened"
 					tn1 = tn->Nodes.Add(GetFileName(f), , f, IconName, IconName)
 					ee1 = _New( ExplorerElement)
-					WLet(ee1->FileName, *ee->FileName & Slash & f)
+					WLet(ee1->FileName, *ee->FileName & WindowsSlash & f)
 					tn1->Tag = ee1
 				End If
 				tn1->Nodes.Add ""
 			End If
 		Else
-			Files.Add *ee->FileName & Slash & f
+			Files.Add *ee->FileName & WindowsSlash & f
 		End If
 		f = Dir(Attr)
 	Wend
@@ -689,10 +689,10 @@ Function AddFolder(ByRef FolderName As WString) As TreeNode Ptr
 			End If
 		Next
 		Dim As String IconName
-		If FileExists(FolderName & Slash & GetFileName(FolderName) & ".vfp") Then
+		If FileExists(FolderName & WindowsSlash & GetFileName(FolderName) & ".vfp") Then
 			IconName = "Opened"
 			tn = tvExplorer.Nodes.Add(GetFileName(FolderName), , FolderName, IconName, IconName)
-			AddProject FolderName & Slash & GetFileName(FolderName) & ".vfp", , tn
+			AddProject FolderName & WindowsSlash & GetFileName(FolderName) & ".vfp", , tn
 			WLet(Cast(ExplorerElement Ptr, tn->Tag)->FileName, FolderName)
 			If MainNode = 0 Then SetMainNode tn
 		Else
@@ -1002,11 +1002,11 @@ Function AddProject(ByRef FileName As WString, pFilesList As WStringList Ptr, tn
 						Else
 							Dim LibKey As String = GetLibKey
 							Dim As IniFile ini
-							ini.Load LibraryFolder & Slash & "Settings.ini"
+							ini.Load LibraryFolder & WindowsSlash & "Settings.ini"
 							Var CtlLibrary = _New(Library)
 							CtlLibrary->Name = ini.ReadString("Setup", "Name")
 							CtlLibrary->Tips = ini.ReadString("Setup", "Tips")
-							CtlLibrary->Path = WinOsPath(GetFullPath(LibraryFolder & Slash & ini.ReadString("Setup", LibKey, " "), ""))
+							CtlLibrary->Path = WinOsPath(GetFullPath(LibraryFolder & WindowsSlash & ini.ReadString("Setup", LibKey, " "), ""))
 							CtlLibrary->HeadersFolder = ini.ReadString("Setup", "HeadersFolder")
 							CtlLibrary->SourcesFolder = ini.ReadString("Setup", "SourcesFolder")
 							CtlLibrary->IncludeFolder = GetFullPath(GetFullPath(ini.ReadString("Setup", "IncludeFolder"), CtlLibrary->Path))
@@ -1185,7 +1185,7 @@ Sub AddNewProjectFile(ByRef Template As WString, ByRef ItemName As WString)
 	Dim As UString fileExt = ""
 	Dim extPos As Integer = InStrRev(templateFile, ".")
 	If extPos > 0 Then fileExt = Mid(templateFile, extPos)
-	Dim As UString destPath = WinOsPath(projectDir & Slash & itemBaseName & fileExt)
+	Dim As UString destPath = WinOsPath(projectDir & WindowsSlash & itemBaseName & fileExt)
 	If FileExistsU(destPath) Then
 		MsgBox ML("File already exists") & ":" & WChr(13, 10) & WChr(13, 10) & FormatMsgPathU(destPath), , mtWarning
 		Return
@@ -1308,7 +1308,7 @@ Function LoadWorkspace() As Boolean
 			If Pos1 <> 0 Then
 				n += 1
 				bMain = StartsWith(Buff, "*")
-				WLet(filn, Replace(Mid(Buff, Pos1 + 1), BackSlash, Slash))
+				WLet(filn, Replace(Mid(Buff, Pos1 + 1), UnixSlash, WindowsSlash))
 				If bTabs Then
 					Var tb = AddTab(*filn, , , Not bMain)
 					If tb AndAlso tb->Index <> n - 1 Then ptabCode->ReorderTab(tb, n - 1, True)
@@ -1346,7 +1346,7 @@ End Function
 Sub AddMRUListOnly(ByRef FileFolderName As WString, ByRef MRUList As WStringList)
 	Dim As UString FileFolderName_
 	If AddRelativePathsToRecent Then
-		FileFolderName_ = GetShortFileName(FileFolderName, ExePath & Slash & Slash)
+		FileFolderName_ = GetShortFileName(FileFolderName, ExePath & WindowsSlash & WindowsSlash)
 	Else
 		FileFolderName_ = FileFolderName
 	End If
@@ -1369,7 +1369,7 @@ End Sub
 Sub AddMRUAIChat(ByRef FileName As WString)
 	Dim As UString FileName_
 	If AddRelativePathsToRecent Then
-		FileName_ = GetShortFileName(FileName, ExePath & Slash & Slash)
+		FileName_ = GetShortFileName(FileName, ExePath & WindowsSlash & WindowsSlash)
 	Else
 		FileName_ = FileName
 	End If
@@ -1398,11 +1398,39 @@ Sub AddMRUFolder(ByRef FolderName As WString)
 End Sub
 
 Sub PruneMissingMRUProjects()
+	SanitizeMRUListsOnLoad()
+End Sub
+
+Sub SanitizeMRUListsOnLoad()
 	Dim As Boolean changed = False
+	Dim As UString path
 	For i As Integer = MRUProjects.Count - 1 To 0 Step -1
-		Dim As UString path = MRUProjects.Item(i)
-		If Trim(path) = "" OrElse (EndsWith(LCase(path), ".vfp") AndAlso Not FileExistsU(GetFullPath(path))) Then
+		Dim As UString path = SanitizeIniOptionalPath(MRUProjects.Item(i))
+		If path = "" OrElse (EndsWith(LCase(path), ".vfp") AndAlso Not FileExistsU(GetFullPathU(path))) Then
 			MRUProjects.Remove i
+			changed = True
+		ElseIf path <> MRUProjects.Item(i) Then
+			MRUProjects.Item(i) = path
+			changed = True
+		End If
+	Next
+	For i As Integer = MRUFiles.Count - 1 To 0 Step -1
+		path = SanitizeIniOptionalPath(MRUFiles.Item(i))
+		If path = "" OrElse Not FileExistsU(GetFullPathU(path)) Then
+			MRUFiles.Remove i
+			changed = True
+		ElseIf path <> MRUFiles.Item(i) Then
+			MRUFiles.Item(i) = path
+			changed = True
+		End If
+	Next
+	For i As Integer = MRUFolders.Count - 1 To 0 Step -1
+		path = SanitizeIniOptionalPath(MRUFolders.Item(i))
+		If path = "" OrElse Not FolderExistsU(GetFullPathU(path)) Then
+			MRUFolders.Remove i
+			changed = True
+		ElseIf path <> MRUFolders.Item(i) Then
+			MRUFolders.Item(i) = path
 			changed = True
 		End If
 	Next
@@ -1414,19 +1442,19 @@ Function FolderCopy(FromDir As UString, ToDir As UString) As Integer
 	Dim As UInteger Attr
 	Dim As WStringList Folders
 	MkDir ToDir
-	f = Dir(FromDir & Slash & "*", fbReadOnly Or fbHidden Or fbSystem Or fbDirectory Or fbArchive, Attr)
+	f = Dir(FromDir & WindowsSlash & "*", fbReadOnly Or fbHidden Or fbSystem Or fbDirectory Or fbArchive, Attr)
 	While f <> ""
 		If (Attr And fbDirectory) <> 0 Then
-			If f <> "." AndAlso f <> ".." Then Folders.Add FromDir & IIf(EndsWith(FromDir, Slash), "", Slash) & f
+			If f <> "." AndAlso f <> ".." Then Folders.Add FromDir & IIf(EndsWith(FromDir, WindowsSlash), "", WindowsSlash) & f
 		Else
-				fsrc = FromDir & Slash & f
-				fdest = ToDir & Slash & f
+				fsrc = FromDir & WindowsSlash & f
+				fdest = ToDir & WindowsSlash & f
 				CopyFileW @fsrc, @fdest, False
 		End If
 		f = Dir(Attr)
 	Wend
 	For i As Integer = 0 To Folders.Count - 1
-		FolderCopy Folders.Item(i), ToDir & Slash & GetFileName(Folders.Item(i))
+		FolderCopy Folders.Item(i), ToDir & WindowsSlash & GetFileName(Folders.Item(i))
 	Next
 	Folders.Clear
 	Return 0
@@ -2208,7 +2236,7 @@ Sub ReloadHistoryCode()
 		tb->Save
 	End If
 	Dim As OpenFileDialog OpenD
-	OpenD.InitialDir = ExePath & Slash & "Temp"
+	OpenD.InitialDir = ExePath & WindowsSlash & "Temp"
 	OpenD.Filter = ML("Backup Files") & " (*.bak)|" & GetFileName(tb->FileName) & "*.bak|" & ML("All Files") & "|*.*|"
 	If OpenD.Execute AndAlso Trim(OpenD.FileName) <> "" Then
 		tb->txtCode.Changing "Reload"
@@ -2555,6 +2583,36 @@ Sub ChangeUseDebugger(bUseDebugger As Boolean, ChangeObject As Integer = -1)
 	If iFlagStartDebug = 0 Then ChangeEnabledDebug True, False, False
 End Sub
 
+Sub ChangeShowSymbolsTooltipsOnMouseHover(bEnabled As Boolean, ChangeObject As Integer = -1)
+	GlobalSettings.ShowSymbolsTooltipsOnMouseHover = bEnabled
+	If Not bEnabled AndAlso ptabCode <> 0 Then
+		For i As Integer = 0 To ptabCode->TabCount - 1
+			Var tb = Cast(TabWindow Ptr, ptabCode->Tab(i))
+			If tb <> 0 AndAlso tb->txtCode.MouseHoverToolTipShowed Then tb->txtCode.CloseMouseHoverToolTip
+		Next
+	End If
+	If miSuggestions <> 0 AndAlso miSuggestions->Checked <> bEnabled Then miSuggestions->Checked = bEnabled
+	iniSettings.WriteBool "Options", "ShowSymbolsTooltipsOnMouseHover", bEnabled
+End Sub
+
+Sub ChangeAutoComplete(bEnabled As Boolean, ChangeObject As Integer = -1)
+	AutoComplete = bEnabled
+	If miCompleteWord <> 0 AndAlso miCompleteWord->Checked <> bEnabled Then miCompleteWord->Checked = bEnabled
+	iniSettings.WriteBool "Options", "AutoComplete", bEnabled
+End Sub
+
+Sub ChangeParameterInfo(bEnabled As Boolean, ChangeObject As Integer = -1)
+	ParameterInfoShow = bEnabled
+	If Not bEnabled AndAlso ptabCode <> 0 Then
+		For i As Integer = 0 To ptabCode->TabCount - 1
+			Var tb = Cast(TabWindow Ptr, ptabCode->Tab(i))
+			If tb <> 0 AndAlso tb->txtCode.ToolTipShowed Then tb->txtCode.CloseToolTip
+		Next
+	End If
+	If miParameterInfo <> 0 AndAlso miParameterInfo->Checked <> bEnabled Then miParameterInfo->Checked = bEnabled
+	iniSettings.WriteBool "Options", "ParameterInfoShow", bEnabled
+End Sub
+
 Sub ChangeLockControls(bLockControls As Boolean, ChangeObject As Integer = -1)
 	LockControls = bLockControls
 	If ChangeObject <> 0 Then tbtLockControls->Checked = bLockControls
@@ -2685,7 +2743,7 @@ Sub ChangeFolderType(Value As ProjectFolderTypes)
 		End If
 		If ppe->ProjectFolderType = ProjectFolderTypes.ShowAsFolder Then
 			tn->Text = tn->Text & ".vfp"
-			WLetEx(ppe->FileName, *ppe->FileName & Slash & GetFileName(*ppe->FileName) & ".vfp")
+			WLetEx(ppe->FileName, *ppe->FileName & WindowsSlash & GetFileName(*ppe->FileName) & ".vfp")
 			Dim As String IconName
 			For j As Integer = 0 To ppe->Files.Count - 1
 				ee = _New(ExplorerElement)
@@ -4808,19 +4866,19 @@ Sub LoadToolBox(ForLibrary As Library Ptr = 0)
 			MFF = IIf(i = 0, "Controls\MyFbFramework\mff64.dll", "")
 	If ForLibrary = 0 AndAlso ControlLibraries.Count = 0 Then
 		IncludeMFFPath = iniSettings.ReadBool("Options", "IncludeMFFPath", True)
-		WLet(MFFPath, iniSettings.ReadString("Options", "MFFPath", "./Controls/MyFbFramework"))
+		WLet(MFFPath, SanitizeIniCriticalPath(iniSettings.ReadString("Options", "MFFPath", "./Controls/MyFbFramework"), "./Controls/MyFbFramework"))
 		If iniSettings.KeyExists("ControlLibraries", "Path_0") = -1 Then
 			Dim LibKey As String = GetLibKey
 			Dim DirName As WString * 1024
-			DirName = Dir(ExePath & Slash & "Controls" & Slash & "*", fbReadOnly Or fbHidden Or fbSystem Or fbDirectory Or fbArchive, Attr)
+			DirName = Dir(ExePath & WindowsSlash & "Controls" & WindowsSlash & "*", fbReadOnly Or fbHidden Or fbSystem Or fbDirectory Or fbArchive, Attr)
 			While DirName <> ""
 				If (Attr And fbDirectory) <> 0 Then
 					If DirName <> "." AndAlso DirName <> ".." Then
 						Dim As IniFile ini
-						ini.Load ExePath & Slash & "Controls" & Slash & DirName & Slash & "Settings.ini"
+						ini.Load ExePath & WindowsSlash & "Controls" & WindowsSlash & DirName & WindowsSlash & "Settings.ini"
 						Dim FileName As UString = ini.ReadString("Setup", LibKey)
 						If FileName <> "" Then
-							Temp = "Controls" & Slash & DirName & Slash & FileName
+							Temp = "Controls" & WindowsSlash & DirName & WindowsSlash & FileName
 							Var CtlLibrary = _New(Library)
 							CtlLibrary->Name = ini.ReadString("Setup", "Name")
 							CtlLibrary->Tips = ini.ReadString("Setup", "Tips")
@@ -4850,7 +4908,13 @@ Sub LoadToolBox(ForLibrary As Library Ptr = 0)
 		Else
 			Do Until iniSettings.KeyExists("ControlLibraries", "Path_" & WStr(i)) = -1
 				Dim As IniFile ini
-				Temp = iniSettings.ReadString("ControlLibraries", "Path_" & WStr(i), MFF)
+				Dim As UString rawPath = iniSettings.ReadString("ControlLibraries", "Path_" & WStr(i), MFF)
+				Temp = SanitizeIniOptionalPath(rawPath)
+				If Temp = "" AndAlso Trim(rawPath) <> "" Then
+					i += 1
+					Continue Do
+				End If
+				If Temp = "" Then Temp = SanitizeIniPath(MFF)
 				ini.Load GetFolderName(GetRelativePath(Temp)) & "Settings.ini"
 				Var CtlLibrary = _New(Library)
 				CtlLibrary->Name = ini.ReadString("Setup", "Name")
@@ -4899,14 +4963,14 @@ Sub LoadToolBox(ForLibrary As Library Ptr = 0)
 			End If
 			If Not CtlLibrary->Enabled Then Continue For
 			IncludePath = GetFullPath(GetFullPath(CtlLibrary->HeadersFolder, CtlLibrary->Path))
-			If Not EndsWith(IncludePath, Slash) Then IncludePath &= Slash
+			If Not EndsWith(IncludePath, WindowsSlash) Then IncludePath &= WindowsSlash
 			f = Dir(IncludePath & "*.bi")
 			While f <> ""
 				LoadFunctions GetOSPath(IncludePath & f), LoadParam.OnlyFilePath, Comps, Globals.Enums, Globals.Functions, Globals.TypeProcedures, Globals.Args, , CtlLibrary
 				f = Dir()
 			Wend
 			IncludePath = GetFullPath(GetFullPath(CtlLibrary->SourcesFolder, CtlLibrary->Path))
-			If Not EndsWith(IncludePath, Slash) Then IncludePath &= Slash
+			If Not EndsWith(IncludePath, WindowsSlash) Then IncludePath &= WindowsSlash
 			f = Dir(IncludePath & "*.bas")
 			While f <> ""
 				LoadFunctions GetOSPath(IncludePath & f), LoadParam.OnlyFilePath, Comps, Globals.Enums, Globals.Functions, Globals.TypeProcedures, Globals.Args, , CtlLibrary
@@ -5649,20 +5713,21 @@ Sub CreateMenusAndToolBars
 
 	Dim sTmp As WString * 1024
 	For i As Integer = 0 To miRecentMax
-		sTmp = iniSettings.ReadString("MRUProjects", "MRUProject_0" & WStr(i), "")
+		sTmp = SanitizeIniOptionalPath(iniSettings.ReadString("MRUProjects", "MRUProject_0" & WStr(i), ""))
 		If Trim(sTmp) <> "" Then MRUProjects.Add sTmp
 	Next
 	For i As Integer = 0 To miRecentMax
-		sTmp = iniSettings.ReadString("MRUFolders", "MRUFolder_0" & WStr(i), "")
+		sTmp = SanitizeIniOptionalPath(iniSettings.ReadString("MRUFolders", "MRUFolder_0" & WStr(i), ""))
 		If Trim(sTmp) <> "" Then MRUFolders.Add sTmp
 	Next
 
 	miRecentFiles = miFile->Add(ML("Recent Files"), "", "RecentFilesMRU", @mClick)
 	miRecentFiles->Visible = False
 	For i As Integer = 0 To miRecentMax
-		sTmp = iniSettings.ReadString("MRUFiles", "MRUFile_0" & WStr(i), "")
+		sTmp = SanitizeIniOptionalPath(iniSettings.ReadString("MRUFiles", "MRUFile_0" & WStr(i), ""))
 		If Trim(sTmp) <> "" Then MRUFiles.Add sTmp
 	Next
+	SanitizeMRUListsOnLoad()
 	
 	mnuAIChat.Add(ML("&Edit"), "Edit", "AIChatEdit", @mClickAIChat, , , True)
 	mnuAIChat.Add("-")
@@ -5716,9 +5781,9 @@ Sub CreateMenusAndToolBars
 	miAddSpaces = miEdit->Add(ML("Add &Spaces") & HK("AddSpaces"), "", "AddSpaces", @mClick, , , False)
 	miDeleteBlankLines = miEdit->Add(ML("Merge Multiple Blank Lines"), "", "DeleteBlankLines", @mClick)
 	miEdit->Add("-")
-	miSuggestions = miEdit->Add(ML("Suggestions") & HK("Suggestions"), "Suggestions", "Suggestions", @mClick, , , False)
-	miCompleteWord = miEdit->Add(ML("Complete Word") & HK("CompleteWord", "Ctrl+Space"), "CompleteWord", "CompleteWord", @mClick, , , False)
-	miParameterInfo = miEdit->Add(ML("Parameter Info") & HK("ParameterInfo", "Ctrl+J"), "ParameterInfo", "ParameterInfo", @mClick, , , False)
+	miSuggestions = miEdit->Add(ML("Code - Bubble Help") & HK("Suggestions"), "", "Suggestions", @mClick, True)
+	miCompleteWord = miEdit->Add(ML("Code - Suggest Options"), "", "SuggestOptions", @mClick, True)
+	miParameterInfo = miEdit->Add(ML("Code - Parameter Info") & HK("ParameterInfo", "Ctrl+J"), "", "ParameterInfo", @mClick, True)
 	miEdit->Add("-")
 	miAddProcedure = miEdit->Add(ML("Add &Procedure") & "..." & HK("AddProcedure"), "", "AddProcedure", @mClick, , , False)
 	miAddType = miEdit->Add(ML("Add &Type") & "..." & HK("AddType"), "", "AddType", @mClick, , , False)
@@ -6072,10 +6137,10 @@ Sub CreateMenusAndToolBars
 	tbtUncommentBlock = tbEdit.Buttons.Add(, "UnComment", , @mClick, "UnComment", , ML("UnComment") & HK("UnComment", "Shift+Ctrl+I", True), True, ToolButtonState.tstNone)
 	tbEdit.Buttons.Add tbsSeparator
 	tbtCompleteWord = tbEdit.Buttons.Add(, "CompleteWord", , @mClick, "CompleteWord", , ML("Complete Word") & HK("CompleteWord", "Ctrl+Space", True), True, ToolButtonState.tstNone)
-	tbtParameterInfo = tbEdit.Buttons.Add(, "ParameterInfo", , @mClick, "ParameterInfo", , ML("Parameter Info") & HK("ParameterInfo", "Ctrl+J", True), True)
+	tbtParameterInfo = tbEdit.Buttons.Add(, "ParameterInfo", , @mClick, "InvokeParameterInfo", , ML("Parameter Info") & HK("ParameterInfo", "Ctrl+J", True), True)
 	tbEdit.Buttons.Add tbsSeparator
 	tbtSyntaxCheck = tbEdit.Buttons.Add(, "SyntaxCheck", , @mClick, "SyntaxCheck", , ML("Syntax Check"), True, ToolButtonState.tstNone)
-	tbtSuggestions = tbEdit.Buttons.Add(, "Suggestions", , @mClick, "Suggestions", , ML("Suggestions"), True, ToolButtonState.tstNone)
+	tbtSuggestions = tbEdit.Buttons.Add(, "Suggestions", , @mClick, "AnalyzeSuggestions", , ML("Suggestions"), True, ToolButtonState.tstNone)
 	'tbStandard.Buttons.Add tbsSeparator
 	tbBuild.Name = "Build"
 	tbBuild.ImagesList = @imgList
@@ -6698,7 +6763,7 @@ Sub tvExplorer_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As TreeVi
 						txtChangeLog.SaveToFile(mChangelogName)  ' David Change
 						mChangeLogEdited = False
 					End If
-					mChangelogName = ExePath & Slash & StringExtract(ptn->Text, ".") & "_Change.log"
+					mChangelogName = ExePath & WindowsSlash & StringExtract(ptn->Text, ".") & "_Change.log"
 					txtChangeLog.Text = "Waiting...... "
 					If Dir(mChangelogName)<>"" AndAlso mChangelogName<> "" Then
 						txtChangeLog.LoadFromFile(mChangelogName) ' David Change
@@ -8228,7 +8293,7 @@ txtImmediate.OnKeyDown = @txtImmediate_KeyDown
 '
 'txtImmediate.BackColor = NormalText.Background
 'txtImmediate.Font.Color = NormalText.Foreground
-txtImmediate.Text = "import #Include Once " + Chr(34) + ".." + Slash + "Controls" + Slash + "MyFbFramework"+ Slash + "mff" + Slash + "SysUtils.bas" + Chr(34) & Chr(13,10) & Chr(13,10)
+txtImmediate.Text = "import #Include Once " + Chr(34) + ".." + WindowsSlash + "Controls" + WindowsSlash + "MyFbFramework"+ WindowsSlash + "mff" + WindowsSlash + "SysUtils.bas" + Chr(34) & Chr(13,10) & Chr(13,10)
 txtImmediate.SetSel txtImmediate.GetTextLength, txtImmediate.GetTextLength
 
 Sub txtChangeLog_KeyDown(ByRef Designer As My.Sys.Object, ByRef Sender As Control, Key As Integer, Shift As Integer)
@@ -8426,7 +8491,7 @@ Sub tabBottom_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As Control
 				txtChangeLog.SaveToFile(mChangelogName)  ' David Change
 				mChangeLogEdited = False
 			End If
-			mChangelogName = ExePath & Slash & StringExtract(MainNode->Text, ".") & "_Change.log"
+			mChangelogName = ExePath & WindowsSlash & StringExtract(MainNode->Text, ".") & "_Change.log"
 			txtChangeLog.Text = "Waiting...... "
 			If Dir(mChangelogName)<>"" AndAlso mChangelogName<> "" Then
 				txtChangeLog.LoadFromFile(mChangelogName) ' David Change
@@ -8709,7 +8774,6 @@ Sub frmMain_ActiveControlChanged(ByRef Designer As My.Sys.Object, ByRef sender A
 	tbtUnformat->Enabled = bEnabledEditControl
 	miAddSpaces->Enabled = bEnabledEditControl
 	miDeleteBlankLines->Enabled = bEnabledEditControl
-	miCompleteWord->Enabled = bEnabledEditControl
 	tbtCompleteWord->Enabled = bEnabledEditControl
 	miParameterInfo->Enabled = bEnabledEditControl
 	tbtParameterInfo->Enabled = bEnabledEditControl
@@ -8943,10 +9007,13 @@ Sub frmMain_Create(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	End If
 	tbForm.Buttons.Item(0)->Checked = iniSettings.ReadBool("MainWindow", "ToolLabels", True)
 	ChangeUseDebugger iniSettings.ReadBool("MainWindow", "UseDebugger", False)
-	WLet(RecentFiles, iniSettings.ReadString("MainWindow", "RecentFiles", ""))
-	WLet(RecentFile, iniSettings.ReadString("MainWindow", "RecentFile", ""))
-	WLet(RecentProject, iniSettings.ReadString("MainWindow", "RecentProject", ""))
-	WLet(RecentFolder, iniSettings.ReadString("MainWindow", "RecentFolder", ""))
+	ChangeShowSymbolsTooltipsOnMouseHover GlobalSettings.ShowSymbolsTooltipsOnMouseHover, 0
+	ChangeAutoComplete AutoComplete, 0
+	ChangeParameterInfo ParameterInfoShow, 0
+	WLet(RecentFiles, SanitizeIniOptionalPath(iniSettings.ReadString("MainWindow", "RecentFiles", "")))
+	WLet(RecentFile, SanitizeIniOptionalPath(iniSettings.ReadString("MainWindow", "RecentFile", "")))
+	WLet(RecentProject, SanitizeIniOptionalPath(iniSettings.ReadString("MainWindow", "RecentProject", "")))
+	WLet(RecentFolder, SanitizeIniOptionalPath(iniSettings.ReadString("MainWindow", "RecentFolder", "")))
 	ShowStandardToolBar = iniSettings.ReadBool("MainWindow", "ShowStandardToolBar", True)
 	ShowEditToolBar = iniSettings.ReadBool("MainWindow", "ShowEditToolBar", True)
 	ShowProjectToolBar = iniSettings.ReadBool("MainWindow", "ShowProjectToolbar", True)
@@ -9117,7 +9184,7 @@ Sub frmMain_Show(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	If bFileOpening Then
 		OpenFiles GetFullPath(File)
 	ElseIf bSharedFind AndAlso CBool(WhenVisualFBEditorStarts = 1 OrElse WhenVisualFBEditorStarts = 2) Then
-		AddNew ExePath & Slash & "Templates" & Slash & WGet(DefaultProjectFile)
+		AddNew ExePath & WindowsSlash & "Templates" & WindowsSlash & WGet(DefaultProjectFile)
 	Else
 		mApplyingWorkspaceLoad = True
 		LoadWorkspace()
@@ -9269,7 +9336,7 @@ Sub frmMain_Close(ByRef Designer As My.Sys.Object, ByRef Sender As Form, ByRef A
 	iniSettings.WriteString("MainWindow", "RecentFile", *RecentFile)
 	iniSettings.WriteString("MainWindow", "RecentProject", *RecentProject)
 	iniSettings.WriteString("MainWindow", "RecentFolder", *RecentFolder)
-	If mChangeLogEdited Then txtChangeLog.SaveToFile(ExePath & Slash & StringExtract(MainNode->Text, ".") & "_Change.log") '
+	If mChangeLogEdited Then txtChangeLog.SaveToFile(ExePath & WindowsSlash & StringExtract(MainNode->Text, ".") & "_Change.log") '
 	UnLoadAddins
 	Exit Sub
 	ErrorHandler:

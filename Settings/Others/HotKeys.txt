@@ -30,6 +30,7 @@ UnformatProject=
 CollapseAll=
 UnCollapseAll=
 CompleteWord=Ctrl+Space
+ParameterInfo=Ctrl+J
 NumberOn=
 NumberOff=
 ProcedureNumberOn=

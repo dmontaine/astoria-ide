@@ -1,4 +1,4 @@
-'#########################################################
+﻿'#########################################################
 '#  Main.bi                                              #
 '#  This file is part of VisualFBEditor                  #
 '#  Authors: Xusinboy Bekchanov (bxusinboy@mail.ru)      #
@@ -30,8 +30,8 @@
 		#define SettingsPath ExePath & "/Settings/VisualFBEditor64.ini"
 	#define WorkspacePath ExePath & "/Settings/Workspace.ini"
 
-	#define Slash "\"
-	#define BackSlash "/"
+	#define WindowsSlash "\"
+	#define UnixSlash "/"
 
 	Type WStringOrStringList As WStringList
 	Type WStringOrStringListItem As WStringListItem
@@ -218,6 +218,7 @@ Declare Sub AddMRUFile(ByRef FileName As WString)
 Declare Sub AddMRUProject(ByRef FileName As WString) '
 Declare Sub AddMRUFolder(ByRef FolderName As WString)
 Declare Sub PruneMissingMRUProjects()
+Declare Sub SanitizeMRUListsOnLoad()
 Declare Sub AddFromTemplates
 Declare Sub AddFilesToProject
 Declare Sub RemoveFileFromProject
@@ -255,6 +256,9 @@ Declare Sub ChangeEnabledDebug(bStart As Boolean, bBreak As Boolean, bEnd As Boo
 Declare Sub ClearThreadsWindow() ' Defined in VisualFBEditor.bas; forward-declared here since Main.bi pulls in Main.bas before VisualFBEditor.bas defines it
 Declare Sub ChangeLockControls(bLockControls As Boolean, ChangeObject As Integer = -1)
 Declare Sub ChangeUseDebugger(bUseDebugger As Boolean, ChangeObject As Integer = -1)
+Declare Sub ChangeShowSymbolsTooltipsOnMouseHover(bEnabled As Boolean, ChangeObject As Integer = -1)
+Declare Sub ChangeAutoComplete(bEnabled As Boolean, ChangeObject As Integer = -1)
+Declare Sub ChangeParameterInfo(bEnabled As Boolean, ChangeObject As Integer = -1)
 Declare Sub ChangeUseProfiler(bUseProfiler As Boolean, ChangeObject As Integer = -1)
 Declare Sub ChangeFileEncoding(FileEncoding As FileEncodings)
 Declare Sub ChangeNewLineType(NewLineType As NewLineTypes)

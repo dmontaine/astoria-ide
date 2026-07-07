@@ -1,4 +1,4 @@
-'#########################################################
+﻿'#########################################################
 '#  TabWindow.bi                                         #
 '#  This file is part of VisualFBEditor                  #
 '#  Authors: Xusinboy Bekchanov (bxusinboy@mail.ru)      #

@@ -1,4 +1,4 @@
-'#########################################################
+﻿'#########################################################
 '#  frmFindInFiles.bas                                   #
 '#  This file is part of VisualFBEditor                  #
 '#  Authors: Xusinboy Bekchanov (2018-2019)              #
@@ -209,25 +209,25 @@ Sub frmFindInFiles.Find(ByRef lvSearchResult As ListView Ptr, ByRef Path As WStr
 	Dim As WStringList Folders
 	If Path = "" OrElse tSearch = "" Then Exit Sub
 	If SearchInSub Then
-		f = Dir(Path & Slash & "*", fbReadOnly Or fbHidden Or fbSystem Or fbDirectory Or fbArchive, Attr)
+		f = Dir(Path & WindowsSlash & "*", fbReadOnly Or fbHidden Or fbSystem Or fbDirectory Or fbArchive, Attr)
 	Else
-		f = Dir(Path & Slash & "*", fbReadOnly Or fbHidden Or fbSystem Or fbArchive, Attr)
+		f = Dir(Path & WindowsSlash & "*", fbReadOnly Or fbHidden Or fbSystem Or fbArchive, Attr)
 	End If
 	WLet(gSearchSave, tSearch)
 	While f <> ""
 		If FormClosing Then Exit Sub
 		If (Attr And fbDirectory) <> 0 Then
-			If f <> "." AndAlso f <> ".." Then Folders.Add Path & IIf(EndsWith(Path, Slash), "", Slash) & f
+			If f <> "." AndAlso f <> ".." Then Folders.Add Path & IIf(EndsWith(Path, WindowsSlash), "", WindowsSlash) & f
 		ElseIf EndsWith(LCase(f), ".bas") OrElse EndsWith(LCase(f), ".bi") OrElse EndsWith(LCase(f), ".rc") _
 			OrElse EndsWith(LCase(f), ".inc") OrElse EndsWith(LCase(f), ".frm") OrElse EndsWith(LCase(f), ".ini") OrElse EndsWith(LCase(f), ".md") OrElse EndsWith(LCase(f), ".htm")  OrElse EndsWith(LCase(f), ".html") _ _
 			OrElse EndsWith(LCase(f), ".txt") OrElse EndsWith(LCase(f), ".log") OrElse EndsWith(LCase(f), ".lng") _
 			OrElse EndsWith(LCase(f), ".vfp") OrElse EndsWith(LCase(f), ".vfs") OrElse EndsWith(LCase(f), ".xml") _
 			OrElse EndsWith(LCase(f), ".c") OrElse EndsWith(LCase(f), ".cxx") OrElse EndsWith(LCase(f), ".h") OrElse EndsWith(LCase(f), ".idl") OrElse EndsWith(LCase(f), ".cpp") OrElse EndsWith(LCase(f), ".java") Then
 			Fn = FreeFile_
-			Result = Open(Path & Slash & f For Input Encoding "utf-8" As #Fn)
-			If Result <> 0 Then Result = Open(Path & Slash & f For Input Encoding "utf-16" As #Fn)
-			If Result <> 0 Then Result = Open(Path & Slash & f For Input Encoding "utf-32" As #Fn)
-			If Result <> 0 Then Result = Open(Path & Slash & f For Input As #Fn)
+			Result = Open(Path & WindowsSlash & f For Input Encoding "utf-8" As #Fn)
+			If Result <> 0 Then Result = Open(Path & WindowsSlash & f For Input Encoding "utf-16" As #Fn)
+			If Result <> 0 Then Result = Open(Path & WindowsSlash & f For Input Encoding "utf-32" As #Fn)
+			If Result <> 0 Then Result = Open(Path & WindowsSlash & f For Input As #Fn)
 			If Result = 0 Then
 				iLine = 0
 				Do Until EOF(Fn)
@@ -257,7 +257,7 @@ Sub frmFindInFiles.Find(ByRef lvSearchResult As ListView Ptr, ByRef Path As WStr
 						lvSearchResult->ListItems.Add Buff
 						lvSearchResult->ListItems.Item(lvSearchResult->ListItems.Count - 1)->Text(1) = WStr(iLine)
 						lvSearchResult->ListItems.Item(lvSearchResult->ListItems.Count - 1)->Text(2) = WStr(Pos1)
-						lvSearchResult->ListItems.Item(lvSearchResult->ListItems.Count - 1)->Text(3) = Path & IIf(EndsWith(Path, Slash), "", Slash) & f
+						lvSearchResult->ListItems.Item(lvSearchResult->ListItems.Count - 1)->Text(3) = Path & IIf(EndsWith(Path, WindowsSlash), "", WindowsSlash) & f
 						pfrmMain->Update
 						ThreadsLeave
 						Pos1 = Pos1 + Len(tSearch) - 1
@@ -303,8 +303,8 @@ Sub FindSub(Param As Any Ptr)
 	StartProgress
 	With fFindFile
 		.btnFind.Enabled = False
-		.txtPath.Text  = Replace(.txtPath.Text, BackSlash, Slash)
-		If EndsWith(.txtPath.Text, Slash) = False Then .txtPath.Text =.txtPath.Text & Slash
+		.txtPath.Text  = Replace(.txtPath.Text, UnixSlash, WindowsSlash)
+		If EndsWith(.txtPath.Text, WindowsSlash) = False Then .txtPath.Text =.txtPath.Text & WindowsSlash
 		ThreadsLeave
 		.Find plvSearch, .txtPath.Text, .txtFind.Text
 		ThreadsEnter
@@ -322,8 +322,8 @@ Sub ReplaceSub(Param As Any Ptr)
 	With fFindFile
 		.btnFind.Enabled = False
 		.btnReplace.Enabled = False
-		.txtPath.Text  = Replace(.txtPath.Text,BackSlash,Slash)
-		If EndsWith(.txtPath.Text,Slash) = False Then .txtPath.Text =.txtPath.Text & Slash
+		.txtPath.Text  = Replace(.txtPath.Text,UnixSlash,WindowsSlash)
+		If EndsWith(.txtPath.Text,WindowsSlash) = False Then .txtPath.Text =.txtPath.Text & WindowsSlash
 		ThreadsLeave
 		.ReplaceInFile .txtPath.Text, .txtFind.Text,.txtReplace.Text
 		ThreadsEnter

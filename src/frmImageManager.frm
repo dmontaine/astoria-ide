@@ -1,4 +1,4 @@
-	'#Compile -exx "Form1.rc"
+﻿	'#Compile -exx "Form1.rc"
 '#Region "Form"
 	#include once "frmImageManager.bi"
 	#include once "frmPath.bi"
@@ -686,7 +686,7 @@ Private Sub frmImageManager.Form_Create(ByRef Sender As Control)
 	ExeFileName = GetFullPath(GetExeFileName(MainFile, CompileLine & " " & sFirstLine), MainFile)
 	FolderName = GetFolderName(ExeFileName)
 	If Len(FolderName) = 0 Then
-		ExeFileName = ExePath & Slash & "Projects" & Slash & ExeFileName
+		ExeFileName = ExePath & WindowsSlash & "Projects" & WindowsSlash & ExeFileName
 	Else
 		ExeFileName = FolderName & ExeFileName
 	End If

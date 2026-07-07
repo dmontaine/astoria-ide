@@ -1,4 +1,4 @@
-'#Region "Form"
+﻿'#Region "Form"
 	#include once "mff/Form.bi"
 	#include once "mff/CheckedListBox.bi"
 	#include once "mff/TabControl.bi"
@@ -311,15 +311,15 @@ Private Sub frmComponentsType.Form_Create(ByRef Sender As Control)
 	LibKey = GetLibKey
 	chlControls.Clear
 	Paths.Clear
-	f = Dir(ExePath & Slash & "Controls" & Slash & "*", fbReadOnly Or fbHidden Or fbSystem Or fbDirectory Or fbArchive, Attr)
+	f = Dir(ExePath & WindowsSlash & "Controls" & WindowsSlash & "*", fbReadOnly Or fbHidden Or fbSystem Or fbDirectory Or fbArchive, Attr)
 	While f <> ""
 		If (Attr And fbDirectory) <> 0 Then
 			If f <> "." AndAlso f <> ".." Then
 				Dim As IniFile ini
-				ini.Load ExePath & Slash & "Controls" & Slash & f & Slash & "Settings.ini"
+				ini.Load ExePath & WindowsSlash & "Controls" & WindowsSlash & f & WindowsSlash & "Settings.ini"
 				Dim FileName As UString = ini.ReadString("Setup", LibKey)
 				If FileName <> "" Then
-					Dim As UString libPath = GetFullPath(ExePath & Slash & "Controls" & Slash & f & Slash & FileName)
+					Dim As UString libPath = GetFullPath(ExePath & WindowsSlash & "Controls" & WindowsSlash & f & WindowsSlash & FileName)
 					chlControls.AddItem ini.ReadString("Setup", "Name")
 					Paths.Add libPath
 					Dim As Library Ptr CtlLibrary
@@ -381,17 +381,17 @@ Private Sub frmComponentsType.chkSelectedItemsOnly_Click(ByRef Sender As CheckBo
 		Var ItemCount = chlControls.ItemCount
 		Dim As UInteger Attr
 		Dim f As WString * 1024
-		f = Dir(ExePath & Slash & "Controls" & Slash & "*", fbReadOnly Or fbHidden Or fbSystem Or fbDirectory Or fbArchive, Attr)
+		f = Dir(ExePath & WindowsSlash & "Controls" & WindowsSlash & "*", fbReadOnly Or fbHidden Or fbSystem Or fbDirectory Or fbArchive, Attr)
 		While f <> ""
 			If (Attr And fbDirectory) <> 0 Then
 				If f <> "." AndAlso f <> ".." Then
 					Dim As IniFile ini
-					ini.Load ExePath & Slash & "Controls" & Slash & f & Slash & "Settings.ini"
+					ini.Load ExePath & WindowsSlash & "Controls" & WindowsSlash & f & WindowsSlash & "Settings.ini"
 					Dim FileName As UString = ini.ReadString("Setup", LibKey)
 					If FileName <> "" Then
-						If Not Paths.Contains(GetFullPath(ExePath & Slash & "Controls" & Slash & f & Slash & FileName)) Then
+						If Not Paths.Contains(GetFullPath(ExePath & WindowsSlash & "Controls" & WindowsSlash & f & WindowsSlash & FileName)) Then
 							chlControls.AddItem ini.ReadString("Setup", "Name")
-							Paths.Add GetFullPath(ExePath & Slash & "Controls" & Slash & f & Slash & FileName)
+							Paths.Add GetFullPath(ExePath & WindowsSlash & "Controls" & WindowsSlash & f & WindowsSlash & FileName)
 						End If
 					End If
 				End If

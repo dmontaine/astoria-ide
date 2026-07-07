@@ -1,4 +1,4 @@
-'#########################################################
+﻿'#########################################################
 '#  AIService.bas                                        #
 '#  This file is part of VisualFBEditor                  #
 '#  Authors: Xusinboy Bekchanov (bxusinboy@mail.ru)      #
@@ -21,7 +21,7 @@ Function EscapeJsonForPrompt(ByRef iText As WString) As String
 		End If
 		If ResultPtr = 0 Then Return "" ' Guard against allocation failure
 		Select Case iText[i]
-		Case 92                  '"\\", "\"))    ' Backslash
+		Case 92                  '"\\", "\"))    ' UnixSlash
 			(*ResultPtr)[Posi] = 92
 			Posi += 1
 			(*ResultPtr)[Posi] = 92
@@ -32,7 +32,7 @@ Function EscapeJsonForPrompt(ByRef iText As WString) As String
 			Posi += 1
 			(*ResultPtr)[Posi] = 34
 			Posi += 1
-		Case 47                  '"\/", "/"))    ' Forward slash
+		Case 47                  '"\/", "/"))    ' Forward WindowsSlash
 			(*ResultPtr)[Posi] = 92
 			Posi += 1
 			(*ResultPtr)[Posi] = 47
@@ -112,7 +112,7 @@ Function EscapeFromJson(ByRef iText As WString) As WString Ptr
 		End If
 		If iText[i] = 92  AndAlso i < iLen - 1 Then
 			Select Case iText[i + 1]
-			Case 92                  '"\\", "\"))    ' Backslash
+			Case 92                  '"\\", "\"))    ' UnixSlash
 				(*ResultPtr)[Posi] = 92
 				Posi += 1
 				i += 1
@@ -120,7 +120,7 @@ Function EscapeFromJson(ByRef iText As WString) As WString Ptr
 				(*ResultPtr)[Posi] = 34
 				Posi += 1
 				i += 1
-			Case 47                  '"\/", "/"))    ' Forward slash
+			Case 47                  '"\/", "/"))    ' Forward WindowsSlash
 				(*ResultPtr)[Posi] = 47
 				Posi += 1
 				i += 1
@@ -351,12 +351,12 @@ Sub HTTPAIAgent_Receive(ByRef Designer As My.Sys.Object, ByRef Sender As HTTPCon
 	
 	'' Check for complete JSON object (determines if packet is complete)
 	Dim As Boolean inString   = False   ' False = not in string, True = in string
-	Dim As Boolean escapeNext = False   ' Whether previous char was backslash escape
+	Dim As Boolean escapeNext = False   ' Whether previous char was UnixSlash escape
 	Dim As Integer braceCount = 0   ' Unclosed brace count ({ increments, } decrements)
 	Dim As Integer lastEndPos = -1  ' Position of closing '}' for outermost object
 	For i As Integer = 0 To Len(*tmpBodyWStrPtr) - 1
 		If escapeNext Then
-			' Previous was backslash; current char is escaped and does not affect state
+			' Previous was UnixSlash; current char is escaped and does not affect state
 			escapeNext = False
 		Else
 			Select Case (*tmpBodyWStrPtr)[i]

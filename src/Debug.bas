@@ -1,4 +1,4 @@
-'#########################################################
+﻿'#########################################################
 '#  Debug.bas                                            #
 '#  This file is part of VisualFBEditor                  #
 '#  Authors: Laurent GRAS                                #
@@ -2404,7 +2404,7 @@ Sub RunWithDebug(Debugger As String, ByRef ProjectFileName As WString, ByRef Pro
 		Restarting = False
 	End If
 	WatchIndex = -1
-	exename = Replace(exename, BackSlash, Slash)
+	exename = Replace(exename, UnixSlash, WindowsSlash)
 	ThreadsEnter()
 	tpLocals->SelectTab
 	ThreadsLeave()

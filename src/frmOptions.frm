@@ -3515,6 +3515,7 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		WLet(EnvironmentVariables, .txtEnvironmentVariables.Text)
 		AutoIndentation = .chkAutoIndentation.Checked
 		AutoComplete = .chkEnableAutoComplete.Checked
+		ChangeAutoComplete AutoComplete, 0
 		AutoSuggestions = .chkEnableAutoSuggestions.Checked
 		AutoCreateRC = .chkAutoCreateRC.Checked
 		AutoCreateBakFiles = .chkAutoCreateBakFiles.Checked
@@ -3531,6 +3532,7 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		ShowKeywordsToolTip = .chkShowKeywordsTooltip.Checked
 		ShowTooltipsAtTheTop = .chkShowTooltipsAtTheTop.Checked
 		GlobalSettings.ShowSymbolsTooltipsOnMouseHover = .chkShowSymbolsTooltipsOnMouseHover.Checked
+		ChangeShowSymbolsTooltipsOnMouseHover GlobalSettings.ShowSymbolsTooltipsOnMouseHover, 0
 		GlobalSettings.ShowClassesExplorerOnOpenWindow = .chkShowClassesExplorerOnOpenWindow.Checked
 		ShowHorizontalSeparatorLines = .chkShowHorizontalSeparatorLines.Checked
 		ShowHolidayFrame = .chkShowHolidayFrame.Checked
@@ -4661,13 +4663,13 @@ Sub HistoryCodeClean(ByRef Path As WString)
 	If Trim(Path) = "" Then Exit Sub
 	If FormClosing Then Exit Sub
 	If EndsWith(Path, "\Windows") Then Exit Sub
-	f = Dir(Path & Slash & "*.bak", fbArchive, Attr)
+	f = Dir(Path & WindowsSlash & "*.bak", fbArchive, Attr)
 	While Len(Trim(f)) > 0
 		If FormClosing Then Exit Sub
 		f1 = Mid(f, Len(f) - 16)
 		If Len(f1) > 16 Then
 			d2 = DateValue(Mid(f1, 1, 4) & "/" & Mid(f1, 5, 2) & "/" & Mid(f1, 7, 2))
-			If DateDiff( "d", d2, Now()) > HistoryCodeDays Then Kill Path & Slash & f
+			If DateDiff( "d", d2, Now()) > HistoryCodeDays Then Kill Path & WindowsSlash & f
 		End If
 		f = Dir()
 	Wend

@@ -10,7 +10,9 @@
 '################################################################################
 
 
-		#define UNICODE
+		#ifndef UNICODE
+			#define UNICODE
+		#endif
 	#include once "windows.bi"
 
 	#include once "win/wincrypt.bi"

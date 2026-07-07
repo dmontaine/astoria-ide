@@ -1,4 +1,6 @@
-#define UNICODE
+#ifndef UNICODE
+	#define UNICODE
+#endif
 #include once "file.bi"
 	#undef FileExists
 		#include once "win\shlwapi.bi"

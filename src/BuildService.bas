@@ -1,4 +1,4 @@
-'#########################################################
+﻿'#########################################################
 '#  BuildService.bas                                     #
 '#  This file is part of VisualFBEditor                  #
 '#  Authors: Xusinboy Bekchanov (bxusinboy@mail.ru)      #
@@ -158,10 +158,10 @@ Function Compile(Parameter As String, bAll As Boolean) As Integer
 		If Project Then
 			WAdd(ctx.CompileWith, " -gen gcc" )
 			For i As Integer = 0 To Project->Components.Count - 1
-				If EndsWith(Project->Components.Item(i), Slash) Then
-					WAdd(ctx.CompileWith, " -i """ & GetRelativePath(Left(Project->Components.Item(i), Len(Project->Components.Item(i)) - 1), *ctx.ProjectPath & Slash) & """")
+				If EndsWith(Project->Components.Item(i), WindowsSlash) Then
+					WAdd(ctx.CompileWith, " -i """ & GetRelativePath(Left(Project->Components.Item(i), Len(Project->Components.Item(i)) - 1), *ctx.ProjectPath & WindowsSlash) & """")
 				Else
-					WAdd(ctx.CompileWith, " -i """ & GetRelativePath(Project->Components.Item(i), *ctx.ProjectPath & Slash) & """")
+					WAdd(ctx.CompileWith, " -i """ & GetRelativePath(Project->Components.Item(i), *ctx.ProjectPath & WindowsSlash) & """")
 				End If
 			Next
 		End If
@@ -169,7 +169,7 @@ Function Compile(Parameter As String, bAll As Boolean) As Integer
 		For i As Integer = 0 To ControlLibraries.Count - 1
 			CtlLibrary = ControlLibraries.Item(i)
 			If CtlLibrary <> 0 AndAlso CtlLibrary->Enabled Then
-				If EndsWith(CtlLibrary->IncludeFolder, Slash) Then
+				If EndsWith(CtlLibrary->IncludeFolder, WindowsSlash) Then
 					WAdd(ctx.CompileWith, " -i """ & Left(CtlLibrary->IncludeFolder, Len(CtlLibrary->IncludeFolder) - 1) & """")
 				Else
 					WAdd(ctx.CompileWith, " -i """ & CtlLibrary->IncludeFolder & """")
@@ -177,7 +177,7 @@ Function Compile(Parameter As String, bAll As Boolean) As Integer
 				Dim As UString LibFolder
 						LibFolder = CtlLibrary->Lib64Folder
 				If LibFolder <> "" Then
-					If EndsWith(LibFolder, Slash) Then
+					If EndsWith(LibFolder, WindowsSlash) Then
 						WAdd(ctx.CompileWith, " -p """ & Left(LibFolder, Len(LibFolder) - 1) & """")
 					Else
 						WAdd(ctx.CompileWith, " -p """ & LibFolder & """")

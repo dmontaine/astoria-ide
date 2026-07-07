@@ -7,6 +7,7 @@
 
 #include once "SettingsService.bi"
 #include once "AIService.bi"
+#include once "PathUtils.bi"
 
 Const INDEXED_SETTINGS_SECTION_COUNT As Integer = 8
 Const DEFAULT_AI_PORT As Integer = 443
@@ -36,13 +37,13 @@ Sub ResolveFbcExePath(ByRef FbcExe As WString Ptr, CompilerTool As ToolType Ptr,
 	Dim As Integer sp = InStr(CompExe, " ")
 	If sp > 0 Then CompExe = Left(CompExe, sp - 1)
 	If InStr(LCase(*FbcExe), ".exe") = 0 Then
-		Dim As UString FullExe = *FbcExe & Slash & CompExe
+		Dim As UString FullExe = *FbcExe & WindowsSlash & CompExe
 		If FileExists(FullExe) Then
 			WLet(FbcExe, FullExe)
-		ElseIf FileExists(*FbcExe & Slash & "bin" & Slash & CompExe) Then
-			WLet(FbcExe, *FbcExe & Slash & "bin" & Slash & CompExe)
-		ElseIf FileExists(*FbcExe & Slash & "bin" & Slash & "win64" & Slash & CompExe) Then
-			WLet(FbcExe, *FbcExe & Slash & "bin" & Slash & "win64" & Slash & CompExe)
+		ElseIf FileExists(*FbcExe & WindowsSlash & "bin" & WindowsSlash & CompExe) Then
+			WLet(FbcExe, *FbcExe & WindowsSlash & "bin" & WindowsSlash & CompExe)
+		ElseIf FileExists(*FbcExe & WindowsSlash & "bin" & WindowsSlash & "win64" & WindowsSlash & CompExe) Then
+			WLet(FbcExe, *FbcExe & WindowsSlash & "bin" & WindowsSlash & "win64" & WindowsSlash & CompExe)
 		End If
 	End If
 	If fbcCommand <> 0 Then
@@ -196,7 +197,7 @@ Sub LoadSettings
 		If Temp <> "" Then
 			Tool = _New(ToolType)
 			Tool->Name = Temp
-			Tool->Path = iniSettings.ReadString("MakeTools", "Path_" & WStr(i), "")
+			Tool->Path = SanitizeIniOptionalPath(iniSettings.ReadString("MakeTools", "Path_" & WStr(i), ""))
 			Tool->Parameters = iniSettings.ReadString("MakeTools", "Command_" & WStr(i), "")
 			MakeTools.Add Temp, Tool->Path, Tool
 		End If
@@ -204,7 +205,7 @@ Sub LoadSettings
 		If Temp <> "" Then
 			Tool = _New(ToolType)
 			Tool->Name = Temp
-			Tool->Path = iniSettings.ReadString("Terminals", "Path_" & WStr(i), "")
+			Tool->Path = SanitizeIniOptionalPath(iniSettings.ReadString("Terminals", "Path_" & WStr(i), ""))
 			Tool->Parameters = iniSettings.ReadString("Terminals", "Command_" & WStr(i), "")
 			Terminals.Add Temp, Tool->Path, Tool
 		End If
@@ -212,19 +213,19 @@ Sub LoadSettings
 		If Temp <> "" Then
 			Tool = _New(ToolType)
 			Tool->Name = Temp
-			Tool->Path = iniSettings.ReadString("OtherEditors", "Path_" & WStr(i), "")
+			Tool->Path = SanitizeIniOptionalPath(iniSettings.ReadString("OtherEditors", "Path_" & WStr(i), ""))
 			Tool->Parameters = iniSettings.ReadString("OtherEditors", "Command_" & WStr(i), "")
 			Tool->Extensions = iniSettings.ReadString("OtherEditors", "Extensions_" & WStr(i), "")
 			OtherEditors.Add Temp, Tool->Path, Tool
 		End If
 		
 		Temp = iniSettings.ReadString("Helps", "Version_" & WStr(i), "")
-		If Temp <> "" Then Helps.Add Temp, iniSettings.ReadString("Helps", "Path_" & WStr(i), "")
+		If Temp <> "" Then Helps.Add Temp, SanitizeIniOptionalPath(iniSettings.ReadString("Helps", "Path_" & WStr(i), ""))
 		Temp = iniSettings.ReadString("BuildConfigurations", "Name_" & WStr(i), "")
 		If Temp <> "" Then BuildConfigurations.Add Temp, iniSettings.ReadString("BuildConfigurations", "Switches_" & WStr(i), ""): cboBuildConfiguration.AddItem Temp
-		Temp = iniSettings.ReadString("IncludePaths", "Path_" & WStr(i), "")
+		Temp = SanitizeIniOptionalPath(iniSettings.ReadString("IncludePaths", "Path_" & WStr(i), ""))
 		If Temp <> "" Then IncludePaths.Add Temp
-		Temp = iniSettings.ReadString("LibraryPaths", "Path_" & WStr(i), "")
+		Temp = SanitizeIniOptionalPath(iniSettings.ReadString("LibraryPaths", "Path_" & WStr(i), ""))
 		If Temp <> "" Then LibraryPaths.Add Temp
 		i += 1
 	Loop Until NoMoreIndexedSettingsKeys(i)
@@ -251,12 +252,12 @@ Sub LoadSettings
 	CreateEventHandlersWithoutStaticEventHandlerIfEventAllowsIt = iniSettings.ReadBool("Options", "CreateEventHandlersWithoutStaticEventHandlerIfEventAllowsIt", True)
 	CreateFormTypesWithoutTypeWord = iniSettings.ReadBool("Options", "CreateFormTypesWithoutTypeWord", False)
 	OpenCommandPromptInMainFileFolder = iniSettings.ReadBool("Options", "OpenCommandPromptInMainFileFolder", True)
-	WLet(CommandPromptFolder, iniSettings.ReadString("Options", "CommandPromptFolder", "./Projects"))
+	WLet(CommandPromptFolder, SanitizeIniCriticalPath(iniSettings.ReadString("Options", "CommandPromptFolder", "./Projects"), "./Projects"))
 	LimitDebug = iniSettings.ReadBool("Options", "LimitDebug", False)
 	DisplayWarningsInDebug = iniSettings.ReadBool("Options", "DisplayWarningsInDebug", False)
 	TurnOnEnvironmentVariables = iniSettings.ReadBool("Options", "TurnOnEnvironmentVariables", True)
 	WLet(EnvironmentVariables, iniSettings.ReadString("Options", "EnvironmentVariables"))
-	WLet(ProjectsPath, iniSettings.ReadString("Options", "ProjectsPath", "./Projects"))
+	WLet(ProjectsPath, SanitizeIniCriticalPath(iniSettings.ReadString("Options", "ProjectsPath", "./Projects"), "./Projects"))
 	GridSize = iniSettings.ReadInteger("Options", "GridSize", 10)
 	ShowAlignmentGrid = iniSettings.ReadBool("Options", "ShowAlignmentGrid", True)
 	SnapToGridOption = iniSettings.ReadBool("Options", "SnapToGrid", True)
@@ -266,11 +267,12 @@ Sub LoadSettings
 	AutoCreateBakFiles = iniSettings.ReadBool("Options", "AutoCreateBakFiles", False)
 	AddRelativePathsToRecent = iniSettings.ReadBool("Options", "AddRelativePathsToRecent", True)
 	WhenVisualFBEditorStarts = iniSettings.ReadInteger("Options", "WhenVisualFBEditorStarts", 0)
-	WLet(DefaultProjectFile, iniSettings.ReadString("Options", "DefaultProjectFile", "Files/Form.frm"))
+	WLet(DefaultProjectFile, SanitizeIniPath(iniSettings.ReadString("Options", "DefaultProjectFile", "Files/Form.frm")))
 	DefaultFileFormat = FileEncodings.Utf8
 	DefaultNewLineFormat = NewLineTypes.WindowsCRLF
 	LastOpenedFileType = iniSettings.ReadInteger("Options", "LastOpenedFileType", 0)
 	AutoComplete = iniSettings.ReadBool("Options", "AutoComplete", True)
+	ParameterInfoShow = iniSettings.ReadBool("Options", "ParameterInfoShow", True)
 		AutoSuggestions = iniSettings.ReadBool("Options", "AutoSuggestions", True)
 	AutoIndentation = iniSettings.ReadBool("Options", "AutoIndentation", True)
 	ShowSpaces = iniSettings.ReadBool("Options", "ShowSpaces", True)

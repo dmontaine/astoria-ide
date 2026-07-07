@@ -21,7 +21,13 @@ Declare Function FolderExistsU(path As UString) As Boolean
 Declare Function FileExistsU(path As UString) As Boolean
 Declare Function GetFolderNameU(path As UString, WithSlash As Boolean = True) As UString
 Declare Function GetFileNameU(path As UString, WithExtension As Boolean = True) As UString
+Declare Function CanonicalWinPath(path As UString) As UString
+Declare Function SanitizeIniPath(path As UString) As UString
+Declare Function IsIniPathDriveAvailable(path As UString) As Boolean
+Declare Function SanitizeIniCriticalPath(path As UString, defaultPath As UString) As UString
+Declare Function SanitizeIniOptionalPath(path As UString) As UString
 Declare Function WinOsPath(path As UString) As UString
+Declare Function OsPathForDir(path As UString) As UString
 Declare Function FormatMsgPath(ByRef Path As WString) As UString
 Declare Function FormatMsgPathU(path As UString) As UString
 Declare Function GetControlLibraryVfpPath(path As UString) As UString

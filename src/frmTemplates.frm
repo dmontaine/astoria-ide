@@ -1,4 +1,4 @@
-	'#Compile -exx "Form1.rc"
+﻿	'#Compile -exx "Form1.rc"
 '#Region "Form"
 	#include once "frmTemplates.bi"
 	
@@ -334,19 +334,19 @@ Private Sub frmTemplates.cmdOK_Click(ByRef Sender As Control)
 					MsgBox ML("Parent folder not exists, change the parent folder!")
 					Me.BringToFront
 				Else
-					SelectedTemplate = ExePath & Slash & "Templates" & Slash & Templates.Item(lvTemplates.SelectedItemIndex)
+					SelectedTemplate = ExePath & WindowsSlash & "Templates" & WindowsSlash & Templates.Item(lvTemplates.SelectedItemIndex)
 					Dim As UString TemplateFolderName = ..Left(SelectedTemplate, Len(SelectedTemplate) - 4)
 					SelectedFolder = GetFullPath(txtSaveLocation.Text)
 					FolderCopy TemplateFolderName, SelectedFolder
 					Dim As WString * MAX_PATH SrcPath, DestPath
-					SrcPath = SelectedFolder & Slash & GetFileName(SelectedTemplate)
-					DestPath = SelectedFolder & Slash & GetFileName(SelectedFolder) & ".vfp"
+					SrcPath = SelectedFolder & WindowsSlash & GetFileName(SelectedTemplate)
+					DestPath = SelectedFolder & WindowsSlash & GetFileName(SelectedFolder) & ".vfp"
 						MoveFile @SrcPath, @DestPath
 					ModalResult = ModalResults.OK
 					Me.CloseForm
 				End If
 			Else
-				SelectedTemplate = ExePath & Slash & "Templates" & Slash & Templates.Item(lvTemplates.SelectedItemIndex)
+				SelectedTemplate = ExePath & WindowsSlash & "Templates" & WindowsSlash & Templates.Item(lvTemplates.SelectedItemIndex)
 				ModalResult = ModalResults.OK
 				Me.CloseForm
 			End If
@@ -395,9 +395,9 @@ Private Sub frmTemplates.tvTemplates_SelChanged(ByRef Sender As TreeView, ByRef 
 			If imgList32.IndexOf(ImageName) < 0 Then ImageName = "AppGUI"
 			lvTemplates.ListItems.Add ML(TemplateName), ImageName
 			If FileExists(ExePath & "/Templates/Projects/" & TemplateName & "/" & f) Then
-				Templates.Add "Projects" & Slash & f, lvTemplates.ListItems.Item(lvTemplates.ListItems.Count - 1)
+				Templates.Add "Projects" & WindowsSlash & f, lvTemplates.ListItems.Item(lvTemplates.ListItems.Count - 1)
 			Else
-				Templates.Add "Projects" & Slash & f
+				Templates.Add "Projects" & WindowsSlash & f
 			End If
 			f = Dir()
 		Wend
@@ -421,7 +421,7 @@ Private Sub frmTemplates.tvTemplates_SelChanged(ByRef Sender As TreeView, ByRef 
 			End If
 			If imgList32.IndexOf(IconName) < 0 Then IconName = "AppGUI"
 			lvTemplates.ListItems.Add ML(TemplateName), IconName
-			Templates.Add "Files" & Slash & f
+			Templates.Add "Files" & WindowsSlash & f
 			f = Dir()
 		Wend
 	End If
@@ -515,9 +515,9 @@ Private Sub frmTemplates.cmdSaveLocation_Click_(ByRef Designer As My.Sys.Object,
 End Sub
 Private Sub frmTemplates.cmdSaveLocation_Click(ByRef Sender As Control)
 	Dim BrowseD As FolderBrowserDialog
-	BrowseD.InitialDir = GetFullPath(Replace(GetFolderName(txtSaveLocation.Text), BackSlash, Slash))
+	BrowseD.InitialDir = GetFullPath(Replace(GetFolderName(txtSaveLocation.Text), UnixSlash, WindowsSlash))
 	If BrowseD.Execute Then
-		txtSaveLocation.Text = BrowseD.Directory & Slash & Mid(txtSaveLocation.Text, InStrRev(Replace(txtSaveLocation.Text, BackSlash, Slash), Slash) + 1)
+		txtSaveLocation.Text = BrowseD.Directory & WindowsSlash & Mid(txtSaveLocation.Text, InStrRev(Replace(txtSaveLocation.Text, UnixSlash, WindowsSlash), WindowsSlash) + 1)
 	End If
 End Sub
 
@@ -581,7 +581,7 @@ Private Sub frmTemplates.cmdChange_Click(ByRef Sender As Control)
 		Else
 			Exit Sub
 		End If
-		If StartsWith(Path, "." & Slash) Then Path = Mid(Path, 3)
+		If StartsWith(Path, "." & WindowsSlash) Then Path = Mid(Path, 3)
 		If NodeIdx = 0 Then
 			MRUFolders.Item(Idx) = Path
 		ElseIf NodeIdx = 1 Then
@@ -612,7 +612,7 @@ Private Sub frmTemplates.cmdAdd_Click(ByRef Sender As Control)
 	Else
 		Exit Sub
 	End If
-	If StartsWith(Path, "." & Slash) Then Path = Mid(Path, 3)
+	If StartsWith(Path, "." & WindowsSlash) Then Path = Mid(Path, 3)
 	If NodeIdx = 0 Then
 		MRUFolders.Insert 0, Path
 	ElseIf NodeIdx = 1 Then
@@ -644,7 +644,7 @@ Private Sub frmTemplates.Form_Create(ByRef Sender As Control)
 	Do
 		n = n + 1
 		NewName = ProjectName & Str(n)
-	Loop While FolderExists(*ProjectsPath & Slash & NewName)
-	txtSaveLocation.Text = Replace(*ProjectsPath, BackSlash, Slash) & Slash & NewName
+	Loop While FolderExists(*ProjectsPath & WindowsSlash & NewName)
+	txtSaveLocation.Text = Replace(*ProjectsPath, UnixSlash, WindowsSlash) & WindowsSlash & NewName
 End Sub
 

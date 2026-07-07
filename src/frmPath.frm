@@ -1,4 +1,4 @@
-'#########################################################
+﻿'#########################################################
 '#  frmPath.bas                                          #
 '#  This file is part of VisualFBEditor                  #
 '#  Authors: Xusinboy Bekchanov (bxusinboy@mail.ru)      #
@@ -296,7 +296,7 @@ Private Sub frmPath.cmdPath_Click(ByRef Sender As Control)
 				.BrowseD.InitialDir = GetFullPath(.txtPath.Text)
 				If .BrowseD.Execute Then
 					If FolderName <> "" AndAlso StartsWith(.BrowseD.Directory, FolderName) Then
-						.txtPath.Text = "." & Slash & Mid(.BrowseD.Directory, Len(FolderName) + 1)
+						.txtPath.Text = "." & WindowsSlash & Mid(.BrowseD.Directory, Len(FolderName) + 1)
 					Else
 						.txtPath.Text = .BrowseD.Directory
 					End If
@@ -305,7 +305,7 @@ Private Sub frmPath.cmdPath_Click(ByRef Sender As Control)
 				.OpenD.Filter = ML("All Files") & "|*.*;"
 				If .OpenD.Execute Then
 					If FolderName <> "" AndAlso StartsWith(.OpenD.FileName, FolderName) Then
-						.txtPath.Text = "." & Slash & Mid(.OpenD.FileName, Len(FolderName) + 1)
+						.txtPath.Text = "." & WindowsSlash & Mid(.OpenD.FileName, Len(FolderName) + 1)
 					Else
 						.txtPath.Text = .OpenD.FileName
 					End If

@@ -1,4 +1,4 @@
-'#########################################################
+﻿'#########################################################
 '#  VisualFBEditor.bas                                   #
 '#  This file is part of VisualFBEditor                  #
 '#  Authors: Xusinboy Bekchanov (bxusinboy@mail.ru)      #
@@ -111,7 +111,7 @@ Sub mClickAIChat(ByRef Designer As My.Sys.Object, Sender As My.Sys.Object)
 			txtAIAgent.SelEnd = InStr(txtAIAgent.SelStart + 3, txtAIAgent.Text, "```")
 		End If
 		If Trim(txtAIAgent.SelText) = "" Then Exit Sub
-		FileName= GetFullPath(ExePath & Slash & "Temp" & Slash & ML("Untitled") & ".bas")
+		FileName= GetFullPath(ExePath & WindowsSlash & "Temp" & WindowsSlash & ML("Untitled") & ".bas")
 		SaveToFile(FileName, txtAIAgent.SelText)
 		AddTab FileName, True
 	Case "AIChatPaste"
@@ -120,7 +120,7 @@ Sub mClickAIChat(ByRef Designer As My.Sys.Object, Sender As My.Sys.Object)
 		AIChatPaste(True)
 	Case "AIChatOpen"
 		Dim As OpenFileDialog OpenD
-		OpenD.InitialDir = ExePath & Slash & "AIChat"
+		OpenD.InitialDir = ExePath & WindowsSlash & "AIChat"
 		OpenD.Filter = ML("AIChat Files") & " (*.md)|*.md|" & ML("All Files") & "|*.*|"
 		If OpenD.Execute Then
 			frmMain.Cursor = crWait
@@ -368,7 +368,16 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 	Case "Compile":                             If SaveAllBeforeCompile Then ThreadCounter(ThreadCreate_(@CompileProgram))
 	Case "Make":                                If SaveAllBeforeCompile Then ThreadCounter(ThreadCreate_(@MakeExecute))
 	Case "MakeClean":                           If SaveAllBeforeCompile Then ThreadCounter(ThreadCreate_(@MakeClean))
-	Case "Suggestions":                         Suggestions
+	Case "Suggestions":                         ChangeShowSymbolsTooltipsOnMouseHover Not GlobalSettings.ShowSymbolsTooltipsOnMouseHover, 1
+	Case "SuggestOptions":                      ChangeAutoComplete Not AutoComplete, 1
+	Case "ParameterInfo"
+		If (GetKeyState(VK_CONTROL) And 8000) <> 0 Then
+			If ParameterInfoShow Then ParameterInfo 0
+		Else
+			ChangeParameterInfo Not ParameterInfoShow, 1
+		End If
+	Case "InvokeParameterInfo":                 If ParameterInfoShow Then ParameterInfo 0
+	Case "AnalyzeSuggestions":                  Suggestions
 	Case "FormatProject":                       ThreadCounter(ThreadCreate_(@FormatProject)) 'FormatProject 0
 	Case "UnformatProject":                     ThreadCounter(ThreadCreate_(@FormatProject, Cast(Any Ptr, 1))) 'FormatProject Cast(Any Ptr, 1)
 	Case "Parameters":                          pfParameters->ShowModal *pfrmMain : pfParameters->CenterToParent
@@ -671,7 +680,7 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 	Case "AddManifest":                     AddFromTemplate ExePath + "/Templates/Files/Manifest.xml"
 	Case "Undo", "Redo", "CutCurrentLine", "Cut", "Copy", "Paste", "SelectAll", "Duplicate", "SingleComment", "BlockComment", "UnComment", _
 		"Indent", "Outdent", "Format", "Unformat", "AddSpaces", "Breakpoint", "ToggleBookmark", "CollapseAll", "UnCollapseAll", "CollapseAllProcedures", "UnCollapseAllProcedures", _
-		"CollapseCurrent", "UnCollapseCurrent", "CompleteWord", "ParameterInfo", "Define", _
+		"CollapseCurrent", "UnCollapseCurrent", "CompleteWord", "Define", _
 		"AlignLefts", "AlignCenters", "AlignRights", "AlignTops", "AlignMiddles", "AlignBottoms", "AlignToGrid", "MakeSameSizeWidth", "MakeSameSizeHeight", "MakeSameSizeBoth", "SizeToGrid", _
 		"HorizontalSpacingMakeEqual", "HorizontalSpacingIncrease", "HorizontalSpacingDecrease", "HorizontalSpacingRemove", "VerticalSpacingMakeEqual", "VerticalSpacingIncrease", "VerticalSpacingDecrease", _
 		"VerticalSpacingRemove", "CenterInParentHorizontally", "CenterInParentVertically", "SendToBack", "BringToFront", "LockControls", "TBLockControls"
@@ -761,7 +770,6 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 				Case "CollapseCurrent":             ec->CollapseCurrent
 				Case "UnCollapseCurrent":           ec->UnCollapseCurrent
 				Case "CompleteWord":                CompleteWord
-				Case "ParameterInfo":               ParameterInfo 0
 				Case "ToggleBookmark":              ec->Bookmark
 				Case "Define":                      tb->Define
 				End Select

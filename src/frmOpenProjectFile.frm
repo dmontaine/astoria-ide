@@ -1,4 +1,4 @@
-	'#Compile -exx "Form1.rc"
+﻿	'#Compile -exx "Form1.rc"
 '#Region "Form"
 	#include once "frmOpenProjectFile.bi"
 	
@@ -116,11 +116,11 @@ Private Sub frmOpenProjectFile.Form_Create(ByRef Sender As Control)
 	If projectDir = "" Then Return
 	Dim As WStringList paths
 	Dim As UInteger Attr
-	Dim As WString * MAX_PATH entry = Dir(projectDir & Slash & "*", fbReadOnly Or fbHidden Or fbSystem Or fbArchive, Attr)
+	Dim As WString * MAX_PATH entry = Dir(projectDir & WindowsSlash & "*", fbReadOnly Or fbHidden Or fbSystem Or fbArchive, Attr)
 	While entry <> ""
 		If (Attr And fbDirectory) = 0 Then
-			If IsProjectOpenFileType(entry) AndAlso FileExistsU(WinOsPath(projectDir & Slash & entry)) Then
-				paths.Add WinOsPath(projectDir & Slash & entry)
+			If IsProjectOpenFileType(entry) AndAlso FileExistsU(WinOsPath(projectDir & WindowsSlash & entry)) Then
+				paths.Add WinOsPath(projectDir & WindowsSlash & entry)
 			End If
 		End If
 		entry = Dir(Attr)

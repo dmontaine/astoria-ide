@@ -155,7 +155,10 @@ Sub FormatProject(UnFormat As Any Ptr)
 	pstBar->Panels[0]->Caption = IIf(UnFormat, ML("UnFormat Project"), ML("Format Project")) &"... "
 	ThreadsLeave()
 	If tbCurrent <> 0 Then tbCurrent->txtCode.UpdateLock
-	pfrmMain->Enabled = False
+	ThreadsEnter()
+	ptabCode->Enabled = False
+	ptvExplorer->Enabled = False
+	ThreadsLeave()
 	StartProgress
 	For i As Integer = 0 To tn2->Nodes.Count - 1
 		tn = tn2->Nodes.Item(i)
@@ -195,7 +198,10 @@ Sub FormatProject(UnFormat As Any Ptr)
 		End If
 	Next
 	StopProgress
-	pfrmMain->Enabled = True
+	ThreadsEnter()
+	ptabCode->Enabled = True
+	ptvExplorer->Enabled = True
+	ThreadsLeave()
 	If tbCurrent <> 0 Then tbCurrent->txtCode.UpdateUnLock
 	ThreadsEnter()
 	pstBar->Panels[0]->Caption = ML("Press F1 for get more information")
@@ -8171,8 +8177,7 @@ Sub Suggestions
 					ecc->Globals = @Project->Globals
 					ecc->Tag = Project
 					Project->Contents.Add ecc
-					LoadFunctions ecc->FileName, LoadParam.OnlyFilePathOverwriteWithContent, Globals.Types, Globals.Enums, Globals.Functions, Globals.TypeProcedures, Globals.Args, , , ecc
-					ecc->ExternalIncludesLoaded = LoadFunctionsCount = 0
+					ThreadCounter(ThreadCreate_(@LoadOnlyFilePathOverwriteWithContent, ecc))
 					'LoadFunctionsWithContent Project->Files_.Item(i), Project, *ecc
 				End If
 			Next

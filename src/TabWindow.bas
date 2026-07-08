@@ -8371,7 +8371,11 @@ Sub TabWindow.FormDesign(NotForms As Boolean = False)
 	On Error Goto ErrorHandler
 	If pApp = 0 Then pApp = @VisualFBEditorApp
 	If pApp->MainForm = 0 Then pApp->MainForm = @frmMain
-	If bNotDesign OrElse FormClosing OrElse txtCode.LinesCount > 50000 Then Exit Sub
+	If bNotDesign OrElse FormClosing Then Exit Sub
+	If txtCode.LinesCount > 50000 Then
+		pstBar->Panels[0]->Caption = ML("This file is too large for the Form Designer (over 50,000 lines) - showing code only.")
+		Exit Sub
+	End If
 	If Not txtCode.SyntaxEdit Then
 		If cboClass.Items.Count = 0 Then
 			cboClass.Items.Clear

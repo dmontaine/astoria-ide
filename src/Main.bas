@@ -3205,6 +3205,10 @@ Sub LoadFunctions(ByRef Path As WString, LoadParameter As LoadParam = FilePathAn
 					Lines.Add b
 				End If
 			Loop
+		Else
+			ThreadsEnter
+			ShowMessages(ML("Could not find include file:") & " " & PathFunction, False)
+			ThreadsLeave
 		End If
 		CloseFile_(ff)
 	End If

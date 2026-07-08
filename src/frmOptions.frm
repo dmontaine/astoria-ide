@@ -1712,7 +1712,7 @@ pfOptions = @fOptions
 		' chkCreateNonStaticEventHandlers
 		With chkCreateNonStaticEventHandlers
 			.Name = "chkCreateNonStaticEventHandlers"
-			.Text = ML("Create non-static event handlers")
+			.Text = ML("Event handlers: Non-static (modern)")
 			.TabIndex = 162
 			.SetBounds 12, 150, 288, 24
 
@@ -1982,6 +1982,7 @@ pfOptions = @fOptions
 
 			.SetBounds 32, 172, 310, 24
 			.Parent = @pnlDesigner
+			.Visible = False
 		End With
 		' chkCreateStaticEventHandlersWithAnUnderscoreAtTheBeginning
 		With chkCreateStaticEventHandlersWithAnUnderscoreAtTheBeginning
@@ -1991,6 +1992,7 @@ pfOptions = @fOptions
 
 			.SetBounds 32, 195, 380, 24
 			.Parent = @pnlDesigner
+			.Visible = False
 		End With
 		' txtHistoryCodeDays
 		With txtHistoryCodeDays
@@ -2338,6 +2340,7 @@ pfOptions = @fOptions
 			.SetBounds 32, 219, 380, 24
 			.Designer = @This
 			.Parent = @pnlDesigner
+			.Visible = False
 		End With
 			'.ExtraMargins.Top = 4
 			'.ExtraMargins.Right = 10

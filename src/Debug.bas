@@ -454,10 +454,23 @@ End Function
 			Dim sBuffer As ZString * BufferSize
 			Dim sOutput As UString
 			Dim bytesRead As DWORD
+			Dim As DWORD dwAvail
 			Dim result_ As Integer
 			Dim s As String = ""
 			Dim As Integer iNumberOfBytesWritten
 			Do
+				' R5 (2026-07-08): don't block ReadFile forever on an unresponsive GDB. Poll with
+				' PeekNamedPipe first so the debug worker thread bails on app close (FormClosing) or a
+				' broken pipe (GDB terminated/crashed) instead of stalling -- the broken-pipe case also
+				' fixes a tight infinite loop the old blocking read hit (ReadFile returns 0 bytes
+				' repeatedly). Behaviour is unchanged whenever data is actually available.
+				Do
+					If FormClosing Then Return sOutput
+					dwAvail = 0
+					If PeekNamedPipe(hReadPipe, NULL, 0, NULL, @dwAvail, NULL) = 0 Then Return sOutput
+					If dwAvail > 0 Then Exit Do
+					Sleep 5, 1
+				Loop
 				result_ = ReadFile(hReadPipe, @sBuffer, BufferSize, @bytesRead, ByVal 0)
 				sBuffer = Left(sBuffer, bytesRead)
 				sOutput += sBuffer

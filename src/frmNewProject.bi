@@ -13,6 +13,8 @@
 		Declare Sub cmdOK_Click(ByRef Sender As Control)
 		Declare Static Sub cmdCancel_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Sub cmdCancel_Click(ByRef Sender As Control)
+		Declare Static Sub cmdOpenExisting_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
+		Declare Sub cmdOpenExisting_Click(ByRef Sender As Control)
 		Declare Static Sub lvTemplates_ItemActivate_(ByRef Designer As My.Sys.Object, ByRef Sender As ListView, ByVal ItemIndex As Integer)
 		Declare Sub lvTemplates_ItemActivate(ByRef Sender As ListView, ByVal ItemIndex As Integer)
 		Declare Static Sub lvTemplates_SelectedItemChanged_(ByRef Designer As My.Sys.Object, ByRef Sender As ListView, ByVal ItemIndex As Integer)
@@ -23,12 +25,13 @@
 		Declare Constructor
 		
 		Dim As ListView lvTemplates
-		Dim As CommandButton cmdOK, cmdCancel
+		Dim As CommandButton cmdOK, cmdCancel, cmdOpenExisting
 		Dim As Label lblProjectTemplates, lblProjectName
 		Dim As TextBox txtProjectName
 		Dim As Panel pnlProjectName, pnlBottom
 		Dim As WStringList TemplateNames
 		Dim As UString SelectedTemplate, SelectedFolder, SelectedProjectFile
+		Dim As Boolean OpenExistingRequested
 	End Type
 	
 	Common Shared pfNewProject As frmNewProject Ptr

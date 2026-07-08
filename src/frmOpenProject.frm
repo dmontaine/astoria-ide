@@ -54,7 +54,7 @@
 
 			.Text = ML("Browse") & "..."
 
-			.Align = DockStyle.alLeft
+			.Align = DockStyle.alNone
 
 			.ExtraMargins.Left = 10
 
@@ -64,7 +64,7 @@
 
 			.TabIndex = 5
 
-			.SetBounds 10, 0, 88, 20
+			.SetBounds 145, 0, 88, 20
 
 			.Designer = @This
 
@@ -72,6 +72,18 @@
 
 			.Parent = @pnlBottom
 
+		End With
+
+		' cmdOpenNew  (leftmost; closes this dialog and opens the New Project window instead)
+		With cmdOpenNew
+			.Name = "cmdOpenNew"
+			.Text = ML("Open New Project")
+			.Align = DockStyle.alNone
+			.TabIndex = 6
+			.SetBounds 10, 0, 130, 20
+			.Designer = @This
+			.OnClick = @cmdOpenNew_Click_
+			.Parent = @pnlBottom
 		End With
 
 		' cmdCancel
@@ -396,6 +408,16 @@ Private Sub frmOpenProject.cmdCancel_Click(ByRef Sender As Control)
 
 	Me.CloseForm
 
+End Sub
+
+Private Sub frmOpenProject.cmdOpenNew_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
+	(*Cast(frmOpenProject Ptr, Sender.Designer)).cmdOpenNew_Click(Sender)
+End Sub
+Private Sub frmOpenProject.cmdOpenNew_Click(ByRef Sender As Control)
+	' Close Open Project and signal OpenProject() to bring up the New Project window instead.
+	OpenNewRequested = True
+	ModalResult = ModalResults.Cancel
+	Me.CloseForm
 End Sub
 
 

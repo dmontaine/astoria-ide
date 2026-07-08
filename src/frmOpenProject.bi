@@ -13,6 +13,8 @@
 		Declare Sub cmdOK_Click(ByRef Sender As Control)
 		Declare Static Sub cmdBrowse_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Sub cmdBrowse_Click(ByRef Sender As Control)
+		Declare Static Sub cmdOpenNew_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
+		Declare Sub cmdOpenNew_Click(ByRef Sender As Control)
 		Declare Static Sub cmdCancel_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Sub cmdCancel_Click(ByRef Sender As Control)
 		Declare Static Sub lvProjects_ItemActivate_(ByRef Designer As My.Sys.Object, ByRef Sender As ListView, ByVal ItemIndex As Integer)
@@ -32,11 +34,12 @@
 		Dim As TabControl tabOpenProject
 		Dim As TabPage tpProjects, tpExamples
 		Dim As ListView lvProjects, lvExamples
-		Dim As CommandButton cmdOK, cmdCancel, cmdBrowse
+		Dim As CommandButton cmdOK, cmdCancel, cmdBrowse, cmdOpenNew
 		Dim As Panel pnlBottom
 		Dim As WStringList ProjectFiles, ExampleFiles
 		Dim As UString SelectedFile
 		Dim As Boolean ExamplesLoaded
+		Dim As Boolean OpenNewRequested
 	End Type
 	
 	Common Shared pfOpenProject As frmOpenProject Ptr

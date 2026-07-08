@@ -1069,6 +1069,9 @@ Sub OpenProject()
 			tpProject->SelectTab
 		End If
 	End If
+	' "Open New Project" button on the Open Project dialog: it closed with Cancel + this flag;
+	' now bring up the New Project window instead.
+	If pfOpenProject->OpenNewRequested Then NewProject()
 End Sub
 
 Sub OpenRecentProject()
@@ -2055,6 +2058,9 @@ Sub NewProject()
 			AddNewU pfNewProject->SelectedTemplate
 		End If
 	End If
+	' "Open Existing Project" button on the New Project dialog: it closed with Cancel + this flag;
+	' now bring up the Open Project window (only reached on the non-OK path, so no early Return skips it).
+	If pfNewProject->OpenExistingRequested Then OpenProject()
 End Sub
 
 Function ContainsFileName(tn As TreeNode Ptr, ByRef FileName As WString) As Boolean
@@ -2420,6 +2426,16 @@ Sub Save()
 	End If
 End Sub
 
+Function NodeInProject(node As TreeNode Ptr, proj As TreeNode Ptr) As Boolean
+	' True if 'node' is 'proj' or any descendant of it (walk up the parent chain).
+	Dim As TreeNode Ptr n = node
+	Do While n <> 0
+		If n = proj Then Return True
+		n = n->ParentNode
+	Loop
+	Return False
+End Function
+
 Function CloseProject(tn As TreeNode Ptr, WithoutMessage As Boolean = False) As Boolean
 	If tn = 0 Then Return True
 	If tn->ImageKey <> "Project" AndAlso tn->ImageKey <> "MainProject" AndAlso tn->ImageKey <> "Opened" Then Return True
@@ -2461,13 +2477,34 @@ Function CloseProject(tn As TreeNode Ptr, WithoutMessage As Boolean = False) As 
 			End If
 		End With
 	End If
+	' Close every tab belonging to this project BEFORE freeing/removing the project node.
+	' Otherwise leftover tabs keep dangling pointers into the freed project data and the app
+	' hangs/faults on the next interaction (owner-reported 2026-07-07). Match by tree-node
+	' ancestry (robust even if tb->ptn is stale) as well as the direct ptn pointer, and re-scan
+	' after each close since CloseTab mutates the tab list.
+	Dim As Boolean bClosedTab
+	Do
+		bClosedTab = False
+		For jj As Integer = 0 To TabPanels.Count - 1
+			Var ptabCode = @Cast(TabPanel Ptr, TabPanels.Item(jj))->tabCode
+			For i As Integer = 0 To ptabCode->TabCount - 1
+				tb = Cast(TabWindow Ptr, ptabCode->Tab(i))
+				If tb <> 0 AndAlso (tb->ptn = tn OrElse NodeInProject(tb->tn, tn)) Then
+					If Not CloseTab(tb, True) Then Return False
+					bClosedTab = True
+					Exit For
+				End If
+			Next i
+			If bClosedTab Then Exit For
+		Next jj
+	Loop While bClosedTab
+	' SAFETY: if any tab still references this project, bail WITHOUT freeing (no dangling-ref hang).
 	For jj As Integer = 0 To TabPanels.Count - 1
 		Var ptabCode = @Cast(TabPanel Ptr, TabPanels.Item(jj))->tabCode
 		For i As Integer = 0 To ptabCode->TabCount - 1
 			tb = Cast(TabWindow Ptr, ptabCode->Tab(i))
-			If tb->ptn = tn Then
-				If Not CloseTab(tb, True) Then Return False
-				Exit For
+			If tb <> 0 AndAlso (tb->ptn = tn OrElse NodeInProject(tb->tn, tn)) Then
+				Return False
 			End If
 		Next i
 	Next jj
@@ -2483,7 +2520,7 @@ Function CloseProject(tn As TreeNode Ptr, WithoutMessage As Boolean = False) As 
 			'		End If
 			'	Next i
 			'Next jj
-			If tn->Nodes.Item(j)->Tag <> 0 Then _Delete(Cast(ExplorerElement Ptr, tn->Nodes.Item(j)->Tag))
+			If tn->Nodes.Item(j)->Tag <> 0 Then _Delete(Cast(ExplorerElement Ptr, tn->Nodes.Item(j)->Tag)): tn->Nodes.Item(j)->Tag = 0 ' null after free: Nodes.Remove below fires tvExplorer_SelChange, which derefs Tag in an Is-check
 		Else
 			For k As Integer = tn->Nodes.Item(j)->Nodes.Count - 1 To 0 Step - 1 '
 				'For jj As Integer = 0 To TabPanels.Count - 1
@@ -2496,7 +2533,7 @@ Function CloseProject(tn As TreeNode Ptr, WithoutMessage As Boolean = False) As 
 				'		End If
 				'	Next i
 				'Next jj
-				If tn->Nodes.Item(j)->Nodes.Item(k)->Tag <> 0 Then _Delete(Cast(ExplorerElement Ptr, tn->Nodes.Item(j)->Nodes.Item(k)->Tag))
+				If tn->Nodes.Item(j)->Nodes.Item(k)->Tag <> 0 Then _Delete(Cast(ExplorerElement Ptr, tn->Nodes.Item(j)->Nodes.Item(k)->Tag)): tn->Nodes.Item(j)->Nodes.Item(k)->Tag = 0 ' null after free (dangling-Tag Is-check crash)
 			Next k
 		End If
 	Next
@@ -2508,7 +2545,7 @@ Function CloseProject(tn As TreeNode Ptr, WithoutMessage As Boolean = False) As 
 	'		End Select
 	'	End If
 	If tn = MainNode Then SetMainNode 0
-	If tn->Tag <> 0 Then _Delete(Cast(ProjectElement Ptr, tn->Tag))
+	If tn->Tag <> 0 Then _Delete(Cast(ProjectElement Ptr, tn->Tag)): tn->Tag = 0 ' null after free: Nodes.Remove below fires tvExplorer_SelChange -> *Tag Is ... (fb_IsTypeOf on freed vtable = SIGSEGV)
 	'miSaveProject->Enabled = False
 	'miSaveProjectAs->Enabled = False
 	'miCloseProject->Enabled = False
@@ -9252,9 +9289,13 @@ Sub frmMain_Show(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Var bWorkspaceLoaded = LoadWorkspace()
 		mApplyingWorkspaceLoad = False
 		RunDeferredFormDesign()
-		' Nothing to reopen (fresh install, or a workspace with no surviving project/tabs) -- open a starter project instead of an empty IDE.
+		' Nothing to reopen (fresh install, or a workspace with no surviving project/tabs): prompt the
+		' user with File > New Project so they choose the project type, instead of landing on an empty
+		' IDE. This is the original design intent (see the commented Case 1: NewProject below) and a
+		' startup modal here is already the norm (frmTipOfDay.ShowModal further down). Cancelling just
+		' leaves the empty IDE, which is fine.
 		If Not bWorkspaceLoaded Then
-			AddNew ExePath & WindowsSlash & "Templates" & WindowsSlash & WGet(DefaultProjectFile)
+			NewProject
 		End If
 	End If
 	'	Var FILE = Command(-1)

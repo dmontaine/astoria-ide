@@ -86,6 +86,20 @@
 			.OnClick = @cmdOK_Click_
 			.Parent = @pnlBottom
 		End With
+		' cmdOpenExisting  (lower-left, aligned with OK; opens the Open Project window instead)
+		With cmdOpenExisting
+			.Name = "cmdOpenExisting"
+			.Text = ML("Open Existing Project")
+			.Align = DockStyle.alLeft
+			.ExtraMargins.Top = 4
+			.ExtraMargins.Left = 10
+			.ExtraMargins.Bottom = 8
+			.TabIndex = 9
+			.SetBounds 10, 36, 160, 20
+			.Designer = @This
+			.OnClick = @cmdOpenExisting_Click_
+			.Parent = @pnlBottom
+		End With
 		' lvTemplates
 		With lvTemplates
 			.Name = "lvTemplates"
@@ -174,6 +188,16 @@ Private Sub frmNewProject.cmdCancel_Click_(ByRef Designer As My.Sys.Object, ByRe
 	(*Cast(frmNewProject Ptr, Sender.Designer)).cmdCancel_Click(Sender)
 End Sub
 Private Sub frmNewProject.cmdCancel_Click(ByRef Sender As Control)
+	ModalResult = ModalResults.Cancel
+	Me.CloseForm
+End Sub
+
+Private Sub frmNewProject.cmdOpenExisting_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
+	(*Cast(frmNewProject Ptr, Sender.Designer)).cmdOpenExisting_Click(Sender)
+End Sub
+Private Sub frmNewProject.cmdOpenExisting_Click(ByRef Sender As Control)
+	' Close New Project and signal NewProject() to open the Open Project window instead.
+	OpenExistingRequested = True
 	ModalResult = ModalResults.Cancel
 	Me.CloseForm
 End Sub

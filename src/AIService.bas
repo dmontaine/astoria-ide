@@ -755,20 +755,36 @@ Public Sub AIChatPaste(ByVal IsFBCode As Boolean = False)
 	pstBar->Panels[0]->Caption = ML("Press F1 for get more information")
 End Sub
 
-Public Sub AIRelease()
-	ThreadsEnter 
-	If pHTTPAIAgent <> 0 Then pHTTPAIAgent->Abort = True
-	ThreadsLeave
+Sub AIReleaseFinish(Param As Any Ptr = 0)
 	Sleep(500)
-	'If AIThread Then ThreadDetach(AIThread)
+	ThreadsEnter
 	WLet(AIAssistantsAnswersPtr, "")
 	bInAIThread = False
 	txtAIRequest.Enabled = True
 	txtAIRequest.SetFocus
 	cboAIAgentModels.Enabled = True
+	ThreadsLeave
+End Sub
+
+Public Sub AIRelease()
+	ThreadsEnter
+	If pHTTPAIAgent <> 0 Then pHTTPAIAgent->Abort = True
+	ThreadsLeave
+	'If AIThread Then ThreadDetach(AIThread)
+	ThreadCreate(@AIReleaseFinish)
+End Sub
+
+Sub AIResetContextFinish(Param As Any Ptr = 0)
+	Sleep(300)
+	If AIThread Then ThreadDetach(AIThread)
+	AIThread = ThreadCreate(@AIRequest)
 End Sub
 
 Public Sub AIResetContext()
+	If bInAIThread Then
+		ShowMessages(ML("Please waiting, AI is working hard......"))
+		Return
+	End If
 	txtAIAgent.Text = " "
 	txtAIAgent.TextRTF = ""
 	ThreadsEnter 
@@ -802,8 +818,6 @@ Public Sub AIResetContext()
 	txtAIRequest.Enabled = True
 	txtAIRequest.SetFocus
 	cboAIAgentModels.Enabled = True
-	Sleep(300)
-	If AIThread Then ThreadDetach(AIThread)
-	AIThread = ThreadCreate(@AIRequest)
+	ThreadCreate(@AIResetContextFinish)
 End Sub
 

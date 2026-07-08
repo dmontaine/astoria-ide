@@ -1633,8 +1633,13 @@ Function SaveProject(ByRef tnP As TreeNode Ptr, bWithQuestion As Boolean = False
 		End If
 	Next
 	Dim As Integer Fn = FreeFile_
+	Dim As Integer OpenResult
 	If Not EndsWith(LCase(*ppe->FileName), ".vfp") Then
-		Open *ppe->FileName & "/" & GetFileName(*ppe->FileName) & ".vfp" For Output Encoding "utf-8" As #Fn
+		OpenResult = Open(*ppe->FileName & "/" & GetFileName(*ppe->FileName) & ".vfp" For Output Encoding "utf-8" As #Fn)
+		If OpenResult <> 0 Then
+			MsgBox ML("Couldn't save the project file - check that the folder still exists and isn't read-only") & "." & WChr(13,10) & *ppe->FileName, "Visual FB Editor", mtError
+			Return False
+		End If
 		For i As Integer = 0 To ppe->Files.Count - 1
 			Zv = IIf(ppe AndAlso (ppe->Files.Item(i) = *ppe->MainFileName OrElse ppe->Files.Item(i) = *ppe->ResourceFileName OrElse ppe->Files.Item(i) = *ppe->IconResourceFileName OrElse ppe->Files.Item(i) = *ppe->BatchCompilationFileNameWindows OrElse ppe->Files.Item(i) = *ppe->BatchCompilationFileNameLinux), "*", "")
 			If StartsWith(ppe->Files.Item(i), *ppe->FileName & "\") Then
@@ -1644,7 +1649,11 @@ Function SaveProject(ByRef tnP As TreeNode Ptr, bWithQuestion As Boolean = False
 			End If
 		Next
 	Else
-		Open *ppe->FileName For Output Encoding "utf-8" As #Fn
+		OpenResult = Open(*ppe->FileName For Output Encoding "utf-8" As #Fn)
+		If OpenResult <> 0 Then
+			MsgBox ML("Couldn't save the project file - check that the folder still exists and isn't read-only") & "." & WChr(13,10) & *ppe->FileName, "Visual FB Editor", mtError
+			Return False
+		End If
 		For i As Integer = 0 To tnPr->Nodes.Count - 1
 			tn1 = tnPr->Nodes.Item(i)
 			ee = tn1->Tag
@@ -3172,9 +3181,15 @@ Sub LoadFunctions(ByRef Path As WString, LoadParameter As LoadParam = FilePathAn
 				Line Input #ff, b
 				If LoadParameter = LoadParam.OnlyFilePathOverwriteWithContent Then
 					FECLine = _New( EditControlLine)
-					If FECLine->Text = 0 Then Return
+					If FECLine->Text = 0 Then
+						MutexUnlock tlockSave
+						Return
+					End If
 					WLet(FECLine->Text, b)
-					If FECLine->Text = 0 Then Return
+					If FECLine->Text = 0 Then
+						MutexUnlock tlockSave
+						Return
+					End If
 					File->Lines.Add(FECLine)
 					iC = FindCommentIndex(b, OldiC)
 					FECLine->CommentIndex = iC

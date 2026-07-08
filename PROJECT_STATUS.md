@@ -1,6 +1,6 @@
 ﻿# VFBE Win64 Fork — Project Status & Handoff
 
-**Last updated:** 2026-07-07 (13.3.A S1–S7 **all Opus-reviewed & committed**; owner-found Run-toolbar persistence regression fixed; Edit menu owner-approved; Search → Define F2 reliability pass; File/Open Project + path fixes)  
+**Last updated:** 2026-07-07 (Opus "Next Steps" backlog Phase A + P1 done & committed: 4 verified robustness fixes + main-thread AI `Sleep()` calls moved off-thread; 13.3.A S1–S7 **all Opus-reviewed & committed**; owner-found Run-toolbar persistence regression fixed; Edit menu owner-approved; Search → Define F2 reliability pass; File/Open Project + path fixes)  
 **Repository:** [codeberg.org/bigriverguy/VFBEWin64](https://codeberg.org/bigriverguy/VFBEWin64)  
 **Local path:** `C:\Users\dmont\VisualFBEditor`  
 **Owner:** bigriverguy (`dmontaine@gmail.com`)
@@ -24,8 +24,26 @@ This document captures project history, completed work, open items, and workflow
 | **Debugger** | GDB-only; Step, Continue, Break, Step Out, command queue, and debug-tab show/hide all working; 3 GDB items pending owner smoke test (§7) |
 | **Build** | `Compile.bat` for release, `CompileDebug.bat` for debug; `NOPAUSE=1` for agent runs |
 
-**Active work:** 13.3.A S1–S7 are **all committed** (Opus-reviewed). A Run-toolbar persistence regression the owner found post-S4 (my own S3 migration latching Run permanently visible) was root-caused and fixed 2026-07-07 — see the S5–S7 review outcome below. Next: §13.3 step-by-step UI review continues with the **View menu** (File + Edit complete; Search → Define reliability pass shipped with S1–S4).  
+**Active work:** Opus's "Next Steps" review (`Next Steps - Opus.md`, 2026-07-07) evaluated three prior AI reviews against the actual source and produced a verified, sequenced backlog. **Phase A + P1 are done and committed** (see below). 13.3.A S1–S7 are **all committed** (Opus-reviewed). A Run-toolbar persistence regression the owner found post-S4 (my own S3 migration latching Run permanently visible) was root-caused and fixed 2026-07-07 — see the S5–S7 review outcome below. Next: continue the Opus backlog (Phase B responsiveness wins P2/P3, or Phase C audience-fit work), or resume §13.3 step-by-step UI review with the **View menu** (File + Edit complete; Search → Define reliability pass shipped with S1–S4).  
 **Open items consolidated:** see [Open Items](#open-items) below.
+
+---
+
+## Opus "Next Steps" backlog — Phase A + P1 done (2026-07-07)
+
+Executes Phase A + item 5 (P1) of `Next Steps - Opus.md`'s consolidated, source-verified backlog (Opus cross-checked three prior AI reviews — Cursor, Deepseek, Sonnet — against the actual code before sequencing this plan; see that document for full methodology and the discarded/unsubstantiated claims).
+
+| ID | Fix | Location | Verified |
+|----|-----|----------|----------|
+| **R1** | `LoadFunctions` bare `Return`s skipped `MutexUnlock tlockSave` under an allocation-failure path — real (if rare, OOM-gated) whole-IDE deadlock. Added `MutexUnlock tlockSave` before both early returns. | `src/Main.bas:3175-3181` | Compile-clean + launch check |
+| **R2** | `SaveProject`'s two `Open ... For Output` calls ignored the result — a missing/read-only project folder silently no-op'd the save. Both now check the result and show a plain MsgBox + return `False` on failure. | `src/Main.bas:1637, 1652` | Compile-clean + launch check |
+| **R4** | `PipeCmd`'s `CreateProcess` result was discarded, so a failed launch still called `WaitForSingleObject`/`CloseHandle` on invalid handles. Now checked before use, matching the pattern already used in `Debug.bas`'s debuggee launch. | `src/TabWindow.bas:10902-10908` | Compile-clean + launch check |
+| **R3** | `AIResetContext` ("New Chat") could restart the AI thread while a previous request was still in flight — a race over shared globals (`AIBodyWStringPtr` etc. deallocated mid-use). Gated the Sub on `bInAIThread`, mirroring the guard `txtAIRequest_Activate` (the send path) already uses. | `src/AIService.bas:783-787` | Compile-clean + launch check |
+| **P1** | `AIRelease` and `AIResetContext` both called `Sleep(500)`/`Sleep(300)` on the **main UI thread** while waiting for the aborted AI request thread to unwind — a visible stutter on every Stop/New-Chat click. Moved each tail (the delay + the state reset / thread restart) into a small helper Sub run on its own worker thread (`AIReleaseFinish`, `AIResetContextFinish`), so the UI thread returns immediately. Same effective delay, no main-thread block. | `src/AIService.bas:758-781` | Compile-clean + launch check |
+
+**Verification performed:** compile-clean after each fix (0 errors; same 4 pre-existing `frmFindInFiles.frm` warnings throughout) + release-build launch/process-alive check after each. **Not verified this session** (no GUI/computer-use access): live click-through of Save-failure messaging, AI Stop/New Chat under an in-flight request, and the Immediate window — same gap noted throughout recent sessions; needs owner or a computer-use-capable session.
+
+**Remaining Opus backlog** (not started, see `Next Steps - Opus.md` for full detail): Phase B (P2 `Suggestions` preload off UI thread, P3 `FormatProject`'s blanket disable), Phase C (audience-fit text/Options passes, rides along with the View-menu review), Phase D (silent-failure-as-a-class fixes: F1 feedback-channel policy, F2/R5 visible reasons + bounded GDB read), Phase E (owner decisions: AI catalog size, plaintext keys, Android/ADB cleanup, unconditional Options-Apply write), Phase F (deferred structural: file splits, `FormDesign` debounce — deliberately last, touches the fragile designer path).
 
 ---
 

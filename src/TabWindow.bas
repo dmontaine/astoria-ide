@@ -10899,12 +10899,14 @@ Sub PipeCmd(ByRef file As WString, ByRef cmd As WString, MainThread As Boolean =
 		SI.wShowWindow = SW_HIDE
 		SI.cb = SizeOf(STARTUPINFO)
 		SI.dwFlags = STARTF_USESHOWWINDOW
-		CreateProcess(0, cmdW, 0, 0, 1, NORMAL_PRIORITY_CLASS, 0, 0, @SI, @PI)
+		If CreateProcess(0, cmdW, 0, 0, 1, NORMAL_PRIORITY_CLASS, 0, 0, @SI, @PI) = 0 Then
+			Dim As Integer result = GetLastError()
+			MsgBox ML("Error: Couldn't Create Process") & Chr(13, 10) & GetErrorString(result) & Chr(13, 10) & cmd
+			Exit Sub
+		End If
 		WaitForSingleObject(PI.hProcess, INFINITE)
 		CloseHandle(PI.hProcess)
 		CloseHandle(PI.hThread)
-		Dim As Integer result = GetLastError()
-		If result <> 0 Then MsgBox ML("Error: Couldn't Create Process") & Chr(13, 10) & GetErrorString(result) & Chr(13, 10) & cmd
 End Sub
 
 

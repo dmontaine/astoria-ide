@@ -313,6 +313,12 @@ Sub ChangeMenuItemsEnabled
 	dmiMakeClean->Enabled = bEnabled
 	miFormatProject->Enabled = bEnabled
 	miUnformatProject->Enabled = bEnabled
+	' D1: the top-level Designer menu is enabled only when the ACTIVE tab holds a form with
+	' controls. Computed here (not only in tabCode_SelChange/ApplyFormTabView) so it also greys
+	' on tab/form CLOSE -- CloseTab calls ChangeMenuItemsEnabled, whereas tabCode_SelChange's
+	' "If tb = tbOld Then Exit Sub" early-exits can skip the per-select update.
+	Dim As TabWindow Ptr tbActiveDesigner = Cast(TabWindow Ptr, ptabCode->SelectedTab)
+	miFormFormat->Enabled = (tbActiveDesigner <> 0 AndAlso tbActiveDesigner->cboClass.Items.Count > 1)
 	ChangeEnabledDebug bEnabled, False, False
 End Sub
 

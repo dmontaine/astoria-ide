@@ -121,35 +121,12 @@ End Sub
 ' seed the default model catalog from upstream VisualFBEditor64.ini so the AI Agent
 ' dropdown lists the full set instead of only DefaultAIAgent.
 Private Sub SeedDefaultAIAgents()
+	' Kept deliberately small (owner decision, 2026-07-07): a handful of recognizable,
+	' well-known defaults rather than the full provider catalog. Use "Add AI Agent" in
+	' Options to add any other cloud model by hand.
 	AddSeededAIAgent(*DefaultAIAgent)
 	AddSeededAIAgent("google/gemini-2.5-pro-exp-03-25:free|OpenRouter")
-	AddSeededAIAgent("Pro/deepseek-ai/DeepSeek-V3.2-Exp|Silicon", "api.siliconflow.cn", "v1/chat/completions")
-	AddSeededAIAgent("qwen/qwen3-coder:free|OpenRouter")
-	AddSeededAIAgent("Pro/deepseek-ai/DeepSeek-V3.1-Terminus|Silicon", "api.siliconflow.cn", "v1/chat/completions")
-	AddSeededAIAgent("Pro/deepseek-ai/DeepSeek-V3|Silicon", "api.siliconflow.cn", "v1/chat/completions")
-	AddSeededAIAgent("Qwen/Qwen3-Coder-480B-A35B-Instruct|Silicon", "api.siliconflow.cn", "v1/chat/completions")
 	AddSeededAIAgent("deepseek-chat|DeepSeek", "api.deepseek.com", "v1/chat/completions")
-	AddSeededAIAgent("deepseek-reasoner|DeepSeek", "api.deepseek.com", "v1/chat/completions")
-	AddSeededAIAgent("deepseek-ai/deepseek-r1-0528|Nvidia", "integrate.api.nvidia.com", "v1/chat/completions")
-	AddSeededAIAgent("deepseek/deepseek-r1-0528:free|OpenRouter")
-	AddSeededAIAgent("meta-llama/llama-4-maverick:free|OpenRouter")
-	AddSeededAIAgent("deepseek/deepseek-prover-v2:free|OpenRouter")
-	AddSeededAIAgent("qwen/qwen3.6-plus:free|OpenRouter")
-	AddSeededAIAgent("Qwen/Qwen3-235B-A22B|HuggingFace", "api-inference.huggingface.co/models", "Qwen/Qwen3-235B-A22B")
-	AddSeededAIAgent("Qwen/Qwen3-235B-A22B-Instruct-2507|Silicon", "api.siliconflow.cn", "v1/chat/completions")
-	AddSeededAIAgent("gpt-4.1|AiHubMix", "aihubmix.com", "v1/chat/completions")
-	AddSeededAIAgent("moonshot-v1-128k|Kemi", "api.moonshot.cn", "v1/chat/completions")
-	AddSeededAIAgent("kimi-k2-instruct|Nvidia", "integrate.api.nvidia.com", "v1/chat/completions")
-	AddSeededAIAgent("moonshotai/Kimi-K2-Thinking|Silicon", "api.siliconflow.cn", "v1/chat/completions")
-	AddSeededAIAgent("hunter alpha|OpenRouter")
-	AddSeededAIAgent("nvidia/nemotron-3-super-120b-a12b|Nvidia", "integrate.api.nvidia.com", "v1/chat/completions")
-	AddSeededAIAgent("qwen/Qwen3-Coder-480B-A35B-Instruct|Nvidia", "integrate.api.nvidia.com", "v1/chat/completions")
-	AddSeededAIAgent("qwen3.6-plus|AliYun", "dashscope.aliyuncs.com", "compatible-mode/v1")
-	AddSeededAIAgent("glm-5.1|glm", "open.bigmodel.cn", "api/paas/v4/chat/completions")
-	AddSeededAIAgent("deepseek/deepseek-chat-v3-0324:free|OpenRouter")
-	AddSeededAIAgent("deepseek/deepseek-r1:free|OpenRouter")
-	AddSeededAIAgent("qwen/qwq-32b:free|OpenRouter")
-	AddSeededAIAgent("google/gemini-2.0-flash-thinking-exp:free|OpenRouter")
 End Sub
 
 Sub LoadSettings

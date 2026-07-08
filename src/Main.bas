@@ -117,6 +117,7 @@ Dim Shared As MenuItem Ptr miUndo, miRedo, miCutCurrentLine, miCut, miCopy, miPa
 Dim Shared As MenuItem Ptr dmiMake, dmiMakeClean
 Dim Shared As MenuItem Ptr miCode, miForm, miCodeAndForm, miGotoCodeForm, miCollapseCurrent, miCollapseAllProcedures, miCollapseAll, miUnCollapseCurrent, miUnCollapseAllProcedures, miUnCollapseAll, miImageManager, miAddProcedure, miAddType, miFind, miReplace, miFindNext, miFindPrevious, miGoto, miDefine, miToggleBookmark, miNextBookmark, miPreviousBookmark, miClearAllBookmarks, miSyntaxCheck, miCompile, miCompileAll, miMake, miMakeClean
 Dim Shared As MenuItem Ptr miAlignLefts, miAlignCenters, miAlignRights, miAlignTops, miAlignMiddles, miAlignBottoms, miAlignToGrid, miMakeSameSizeWidth, miMakeSameSizeHeight, miMakeSameSizeBoth, miSizeToGrid, miHorizontalSpacingMakeEqual, miHorizontalSpacingIncrease, miHorizontalSpacingDecrease, miHorizontalSpacingRemove, miVerticalSpacingMakeEqual, miVerticalSpacingIncrease, miVerticalSpacingDecrease, miVerticalSpacingRemove, miCenterInParentHorizontally, miCenterInParentVertically, miOrderBringToFront, miOrderSendToBack, miLockControls
+Dim Shared As MenuItem Ptr miFormFormat ' D1 (2026-07-07): top-level Designer menu; disabled when no form with controls is active
 Dim Shared As MenuItem Ptr miShowWithFolders, miShowWithoutFolders, miShowAsFolder
 Dim Shared As ToolButton Ptr tbtAlignLefts, tbtAlignCenters, tbtAlignRights, tbtAlignTops, tbtAlignMiddles, tbtAlignBottoms, tbtAlignToGrid, tbtMakeSameSizeWidth, tbtMakeSameSizeHeight, tbtMakeSameSizeBoth, tbtSizeToGrid, tbtHorizontalSpacingMakeEqual, tbtHorizontalSpacingIncrease, tbtHorizontalSpacingDecrease, tbtHorizontalSpacingRemove, tbtVerticalSpacingMakeEqual, tbtVerticalSpacingIncrease, tbtVerticalSpacingDecrease, tbtVerticalSpacingRemove, tbtCenterInParentHorizontally, tbtCenterInParentVertically, tbtOrderBringToFront, tbtOrderSendToBack, tbtLockControls
 Dim Shared As ToolButton Ptr tbtSave, tbtSaveAll, tbtSyntaxCheck, tbtSuggestions, tbtCompile, tbtUndo, tbtRedo, tbtCut, tbtCopy, tbtPaste, tbtBlockComment, tbtSingleComment, tbtUncommentBlock, tbtFormat, tbtUnformat, tbtCompleteWord, tbtParameterInfo, tbtFind, tbtUseDirect2D, tbtRemoveFileFromProject, tbtStartWithCompile, tbtStart, tbtBreak, tbtEnd, tbtUseDebugger, tbtNotSetted, tbtConsole, tbtGUI, tbtStepInto, tbtStepOver, tbtStepOut, tbtRunToCursor, tbtToggleBreakpoint, tbtSetNextStatement, tbtShowNextStatement
@@ -5916,7 +5917,8 @@ Sub CreateMenusAndToolBars
 	miProject->Add("-")
 	miProjectProperties = miProject->Add(ML("&Project Properties") & "..." & HK("ProjectProperties"), "", "ProjectProperties", @mClick, , , False)
 	
-	Var miFormFormat = mnuMain.Add(ML("&Designer"), "", "FormFormat")
+	miFormFormat = mnuMain.Add(ML("&Designer"), "", "FormFormat")
+	miFormFormat->Enabled = False ' D1: no form open at startup; enabled by tabCode_SelChange/ApplyFormTabView when a form with controls is active
 	Var miAlign = miFormFormat->Add(ML("&Align"), "Align", "Align", @mClick)
 	miAlignLefts = miAlign->Add(ML("&Lefts") & HK("AlignLefts"), "AlignLefts", "AlignLefts", @mClick)
 	miAlignCenters = miAlign->Add(ML("&Centers") & HK("AlignLefts"), "AlignCenters", "AlignCenters", @mClick)
@@ -8150,7 +8152,7 @@ txtEvents.OnChange = @txtEvents_Change
 
 Sub tabCode_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As TabControl, newIndex As Integer)
 	Static tbOld As TabWindow Ptr
-	If newIndex = -1 Then Exit Sub
+	If newIndex = -1 Then miFormFormat->Enabled = False: Exit Sub ' D1: no tab selected → no form open
 	Dim tb As TabWindow Ptr = Cast(TabWindow Ptr, Sender.Tab(newIndex))
 	If tb = 0 Then tbFormat.Visible = False: Exit Sub
 	If tb = tbOld Then Exit Sub
@@ -8193,6 +8195,7 @@ Sub tabCode_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As TabContro
 		miForm->Enabled = True
 		miCodeAndForm->Enabled = True
 		miGotoCodeForm->Enabled = True
+		miFormFormat->Enabled = True ' D1: form with controls is active
 		tb->tbrTop.Buttons.Item("Form")->Enabled = True
 		tb->tbrTop.Buttons.Item("CodeAndForm")->Enabled = True
 	Else
@@ -8202,6 +8205,7 @@ Sub tabCode_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As TabContro
 		miForm->Enabled = bFormFile
 		miCodeAndForm->Enabled = bFormFile
 		miGotoCodeForm->Enabled = bFormFile
+		miFormFormat->Enabled = False ' D1: no controls to design (Designer ops need existing controls)
 		tb->tbrTop.Buttons.Item("Form")->Enabled = bFormFile
 		tb->tbrTop.Buttons.Item("CodeAndForm")->Enabled = bFormFile
 		If mApplyingDeferredFormDesign = False AndAlso mApplyingFormTabView = False Then

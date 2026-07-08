@@ -342,6 +342,7 @@ Sub ApplyFormTabView(tb As TabWindow Ptr)
 		miForm->Enabled = bFormFile
 		miCodeAndForm->Enabled = bFormFile
 		miGotoCodeForm->Enabled = bFormFile
+		miFormFormat->Enabled = False ' D1: no controls to design
 		tb->tbrTop.Buttons.Item("Form")->Enabled = bFormFile
 		tb->tbrTop.Buttons.Item("CodeAndForm")->Enabled = bFormFile
 		tb->tbrTop.Buttons.Item("Code")->Checked = True: tbrTop_ButtonClick *tb->tbrTop.Designer, tb->tbrTop, *tb->tbrTop.Buttons.Item("Code")
@@ -349,6 +350,7 @@ Sub ApplyFormTabView(tb As TabWindow Ptr)
 		miForm->Enabled = True
 		miCodeAndForm->Enabled = True
 		miGotoCodeForm->Enabled = True
+		miFormFormat->Enabled = True ' D1: form with controls is active
 		tb->tbrTop.Buttons.Item("Form")->Enabled = True
 		tb->tbrTop.Buttons.Item("CodeAndForm")->Enabled = True
 		tb->tbrTop.Buttons.Item("CodeAndForm")->Checked = True: tbrTop_ButtonClick *tb->tbrTop.Designer, tb->tbrTop, *tb->tbrTop.Buttons.Item("CodeAndForm")

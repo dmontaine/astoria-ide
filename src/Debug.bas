@@ -1643,7 +1643,7 @@ End Function
 			
 			ThreadsEnter
 			
-			MsgBox("File gdb not found or is not executable.", "Error!")
+			MsgBox(ML("The debugger could not be found. Try reinstalling the IDE."), "Visual FB Editor", mtError)
 			
 			ThreadsLeave
 			
@@ -1655,7 +1655,7 @@ End Function
 			
 			ThreadsEnter
 			
-			MsgBox("Source file is not executable.", "Error!")
+			MsgBox(ML("The program to debug could not be found. Build the project first."), "Visual FB Editor", mtError)
 			
 			ThreadsLeave
 			
@@ -2368,16 +2368,16 @@ End Function
 
 Private Sub hard_closing(errormsg As String)
 	ThreadsEnter
-	MsgBox("Sorry an unrecoverable problem occurs :" + Chr(13) + errormsg + Chr(13) + Chr(13) + "Report to dev please")
+	MsgBox(ML("The debugger ran into a problem and had to stop.") & Chr(13) & Chr(13) & errormsg, "Visual FB Editor", mtError)
 	ThreadsLeave
 End Sub
 
 Private Function kill_process(text As String) As Integer
 	Dim As Long retcode,lasterr
 	If prun Then ''debuggee waiting or running Then
-		If MsgBox(ML("Kill current running Program?") & " " & text + Chr(10) + Chr(10) + _
-			ML("USE CARREFULLY SYSTEM CAN BECOME UNSTABLE, LOSS OF DATA, MEMORY LEAK") + Chr(10) + _
-			ML("Try to close your program first"), , mtWarning, btYesNo) = mrYes Then
+		If MsgBox(ML("Stop the running program?") & " " & text + Chr(10) + Chr(10) + _
+			ML("Any unsaved data in the program will be lost.") + Chr(10) + _
+			ML("If possible, try closing the program normally first."), "Visual FB Editor", mtWarning, btYesNo) = mrYes Then
 			flagkill = True
 				retcode=TerminateProcess(dbghand,999)
 				lasterr=GetLastError

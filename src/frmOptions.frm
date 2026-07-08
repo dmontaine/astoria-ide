@@ -530,7 +530,7 @@ pfOptions = @fOptions
 		End With
 		' chkAutoCreateRC
 		chkAutoCreateRC.Name = "chkAutoCreateRC"
-		chkAutoCreateRC.Text = ML("Auto create resource and manifest files (.rc, .xml)")
+		chkAutoCreateRC.Text = ML("Automatically create the icon and manifest files needed to build")
 		chkAutoCreateRC.ExtraMargins.Top = 0
 		chkAutoCreateRC.Align = DockStyle.alTop
 		chkAutoCreateRC.TabIndex = 101
@@ -800,7 +800,7 @@ pfOptions = @fOptions
 		' chkUseDirect2D
 	With chkUseDirect2D
 		.Name = "chkUseDirect2D"
-		.Text = ML("Use Direct2D (For Windows)")
+		.Text = ML("Smoother text rendering (Direct2D)")
 		.TabIndex = 278
 		.Align = DockStyle.alTop
 		.AutoSize = True
@@ -1933,7 +1933,7 @@ pfOptions = @fOptions
 		' lblIntellisenseLimit
 		With lblIntellisenseLimit
 			.Name = "lblIntellisenseLimit"
-			.Text = ML("Intellisense limit (items)") & ":"
+			.Text = ML("IntelliSense limit (items)") & ":"
 			.TabIndex = 187
 
 			.ExtraMargins.Top = 2
@@ -2025,7 +2025,7 @@ pfOptions = @fOptions
 		' chkAllLNG
 		With chkAllLNG
 			.Name = "chkAllLNG"
-			.Text = ML("Update all language file (*.lng)")
+			.Text = ML("Update all language files")
 			.TabIndex = 201
 			.Checked = False
 			.Align = DockStyle.alTop

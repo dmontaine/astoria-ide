@@ -9241,9 +9241,13 @@ Sub frmMain_Show(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		AddNew ExePath & WindowsSlash & "Templates" & WindowsSlash & WGet(DefaultProjectFile)
 	Else
 		mApplyingWorkspaceLoad = True
-		LoadWorkspace()
+		Var bWorkspaceLoaded = LoadWorkspace()
 		mApplyingWorkspaceLoad = False
 		RunDeferredFormDesign()
+		' Nothing to reopen (fresh install, or a workspace with no surviving project/tabs) -- open a starter project instead of an empty IDE.
+		If Not bWorkspaceLoaded Then
+			AddNew ExePath & WindowsSlash & "Templates" & WindowsSlash & WGet(DefaultProjectFile)
+		End If
 	End If
 	'	Var FILE = Command(-1)
 	'	Var Pos1 = InStr(file, "2>CON")

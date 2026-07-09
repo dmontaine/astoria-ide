@@ -36,4 +36,5 @@ Declare Function IsValidProjectItemName(itemName As UString) As Boolean
 Declare Function IsProjectOpenFileType(ByRef FileName As WString) As Boolean
 Declare Function FindProjectVfpInFolder(folder As UString) As UString
 Declare Function CopyFileU(src As UString, dest As UString) As Boolean
+Declare Function MakePathPortable(path As UString) As UString
 

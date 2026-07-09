@@ -248,6 +248,24 @@ Function FileExistsU(path As UString) As Boolean
 	Return (attrs And FILE_ATTRIBUTE_DIRECTORY) = 0
 End Function
 
+' A folder browse dialog always returns an absolute OS path. When that path sits inside the
+' app's own install folder (e.g. picking the bundled Projects or MyFbFramework folder), storing
+' it verbatim hard-codes the current install location into Settings and breaks the moment the
+' app folder is moved or renamed. Return a ".\"-relative form in that case; paths genuinely
+' outside ExePath (a Projects folder deliberately kept on another drive, say) are left absolute.
+Function MakePathPortable(path As UString) As UString
+	path = WinOsPath(Trim(path, Any !" \t" + Chr(10) + Chr(13)))
+	If path = "" Then Return path
+	Dim As WString Ptr pathPtr, exePtr
+	WLet(pathPtr, path)
+	WLet(exePtr, ExePath & WindowsSlash & WindowsSlash)
+	Dim As UString shortened = GetShortFileName(*pathPtr, *exePtr)
+	WDeAllocate(pathPtr)
+	WDeAllocate(exePtr)
+	If shortened = path Then Return path
+	Return ".\" & shortened
+End Function
+
 Function CopyFileU(src As UString, dest As UString) As Boolean
 	src = WinOsPath(Trim(src, Any !" \t" + Chr(10) + Chr(13)))
 	dest = WinOsPath(Trim(dest, Any !" \t" + Chr(10) + Chr(13)))

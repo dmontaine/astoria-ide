@@ -4350,7 +4350,7 @@ Private Sub frmOptions.cmdMFFPath_Click(ByRef Designer As My.Sys.Object, ByRef S
 	With fOptions
 		.BrowsD.InitialDir = GetFullPath(.txtMFFpath.Text)
 		If .BrowsD.Execute Then
-			.txtMFFpath.Text = .BrowsD.Directory
+			.txtMFFpath.Text = MakePathPortable(.BrowsD.Directory)
 		End If
 	End With
 End Sub
@@ -4845,7 +4845,7 @@ Private Sub frmOptions.cmdProjectsPath_Click(ByRef Designer As My.Sys.Object, By
 	With fOptions
 		.BrowsD.InitialDir = GetFullPath(.txtProjectsPath.Text)
 		If .BrowsD.Execute Then
-			.txtProjectsPath.Text = .BrowsD.Directory
+			.txtProjectsPath.Text = MakePathPortable(.BrowsD.Directory)
 		End If
 	End With
 End Sub

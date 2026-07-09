@@ -10953,6 +10953,12 @@ Function GetMainFile(bSaveTab As Boolean = False, ByRef Project As ProjectElemen
 									Else
 										FFileName = GetFolderName(tb->FileName) & "Temp.bas"
 									End If
+									'' Scratch save for analysis of an unsaved-to-disk tab -- the target
+									'' folder (ExePath/Temp, or the project's own folder) isn't guaranteed
+									'' to exist (e.g. Temp/ can be cleaned out by hand), and SaveToFile
+									'' doesn't create missing parents, so it silently failed with
+									'' "Save file failure!" every time this ran.
+									If Not FolderExistsU(GetFolderName(FFileName, False)) Then MkDir GetFolderName(FFileName, False)
 									tb->txtCode.SaveToFile(FFileName, tb->FileEncoding, tb->NewLineType)
 									Return FFileName
 								End If
@@ -10981,6 +10987,7 @@ Function GetMainFile(bSaveTab As Boolean = False, ByRef Project As ProjectElemen
 								Else
 									FFileName = GetFolderName(tb->FileName) & "Temp.bas"
 								End If
+								If Not FolderExistsU(GetFolderName(FFileName, False)) Then MkDir GetFolderName(FFileName, False)
 								tb->txtCode.SaveToFile(FFileName, tb->FileEncoding, tb->NewLineType)
 								Return FFileName
 							End If
@@ -11024,6 +11031,7 @@ Function GetMainFile(bSaveTab As Boolean = False, ByRef Project As ProjectElemen
 					Else
 						FFileName = GetFolderName(tb->FileName) & "Temp.bas"
 					End If
+					If Not FolderExistsU(GetFolderName(FFileName, False)) Then MkDir GetFolderName(FFileName, False)
 					tb->txtCode.SaveToFile(FFileName, tb->FileEncoding, tb->NewLineType)
 					Return FFileName
 				End If

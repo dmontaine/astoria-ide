@@ -2201,8 +2201,18 @@ Sub AddFromTemplate(ByRef Template As WString)
 			If Not EndsWith(ptn->Text, "*") Then ptn->Text &= "*"
 			If Not ptn->IsExpanded Then ptn->Expand
 			If Not tn1->IsExpanded Then tn1->Expand
-			tn3->SelectItem
+			'' Open the tab before selecting the node -- SelectItem fires the tree's
+			'' single-click auto-open (tvExplorer_SelChange -> OpenPlainFileTreeNode),
+			'' which for a brand-new template-backed node opens its own tab from the
+			'' template file. If that runs first, AddTab below can't recognize it as
+			'' the same file (a bNew tab's .FileName comes from the tree node's text,
+			'' not the template path, so AddTab's by-path dedup never matches) and
+			'' creates a second, independent tab for the same node -- doubled up in
+			'' the save-changes list, and the second Save-As collides with the first.
+			'' Opening the tab first means OpenPlainFileTreeNode's own tb->tn=Item
+			'' check (its first, path-independent check) finds it already open.
 			AddTab *ee->TemplateFileName, True, tn3
+			tn3->SelectItem
 		End If
 	End If
 	If tn3 = 0 Then

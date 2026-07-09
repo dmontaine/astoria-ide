@@ -1,230 +1,119 @@
-'###############################################################################
-'#  Font.bi                                                                    #
-'#  This file is part of MyFBFramework                                         #
-'#  Authors: Nastase Eodor, Xusinboy Bekchanov, Liu ZiQI                       #
-'#  Based on:                                                                  #
-'#   TFont.bi                                                                  #
-'#   FreeBasic Windows GUI ToolKit                                             #
-'#   Copyright (c) 2007-2008 Nastase Eodor                                     #
-'#   Version 1.0.0                                                             #
-'#  Updated and added cross-platform                                           #
-'#  by Xusinboy Bekchanov (2018-2019)                                          #
-'###############################################################################
+﻿'################################################################################
+'#  Brush.bi                                                                    #
+'#  This file is part of MyFBFramework                                          #
+'#  Authors: Nastase Eodor, Xusinboy Bekchanov, Liu XiaLin                      #
+'#  Based on:                                                                   #
+'#   TBrush.bi                                                                  #
+'#   FreeBasic Windows GUI ToolKit                                              #
+'#   Copyright (c) 2007-2008 Nastase Eodor                                      #
+'#   Version 1.0.0                                                              #
+'#  Modified by Xusinboy Bekchanov (2018-2019), Liu XiaLin (2020)               #
+'################################################################################
 
-#include once "Font.bi"
+#include once "Brush.bi"
 
-'Gets/sets the default font that applications can use for dialog boxes and forms.
-Dim Shared DefaultFont As My.Sys.Drawing.Font
-pDefaultFont = @DefaultFont
+	' ugly colors for illustration purposes
+	g_brItemBackground = CreateSolidBrush(BGR(&hC0, &hC0, &hFF))
+	g_brItemBackgroundHot = CreateSolidBrush(BGR(&hD0, &hD0, &hFF))
+	g_brItemBackgroundSelected = CreateSolidBrush(BGR(&hE0, &hE0, &hFF))
+	g_menuTheme = 0
+	hbrBkgnd = CreateSolidBrush(darkBkColor)
+	hbrHlBkgnd = CreateSolidBrush(darkHlBkColor)
+	hbrBkgndMenu = CreateSolidBrush(darkBkColorMenu)
 
 Namespace My.Sys.Drawing
-		Private Function Font.ReadProperty(ByRef PropertyName As String) As Any Ptr
+		Private Function Brush.ReadProperty(ByRef PropertyName As String) As Any Ptr
 			Select Case LCase(PropertyName)
-			Case "name": Return FName
 			Case "color": Return @FColor
-			Case "size": Return @FSize
-			Case "charset": Return @FCharSet
-			Case "bold": Return @FBold
-			Case "italic": Return @FItalic
-			Case "underline": Return @FUnderline
-			Case "strikeout": Return @FStrikeOut
-			Case "orientation": Return @FOrientation
+			Case "style": Return @FStyle
+			Case "hatchstyle": Return @FHatchStyle
 			Case Else: Return Base.ReadProperty(PropertyName)
 			End Select
 			Return 0
 		End Function
 	
-		Private Function Font.WriteProperty(ByRef PropertyName As String, Value As Any Ptr) As Boolean
-			If Value <> 0 Then
-				Select Case LCase(PropertyName)
-				Case "name": This.Name = QWString(Value)
-				Case "color": This.Color = QInteger(Value)
-				Case "size": This.Size = QInteger(Value)
-				Case "charset": This.CharSet = *Cast(FontCharset Ptr, Value)
-				Case "bold": This.Bold = QBoolean(Value)
-				Case "italic": This.Italic = QBoolean(Value)
-				Case "underline": This.Underline = QBoolean(Value)
-				Case "strikeout": This.StrikeOut = QBoolean(Value)
-				Case "orientation": This.Orientation = QInteger(Value)
-				Case Else: Return Base.WriteProperty(PropertyName, Value)
-				End Select
-			End If
+		Private Function Brush.WriteProperty(ByRef PropertyName As String, Value As Any Ptr) As Boolean
+			Select Case LCase(PropertyName)
+			Case "color": This.Color = QInteger(Value)
+			Case "style": This.Style = *Cast(BrushStyles Ptr, Value)
+			Case "hatchstyle": This.HatchStyle = *Cast(HatchStyles Ptr, Value)
+			Case Else: Return Base.WriteProperty(PropertyName, Value)
+			End Select
 			Return True
 		End Function
 	
-	Private Sub Font.Create
-		If WGet(FName) = "" Then
-			WLet(FName, DefaultFont.Name)
-		End If
-		If FSize = 0 Then
-			FSize = DefaultFont.Size
-		End If
-				If Handle Then DeleteObject(Handle)
-				Handle = CreateFontW(-MulDiv(FSize, ydpi * 96, 72), 0, FOrientation * 10, FOrientation * 10, FBolds(Min(1, _Abs(FBold))), FItalic, FUnderline, FStrikeOut, FCharSet, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FF_DONTCARE, *FName)
-			If Handle Then
-				If FParent AndAlso *FParent Is My.Sys.ComponentModel.Component Then
-						If QComponent(FParent).Handle Then
-							SendMessage(QComponent(FParent).Handle, WM_SETFONT, CUInt(Handle), True)
-							InvalidateRect Cast(Component Ptr, FParent)->Handle, 0, True
-						End If
-				End If
-				If OnCreate Then OnCreate(*Designer, This)
-			End If
-	End Sub
-	
-	Private Property Font.Parent As My.Sys.Object Ptr
-		Return FParent
-	End Property
-	
-	Private Property Font.Parent(Value As My.Sys.Object Ptr)
-		FParent = Value
-		If FDefaultName AndAlso *FName <> DefaultFont.Name Then WLet(FName, DefaultFont.Name)
-		If FDefaultSize AndAlso FSize <> DefaultFont.Size Then FSize = DefaultFont.Size
-			Create
-	End Property
-	
-	Private Property Font.Name ByRef As WString
-		Return WGet(FName)
-	End Property
-	
-	Private Property Font.Name(ByRef Value As WString)
-		WLet(FName, Value)
-		FDefaultName = False
-		Create
-	End Property
-	
-	Private Property Font.Color As Integer
-		Return FColor
-	End Property
-	
-		Private Property Font.Color(Value As Integer)
-			FColor = Value
-			'Create
+		Private Property Brush.Color As Integer
+			Return FColor
 		End Property
 	
-	Private Property Font.CharSet As FontCharset
-		Return FCharSet
-	End Property
-	
-	Private Property Font.CharSet(Value As FontCharset)
-		FCharSet = Value
+	Private Property Brush.Color(Value As Integer)
+		FColor = Value
 		Create
 	End Property
 	
-	Private Property Font.Size As Integer
-		Return FSize
+	Private Property Brush.Style As BrushStyles
+		Return FStyle
 	End Property
 	
-	Private Property Font.Size(Value As Integer)
-		FSize = Value
-		FDefaultSize = False
+	Private Property Brush.Style(Value As BrushStyles)
+		FStyle = Value
 		Create
 	End Property
 	
-	'FOrientation
-	Private Property Font.Orientation As Integer
-		Return FOrientation
+	Private Property Brush.HatchStyle As HatchStyles
+		Return FHatchStyle
 	End Property
 	
-	Private Property Font.Orientation(Value As Integer)
-		FOrientation = Value
+	Private Property Brush.HatchStyle(Value As HatchStyles)
+		FHatchStyle = Value
 		Create
 	End Property
 	
-	Private Property Font.Bold As Boolean
-		Return FBold
-	End Property
+	Private Sub Brush.Create
+			Dim As LOGBRUSH LB
+			LB.lbColor = FColor
+			LB.lbHatch = FHatchStyle
+			Select Case FStyle
+			Case bsClear
+				LB.lbStyle = BS_NULL
+			Case bsSolid
+				LB.lbStyle = BS_SOLID
+			Case bsHatch
+				LB.lbStyle = BS_HATCHED
+				LB.lbHatch = FHatchStyle
+			End Select
+			If (FHandle <> 0) AndAlso (FHandle <> hbrBkgnd) Then DeleteObject(FHandle)
+			FHandle = CreateBrushIndirect(@LB)
+			If FHandle Then If OnCreate Then OnCreate(*Designer, This)
+	End Sub
 	
-	Private Property Font.Bold(Value As Boolean)
-		FBold = Value
-		Create
-	End Property
+		Private Operator Brush.Let(Value As HBRUSH)
+			If (FHandle <> 0) AndAlso (FHandle <> hbrBkgnd) Then DeleteObject(FHandle)
+			FHandle = Value
+		End Operator
+		
+		Private Property Brush.Handle As HBRUSH
+			Return FHandle
+		End Property
+		
+		Private Property Brush.Handle(Value As HBRUSH)
+			If (FHandle <> 0) AndAlso (FHandle <> hbrBkgnd) Then DeleteObject(FHandle)
+			FHandle = Value
+		End Property
 	
-	Private Property Font.Italic As Boolean
-		Return FItalic
-	End Property
-	
-	Private Property Font.Italic(Value As Boolean)
-		FItalic = Value
-		Create
-	End Property
-	
-	Private Property Font.Underline As Boolean
-		Return FUnderline
-	End Property
-	
-	Private Property Font.Underline(Value As Boolean)
-		FUnderline = Value
-		Create
-	End Property
-	
-	Private Property Font.StrikeOut As Boolean
-		Return FStrikeOut
-	End Property
-	
-	Private Property Font.StrikeOut(Value As Boolean)
-		FStrikeOut = Value
-		Create
-	End Property
-	
-	Private Operator Font.Cast As Any Ptr
+	Private Operator Brush.Cast As Any Ptr
 		Return @This
 	End Operator
 	
-	Private Operator Font.Cast ByRef As WString
-		Return ToString
-	End Operator
-	
-	Private Function Font.ToString ByRef As WString
-		WLet(FTemp, This.Name & ", " & This.Size)
-		Return *FTemp
-	End Function
-	
-	Private Operator Font.Let(Value As Font)
-		With Value
-			WLet(FName, .Name)
-			FBold       = .Bold
-			FItalic     = .Italic
-			FUnderline  = .Underline
-			FStrikeOut  = .StrikeOut
-			FSize       = .Size
-			FColor      = .Color
-			FCharSet    = .CharSet
-			FOrientation = .Orientation
-			xdpi        = .xdpi
-			ydpi        = .ydpi
-		End With
-		Create
-	End Operator
-	
-	Private Constructor Font
-		WLet(FClassName, "Font")
-		FCharSet  = FontCharset.Default
-		WLet(FName, DefaultFont.Name)
-		FSize     = DefaultFont.Size
-			If *FName = "" Then WLet(FName, "Tahoma")
-			If FSize = 0 Then FSize = 8
-			If xdpi = 0 OrElse ydpi = 0 Then
-				Dim As HDC Dc
-				Dc = GetDC(NULL)
-				xdpi = GetDeviceCaps(Dc, LOGPIXELSX) / 96
-				ydpi = GetDeviceCaps(Dc, LOGPIXELSY) / 96
-				If xdpi = 0 Then xdpi = 1
-				If ydpi = 0 Then ydpi = 1
-				ReleaseDC(NULL, Dc)
-			End If
-			FBolds(0) = 400
-			FBolds(1) = 700
-			'Create
+	Private Constructor Brush
+		FColor = &HFFFFFF
+		FStyle = bsSolid
+		'Create
+		WLet(FClassName, "Brush")
 	End Constructor
 	
-	Destructor Font
-		WDeAllocate(FName)
-			If Handle Then DeleteObject(Handle)
+	Private Destructor Brush
+			If FHandle AndAlso FHandle <> hbrBkgnd Then DeleteObject FHandle
 	End Destructor
-	
-		DefaultFont.Name = "Tahoma"
-		DefaultFont.Size = 8
 End Namespace
-
 

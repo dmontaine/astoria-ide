@@ -176,6 +176,9 @@ Namespace My.Sys.Forms
 	Type ExplorerElement Extends Object
 		FileName As WString Ptr
 		TemplateFileName As WString Ptr
+		'' B1: "Delete File" queues project-member files for removal instead of
+		'' deleting immediately -- see DeleteEditorFile/SaveProject in Main.bas.
+		PendingDelete As Boolean
 		Declare Destructor
 	End Type
 	

@@ -32,7 +32,6 @@
 		Declare Sub Form_Show(ByRef Sender As Form)
 		Declare Sub Form_Close(ByRef Sender As Form, ByRef Action As Integer)
 		Declare Sub TreeView1_DblClick(ByRef Sender As Control)
-		Declare Sub TreeView1_Click(ByRef Sender As Control)
 		Declare Constructor
 		
 		Dim As TreeView TreeView1
@@ -81,11 +80,10 @@
 			.Sorted = True
 			.SelectedImages = @ImageList1
 			.Images = @ImageList1
-			.SetBounds 10, 10, 380, 423
+			.SetBounds 10, 10, 380, 419
 			.Designer = @This
 			.OnSelChanged = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As TreeView, ByRef Item As TreeNode), @TreeView1_SelChanged)
 			.OnDblClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @TreeView1_DblClick)
-			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @TreeView1_Click)
 			.Parent = @This
 		End With
 		' Splitter1
@@ -377,8 +375,3 @@ Private Sub frmDeviceExplorerType.CommandButton_Click(ByRef Sender As Control)
 End Sub
 
 
-
-
-Private Sub frmDeviceExplorerType.TreeView1_Click(ByRef Sender As Control)
-	
-End Sub

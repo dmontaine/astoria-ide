@@ -2628,11 +2628,29 @@ Function DeleteProject() As Boolean
 	If tn = 0 Then Return False
 	If tn->Tag = 0 Then Return False
 	If MsgBox(("Are you sure you want to delete the project") & " """ & tn->Text & """?", "Visual FB Editor", mtWarning, btYesNo) <> mrYes Then Return False
-	If Not CloseProject(tn, True) Then Return False
+	'' Read the project's path before CloseProject runs -- it frees tn->Tag (the
+	'' ProjectElement) and nulls it as part of its normal cleanup, so reading it
+	'' afterward dereferenced a freed/null pointer and crashed before the actual
+	'' folder delete below ever ran.
 	Dim As ProjectElement Ptr ppe = Cast(ProjectElement Ptr, tn->Tag)
-	Dim As UString ProjectPath = GetFolderName(WGet(ppe->FileName))
-	If ProjectPath <> "" AndAlso FolderExists(ProjectPath) Then
-		PipeCmd "cmd /c rd /s /q """ & ProjectPath & """", ""
+	Dim As UString ProjectPath = GetFolderName(WGet(ppe->FileName), False)
+	If Not CloseProject(tn, True) Then Return False
+	'' FolderExists (the legacy Dir()-based check) doesn't match a bare directory
+	'' path at all -- Dir() only enumerates against a wildcard, so a path with no
+	'' "*" in it always came back with nothing found, regardless of trailing slash.
+	'' FolderExistsU (PathUtils.bas, GetFileAttributesW-based) actually answers
+	'' "does this exact path exist and is it a directory" correctly.
+	If ProjectPath <> "" AndAlso FolderExistsU(ProjectPath) Then
+		'' Opening/running a project ChDir's into its folder (see BUILD.md) -- Windows
+		'' refuses to remove a directory that's any process's current directory, and
+		'' since this inherits our CWD (PipeCmd passes no lpCurrentDirectory) that
+		'' silently no-ops "rd" if the project we just closed left us sitting inside
+		'' it. Step out to somewhere unrelated to the project first.
+		ChDir ExePath
+		'' PipeCmd(file, cmd) only ever runs "cmd" -- "file" is unused (see every
+		'' other call site). This had the real command in "file" and an empty
+		'' string in "cmd", so it silently ran nothing.
+		PipeCmd "", "rd /s /q """ & ProjectPath & """"
 	End If
 	Return True
 End Function

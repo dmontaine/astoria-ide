@@ -138,7 +138,7 @@ Sub LoadSettings
 	WLet(DefaultAIAgent, iniSettings.ReadString("AIAgents", "DefaultAIAgent", "deepseek/deepseek-chat-v3-0324:free|OpenRouter"))
 	WLet(CurrentAIAgent, *DefaultAIAgent)
 	If iniSettings.KeyExists("AIAgents", "Version_0") = -1 Then SeedDefaultAIAgents()
-	cboBuildConfiguration.AddItem ML("No options")
+	cboBuildConfiguration.AddItem ("No options")
 	Do
 		Temp = iniSettings.ReadString("AIAgents", "Version_" & WStr(i), "")
 		If Temp <> "" Then
@@ -301,7 +301,6 @@ Sub LoadSettings
 	If g_buildNumber = 0 Then InitDarkMode
 	SetDarkMode(DarkMode, False, False)
 	'gLocalToolBox = iniSettings.ReadBool("Options", "ShowToolBoxLocal", False)
-	gLocalProperties = iniSettings.ReadBool("Options", "PropertiesLocal", False)
 	'gLocalKeyWords = iniSettings.ReadBool("Options", "KeyWordsLocal", False)
 	ProjectAutoSuggestions = False
 	pDefaultFont->Name = WGet(InterfaceFontName)
@@ -315,119 +314,22 @@ Sub LoadSettings
 	WLet(Make2Arguments, iniSettings.ReadString("Parameters", "Make2Arguments", "clean"))
 	WLet(RunArguments, iniSettings.ReadString("Parameters", "RunArguments", ""))
 	WLet(Debug64Arguments, iniSettings.ReadString("Parameters", "Debug64Arguments", ""))
-	pfSplash->lblProcess.Text = ML("Load On Startup") & ": " & ML("KeyWords")
+	pfSplash->lblProcess.Text = ("Load On Startup") & ": " & ("KeyWords")
 	LoadKeyWords
 	LoadTheme
 		LoadD2D1
 	EditControlFrame.LoadFromFile(ExePath & "/Resources/Frame.png")
 End Sub
 
+' English-only: this used to load a chosen Settings/Languages/*.lng file into the
+' mlKeys/mcKeys/mpKeys/mlCompiler translation tables consulted by ML()/MC()/MP()/
+' MLCompilerFun(). Those wrapper calls have been removed from the app entirely, so
+' the load/parse logic is gone too. App.CurLanguage is still set (App.Language's
+' default) since a couple of unrelated features -- e.g. frmTipOfDay's "<lang>.tip"
+' lookup -- key off of it.
 Sub LoadLanguageTexts
 	LoadSettingsIni()
-	App.CurLanguagePath = ExePath & "/Settings/Languages/"
-	App.CurLanguage = iniSettings.ReadString("Options", "Language", "english")
-	Dim As Boolean StartGeneral = True, StartKeyWords, StartProperty, StartCompiler, StartTemplates
-	If App.CurLanguage = "" Then
-		mpKeys.Add "#Til", "English"
-		mlKeys.Add "#Til", "English"
-		mlCompiler.Add "#Til", "English"
-		App.CurLanguage = "English"
-	Else
-		mlKeys.Clear
-		mcKeys.Clear
-		mpKeys.Clear
-		mlCompiler.Clear
-		Dim As Integer i, Pos1, Pos2
-		Dim As Integer Fn = FreeFile_, Result
-		Dim As WString * 2048 Buff, tKey
-		Dim As WString * MAX_PATH Filename = ExePath & "/Settings/Languages/" & App.CurLanguage & ".lng"
-		Result = Open(FileName For Input Encoding "utf-8" As #Fn)
-		If Result <> 0 Then Result = Open(FileName For Input Encoding "utf-16" As #Fn)
-		If Result <> 0 Then Result = Open(FileName For Input Encoding "utf-32" As #Fn)
-		If Result <> 0 Then Result = Open(FileName For Input As #Fn)
-		If Result = 0 Then
-			Do Until EOF(Fn)
-				Line Input #Fn, Buff
-				If LCase(Trim(Buff)) = "[keywords]" Then
-					StartKeyWords = True
-					StartProperty = False
-					StartCompiler = False
-					StartTemplates = False
-					StartGeneral = False
-				ElseIf LCase(Trim(Buff)) = "[property]" Then
-					StartKeyWords = False
-					StartProperty = True
-					StartCompiler = False
-					StartTemplates = False
-					StartGeneral = False
-				ElseIf LCase(Trim(Buff)) = "[compiler]" Then
-					StartKeyWords = False
-					StartProperty = False
-					StartCompiler = True
-					StartTemplates = False
-					StartGeneral = False
-				ElseIf LCase(Trim(Buff)) = "[templates]" Then
-					StartKeyWords = False
-					StartProperty = False
-					StartCompiler = False
-					StartTemplates = True
-					StartGeneral = False
-				ElseIf LCase(Trim(Buff)) = "[general]" Then
-					StartKeyWords = False
-					StartProperty = False
-					StartCompiler = False
-					StartTemplates = False
-					StartGeneral = True
-				End If
-				Pos1 = InStr(Buff, "=")
-				If Len(Trim(Buff, Any !"\t ")) > 0 AndAlso Pos1 > 0 Then
-					Pos2 = InStr(Pos1, Buff, "|")
-					'David Change For the Control Property's Language.
-					'note: "=" already convert To "~"
-					tKey = Trim(Mid(Buff, 1, Pos1 - 1), Any !"\t ")
-					Var Pos3 = InStr(Buff, "~")
-					If Pos3 > 0 AndAlso Pos3 < Pos1 Then Buff = Replace(Buff, "~", "=")
-					If StartGeneral = True Then
-						If Trim(Mid(Buff, Pos1 + 1), Any !"\t ") <> "" Then mlKeys.Add Trim(Left(Buff, Pos1 - 1), Any !"\t "), Trim(Mid(Buff, Pos1 + 1), Any !"\t ")
-					ElseIf StartProperty = True Then
-						If Pos2 > 0 Then
-							mpKeys.Add tKey, Trim(Mid(Buff, Pos1 + 1, Pos2 - Pos1 - 1), Any !"\t ")
-							If Len(Buff) - Pos2 <= 1 Then
-								mcKeys.Add tKey, Trim(Mid(Buff, 1, Pos1 - 1), Any !"\t ")  & IIf(Trim(Mid(Buff, 1, Pos1 - 1)) <> Trim(Mid(Buff, Pos1 + 1, Pos2 - Pos1 - 1)), "  " & Trim(Mid(Buff, Pos1 + 1, Pos2 - Pos1 - 1), Any !"\t "), WStr(""))   ' No comment
-							Else
-								mcKeys.Add tKey, Trim(Mid(Buff, 1, Pos1 - 1), Any !"\t ")  & IIf(Trim(Mid(Buff, 1, Pos1 - 1)) <> Trim(Mid(Buff, Pos1 + 1, Pos2 - Pos1 - 1)), "  " & Trim(Mid(Buff, Pos1 + 1, Pos2 - Pos1 - 1), Any !"\t "), WStr("")) & Chr(13, 10) & Trim(Mid(Buff, Pos2 + 1, Len(Buff) - Pos2), Any !"\t ")
-							End If
-						Else
-							mpKeys.Add tKey, Trim(Mid(Buff, Pos1 + 1, Len(Buff) - Pos2), Any !"\t ")
-							mcKeys.Add tKey, Trim(Mid(Buff, 1, Pos1 - 1), Any !"\t ") & "  " & Trim(Mid(Buff, Pos1 + 1, Len(Buff) - Pos2), Any !"\t ")
-						End If
-					ElseIf StartKeyWords = True Then
-						
-					ElseIf StartCompiler = True Then
-						If Trim(Mid(Buff, Pos1 + 1), Any !"\t ") <> "" Then mlCompiler.Add tKey, Trim(Mid(Buff, Pos1 + 1), Any !"\t ")
-					ElseIf StartTemplates = True Then
-						If Trim(Mid(Buff, Pos1 + 1), Any !"\t ") <> "" Then mlTemplates.Add tKey, Trim(Mid(Buff, Pos1 + 1), Any !"\t ")
-					End If
-				End If
-			Loop
-			mlKeys.SortKeys
-			mpKeys.SortKeys
-			mlCompiler.SortKeys
-			mlTemplates.SortKeys
-			CloseFile_(Fn)
-			Exit Sub
-		Else
-			MsgBox ML("Open file failure!") &  " " & Chr(13, 10) & ML("in function") & " Main.LoadLanguageTexts" & Chr(13, 10) & "  " & ExePath & "/Settings/Languages/" & App.CurLanguage & ".lng"
-		End If
-	End If
-	mlKeys.Clear
-	mcKeys.Clear
-	mpKeys.Clear
-	mlCompiler.Clear
-	mpKeys.Add "#Til", "English"
-	mlKeys.Add "#Til", "English"
-	mlCompiler.Add "#Til", "English"
-	App.CurLanguage = "english"
+	App.CurLanguage = "English"
 End Sub
 
 Sub SaveMRU

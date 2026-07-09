@@ -5,7 +5,7 @@
 	Constructor frmNewProject
 		With This
 			.Name = "frmNewProject"
-			.Text = ML("New Project")
+			.Text = ("New Project")
 				.Icon.LoadFromResourceID(1)
 			.Designer = @This
 			.BorderStyle = FormBorderStyle.FixedDialog
@@ -38,7 +38,7 @@
 		' lblProjectName
 		With lblProjectName
 			.Name = "lblProjectName"
-			.Text = ML("Project Name") & ":"
+			.Text = ("Project Name") & ":"
 			.Align = DockStyle.alLeft
 			.TabIndex = 4
 			.ExtraMargins.Top = 8
@@ -60,7 +60,7 @@
 		' cmdCancel
 		With cmdCancel
 			.Name = "cmdCancel"
-			.Text = ML("Cancel")
+			.Text = ("Cancel")
 			.Align = DockStyle.alRight
 			.ExtraMargins.Bottom = 8
 			.ExtraMargins.Top = 4
@@ -74,7 +74,7 @@
 		' cmdOK
 		With cmdOK
 			.Name = "cmdOK"
-			.Text = ML("OK")
+			.Text = ("OK")
 			.Align = DockStyle.alRight
 			.ExtraMargins.Top = 4
 			.ExtraMargins.Right = 10
@@ -89,7 +89,7 @@
 		' cmdOpenExisting  (lower-left, aligned with OK; opens the Open Project window instead)
 		With cmdOpenExisting
 			.Name = "cmdOpenExisting"
-			.Text = ML("Open Existing Project")
+			.Text = ("Open Existing Project")
 			.Align = DockStyle.alLeft
 			.ExtraMargins.Top = 4
 			.ExtraMargins.Left = 10
@@ -114,7 +114,7 @@
 			.TabIndex = 2
 			.SetBounds 10, 32, 621, 303
 			.Designer = @This
-			.Columns.Add ML("Template"), , 500, cfLeft
+			.Columns.Add ("Template"), , 500, cfLeft
 			.OnItemActivate = @lvTemplates_ItemActivate_
 			.OnSelectedItemChanged = @lvTemplates_SelectedItemChanged_
 			.Parent = @This
@@ -122,7 +122,7 @@
 		' lblProjectTemplates
 		With lblProjectTemplates
 			.Name = "lblProjectTemplates"
-			.Text = ML("Project Templates")
+			.Text = ("Project Templates")
 			.TabIndex = 0
 			.SetBounds 10, 10, 300, 18
 			.Parent = @This
@@ -139,13 +139,13 @@ Private Sub frmNewProject.cmdOK_Click(ByRef Sender As Control)
 	SelectedFolder = ""
 	SelectedProjectFile = ""
 	If lvTemplates.SelectedItemIndex = -1 Then
-		MsgBox ML("Select template!")
+		MsgBox ("Select template!")
 		Me.BringToFront
 		Exit Sub
 	End If
 	Dim As String ProjectName = Trim(txtProjectName.Text)
 	If ProjectName = "" Then
-		MsgBox ML("Enter a project name!")
+		MsgBox ("Enter a project name!")
 		Me.BringToFront
 		Exit Sub
 	End If
@@ -155,28 +155,28 @@ Private Sub frmNewProject.cmdOK_Click(ByRef Sender As Control)
 	SelectedFolder = WinOsPath(GetFullPathU(projectsPathInput & "/" & ProjectName))
 	SelectedProjectFile = SelectedFolder & WindowsSlash & GetFileNameU(SelectedFolder) & ".vfp"
 	If Not FolderExistsU(GetFullPathU(projectsPathInput)) Then
-		MsgBox ML("Parent folder not exists, change the parent folder!")
+		MsgBox ("Parent folder not exists, change the parent folder!")
 		Me.BringToFront
 		Exit Sub
 	ElseIf FolderExistsU(SelectedFolder) Then
-		MsgBox ML("Selected folder exists, change the project name!")
+		MsgBox ("Selected folder exists, change the project name!")
 		Me.BringToFront
 		Exit Sub
 	End If
 	If Not EnsureDirectoryExists(SelectedFolder) Then
-		MsgBox ML("Could not create project folder!")
+		MsgBox ("Could not create project folder!")
 		Me.BringToFront
 		Exit Sub
 	End If
 	Dim As UString TemplateFolder = WinOsPath(ExePath & "/Templates/Projects/" & TemplateName)
 	If FolderExistsU(TemplateFolder) Then FolderCopy TemplateFolder, SelectedFolder
 	If Not FileExistsU(SelectedTemplate) Then
-		MsgBox ML("Template not found!")
+		MsgBox ("Template not found!")
 		Me.BringToFront
 		Exit Sub
 	End If
 	If Not CopyFileU(SelectedTemplate, SelectedProjectFile) Then
-		MsgBox ML("Could not create project file!")
+		MsgBox ("Could not create project file!")
 		Me.BringToFront
 		Exit Sub
 	End If
@@ -248,6 +248,6 @@ End Sub
 Private Sub frmNewProject.AddProjectTemplateItem(ByRef TemplateName As String)
 	Dim As String ImageName = "App" & ..Left(TemplateName, IfNegative(InStr(TemplateName, " ") - 1, Len(TemplateName)))
 	If imgList32.IndexOf(ImageName) < 0 Then ImageName = "AppGUI"
-	lvTemplates.ListItems.Add ML(TemplateName), ImageName
+	lvTemplates.ListItems.Add (TemplateName), ImageName
 	TemplateNames.Add TemplateName
 End Sub

@@ -190,7 +190,7 @@ End Function
 Sub SyncCurrentAIAgentSettings(ByRef AgentKey As String)
 	Dim As String Key = AgentKey
 	If Key = "" Then Key = cboAIAgentModels.Text
-	If Key = "" OrElse Key = ML("(not selected)") Then Return
+	If Key = "" OrElse Key = ("(not selected)") Then Return
 	Dim As Integer Index = pAIAgents->IndexOfKey(Key)
 	If Index < 0 AndAlso CurrentAIAgent Then
 		Key = *CurrentAIAgent
@@ -510,7 +510,7 @@ Sub AIRequest(Param As Any Ptr)
 	Dim As String EffectiveAPIKey = NormalizeAIAgentAPIKey(AIAgentAPIKey)
 	If EffectiveAPIKey = "" Then
 		ThreadsEnter
-		ShowMessages(ML("API key is not configured for the selected AI agent.") & " (" & *CurrentAIAgent & ", " & AIAgentProvider & "). " & ML("Set it in Options -> AI Agents."))
+		ShowMessages(("API key is not configured for the selected AI agent.") & " (" & *CurrentAIAgent & ", " & AIAgentProvider & "). " & ("Set it in Options -> AI Agents."))
 		txtAIRequest.Enabled = True
 		txtAIRequest.SetFocus
 		cboAIAgentModels.Enabled = True
@@ -591,7 +591,7 @@ End Sub
 
 Sub txtAIRequest_Activate(ByRef Designer As My.Sys.Object, ByRef Sender As TextBox)
 	If bInAIThread Then 
-		ShowMessages(ML("Please waiting, AI is working hard......"))
+		ShowMessages(("Please waiting, AI is working hard......"))
 		Return
 	End If
 	If Trim(txtAIRequest.Text, Any !"\t\n\r ") = "" Then Return
@@ -722,7 +722,7 @@ End Sub
 
 Public Sub AIChatPaste(ByVal IsFBCode As Boolean = False)
 	Dim As WString Ptr res(Any), tmpWStrPtr
-	pstBar->Panels[0]->Caption = ML("Wait until tool quits")
+	pstBar->Panels[0]->Caption = ("Wait until tool quits")
 	If IsFBCode Then
 		WLet(tmpWStrPtr, Replace(Clipboard.GetAsText, Chr(9), "    "))
 		AIMessages.Add "```FreeBasic " & Chr(10) & *tmpWStrPtr & Chr(10) & "```", " "
@@ -752,7 +752,7 @@ Public Sub AIChatPaste(ByVal IsFBCode As Boolean = False)
 	End If
 	_Deallocate(AIBodyWStringPtr): AIBodyWStringPtr = 0
 	frmMain.Cursor = 0
-	pstBar->Panels[0]->Caption = ML("Press F1 for get more information")
+	pstBar->Panels[0]->Caption = ("Press F1 for get more information")
 End Sub
 
 Sub AIReleaseFinish(Param As Any Ptr = 0)
@@ -782,7 +782,7 @@ End Sub
 
 Public Sub AIResetContext()
 	If bInAIThread Then
-		ShowMessages(ML("Please waiting, AI is working hard......"))
+		ShowMessages(("Please waiting, AI is working hard......"))
 		Return
 	End If
 	txtAIAgent.Text = " "
@@ -807,7 +807,7 @@ Public Sub AIResetContext()
 			MRUAIChat.Add FileName
 			miRecentAIChat->Add(FileName, "", FileName, @mClickAIChat)
 		End If
-		ShowMessages(ML("The conversation context was saved to") & " " & ExePath & "/AIChat/" & FileName)
+		ShowMessages(("The conversation context was saved to") & " " & ExePath & "/AIChat/" & FileName)
 		AIMessages.Clear
 	End If
 	_Deallocate((RecentAIChat)): RecentAIChat = 0

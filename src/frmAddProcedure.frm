@@ -66,9 +66,9 @@
 		' frmAddProcedure
 		With This
 			.Name = "frmAddProcedure"
-			.Text = ML("Add Procedure")
+			.Text = ("Add Procedure")
 			.Designer = @This
-			.Caption = ML("Add Procedure")
+			.Caption = ("Add Procedure")
 			.BorderStyle = FormBorderStyle.FixedDialog
 			.MaximizeBox = False
 			.MinimizeBox = False
@@ -79,9 +79,9 @@
 		' lblName
 		With lblName
 			.Name = "lblName"
-			.Text = ML("Name") & ":"
+			.Text = ("Name") & ":"
 			.TabIndex = 0
-			.Caption = ML("Name") & ":"
+			.Caption = ("Name") & ":"
 			.SetBounds 10, 10, 90, 20
 			.Designer = @This
 			.Parent = @This
@@ -98,9 +98,9 @@
 		' cmdOK
 		With cmdOK
 			.Name = "cmdOK"
-			.Text = ML("OK")
+			.Text = ("OK")
 			.TabIndex = 36
-			.Caption = ML("OK")
+			.Caption = ("OK")
 			.SetBounds 150, 540, 80, 20
 			.Designer = @This
 			.OnClick = @cmdOK_Click_
@@ -109,10 +109,10 @@
 		' cmdCancel
 		With cmdCancel
 			.Name = "cmdCancel"
-			.Text = ML("Cancel")
+			.Text = ("Cancel")
 			.TabIndex = 37
 			.ControlIndex = 2
-			.Caption = ML("Cancel")
+			.Caption = ("Cancel")
 			.SetBounds 240, 540, 80, 20
 			.Designer = @This
 			.OnClick = @cmdCancel_Click_
@@ -121,9 +121,9 @@
 		' grbType
 		With grbType
 			.Name = "grbType"
-			.Text = ML("Type")
+			.Text = ("Type")
 			.TabIndex = 20
-			.Caption = ML("Type")
+			.Caption = ("Type")
 			.SetBounds 10, 330, 310, 80
 			.Designer = @This
 			.Parent = @This
@@ -131,9 +131,9 @@
 		' optSub
 		With optSub
 			.Name = "optSub"
-			.Text = ML("Sub")
+			.Text = ("Sub")
 			.TabIndex = 21
-			.Caption = ML("Sub")
+			.Caption = ("Sub")
 			.SetBounds 10, 20, 100, 20
 			.Designer = @This
 			.OnClick = @optSub_Click_
@@ -142,10 +142,10 @@
 		' optFunction
 		With optFunction
 			.Name = "optFunction"
-			.Text = ML("Function")
+			.Text = ("Function")
 			.TabIndex = 22
 			.ControlIndex = 0
-			.Caption = ML("Function")
+			.Caption = ("Function")
 			.SetBounds 110, 20, 100, 20
 			.Designer = @This
 			.OnClick = @optFunction_Click_
@@ -154,10 +154,10 @@
 		' optProperty
 		With optProperty
 			.Name = "optProperty"
-			.Text = ML("Property")
+			.Text = ("Property")
 			.TabIndex = 23
 			.ControlIndex = 1
-			.Caption = ML("Property")
+			.Caption = ("Property")
 			.SetBounds 210, 20, 90, 20
 			.Designer = @This
 			.OnClick = @optProperty_Click_
@@ -166,9 +166,9 @@
 		' grbScope
 		With grbScope
 			.Name = "grbScope"
-			.Text = ML("Scope")
+			.Text = ("Scope")
 			.TabIndex = 27
-			.Caption = ML("Scope")
+			.Caption = ("Scope")
 			.SetBounds 10, 420, 310, 50
 			.Designer = @This
 			.Parent = @This
@@ -176,10 +176,10 @@
 		' optPublicScope
 		With optPublicScope
 			.Name = "optPublicScope"
-			.Text = ML("Public")
+			.Text = ("Public")
 			.TabIndex = 28
-			.Caption = ML("Public")
-			.Hint = ML("With Public scope")
+			.Caption = ("Public")
+			.Hint = ("With Public scope")
 			.SetBounds 10, 20, 90, 20
 			.Designer = @This
 			.OnClick = @optPublicScope_Click_
@@ -188,11 +188,11 @@
 		' optPrivateScope
 		With optPrivateScope
 			.Name = "optPrivateScope"
-			.Text = ML("Private")
+			.Text = ("Private")
 			.TabIndex = 29
 			.ControlIndex = 0
-			.Caption = ML("Private")
-			.Hint = ML("With Private scope")
+			.Caption = ("Private")
+			.Hint = ("With Private scope")
 			.SetBounds 110, 20, 80, 20
 			.Designer = @This
 			.OnClick = @optPrivateScope_Click_
@@ -201,9 +201,9 @@
 		' chkStatic
 		With chkStatic
 			.Name = "chkStatic"
-			.Text = ML("All Local variables as Statics")
+			.Text = ("All Local variables as Statics")
 			.TabIndex = 31
-			.Hint = ML("Static specifies static storage for all local variables, objects and arrays, except temporary types and internal variables (objects not explicitly declared)")
+			.Hint = ("Static specifies static storage for all local variables, objects and arrays, except temporary types and internal variables (objects not explicitly declared)")
 			.SetBounds 10, 480, 200, 20
 			.Designer = @This
 			.Parent = @This
@@ -211,10 +211,10 @@
 		' optOperator
 		With optOperator
 			.Name = "optOperator"
-			.Text = ML("Operator")
+			.Text = ("Operator")
 			.TabIndex = 24
 			.ControlIndex = 1
-			.Caption = ML("Operator")
+			.Caption = ("Operator")
 			.SetBounds 10, 50, 100, 20
 			.Designer = @This
 			.OnClick = @optOperator_Click_
@@ -223,10 +223,10 @@
 		' lblParameters
 		With lblParameters
 			.Name = "lblParameters"
-			.Text = ML("Parameters") & ":"
+			.Text = ("Parameters") & ":"
 			.TabIndex = 4
 			.ControlIndex = 0
-			.Caption = ML("Parameters") & ":"
+			.Caption = ("Parameters") & ":"
 			.SetBounds 10, 70, 90, 20
 			.Designer = @This
 			.Parent = @This
@@ -245,10 +245,10 @@
 		' lblType
 		With lblType
 			.Name = "lblType"
-			.Text = ML("Type") & ":"
+			.Text = ("Type") & ":"
 			.TabIndex = 8
 			.ControlIndex = 0
-			.Caption = ML("Type") & ":"
+			.Caption = ("Type") & ":"
 			.SetBounds 10, 150, 90, 20
 			.Designer = @This
 			.Parent = @This
@@ -266,10 +266,10 @@
 		' grbAccessControl
 		With grbAccessControl
 			.Name = "grbAccessControl"
-			.Text = ML("Access Control")
+			.Text = ("Access Control")
 			.TabIndex = 10
 			.ControlIndex = 7
-			.Caption = ML("Access Control")
+			.Caption = ("Access Control")
 			.SetBounds 10, 180, 310, 50
 			.Designer = @This
 			.Parent = @This
@@ -277,9 +277,9 @@
 		' optPublicAccess
 		With optPublicAccess
 			.Name = "optPublicAccess"
-			.Text = ML("Public")
+			.Text = ("Public")
 			.TabIndex = 11
-			.Caption = ML("Public")
+			.Caption = ("Public")
 			.SetBounds 10, 20, 100, 20
 			.Designer = @This
 			.Parent = @grbAccessControl
@@ -287,9 +287,9 @@
 		' optProtectedAccess
 		With optProtectedAccess
 			.Name = "optProtectedAccess"
-			.Text = ML("Protected")
+			.Text = ("Protected")
 			.TabIndex = 12
-			.Caption = ML("Protected")
+			.Caption = ("Protected")
 			.SetBounds 110, 20, 100, 20
 			.Designer = @This
 			.Parent = @grbAccessControl
@@ -297,9 +297,9 @@
 		' optPrivateAccess
 		With optPrivateAccess
 			.Name = "optPrivateAccess"
-			.Text = ML("Private")
+			.Text = ("Private")
 			.TabIndex = 13
-			.Caption = ML("Private")
+			.Caption = ("Private")
 			.SetBounds 210, 20, 80, 20
 			.Designer = @This
 			.Parent = @grbAccessControl
@@ -307,10 +307,10 @@
 		' optConstructor
 		With optConstructor
 			.Name = "optConstructor"
-			.Text = ML("Constructor")
+			.Text = ("Constructor")
 			.TabIndex = 25
 			.ControlIndex = 3
-			.Caption = ML("Constructor")
+			.Caption = ("Constructor")
 			.SetBounds 110, 50, 100, 20
 			.Designer = @This
 			.OnClick = @optConstructor_Click_
@@ -319,10 +319,10 @@
 		' optDestructor
 		With optDestructor
 			.Name = "optDestructor"
-			.Text = ML("Destructor")
+			.Text = ("Destructor")
 			.TabIndex = 26
 			.ControlIndex = 3
-			.Caption = ML("Destructor")
+			.Caption = ("Destructor")
 			.SetBounds 210, 50, 90, 20
 			.Designer = @This
 			.OnClick = @optDestructor_Click_
@@ -331,10 +331,10 @@
 		' lblParameters1
 		With lblParameters1
 			.Name = "lblParameters1"
-			.Text = ML("Description") & ":"
+			.Text = ("Description") & ":"
 			.TabIndex = 6
 			.ControlIndex = 7
-			.Caption = ML("Description") & ":"
+			.Caption = ("Description") & ":"
 			.SetBounds 10, 100, 90, 20
 			.Designer = @This
 			.Parent = @This
@@ -355,10 +355,10 @@
 		' lblPriority
 		With lblPriority
 			.Name = "lblPriority"
-			.Text = ML("Priority") & ":"
+			.Text = ("Priority") & ":"
 			.TabIndex = 33
 			.ControlIndex = 0
-			.Caption = ML("Priority") & ":"
+			.Caption = ("Priority") & ":"
 			.SetBounds 190, 513, 60, 20
 			.Designer = @This
 			.Parent = @This
@@ -389,10 +389,10 @@
 		' lblAlias
 		With lblAlias
 			.Name = "lblAlias"
-			.Text = ML("Alias") & ":"
+			.Text = ("Alias") & ":"
 			.TabIndex = 2
 			.ControlIndex = 0
-			.Caption = ML("Alias") & ":"
+			.Caption = ("Alias") & ":"
 			.SetBounds 10, 40, 90, 20
 			.Designer = @This
 			.Parent = @This
@@ -410,11 +410,11 @@
 		' chkExport
 		With chkExport
 			.Name = "chkExport"
-			.Text = ML("Export")
+			.Text = ("Export")
 			.TabIndex = 32
 			.ControlIndex = 17
-			.Caption = ML("Export")
-			.Hint = ML("Procedure will be added to the public export table")
+			.Caption = ("Export")
+			.Hint = ("Procedure will be added to the public export table")
 			.SetBounds 220, 480, 100, 20
 			.Designer = @This
 			.Parent = @This
@@ -422,11 +422,11 @@
 		' optDefaultScope
 		With optDefaultScope
 			.Name = "optDefaultScope"
-			.Text = ML("Default")
+			.Text = ("Default")
 			.TabIndex = 30
 			.ControlIndex = 1
-			.Caption = ML("Default")
-			.Hint = ML("Without Public or Private scope")
+			.Caption = ("Default")
+			.Hint = ("Without Public or Private scope")
 			.SetBounds 210, 20, 90, 20
 			.Designer = @This
 			.OnClick = @optDefaultScope_Click_
@@ -435,11 +435,11 @@
 		' chkProcedureAlso
 		With chkProcedureAlso
 			.Name = "chkProcedureAlso"
-			.Text = ML("Add to procedure body also")
+			.Text = ("Add to procedure body also")
 			.TabIndex = 19
 			.ControlIndex = 4
-			.Caption = ML("Add to procedure body also")
-			.Hint = ML("Add to procedure body also this keyword, for improved code readability")
+			.Caption = ("Add to procedure body also")
+			.Hint = ("Add to procedure body also this keyword, for improved code readability")
 			.SetBounds 110, 50, 180, 20
 			.Designer = @This
 			.Parent = @grbMemberType
@@ -447,10 +447,10 @@
 		' grbMemberType
 		With grbMemberType
 			.Name = "grbMemberType"
-			.Text = ML("Member Type")
+			.Text = ("Member Type")
 			.TabIndex = 14
 			.ControlIndex = 11
-			.Caption = ML("Member Type")
+			.Caption = ("Member Type")
 			.SetBounds 10, 240, 310, 80
 			.Designer = @This
 			.Parent = @This
@@ -458,9 +458,9 @@
 		' optNormalMember
 		With optNormalMember
 			.Name = "optNormalMember"
-			.Text = ML("Normal")
+			.Text = ("Normal")
 			.TabIndex = 15
-			.Caption = ML("Normal")
+			.Caption = ("Normal")
 			.SetBounds 10, 20, 100, 20
 			.Designer = @This
 			.OnClick = @optNormalMember_Click_
@@ -469,9 +469,9 @@
 		' optStaticMember
 		With optStaticMember
 			.Name = "optStaticMember"
-			.Text = ML("Static")
+			.Text = ("Static")
 			.TabIndex = 18
-			.Caption = ML("Static")
+			.Caption = ("Static")
 			.SetBounds 10, 50, 100, 20
 			.Designer = @This
 			.OnClick = @optStaticMember_Click_
@@ -480,9 +480,9 @@
 		' optVirtualMember
 		With optVirtualMember
 			.Name = "optVirtualMember"
-			.Text = ML("Virtual")
+			.Text = ("Virtual")
 			.TabIndex = 17
-			.Caption = ML("Virtual")
+			.Caption = ("Virtual")
 			.SetBounds 210, 20, 80, 20
 			.Designer = @This
 			.OnClick = @optVirtualMember_Click_
@@ -491,10 +491,10 @@
 		' optAbstractMember
 		With optAbstractMember
 			.Name = "optAbstractMember"
-			.Text = ML("Abstract")
+			.Text = ("Abstract")
 			.TabIndex = 16
 			.ControlIndex = 0
-			.Caption = ML("Abstract")
+			.Caption = ("Abstract")
 			.SetBounds 110, 20, 100, 20
 			.Designer = @This
 			.OnClick = @optAbstractMember_Click_
@@ -584,7 +584,7 @@ End Sub
 
 Private Sub frmAddProcedureType.cmdOK_Click(ByRef Sender As Control)
 	If Trim(txtName.Text) = "" Then
-		MsgBox ML("Invalid procedure name"), , mtError
+		MsgBox ("Invalid procedure name"), , mtError
 		Exit Sub
 	End If
 	Dim tb As TabWindow Ptr = Cast(TabWindow Ptr, ptabCode->SelectedTab)
@@ -845,7 +845,7 @@ Private Sub frmAddProcedureType.Form_Create(ByRef Sender As Control)
 	txtDescription.Text = ""
 	txtParameters.Text = ""
 	cboType.Clear
-	cboType.AddItem ML("(not selected)")
+	cboType.AddItem ("(not selected)")
 	For i As Integer = 0 To tb->txtCode.Content.Types.Count - 1
 		cboType.AddItem tb->txtCode.Content.Types.Item(i)
 	Next

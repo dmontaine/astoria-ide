@@ -5,7 +5,7 @@
 		' frmMenuEditor
 		With This
 			.Name = "frmMenuEditor"
-			.Caption = ML("Menu Editor")
+			.Caption = ("Menu Editor")
 			.Designer = @This
 				This.Icon.LoadFromResourceID(1)
 			.OnPaint = @Form_Paint_
@@ -317,12 +317,12 @@ Private Sub frmMenuEditor.Form_Paint(ByRef Sender As Control, ByRef Canvas As My
 				End If
 			ElseIf CurrentStatusBar Then
 				If stCurrentStatusBar AndAlso stCurrentStatusBar->ReadPropertyFunc Then
-					Rects(RectsCount).Right = Rects(RectsCount).Left + .TextWidth(ML("Type here")) + 10
+					Rects(RectsCount).Right = Rects(RectsCount).Left + .TextWidth(("Type here")) + 10
 					Rects(RectsCount).Bottom = Rects(RectsCount).Top + QInteger(stCurrentStatusBar->ReadPropertyFunc(CurrentStatusBar, "Height")) - 1
 				End If
 			Else
-				Rects(RectsCount).Right = Rects(RectsCount).Left + .TextWidth(ML("Type here")) + 10
-				Rects(RectsCount).Bottom = Rects(RectsCount).Top + .TextHeight(ML("Type here")) + 6
+				Rects(RectsCount).Right = Rects(RectsCount).Left + .TextWidth(("Type here")) + 10
+				Rects(RectsCount).Bottom = Rects(RectsCount).Top + .TextHeight(("Type here")) + 6
 			End If
 			.Rectangle Rects(RectsCount)
 			If CurrentToolBar Then
@@ -330,7 +330,7 @@ Private Sub frmMenuEditor.Form_Paint(ByRef Sender As Control, ByRef Canvas As My
 				AddButton.LoadFromResourceName("UserControl")
 					.DrawTransparent ScaleX(Rects(RectsCount).Left + IIf(IsToolBarList, 3, (Rects(RectsCount).Right - Rects(RectsCount).Left - BitmapWidth) / 2)), ScaleY(Rects(RectsCount).Top + IIf(Rects(RectsCount).Bottom - Rects(RectsCount).Top - 6 < BitmapHeight, 3, 3)), AddButton.Handle
 			Else
-				.TextOut Rects(RectsCount).Left + 5, Rects(RectsCount).Top + 3, ML("Type here"), BGR(109, 109, 109), -1
+				.TextOut Rects(RectsCount).Left + 5, Rects(RectsCount).Top + 3, ("Type here"), BGR(109, 109, 109), -1
 			End If
 			If CurrentStatusBar Then
 				.Pen.Color = BGR(191, 191, 191)
@@ -497,7 +497,7 @@ Private Sub frmMenuEditor.Form_Paint(ByRef Sender As Control, ByRef Canvas As My
 						Rects(RectsCount).Right = Rects(RectsCount).Left + MaxWidth - 4
 						Rects(RectsCount).Bottom = Rects(RectsCount).Top + .TextHeight("A") + 6
 						.Rectangle Rects(RectsCount)
-						.TextOut Rects(RectsCount).Left + 5, Rects(RectsCount).Top + 3, ML("Type here"), BGR(109, 109, 109), -1
+						.TextOut Rects(RectsCount).Left + 5, Rects(RectsCount).Top + 3, ("Type here"), BGR(109, 109, 109), -1
 					End If
 				End If
 			Next
@@ -680,7 +680,7 @@ Sub frmMenuEditor.SelectRect(Index As Integer)
 	ActiveRect = Index
 	If Ctrls(Index) = 0 Then
 		ActiveCtrl = Parents(Index)
-		txtActive.Text = ML("Type here")
+		txtActive.Text = ("Type here")
 		If CurrentToolBar AndAlso Index = TopCount Then CurrentMenu = 0
 	Else
 		ActiveCtrl = Ctrls(Index)

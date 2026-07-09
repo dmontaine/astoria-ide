@@ -13,7 +13,7 @@
 		' frmPath
 		With This
 			.Name = "frmPath"
-			.Text = ML("Path")
+			.Text = ("Path")
 			.StartPosition = FormStartPosition.CenterParent
 			.BorderStyle = FormBorderStyle.FixedDialog
 			.MaximizeBox = False
@@ -31,7 +31,7 @@
 		' cmdCancel
 		With cmdCancel
 			.Name = "cmdCancel"
-			.Text = ML("Cancel")
+			.Text = ("Cancel")
 			.TabIndex = 10
 			.Align = DockStyle.alRight
 			.SetBounds 112, 0, 112, 30
@@ -42,7 +42,7 @@
 		' lblVersion
 		With lblVersion
 			.Name = "lblVersion"
-			.Text = ML("Version") & ":"
+			.Text = ("Version") & ":"
 			.TabIndex = 3
 			.Align = DockStyle.alLeft
 			.SetBounds 0, 0, 84, 20
@@ -60,7 +60,7 @@
 		' lblPath
 		With lblPath
 			.Name = "lblPath"
-			.Text = ML("Path") & ":"
+			.Text = ("Path") & ":"
 			.TabIndex = 0
 			.Align = DockStyle.alLeft
 			.SetBounds 0, 0, 84, 20
@@ -90,7 +90,7 @@
 		' cmdOK
 		With cmdOK
 			.Name = "cmdOK"
-			.Text = ML("OK")
+			.Text = ("OK")
 			.TabIndex = 9
 			.Align = DockStyle.alRight
 			.SetBounds 112, 0, 112, 30
@@ -101,7 +101,7 @@
 		' lblCommandLine
 		With lblCommandLine
 			.Name = "lblCommandLine"
-			.Text = ML("Command line") & ":"
+			.Text = ("Command line") & ":"
 			.TabIndex = 5
 			.Align = DockStyle.alLeft
 			.SetBounds 0, 0, 84, 20
@@ -128,11 +128,11 @@
 		' lblExtensions
 		With lblExtensions
 			.Name = "lblExtensions"
-			.Text = ML("Extensions") & ":"
+			.Text = ("Extensions") & ":"
 			.TabIndex = 7
 			.Align = DockStyle.alRight
 			.SetBounds 344, 0, 88, 20
-			.Caption = ML("Extensions") & ":"
+			.Caption = ("Extensions") & ":"
 			.Parent = @hbxCommandLine
 		End With
 		' cboType
@@ -236,14 +236,14 @@ End Sub
 Private Sub frmPath.cmdOK_Click(ByRef Sender As Control)
 	If Not ChooseFolder AndAlso Trim(txtVersion.Text) = "" Then
 		If ForConfiguration Then
-			MsgBox ML("Enter name of configuration!")
+			MsgBox ("Enter name of configuration!")
 		Else
-			MsgBox ML("Enter version of program!")
+			MsgBox ("Enter version of program!")
 		End If
 		This.BringToFront()
 		Exit Sub
 	ElseIf Trim(This.txtPath.Text) = "" Then
-		MsgBox ML("Select path of program!")
+		MsgBox ("Select path of program!")
 		This.BringToFront()
 		Exit Sub
 	End If
@@ -302,7 +302,7 @@ Private Sub frmPath.cmdPath_Click(ByRef Sender As Control)
 					End If
 				End If
 			Else
-				.OpenD.Filter = ML("All Files") & "|*.*;"
+				.OpenD.Filter = ("All Files") & "|*.*;"
 				If .OpenD.Execute Then
 					If FolderName <> "" AndAlso StartsWith(.OpenD.FileName, FolderName) Then
 						.txtPath.Text = "." & WindowsSlash & Mid(.OpenD.FileName, Len(FolderName) + 1)
@@ -374,7 +374,7 @@ Private Sub frmPath.Form_Close(ByRef Sender As Form, ByRef Action As Integer)
 End Sub
 
 Private Sub frmPath.Form_Create(ByRef Sender As Control)
-	Me.Caption = IIf(ForConfiguration, ML("Build Configurations"), ML("Path"))
+	Me.Caption = IIf(ForConfiguration, ("Build Configurations"), ("Path"))
 	lblVersion.Visible = (Not WithoutVersion) AndAlso Not ChooseFolder
 	txtVersion.Visible = (Not WithoutVersion) AndAlso Not ChooseFolder
 	lblCommandLine.Visible = Not (WithoutCommandLine OrElse ChooseFolder)
@@ -382,9 +382,9 @@ Private Sub frmPath.Form_Create(ByRef Sender As Control)
 	lblExtensions.Visible = WithExtensions
 	txtExtensions.Visible = WithExtensions
 	cboType.Visible = WithType
-	lblPath.Text = IIf(ForConfiguration, ML("Switches") & ":", IIf(WithKey, ML("Resource Name / Path") & ":", ML("Path") & ":"))
-	lblVersion.Text = IIf(ForConfiguration, ML("Name") & ":", IIf(WithType, IIf(WithKey, ML("Key") & ":", ML("Resource Name") & ":"), ML("Version") & ":"))
-	lblCommandLine.Text = IIf(WithType, ML("Type") & ":", ML("Command line") & ":")
+	lblPath.Text = IIf(ForConfiguration, ("Switches") & ":", IIf(WithKey, ("Resource Name / Path") & ":", ("Path") & ":"))
+	lblVersion.Text = IIf(ForConfiguration, ("Name") & ":", IIf(WithType, IIf(WithKey, ("Key") & ":", ("Resource Name") & ":"), ("Version") & ":"))
+	lblCommandLine.Text = IIf(WithType, ("Type") & ":", ("Command line") & ":")
 	txtCommandLineText = ""
 	txtExtensionsText = ""
 	cboTypeText = ""

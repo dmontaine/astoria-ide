@@ -5,7 +5,7 @@
 	Constructor frmRecentProjects
 		With This
 			.Name = "frmRecentProjects"
-			.Text = ML("Recent Projects")
+			.Text = ("Recent Projects")
 				.Icon.LoadFromResourceID(1)
 			.Designer = @This
 			.BorderStyle = FormBorderStyle.Sizable
@@ -25,7 +25,7 @@
 		' cmdCancel
 		With cmdCancel
 			.Name = "cmdCancel"
-			.Text = ML("Cancel")
+			.Text = ("Cancel")
 			.Align = DockStyle.alRight
 			.ExtraMargins.Bottom = 10
 			.ExtraMargins.Top = 0
@@ -39,7 +39,7 @@
 		' cmdOK
 		With cmdOK
 			.Name = "cmdOK"
-			.Text = ML("OK")
+			.Text = ("OK")
 			.Align = DockStyle.alRight
 			.ExtraMargins.Top = 0
 			.ExtraMargins.Right = 10
@@ -66,8 +66,8 @@
 			.TabIndex = 1
 			.SetBounds 10, 10, 621, 361
 			.Designer = @This
-			.Columns.Add ML("File"), , 150
-			.Columns.Add ML("Path"), , 450
+			.Columns.Add ("File"), , 150
+			.Columns.Add ("Path"), , 450
 			.OnItemActivate = @lvRecent_ItemActivate_
 			.Parent = @This
 		End With
@@ -85,7 +85,7 @@ Private Sub frmRecentProjects.cmdOK_Click(ByRef Sender As Control)
 		ModalResult = ModalResults.OK
 		Me.CloseForm
 	Else
-		MsgBox ML("Select recent file!")
+		MsgBox ("Select recent file!")
 		Me.BringToFront
 	End If
 End Sub

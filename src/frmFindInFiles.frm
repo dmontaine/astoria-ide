@@ -34,7 +34,7 @@ pfFindFile = @fFindFile
 		This.StartPosition = FormStartPosition.CenterParent
 			This.Icon.LoadFromResourceID(1)
 		This.BorderStyle = FormBorderStyle.Sizable
-		This.Caption = ML("Find In Files")
+		This.Caption = ("Find In Files")
 		This.ID = 1000
 		'This.IsChild = True
 		This.OnResize = @Form_Resize
@@ -52,7 +52,7 @@ pfFindFile = @fFindFile
 			.Parent = @This
 		End With
 		lblFind.Name = "lblFind"
-		lblFind.Caption = ML("Find What") & ":"
+		lblFind.Caption = ("Find What") & ":"
 		lblFind.TabIndex = 0
 		lblFind.SetBounds 10, 11, 85, 20
 		lblFind.Parent = @This
@@ -65,7 +65,7 @@ pfFindFile = @fFindFile
 		txtFind.Parent = @This
 		
 		lblPath.Name = "lblPath"
-		lblPath.Caption = ML("In Folder") & ":"
+		lblPath.Caption = ("In Folder") & ":"
 		lblPath.TabIndex = 4
 		lblPath.SetBounds 4, 9, 85, 20
 		lblPath.Parent =  @Panel1
@@ -85,12 +85,12 @@ pfFindFile = @fFindFile
 		txtPath.Parent =  @Panel1
 		
 		chkMatchCase.Name = "chkMatchCase"
-		chkMatchCase.Caption = ML("Match Case")
+		chkMatchCase.Caption = ("Match Case")
 		chkMatchCase.TabIndex = 7
 		chkMatchCase.SetBounds 92, 38, 150, 22
 		chkMatchCase.Parent =  @Panel1
 		chkSearchInSub.Name = "chkSearchInSub"
-		chkSearchInSub.Caption = ML("Search Subfolders")
+		chkSearchInSub.Caption = ("Search Subfolders")
 		chkSearchInSub.TabIndex = 9
 		chkSearchInSub.SetBounds 92, 63, 150, 22
 		chkSearchInSub.Checked = True
@@ -98,7 +98,7 @@ pfFindFile = @fFindFile
 		'btnFind
 		With btnFind
 			.Name = "btnFind"
-			.Caption = ML("&Find")
+			.Caption = ("&Find")
 			.Default = True
 			.TabIndex = 10
 			.SetBounds 90, 92, 106, 30
@@ -110,7 +110,7 @@ pfFindFile = @fFindFile
 		' btnReplace
 		With btnReplace
 			.Name = "btnReplace"
-			.Text = ML("&Replace")
+			.Text = ("&Replace")
 			.TabIndex = 11
 			.SetBounds 199, 92, 106, 30
 			.Anchor.Right = asAnchor
@@ -121,7 +121,7 @@ pfFindFile = @fFindFile
 		'btnFind
 		With btnCancel
 			.Name="btnCancel"
-			.Caption = ML("&Cancel")
+			.Caption = ("&Cancel")
 			btnCancel.TabIndex = 12
 			.SetBounds 308, 92, 104, 30
 			.Anchor.Right = asAnchor
@@ -139,7 +139,7 @@ pfFindFile = @fFindFile
 		
 		With lblReplace
 			.Name = "lblReplace"
-			.Text = ML("Replace")+":"
+			.Text = ("Replace")+":"
 			.TabIndex = 2
 			.SetBounds 10, 41, 82, 25
 			.Parent =  @This
@@ -158,9 +158,9 @@ pfFindFile = @fFindFile
 		' chkUsePatternMatching
 		With chkUsePatternMatching
 			.Name = "chkUsePatternMatching"
-			.Text = ML("Use Pattern Matching")
+			.Text = ("Use Pattern Matching")
 			.TabIndex = 8
-			.Caption = ML("Use Pattern Matching")
+			.Caption = ("Use Pattern Matching")
 			.SetBounds 252, 63, 150, 22
 			.Parent = @Panel1
 		End With
@@ -174,10 +174,10 @@ pfFindFile = @fFindFile
 		' chkWholeWordsOnly
 		With chkWholeWordsOnly
 			.Name = "chkWholeWordsOnly"
-			.Text = ML("Find Whole Words Only")
+			.Text = ("Find Whole Words Only")
 			.TabIndex = 14
 			.ControlIndex = 3
-			.Caption = ML("Find Whole Words Only")
+			.Caption = ("Find Whole Words Only")
 			.SetBounds 252, 38, 150, 22
 			.Designer = @This
 			.Parent = @Panel1
@@ -311,7 +311,7 @@ Sub FindSub(Param As Any Ptr)
 		.btnFind.Enabled = True
 	End With
 	StopProgress
-	tpFind->Caption = ML("Find") & " (" & plvSearch->ListItems.Count & " " & ML("Pos") & ")"
+	tpFind->Caption = ("Find") & " (" & plvSearch->ListItems.Count & " " & ("Pos") & ")"
 	ThreadsLeave
 End Sub
 
@@ -331,7 +331,7 @@ Sub ReplaceSub(Param As Any Ptr)
 		.btnReplace.Enabled = True
 	End With
 	StopProgress
-	tpFind->Caption = ML("Replace") & " (" & plvSearch->ListItems.Count & " " & ML("Pos") & ")"
+	tpFind->Caption = ("Replace") & " (" & plvSearch->ListItems.Count & " " & ("Pos") & ")"
 	ThreadsLeave
 End Sub
 
@@ -456,7 +456,7 @@ Private Sub frmFindInFiles.ReplaceInFile(ByRef Path As WString ="", ByRef tSearc
 					If Open(Path & f For Output Encoding "utf-8" As #Fn1) = 0 Then
 						Print #Fn1, *BuffOut
 					Else
-						MsgBox ML("Open file failure!") & " " & ML("in function") & " frmFindInFiles.ReplaceInFile" & WChr(13,10) & "  " & Path & f
+						MsgBox ("Open file failure!") & " " & ("in function") & " frmFindInFiles.ReplaceInFile" & WChr(13,10) & "  " & Path & f
 					End If
 					CloseFile_(Fn1)
 				End If
@@ -502,7 +502,7 @@ Private Sub frmFindInFiles.Form_Create(ByRef Sender As Control)
 	End If
 	fFindFile.Panel1.Top = IIf(mFormFindInFile, 35, 64)
 	fFindFile.Height=IIf(mFormFindInFile,208,236)
-	fFindFile.Caption=IIf(mFormFindInFile,ML("Find In Files"),ML("Replace In Files"))
+	fFindFile.Caption=IIf(mFormFindInFile,("Find In Files"),("Replace In Files"))
 	fFindFile.btnReplace.Visible =Not mFormFindInFile
 	fFindFile.lblReplace.Visible =Not mFormFindInFile
 	fFindFile.txtReplace.Visible =Not mFormFindInFile

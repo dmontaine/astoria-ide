@@ -71,36 +71,36 @@ Constructions(C_Constructor)        = Type<Construction>("Constructor",   "Publi
 Constructions(C_Destructor)         = Type<Construction>("Destructor",    "Public Destructor",  "Private Destructor",  "Virtual Destructor", "Public Virtual Destructor", "Private Virtual Destructor", "",                "",                       "",                        "",         "",           "",        "End Destructor",  "",      True,  True)
 
 ReDim ElementTypeNames(E_Count - 1) As ElementType
-ElementTypeNames(E_ByRefParameter)     = Type<ElementType>("ByRef Parameters", ML("ByRef Parameters"), "Property", @ColorByRefParameters)
-ElementTypeNames(E_ByValParameter)     = Type<ElementType>("ByVal Parameters", ML("ByVal Parameters"), "Property", @ColorByValParameters)
-ElementTypeNames(E_Class)              = Type<ElementType>("Classes", ML("Classes"), "Type", @ColorGlobalTypes)
-ElementTypeNames(E_CommonVariable)     = Type<ElementType>("Common Variables", ML("Common Variables"), "Property", @ColorLocalVariables)
-ElementTypeNames(E_Constant)           = Type<ElementType>("Constants", ML("Constants"), "Property", @ColorConstants)
-ElementTypeNames(E_Constructor)        = Type<ElementType>("Constructors", ML("Constructors"), "Sub", @ColorSubs)
-ElementTypeNames(E_Define)             = Type<ElementType>("Defines", ML("Defines"), "Sub", @ColorDefines)
-ElementTypeNames(E_Destructor)         = Type<ElementType>("Destructors", ML("Destructors"), "Sub", @ColorSubs)
-ElementTypeNames(E_Enum)               = Type<ElementType>("Enums", ML("Enums"), "Enum", @ColorGlobalEnums)
-ElementTypeNames(E_EnumItem)           = Type<ElementType>("Enum Items", ML("Enum Items"), "EnumItem", @ColorEnumMembers)
-ElementTypeNames(E_Event)              = Type<ElementType>("Events", ML("Events"), "Event", @ColorFields)
-ElementTypeNames(E_ExternVariable)     = Type<ElementType>("Extern Variables", ML("Extern Variables"), "Property", @ColorCommonVariables)
-ElementTypeNames(E_Field)              = Type<ElementType>("Fields", ML("Fields"), "Property", @ColorProperties)
-ElementTypeNames(E_Function)           = Type<ElementType>("Functions", ML("Functions"), "Function", @ColorGlobalFunctions)
-ElementTypeNames(E_Keyword)            = Type<ElementType>("Keywords", ML("Keywords"), "Keyword", @ColorGlobalFunctions)
-ElementTypeNames(E_KeywordFunction)    = Type<ElementType>("Keyword Functions", ML("Keyword Functions"), "Keyword", @ColorGlobalFunctions)
-ElementTypeNames(E_KeywordOperator)    = Type<ElementType>("Keyword Operators", ML("Keyword Operators"), "Operator", @ColorGlobalFunctions)
-ElementTypeNames(E_KeywordSub)         = Type<ElementType>("Keyword Subs", ML("Keyword Subs"), "Sub", @ColorGlobalFunctions)
-ElementTypeNames(E_LineLabel)          = Type<ElementType>("Line Labels", ML("Line Labels"), "Sub", @ColorLineLabels)
-ElementTypeNames(E_LocalVariable)      = Type<ElementType>("Local Variables", ML("Local Variables"), "Property", @ColorLocalVariables)
-ElementTypeNames(E_Macro)              = Type<ElementType>("Macros", ML("Macros"), "Sub", @ColorMacros)
-ElementTypeNames(E_Namespace)          = Type<ElementType>("Namespaces", ML("Namespaces"), "Sub", @ColorGlobalNamespaces)
-ElementTypeNames(E_Operator)           = Type<ElementType>("Operators", ML("Operators"), "Sub", @ColorOperators)
-ElementTypeNames(E_Property)           = Type<ElementType>("Properties", ML("Properties"), "Property", @ColorProperties)
-ElementTypeNames(E_SharedVariable)     = Type<ElementType>("Shared Variables", ML("Shared Variables"), "Property", @ColorSharedVariables)
-ElementTypeNames(E_Snippet)            = Type<ElementType>("Snippets", ML("Snippets"), "Sub", @ColorSubs)
-ElementTypeNames(E_Sub)                = Type<ElementType>("Subs", ML("Subs"), "Sub", @ColorSubs)
-ElementTypeNames(E_Type)               = Type<ElementType>("Types", ML("Types"), "Type", @ColorGlobalTypes)
-ElementTypeNames(E_TypeCopy)           = Type<ElementType>("Type Copies", ML("Type Copies"), "Type", @ColorGlobalTypes)
-ElementTypeNames(E_Union)              = Type<ElementType>("Unions", ML("Unions"), "Type", @ColorGlobalTypes)
+ElementTypeNames(E_ByRefParameter)     = Type<ElementType>("ByRef Parameters", ("ByRef Parameters"), "Property", @ColorByRefParameters)
+ElementTypeNames(E_ByValParameter)     = Type<ElementType>("ByVal Parameters", ("ByVal Parameters"), "Property", @ColorByValParameters)
+ElementTypeNames(E_Class)              = Type<ElementType>("Classes", ("Classes"), "Type", @ColorGlobalTypes)
+ElementTypeNames(E_CommonVariable)     = Type<ElementType>("Common Variables", ("Common Variables"), "Property", @ColorLocalVariables)
+ElementTypeNames(E_Constant)           = Type<ElementType>("Constants", ("Constants"), "Property", @ColorConstants)
+ElementTypeNames(E_Constructor)        = Type<ElementType>("Constructors", ("Constructors"), "Sub", @ColorSubs)
+ElementTypeNames(E_Define)             = Type<ElementType>("Defines", ("Defines"), "Sub", @ColorDefines)
+ElementTypeNames(E_Destructor)         = Type<ElementType>("Destructors", ("Destructors"), "Sub", @ColorSubs)
+ElementTypeNames(E_Enum)               = Type<ElementType>("Enums", ("Enums"), "Enum", @ColorGlobalEnums)
+ElementTypeNames(E_EnumItem)           = Type<ElementType>("Enum Items", ("Enum Items"), "EnumItem", @ColorEnumMembers)
+ElementTypeNames(E_Event)              = Type<ElementType>("Events", ("Events"), "Event", @ColorFields)
+ElementTypeNames(E_ExternVariable)     = Type<ElementType>("Extern Variables", ("Extern Variables"), "Property", @ColorCommonVariables)
+ElementTypeNames(E_Field)              = Type<ElementType>("Fields", ("Fields"), "Property", @ColorProperties)
+ElementTypeNames(E_Function)           = Type<ElementType>("Functions", ("Functions"), "Function", @ColorGlobalFunctions)
+ElementTypeNames(E_Keyword)            = Type<ElementType>("Keywords", ("Keywords"), "Keyword", @ColorGlobalFunctions)
+ElementTypeNames(E_KeywordFunction)    = Type<ElementType>("Keyword Functions", ("Keyword Functions"), "Keyword", @ColorGlobalFunctions)
+ElementTypeNames(E_KeywordOperator)    = Type<ElementType>("Keyword Operators", ("Keyword Operators"), "Operator", @ColorGlobalFunctions)
+ElementTypeNames(E_KeywordSub)         = Type<ElementType>("Keyword Subs", ("Keyword Subs"), "Sub", @ColorGlobalFunctions)
+ElementTypeNames(E_LineLabel)          = Type<ElementType>("Line Labels", ("Line Labels"), "Sub", @ColorLineLabels)
+ElementTypeNames(E_LocalVariable)      = Type<ElementType>("Local Variables", ("Local Variables"), "Property", @ColorLocalVariables)
+ElementTypeNames(E_Macro)              = Type<ElementType>("Macros", ("Macros"), "Sub", @ColorMacros)
+ElementTypeNames(E_Namespace)          = Type<ElementType>("Namespaces", ("Namespaces"), "Sub", @ColorGlobalNamespaces)
+ElementTypeNames(E_Operator)           = Type<ElementType>("Operators", ("Operators"), "Sub", @ColorOperators)
+ElementTypeNames(E_Property)           = Type<ElementType>("Properties", ("Properties"), "Property", @ColorProperties)
+ElementTypeNames(E_SharedVariable)     = Type<ElementType>("Shared Variables", ("Shared Variables"), "Property", @ColorSharedVariables)
+ElementTypeNames(E_Snippet)            = Type<ElementType>("Snippets", ("Snippets"), "Sub", @ColorSubs)
+ElementTypeNames(E_Sub)                = Type<ElementType>("Subs", ("Subs"), "Sub", @ColorSubs)
+ElementTypeNames(E_Type)               = Type<ElementType>("Types", ("Types"), "Type", @ColorGlobalTypes)
+ElementTypeNames(E_TypeCopy)           = Type<ElementType>("Type Copies", ("Type Copies"), "Type", @ColorGlobalTypes)
+ElementTypeNames(E_Union)              = Type<ElementType>("Unions", ("Unions"), "Type", @ColorGlobalTypes)
 
 Namespace My.Sys.Forms
 	Function EditControl.deltaToScrollAmount(lDelta As Integer) As Integer
@@ -234,7 +234,7 @@ Namespace My.Sys.Forms
 		FECLine = Content.Lines.Items[FSelEndLine]
 		If CInt(Trim(*FECLine->Text, Any !"\t ") = "") OrElse CInt(StartsWith(LTrim(*FECLine->Text, Any !"\t "), "'")) OrElse _
 			CInt(StartsWith(LTrim(LCase(*FECLine->Text), Any !"\t ") & " ", "rem ")) Then
-			MsgBox ML("Don't set breakpoint to this line"), "VisualFBEditor", mtWarning
+			MsgBox ("Don't set breakpoint to this line"), "VisualFBEditor", mtWarning
 			This.SetFocus
 		Else
 			FECLine->Breakpoint = Not FECLine->Breakpoint
@@ -1882,7 +1882,7 @@ Namespace My.Sys.Forms
 		'check the Newlinetype again for missing Cr in AsicII file
 		Fn = FreeFile_
 		If Not FileExists(FileName) Then
-			MsgBox ML("File not found") & ": " & FileName
+			MsgBox ("File not found") & ": " & FileName
 			Exit Sub
 		End If
 		ModifiedLine = False
@@ -1896,7 +1896,7 @@ Namespace My.Sys.Forms
 				Dim As Integer BOMSymbolsCount
 				hFile = CreateFile(@FileName, GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0)
 				If hFile = INVALID_HANDLE_VALUE Then
-					MsgBox ML("Open file failure!") &  " " & ML("in function") & " EditControl.LoadFromFile" & Chr(13, 10) & " " & FileName
+					MsgBox ("Open file failure!") &  " " & ("in function") & " EditControl.LoadFromFile" & Chr(13, 10) & " " & FileName
 				Else
 					dwBytesToRead = GetFileSize(hFile, 0)
 					If dwBytesToRead <> 0 Then
@@ -2081,7 +2081,7 @@ Namespace My.Sys.Forms
 					NewLineStr = Chr(10)
 				End If
 			Else
-				MsgBox ML("Open file failure!") &  " " & ML("in function") & " EditControl.LoadFromFile" & Chr(13, 10) & " " & FileName
+				MsgBox ("Open file failure!") &  " " & ("in function") & " EditControl.LoadFromFile" & Chr(13, 10) & " " & FileName
 				CloseFile_(Fn)
 				Exit Sub
 			End If
@@ -2199,7 +2199,7 @@ Namespace My.Sys.Forms
 				Dim As String sFileContents = FileEncodingSymbols
 				hFile = CreateFile(@FileName, GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0)
 				If hFile = INVALID_HANDLE_VALUE Then
-					MsgBox ML("Save file failure!") & Chr(13, 10) & FileName
+					MsgBox ("Save file failure!") & Chr(13, 10) & FileName
 				Else
 					If FileEncoding = FileEncodings.PlainText  Then
 						For i As Integer = 0 To Content.Lines.Count - 1
@@ -2247,7 +2247,7 @@ Namespace My.Sys.Forms
 					Next
 				End If
 			Else
-				MsgBox ML("Save file failure!") & Chr(13, 10) & FileName
+				MsgBox ("Save file failure!") & Chr(13, 10) & FileName
 			End If
 			CloseFile_(Fn)
 		End If

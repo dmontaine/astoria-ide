@@ -7,7 +7,7 @@
 		' frmImageManager
 		With This
 			.Name = "frmImageManager"
-			.Text = ML("Image Manager")
+			.Text = ("Image Manager")
 			.Designer = @This
 			.Margins.Top = 0
 			.Margins.Right = 0
@@ -29,8 +29,8 @@
 			.HotImagesList = @imgList
 			.Buttons.Add , "Add", , , "Add"
 			Var AddButton = .Buttons.Add(tbsWholeDropdown, "Add", , , "AddDropdown")
-			Var AddFromResource = AddButton->DropDownMenu.Add(ML("Add From Resource"), "Add", "AddFromResource", @MenuItemClick_)
-			Var AddFromFile = AddButton->DropDownMenu.Add(ML("Add From File"), "Add", "AddFromFile", @MenuItemClick_)
+			Var AddFromResource = AddButton->DropDownMenu.Add(("Add From Resource"), "Add", "AddFromResource", @MenuItemClick_)
+			Var AddFromFile = AddButton->DropDownMenu.Add(("Add From File"), "Add", "AddFromFile", @MenuItemClick_)
 			AddFromResource->Designer = @This
 			AddFromFile->Designer = @This
 			.Buttons.Add , "Project", , , "Change"
@@ -49,9 +49,9 @@
 			.Text = "lvImages"
 			.TabIndex = 0
 			.SetBounds 10, 26, 261, 403
-			.Columns.Add ML("Name"), , 100
-			.Columns.Add ML("Type"), , 80
-			.Columns.Add ML("Path"), , 200
+			.Columns.Add ("Name"), , 100
+			.Columns.Add ("Type"), , 80
+			.Columns.Add ("Path"), , 200
 			.Anchor.Top = AnchorStyle.asNone
 			.Anchor.Right = AnchorStyle.asNone
 			.Anchor.Left = AnchorStyle.asNone
@@ -77,10 +77,10 @@
 		' gbImagePreview
 		With gbImagePreview
 			.Name = "gbImagePreview"
-			.Text = ML("Image Preview")
+			.Text = ("Image Preview")
 			.TabIndex = 1
 			.SetBounds 281, 26, 320, 403
-			.Caption = ML("Image Preview")
+			.Caption = ("Image Preview")
 			.Anchor.Top = AnchorStyle.asAnchor
 			.Anchor.Right = AnchorStyle.asAnchor
 			.Anchor.Left = AnchorStyle.asAnchor
@@ -126,13 +126,13 @@
 		' cmdCancel
 		With cmdCancel
 			.Name = "cmdCancel"
-			.Text = ML("Cancel")
+			.Text = ("Cancel")
 			.TabIndex = 13
 			.SetBounds 521, 10, 80, 22
 			.Align = DockStyle.alRight
 			.ExtraMargins.Bottom = 10
 			.ExtraMargins.Right = 10
-			.Caption = ML("Cancel")
+			.Caption = ("Cancel")
 			.ExtraMargins.Top = 10
 			.Designer = @This
 			.OnClick = @cmdCancel_Click_
@@ -142,13 +142,13 @@
 		' cmdOK
 		With cmdOK
 			.Name = "cmdOK"
-			.Text = ML("OK")
+			.Text = ("OK")
 			.TabIndex = 12
 			.SetBounds 431, 10, 80, 22
 			.Align = DockStyle.alRight
 			.ExtraMargins.Bottom = 10
 			.ExtraMargins.Right = 10
-			.Caption = ML("OK")
+			.Caption = ("OK")
 			.ExtraMargins.Top = 10
 			.Designer = @This
 			.OnClick = @cmdOK_Click_
@@ -158,7 +158,7 @@
 		' lblResourceFile
 		With lblResourceFile
 			.Name = "lblResourceFile"
-			.Text = ML("File") & ":"
+			.Text = ("File") & ":"
 			.TabIndex = 15
 			.SetBounds 10, 10, 411, 22
 			.ExtraMargins.Top = 10
@@ -178,7 +178,7 @@
 		' lblSize
 		With lblSize
 			.Name = "lblSize"
-			.Text = ML("Size") & ":"
+			.Text = ("Size") & ":"
 			.TabIndex = 3
 			.SetBounds 9, 9, 120, 18
 			.Parent = @pnlOptions
@@ -219,10 +219,10 @@
 		' optCustom
 		With optCustom
 			.Name = "optCustom"
-			.Text = ML("Custom")
+			.Text = ("Custom")
 			.TabIndex = 7
 			.SetBounds 19, 87, 110, 20
-			.Caption = ML("Custom")
+			.Caption = ("Custom")
 			.Designer = @This
 			.OnClick = @optCustom_Click_
 			.Parent = @pnlOptions
@@ -230,19 +230,19 @@
 		' lblWidth
 		With lblWidth
 			.Name = "lblWidth"
-			.Text = ML("Width") & ":"
+			.Text = ("Width") & ":"
 			.TabIndex = 8
 			.SetBounds 39, 110, 80, 18
-			.Caption = ML("Width") & ":"
+			.Caption = ("Width") & ":"
 			.Parent = @pnlOptions
 		End With
 		' lblHeight
 		With lblHeight
 			.Name = "lblHeight"
-			.Text = ML("Height") & ":"
+			.Text = ("Height") & ":"
 			.TabIndex = 10
 			.SetBounds 39, 134, 80, 18
-			.Caption = ML("Height") & ":"
+			.Caption = ("Height") & ":"
 			.Parent = @pnlOptions
 		End With
 		' txtWidth
@@ -283,10 +283,10 @@ End Sub
 Private Sub frmImageManager.cmdOK_Click(ByRef Sender As Control)
 	If WithoutMainNode Then
 		If lvImages.SelectedItemIndex = -1 Then
-			MsgBox ML("Nothing has been chosen"), pApp->Title
+			MsgBox ("Nothing has been chosen"), pApp->Title
 			Exit Sub
 		ElseIf OnlyIcons AndAlso lvImages.SelectedItem <> 0 AndAlso lvImages.SelectedItem->Text(1) <> "ICON" Then
-			MsgBox ML("Select only icon"), pApp->Title
+			MsgBox ("Select only icon"), pApp->Title
 			Exit Sub
 		End If
 	End If
@@ -455,7 +455,7 @@ Private Sub frmImageManager.lvImages_ItemActivate(ByRef Sender As ListView, ByVa
 		If lvImages.SelectedItem = 0 Then Exit Sub
 		pfrmPath->txtVersion.Text = lvImages.SelectedItem->Text(0)
 		pfrmPath->txtPath.Text = lvImages.SelectedItem->Text(2)
-		pfrmPath->lblCommandLine.Text = ML("Type") & ":"
+		pfrmPath->lblCommandLine.Text = ("Type") & ":"
 		pfrmPath->cboType.ItemIndex = pfrmPath->cboType.IndexOf(lvImages.SelectedItem->Text(1))
 		pfrmPath->WithType = True
 		pfrmPath->WithKey = CurrentImageList <> 0
@@ -465,7 +465,7 @@ Private Sub frmImageManager.lvImages_ItemActivate(ByRef Sender As ListView, ByVa
 			If lvImages.SelectedItem->Text(0) = pfrmPath->txtVersion.Text OrElse lvImages.ListItems.IndexOf(pfrmPath->txtVersion.Text) = -1 Then
 				Var ImageIndex = ImageList1.IndexOf(pfrmPath->txtVersion.Text)
 				If ImageIndex = -1 Then
-					If pfrmPath->cboTypeText = ML("Resource") Then
+					If pfrmPath->cboTypeText = ("Resource") Then
 						ImageList1.AddFromFile GetResNamePath(pfrmPath->txtPath.Text, ResourceFile), pfrmPath->txtVersion.Text
 					Else
 						ImageList1.AddFromFile GetRelativePath(pfrmPath->txtPath.Text, ResourceFile), pfrmPath->txtVersion.Text
@@ -478,7 +478,7 @@ Private Sub frmImageManager.lvImages_ItemActivate(ByRef Sender As ListView, ByVa
 				lvImages.SelectedItem->Text(1) = pfrmPath->cboTypeText
 				lvImages.SelectedItem->Text(2) = pfrmPath->txtPath.Text
 			Else
-				MsgBox ML("This name is exists!")
+				MsgBox ("This name is exists!")
 			End If
 		End If
 	End If
@@ -531,7 +531,7 @@ Private Sub frmImageManager.MenuItemClick(ByRef Sender As My.Sys.Object)
 		Dim OpenD As OpenFileDialog
 		OpenD.Options.Include ofOldStyleDialog
 		OpenD.MultiSelect = True
-		OpenD.Filter = ML("Image Files") & " (*.bmp, *.cur, *.ico, *.png)|*.bmp;*.cur;*.ico;*.png|" & ML("All Files") & "|*.*|"
+		OpenD.Filter = ("Image Files") & " (*.bmp, *.cur, *.ico, *.png)|*.bmp;*.cur;*.ico;*.png|" & ("All Files") & "|*.*|"
 		If OpenD.Execute Then
 			For i As Integer = 0 To OpenD.FileNames.Count - 1
 				Dim As UString FileName = OpenD.FileNames.Item(i)
@@ -571,7 +571,7 @@ Private Sub frmImageManager.tbToolbar_ButtonClick(ByRef Sender As ToolBar,ByRef 
 			Dim OpenD As OpenFileDialog
 			OpenD.Options.Include ofOldStyleDialog
 			OpenD.MultiSelect = True
-			OpenD.Filter = ML("Image Files") & " (*.bmp, *.cur, *.ico, *.png)|*.bmp;*.cur;*.ico;*.png|" & ML("All Files") & "|*.*|"
+			OpenD.Filter = ("Image Files") & " (*.bmp, *.cur, *.ico, *.png)|*.bmp;*.cur;*.ico;*.png|" & ("All Files") & "|*.*|"
 			If OpenD.Execute Then
 				For i As Integer = 0 To OpenD.FileNames.Count - 1
 					Dim As UString FileName = OpenD.FileNames.Item(i)
@@ -584,7 +584,7 @@ Private Sub frmImageManager.tbToolbar_ButtonClick(ByRef Sender As ToolBar,ByRef 
 						Key = ..Left(Key, Pos1 - 1)
 					End If
 					If InStr(" BITMAP PNG ICON CURSOR RCDATA ", " " & UCase(Trim(Key)) & " ") Then 
-						MsgBox ML("not loaded") & " " & ML("Keywords") & ": " & Key
+						MsgBox ("not loaded") & " " & ("Keywords") & ": " & Key
 						Exit Sub
 					End If
 					Select Case LCase(FileExt)
@@ -655,7 +655,7 @@ End Sub
 Private Sub frmImageManager.Form_Create(ByRef Sender As Control)
 	If CurrentImageList Then
 		pfrmPath = pfPathImageList
-		gbImagePreview.Caption = ML("ImageList Properties")
+		gbImagePreview.Caption = ("ImageList Properties")
 		pnlOptions.Visible = True
 		imgImage.Visible = False
 		tbToolbar.Buttons.Item("Add")->Visible = False
@@ -705,7 +705,7 @@ Private Sub frmImageManager.Form_Create(ByRef Sender As Control)
 				Line Input #Fn, sLine
 				Pos1 = InStr(LTrim(sLine), " ")
 				If Pos1 > 0 AndAlso InStr(" BITMAP PNG ICON CURSOR RCDATA ", " " & UCase(Trim(Mid(LTrim(sLine), 1, Pos1))) & " ") Then 
-					MsgBox ML("not loaded") & " " & ML("Keywords") & ": " & Trim(Mid(LTrim(sLine), 1, Pos1))
+					MsgBox ("not loaded") & " " & ("Keywords") & ": " & Trim(Mid(LTrim(sLine), 1, Pos1))
 					Continue Do
 				End If
 				Pos1 = InStr(sLine, " BITMAP "): Image = "BITMAP"
@@ -733,12 +733,12 @@ Private Sub frmImageManager.Form_Create(ByRef Sender As Control)
 			Loop
 		End If
 		CloseFile_(Fn)
-		lblResourceFile.Text = ML("File") & ": " & ResourceFile
+		lblResourceFile.Text = ("File") & ": " & ResourceFile
 	Else
 		Dim As SymbolsType Ptr st = Des->Symbols(CurrentImageList)
 		lblResourceFile.Text = ""
-		lvImages.Columns.Column(0)->Text = ML("Key")
-		lvImages.Columns.Column(2)->Text = ML("Resource Name / Path")
+		lvImages.Columns.Column(0)->Text = ("Key")
+		lvImages.Columns.Column(2)->Text = ("Resource Name / Path")
 		If st AndAlso st->ReadPropertyFunc Then
 			txtWidth.Text = Str(QInteger(st->ReadPropertyFunc(CurrentImageList, "ImageWidth")))
 			txtHeight.Text = Str(QInteger(st->ReadPropertyFunc(CurrentImageList, "ImageHeight")))

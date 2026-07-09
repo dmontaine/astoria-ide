@@ -30,7 +30,7 @@
 		' lblMessage
 		With lblMessage
 			.Name = "lblMessage"
-			.Text = ML("Save changes to the following files?")
+			.Text = ("Save changes to the following files?")
 			.TabIndex = 0
 			.SetBounds 10, 10, 240, 20
 			.Parent = @This
@@ -38,10 +38,10 @@
 		' cmdYes
 		With cmdYes
 			.Name = "cmdYes"
-			.Text = ML("Yes")
+			.Text = ("Yes")
 			.TabIndex = 2
 			.SetBounds 315, 10, 70, 24
-			.Caption = ML("Yes")
+			.Caption = ("Yes")
 			.Designer = @This
 			.OnClick = @cmdYes_Click_
 			.Default = True
@@ -50,10 +50,10 @@
 		' cmdNo
 		With cmdNo
 			.Name = "cmdNo"
-			.Text = ML("No")
+			.Text = ("No")
 			.TabIndex = 3
 			.SetBounds 315, 41, 70, 24
-			.Caption = ML("No")
+			.Caption = ("No")
 			.Designer = @This
 			.OnClick = @cmdNo_Click_
 			.Parent = @This
@@ -61,10 +61,10 @@
 		' cmdCancel
 		With cmdCancel
 			.Name = "cmdCancel"
-			.Text = ML("Cancel")
+			.Text = ("Cancel")
 			.TabIndex = 4
 			.SetBounds 315, 73, 70, 24
-			.Caption = ML("Cancel")
+			.Caption = ("Cancel")
 			.Designer = @This
 			.OnClick = @cmdCancel_Click_
 			.Parent = @This

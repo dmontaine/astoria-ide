@@ -36,7 +36,7 @@
 		' frmAIAgent
 		With This
 			.Name = "frmAIAgent"
-			.Text = ML("AI Agent")
+			.Text = ("AI Agent")
 			.Designer = @This
 			.OnCreate = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @Form_Create)
 			.WindowState = WindowStates.wsNormal
@@ -48,7 +48,7 @@
 		' lblAIAgentName
 		With lblAIAgentName
 			.Name = "lblAIAgentName"
-			.Text = ML("Name") & ":"
+			.Text = ("Name") & ":"
 			.TabIndex = 0
 			.Alignment = AlignmentConstants.taRight
 			.ControlIndex = 0
@@ -63,14 +63,14 @@
 		' lblAIAgentModelName
 		With lblAIAgentModelName
 			.Name = "lblAIAgentModelName"
-			.Text = ML("Model Name") & ":"
+			.Text = ("Model Name") & ":"
 			.TabIndex = 1
 			.Alignment = AlignmentConstants.taRight
 			.ControlIndex = 1
 			.Align = DockStyle.alLeft
 			.CenterImage = True
 			.ID = 1918
-			.Caption = ML("Model Name") & ":"
+			.Caption = ("Model Name") & ":"
 			.SetBounds 0, 0, 80, 21
 			.Designer = @This
 			.Parent = @HorizontalBox3
@@ -78,7 +78,7 @@
 		' lblAIAgentHost
 		With lblAIAgentHost
 			.Name = "lblAIAgentHost"
-			.Text = ML("Host") & ":"
+			.Text = ("Host") & ":"
 			.TabIndex = 2
 			.Alignment = AlignmentConstants.taRight
 			.ControlIndex = 2
@@ -92,7 +92,7 @@
 		' lblAIAgentPort
 		With lblAIAgentPort
 			.Name = "lblAIAgentPort"
-			.Text = ML("Port") & ":"
+			.Text = ("Port") & ":"
 			.TabIndex = 3
 			.Alignment = AlignmentConstants.taRight
 			.ControlIndex = 3
@@ -106,7 +106,7 @@
 		' lblAIAgentAPIKey
 		With lblAIAgentAPIKey
 			.Name = "lblAIAgentAPIKey"
-			.Text = ML("API Key") & ":"
+			.Text = ("API Key") & ":"
 			.TabIndex = 4
 			.Alignment = AlignmentConstants.taRight
 			.ControlIndex = 4
@@ -140,7 +140,7 @@
 		' lblAIAgentTemperature
 		With lblAIAgentTemperature
 			.Name = "lblAIAgentTemperature"
-			.Text = ML("Temperature") & ":"
+			.Text = ("Temperature") & ":"
 			.TabIndex = 7
 			.ControlIndex = 7
 			.Alignment = AlignmentConstants.taRight
@@ -187,7 +187,7 @@
 		' lblAIAgentAddress
 		With lblAIAgentAddress
 			.Name = "lblAIAgentAddress"
-			.Text = ML("Address") & ":"
+			.Text = ("Address") & ":"
 			.TabIndex = 12
 			.ControlIndex = 8
 			.Alignment = AlignmentConstants.taRight
@@ -222,7 +222,7 @@
 		' cmdCancel
 		With cmdCancel
 			.Name = "cmdCancel"
-			.Text = ML("Cancel")
+			.Text = ("Cancel")
 			.TabIndex = 17
 			.ControlIndex = 0
 			.Anchor.Right = AnchorStyle.asAnchor
@@ -236,7 +236,7 @@
 		' cmdOK
 		With cmdOK
 			.Name = "cmdOK"
-			.Text = ML("OK")
+			.Text = ("OK")
 			.TabIndex = 16
 			.ControlIndex = 1
 			.Anchor.Right = AnchorStyle.asAnchor
@@ -250,14 +250,14 @@
 		' lblAIAgentprovider
 		With lblAIAgentprovider
 			.Name = "lblAIAgentprovider"
-			.Text = ML("Provider") & ":"
+			.Text = ("Provider") & ":"
 			.TabIndex = 18
 			.Alignment = AlignmentConstants.taRight
 			.ControlIndex = 1
 			.Align = DockStyle.alLeft
 			.CenterImage = True
 			.ID = 1917
-			.Caption = ML("Provider") & ":"
+			.Caption = ("Provider") & ":"
 			.SetBounds 0, 0, 80, 21
 			.Designer = @This
 			.Parent = @HorizontalBox2
@@ -397,7 +397,7 @@
 		' lblAIAgentContentSize
 		With lblAIAgentContentSize
 			.Name = "lblAIAgentContentSize"
-			.Text = ML("Content") & " (Kb)"
+			.Text = ("Content") & " (Kb)"
 			.TabIndex = 29
 			.Align = DockStyle.alLeft
 			.Alignment = AlignmentConstants.taRight
@@ -431,43 +431,43 @@ End Sub
 
 Private Sub frmAIAgentType.cmdOK_Click(ByRef Sender As Control)
 	If Trim(txtAIAgentName.Text) = "" Then
-		MsgBox ML("Enter name of AI Agent!")
+		MsgBox ("Enter name of AI Agent!")
 		This.BringToFront()
 		Exit Sub
 	ElseIf Trim(cboAIAgentModelName.Text) = "" Then
-		MsgBox ML("Enter model name of AI Agent!")
+		MsgBox ("Enter model name of AI Agent!")
 		This.BringToFront()
 		Exit Sub
 	ElseIf Trim(cboAIAgentProvider.Text) = "" Then
-		MsgBox ML("Enter provider of AI Agent!")
+		MsgBox ("Enter provider of AI Agent!")
 		This.BringToFront()
 		Exit Sub
 	ElseIf Trim(cboAIAgentHost.Text) = "" Then
-		MsgBox ML("Enter host of AI Agent!")
+		MsgBox ("Enter host of AI Agent!")
 		This.BringToFront()
 		Exit Sub
 	ElseIf Trim(cboAIAgentAddress.Text) = "" Then
-		MsgBox ML("Enter address of AI Agent!")
+		MsgBox ("Enter address of AI Agent!")
 		This.BringToFront()
 		Exit Sub
 	ElseIf Trim(cboAIAgentPort.Text) = "" Then
-		MsgBox ML("Enter port of AI Agent!")
+		MsgBox ("Enter port of AI Agent!")
 		This.BringToFront()
 		Exit Sub
 	ElseIf Trim(updnAIAgentTemperature.Text) = "" Then
-		MsgBox ML("Enter temperature of AI Agent!")
+		MsgBox ("Enter temperature of AI Agent!")
 		This.BringToFront()
 		Exit Sub
 	ElseIf Trim(NormalizeAIAgentAPIKey(txtAIAgentAPIKey.Text)) = "" Then
 		If Trim(txtAIAgentAPIKey.Text) <> "" Then
-			MsgBox ML("The API key looks invalid. Paste your raw key (e.g. sk-...) without ""Bearer"" or error text.")
+			MsgBox ("The API key looks invalid. Paste your raw key (e.g. sk-...) without ""Bearer"" or error text.")
 		Else
-			MsgBox ML("Enter API key of AI Agent!")
+			MsgBox ("Enter API key of AI Agent!")
 		End If
 		This.BringToFront()
 		Exit Sub
 	ElseIf Trim(cboAIAgentContentSize.Text) = "" Then
-		MsgBox ML("Enter Content size AI Agent!")
+		MsgBox ("Enter Content size AI Agent!")
 		This.BringToFront()
 		Exit Sub
 	End If

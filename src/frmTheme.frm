@@ -11,13 +11,13 @@
 	Constructor frmTheme
 		' frmTheme
 		This.Name = "frmTheme"
-		This.Text = ML("New Theme")
+		This.Text = ("New Theme")
 			This.Icon.LoadFromResourceID(1)
 		This.StartPosition = FormStartPosition.CenterParent
 		This.SetBounds 0, 0, 310, 156
 		' lblThemeName
 		lblThemeName.Name = "lblThemeName"
-		lblThemeName.Text = ML("Theme name") & ":"
+		lblThemeName.Text = ("Theme name") & ":"
 		lblThemeName.SetBounds 16, 16, 104, 16
 		lblThemeName.Parent = @This
 		' txtThemeName
@@ -27,13 +27,13 @@
 		txtThemeName.Parent = @This
 		' cmdOK
 		cmdOK.Name = "cmdOK"
-		cmdOK.Text = ML("OK")
+		cmdOK.Text = ("OK")
 		cmdOK.SetBounds 16, 80, 80, 24
 		cmdOK.OnClick = @cmdOK_Click
 		cmdOK.Parent = @This
 		' cmdCancel
 		cmdCancel.Name = "cmdCancel"
-		cmdCancel.Text = ML("Cancel")
+		cmdCancel.Text = ("Cancel")
 		cmdCancel.SetBounds 200, 80, 80, 24
 		cmdCancel.OnClick = @cmdCancel_Click
 		cmdCancel.Parent = @This

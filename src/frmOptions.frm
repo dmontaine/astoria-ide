@@ -9,7 +9,6 @@
 #include once "frmAIAgent.frm"
 #include once "TabWindow.bi"
 
-Dim Shared Languages As WStringList
 Dim Shared fOptions As frmOptions
 pfOptions = @fOptions
 
@@ -17,7 +16,7 @@ pfOptions = @fOptions
 	Constructor frmOptions
 		' Form1
 		This.Name = "frmOptions"
-		This.Text = ML("Options")
+		This.Text = ("Options")
 		This.OnCreate = @Form_Create
 		This.OnClose = @Form_Close
 			This.Icon.LoadFromResourceID(1)
@@ -54,14 +53,6 @@ pfOptions = @fOptions
 		pnlGeneral.SetBounds 10, 0, 417, 400
 		pnlGeneral.ControlIndex = 0
 		pnlGeneral.Parent = @pplGeneral
-		' pnlLocalization
-		pnlLocalization.Name = "pnlLocalization"
-		pnlLocalization.Text = ""
-		pnlLocalization.Align = DockStyle.alClient
-		pnlLocalization.TabIndex = 72
-		pnlLocalization.SetBounds 10, 0, 417, 400
-		pnlLocalization.ControlIndex = 1
-		pnlLocalization.Parent = @pplGeneral
 		' pnlShortcuts
 		pnlShortcuts.Name = "pnlShortcuts"
 		pnlShortcuts.Text = ""
@@ -146,10 +137,6 @@ pfOptions = @fOptions
 		pnlDesigner.TabIndex = 71
 		pnlDesigner.SetBounds -162, 4, 427, 400
 		pnlDesigner.Parent = @pplGeneral
-		'pnlLocalization.ExtraMargins.Top = 4
-		'pnlLocalization.ExtraMargins.Bottom = 9
-		'pnlLocalization.ExtraMargins.Right = 10
-		'pnlLocalization.Margins.Left = 10
 		'pnlThemes.ExtraMargins.Top = 4
 		'pnlThemes.ExtraMargins.Bottom = 9
 		'pnlThemes.ExtraMargins.Right = 10
@@ -235,7 +222,7 @@ pfOptions = @fOptions
 		'cmdOK.Caption = ML("OK")
 		' cmdApply
 		cmdApply.Name = "cmdApply"
-		cmdApply.Text = ML("Apply")
+		cmdApply.Text = ("Apply")
 		cmdApply.Align = DockStyle.alRight
 		cmdApply.ExtraMargins.Bottom = 10
 		cmdApply.ExtraMargins.Right = 10
@@ -246,7 +233,7 @@ pfOptions = @fOptions
 		cmdApply.Parent = @pnlCommands
 		' cmdCancel
 		cmdCancel.Name = "cmdCancel"
-		cmdCancel.Text = ML("Cancel")
+		cmdCancel.Text = ("Cancel")
 		cmdCancel.Align = DockStyle.alRight
 		cmdCancel.ExtraMargins.Bottom = 10
 		cmdCancel.ExtraMargins.Top = 10
@@ -256,7 +243,7 @@ pfOptions = @fOptions
 		cmdCancel.Parent = @pnlCommands
 		' cmdOK
 		cmdOK.Name = "cmdOK"
-		cmdOK.Text = ML("OK")
+		cmdOK.Text = ("OK")
 		cmdOK.Default = True
 		cmdOK.Align = DockStyle.alRight
 		cmdOK.ExtraMargins.Bottom = 10
@@ -282,7 +269,7 @@ pfOptions = @fOptions
 		' grbDefaultCompilers
 		With grbDefaultCompilers
 			.Name = "grbDefaultCompilers"
-			.Text = ML("Default Compiler")
+			.Text = ("Default Compiler")
 			.AutoSize = True
 			.Align = DockStyle.alTop
 			.ExtraMargins.Left = 0
@@ -297,7 +284,7 @@ pfOptions = @fOptions
 		' grbDefaults
 		With grbDefaults
 			.Name = "grbDefaults"
-			.Text = ML("Default Settings for New Files")
+			.Text = ("Default Settings for New Files")
 			.AutoSize = false
 			.Align = DockStyle.alClient
 			.ExtraMargins.Left = 0
@@ -312,7 +299,7 @@ pfOptions = @fOptions
 		' grbShortcuts
 		With grbShortcuts
 			.Name = "grbShortcuts"
-			.Text = ML("Shortcuts")
+			.Text = ("Shortcuts")
 			.Align = DockStyle.alClient
 			.Margins.Top = 22
 			.Margins.Right = 15
@@ -330,7 +317,7 @@ pfOptions = @fOptions
 		'' files) and BuildService.bas's bundled-compiler fallback are untouched.
 		' lblShortcut
 		lblShortcut.Name = "lblShortcut"
-		lblShortcut.Text = ML("Select shortcut") & ":"
+		lblShortcut.Text = ("Select shortcut") & ":"
 		lblShortcut.ExtraMargins.Right = 0
 		lblShortcut.Align = DockStyle.alLeft
 		lblShortcut.CenterImage = True
@@ -348,7 +335,7 @@ pfOptions = @fOptions
 		hkShortcut.Parent = @pnlSelectShortcut
 		' cmdSetShortcut
 		cmdSetShortcut.Name = "cmdSetShortcut"
-		cmdSetShortcut.Text = ML("Set")
+		cmdSetShortcut.Text = ("Set")
 			cmdSetShortcut.ExtraMargins.Top = -1
 			cmdSetShortcut.ExtraMargins.Bottom = -1
 			cmdSetShortcut.ExtraMargins.Right = -1
@@ -370,7 +357,7 @@ pfOptions = @fOptions
 		End With
 		With grbDefaultTerminal
 			.Name = "grbDefaultTerminal"
-			.Text = ML("Default Terminal")
+			.Text = ("Default Terminal")
 			.Align = DockStyle.alTop
 			.TabIndex = 91
 			.SetBounds 10, 0, 417, 64
@@ -387,7 +374,7 @@ pfOptions = @fOptions
 		' grbTerminalPaths
 		With grbTerminalPaths
 			.Name = "grbTerminalPaths"
-			.Text = ML("Terminal Paths")
+			.Text = ("Terminal Paths")
 			.ExtraMargins.Top = 5
 			.Align = DockStyle.alClient
 			.Margins.Top = 22
@@ -412,7 +399,7 @@ pfOptions = @fOptions
 		End With
 		With cmdClearTerminals
 			.Name = "cmdClearTerminals"
-			.Text = ML("&Clear")
+			.Text = ("&Clear")
 			.ExtraMargins.Right = 0
 			.ExtraMargins.Left = 0
 			.ExtraMargins.Bottom = 0
@@ -425,7 +412,7 @@ pfOptions = @fOptions
 		' cmdRemoveTerminal
 		With cmdRemoveTerminal
 			.Name = "cmdRemoveTerminal"
-			.Text = ML("&Remove")
+			.Text = ("&Remove")
 			.ExtraMargins.Right = 0
 			.ExtraMargins.Left = 0
 			.ExtraMargins.Bottom = 0
@@ -437,7 +424,7 @@ pfOptions = @fOptions
 		End With
 		' cmdChangeTerminal
 		cmdChangeTerminal.Name = "cmdChangeTerminal"
-		cmdChangeTerminal.Text = ML("Chan&ge")
+		cmdChangeTerminal.Text = ("Chan&ge")
 		cmdChangeTerminal.ExtraMargins.Right = 0
 		cmdChangeTerminal.ExtraMargins.Bottom = 0
 		cmdChangeTerminal.ExtraMargins.Left = 0
@@ -449,7 +436,7 @@ pfOptions = @fOptions
 		' cmdAddTerminal
 		With cmdAddTerminal
 			.Name = "cmdAddTerminal"
-			.Text = ML("&Add")
+			.Text = ("&Add")
 			.ExtraMargins.Left = 0
 			.ExtraMargins.Right = 0
 			.Align = DockStyle.alRight
@@ -459,23 +446,10 @@ pfOptions = @fOptions
 			.OnClick = @cmdAddTerminal_Click
 			.Parent = @hbxTerminal
 		End With
-		' grbLanguage
-		With grbLanguage
-			.Name = "grbLanguage"
-			.Text = ML("Language")
-			.Align = DockStyle.alClient
-			.Margins.Top = 22
-			.Margins.Right = 15
-			.Margins.Left = 15
-			.Margins.Bottom = 15
-			.TabIndex = 95
-			.SetBounds 10, 0, 417, 400
-			.Parent = @pnlLocalization
-		End With
 		' grbThemes
 		With grbThemes
 			.Name = "grbThemes"
-			.Text = ML("Themes")
+			.Text = ("Themes")
 			.Align = DockStyle.alClient
 			.Margins.Top = 20
 			.Margins.Right = 10
@@ -485,26 +459,6 @@ pfOptions = @fOptions
 			.SetBounds 10, 0, 417, 400
 			.Parent = @pnlThemes
 		End With
-		' pnlLanguage
-		With pnlLanguage
-			.Name = "pnlLanguage"
-			.Text = "Panel1"
-			.AutoSize = True
-			.TabIndex = 97
-			.Align = DockStyle.alTop
-			.SetBounds 15, 22, 387, 21
-			.Designer = @This
-			.Parent = @grbLanguage
-		End With
-		' cboLanguage
-		cboLanguage.Name = "cboLanguage"
-		'ComboBoxEdit1.Text = "russian"
-		cboLanguage.Align = DockStyle.alClient
-		cboLanguage.ExtraMargins.Right = 0
-		cboLanguage.ControlIndex = 0
-		cboLanguage.TabIndex = 98
-		cboLanguage.SetBounds 0, 0, 257, 21
-		cboLanguage.Parent = @pnlLanguage
 		' vbxGeneral
 		With vbxGeneral
 			.Name = "vbxGeneral"
@@ -518,7 +472,7 @@ pfOptions = @fOptions
 		' chkAutoCreateBakFiles
 		With chkAutoCreateBakFiles
 			.Name = "chkAutoCreateBakFiles"
-			.Text = ML("Auto create bak files before saving")
+			.Text = ("Auto create bak files before saving")
 			.ExtraMargins.Top = 0
 			.Align = DockStyle.alTop
 			.TabIndex = 100
@@ -530,7 +484,7 @@ pfOptions = @fOptions
 		End With
 		' chkAutoCreateRC
 		chkAutoCreateRC.Name = "chkAutoCreateRC"
-		chkAutoCreateRC.Text = ML("Automatically create the icon and manifest files needed to build")
+		chkAutoCreateRC.Text = ("Automatically create the icon and manifest files needed to build")
 		chkAutoCreateRC.ExtraMargins.Top = 0
 		chkAutoCreateRC.Align = DockStyle.alTop
 		chkAutoCreateRC.TabIndex = 101
@@ -542,7 +496,7 @@ pfOptions = @fOptions
 		' chkAddRelativePathsToRecent
 		With chkAddRelativePathsToRecent
 			.Name = "chkAddRelativePathsToRecent"
-			.Text = ML("Add relative paths to recent")
+			.Text = ("Add relative paths to recent")
 			.TabIndex = 103
 			.ExtraMargins.Top = 0
 			.Align = DockStyle.alTop
@@ -554,7 +508,7 @@ pfOptions = @fOptions
 		' grbIncludePaths
 		With grbIncludePaths
 			.Name = "grbIncludePaths"
-			.Text = ML("Include Paths")
+			.Text = ("Include Paths")
 			.Align = DockStyle.alClient
 			.ExtraMargins.Left = 0
 			.Margins.Top = 23
@@ -568,7 +522,7 @@ pfOptions = @fOptions
 		' grbLibraryPaths
 		With grbLibraryPaths
 			.Name = "grbLibraryPaths"
-			.Text = ML("Library Paths")
+			.Text = ("Library Paths")
 			.Align = DockStyle.alBottom
 			.ExtraMargins.Left = 0
 			.ExtraMargins.Top = 8
@@ -593,7 +547,7 @@ pfOptions = @fOptions
 		' chkIncludeMFFPath
 		With chkIncludeMFFPath
 			.Name = "chkIncludeMFFPath"
-			.Text = ML("Include MFF Path") & ":"
+			.Text = ("Include MFF Path") & ":"
 			.Align = DockStyle.alLeft
 			.TabIndex = 107
 			.SetBounds 0, 0, 132, 16
@@ -629,7 +583,7 @@ pfOptions = @fOptions
 		' grbDisplay
 		With grbDisplay
 			.Name = "grbDisplay"
-			.Text = ML("Display")
+			.Text = ("Display")
 			.Align = DockStyle.alTop
 			.AutoSize = True
 			.TabIndex = 260
@@ -640,7 +594,7 @@ pfOptions = @fOptions
 		' grbCompletion
 		With grbCompletion
 			.Name = "grbCompletion"
-			.Text = ML("Completion")
+			.Text = ("Completion")
 			.Align = DockStyle.alTop
 			.AutoSize = True
 			.TabIndex = 261
@@ -651,7 +605,7 @@ pfOptions = @fOptions
 		' grbIntelliSense
 		With grbIntelliSense
 			.Name = "grbIntelliSense"
-			.Text = ML("IntelliSense")
+			.Text = ("IntelliSense")
 			.Align = DockStyle.alTop
 			.AutoSize = True
 			.TabIndex = 262
@@ -662,7 +616,7 @@ pfOptions = @fOptions
 		' grbHistory
 		With grbHistory
 			.Name = "grbHistory"
-			.Text = ML("History")
+			.Text = ("History")
 			.Align = DockStyle.alTop
 			.AutoSize = True
 			.TabIndex = 263
@@ -672,7 +626,7 @@ pfOptions = @fOptions
 		End With
 		' chkAutoIndentation
 		chkAutoIndentation.Name = "chkAutoIndentation"
-		chkAutoIndentation.Text = ML("Auto Indentation")
+		chkAutoIndentation.Text = ("Auto Indentation")
 		chkAutoIndentation.ExtraMargins.Top = 2
 		chkAutoIndentation.Align = DockStyle.alTop
 		chkAutoIndentation.TabIndex = 111
@@ -683,7 +637,7 @@ pfOptions = @fOptions
 		chkAutoIndentation.Parent = @grbCompletion
 		' chkEnableAutoComplete
 		chkEnableAutoComplete.Name = "chkEnableAutoComplete"
-		chkEnableAutoComplete.Text = ML("Enable Auto Complete")
+		chkEnableAutoComplete.Text = ("Enable Auto Complete")
 		chkEnableAutoComplete.ExtraMargins.Top = 0
 		chkEnableAutoComplete.Align = DockStyle.alTop
 		chkEnableAutoComplete.TabIndex = 112
@@ -695,7 +649,7 @@ pfOptions = @fOptions
 		' chkEnableAutoSuggestions
 	With chkEnableAutoSuggestions
 		.Name = "chkEnableAutoSuggestions"
-		.Text = ML("Enable Auto Suggestions")
+		.Text = ("Enable Auto Suggestions")
 		.TabIndex = 228
 		.Align = DockStyle.alTop
 		.ControlIndex = 1
@@ -707,7 +661,7 @@ pfOptions = @fOptions
 	End With
 		' chkShowSpaces
 		chkShowSpaces.Name = "chkShowSpaces"
-		chkShowSpaces.Text = ML("Show Spaces")
+		chkShowSpaces.Text = ("Show Spaces")
 		chkShowSpaces.Align = DockStyle.alTop
 		chkShowSpaces.ExtraMargins.Top = 0
 		chkShowSpaces.TabIndex = 113
@@ -719,12 +673,12 @@ pfOptions = @fOptions
 		' chkShowHolidayFrame
 	With chkShowHolidayFrame
 		.Name = "chkShowHolidayFrame"
-		.Text = ML("Show Indent Guides")
+		.Text = ("Show Indent Guides")
 		.TabIndex = 252
 		.Align = DockStyle.alTop
 		.AutoSize = True
 		.ControlIndex = 8
-		.Caption = ML("Show Indent Guides")
+		.Caption = ("Show Indent Guides")
 		.Constraints.Height = 21
 		.SetBounds 0, 86, 152, 21
 		.Designer = @This
@@ -734,7 +688,7 @@ pfOptions = @fOptions
 		' chkShowKeywordsTooltip
 	With chkShowKeywordsTooltip
 		.Name = "chkShowKeywordsTooltip"
-		.Text = ML("Show Keywords Tooltip")
+		.Text = ("Show Keywords Tooltip")
 		.TabIndex = 114
 		.ExtraMargins.Top = 0
 		.Align = DockStyle.alTop
@@ -747,7 +701,7 @@ pfOptions = @fOptions
 		' chkShowTooltipsAtTheTop
 	With chkShowTooltipsAtTheTop
 		.Name = "chkShowTooltipsAtTheTop"
-		.Text = ML("Show Tooltips at the Top")
+		.Text = ("Show Tooltips at the Top")
 		.TabIndex = 115
 		.ExtraMargins.Top = 0
 		.Align = DockStyle.alTop
@@ -760,7 +714,7 @@ pfOptions = @fOptions
 		' chkShowSymbolsTooltipsOnMouseHover
 	With chkShowSymbolsTooltipsOnMouseHover
 		.Name = "chkShowSymbolsTooltipsOnMouseHover"
-		.Text = ML("Show Symbols Tooltips On Mouse Hover")
+		.Text = ("Show Symbols Tooltips On Mouse Hover")
 		.TabIndex = 114
 		.ExtraMargins.Top = 0
 		.Align = DockStyle.alTop
@@ -773,7 +727,7 @@ pfOptions = @fOptions
 		' chkShowSymbolsTooltipsOnMouseHover
 	With chkShowClassesExplorerOnOpenWindow
 		.Name = "ShowClassesExplorerOnOpenWindow"
-		.Text = ML("Show Classes Explorer On Open Window")
+		.Text = ("Show Classes Explorer On Open Window")
 		.TabIndex = 114
 		.ExtraMargins.Top = 0
 		.Align = DockStyle.alTop
@@ -786,7 +740,7 @@ pfOptions = @fOptions
 		' chkShowHorizontalSeparatorLines
 	With chkShowHorizontalSeparatorLines
 		.Name = "chkShowHorizontalSeparatorLines"
-		.Text = ML("Show Horizontal Separator Lines")
+		.Text = ("Show Horizontal Separator Lines")
 		.TabIndex = 230
 		.Align = DockStyle.alTop
 		.ControlIndex = 6
@@ -800,7 +754,7 @@ pfOptions = @fOptions
 		' chkUseDirect2D
 	With chkUseDirect2D
 		.Name = "chkUseDirect2D"
-		.Text = ML("Smoother text rendering (Direct2D)")
+		.Text = ("Smoother text rendering (Direct2D)")
 		.TabIndex = 278
 		.Align = DockStyle.alTop
 		.AutoSize = True
@@ -813,7 +767,7 @@ pfOptions = @fOptions
 		' chkHighlightCurrentWord
 	With chkHighlightCurrentWord
 		.Name = "chkHighlightCurrentWord"
-		.Text = ML("Highlight Current Word")
+		.Text = ("Highlight Current Word")
 		.ExtraMargins.Top = 0
 		.Align = DockStyle.alTop
 		.TabIndex = 116
@@ -825,7 +779,7 @@ pfOptions = @fOptions
 		' chkHighlightCurrentLine
 	With chkHighlightCurrentLine
 		.Name = "chkHighlightCurrentLine"
-		.Text = ML("Highlight Current Line")
+		.Text = ("Highlight Current Line")
 		.ExtraMargins.Top = 0
 		.Align = DockStyle.alTop
 		.TabIndex = 117
@@ -837,7 +791,7 @@ pfOptions = @fOptions
 		' chkHighlightBrackets
 	With chkHighlightBrackets
 		.Name = "chkHighlightBrackets"
-		.Text = ML("Highlight Brackets")
+		.Text = ("Highlight Brackets")
 		.ExtraMargins.Top = 0
 		.Align = DockStyle.alTop
 		.TabIndex = 118
@@ -849,7 +803,7 @@ pfOptions = @fOptions
 		' chkAddSpacesToOperators
 	With chkAddSpacesToOperators
 		.Name = "chkAddSpacesToOperators"
-		.Text = ML("Add Spaces To Operators")
+		.Text = ("Add Spaces To Operators")
 		.TabIndex = 119
 		.ExtraMargins.Top = 0
 		.Align = DockStyle.alTop
@@ -862,7 +816,7 @@ pfOptions = @fOptions
 		' chkSyntaxHighlightingIdentifiers
 	With chkSyntaxHighlightingIdentifiers
 		.Name = "chkSyntaxHighlightingIdentifiers"
-		.Text = ML("Syntax Highlighting Identifiers")
+		.Text = ("Syntax Highlighting Identifiers")
 		.TabIndex = 121
 		.Align = DockStyle.alTop
 
@@ -887,7 +841,7 @@ pfOptions = @fOptions
 		' chkChangeIdentifiersCase
 		With chkChangeIdentifiersCase
 			.Name = "chkChangeIdentifiersCase"
-			.Text = ML("Change Identifiers Case To") & ":"
+			.Text = ("Change Identifiers Case To") & ":"
 			.TabIndex = 120
 			.Align = DockStyle.alLeft
 			.ExtraMargins.Top = 0
@@ -910,7 +864,7 @@ pfOptions = @fOptions
 		cboIdentifiersCase.Parent = @pnlChangeIdentifiersCase
 		' chkChangeKeywordsCase
 		chkChangeKeywordsCase.Name = "chkChangeKeywordsCase"
-		chkChangeKeywordsCase.Text = ML("Change Keywords Case To") & ":"
+		chkChangeKeywordsCase.Text = ("Change Keywords Case To") & ":"
 		chkChangeKeywordsCase.ExtraMargins.Top = 0
 		chkChangeKeywordsCase.Align = DockStyle.alLeft
 		chkChangeKeywordsCase.ExtraMargins.Right = 0
@@ -932,7 +886,7 @@ pfOptions = @fOptions
 		cboCase.Parent = @pnlChangeKeywordsCase
 		' chkTabAsSpaces
 		chkTabAsSpaces.Name = "chkTabAsSpaces"
-		chkTabAsSpaces.Text = ML("Tab style:")
+		chkTabAsSpaces.Text = ("Tab style:")
 		chkTabAsSpaces.ExtraMargins.Top = 0
 		chkTabAsSpaces.Align = DockStyle.alLeft
 		chkTabAsSpaces.ExtraMargins.Right = 0
@@ -955,7 +909,7 @@ pfOptions = @fOptions
 		cboTabStyle.Parent = @pnlTreatTabAsSpaces
 		' lblTabSize
 		lblTabSize.Name = "lblTabSize"
-		lblTabSize.Text = ML("Tab Size") & ":"
+		lblTabSize.Text = ("Tab Size") & ":"
 		lblTabSize.ExtraMargins.Left = 40
 		lblTabSize.ExtraMargins.Right = 0
 		lblTabSize.Align = DockStyle.alClient
@@ -994,7 +948,7 @@ pfOptions = @fOptions
 		lstLibraryPaths.Parent = @hbxLibraryPaths
 		' lblOthers
 		lblOthers.Name = "lblOthers"
-		lblOthers.Text = ML("Others") & ":"
+		lblOthers.Text = ("Others") & ":"
 		lblOthers.Align = DockStyle.alTop
 		lblOthers.ExtraMargins.Top = 5
 		lblOthers.ExtraMargins.Bottom = 4
@@ -1035,7 +989,7 @@ pfOptions = @fOptions
 		cmdRemoveLibrary.Parent = @vbxLibraryPaths
 		' lblHistoryLimit
 		lblHistoryLimit.Name = "lblHistoryLimit"
-		lblHistoryLimit.Text = ML("History limit") & ":"
+		lblHistoryLimit.Text = ("History limit") & ":"
 		lblHistoryLimit.ExtraMargins.Top = 2
 		lblHistoryLimit.ExtraMargins.Left = 40
 		lblHistoryLimit.ExtraMargins.Right = 0
@@ -1056,14 +1010,14 @@ pfOptions = @fOptions
 		txtHistoryLimit.Parent = @pnlHistoryLimit
 		' grbGrid
 		grbGrid.Name = "grbGrid"
-		grbGrid.Text = ML("Grid")
+		grbGrid.Text = ("Grid")
 		grbGrid.Align = DockStyle.alTop
 		grbGrid.TabIndex = 129
 		grbGrid.SetBounds 10, 0, 417, 122
 		grbGrid.Parent = @pnlDesigner
 		' lblGridSize
 		lblGridSize.Name = "lblGridSize"
-		lblGridSize.Text = ML("Size") & ":"
+		lblGridSize.Text = ("Size") & ":"
 		lblGridSize.TabIndex = 130
 		lblGridSize.SetBounds 16, 31, 60, 18
 		lblGridSize.Parent = @grbGrid
@@ -1075,19 +1029,19 @@ pfOptions = @fOptions
 		txtGridSize.Parent = @grbGrid
 		' chkShowAlignmentGrid
 		chkShowAlignmentGrid.Name = "chkShowAlignmentGrid"
-		chkShowAlignmentGrid.Text = ML("Show Alignment Grid")
+		chkShowAlignmentGrid.Text = ("Show Alignment Grid")
 		chkShowAlignmentGrid.TabIndex = 65
 		chkShowAlignmentGrid.SetBounds 8, -5, 186, 30
 		chkShowAlignmentGrid.Parent = @pnlGrid
 		' chkSnapToGrid
 		chkSnapToGrid.Name = "chkSnapToGrid"
-		chkSnapToGrid.Text = ML("Snap to Grid")
+		chkSnapToGrid.Text = ("Snap to Grid")
 		chkSnapToGrid.TabIndex = 66
 		chkSnapToGrid.SetBounds 8, 19, 138, 24
 		chkSnapToGrid.Parent = @pnlGrid
 		' grbColors
 		grbColors.Name = "grbColors"
-		grbColors.Text = ML("Colors")
+		grbColors.Text = ("Colors")
 		grbColors.Align = DockStyle.alClient
 		grbColors.Margins.Top = 21
 		grbColors.Margins.Right = 15
@@ -1098,7 +1052,7 @@ pfOptions = @fOptions
 		grbColors.Parent = @pnlColorsAndFonts
 		' grbFont
 		grbFont.Name = "grbFont"
-		grbFont.Text = ML("Font (applies to all styles)")
+		grbFont.Text = ("Font (applies to all styles)")
 		grbFont.Align = DockStyle.alBottom
 		grbFont.ExtraMargins.Top = 5
 		grbFont.AutoSize = True
@@ -1127,7 +1081,7 @@ pfOptions = @fOptions
 		lstColorKeys.Parent = @vbxTheme
 		' cmdAdd
 		cmdAdd.Name = "cmdAdd"
-		cmdAdd.Text = ML("&Add")
+		cmdAdd.Text = ("&Add")
 		cmdAdd.ControlIndex = 1
 		cmdAdd.Align = DockStyle.alClient
 		cmdAdd.ExtraMargins.Bottom = 0
@@ -1137,7 +1091,7 @@ pfOptions = @fOptions
 		cmdAdd.Parent = @hbxThemeCommands
 		' cmdRemove
 		cmdRemove.Name = "cmdRemove"
-		cmdRemove.Text = ML("&Remove")
+		cmdRemove.Text = ("&Remove")
 		cmdRemove.ControlIndex = 0
 		cmdRemove.Align = DockStyle.alRight
 		cmdRemove.TabIndex = 41
@@ -1146,7 +1100,7 @@ pfOptions = @fOptions
 		cmdRemove.Parent = @hbxThemeCommands
 		' chkForeground
 		chkForeground.Name = "chkForeground"
-		chkForeground.Text = ML("Auto")
+		chkForeground.Text = ("Auto")
 		chkForeground.Align = DockStyle.alRight
 		chkForeground.ExtraMargins.Left = 5
 		chkForeground.TabIndex = 43
@@ -1186,7 +1140,7 @@ pfOptions = @fOptions
 		cmdFont.Parent = @grbFont
 		' lblFont
 		lblFont.Name = "lblFont"
-		lblFont.Text = ML("Font")
+		lblFont.Text = ("Font")
 		lblFont.Align = DockStyle.alClient
 		lblFont.ExtraMargins.Left = 10
 		lblFont.ExtraMargins.Top = 20
@@ -1198,7 +1152,7 @@ pfOptions = @fOptions
 		'cmdProjectsPath.Caption = "..."
 		' chkBackground
 		chkBackground.Name = "chkBackground"
-		chkBackground.Text = ML("Auto")
+		chkBackground.Text = ("Auto")
 		chkBackground.Align = DockStyle.alRight
 		chkBackground.ExtraMargins.Left = 5
 		chkBackground.TabIndex = 47
@@ -1238,7 +1192,7 @@ pfOptions = @fOptions
 		End With
 		' lblForeground
 		lblForeground.Name = "lblForeground"
-		lblForeground.Text = ML("Foreground") & ":"
+		lblForeground.Text = ("Foreground") & ":"
 		lblForeground.ControlIndex = 1
 		lblForeground.Align = DockStyle.alTop
 		lblForeground.TabIndex = 42
@@ -1257,7 +1211,7 @@ pfOptions = @fOptions
 		End With
 		' lblBackground
 		lblBackground.Name = "lblBackground"
-		lblBackground.Text = ML("Background") & ":"
+		lblBackground.Text = ("Background") & ":"
 		lblBackground.ControlIndex = 3
 		lblBackground.Align = DockStyle.alTop
 		lblBackground.ExtraMargins.Top = 2
@@ -1278,7 +1232,7 @@ pfOptions = @fOptions
 		' lblFrame
 		With lblFrame
 			.Name = "lblFrame"
-			.Text = ML("Frame") & ":"
+			.Text = ("Frame") & ":"
 			.ControlIndex = 5
 			.Align = DockStyle.alTop
 			.ExtraMargins.Top = 2
@@ -1299,7 +1253,7 @@ pfOptions = @fOptions
 		End With
 		' lblIndicator
 		lblIndicator.Name = "lblIndicator"
-		lblIndicator.Text = ML("Indicator") & ":"
+		lblIndicator.Text = ("Indicator") & ":"
 		lblIndicator.ControlIndex = 7
 		lblIndicator.Align = DockStyle.alTop
 		lblIndicator.ExtraMargins.Top = 2
@@ -1319,7 +1273,7 @@ pfOptions = @fOptions
 		End With
 		' chkBold
 		chkBold.Name = "chkBold"
-		chkBold.Text = ML("Bold")
+		chkBold.Text = ("Bold")
 		chkBold.ControlIndex = 8
 		chkBold.Align = DockStyle.alTop
 		chkBold.ExtraMargins.Top = 5
@@ -1331,7 +1285,7 @@ pfOptions = @fOptions
 		chkBold.Parent = @vbxColors
 		' chkItalic
 		chkItalic.Name = "chkItalic"
-		chkItalic.Text = ML("Italic")
+		chkItalic.Text = ("Italic")
 		chkItalic.ControlIndex = 9
 		chkItalic.Align = DockStyle.alTop
 		chkItalic.TabIndex = 59
@@ -1342,7 +1296,7 @@ pfOptions = @fOptions
 		chkItalic.Parent = @vbxColors
 		' chkUnderline
 		chkUnderline.Name = "chkUnderline"
-		chkUnderline.Text = ML("Underline")
+		chkUnderline.Text = ("Underline")
 		chkUnderline.ControlIndex = 10
 		chkUnderline.Align = DockStyle.alTop
 		chkUnderline.TabIndex = 60
@@ -1353,7 +1307,7 @@ pfOptions = @fOptions
 		chkUnderline.Parent = @vbxColors
 		' chkIndicator
 		chkIndicator.Name = "chkIndicator"
-		chkIndicator.Text = ML("Auto")
+		chkIndicator.Text = ("Auto")
 		chkIndicator.Align = DockStyle.alRight
 		chkIndicator.ExtraMargins.Left = 5
 		chkIndicator.TabIndex = 55
@@ -1382,7 +1336,7 @@ pfOptions = @fOptions
 		'
 		' lblCompiler64
 		lblCompiler64.Name = "lblCompiler64"
-		lblCompiler64.Text = ML("Compiler 64-bit:") 
+		lblCompiler64.Text = ("Compiler 64-bit:") 
 		lblCompiler64.TabIndex = 144
 		lblCompiler64.SetBounds 15, 22, 120, 16
 		lblCompiler64.Parent = @grbDefaultCompilers
@@ -1410,7 +1364,7 @@ pfOptions = @fOptions
 		' lblInterfaceFontLabel
 		With lblInterfaceFontLabel
 			.Name = "lblInterfaceFontLabel"
-			.Text = ML("Interface font") & ":"
+			.Text = ("Interface font") & ":"
 			.ControlIndex = 6
 			.Align = DockStyle.alLeft
 			.TabIndex = 148
@@ -1443,7 +1397,7 @@ pfOptions = @fOptions
 		' chkDisplayIcons
 		With chkDisplayIcons
 			.Name = "chkDisplayIcons"
-			.Text = ML("Display Icons in the Menu")
+			.Text = ("Display Icons in the Menu")
 			.Align = DockStyle.alTop
 			.TabIndex = 151
 			.Constraints.Height = 21
@@ -1454,7 +1408,7 @@ pfOptions = @fOptions
 		' chkShowMainToolbar
 		With chkShowMainToolbar
 			.Name = "chkShowMainToolbar"
-			.Text = ML("Show main Toolbar")
+			.Text = ("Show main Toolbar")
 			.Align = DockStyle.alTop
 			.TabIndex = 152
 			.Constraints.Height = 21
@@ -1465,7 +1419,7 @@ pfOptions = @fOptions
 		'chkShowToolBoxLocal
 		With chkShowToolBoxLocal
 			.Name = "chkShowToolBoxLocal"
-			.Text = ML("Display ToolBox in localized language.")
+			.Text = ("Display ToolBox in localized language.")
 			.Align = DockStyle.alTop
 			.TabIndex = 153
 			.Constraints.Height = 21
@@ -1473,21 +1427,10 @@ pfOptions = @fOptions
 			.SetBounds 10, 102, 235, 21
 			.Parent = @grbThemes
 		End With
-		'chkShowPropLocal
-		With chkShowPropLocal
-			.Name = "chkShowPropLocal"
-			.Text = ML("Display Property of Control in localized language.")
-			.Align = DockStyle.alTop
-			.TabIndex = 154
-			.Constraints.Height = 21
-			.AutoSize = True
-			.SetBounds 10, 122, 290, 21
-			.Parent = @grbThemes
-		End With
 		' chkFrame
 		With chkFrame
 			.Name = "chkFrame"
-			.Text = ML("Auto")
+			.Text = ("Auto")
 			.Align = DockStyle.alRight
 			.ExtraMargins.Left = 5
 			.TabIndex = 51
@@ -1520,7 +1463,7 @@ pfOptions = @fOptions
 		' grbDefaultHelp
 		With grbDefaultHelp
 			.Name = "grbDefaultHelp"
-			.Text = ML("Default Help")
+			.Text = ("Default Help")
 			.Align = DockStyle.alTop
 			.Margins.Top = 22
 			.Margins.Left = 15
@@ -1534,7 +1477,7 @@ pfOptions = @fOptions
 		' grbDefaultAIAgent
 		With grbDefaultAIAgent
 			.Name = "grbDefaultAIAgent"
-			.Text = ML("Default AI Agent")
+			.Text = ("Default AI Agent")
 			.Align = DockStyle.alTop
 			.Margins.Top = 22
 			.Margins.Left = 15
@@ -1566,7 +1509,7 @@ pfOptions = @fOptions
 		' grbHelpPaths
 		With grbHelpPaths
 			.Name = "grbHelpPaths"
-			.Text = ML("Help Paths")
+			.Text = ("Help Paths")
 			.Align = DockStyle.alClient
 			.ExtraMargins.Top = 5
 			.Margins.Top = 22
@@ -1603,7 +1546,7 @@ pfOptions = @fOptions
 		End With
 		With cmdClearHelps
 			.Name = "cmdClearHelps"
-			.Text = ML("&Clear")
+			.Text = ("&Clear")
 			.ExtraMargins.Right = 0
 			.ExtraMargins.Left = 0
 			.ExtraMargins.Bottom = 0
@@ -1616,7 +1559,7 @@ pfOptions = @fOptions
 		' cmdRemoveHelp
 		With cmdRemoveHelp
 			.Name = "cmdRemoveHelp"
-			.Text = ML("&Remove")
+			.Text = ("&Remove")
 			.ExtraMargins.Right = 0
 			.ExtraMargins.Left = 0
 			.ExtraMargins.Bottom = 0
@@ -1629,7 +1572,7 @@ pfOptions = @fOptions
 		' cmdChangeHelp
 		With cmdChangeHelp
 			.Name = "cmdChangeHelp"
-			.Text = ML("Chan&ge")
+			.Text = ("Chan&ge")
 			.ExtraMargins.Bottom = 0
 			.ExtraMargins.Left = 0
 			.ExtraMargins.Right = 0
@@ -1642,7 +1585,7 @@ pfOptions = @fOptions
 		' cmdAddHelp
 		With cmdAddHelp
 			.Name = "cmdAddHelp"
-			.Text = ML("&Add")
+			.Text = ("&Add")
 			.ExtraMargins.Right = 0
 			.ExtraMargins.Left = 0
 			.Align = DockStyle.alRight
@@ -1656,7 +1599,7 @@ pfOptions = @fOptions
 		' optSaveCurrentFile
 		With optSaveCurrentFile
 			.Name = "optSaveCurrentFile"
-			.Text = ML("Save Current Project / File")
+			.Text = ("Save Current Project / File")
 			.TabIndex = 62
 			.SetBounds 18, 22, 184, 16
 			.Parent = @grbWhenCompiling
@@ -1664,7 +1607,7 @@ pfOptions = @fOptions
 		' optDoNotSave
 		With optDoNotSave
 			.Name = "optDoNotSave"
-			.Text = ML("Don't Save")
+			.Text = ("Don't Save")
 			.TabIndex = 63
 			.SetBounds 18, 90, 184, 16
 			.Parent = @grbWhenCompiling
@@ -1672,7 +1615,7 @@ pfOptions = @fOptions
 		' optSaveAllFiles
 		With optSaveAllFiles
 			.Name = "optSaveAllFiles"
-			.Text = ML("Save All Files")
+			.Text = ("Save All Files")
 			.TabIndex = 64
 			.SetBounds 18, 45, 184, 16
 			.Parent = @grbWhenCompiling
@@ -1688,7 +1631,7 @@ pfOptions = @fOptions
 		' chkLimitDebug
 		With chkLimitDebug
 			.Name = "chkLimitDebug"
-			.Text = ML("Limit debug to the directory of the main file")
+			.Text = ("Limit debug to the directory of the main file")
 			.Align = DockStyle.alTop
 			.ExtraMargins.Top = 10
 			.TabIndex = 160
@@ -1700,7 +1643,7 @@ pfOptions = @fOptions
 		' chkDisplayWarningsInDebug
 		With chkDisplayWarningsInDebug
 			.Name = "chkDisplayWarningsInDebug"
-			.Text = ML("Display warnings in debug")
+			.Text = ("Display warnings in debug")
 			.ExtraMargins.Top = 5
 			.Align = DockStyle.alTop
 			.TabIndex = 161
@@ -1712,7 +1655,7 @@ pfOptions = @fOptions
 		' chkCreateNonStaticEventHandlers
 		With chkCreateNonStaticEventHandlers
 			.Name = "chkCreateNonStaticEventHandlers"
-			.Text = ML("Event handlers: Non-static (modern)")
+			.Text = ("Event handlers: Non-static (modern)")
 			.TabIndex = 162
 			.SetBounds 12, 150, 288, 24
 
@@ -1723,7 +1666,7 @@ pfOptions = @fOptions
 		' grbOtherEditors
 		With grbOtherEditors
 			.Name = "grbOtherEditors"
-			.Text = ML("Other Editors")
+			.Text = ("Other Editors")
 			.Align = DockStyle.alClient
 			.ExtraMargins.Top = 0
 			.ExtraMargins.Left = 0
@@ -1753,7 +1696,7 @@ pfOptions = @fOptions
 		' cmdClearEditor
 		With cmdClearEditor
 			.Name = "cmdClearEditor"
-			.Text = ML("&Clear")
+			.Text = ("&Clear")
 			.ExtraMargins.Bottom = 0
 			.ExtraMargins.Left = 0
 			.ExtraMargins.Right = 0
@@ -1767,7 +1710,7 @@ pfOptions = @fOptions
 		' cmdRemoveEditor
 		With cmdRemoveEditor
 			.Name = "cmdRemoveEditor"
-			.Text = ML("&Remove")
+			.Text = ("&Remove")
 			.Align = DockStyle.alRight
 			.ExtraMargins.Bottom = 0
 			.ExtraMargins.Left = 0
@@ -1781,7 +1724,7 @@ pfOptions = @fOptions
 		' cmdChangeEditor
 		With cmdChangeEditor
 			.Name = "cmdChangeEditor"
-			.Text = ML("Chan&ge")
+			.Text = ("Chan&ge")
 			.Align = DockStyle.alRight
 			.ExtraMargins.Bottom = 0
 			.ExtraMargins.Left = 0
@@ -1795,7 +1738,7 @@ pfOptions = @fOptions
 		' cmdAddEditor
 		With cmdAddEditor
 			.Name = "cmdAddEditor"
-			.Text = ML("&Add")
+			.Text = ("&Add")
 			.Align = DockStyle.alRight
 			.ExtraMargins.Left = 0
 			.ExtraMargins.Bottom = 0
@@ -1813,7 +1756,7 @@ pfOptions = @fOptions
 		' grbWhenCompiling
 		With grbWhenCompiling
 			.Name = "grbWhenCompiling"
-			.Text = ML("When compiling") & ":"
+			.Text = ("When compiling") & ":"
 			.Align = DockStyle.alTop
 			.ExtraMargins.Top = 5
 			.TabIndex = 169
@@ -1822,7 +1765,7 @@ pfOptions = @fOptions
 		End With
 		' lblProjectsPath
 		lblProjectsPath.Name = "lblProjectsPath"
-		lblProjectsPath.Text = ML("Projects path") & ":"
+		lblProjectsPath.Text = ("Projects path") & ":"
 		lblProjectsPath.Align = DockStyle.alTop
 		lblProjectsPath.ExtraMargins.Top = 5
 		lblProjectsPath.TabIndex = 170
@@ -1859,7 +1802,7 @@ pfOptions = @fOptions
 		' optPromptToSave
 		With optPromptToSave
 			.Name = "optPromptToSave"
-			.Text = ML("Prompt To Save")
+			.Text = ("Prompt To Save")
 			.TabIndex = 176
 			.SetBounds 18, 68, 184, 16
 
@@ -1868,7 +1811,7 @@ pfOptions = @fOptions
 		' chkCreateFormTypesWithoutTypeWord
 		With chkCreateFormTypesWithoutTypeWord
 			.Name = "chkCreateFormTypesWithoutTypeWord"
-			.Text = ML("Create Form types without Type word")
+			.Text = ("Create Form types without Type word")
 			.TabIndex = 180
 			.SetBounds 12, 128, 288, 24
 
@@ -1877,7 +1820,7 @@ pfOptions = @fOptions
 		' grbCommandPromptOptions
 		With grbCommandPromptOptions
 			.Name = "grbCommandPromptOptions"
-			.Text = ML("Command Prompt options")
+			.Text = ("Command Prompt options")
 			.TabIndex = 181
 			.Align = DockStyle.alTop
 			.ExtraMargins.Top = 5
@@ -1888,7 +1831,7 @@ pfOptions = @fOptions
 		' optMainFileFolder
 		With optMainFileFolder
 			.Name = "optMainFileFolder"
-			.Text = ML("Main File folder")
+			.Text = ("Main File folder")
 			.TabIndex = 182
 			.SetBounds 20, 39, 220, 20
 
@@ -1897,7 +1840,7 @@ pfOptions = @fOptions
 		' lblOpenCommandPromptIn
 		With lblOpenCommandPromptIn
 			.Name = "lblOpenCommandPromptIn"
-			.Text = ML("Open command prompt in:")
+			.Text = ("Open command prompt in:")
 			.TabIndex = 183
 			.SetBounds 20, 19, 380, 20
 
@@ -1906,7 +1849,7 @@ pfOptions = @fOptions
 		' optInFolder
 		With optInFolder
 			.Name = "optInFolder"
-			.Text = ML("Folder") & ":"
+			.Text = ("Folder") & ":"
 			.TabIndex = 184
 			.SetBounds 20, 59, 120, 20
 
@@ -1933,7 +1876,7 @@ pfOptions = @fOptions
 		' lblIntellisenseLimit
 		With lblIntellisenseLimit
 			.Name = "lblIntellisenseLimit"
-			.Text = ML("IntelliSense limit (items)") & ":"
+			.Text = ("IntelliSense limit (items)") & ":"
 			.TabIndex = 187
 
 			.ExtraMargins.Top = 2
@@ -1966,7 +1909,7 @@ pfOptions = @fOptions
 		' chkDarkMode
 		With chkDarkMode
 			.Name = "chkDarkMode"
-			.Text = ML("Dark Mode (Windows 10 1809 and above)")
+			.Text = ("Dark Mode (Windows 10 1809 and above)")
 			.TabIndex = 195
 			.Align = DockStyle.alTop
 			.Constraints.Height = 21
@@ -1977,7 +1920,7 @@ pfOptions = @fOptions
 		' chkPlaceStaticEventHandlersAfterTheConstructor
 		With chkPlaceStaticEventHandlersAfterTheConstructor
 			.Name = "chkPlaceStaticEventHandlersAfterTheConstructor"
-			.Text = ML("Place static event handlers after the Constructor")
+			.Text = ("Place static event handlers after the Constructor")
 			.TabIndex = 196
 
 			.SetBounds 32, 172, 310, 24
@@ -1987,7 +1930,7 @@ pfOptions = @fOptions
 		' chkCreateStaticEventHandlersWithAnUnderscoreAtTheBeginning
 		With chkCreateStaticEventHandlersWithAnUnderscoreAtTheBeginning
 			.Name = "chkCreateStaticEventHandlersWithAnUnderscoreAtTheBeginning"
-			.Text = ML("Create static event handlers with an underscore at the beginning")
+			.Text = ("Create static event handlers with an underscore at the beginning")
 			.TabIndex = 197
 
 			.SetBounds 32, 195, 380, 24
@@ -2007,54 +1950,6 @@ pfOptions = @fOptions
 			.SetBounds 198, 0, 72, 18
 			.Designer = @This
 			.Parent = @pnlHistoryFileSavingDays
-		End With
-		' cmdUpdateLng
-		With cmdUpdateLng
-			.Name = "cmdUpdateLng"
-			.Text = ML("Scan and Update")
-			.TabIndex = 200
-			.Hint = ML("Scan the text string in source code and update languages files")
-				.ExtraMargins.Top = -1
-				.ExtraMargins.Bottom = -1
-			.ExtraMargins.Left = 0
-			.Align = DockStyle.alRight
-			.ExtraMargins.Right = 0
-			.SetBounds 257, -1, 130, 23
-			.Designer = @This
-			.OnClick = @cmdUpdateLng_Click_
-			.Parent = @pnlLanguage
-		End With
-		' chkAllLNG
-		With chkAllLNG
-			.Name = "chkAllLNG"
-			.Text = ML("Update all language files")
-			.TabIndex = 201
-			.Checked = False
-			.Align = DockStyle.alTop
-			.ExtraMargins.Top = 5
-			.Constraints.Height = 21
-			.AutoSize = True
-			.SetBounds 15, 48, 217, 21
-			.Designer = @This
-			.Parent = @grbLanguage
-		End With
-		' cmdUpdateLngVFPFolds1
-		' cmdUpdateLngHTMLFolds1
-			
-			
-		' cmdReplaceInFiles
-		' cmdReplaceInFiles1
-		' lblShowMsg
-		With lblShowMsg
-			.Name = "lblShowMsg"
-			.Text = ""
-			.TabIndex = 202
-			.Caption = ""
-			.Align = DockStyle.alTop
-			.ExtraMargins.Top = 10
-			.SetBounds 15, 78, 387, 20
-			.Designer = @This
-			.Parent = @grbLanguage
 		End With
 		' pnlLine
 		With pnlLine
@@ -2106,7 +2001,7 @@ pfOptions = @fOptions
 		' lblHistoryDay
 		With lblHistoryDay
 			.Name = "lblHistoryDay"
-			.Text = ML("History file saving days") & ":"
+			.Text = ("History file saving days") & ":"
 			.TabIndex = 199
 			.ExtraMargins.Top = 2
 			.ExtraMargins.Right = 0
@@ -2190,29 +2085,29 @@ pfOptions = @fOptions
 		.Designer = @This
 		.Parent = @grbHistory
 	End With
-		lvShortcuts.Columns.Add ML("Action"), , 250
-		lvShortcuts.Columns.Add ML("Shortcut"), , 100
-		lvOtherEditors.Columns.Add ML("Version"), , 126
-		lvOtherEditors.Columns.Add ML("Extensions"), , 126
-		lvOtherEditors.Columns.Add ML("Path"), , 126
-		lvOtherEditors.Columns.Add ML("Command line"), , 80
-		lvTerminalPaths.Columns.Add ML("Version"), , 190
-		lvTerminalPaths.Columns.Add ML("Path"), , 190
-		lvTerminalPaths.Columns.Add ML("Command line"), , 80
-		lvHelpPaths.Columns.Add ML("Version"), , 190
-		lvHelpPaths.Columns.Add ML("Path"), , 190
+		lvShortcuts.Columns.Add ("Action"), , 250
+		lvShortcuts.Columns.Add ("Shortcut"), , 100
+		lvOtherEditors.Columns.Add ("Version"), , 126
+		lvOtherEditors.Columns.Add ("Extensions"), , 126
+		lvOtherEditors.Columns.Add ("Path"), , 126
+		lvOtherEditors.Columns.Add ("Command line"), , 80
+		lvTerminalPaths.Columns.Add ("Version"), , 190
+		lvTerminalPaths.Columns.Add ("Path"), , 190
+		lvTerminalPaths.Columns.Add ("Command line"), , 80
+		lvHelpPaths.Columns.Add ("Version"), , 190
+		lvHelpPaths.Columns.Add ("Path"), , 190
 		
-		lvAIAgentTypes.Columns.Add ML("Name"), , 190
-		lvAIAgentTypes.Columns.Add ML("Host"), , 100
-		lvAIAgentTypes.Columns.Add ML("Port"), , 50
-		lvAIAgentTypes.Columns.Add ML("Address"), , 100
-		lvAIAgentTypes.Columns.Add ML("Model name"), , 190
-		lvAIAgentTypes.Columns.Add ML("Provider"), , 190
-		lvAIAgentTypes.Columns.Add ML("API key"), , 190
-		lvAIAgentTypes.Columns.Add ML("Temperature"), , 50
+		lvAIAgentTypes.Columns.Add ("Name"), , 190
+		lvAIAgentTypes.Columns.Add ("Host"), , 100
+		lvAIAgentTypes.Columns.Add ("Port"), , 50
+		lvAIAgentTypes.Columns.Add ("Address"), , 100
+		lvAIAgentTypes.Columns.Add ("Model name"), , 190
+		lvAIAgentTypes.Columns.Add ("Provider"), , 190
+		lvAIAgentTypes.Columns.Add ("API key"), , 190
+		lvAIAgentTypes.Columns.Add ("Temperature"), , 50
 		lvAIAgentTypes.OnItemActivate = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As ListView, ByVal ItemIndex As Integer), @lvAIAgentTypes_ItemActivate)
-		lvAIAgentTypes.Columns.Add ML("Stream"), , 50
-		lvAIAgentTypes.Columns.Add ML("Content"), , 100
+		lvAIAgentTypes.Columns.Add ("Stream"), , 50
+		lvAIAgentTypes.Columns.Add ("Content"), , 100
 		' hbxEditors
 		With hbxEditors
 			.Name = "hbxEditors"
@@ -2309,7 +2204,7 @@ pfOptions = @fOptions
 		' lbAutoSaveCharMax
 		With lbAutoSaveCharMax
 			.Name = "lbAutoSaveCharMax"
-			.Text = ML("Autosave after entered chars") & ": "
+			.Text = ("Autosave after entered chars") & ": "
 			.ExtraMargins.Top = 2
 			.ExtraMargins.Left = 40
 			.ExtraMargins.Right = 0
@@ -2334,7 +2229,7 @@ pfOptions = @fOptions
 		' chkCreateEventHandlersWithoutStaticEventHandlerIfEventAllowsIt
 		With chkCreateEventHandlersWithoutStaticEventHandlerIfEventAllowsIt
 			.Name = "chkCreateEventHandlersWithoutStaticEventHandlerIfEventAllowsIt"
-			.Text = ML("Create event handlers without static event handler if event allows it")
+			.Text = ("Create event handlers without static event handler if event allows it")
 			.TabIndex = 233
 			.ControlIndex = 4
 			.SetBounds 32, 219, 380, 24
@@ -2361,10 +2256,10 @@ pfOptions = @fOptions
 		' lblCodeEditorHoverTime
 		With lblCodeEditorHoverTime
 			.Name = "lblCodeEditorHoverTime"
-			.Text = ML("Hover time") & ":"
+			.Text = ("Hover time") & ":"
 			.TabIndex = 255
 			.Align = DockStyle.alClient
-			.Caption = ML("Hover time") & ":"
+			.Caption = ("Hover time") & ":"
 			.ExtraMargins.Left = 40
 			.ExtraMargins.Top = 2
 			.SetBounds 0, 0, 0, 20
@@ -2385,7 +2280,7 @@ pfOptions = @fOptions
 		' grbAIAgent
 		With grbAIAgent
 			.Name = "grbAIAgent"
-			.Text = ML("AI Agents")
+			.Text = ("AI Agents")
 			.ExtraMargins.Top = 5
 			.Margins.Top = 22
 			.Margins.Right = 15
@@ -2400,7 +2295,7 @@ pfOptions = @fOptions
 		' cmdClearAIAgent
 		With cmdClearAIAgent
 			.Name = "cmdClearAIAgent"
-			.Text = ML("&Clear")
+			.Text = ("&Clear")
 			.TabIndex = 271
 			.Align = DockStyle.alRight
 			.SetBounds 306, 175, 97, 24
@@ -2411,7 +2306,7 @@ pfOptions = @fOptions
 		' cmdRemoveAIAgent
 		With cmdRemoveAIAgent
 			.Name = "cmdRemoveAIAgent"
-			.Text = ML("&Remove")
+			.Text = ("&Remove")
 			.TabIndex = 272
 			.Align = DockStyle.alRight
 			.SetBounds 208, 175, 97, 24
@@ -2422,7 +2317,7 @@ pfOptions = @fOptions
 		' cmdChangeAIAgent
 		With cmdChangeAIAgent
 			.Name = "cmdChangeAIAgent"
-			.Text = ML("Chan&ge")
+			.Text = ("Chan&ge")
 			.TabIndex = 270
 			.Align = DockStyle.alRight
 			.SetBounds 98, 0, 97, 24
@@ -2433,7 +2328,7 @@ pfOptions = @fOptions
 		' cmdAddAIAgent
 		With cmdAddAIAgent
 			.Name = "cmdAddAIAgent"
-			.Text = ML("&Add")
+			.Text = ("&Add")
 			.TabIndex = 269
 			.Align = DockStyle.alRight
 			.SetBounds 12, 175, 97, 24
@@ -2444,11 +2339,11 @@ pfOptions = @fOptions
 		' chkChangeEndingType
 		With chkChangeEndingType
 			.Name = "chkChangeEndingType"
-			.Text = ML("Auto-insert End blocks") & ":"
+			.Text = ("Auto-insert End blocks") & ":"
 			.TabIndex = 267
 			.Align = DockStyle.alLeft
 			.AutoSize = True
-			.Caption = ML("Auto-insert End blocks") & ":"
+			.Caption = ("Auto-insert End blocks") & ":"
 			.Constraints.Height = 21
 			.SetBounds 0, 0, 172, 15
 			.Designer = @This
@@ -2601,7 +2496,7 @@ pfOptions = @fOptions
 		' cmdInterfaceThemeAdd
 		With cmdInterfaceThemeAdd
 			.Name = "cmdInterfaceThemeAdd"
-			.Text = ML("&Add")
+			.Text = ("&Add")
 			.TabIndex = 292
 			.Align = DockStyle.alClient
 			.SetBounds 0, 0, 89, 23
@@ -2612,7 +2507,7 @@ pfOptions = @fOptions
 		' cmdInterfaceThemeRemove
 		With cmdInterfaceThemeRemove
 			.Name = "cmdInterfaceThemeRemove"
-			.Text = ML("&Remove")
+			.Text = ("&Remove")
 			.TabIndex = 293
 			.Align = DockStyle.alRight
 			.SetBounds 89, 0, 71, 23
@@ -2623,10 +2518,10 @@ pfOptions = @fOptions
 		' lblInterfaceColor
 		With lblInterfaceColor
 			.Name = "lblInterfaceColor"
-			.Text = ML("Color") & ":"
+			.Text = ("Color") & ":"
 			.TabIndex = 294
 			.Align = DockStyle.alTop
-			.Caption = ML("Color") & ":"
+			.Caption = ("Color") & ":"
 			.SetBounds 0, 37, 154, 16
 			.Designer = @This
 			.Parent = @vbxInterfaceColors
@@ -2644,7 +2539,7 @@ pfOptions = @fOptions
 		' chkInterfaceColor
 		With chkInterfaceColor
 			.Name = "chkInterfaceColor"
-			.Text = ML("Auto")
+			.Text = ("Auto")
 			.TabIndex = 296
 			.Align = DockStyle.alRight
 			.ExtraMargins.Left = 5
@@ -2682,8 +2577,6 @@ pfOptions = @fOptions
 		chkDisplayIcons.ControlIndex = 1
 		chkShowMainToolbar.Parent = @vbxGeneral
 		chkShowMainToolbar.ControlIndex = 2
-		chkShowPropLocal.Parent = @vbxGeneral
-		chkShowPropLocal.ControlIndex = 3
 		chkDarkMode.Parent = @vbxGeneral
 		chkDarkMode.ControlIndex = 4
 		' The rest of the "Themes" page (interface color/theme picker) is
@@ -2706,10 +2599,6 @@ pfOptions = @fOptions
 	
 	Private Sub frmOptions._txtColorForeground_KeyPress(ByRef Designer As My.Sys.Object, ByRef Sender As Control, Key As Integer)
 		(*Cast(frmOptions Ptr, Sender.Designer)).txtColorForeground_KeyPress(Sender, Key)
-	End Sub
-	
-	Private Sub frmOptions.cmdUpdateLng_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-		(*Cast(frmOptions Ptr, Sender.Designer)).cmdUpdateLng_Click(Sender)
 	End Sub
 	
 	Private Sub frmOptions.chkCreateNonStaticEventHandlers_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As CheckBox)
@@ -2866,45 +2755,12 @@ Sub frmOptions.LoadSettings()
 		.txtGridSize.Text = Str(GridSize)
 		.chkShowAlignmentGrid.Checked = ShowAlignmentGrid
 		.chkSnapToGrid.Checked = SnapToGridOption
-		.cboLanguage.Clear
 		.chkDisplayIcons.Checked = DisplayMenuIcons
 		.chkShowMainToolbar.Checked = ShowMainToolBar
 		'.chkShowToolBoxLocal.Checked = gLocalToolBox
-		.chkShowPropLocal.Checked = gLocalProperties
 		.chkDarkMode.Checked = DarkMode
 		Dim As String f
-		Dim As Integer Fn, Result
-		Dim Buff As WString * 2048 '
-		Dim As UString FileName
-		'On Error Resume Next
-		f = Dir(ExePath & "/Settings/Languages/*.lng")
-		While f <> ""
-			FileName = ExePath & "/Settings/Languages/" & f
-			Fn = FreeFile_
-			Result = Open(FileName For Input Encoding "utf-8" As #Fn)
-			If Result <> 0 Then Result = Open(FileName For Input Encoding "utf-16" As #Fn)
-			If Result <> 0 Then Result = Open(FileName For Input Encoding "utf-32" As #Fn)
-			If Result <> 0 Then Result = Open(FileName For Input As #Fn)
-			If Result = 0 Then
-				'WReallocate s, LOF(Fn) '
-				If Not EOF(Fn) Then
-					Line Input #Fn, Buff  '
-					Languages.Add ..Left(f, Len(f) - 4)
-					.cboLanguage.AddItem Buff & " - " & ..Left(f, Len(f) - 4)
-				End If
-			Else
-				Languages.Add ..Left(f, Len(f) - 4)
-				.cboLanguage.AddItem ..Left(f, Len(f) - 4) & " (" & ML("format does not match") & ")"
-			End If
-			CloseFile_(Fn)
-			f = Dir()
-		Wend
 		HotKeysChanged = False
-		'On Error Goto 0
-		'WDeAllocate(s) '
-		newIndex = Languages.IndexOf(App.CurLanguage)
-		.cboLanguage.ItemIndex = newIndex
-		oldIndex = newIndex
 		.cboTheme.Clear
 		f = Dir(ExePath & "/Settings/Themes/*.ini")
 		While f <> ""
@@ -2915,7 +2771,7 @@ Sub frmOptions.LoadSettings()
 		LoadTheme
 		.cboAIAgent.Clear
 		.lvAIAgentTypes.ListItems.Clear
-		.cboAIAgent.AddItem ML("(not selected)")
+		.cboAIAgent.AddItem ("(not selected)")
 		For i As Integer = 0 To pAIAgents->Count - 1
 			.lvAIAgentTypes.ListItems.Add pAIAgents->Item(i)->Key
 			.lvAIAgentTypes.ListItems.Item(i)->Text(1) = pAIAgents->Item(i)->Text
@@ -2932,7 +2788,7 @@ Sub frmOptions.LoadSettings()
 		.cboAIAgent.ItemIndex = Max(0, .cboAIAgent.IndexOf(*DefaultAIAgent))
 		.cboTerminal.Clear
 		.lvTerminalPaths.ListItems.Clear
-		.cboTerminal.AddItem ML("(not selected)")
+		.cboTerminal.AddItem ("(not selected)")
 		For i As Integer = 0 To pTerminals->Count - 1
 			.lvTerminalPaths.ListItems.Add pTerminals->Item(i)->Key
 			.lvTerminalPaths.ListItems.Item(i)->Text(1) = pTerminals->Item(i)->Text
@@ -2949,7 +2805,7 @@ Sub frmOptions.LoadSettings()
 		Next
 		.cboHelp.Clear
 		.lvHelpPaths.ListItems.Clear
-		.cboHelp.AddItem ML("(not selected)")
+		.cboHelp.AddItem ("(not selected)")
 		For i As Integer = 0 To pHelps->Count - 1
 			.lvHelpPaths.ListItems.Add pHelps->Item(i)->Key
 			.lvHelpPaths.ListItems.Item(i)->Text(1) = pHelps->Item(i)->Text
@@ -3126,75 +2982,74 @@ End Sub
 Private Sub frmOptions.Form_Create(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	With fOptions
 		.tvOptions.Nodes.Clear
-		Var tnGeneral = .tvOptions.Nodes.Add(ML("General"), "General")
-		Var tnEditor = .tvOptions.Nodes.Add(ML("Code Editor"), "CodeEditor")
-		Var tnCompiler = .tvOptions.Nodes.Add(ML("Compiler"), "Compiler")
-		Var tnDebugger = .tvOptions.Nodes.Add(ML("Debugger"), "Debugger")
-		.tvOptions.Nodes.Add(ML("Designer"), "Designer")
-		tnGeneral->Nodes.Add(ML("Localization"), "Localization")
-		tnGeneral->Nodes.Add(ML("Shortcuts"), "Shortcuts")
-		tnEditor->Nodes.Add(ML("Colors And Fonts"), "ColorsAndFonts")
-		tnEditor->Nodes.Add(ML("Other Editors"), "OtherEditors")
-		tnEditor->Nodes.Add(ML("Defaults"), "Defaults")
-		tnDebugger->Nodes.Add(ML("Terminal"), "Terminal")
-		Var tnHelp = .tvOptions.Nodes.Add(ML("Help"), "Help")
-		tnHelp->Nodes.Add(ML("AI Agent"), "AIAgent")
+		Var tnGeneral = .tvOptions.Nodes.Add(("General"), "General")
+		Var tnEditor = .tvOptions.Nodes.Add(("Code Editor"), "CodeEditor")
+		Var tnCompiler = .tvOptions.Nodes.Add(("Compiler"), "Compiler")
+		Var tnDebugger = .tvOptions.Nodes.Add(("Debugger"), "Debugger")
+		.tvOptions.Nodes.Add(("Designer"), "Designer")
+		tnGeneral->Nodes.Add(("Shortcuts"), "Shortcuts")
+		tnEditor->Nodes.Add(("Colors And Fonts"), "ColorsAndFonts")
+		tnEditor->Nodes.Add(("Other Editors"), "OtherEditors")
+		tnEditor->Nodes.Add(("Defaults"), "Defaults")
+		tnDebugger->Nodes.Add(("Terminal"), "Terminal")
+		Var tnHelp = .tvOptions.Nodes.Add(("Help"), "Help")
+		tnHelp->Nodes.Add(("AI Agent"), "AIAgent")
 		.tvOptions.ExpandAll
 		.cboCase.Clear
-		.cboCase.AddItem ML("Original Case")
-		.cboCase.AddItem ML("Lower Case")
-		.cboCase.AddItem ML("Upper Case")
+		.cboCase.AddItem ("Original Case")
+		.cboCase.AddItem ("Lower Case")
+		.cboCase.AddItem ("Upper Case")
 		.cboIdentifiersCase.Clear
-		.cboIdentifiersCase.AddItem ML("Original Case")
-		.cboIdentifiersCase.AddItem ML("Capitalized Case")
-		.cboIdentifiersCase.AddItem ML("Lower Case")
-		.cboIdentifiersCase.AddItem ML("Upper Case")
+		.cboIdentifiersCase.AddItem ("Original Case")
+		.cboIdentifiersCase.AddItem ("Capitalized Case")
+		.cboIdentifiersCase.AddItem ("Lower Case")
+		.cboIdentifiersCase.AddItem ("Upper Case")
 		.cboConstructions.Clear
-		.cboConstructions.AddItem ML("All Constructions")
-		.cboConstructions.AddItem ML("Only Procedures")
+		.cboConstructions.AddItem ("All Constructions")
+		.cboConstructions.AddItem ("Only Procedures")
 		.cboTabStyle.Clear
-		.cboTabStyle.AddItem ML("Everywhere")
-		.cboTabStyle.AddItem ML("Only after the words")
+		.cboTabStyle.AddItem ("Everywhere")
+		.cboTabStyle.AddItem ("Only after the words")
 		.lstColorKeys.Clear
-		.lstColorKeys.AddItem ML("Bookmarks")
-		.lstColorKeys.AddItem ML("Breakpoints")
-		.lstColorKeys.AddItem ML("Comments")
-		.lstColorKeys.AddItem ML("Current Brackets")
-		.lstColorKeys.AddItem ML("Current Line")
-		.lstColorKeys.AddItem ML("Current Word")
-		.lstColorKeys.AddItem ML("Executed Line")
-		.lstColorKeys.AddItem ML("Fold Lines")
-		.lstColorKeys.AddItem ML("Identifiers")
-		.lstColorKeys.AddItem ML("Identifiers") & ": " & ML("ByRef Parameters")
-		.lstColorKeys.AddItem ML("Identifiers") & ": " & ML("ByVal Parameters")
-		.lstColorKeys.AddItem ML("Identifiers") & ": " & ML("Common Variables")
-		.lstColorKeys.AddItem ML("Identifiers") & ": " & ML("Components")
-		.lstColorKeys.AddItem ML("Identifiers") & ": " & ML("Constants")
-		.lstColorKeys.AddItem ML("Identifiers") & ": " & ML("Defines")
-		.lstColorKeys.AddItem ML("Identifiers") & ": " & ML("Fields")
-		.lstColorKeys.AddItem ML("Identifiers") & ": " & ML("Functions")
-		.lstColorKeys.AddItem ML("Identifiers") & ": " & ML("Enum Members")
-		.lstColorKeys.AddItem ML("Identifiers") & ": " & ML("Enums")
-		.lstColorKeys.AddItem ML("Identifiers") & ": " & ML("Line Labels")
-		.lstColorKeys.AddItem ML("Identifiers") & ": " & ML("Local Variables")
-		.lstColorKeys.AddItem ML("Identifiers") & ": " & ML("Macros")
-		.lstColorKeys.AddItem ML("Identifiers") & ": " & ML("Namespaces")
-		.lstColorKeys.AddItem ML("Identifiers") & ": " & ML("Properties")
-		.lstColorKeys.AddItem ML("Identifiers") & ": " & ML("Shared Variables")
-		.lstColorKeys.AddItem ML("Identifiers") & ": " & ML("Subs")
-		.lstColorKeys.AddItem ML("Identifiers") & ": " & ML("Types")
-		.lstColorKeys.AddItem ML("Indicator Lines")
+		.lstColorKeys.AddItem ("Bookmarks")
+		.lstColorKeys.AddItem ("Breakpoints")
+		.lstColorKeys.AddItem ("Comments")
+		.lstColorKeys.AddItem ("Current Brackets")
+		.lstColorKeys.AddItem ("Current Line")
+		.lstColorKeys.AddItem ("Current Word")
+		.lstColorKeys.AddItem ("Executed Line")
+		.lstColorKeys.AddItem ("Fold Lines")
+		.lstColorKeys.AddItem ("Identifiers")
+		.lstColorKeys.AddItem ("Identifiers") & ": " & ("ByRef Parameters")
+		.lstColorKeys.AddItem ("Identifiers") & ": " & ("ByVal Parameters")
+		.lstColorKeys.AddItem ("Identifiers") & ": " & ("Common Variables")
+		.lstColorKeys.AddItem ("Identifiers") & ": " & ("Components")
+		.lstColorKeys.AddItem ("Identifiers") & ": " & ("Constants")
+		.lstColorKeys.AddItem ("Identifiers") & ": " & ("Defines")
+		.lstColorKeys.AddItem ("Identifiers") & ": " & ("Fields")
+		.lstColorKeys.AddItem ("Identifiers") & ": " & ("Functions")
+		.lstColorKeys.AddItem ("Identifiers") & ": " & ("Enum Members")
+		.lstColorKeys.AddItem ("Identifiers") & ": " & ("Enums")
+		.lstColorKeys.AddItem ("Identifiers") & ": " & ("Line Labels")
+		.lstColorKeys.AddItem ("Identifiers") & ": " & ("Local Variables")
+		.lstColorKeys.AddItem ("Identifiers") & ": " & ("Macros")
+		.lstColorKeys.AddItem ("Identifiers") & ": " & ("Namespaces")
+		.lstColorKeys.AddItem ("Identifiers") & ": " & ("Properties")
+		.lstColorKeys.AddItem ("Identifiers") & ": " & ("Shared Variables")
+		.lstColorKeys.AddItem ("Identifiers") & ": " & ("Subs")
+		.lstColorKeys.AddItem ("Identifiers") & ": " & ("Types")
+		.lstColorKeys.AddItem ("Indicator Lines")
 		For k As Integer = 0 To KeywordLists.Count - 1
-			.lstColorKeys.AddItem ML("Keywords") & ": " & ML(KeywordLists.Item(k))
+			.lstColorKeys.AddItem ("Keywords") & ": " & (KeywordLists.Item(k))
 		Next k
-		.lstColorKeys.AddItem ML("Line Numbers")
-		.lstColorKeys.AddItem ML("Normal Text")
-		.lstColorKeys.AddItem ML("Numbers")
-		.lstColorKeys.AddItem ML("Real Numbers")
-		.lstColorKeys.AddItem ML("Operators")
-		.lstColorKeys.AddItem ML("Selection")
-		.lstColorKeys.AddItem ML("Space Identifiers")
-		.lstColorKeys.AddItem ML("Strings")
+		.lstColorKeys.AddItem ("Line Numbers")
+		.lstColorKeys.AddItem ("Normal Text")
+		.lstColorKeys.AddItem ("Numbers")
+		.lstColorKeys.AddItem ("Real Numbers")
+		.lstColorKeys.AddItem ("Operators")
+		.lstColorKeys.AddItem ("Selection")
+		.lstColorKeys.AddItem ("Space Identifiers")
+		.lstColorKeys.AddItem ("Strings")
 		ReDim .Colors(.lstColorKeys.Items.Count - 1, 7)
 		.lstColorKeys.ItemIndex = 0
 		For i As Integer = 0 To pfrmMain->Menu->Count - 1
@@ -3295,7 +3150,7 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 			Dim As UString projectsDir = GetFullPathU(projectsPathInput)
 			If Not FolderExistsU(projectsDir) Then
 				If Not EnsureDirectoryExists(projectsPathInput) AndAlso Not FolderExistsU(projectsDir) Then
-					MsgBox ML("New Projects Directory Could Not Be Created")
+					MsgBox ("New Projects Directory Could Not Be Created")
 					fOptions.LastApplySucceeded = False
 					Exit Sub
 				End If
@@ -3440,7 +3295,6 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		DisplayMenuIcons = .chkDisplayIcons.Checked
 		ShowMainToolBar = .chkShowMainToolbar.Checked
 		'gLocalToolBox = .chkShowToolBoxLocal.Checked
-		gLocalProperties = .chkShowPropLocal.Checked
 		DarkMode = .chkDarkMode.Checked
 		App.DarkMode = DarkMode
 		SetColors
@@ -3654,9 +3508,6 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		If IniValueChangedStr(piniSettings, "Options", "ProjectsPath", *ProjectsPath) Then
 			piniSettings->WriteString "Options", "ProjectsPath", *ProjectsPath
 		End If
-		If IniValueChangedStr(piniSettings, "Options", "Language", Languages.Item(.cboLanguage.ItemIndex)) Then
-			piniSettings->WriteString "Options", "Language", Languages.Item(.cboLanguage.ItemIndex)
-		End If
 		If IniValueChangedInt(piniSettings, "Options", "TabWidth", TabWidth) Then
 			piniSettings->WriteInteger "Options", "TabWidth", TabWidth
 		End If
@@ -3838,9 +3689,6 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 			piniSettings->WriteBool "Options", "DarkMode", DarkMode
 		End If
 		'piniSettings->WriteBool "Options", "ShowToolBoxLocal", gLocalToolBox
-		If IniValueChangedBool(piniSettings, "Options", "PropertiesLocal", gLocalProperties) Then
-			piniSettings->WriteBool("Options", "PropertiesLocal", gLocalProperties) 'David Change
-		End If
 		' Not applied live: setting Menu->ImagesList immediately drops the icon lookup for the
 		' whole menu, but already-rendered items keep their cached icon, leaving a half-applied
 		' state (most icons gone, a few stuck) that contradicts the "next run" message below.
@@ -4489,7 +4337,6 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 				tb->txtCode.Font.Size = EditorFontSize
 			Next
 		Next
-		newIndex = .cboLanguage.ItemIndex
 	End With
 	Exit Sub
 	ErrorHandler:
@@ -4501,9 +4348,8 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 End Sub
 
 Private Sub frmOptions.Form_Close(ByRef Designer As My.Sys.Object, ByRef Sender As Form, ByRef Action As Integer)
-	If newIndex <> oldIndex Then MsgBox ML("Localization changes will be applied the next time the application is run.")
-	If *InterfaceFontName <> *fOptions.oldInterfFontName OrElse InterfaceFontSize <> fOptions.oldInterfFontSize Then MsgBox ML("Interface font changes will be applied the next time the application is run.")
-	If DisplayMenuIcons <> fOptions.oldDisplayMenuIcons Then MsgBox ML("Display icons in the menu changes will be applied the next time the application is run.")
+	If *InterfaceFontName <> *fOptions.oldInterfFontName OrElse InterfaceFontSize <> fOptions.oldInterfFontSize Then MsgBox ("Interface font changes will be applied the next time the application is run.")
+	If DisplayMenuIcons <> fOptions.oldDisplayMenuIcons Then MsgBox ("Display icons in the menu changes will be applied the next time the application is run.")
 	'If DarkMode <> fOptions.oldDarkMode Then MsgBox ML("Dark Mode changes will be applied the next time the application is run.")
 	'If fOptions.HotKeysChanged Then MsgBox ML("Hotkey changes will be applied the next time the application is run.")
 End Sub
@@ -4522,13 +4368,12 @@ Private Sub frmOptions.TreeView1_SelChange(ByRef Designer As My.Sys.Object, ByRe
 		.pnlDebugger.Visible = Key = "Debugger"
 		.pnlTerminal.Visible = Key = "Terminal"
 		.pnlDesigner.Visible = Key = "Designer"
-		.pnlLocalization.Visible = Key = "Localization"
 		.pnlHelp.Visible = Key = "Help"
 		.pnlAIAgent.Visible = Key = "AIAgent"
 		If Key = "General" Then
 			' The interface-settings controls relocated into vbxGeneral at
 			' runtime (pnlInterfaceFont, chkDisplayIcons, chkShowMainToolbar,
-			' chkShowPropLocal, chkDarkMode) can end up repositioned back to
+			' chkDarkMode) can end up repositioned back to
 			' their pre-relocation bounds by a native-window recreation that
 			' happens when this page first becomes visible. Forcing one more
 			' layout pass here, after that settles, guarantees the final
@@ -4797,7 +4642,7 @@ Private Sub frmOptions.cmdAddTerminal_Click(ByRef Designer As My.Sys.Object, ByR
 				.lvTerminalPaths.ListItems.Item(.lvTerminalPaths.ListItems.Count - 1)->Text(2) = pfPath->txtCommandLine.Text
 				.cboTerminal.AddItem pfPath->txtVersion.Text
 			Else
-				MsgBox ML("This version is exists!")
+				MsgBox ("This version is exists!")
 			End If
 		End With
 	End If
@@ -4817,7 +4662,7 @@ Private Sub frmOptions.cmdChangeTerminal_Click(ByRef Designer As My.Sys.Object, 
 				.lvTerminalPaths.SelectedItem->Text(1) = pfPath->txtPath.Text
 				.lvTerminalPaths.SelectedItem->Text(2) = pfPath->txtCommandLine.Text
 			Else
-				MsgBox ML("This version is exists!")
+				MsgBox ("This version is exists!")
 			End If
 		End If
 	End With
@@ -4837,7 +4682,7 @@ Private Sub frmOptions.cmdClearTerminals_Click(ByRef Designer As My.Sys.Object, 
 	With fOptions
 		.lvTerminalPaths.ListItems.Clear
 		.cboTerminal.Clear
-		.cboTerminal.AddItem ML("(not selected)")
+		.cboTerminal.AddItem ("(not selected)")
 		.cboTerminal.ItemIndex = 0
 	End With
 End Sub
@@ -4853,7 +4698,7 @@ Private Sub frmOptions.cmdAddHelp_Click(ByRef Designer As My.Sys.Object, ByRef S
 				.lvHelpPaths.ListItems.Item(.lvHelpPaths.ListItems.Count - 1)->Text(1) = pfPath->txtPath.Text
 				.cboHelp.AddItem pfPath->txtVersion.Text
 			Else
-				MsgBox ML("This version is exists!")
+				MsgBox ("This version is exists!")
 			End If
 		End With
 	End If
@@ -4872,7 +4717,7 @@ Private Sub frmOptions.cmdChangeHelp_Click(ByRef Designer As My.Sys.Object, ByRe
 				.lvHelpPaths.SelectedItem->Text(0) = pfPath->txtVersion.Text
 				.lvHelpPaths.SelectedItem->Text(1) = pfPath->txtPath.Text
 			Else
-				MsgBox ML("This version is exists!")
+				MsgBox ("This version is exists!")
 			End If
 		End If
 	End With
@@ -4892,7 +4737,7 @@ Private Sub frmOptions.cmdClearHelps_Click(ByRef Designer As My.Sys.Object, ByRe
 	With fOptions
 		.lvHelpPaths.ListItems.Clear
 		.cboHelp.Clear
-		.cboHelp.AddItem ML("(not selected)")
+		.cboHelp.AddItem ("(not selected)")
 		.cboHelp.ItemIndex = 0
 	End With
 End Sub
@@ -4914,7 +4759,7 @@ Private Sub frmOptions.cmdAddAIAgent_Click(ByRef Sender As Control)
 				.cboAIAgent.AddItem frmAIAgent.txtAIAgentName.Text
 				cboAIAgentModels.AddItem frmAIAgent.txtAIAgentName.Text
 			Else
-				MsgBox ML("This name is exists!")
+				MsgBox ("This name is exists!")
 			End If
 		End With
 	End If
@@ -4964,7 +4809,7 @@ Private Sub frmOptions.cmdChangeAIAgent_Click(ByRef Sender As Control)
 				.lvAIAgentTypes.SelectedItem->Text(8) = Str(frmAIAgent.chkAIAgentStream.Checked)
 				.lvAIAgentTypes.SelectedItem->Text(9) = frmAIAgent.cboAIAgentContentSize.Text
 			Else
-				MsgBox ML("This name is exists!")
+				MsgBox ("This name is exists!")
 			End If
 		End If
 	End With
@@ -4974,10 +4819,10 @@ Private Sub frmOptions.cmdClearAIAgent_Click(ByRef Sender As Control)
 	With fOptions
 		.lvAIAgentTypes.ListItems.Clear
 		.cboAIAgent.Clear
-		.cboAIAgent.AddItem ML("(not selected)")
+		.cboAIAgent.AddItem ("(not selected)")
 		.cboAIAgent.ItemIndex = 0
 		cboAIAgentModels.Clear
-		cboAIAgentModels.AddItem ML("(not selected)")
+		cboAIAgentModels.AddItem ("(not selected)")
 		cboAIAgentModels.ItemIndex = 0
 	End With
 End Sub
@@ -5003,7 +4848,7 @@ Private Sub frmOptions.cmdAddInclude_Click(ByRef Designer As My.Sys.Object, ByRe
 			If Not .lstIncludePaths.Items.Contains(pfPath->txtPath.Text) Then
 					.lstIncludePaths.AddItem pfPath->txtPath.Text
 			Else
-				MsgBox ML("This path is exists!")
+				MsgBox ("This path is exists!")
 			End If
 		End With
 	End If
@@ -5017,7 +4862,7 @@ Private Sub frmOptions.cmdAddLibrary_Click(ByRef Designer As My.Sys.Object, ByRe
 			If Not .lstLibraryPaths.Items.Contains(pfPath->txtPath.Text) Then
 					.lstLibraryPaths.AddItem pfPath->txtPath.Text
 			Else
-				MsgBox ML("This path is exists!")
+				MsgBox ("This path is exists!")
 			End If
 		End With
 	End If
@@ -5079,7 +4924,7 @@ Private Sub frmOptions.cmdAddEditor_Click(ByRef Sender As Control)
 				.Item(ItemsCount)->Text(2) = pfPath->txtPath.Text
 				.Item(ItemsCount)->Text(3) = pfPath->txtCommandLine.Text
 			Else
-				MsgBox ML("This version is exists!")
+				MsgBox ("This version is exists!")
 			End If
 		End With
 	End If
@@ -5104,7 +4949,7 @@ Private Sub frmOptions.cmdChangeEditor_Click(ByRef Sender As Control)
 				.SelectedItem->Text(2) = pfPath->txtPath.Text
 				.SelectedItem->Text(3) = pfPath->txtCommandLine.Text
 			Else
-				MsgBox ML("This version is exists!")
+				MsgBox ("This version is exists!")
 			End If
 		End If
 	End With
@@ -5183,774 +5028,6 @@ Private Sub frmOptions.chkCreateNonStaticEventHandlers_Click(ByRef Sender As Che
 	chkPlaceStaticEventHandlersAfterTheConstructor.Enabled = chkCreateNonStaticEventHandlers.Checked
 	chkCreateStaticEventHandlersWithAnUnderscoreAtTheBeginning.Enabled = chkCreateNonStaticEventHandlers.Checked
 	chkCreateEventHandlersWithoutStaticEventHandlerIfEventAllowsIt.Enabled = chkCreateNonStaticEventHandlers.Checked
-End Sub
-
-
-Private Function UzLot(Text As UString) As UString
-	Dim As Integer Qadam
-	Dim As UString txt, Old(2), U, stat
-	Dim As UString Spravka(10000), Malumot(10000), Uzbek(100), Lotin(100)
-  Spravka(1) = "MAXSUL": Malumot(1) = "MAHSUL"
-  Spravka(2) = "XARAJAT": Malumot(2) = "HARAJAT"
-  Spravka(3) = "XIS": Malumot(3) = "HIS"
-  Spravka(4) = "XARJ": Malumot(4) = "HARJ"
-  Spravka(5) = "XAK": Malumot(5) = "HAQ"
-  Spravka(6) = "XUKUK": Malumot(6) = "HUQUQ"
-  Spravka(7) = "KARZ": Malumot(7) = "QARZ"
-  Spravka(8) = "XAR": Malumot(8) = "HAR"
-  Spravka(9) = "EXTI": Malumot(9) = "EHTI"
-  Spravka(10) = "XOSIL": Malumot(10) = "HOSIL"
-  Spravka(11) = "MAXAL": Malumot(11) = "MAHAL"
-  Spravka(12) = "XAM": Malumot(12) = "HAM"
-  Spravka(13) = "KARZ": Malumot(13) = "QARZ"
-  Spravka(14) = "XUJJAT": Malumot(14) = "HUJJAT"
-  Spravka(15) = "UKUV": Malumot(15) = "O'QUV"
-  Spravka(16) = "TUGRI": Malumot(16) = "TO'G'RI"
-  Spravka(17) = "FARK": Malumot(17) = "FARQ"
-  Spravka(18) = "UZBEK": Malumot(18) = "O'ZBEK"
-  Qadam = 0
-  Dim As UString Result = Text
-  Dim As Integer a, b
-  Dim As UString e = Text & " "
-  Dim As Integer p, h, j, y
-  Dim As UString R, t
-  Var d = Len(e)
-  Var w = 54
-  Dim As UString Z = "АаИиОоУуЭэЮюЯя ,.-:;`@!~#$%^&*()_+=|\?/><"
-  Dim As UString x = " `~!@#$%^&*()_+|\=-/,.<>?/"
-  Dim As UString UzbekHarf = "АаБбВвГгДдЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЪъЫыЭэЉљ" + WChr(1178) + WChr(1179) + WChr(1202) + WChr(1203) + "Е" +  "е"  + "Ё"  + "ё"  + "Ц"  + "ц"  + "Ч"  + "ч"  + "Ш"  + "ш"  + "Щ"  + "щ"  + "Ю"  + "ю"  + "Я"  + "я"  + "Њ"  + "Ў"  + "ў"  + "њ"  + WChr(1170) + WChr(1171) + "Ьь"
-  Dim As UString LotinHarf = "AaBbVvGgDdJjZzIiYyKkLlMmNnOoPpRrSsTtUuFfXxʼʼIiEeQq" + "Q"        + "q"        + "H"        + "h"        + "YE" + "ye" + "YO" + "yo" + "TS" + "ts" + "CH" + "ch" + "SH" + "sh" + "SH" + "sh" + "YU" + "yu" + "YA" + "ya" + "Oʻ" + "Oʻ" + "oʻ" + "oʻ" + "Gʻ"       + "gʻ"
-  txt = ""
-  For i As Integer = 1 To d + 1
-    Old(2) = Old(1)
-    Old(1) = txt
-    txt = Mid(e, i, 1)
-    U = Old(2)
-    For f As Integer = 1 To Len(UzbekHarf)
-      Uzbek(f) = Mid(UzbekHarf, f, 1)
-      If f > w Then p = p + 2: Lotin(f) = Mid(LotinHarf, p - 1, 2) Else p = f: Lotin(f) = Mid(LotinHarf, p, 1)
-      If Old(1) = Uzbek(f) Then
-        If Len(Lotin(f)) = 1 Then
-          R = R + Uzbek(f): t = t + Lotin(f)
-        Else
-          Select Case Old(1)
-            Case "ц"
-              If InStr(Left(Z, 14), U) > 0 And U <> "" Then
-                R = R + Old(1): t = t + "ts"
-              Else: R = R + Old(1): t = t + "s": End If
-            Case "Ц"
-              If InStr(Left(Z, 14), U) > 0 And U <> "" Then
-                R = R + Old(1): t = t + "TS"
-              Else
-                R = R + Old(1): t = t + "S"
-              End If
-            Case "е"
-              If InStr(Z, U) > 0 Then
-                R = R + Old(1): t = t + "ye"
-              Else: R = R + Old(1): t = t + "e": End If
-            Case "Е"
-              If U = UCase(U) And txt = UCase(txt) And InStr(x, U) = 0 Or U = UCase(U) And txt = UCase(txt) And InStr(x, txt) = 0 Then
-                If InStr(Z, U) > 0 Then
-                  R = R + Old(1): t = t + "YE"
-                Else
-                  R = R + Old(1): t = t + "E"
-                End If
-              Else
-                R = R + Old(1): t = t + "Ye"
-              End If
-            Case Else
-              If U = UCase(U) And txt = UCase(txt) And InStr(x, U) = 0 Or U = UCase(U) And txt = UCase(txt) And InStr(x, txt) = 0 Then
-                R = R + Uzbek(f): t = t + Lotin(f)
-              Else: R = R + Uzbek(f): t = t + Left(Lotin(f), 1) + LCase(Right(Lotin(f), 1)): h = 0
-              End If
-          End Select
-        End If
-        Exit For
-      ElseIf InStr(UzbekHarf, Old(1)) = 0 Then
-        If t <> "" Or R <> "" Then
-          j = 1
-          Do While Spravka(j) <> ""
-            For y = 1 To 3
-              t = Replace(t, Spravka(j), Malumot(j))
-              a = Len(Spravka(j)): b = Len(Malumot(j))
-              If y = 1 Then Spravka(j) = Left(Spravka(j), 1) + LCase(Right(Spravka(j), a - 1)): Malumot(j) = Left(Malumot(j), 1) + LCase(Right(Malumot(j), b - 1))
-              If y = 2 Then Spravka(j) = LCase(Spravka(j)): Malumot(j) = LCase(Malumot(j))
-              If y = 3 Then Spravka(j) = UCase(Spravka(j)): Malumot(j) = UCase(Malumot(j))
-            Next y: j = j + 1
-          Loop
-          Result = Replace(Result, R, t, 1, 1)
-          t = "": R = ""
-        End If
-      End If
-    Next f
-  Next i
-  Return Result
-End Function
-
-Private Sub frmOptions.cmdUpdateLng_Click(ByRef Sender As Control)
-	Dim As WString Ptr lang_name
-	Dim As WString * 1024 Buff, FileNameLng, FileNameSrc
-	Dim As String tKey, f
-	Dim As UString tText
-	Dim As Integer Pos1, p, p1, n, Result, Fn1, Fn2
-	Dim As Dictionary mlKeysGeneral, mlKeysCompiler, mlKeysProperty, mlKeysTemplates, mlKeyWords, mlKeysCompilerEnglish, mlKeysPropertyEnglish, mlKeysTemplatesEnglish, mlKeyWordsEnglish, mlKeysGeneralEnglish
-	Dim As Boolean StartGeneral, StartKeyWords, StartProperty, StartCompiler, StartTemplates, IsComment = False
-	cmdUpdateLng.Enabled = False
-	'lblShowMsg.Visible = True
-	' Produce English.lng from Projects at first
-	FileNameLng = ExePath & "/Settings/Languages/English.lng"
-	Fn1 = FreeFile_
-	Result = Open(FileNameLng For Input Encoding "utf-8" As #Fn1)
-	If Result <> 0 Then Result = Open(FileNameLng For Input Encoding "utf-16" As #Fn1)
-	If Result <> 0 Then Result = Open(FileNameLng For Input Encoding "utf-32" As #Fn1)
-	If Result <> 0 Then Result = Open(FileNameLng For Input As #Fn1)
-	If Result = 0 Then
-		StartGeneral = True
-		Line Input #Fn1, Buff
-		WLet(lang_name, Buff)
-		Do Until EOF(Fn1)
-			Line Input #Fn1, Buff
-			If LCase(Trim(Buff)) = "[keywords]" Then
-				StartKeyWords = True
-				StartProperty = False
-				StartCompiler = False
-				StartTemplates = False
-				StartGeneral = False
-			ElseIf LCase(Trim(Buff)) = "[property]" Then
-				StartKeyWords = False
-				StartProperty = True
-				StartCompiler = False
-				StartTemplates = False
-				StartGeneral = False
-			ElseIf LCase(Trim(Buff)) = "[compiler]" Then
-				StartKeyWords = False
-				StartProperty = False
-				StartCompiler = True
-				StartTemplates = False
-				StartGeneral = False
-			ElseIf LCase(Trim(Buff)) = "[templates]" Then
-				StartKeyWords = False
-				StartProperty = False
-				StartCompiler = False
-				StartTemplates = True
-				StartGeneral = False
-			ElseIf LCase(Trim(Buff)) = "[general]" Then
-				StartKeyWords = False
-				StartProperty = False
-				StartCompiler = False
-				StartTemplates = False
-				StartGeneral = True
-			End If
-			Pos1 = InStr(Buff, "=")
-			If Len(Trim(Buff, Any !"\t ")) > 0 AndAlso Pos1 > 0 Then
-				'David Change For the Control Property's Language.
-				'note: "=" already Replaced by "~"
-				tKey = Trim(..Left(Buff, Pos1 - 1), Any !"\t ")
-				tText = Trim(Mid(Buff, Pos1 + 1), Any !"\t ")
-				If tText <> "" Then
-					If InStr(tKey, "~") Then tKey = Replace(tKey, "~", "=")
-					If StartGeneral = True Then
-						mlKeysGeneralEnglish.Add tKey, tText
-					ElseIf StartProperty = True Then
-						mlKeysPropertyEnglish.Add tKey, tText
-					ElseIf StartKeyWords = True Then
-						mlKeyWordsEnglish.Add tKey, tText
-					ElseIf StartCompiler = True Then
-						mlKeysCompilerEnglish.Add tKey, tText
-					ElseIf StartTemplates = True Then
-						mlKeysTemplatesEnglish.Add tKey, tText
-					End If
-				End If
-			End If
-		Loop
-		mlKeysGeneralEnglish.SortKeys
-		mlKeysPropertyEnglish.SortKeys
-		mlKeysCompilerEnglish.SortKeys
-		mlKeysTemplatesEnglish.SortKeys
-		mlKeyWordsEnglish.SortKeys
-	Else
-		lblShowMsg.Text = ML("File not found") & "! " & FileNameLng
-		mlKeysGeneral.Clear
-		mlKeysProperty.Clear
-		mlKeysCompiler.Clear
-		mlKeysTemplates.Clear
-		mlKeyWords.Clear
-		mlKeysGeneralEnglish.Clear
-		mlKeysPropertyEnglish.Clear
-		mlKeysCompilerEnglish.Clear
-		mlKeysTemplatesEnglish.Clear
-		mlKeyWordsEnglish.Clear
-		cmdUpdateLng.Enabled = True
-		Exit Sub
-	End If
-	CloseFile_(Fn1)
-	Fn1 = FreeFile_
-	If Open(ExePath & "/VisualFBEditor.vfp" For Input Encoding "utf-8" As #Fn1) = 0 Then
-		IsComment = False
-		Do Until EOF(Fn1)
-			Line Input #Fn1, Buff
-			If InStr(Trim(Buff, Any !"\t "), "'") = 1 Then Continue Do
-			If InStr(Trim(Buff, Any !"\t "), "/*") = 1 Then IsComment = True
-			If InStr(Trim(Buff, Any !"\t "), "*/") > 1 Then
-				IsComment = False
-				Continue Do
-			End If
-			If IsComment Then Continue Do
-			If StartsWith(Buff, "File=") OrElse StartsWith(Buff, "*File=") Then
-				Buff = Mid(Buff, InStr(Buff, "=") + 1)
-				If InStr(Buff, ":") Then
-					FileNameSrc = Buff
-				Else
-					FileNameSrc = ExePath & "/" & Buff
-				End If
-				Fn2 = FreeFile_
-				Result = Open(FileNameSrc For Input Encoding "utf-8" As #Fn2)
-				If Result <> 0 Then Result = Open(FileNameSrc For Input Encoding "utf-16" As #Fn2)
-				If Result <> 0 Then Result = Open(FileNameSrc For Input Encoding "utf-32" As #Fn2)
-				If Result <> 0 Then Result = Open(FileNameSrc For Input As #Fn2)
-				If Result = 0 Then
-					Print "Source file name: " & FileNameSrc
-					lblShowMsg.Text = ML("Open") & "...  " & FileNameSrc
-					Do Until EOF(Fn2)
-						Line Input #Fn2, Buff
-						p = InStr(LCase(Buff), "ml(""")
-						Do While p > 0
-							p1 = InStr(p + 1, Buff, """)")
-							If p1 > 0 Then
-								tKey = Trim(Mid(Buff, p + 4, p1 - p - 4), Any !"\t ")
-								If tKey <> "" Then
-									If tKey <> """" AndAlso Not mlKeysGeneralEnglish.ContainsKey(tKey) Then
-										mlKeysGeneralEnglish.Add tKey, ""
-										tKey = Replace(tKey, "&", "")
-										If Not mlKeysGeneralEnglish.ContainsKey(tKey) Then mlKeysGeneralEnglish.Add tKey, ""
-									End If
-								End If
-							End If
-							p = InStr(p + 1, LCase(Buff), "ml(""")
-						Loop
-						p = InStr(LCase(Buff), "ms(""")
-						Do While p > 0
-							p1 = InStr(p + 1, Buff, """,")
-							If p1 > 0 Then
-								tKey = Trim(Mid(Buff, p + 4, p1 - p - 4), Any !"\t ")
-								If tKey <> "" Then
-									If tKey <> """" AndAlso Not mlKeysGeneralEnglish.ContainsKey(tKey) Then
-										mlKeysGeneralEnglish.Add tKey, ""
-										tKey = Replace(tKey, "&", "")
-										If Not mlKeysGeneralEnglish.ContainsKey(tKey) Then mlKeysGeneralEnglish.Add tKey, ""
-									End If
-								End If
-							End If
-							p = InStr(p + 1, LCase(Buff), "ms(""")
-						Loop
-					Loop
-					App.DoEvents
-				Else
-					lblShowMsg.Text = ML("File not found") & "! " & FileNameSrc
-				End If
-				CloseFile_(Fn2)
-			End If
-		Loop
-	Else
-		lblShowMsg.Text = ML("File not found") & "! " & ExePath & "/VisualFBEditor.vfp"
-		mlKeysGeneral.Clear
-		mlKeysProperty.Clear
-		mlKeysCompiler.Clear
-		mlKeysTemplates.Clear
-		mlKeyWords.Clear
-		cmdUpdateLng.Enabled = True
-		Exit Sub
-	End If
-	CloseFile_(Fn1)
-	f = Dir(ExePath & "/Templates/Projects/*.vfp")
-	Dim As String TemplateName
-	While f <> ""
-		TemplateName = ..Left(f, IfNegative(InStr(f, ".") - 1, Len(f)))
-		mlKeysGeneralEnglish.Add TemplateName
-		f = Dir()
-	Wend
-	Dim As String IconName
-	f = Dir(ExePath & "/Templates/Files/*")
-	While f <> ""
-		TemplateName = ..Left(f, IfNegative(InStr(f, ".") - 1, Len(f)))
-		mlKeysGeneralEnglish.Add TemplateName
-		f = Dir()
-	Wend
-	Fn1 = FreeFile_
-	If Open(ExePath & "/Settings/Others/Compiler error messages.txt" For Input Encoding "utf-8" As #Fn1) = 0 Then
-		Do Until EOF(Fn1)
-			Line Input #Fn1, Buff
-			If Not IsNumeric(.Left(Buff, 1)) Then Continue Do
-			Var Pos1 = InStr(Buff, " ")
-			If Pos1 > 0 Then
-				mlKeysCompilerEnglish.Add Trim(Mid(Buff, Pos1 + 1))
-			End If
-		Loop
-	End If
-	CloseFile_(Fn1)
-	mlKeysCompilerEnglish.SortKeys
-	Fn1 = FreeFile_
-	If Open(ExePath & "/Settings/Others/Properties.txt" For Input Encoding "utf-8" As #Fn1) = 0 Then
-		Do Until EOF(Fn1)
-			Line Input #Fn1, Buff
-			Var Pos1 = InStr(Buff, "=")
-			If Pos1 > 0 Then
-				mlKeysPropertyEnglish.Add Trim(.Left(Buff, Pos1 - 1))
-			End If
-		Loop
-	End If
-	CloseFile_(Fn1)
-	mlKeyWordsEnglish.Add "#endmacro"
-	mlKeyWordsEnglish.Add "EndIf"
-	For i As Integer = 0 To Globals.Functions.Count - 1
-		Dim As TypeElement Ptr te = Globals.Functions.Object(i)
-		If te->ElementType = E_Keyword OrElse te->ElementType = E_KeywordFunction OrElse te->ElementType = E_KeywordSub Then
-			mlKeyWordsEnglish.Add te->Name
-		ElseIf te->ElementType = E_KeywordOperator Then
-			Dim As Boolean bFind
-			For j As Integer = 1 To Len(te->Name)
-				If InStr("!#$&~)*+-./<>@[]\^=", Mid(te->Name, j, 1)) > 0 Then
-					bFind = True
-					Exit For
-				End If
-			Next
-			If Not bFind Then
-				mlKeyWordsEnglish.Add te->Name
-			End If
-		End If
-	Next
-	App.DoEvents
-	mlKeysGeneralEnglish.SortKeys
-	lblShowMsg.Text = ML("Save") & " " & FileNameLng
-	Fn1 = FreeFile_
-	Open FileNameLng For Output Encoding "utf-8" As #Fn1
-	Print #Fn1, *lang_name
-	App.DoEvents
-	Print #Fn1, "[Compiler]"
-	For i As Integer = 0 To mlKeysCompilerEnglish.Count - 1
-		tKey = mlKeysCompilerEnglish.Item(i)->Key
-		If InStr(tKey, "=") Then tKey = Replace(tKey, "=", "~")
-		If tKey <> "" Then Print #Fn1, tKey & " = " '& mlKeysGeneral.Item(i)->Text
-	Next
-	App.DoEvents
-	Print #Fn1, "[General]"
-	For i As Integer = 0 To mlKeysGeneralEnglish.Count - 1
-		tKey = mlKeysGeneralEnglish.Item(i)->Key
-		If InStr(tKey, "=") Then tKey = Replace(tKey, "=", "~")
-		If tKey <> "" Then Print #Fn1, tKey & " = " '& mlKeysGeneral.Item(i)->Text
-	Next
-	App.DoEvents
-	Print #Fn1, "[Keywords]"
-	For i As Integer = 0 To mlKeyWordsEnglish.Count - 1
-		tKey = mlKeyWordsEnglish.Item(i)->Key
-		If InStr(tKey, "=") Then tKey = Replace(tKey, "=", "~")
-		If tKey <> "" Then Print #Fn1, tKey & " = " '& mlKeysGeneral.Item(i)->Text
-	Next
-	App.DoEvents
-	Print #Fn1, "[Property]"
-	For i As Integer = 0 To mlKeysPropertyEnglish.Count - 1
-		tKey = mlKeysPropertyEnglish.Item(i)->Key
-		If InStr(tKey, "=") Then tKey = Replace(tKey, "=", "~")
-		If tKey <> "" Then Print #Fn1, tKey & " = " '& mlKeysGeneral.Item(i)->Text
-	Next
-	App.DoEvents
-	Print #Fn1, "[Templates]"
-	For i As Integer = 0 To mlKeysTemplatesEnglish.Count - 1
-		tKey = mlKeysTemplatesEnglish.Item(i)->Key
-		If InStr(tKey, "=") Then tKey = Replace(tKey, "=", "~")
-		If tKey <> "" Then Print #Fn1, tKey & " = " '& mlKeysGeneral.Item(i)->Text
-	Next
-	CloseFile_(Fn1)
-	App.DoEvents
-	' Produce other Language .lng file from Projects.
-	mlKeysGeneral.Clear
-	mlKeysCompiler.Clear
-	mlKeysTemplates.Clear
-	mlKeysProperty.Clear
-	mlKeyWords.Clear
-	If chkAllLNG.Checked Then
-		f = Dir(ExePath & "/Settings/Languages/*.lng")
-	Else
-		p = InStr(cboLanguage.Text, "-")
-		If p > 0 Then f = Trim(Mid(cboLanguage.Text, p + 1)) & ".lng" Else Exit Sub
-	End If
-	While f <> ""
-		StartGeneral = True
-		mlKeysGeneral.Clear
-		mlKeysProperty.Clear
-		mlKeysCompiler.Clear
-		mlKeysTemplates.Clear
-		mlKeyWords.Clear
-		If chkAllLNG.Checked AndAlso InStr(LCase(f), "english.lng") > 0 Then
-			f = Dir()
-			If f = "" Then
-				cmdUpdateLng.Enabled = True
-				Exit Sub
-			End If
-		End If
-		Fn1 = FreeFile_
-		FileNameLng = ExePath & "/Settings/Languages/" & f
-		Result = Open(FileNameLng For Input Encoding "utf-8" As #Fn1)
-		If Result <> 0 Then Result = Open(FileNameLng For Input Encoding "utf-16" As #Fn1)
-		If Result <> 0 Then Result = Open(FileNameLng For Input Encoding "utf-32" As #Fn1)
-		If Result <> 0 Then Result = Open(FileNameLng For Input As #Fn1)
-		If Result = 0 Then
-			StartGeneral = True
-			This.Text =  ML("Updating ...") & " " & FileNameLng
-			Line Input #Fn1, Buff
-			WLet(lang_name, Buff)
-			Do Until EOF(Fn1)
-				Line Input #Fn1, Buff
-				If LCase(Trim(Buff)) = "[keywords]" Then
-					StartKeyWords = True
-					StartProperty = False
-					StartCompiler = False
-					StartTemplates = False
-					StartGeneral = False
-				ElseIf LCase(Trim(Buff)) = "[property]" Then
-					StartKeyWords = False
-					StartProperty = True
-					StartCompiler = False
-					StartTemplates = False
-					StartGeneral = False
-				ElseIf LCase(Trim(Buff)) = "[compiler]" Then
-					StartKeyWords = False
-					StartProperty = False
-					StartCompiler = True
-					StartTemplates = False
-					StartGeneral = False
-				ElseIf LCase(Trim(Buff)) = "[templates]" Then
-					StartKeyWords = False
-					StartProperty = False
-					StartCompiler = False
-					StartTemplates = True
-					StartGeneral = False
-				ElseIf LCase(Trim(Buff)) = "[general]" Then
-					StartKeyWords = False
-					StartProperty = False
-					StartCompiler = False
-					StartTemplates = False
-					StartGeneral = True
-				End If
-				Pos1 = InStr(Buff, "=")
-				If Len(Trim(Buff, Any !"\t ")) > 0 AndAlso Pos1 > 0 Then
-					'David Change For the Control Property's Language.
-					'note: "=" already converted to "~"
-					tKey = Trim(..Left(Buff, Pos1 - 1), Any !"\t ")
-					If EndsWith(tKey, " (needs to be removed)") Then
-						tKey = Trim(..Left(tKey, Len(tKey) - 22), Any !"\t ")
-					End If
-					tText = Trim(Mid(Buff, Pos1 + 1), Any !"\t ")
-					If tText <> "" Then
-						If InStr(tKey, "~") Then tKey = Replace(tKey, "~", "=")
-						If StartGeneral = True Then
-							mlKeysGeneral.Add tKey, tText
-						ElseIf StartProperty = True Then
-							mlKeysProperty.Add tKey, tText
-						ElseIf StartKeyWords = True Then
-							mlKeyWords.Add tKey, tText
-						ElseIf StartCompiler = True Then
-							mlKeysCompiler.Add tKey, tText
-						ElseIf StartTemplates = True Then
-							mlKeysTemplates.Add tKey, tText
-						End If
-					End If
-				End If
-			Loop
-			mlKeysGeneral.SortKeys
-			mlKeysProperty.SortKeys
-			mlKeysCompiler.SortKeys
-			mlKeysTemplates.SortKeys
-			mlKeyWords.SortKeys
-			App.DoEvents
-			
-'			'Add the not exist one
-'			txtHtmlFind.Text = ""
-'			txtHtmlFind.Text = txtHtmlFind.Text & Chr(13, 10) & *lang_name
-'			txtHtmlFind.Text = txtHtmlFind.Text & Chr(13, 10) & "[KeyWords]"
-'			For i As Integer = 0 To mlKeyWordsEnglish.Count - 1
-'				tKey = mlKeyWordsEnglish.Item(i)->Key
-'				If InStr(tKey, "=") Then tKey = Replace(tKey, "=", "~")
-'				If Not mlKeyWords.ContainsKey(tKey) Then
-'					mlKeyWords.Add tKey
-'					If Not chkAllLNG.Checked Then txtHtmlFind.Text = txtHtmlFind.Text & Chr(13, 10) & tKey
-'				End If
-'			Next
-'			APP.DoEvents
-'			txtHtmlFind.Text = txtHtmlFind.Text & Chr(13, 10) & "[Property]"
-'			For i As Integer = 0 To mlKeysPropertyEnglish.Count - 1
-'				tKey = mlKeysPropertyEnglish.Item(i)->Key
-'				If InStr(tKey, "=") Then tKey = Replace(tKey, "=", "~")
-'				If Not mlKeysProperty.ContainsKey(tKey) Then
-'					mlKeysProperty.Add tKey
-'					If Not chkAllLNG.Checked Then txtHtmlFind.Text = txtHtmlFind.Text & Chr(13, 10) & tKey
-'				End If
-'			Next
-'			APP.DoEvents
-'			txtHtmlFind.Text = txtHtmlFind.Text & Chr(13, 10) & "[Templates]"
-'			For i As Integer = 0 To mlKeysTemplatesEnglish.Count - 1
-'				tKey = mlKeysTemplatesEnglish.Item(i)->Key
-'				If InStr(tKey, "=") Then tKey = Replace(tKey, "=", "~")
-'				If Not mlKeysTemplates.ContainsKey(tKey) Then
-'					mlKeysTemplates.Add tKey
-'					If Not chkAllLNG.Checked Then txtHtmlFind.Text = txtHtmlFind.Text & Chr(13, 10) & tKey
-'				End If
-'			Next
-'			APP.DoEvents
-'			txtHtmlFind.Text = txtHtmlFind.Text & Chr(13, 10) & "[Compiler]"
-'			For i As Integer = 0 To mlKeysCompilerEnglish.Count - 1
-'				tKey = mlKeysCompilerEnglish.Item(i)->Key
-'				If InStr(tKey, "=") Then tKey = Replace(tKey, "=", "~")
-'				If Not mlKeysCompiler.ContainsKey(tKey) Then
-'					mlKeysCompiler.Add tKey
-'					If Not chkAllLNG.Checked Then txtHtmlFind.Text = txtHtmlFind.Text & Chr(13, 10) & tKey
-'				End If
-'			Next
-'			APP.DoEvents
-'			txtHtmlFind.Text = txtHtmlFind.Text & Chr(13, 10) & "[General]"
-'			For i As Integer = 0 To mlKeysGeneralEnglish.Count - 1
-'				tKey = mlKeysGeneralEnglish.Item(i)->Key
-'				If InStr(tKey, "=") Then tKey = Replace(tKey, "=", "~")
-'				If Not mlKeysGeneral.ContainsKey(tKey) Then
-'					mlKeysGeneral.Add tKey
-'					If Not chkAllLNG.Checked Then txtHtmlFind.Text = txtHtmlFind.Text & Chr(13, 10) & tKey
-'				End If
-'			Next
-		Else
-			lblShowMsg.Text = lblShowMsg.Text & Chr(13, 10) & "File not found！" & FileNameLng
-			mlKeysGeneral.Clear
-			mlKeysProperty.Clear
-			mlKeysCompiler.Clear
-			mlKeysTemplates.Clear
-			mlKeyWords.Clear
-			mlKeysGeneralEnglish.Clear
-			mlKeysPropertyEnglish.Clear
-			mlKeysCompilerEnglish.Clear
-			mlKeysTemplatesEnglish.Clear
-			mlKeyWordsEnglish.Clear
-			cmdUpdateLng.Enabled = True
-			Exit Sub
-		End If
-		CloseFile_(Fn1)
-		App.DoEvents
-		
-		For i As Integer = 0 To mlKeysGeneralEnglish.Count - 1
-			tKey = mlKeysGeneralEnglish.Item(i)->Key
-			If InStr(tKey, "=") Then tKey = Replace(tKey, "=", "~")
-			If tKey <> "" Then
-				If Not mlKeysGeneral.ContainsKey(tKey, , True) Then 
-					mlKeysGeneral.Add tKey, , CPtr(Any Ptr, 1)
-				Else
-					mlKeysGeneral.Item(mlKeysGeneral.IndexOfKey(tKey, , True))->Object = CPtr(Any Ptr, 1)
-				End If
-			End If
-		Next
-		For i As Integer = 0 To mlKeysPropertyEnglish.Count - 1
-			tKey = mlKeysPropertyEnglish.Item(i)->Key
-			If InStr(tKey, "=") Then tKey = Replace(tKey, "=", "~")
-			If tKey <> "" Then
-				If Not mlKeysProperty.ContainsKey(tKey) Then
-					mlKeysProperty.Add tKey, , CPtr(Any Ptr, 1)
-				Else
-					mlKeysProperty.Item(mlKeysProperty.IndexOfKey(tKey))->Object = CPtr(Any Ptr, 1)
-				End If
-			End If
-		Next
-		For i As Integer = 0 To mlKeysCompilerEnglish.Count - 1
-			tKey = mlKeysCompilerEnglish.Item(i)->Key
-			If InStr(tKey, "=") Then tKey = Replace(tKey, "=", "~")
-			If tKey <> "" Then
-				If Not mlKeysCompiler.ContainsKey(tKey) Then 
-					mlKeysCompiler.Add tKey, , CPtr(Any Ptr, 1)
-				Else
-					mlKeysCompiler.Item(mlKeysCompiler.IndexOfKey(tKey))->Object = CPtr(Any Ptr, 1)
-				End If
-			End If
-		Next
-		For i As Integer = 0 To mlKeysTemplatesEnglish.Count - 1
-			tKey = mlKeysTemplatesEnglish.Item(i)->Key
-			If InStr(tKey, "=") Then tKey = Replace(tKey, "=", "~")
-			If tKey <> "" Then
-				If Not mlKeysTemplates.ContainsKey(tKey) Then 
-					mlKeysTemplates.Add tKey, , CPtr(Any Ptr, 1)
-				Else
-					mlKeysTemplates.Item(mlKeysTemplates.IndexOfKey(tKey))->Object = CPtr(Any Ptr, 1)
-				End If
-			End If
-		Next
-		For i As Integer = 0 To mlKeyWordsEnglish.Count - 1
-			tKey = mlKeyWordsEnglish.Item(i)->Key
-			If InStr(tKey, "=") Then tKey = Replace(tKey, "=", "~")
-			If tKey <> "" Then
-				If Not mlKeyWords.ContainsKey(tKey) Then 
-					mlKeyWords.Add tKey, , CPtr(Any Ptr, 1)
-				Else
-					mlKeyWords.Item(mlKeyWords.IndexOfKey(tKey))->Object = CPtr(Any Ptr, 1)
-				End If
-			End If
-		Next
-		mlKeysGeneral.SortKeys
-		mlKeysProperty.SortKeys
-		mlKeysCompiler.SortKeys
-		mlKeysTemplates.SortKeys
-		mlKeyWords.SortKeys
-		Dim As Integer FnL
-		'Save the Language file
-		If EndsWith(FileNameLng, "uzbekcyril.lng") Then
-			FnL = FreeFile_
-			Open .Left(FileNameLng, Len(FileNameLng) - 14) & "uzbeklatin.lng" For Output Encoding "utf-8" As #FnL
-		End If
-		Fn1 = FreeFile_
-		Open FileNameLng For Output Encoding "utf-8" As #Fn1
-		Print #Fn1, *lang_name
-		If FnL Then
-			Print #FnL, "﻿Oʻzbekcha (lotin)"
-		End If
-		lblShowMsg.Text = ML("Saving ...") & " " & FileNameLng
-		App.DoEvents
-		Print #Fn1, "[Compiler]"
-		If FnL Then
-			Print #FnL, "[Compiler]"
-		End If
-		For i As Integer = 0 To mlKeysCompiler.Count - 1
-			tKey = mlKeysCompiler.Item(i)->Key
-			If InStr(tKey, "=") Then tKey = Replace(tKey, "=", "~")
-			If tKey <> "" Then
-				If mlKeysCompiler.Item(i)->Object = 0 Then
-					If mlKeysCompiler.Item(i)->Text <> "" Then
-						Print #Fn1, tKey & IIf(Not EndsWith(tKey, " (needs to be removed)"), " (needs to be removed)", "") & " = " & mlKeysCompiler.Item(i)->Text
-						If FnL Then
-							Print #FnL, tKey & IIf(Not EndsWith(tKey, " (needs to be removed)"), " (needs to be removed)", "") & " = " & UzLot(mlKeysCompiler.Item(i)->Text)
-						End If
-					End If
-				Else
-					Print #Fn1, tKey & " = " & mlKeysCompiler.Item(i)->Text
-					If FnL Then
-						Print #FnL, tKey & " = " & UzLot(mlKeysCompiler.Item(i)->Text)
-					End If
-				End If
-			End If
-		Next
-		App.DoEvents
-		Print #Fn1, "[General]"
-		If FnL Then
-			Print #FnL, "[General]"
-		End If
-		For i As Integer = 0 To mlKeysGeneral.Count - 1
-			tKey = mlKeysGeneral.Item(i)->Key
-			If InStr(tKey, "=") Then tKey = Replace(tKey, "=", "~")
-			If tKey <> "" Then
-				If mlKeysGeneral.Item(i)->Object = 0 Then
-					If mlKeysGeneral.Item(i)->Text <> "" Then
-						Print #Fn1, tKey & IIf(Not EndsWith(tKey, " (needs to be removed)"), " (needs to be removed)", "") & " = " & mlKeysGeneral.Item(i)->Text
-						If FnL Then
-							Print #FnL, tKey & IIf(Not EndsWith(tKey, " (needs to be removed)"), " (needs to be removed)", "") & " = " & UzLot(mlKeysGeneral.Item(i)->Text)
-						End If
-					End If
-				Else
-					Print #Fn1, tKey & " = " & mlKeysGeneral.Item(i)->Text
-					If FnL Then
-						Print #FnL, tKey & " = " & UzLot(mlKeysGeneral.Item(i)->Text)
-					End If
-				End If
-			End If
-		Next
-		App.DoEvents
-		Print #Fn1, "[Keywords]"
-		If FnL Then
-			Print #FnL, "[Keywords]"
-		End If
-		For i As Integer = 0 To mlKeyWords.Count - 1
-			tKey = mlKeyWords.Item(i)->Key
-			If InStr(tKey, "=") Then tKey = Replace(tKey, "=", "~")
-			If tKey <> "" Then
-				If mlKeyWords.Item(i)->Object = 0 Then
-					If mlKeyWords.Item(i)->Text <> "" Then
-						Print #Fn1, tKey & IIf(Not EndsWith(tKey, " (needs to be removed)"), " (needs to be removed)", "") & " = " & mlKeyWords.Item(i)->Text
-						If FnL Then
-							Print #FnL, tKey & IIf(Not EndsWith(tKey, " (needs to be removed)"), " (needs to be removed)", "") & " = " & UzLot(mlKeyWords.Item(i)->Text)
-						End If
-					End If
-				Else
-					Print #Fn1, tKey & " = " & mlKeyWords.Item(i)->Text
-					If FnL Then
-						Print #FnL, tKey & " = " & UzLot(mlKeyWords.Item(i)->Text)
-					End If
-				End If
-			End If
-		Next
-		App.DoEvents
-		Print #Fn1, "[Property]"
-		If FnL Then
-			Print #FnL, "[Property]"
-		End If
-		For i As Integer = 0 To mlKeysProperty.Count - 1
-			tKey = mlKeysProperty.Item(i)->Key
-			If InStr(tKey, "=") Then tKey = Replace(tKey, "=", "~")
-			If tKey <> "" Then 
-				If mlKeysProperty.Item(i)->Object = 0 Then
-					If mlKeysProperty.Item(i)->Text <> "" Then
-						Print #Fn1, tKey & IIf(Not EndsWith(tKey, " (needs to be removed)"), " (needs to be removed)", "") & " = " & mlKeysProperty.Item(i)->Text
-						If FnL Then
-							Print #FnL, tKey & IIf(Not EndsWith(tKey, " (needs to be removed)"), " (needs to be removed)", "") & " = " & UzLot(mlKeysProperty.Item(i)->Text)
-						End If
-					End If
-				Else
-					Print #Fn1, tKey & " = " & mlKeysProperty.Item(i)->Text
-					If FnL Then
-						Print #FnL, tKey & " = " & UzLot(mlKeysProperty.Item(i)->Text)
-					End If
-				End If
-			End If
-		Next
-		App.DoEvents
-		Print #Fn1, "[Templates]"
-		If FnL Then
-			Print #FnL, "[Templates]"
-		End If
-		For i As Integer = 0 To mlKeysTemplates.Count - 1
-			tKey = mlKeysTemplates.Item(i)->Key
-			If InStr(tKey, "=") Then tKey = Replace(tKey, "=", "~")
-			If tKey <> "" Then 
-				If mlKeysTemplates.Item(i)->Object = 0 Then
-					If mlKeysTemplates.Item(i)->Text <> "" Then
-						Print #Fn1, tKey & IIf(Not EndsWith(tKey, " (needs to be removed)"), " (needs to be removed)", "") & " = " & mlKeysTemplates.Item(i)->Text
-						If FnL Then
-							Print #FnL, tKey & IIf(Not EndsWith(tKey, " (needs to be removed)"), " (needs to be removed)", "") & " = " & UzLot(mlKeysTemplates.Item(i)->Text)
-						End If
-					End If
-				Else
-					Print #Fn1, tKey & " = " & mlKeysTemplates.Item(i)->Text
-					If FnL Then
-						Print #FnL, tKey & " = " & UzLot(mlKeysTemplates.Item(i)->Text)
-					End If
-				End If
-			End If
-		Next
-		CloseFile_(Fn1)
-		If FnL Then
-			CloseFile_(FnL)
-		End If
-		App.DoEvents
-		If chkAllLNG.Checked Then f = Dir() Else Exit While
-	Wend
-	App.DoEvents
-	mlKeysGeneral.Clear
-	mlKeysProperty.Clear
-	mlKeysCompiler.Clear
-	mlKeysTemplates.Clear
-	mlKeyWords.Clear
-	mlKeysGeneralEnglish.Clear
-	mlKeysPropertyEnglish.Clear
-	mlKeysCompilerEnglish.Clear
-	mlKeysTemplatesEnglish.Clear
-	mlKeyWordsEnglish.Clear
-	cmdUpdateLng.Enabled = True
-	This.Text =  ML("Options")
-	lblShowMsg.Text = ML("Saved") & ": " & FileNameLng
-	
-	'WebBrowser1.Navigate("https://cn.bing.com/translator?ref=TThis&&text=&from=en&to=cn")
-	
 End Sub
 
 Private Sub frmOptions.txtColorForeground_KeyPress(ByRef Sender As Control, Key As Integer)

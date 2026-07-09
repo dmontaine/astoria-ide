@@ -92,7 +92,7 @@ Dim Shared As Boolean bQuitting
 #include once "frmSplash.bi"
 pfSplash->MainForm = False
 pfSplash->Show
-pfSplash->lblSplash1.Text = "(" & ML("Version") & " " & pApp->Version & "  " & ML("64-bit") & ")"
+pfSplash->lblSplash1.Text = "(" & ("Version") & " " & pApp->Version & "  " & ("64-bit") & ")"
 pApp->DoEvents
 
 Dim Shared As VisualFBEditor.Application VisualFBEditorApp
@@ -132,7 +132,7 @@ Dim Shared As WStringOrStringList Comps, GlobalAsmFunctionsHelp, GlobalFunctions
 'Dim Shared As WStringOrStringList GlobalNamespaces, GlobalTypes, GlobalEnums, GlobalDefines, GlobalFunctions, GlobalTypeProcedures, GlobalArgs
 Dim Shared As WStringList AddIns, IncludeFiles, LoadPaths, IncludePaths, LibraryPaths, MRUAIChat, MRUFiles, MRUFolders, MRUProjects, ProfilingFunctions
 Dim Shared As WString Ptr RecentFiles, RecentFile, RecentProject, RecentFolder, RecentAIChat
-Dim Shared As Dictionary Helps, HotKeys, Compilers, MakeTools, Terminals, OtherEditors, BuildConfigurations, mlCompiler, mlTemplates, AIAgents, mpKeys, mcKeys
+Dim Shared As Dictionary Helps, HotKeys, Compilers, MakeTools, Terminals, OtherEditors, BuildConfigurations, AIAgents
 Dim Shared As ListView lvProblems, lvSuggestions, lvSearch, lvToDo, lvMemory
 Dim Shared As ProgressBar prProgress
 Dim Shared As CommandButton btnPropertyValue
@@ -200,7 +200,7 @@ pIncludeFiles = @IncludeFiles
 pLoadPaths = @LoadPaths
 pIncludePaths = @IncludePaths
 pLibraryPaths = @LibraryPaths
-pfSplash->lblProcess.Text = ML("Load On Startup") & ": " & ML("Settings")
+pfSplash->lblProcess.Text = ("Load On Startup") & ": " & ("Settings")
 
 LoadLanguageTexts
 LoadSettings
@@ -315,13 +315,13 @@ End Sub
 Sub ClearAnalysisPanels()
 	ClearMessages()
 	lvProblems.ListItems.Clear
-	tpProblems->Caption = ML("Problems")
+	tpProblems->Caption = ("Problems")
 	lvSuggestions.ListItems.Clear
-	tpSuggestions->Caption = ML("Suggestions")
+	tpSuggestions->Caption = ("Suggestions")
 	lvSearch.ListItems.Clear
-	tpFind->Caption = ML("Find")
+	tpFind->Caption = ("Find")
 	lvToDo.ListItems.Clear
-	tpToDo->Caption = ML("ToDo")
+	tpToDo->Caption = ("ToDo")
 	txtChangeLog.Text = ""
 	mLoadLog = False
 	mLoadToDo = False
@@ -367,13 +367,13 @@ End Sub
 Sub ClearDebugPanels()
 	ClearThreadsWindow
 	lvLocals.Nodes.Clear
-	If tpLocals <> 0 AndAlso tpLocals->Parent <> 0 Then tpLocals->Caption = ML("Locals")
+	If tpLocals <> 0 AndAlso tpLocals->Parent <> 0 Then tpLocals->Caption = ("Locals")
 	tvVar.Nodes.Clear
 	lvGlobals.Nodes.Clear
-	If tpGlobals <> 0 AndAlso tpGlobals->Parent <> 0 Then tpGlobals->Caption = ML("Globals")
+	If tpGlobals <> 0 AndAlso tpGlobals->Parent <> 0 Then tpGlobals->Caption = ("Globals")
 	tvPrc.Nodes.Clear
 	lvWatches.Nodes.Clear
-	If tpWatches <> 0 AndAlso tpWatches->Parent <> 0 Then tpWatches->Caption = ML("Watches")
+	If tpWatches <> 0 AndAlso tpWatches->Parent <> 0 Then tpWatches->Caption = ("Watches")
 	tvWch.Nodes.Clear
 	tvThd.Nodes.Clear
 	lvMemory.ListItems.Clear
@@ -439,7 +439,7 @@ End Sub
 
 Sub txtOutput_DblClick(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	Dim Buff As WString Ptr = @txtOutput.Lines(txtOutput.GetLineFromCharIndex)
-	If Buff > 0 AndAlso InStr(LCase(*Buff), ML("debugprint")) > 1 Then Exit Sub
+	If Buff > 0 AndAlso InStr(LCase(*Buff), ("debugprint")) > 1 Then Exit Sub
 	Dim As WString Ptr ErrFileName, ErrTitle
 	Dim As ProjectElement Ptr Project
 	Dim As TreeNode Ptr ProjectNode
@@ -639,7 +639,7 @@ Sub ExpandFormControls(ByRef Item As TreeNode)
 	ClearTreeNode @Item
 	Dim As TabWindow Ptr tb = FindOpenTabWindowForNode(@Item)
 	If tb = 0 OrElse tb->Des = 0 Then
-		Item.Nodes.Add ML("(Open the form to view its controls)")
+		Item.Nodes.Add ("(Open the form to view its controls)")
 		Exit Sub
 	End If
 	Dim As My.Sys.Forms.Designer Ptr Des = tb->Des
@@ -653,7 +653,7 @@ Sub ExpandFormControls(ByRef Item As TreeNode)
 			Next
 		End If
 	End If
-	If Item.Nodes.Count = 0 Then Item.Nodes.Add ML("(No controls)")
+	If Item.Nodes.Count = 0 Then Item.Nodes.Add ("(No controls)")
 End Sub
 
 Sub SelectControlTreeNode(cte As ControlTreeElement Ptr)
@@ -762,7 +762,7 @@ Function AddProject(ByRef FileName As WString, pFilesList As WStringList Ptr, tn
 	Else
 		If FileName <> "" AndAlso Not bNew Then
 			If Not FileExists(FileName) Then
-				MsgBox ML("File not found") & ":" & WChr(13, 10) & WChr(13, 10) & FormatMsgPath(FileName)
+				MsgBox ("File not found") & ":" & WChr(13, 10) & WChr(13, 10) & FormatMsgPath(FileName)
 				Return tn
 			End If
 			AddMRUProject FileName
@@ -803,11 +803,11 @@ Function AddProject(ByRef FileName As WString, pFilesList As WStringList Ptr, tn
 		End If
 		'If tn <> 0 Then
 		If ShowProjectFolders Then
-			tn->Nodes.Add ML("Includes"), "Includes", , "Opened", "Opened"
-			tn->Nodes.Add ML("Forms"), "Forms", , "Opened", "Opened"
-			tn->Nodes.Add ML("Modules"), "Modules", , "Opened", "Opened"  '.  Using "Modules" is better than "Sources"
-			tn->Nodes.Add ML("Resources"), "Resources", , "Opened", "Opened"
-			tn->Nodes.Add ML("Others"), "Others", , "Opened", "Opened"
+			tn->Nodes.Add ("Includes"), "Includes", , "Opened", "Opened"
+			tn->Nodes.Add ("Forms"), "Forms", , "Opened", "Opened"
+			tn->Nodes.Add ("Modules"), "Modules", , "Opened", "Opened"  '.  Using "Modules" is better than "Sources"
+			tn->Nodes.Add ("Resources"), "Resources", , "Opened", "Opened"
+			tn->Nodes.Add ("Others"), "Others", , "Opened", "Opened"
 			'End if
 		End If
 	End If
@@ -984,7 +984,7 @@ Function AddProject(ByRef FileName As WString, pFilesList As WStringList Ptr, tn
 					Dim As UString LibraryVfpPath = GetControlLibraryVfpPath(LibraryPath)
 					Dim As UString LibraryFolder = GetControlLibraryFolder(LibraryPath)
 					If LibraryVfpPath = "" OrElse LibraryFolder = "" Then
-						MsgBox ML("Control library must be in the editor Controls folder.") & ":" & WChr(13, 10) & WChr(13, 10) & FormatMsgPathU(LibraryPath), , mtWarning
+						MsgBox ("Control library must be in the editor Controls folder.") & ":" & WChr(13, 10) & WChr(13, 10) & FormatMsgPathU(LibraryPath), , mtWarning
 					Else
 						ppe->Components.Add LibraryVfpPath
 						For i As Integer = 0 To ControlLibraries.Count - 1
@@ -1086,7 +1086,7 @@ End Sub
 
 Sub NewFile()
 	If GetOpenProjectNode() = 0 Then
-		MsgBox ML("Open a project first."), , mtWarning
+		MsgBox ("Open a project first."), , mtWarning
 		Return
 	End If
 	Dim fNewFile As frmNewFile
@@ -1106,7 +1106,7 @@ End Sub
 
 Sub OpenEditorFile()
 	If GetOpenProjectNode() = 0 Then
-		MsgBox ML("Open a project first."), , mtWarning
+		MsgBox ("Open a project first."), , mtWarning
 		Return
 	End If
 	Dim fOpenProjectFile As frmOpenProjectFile
@@ -1142,7 +1142,7 @@ Sub DeleteEditorFile()
 	'' supposed to remove a project member from the explorer tree).
 	Dim As WString * 1024 sFilePath = tb->FileName
 	Dim As Boolean bNestedInProject = (tn->ParentNode <> 0)
-	If MsgBox(ML("Are you sure you want to delete the file") & " """ & tn->Text & """?", "Visual FB Editor", mtWarning, btYesNo) <> mrYes Then Exit Sub
+	If MsgBox(("Are you sure you want to delete the file") & " """ & tn->Text & """?", "Visual FB Editor", mtWarning, btYesNo) <> mrYes Then Exit Sub
 	If Not CloseTab(tb, True) Then Exit Sub
 	If bNestedInProject Then
 		If tn->ParentNode->Nodes.IndexOf(tn) <> -1 Then tn->ParentNode->Nodes.Remove tn->ParentNode->Nodes.IndexOf(tn)
@@ -1189,19 +1189,19 @@ End Function
 Sub AddNewProjectFile(ByRef Template As WString, ByRef ItemName As WString)
 	Dim tnP As TreeNode Ptr = GetOpenProjectNode()
 	If tnP = 0 Then
-		MsgBox ML("Open a project first."), , mtWarning
+		MsgBox ("Open a project first."), , mtWarning
 		Return
 	End If
 	Dim ppe As ProjectElement Ptr = Cast(ProjectElement Ptr, tnP->Tag)
 	If ppe = 0 Then Return
 	Dim As UString itemBaseName = Trim(ItemName, Any !" \t" + Chr(10) + Chr(13))
 	If Not IsValidProjectItemName(itemBaseName) Then
-		MsgBox ML("Enter a valid name without paths or file extensions."), , mtWarning
+		MsgBox ("Enter a valid name without paths or file extensions."), , mtWarning
 		Return
 	End If
 	Dim As UString projectDir = GetProjectDirectory()
 	If projectDir = "" Then
-		MsgBox ML("Project folder not found."), , mtWarning
+		MsgBox ("Project folder not found."), , mtWarning
 		Return
 	End If
 	Dim As UString templateFile = GetFileNameU(Template)
@@ -1210,11 +1210,11 @@ Sub AddNewProjectFile(ByRef Template As WString, ByRef ItemName As WString)
 	If extPos > 0 Then fileExt = Mid(templateFile, extPos)
 	Dim As UString destPath = WinOsPath(projectDir & WindowsSlash & itemBaseName & fileExt)
 	If FileExistsU(destPath) Then
-		MsgBox ML("File already exists") & ":" & WChr(13, 10) & WChr(13, 10) & FormatMsgPathU(destPath), , mtWarning
+		MsgBox ("File already exists") & ":" & WChr(13, 10) & WChr(13, 10) & FormatMsgPathU(destPath), , mtWarning
 		Return
 	End If
 	If Not CopyFileU(Template, destPath) Then
-		MsgBox ML("Create file failure!") & ":" & WChr(13, 10) & WChr(13, 10) & FormatMsgPathU(destPath), , mtWarning
+		MsgBox ("Create file failure!") & ":" & WChr(13, 10) & WChr(13, 10) & FormatMsgPathU(destPath), , mtWarning
 		Return
 	End If
 	Dim tn1 As TreeNode Ptr = GetTreeNodeChild(tnP, destPath)
@@ -1222,7 +1222,7 @@ Sub AddNewProjectFile(ByRef Template As WString, ByRef ItemName As WString)
 	WLet(destPathPtr, destPath)
 	If ContainsFileName(tn1, *destPathPtr) Then
 		WDeAllocate(destPathPtr)
-		MsgBox ML("This path is exists!"), , mtWarning
+		MsgBox ("This path is exists!"), , mtWarning
 		Return
 	End If
 	Dim As String IconName = GetIconName(destPath)
@@ -1385,7 +1385,7 @@ Sub AddMRU(ByRef FileFolderName As WString, ByRef MRUFilesFolders As WStringList
 		miRecentFilesFolders->Add(MRUFilesFolders.Item(i), "", MRUFilesFolders.Item(i), @mClickMRU, , i)
 	Next
 	miRecentFilesFolders->Add("-")
-	miRecentFilesFolders->Add(ML("Clear Recently Opened"), "", "Clear" & MRUType, @mClickMRU)
+	miRecentFilesFolders->Add(("Clear Recently Opened"), "", "Clear" & MRUType, @mClickMRU)
 	If miRecentFilesFolders->Enabled = False Then miRecentFilesFolders->Enabled = True
 End Sub
 
@@ -1404,7 +1404,7 @@ Sub AddMRUAIChat(ByRef FileName As WString)
 		miRecentAIChat->Add(MRUAIChat.Item(i), "", MRUAIChat.Item(i), @mClickAIChat, , i)
 	Next
 	miRecentAIChat->Add("-")
-	miRecentAIChat->Add(ML("Clear Recently Opened"), "", "ClearAIChat", @mClickAIChat)
+	miRecentAIChat->Add(("Clear Recently Opened"), "", "ClearAIChat", @mClickAIChat)
 	If miRecentAIChat->Enabled = False Then miRecentAIChat->Enabled = True
 End Sub
 
@@ -1497,7 +1497,7 @@ Sub AddNew(ByRef Template As WString)
 		Dim tn As TreeNode Ptr = AddProject(Template, , , True)
 		If tn <> tnPrev Then ChangeUseDebugger False, 1
 	Else
-		MsgBox ML("Open a project first."), , mtWarning
+		MsgBox ("Open a project first."), , mtWarning
 	End If
 End Sub
 
@@ -1520,8 +1520,8 @@ Sub OpenFiles(ByRef FileName As WString)
 End Sub
 
 Sub SetSaveDialogParameters(ByRef FileName As WString)
-	pSaveD->Caption = ML("Save File As")
-	pSaveD->Filter = ML("FreeBasic Module") & " (*.bas)|*.bas|" & ML("FreeBasic Include File") & " (*.bi)|*.bi|" & ML("Other Include File") & " (*.inc)|*.inc|" & ML("Form Module") & " (*.frm)|*.frm|" & ML("Resource File") & " (*.rc)|*.rc|" & ML("All Files") & "|*.*|"
+	pSaveD->Caption = ("Save File As")
+	pSaveD->Filter = ("FreeBasic Module") & " (*.bas)|*.bas|" & ("FreeBasic Include File") & " (*.bi)|*.bi|" & ("Other Include File") & " (*.inc)|*.inc|" & ("Form Module") & " (*.frm)|*.frm|" & ("Resource File") & " (*.rc)|*.rc|" & ("All Files") & "|*.*|"
 	If InStr(FileName, "/") = 0 AndAlso InStr(FileName, "\") = 0 Then
 		If *LastOpenPath = "" Then
 			pSaveD->InitialDir = *ProjectsPath
@@ -1532,7 +1532,7 @@ Sub SetSaveDialogParameters(ByRef FileName As WString)
 		pSaveD->InitialDir = GetFolderName(FileName)
 	End If
 	pSaveD->FileName = FileName
-	If FileName = ML("Untitled") Then
+	If FileName = ("Untitled") Then
 		'pSaveD->FileName = FileName & ".bas"
 		pSaveD->InitialDir = GetFullPath(*ProjectsPath)
 		pSaveD->FilterIndex = SAVE_FILTER_BAS
@@ -1563,7 +1563,7 @@ Function SaveProjectFile(ppe As ProjectElement Ptr, ee As ExplorerElement Ptr, t
 			If pSaveD->Execute Then
 				WLet(LastOpenPath, GetFolderName(pSaveD->FileName))
 				If FileExists(pSaveD->FileName) Then
-					Select Case MsgBox(ML("Want to replace the file") & " """ & pSaveD->FileName & """?", App.Title, mtWarning, btYesNoCancel)
+					Select Case MsgBox(("Want to replace the file") & " """ & pSaveD->FileName & """?", App.Title, mtWarning, btYesNoCancel)
 					Case mrYes: Exit Do
 					Case mrCancel: Return False
 					Case mrNo:
@@ -1588,15 +1588,15 @@ Function SaveProjectFile(ppe As ProjectElement Ptr, ee As ExplorerElement Ptr, t
 End Function
 
 Function SaveProject(ByRef tnP As TreeNode Ptr, bWithQuestion As Boolean = False) As Boolean
-	If tnP = 0 Then MsgBox(ML("Project not selected!")): Return True
+	If tnP = 0 Then MsgBox(("Project not selected!")): Return True
 	Dim As TreeNode Ptr tnPr = GetParentNode(tnP)
 	If tnPr = 0 Then Return True
 	Dim As ExplorerElement Ptr ee
 	Dim As ProjectElement Ptr ppe
 	ppe = tnPr->Tag
-	If tnPr->ImageKey <> "Project" AndAlso tnPr->ImageKey <> "Opened" Then MsgBox(ML("Project not selected!")): Return True
+	If tnPr->ImageKey <> "Project" AndAlso tnPr->ImageKey <> "Opened" Then MsgBox(("Project not selected!")): Return True
 	If CInt(ppe = 0) OrElse CInt(InStr(WGet(ppe->FileName), "\") = 0 AndAlso InStr(WGet(ppe->FileName), "/") = 0) OrElse CInt(bWithQuestion) Then
-		SaveD.Caption = ML("Save Project As")
+		SaveD.Caption = ("Save Project As")
 		SaveD.InitialDir = GetFullPath(*ProjectsPath)
 		If ppe <> 0 Then
 			SaveD.FileName = WGet(ppe->FileName)
@@ -1606,11 +1606,11 @@ Function SaveProject(ByRef tnP As TreeNode Ptr, bWithQuestion As Boolean = False
 			'				SaveD.FileName = WGet(ppe->FileName)
 			'			End If
 		End If
-		SaveD.Filter = ML("VisualFBEditor Project") & " (*.vfp)|*.vfp|"
+		SaveD.Filter = ("VisualFBEditor Project") & " (*.vfp)|*.vfp|"
 		If Not SaveD.Execute Then Return False
 		WLet(LastOpenPath, GetFolderName(SaveD.FileName))
 		If FileExists(SaveD.FileName) Then
-			Select Case MsgBox(ML("Are you sure you want to overwrite the project") & "?" & WChr(13,10) & SaveD.FileName, "Visual FB Editor", mtWarning, btYesNo)
+			Select Case MsgBox(("Are you sure you want to overwrite the project") & "?" & WChr(13,10) & SaveD.FileName, "Visual FB Editor", mtWarning, btYesNo)
 			Case mrYes:
 			Case mrNo: Return SaveProject(tnPr, bWithQuestion)
 			End Select
@@ -1641,7 +1641,7 @@ Function SaveProject(ByRef tnP As TreeNode Ptr, bWithQuestion As Boolean = False
 	If Not EndsWith(LCase(*ppe->FileName), ".vfp") Then
 		OpenResult = Open(*ppe->FileName & "/" & GetFileName(*ppe->FileName) & ".vfp" For Output Encoding "utf-8" As #Fn)
 		If OpenResult <> 0 Then
-			MsgBox ML("Couldn't save the project file - check that the folder still exists and isn't read-only") & "." & WChr(13,10) & *ppe->FileName, "Visual FB Editor", mtError
+			MsgBox ("Couldn't save the project file - check that the folder still exists and isn't read-only") & "." & WChr(13,10) & *ppe->FileName, "Visual FB Editor", mtError
 			Return False
 		End If
 		For i As Integer = 0 To ppe->Files.Count - 1
@@ -1655,7 +1655,7 @@ Function SaveProject(ByRef tnP As TreeNode Ptr, bWithQuestion As Boolean = False
 	Else
 		OpenResult = Open(*ppe->FileName For Output Encoding "utf-8" As #Fn)
 		If OpenResult <> 0 Then
-			MsgBox ML("Couldn't save the project file - check that the folder still exists and isn't read-only") & "." & WChr(13,10) & *ppe->FileName, "Visual FB Editor", mtError
+			MsgBox ("Couldn't save the project file - check that the folder still exists and isn't read-only") & "." & WChr(13,10) & *ppe->FileName, "Visual FB Editor", mtError
 			Return False
 		End If
 		For i As Integer = 0 To tnPr->Nodes.Count - 1
@@ -1872,7 +1872,7 @@ Sub CloseAllTabs(WithoutCurrent As Boolean = False)
 End Sub
 
 Function CloseAllDocuments() As Boolean
-		If prun AndAlso kill_process(ML("Trying to launch but debuggee still running")) = False Then
+		If prun AndAlso kill_process(("Trying to launch but debuggee still running")) = False Then
 			Return False
 		End If
 	Dim tb As TabWindow Ptr
@@ -1962,7 +1962,7 @@ Sub RunHelp(Param As Any Ptr)
 	CurrentHelpPath = GetFullPath(CurrentHelpPath)
 	If Not FileExists(CurrentHelpPath) Then
 		ThreadsEnter()
-		ShowMessages ML("File") & " " & CurrentHelpPath & " " & ML("not found")
+		ShowMessages ("File") & " " & CurrentHelpPath & " " & ("not found")
 		ThreadsLeave()
 	Else
 	End If
@@ -2030,7 +2030,7 @@ Sub OpenProjectTemplate(ByVal TabIndex As Integer = 0)
 		templateTitle = "Recent Project"
 	End If
 	pfTemplates->DialogMode = IIf(TabIndex = 0, 1, TabIndex)
-	pfTemplates->Text = ML(templateTitle)
+	pfTemplates->Text = (templateTitle)
 	If pfTemplates->ShowModal(frmMain) = ModalResults.OK Then
 		If pfTemplates->SelectedFolder <> "" Then
 			AddFolder pfTemplates->SelectedFolder
@@ -2122,7 +2122,7 @@ Sub AddFromTemplate(ByRef Template As WString)
 		End If
 	End If
 	If tn3 = 0 Then
-		If GetOpenProjectNode() = 0 Then MsgBox ML("Open a project first."), , mtWarning
+		If GetOpenProjectNode() = 0 Then MsgBox ("Open a project first."), , mtWarning
 	End If
 End Sub
 
@@ -2143,7 +2143,7 @@ Sub AddFilesToProject
 	Dim OpenD As OpenFileDialog
 	OpenD.Options.Include ofOldStyleDialog
 	OpenD.MultiSelect = True
-	OpenD.Filter = ML("FreeBasic Files") & " (*.vfp, *.bas, *.frm, *.bi, *.inc; *.rc)|*.vfp;*.bas;*.frm;*.bi;*.inc;*.rc|" & ML("VisualFBEditor Project") & " (*.vfp)|*.vfp|" & ML("FreeBasic Module") & " (*.bas)|*.bas|" & ML("FreeBasic Include File") & " (*.bi)|*.bi|" & ML("Other Include File") & " (*.inc)|*.inc|" & ML("Form Module") & " (*.frm)|*.frm|" & ML("Resource File") & " (*.rc)|*.rc|" & ML("All Files") & "|*.*|"
+	OpenD.Filter = ("FreeBasic Files") & " (*.vfp, *.bas, *.frm, *.bi, *.inc; *.rc)|*.vfp;*.bas;*.frm;*.bi;*.inc;*.rc|" & ("VisualFBEditor Project") & " (*.vfp)|*.vfp|" & ("FreeBasic Module") & " (*.bas)|*.bas|" & ("FreeBasic Include File") & " (*.bi)|*.bi|" & ("Other Include File") & " (*.inc)|*.inc|" & ("Form Module") & " (*.frm)|*.frm|" & ("Resource File") & " (*.rc)|*.rc|" & ("All Files") & "|*.*|"
 	If OpenD.Execute Then
 		Dim tn1 As TreeNode Ptr
 		For i As Integer = 0 To OpenD.FileNames.Count - 1
@@ -2257,10 +2257,10 @@ Sub SetMainNode(tn As TreeNode Ptr)
 	If MainNode <> 0 Then MainNode->Bold = False
 	MainNode = tn
 	If tn = 0 Then
-		lblLeft.Text = ML("Main Project") & ": " & ML("Automatic")
+		lblLeft.Text = ("Main Project") & ": " & ("Automatic")
 	Else
 		MainNode->Bold = True
-		lblLeft.Text = ML("Main Project") & ": " & MainNode->Text
+		lblLeft.Text = ("Main Project") & ": " & MainNode->Text
 	End If
 End Sub
 
@@ -2272,7 +2272,7 @@ Sub ReloadHistoryCode()
 	End If
 	Dim As OpenFileDialog OpenD
 	OpenD.InitialDir = ExePath & WindowsSlash & "Temp"
-	OpenD.Filter = ML("Backup Files") & " (*.bak)|" & GetFileName(tb->FileName) & "*.bak|" & ML("All Files") & "|*.*|"
+	OpenD.Filter = ("Backup Files") & " (*.bak)|" & GetFileName(tb->FileName) & "*.bak|" & ("All Files") & "|*.*|"
 	If OpenD.Execute AndAlso Trim(OpenD.FileName) <> "" Then
 		tb->txtCode.Changing "Reload"
 		tb->txtCode.LoadFromFile(OpenD.FileName, tb->FileEncoding, tb->NewLineType)
@@ -2312,7 +2312,7 @@ Sub SetAsMain(IsTab As Boolean)
 	If tn = 0 Then Exit Sub Else ptn = GetParentNode(tn)
 	If tn->ParentNode = 0 OrElse (ptn <> 0 AndAlso ptn->ImageKey = "Opened") OrElse (tn->Tag <> 0 AndAlso *Cast(ExplorerElement Ptr, tn->Tag) Is ProjectElement) Then
 		SetMainNode tn
-		lblLeft.Text = ML("Main Project") & ": " & MainNode->Text
+		lblLeft.Text = ("Main Project") & ": " & MainNode->Text
 	Else
 		Dim As ExplorerElement Ptr ee = tn->Tag
 		Dim As ProjectElement Ptr ppe
@@ -2564,7 +2564,7 @@ Function DeleteProject() As Boolean
 	Dim As TreeNode Ptr tn = GetParentNode(ptvExplorer->SelectedNode)
 	If tn = 0 Then Return False
 	If tn->Tag = 0 Then Return False
-	If MsgBox(ML("Are you sure you want to delete the project") & " """ & tn->Text & """?", "Visual FB Editor", mtWarning, btYesNo) <> mrYes Then Return False
+	If MsgBox(("Are you sure you want to delete the project") & " """ & tn->Text & """?", "Visual FB Editor", mtWarning, btYesNo) <> mrYes Then Return False
 	If Not CloseProject(tn, True) Then Return False
 	Dim As ProjectElement Ptr ppe = Cast(ProjectElement Ptr, tn->Tag)
 	Dim As UString ProjectPath = GetFolderName(WGet(ppe->FileName))
@@ -2801,11 +2801,11 @@ Sub ChangeFolderType(Value As ProjectFolderTypes)
 		Dim As TreeNode Ptr tnF, tnI, tnS, tnR, tnO
 		Dim As TreeNode Ptr tn1, tn2
 		If Value = ProjectFolderTypes.ShowWithFolders Then
-			tnI = tn->Nodes.Add(ML("Includes"), "Includes", , "Opened", "Opened")
-			tnF = tn->Nodes.Add(ML("Forms"), "Forms", , "Opened", "Opened")
-			tnS = tn->Nodes.Add(ML("Modules"), "Modules",, "Opened", "Opened") ' "Modules" is better than "Sources"
-			tnR = tn->Nodes.Add(ML("Resources"), "Resources", , "Opened", "Opened")
-			tnO = tn->Nodes.Add(ML("Others"), "Others", , "Opened", "Opened")
+			tnI = tn->Nodes.Add(("Includes"), "Includes", , "Opened", "Opened")
+			tnF = tn->Nodes.Add(("Forms"), "Forms", , "Opened", "Opened")
+			tnS = tn->Nodes.Add(("Modules"), "Modules",, "Opened", "Opened") ' "Modules" is better than "Sources"
+			tnR = tn->Nodes.Add(("Resources"), "Resources", , "Opened", "Opened")
+			tnO = tn->Nodes.Add(("Others"), "Others", , "Opened", "Opened")
 		End If
 		If ppe->ProjectFolderType = ProjectFolderTypes.ShowAsFolder Then
 			tn->Text = tn->Text & ".vfp"
@@ -2972,10 +2972,10 @@ End Function
 
 Sub InitToolBoxTree()
 	tvToolBox.Nodes.Clear
-	tnToolControls = tvToolBox.Nodes.Add(ML("Controls"), "Controls", "", "Folder", "Folder")
-	tnToolContainers = tvToolBox.Nodes.Add(ML("Containers"), "Containers", "", "Folder", "Folder")
-	tnToolComponents = tvToolBox.Nodes.Add(ML("Components"), "Components", "", "Folder", "Folder")
-	tnToolDialogs = tvToolBox.Nodes.Add(ML("Dialogs"), "Dialogs", "", "Folder", "Folder")
+	tnToolControls = tvToolBox.Nodes.Add(("Controls"), "Controls", "", "Folder", "Folder")
+	tnToolContainers = tvToolBox.Nodes.Add(("Containers"), "Containers", "", "Folder", "Folder")
+	tnToolComponents = tvToolBox.Nodes.Add(("Components"), "Components", "", "Folder", "Folder")
+	tnToolDialogs = tvToolBox.Nodes.Add(("Dialogs"), "Dialogs", "", "Folder", "Folder")
 	tnToolControls->Nodes.Add("Cursor", "Cursor", "", "Cursor", "Cursor")
 	tnToolContainers->Nodes.Add("Cursor", "Cursor", "", "Cursor", "Cursor")
 	tnToolComponents->Nodes.Add("Cursor", "Cursor", "", "Cursor", "Cursor")
@@ -3245,7 +3245,7 @@ Sub LoadFunctions(ByRef Path As WString, LoadParameter As LoadParam = FilePathAn
 			Loop
 		Else
 			ThreadsEnter
-			ShowMessages(ML("Could not find include file:") & " " & PathFunction, False)
+			ShowMessages(("Could not find include file:") & " " & PathFunction, False)
 			ThreadsLeave
 		End If
 		CloseFile_(ff)
@@ -4426,7 +4426,7 @@ End Sub
 Sub EndOfLoadFunctions
 	LoadFunctionsCount -= 1
 	If LoadFunctionsCount = 0 Then
-		stBar.Panels[2]->Caption = ML("IntelliSense fully loaded")
+		stBar.Panels[2]->Caption = ("IntelliSense fully loaded")
 		Dim As TabWindow Ptr tb
 		For j As Integer = TabPanels.Count - 1 To 0 Step -1
 			Var ptabCode = @Cast(TabPanel Ptr, TabPanels.Item(j))->tabCode
@@ -4509,13 +4509,13 @@ Sub LoadHelp
 	If Result <> 0 Then Result = Open(*KeywordsHelpPath For Input Encoding "utf-32" As #Fn)
 	If Result <> 0 Then Result = Open(*KeywordsHelpPath For Input As #Fn): tEncode= 1
 	If Result = 0 Then
-			If tEncode = 1 AndAlso Not InEnglish Then MsgBox ML("The file encoding is not UTF-8 (BOM). You should convert it to UTF-8 (BOM).") & Chr(13, 10) & *KeywordsHelpPath
+			If tEncode = 1 AndAlso Not InEnglish Then MsgBox ("The file encoding is not UTF-8 (BOM). You should convert it to UTF-8 (BOM).") & Chr(13, 10) & *KeywordsHelpPath
 		Dim As TypeElement Ptr te, te1
 		Dim As WString * 1024 Buff, StartBuff, bTrim
 		Dim As Boolean bStart, bStartEnd, bDescriptionStart, bDescriptionEnd, bReturnValueStart, bOperator
 		Dim As Paragraph Parag
-		Dim As WString * 1024 MLSyntax = ML("Syntax"), MLUsage = ML("Usage"), MLParameters = ML("Parameters"), MLReturnValue = ML("Return Value"), MLDescription = ML("Description"), _
-		MLExample = ML("Example"), MLDifferencesFromQB = ML("Differences from QB"), MLSeeAlso = ML("See also"), MLMoreDetails = ML("More details ..."), MLDot = ML(".")
+		Dim As WString * 1024 MLSyntax = ("Syntax"), MLUsage = ("Usage"), MLParameters = ("Parameters"), MLReturnValue = ("Return Value"), MLDescription = ("Description"), _
+		MLExample = ("Example"), MLDifferencesFromQB = ("Differences from QB"), MLSeeAlso = ("See also"), MLMoreDetails = ("More details ..."), MLDot = (".")
 		Dim As Integer Pos2, Pos1, LineNumber
 		Do Until EOF(Fn)
 			LineNumber += 1
@@ -4696,13 +4696,13 @@ Sub LoadHelp
 	If Result <> 0 Then Result = Open(*AsmKeywordsHelpPath For Input Encoding "utf-32" As #Fn)
 	If Result <> 0 Then Result = Open(*AsmKeywordsHelpPath For Input As #Fn): tEncode= 1
 	If Result = 0 Then
-			If tEncode = 1 AndAlso Not InEnglish Then MsgBox ML("The file encoding is not UTF-8 (BOM). You should convert it to UTF-8 (BOM).") & Chr(13, 10) & *AsmKeywordsHelpPath
+			If tEncode = 1 AndAlso Not InEnglish Then MsgBox ("The file encoding is not UTF-8 (BOM). You should convert it to UTF-8 (BOM).") & Chr(13, 10) & *AsmKeywordsHelpPath
 		Dim As TypeElement Ptr te, te1
 		Dim As WString * 1024 Buff, StartBuff, bTrim
 		Dim As Boolean bAsmCommand, bExampleStarted
 		Dim As Paragraph Parag
 		Dim As List Commands
-		Dim As WString * 1024 MLSyntax = ML("Syntax"), MLExample = ML("Example"), MLMoreDetails = ML("More details ..."), MLDot = ML(".")
+		Dim As WString * 1024 MLSyntax = ("Syntax"), MLExample = ("Example"), MLMoreDetails = ("More details ..."), MLDot = (".")
 		Dim As Integer Pos1, Pos2, LineNumber
 		Do Until EOF(Fn)
 			LineNumber += 1
@@ -5032,9 +5032,9 @@ Sub LoadToolBox(ForLibrary As Library Ptr = 0)
 			If CtlLibrary->Handle = 0 Then
 				CtlLibrary->Handle = DyLibLoad(GetFullPath(CtlLibrary->Path))
 				If Not FileExists(GetFullPath(CtlLibrary->Path)) Then
-					MsgBox ML("File not found") & ":" & WChr(13, 10) & WChr(13, 10) & FormatMsgPathU(CtlLibrary->Path) & WChr(13, 10) & WChr(13, 10) & ML("Can not load control to toolbox")
+					MsgBox ("File not found") & ":" & WChr(13, 10) & WChr(13, 10) & FormatMsgPathU(CtlLibrary->Path) & WChr(13, 10) & WChr(13, 10) & ("Can not load control to toolbox")
 				ElseIf CtlLibrary->Handle = 0 Then
-					MsgBox ML("File not loaded") & ":" & WChr(13, 10) & WChr(13, 10) & FormatMsgPathU(CtlLibrary->Path) & WChr(13, 10) & WChr(13, 10) & ML("Can not load control to toolbox")
+					MsgBox ("File not loaded") & ":" & WChr(13, 10) & WChr(13, 10) & FormatMsgPathU(CtlLibrary->Path) & WChr(13, 10) & WChr(13, 10) & ("Can not load control to toolbox")
 				End If
 			End If
 			If Not CtlLibrary->Enabled Then Continue For
@@ -5582,9 +5582,9 @@ End Sub
 
 Dim As Double tWidth = Max(8, DefaultFont.Size) * 0.85
 stBar.Align = DockStyle.alBottom
-stBar.Add ML("Press F1 for help"), tWidth * 25
+stBar.Add ("Press F1 for help"), tWidth * 25
 stBar.Add("", tWidth * 50) 'Row +Col 
-stBar.Add ML("IntelliSense fully loaded"), tWidth * 27
+stBar.Add ("IntelliSense fully loaded"), tWidth * 27
 stBar.Add "UTF-8 (BOM)", tWidth * 11
 stBar.Add "CR+LF", tWidth * 6
 stBar.Add "NUM", tWidth * 4
@@ -5603,8 +5603,8 @@ prProgress.Marquee = True
 'stBar.Panels[1]->Alignment = 1
 
 Sub GDBCommand
-	fTheme.Text = ML("GDB Command")
-	fTheme.lblThemeName.Text = ML("Type command:")
+	fTheme.Text = ("GDB Command")
+	fTheme.lblThemeName.Text = ("Type command:")
 	If fTheme.ShowModal(frmMain) = ModalResults.OK Then
 		'ShowResult = True
 			command_debug fTheme.txtThemeName.Text
@@ -5612,7 +5612,7 @@ Sub GDBCommand
 End Sub
 
 Sub CreateMenusAndToolBars
-	pfSplash->lblProcess.Text = ML("Load On Startup") & ": " & ML("Create Menus And ToolBars")
+	pfSplash->lblProcess.Text = ("Load On Startup") & ": " & ("Create Menus And ToolBars")
 	imgList.Name = "imgList"
 	imgList.Add "StartWithCompile", "StartWithCompile"
 	imgList.Add "Start", "Start"
@@ -5763,25 +5763,25 @@ Sub CreateMenusAndToolBars
 	imgList32.Add "Manifest32", "Manifest32"
 	
 	'mnuMain.ImagesList = @imgList
-	pfSplash->lblProcess.Text = ML("Load On Startup") & ": " & ML("Load Hot Keys")
+	pfSplash->lblProcess.Text = ("Load On Startup") & ": " & ("Load Hot Keys")
 	LoadHotKeys
-	Var miFile = mnuMain.Add(ML("&File"), "", "File")
-	miFile->Add(ML("&New Project") & HK("NewProject", "Ctrl+Shift+N"), "Project", "NewProject", @mClick)
-	miFile->Add(ML("&Open Project") & "...", "", "OpenProject", @mClick)
-	miFile->Add(ML("&Recent Projects") & "...", "", "RecentProject", @mClick)
-	miCloseProject = miFile->Add(ML("Close Project") & HK("CloseProject", "Ctrl+Shift+F4"), "", "CloseProject", @mClick, , , False)
+	Var miFile = mnuMain.Add(("&File"), "", "File")
+	miFile->Add(("&New Project") & HK("NewProject", "Ctrl+Shift+N"), "Project", "NewProject", @mClick)
+	miFile->Add(("&Open Project") & "...", "", "OpenProject", @mClick)
+	miFile->Add(("&Recent Projects") & "...", "", "RecentProject", @mClick)
+	miCloseProject = miFile->Add(("Close Project") & HK("CloseProject", "Ctrl+Shift+F4"), "", "CloseProject", @mClick, , , False)
 	miFile->Add("-")
-	miSaveProject = miFile->Add(ML("Save Project") & "..." & HK("SaveProject", "Ctrl+Shift+S"), "SaveAll", "SaveProject", @mClick, , , False)
-	miSaveProjectAs = miFile->Add(ML("Save Project As") & "..." & HK("SaveProjectAs"), "", "SaveProjectAs", @mClick, , , False)
+	miSaveProject = miFile->Add(("Save Project") & "..." & HK("SaveProject", "Ctrl+Shift+S"), "SaveAll", "SaveProject", @mClick, , , False)
+	miSaveProjectAs = miFile->Add(("Save Project As") & "..." & HK("SaveProjectAs"), "", "SaveProjectAs", @mClick, , , False)
 	miFile->Add("-")
-	miNewFile = miFile->Add(ML("&New File") & HK("NewFile", "Ctrl+N"), "New", "NewFile", @mClick)
-	miOpenFile = miFile->Add(ML("&Open File") & "..." & HK("OpenFile", "Ctrl+O"), "Open", "OpenFile", @mClick)
-	miCloseFile = miFile->Add(ML("Close File") & HK("CloseFile", "Ctrl+F4"), "Close", "CloseFile", @mClick, , , False)
+	miNewFile = miFile->Add(("&New File") & HK("NewFile", "Ctrl+N"), "New", "NewFile", @mClick)
+	miOpenFile = miFile->Add(("&Open File") & "..." & HK("OpenFile", "Ctrl+O"), "Open", "OpenFile", @mClick)
+	miCloseFile = miFile->Add(("Close File") & HK("CloseFile", "Ctrl+F4"), "Close", "CloseFile", @mClick, , , False)
 	miFile->Add("-")
-	miSaveFile = miFile->Add(ML("Save File") & "..." & HK("SaveFile", "Ctrl+S"), "Save", "SaveFile", @mClick, , , False)
-	miSaveFileAs = miFile->Add(ML("Save File &As") & "..." & HK("SaveFileAs"), "", "SaveFileAs", @mClick, , , False)
+	miSaveFile = miFile->Add(("Save File") & "..." & HK("SaveFile", "Ctrl+S"), "Save", "SaveFile", @mClick, , , False)
+	miSaveFileAs = miFile->Add(("Save File &As") & "..." & HK("SaveFileAs"), "", "SaveFileAs", @mClick, , , False)
 	miFile->Add("-")
-	miPrint = miFile->Add(ML("&Print") & HK("Print", "Ctrl+P"), "Print", "Print", @mClick, , , False)
+	miPrint = miFile->Add(("&Print") & HK("Print", "Ctrl+P"), "Print", "Print", @mClick, , , False)
 
 	Dim sTmp As WString * 1024
 	For i As Integer = 0 To miRecentMax
@@ -5793,7 +5793,7 @@ Sub CreateMenusAndToolBars
 		If Trim(sTmp) <> "" Then MRUFolders.Add sTmp
 	Next
 
-	miRecentFiles = miFile->Add(ML("Recent Files"), "", "RecentFilesMRU", @mClick)
+	miRecentFiles = miFile->Add(("Recent Files"), "", "RecentFilesMRU", @mClick)
 	miRecentFiles->Visible = False
 	For i As Integer = 0 To miRecentMax
 		sTmp = SanitizeIniOptionalPath(iniSettings.ReadString("MRUFiles", "MRUFile_0" & WStr(i), ""))
@@ -5801,16 +5801,16 @@ Sub CreateMenusAndToolBars
 	Next
 	SanitizeMRUListsOnLoad()
 	
-	mnuAIChat.Add(ML("&Edit"), "Edit", "AIChatEdit", @mClickAIChat, , , True)
+	mnuAIChat.Add(("&Edit"), "Edit", "AIChatEdit", @mClickAIChat, , , True)
 	mnuAIChat.Add("-")
-	mnuAIChat.Add(ML("&Open") & "..." , "Open", "AIChatOpen", @mClickAIChat, , , True)
-	mnuAIChat.Add(ML("&Paste"), "Paste", "AIChatPaste", @mClickAIChat, , , True)
-	mnuAIChat.Add(ML("&Paste") & " Code", "Paste", "AIChatPasteCode", @mClickAIChat, , , True)
+	mnuAIChat.Add(("&Open") & "..." , "Open", "AIChatOpen", @mClickAIChat, , , True)
+	mnuAIChat.Add(("&Paste"), "Paste", "AIChatPaste", @mClickAIChat, , , True)
+	mnuAIChat.Add(("&Paste") & " Code", "Paste", "AIChatPasteCode", @mClickAIChat, , , True)
 	mnuAIChat.Add("-")
-	mnuAIChat.Add(ML("&Save") , "Save", "AIChatSave", @mClickAIChat, , , True)
-	mnuAIChat.Add(ML("Save &As") & "...", "", "AIChatSaveAs", @mClickAIChat, , , True)
+	mnuAIChat.Add(("&Save") , "Save", "AIChatSave", @mClickAIChat, , , True)
+	mnuAIChat.Add(("Save &As") & "...", "", "AIChatSaveAs", @mClickAIChat, , , True)
 	mnuAIChat.Add("-")
-	miRecentAIChat = mnuAIChat.Add(ML("Recent Files"), "", "RecentFiles", @mClickAIChat)
+	miRecentAIChat = mnuAIChat.Add(("Recent Files"), "", "RecentFiles", @mClickAIChat)
 	For i As Integer = 0 To miRecentMax
 		sTmp = iniSettings.ReadString("MRUAIChat", "MRUAIChat_0" & WStr(i), "")
 		If Trim(sTmp) <> "" AndAlso Dir(ExePath & "/AIChat/" & sTmp) <> "" Then
@@ -5819,224 +5819,224 @@ Sub CreateMenusAndToolBars
 		End If
 	Next
 	miRecentAIChat->Add("-")
-	miRecentAIChat->Add(ML("Clear Recently Opened"), "", "ClearAIChat", @mClickAIChat)
+	miRecentAIChat->Add(("Clear Recently Opened"), "", "ClearAIChat", @mClickAIChat)
 	
 	miFile->Add("-")
 	'' 13.3.A S5: Delete Project/Delete File regrouped into their own bracketed group, well away
 	'' from Close Project/Close File (safety -- a misclick on Delete is destructive, on Close is not).
-	miDeleteProject = miFile->Add(ML("Delete Project"), "", "DeleteProject", @mClick, , , False)
-	miDeleteFile = miFile->Add(ML("Delete File"), "", "DeleteFile", @mClick, , , False)
+	miDeleteProject = miFile->Add(("Delete Project"), "", "DeleteProject", @mClick, , , False)
+	miDeleteFile = miFile->Add(("Delete File"), "", "DeleteFile", @mClick, , , False)
 	miFile->Add("-")
-	Var miFileAdvanced = miFile->Add(ML("Advanced"), "", "FileAdvanced")
-	miPrintPreview = miFileAdvanced->Add(ML("Print P&review") & HK("PrintPreview"), "PrintPreview", "PrintPreview", @mClick, , , False)
-	miPageSetup = miFileAdvanced->Add(ML("Page Set&up") & "..." & HK("PageSetup"), "", "PageSetup", @mClick, , , False)
+	Var miFileAdvanced = miFile->Add(("Advanced"), "", "FileAdvanced")
+	miPrintPreview = miFileAdvanced->Add(("Print P&review") & HK("PrintPreview"), "PrintPreview", "PrintPreview", @mClick, , , False)
+	miPageSetup = miFileAdvanced->Add(("Page Set&up") & "..." & HK("PageSetup"), "", "PageSetup", @mClick, , , False)
 	miFile->Add("-")
-	miFile->Add(ML("&Exit") & HK("Exit", "Alt+F4"), "Exit", "Exit", @mClick)
+	miFile->Add(("&Exit") & HK("Exit", "Alt+F4"), "Exit", "Exit", @mClick)
 	
-	Var miEdit = mnuMain.Add(ML("&Edit"), "", "Tahrir")
-	miUndo = miEdit->Add(ML("Undo") & HK("Undo", "Ctrl+Z"), "Undo", "Undo", @mClick, , , False)
-	miRedo = miEdit->Add(ML("Redo") & HK("Redo", "Ctrl+Shift+Z"), "Redo", "Redo", @mClick, , , False)
+	Var miEdit = mnuMain.Add(("&Edit"), "", "Tahrir")
+	miUndo = miEdit->Add(("Undo") & HK("Undo", "Ctrl+Z"), "Undo", "Undo", @mClick, , , False)
+	miRedo = miEdit->Add(("Redo") & HK("Redo", "Ctrl+Shift+Z"), "Redo", "Redo", @mClick, , , False)
 	miEdit->Add("-")
-	miCutCurrentLine = miEdit->Add(ML("C&ut Current Line") & HK("CutCurrentLine", "Ctrl+Y"), "", "CutCurrentLine", @mClick, , , False)
-	miCut = miEdit->Add(ML("Cu&t") & HK("Cut", "Ctrl+X"), "Cut", "Cut", @mClick, , , False)
-	miCopy = miEdit->Add(ML("&Copy") & HK("Copy", "Ctrl+C"), "Copy", "Copy", @mClick, , , False)
-	miPaste = miEdit->Add(ML("&Paste") & HK("Paste", "Ctrl+V"), "Paste", "Paste", @mClick, , , False)
+	miCutCurrentLine = miEdit->Add(("C&ut Current Line") & HK("CutCurrentLine", "Ctrl+Y"), "", "CutCurrentLine", @mClick, , , False)
+	miCut = miEdit->Add(("Cu&t") & HK("Cut", "Ctrl+X"), "Cut", "Cut", @mClick, , , False)
+	miCopy = miEdit->Add(("&Copy") & HK("Copy", "Ctrl+C"), "Copy", "Copy", @mClick, , , False)
+	miPaste = miEdit->Add(("&Paste") & HK("Paste", "Ctrl+V"), "Paste", "Paste", @mClick, , , False)
 	miEdit->Add("-")
-	miSingleComment = miEdit->Add(ML("&Single Comment") & HK("SingleComment", "Ctrl+I"), "Comment", "SingleComment", @mClick, , , False)
-	miBlockComment = miEdit->Add(ML("&Block Comment") & HK("BlockComment", "Ctrl+Alt+I"), "BlockComment", "BlockComment", @mClick, , , False)
-	miUncommentBlock = miEdit->Add(ML("&Uncomment Block") & HK("UnComment", "Ctrl+Shift+I"), "UnComment", "UnComment", @mClick, , , False)
+	miSingleComment = miEdit->Add(("&Single Comment") & HK("SingleComment", "Ctrl+I"), "Comment", "SingleComment", @mClick, , , False)
+	miBlockComment = miEdit->Add(("&Block Comment") & HK("BlockComment", "Ctrl+Alt+I"), "BlockComment", "BlockComment", @mClick, , , False)
+	miUncommentBlock = miEdit->Add(("&Uncomment Block") & HK("UnComment", "Ctrl+Shift+I"), "UnComment", "UnComment", @mClick, , , False)
 	miEdit->Add("-")
-	miDuplicate = miEdit->Add(ML("&Duplicate") & HK("Duplicate", "Ctrl+D"), "", "Duplicate", @mClick, , , False)
+	miDuplicate = miEdit->Add(("&Duplicate") & HK("Duplicate", "Ctrl+D"), "", "Duplicate", @mClick, , , False)
 	miEdit->Add("-")
-	miSelectAll = miEdit->Add(ML("Select &All") & HK("SelectAll", "Ctrl+A"), "", "SelectAll", @mClick, , , False)
+	miSelectAll = miEdit->Add(("Select &All") & HK("SelectAll", "Ctrl+A"), "", "SelectAll", @mClick, , , False)
 	miEdit->Add("-")
-	miIndent = miEdit->Add(ML("&Indent") & HK("Indent", "Tab"), "", "Indent", @mClick, , , False)
-	miOutdent = miEdit->Add(ML("&Outdent") & HK("Outdent", "Shift+Tab"), "", "Outdent", @mClick, , , False)
+	miIndent = miEdit->Add(("&Indent") & HK("Indent", "Tab"), "", "Indent", @mClick, , , False)
+	miOutdent = miEdit->Add(("&Outdent") & HK("Outdent", "Shift+Tab"), "", "Outdent", @mClick, , , False)
 	miEdit->Add("-")
-	miFormat = miEdit->Add(ML("&Format") & HK("Format", "Ctrl+Tab"), "Format", "Format", @mClick, , , False)
+	miFormat = miEdit->Add(("&Format") & HK("Format", "Ctrl+Tab"), "Format", "Format", @mClick, , , False)
 	miEdit->Add("-")
-	Var miEditAdvanced = miEdit->Add(ML("Advanced"), "", "EditAdvanced")
-	miUnformat = miEditAdvanced->Add(ML("&Unformat") & HK("Unformat", "Ctrl+Shift+Tab"), "Unformat", "Unformat", @mClick, , , False)
-	miFormatProject = miEditAdvanced->Add(ML("&Format Project") & HK("FormatProject"), "", "FormatProject", @mClick, , , False)
-	miUnformatProject = miEditAdvanced->Add(ML("&Unformat Project") & HK("UnformatProject"), "", "UnformatProject", @mClick, , , False)
-	miAddSpaces = miEditAdvanced->Add(ML("Add &Spaces") & HK("AddSpaces"), "", "AddSpaces", @mClick, , , False)
-	miDeleteBlankLines = miEditAdvanced->Add(ML("Merge Multiple Blank Lines"), "", "DeleteBlankLines", @mClick)
+	Var miEditAdvanced = miEdit->Add(("Advanced"), "", "EditAdvanced")
+	miUnformat = miEditAdvanced->Add(("&Unformat") & HK("Unformat", "Ctrl+Shift+Tab"), "Unformat", "Unformat", @mClick, , , False)
+	miFormatProject = miEditAdvanced->Add(("&Format Project") & HK("FormatProject"), "", "FormatProject", @mClick, , , False)
+	miUnformatProject = miEditAdvanced->Add(("&Unformat Project") & HK("UnformatProject"), "", "UnformatProject", @mClick, , , False)
+	miAddSpaces = miEditAdvanced->Add(("Add &Spaces") & HK("AddSpaces"), "", "AddSpaces", @mClick, , , False)
+	miDeleteBlankLines = miEditAdvanced->Add(("Merge Multiple Blank Lines"), "", "DeleteBlankLines", @mClick)
 	miEdit->Add("-")
-	miSuggestions = miEdit->Add(ML("Code - Bubble Help") & HK("Suggestions"), "", "Suggestions", @mClick, True)
-	miCompleteWord = miEdit->Add(ML("Code - Suggest Options"), "", "SuggestOptions", @mClick, True)
-	miParameterInfo = miEdit->Add(ML("Code - Parameter Info") & HK("ParameterInfo", "Ctrl+J"), "", "ParameterInfo", @mClick, True)
+	miSuggestions = miEdit->Add(("Code - Bubble Help") & HK("Suggestions"), "", "Suggestions", @mClick, True)
+	miCompleteWord = miEdit->Add(("Code - Suggest Options"), "", "SuggestOptions", @mClick, True)
+	miParameterInfo = miEdit->Add(("Code - Parameter Info") & HK("ParameterInfo", "Ctrl+J"), "", "ParameterInfo", @mClick, True)
 	miEdit->Add("-")
-	miAddProcedure = miEdit->Add(ML("Add &Procedure") & "..." & HK("AddProcedure"), "", "AddProcedure", @mClick, , , False)
-	miAddType = miEdit->Add(ML("Add &Type") & "..." & HK("AddType"), "", "AddType", @mClick, , , False)
-	Var miSearch = mnuMain.Add(ML("&Search"), "", "Search")
-	miFind = miSearch->Add(ML("&Find") & "..." & HK("Find", "Ctrl+F"), "Find", "Find", @mClick, , , False)
-	miReplace = miSearch->Add(ML("&Replace") & "..."  & HK("Replace", "Ctrl+H"), "", "Replace", @mClick, , , False)
-	miFindNext = miSearch->Add(ML("Find &Next") & HK("FindNext", "F3"), "", "FindNext", @mClick, , , False)
-	miFindPrevious = miSearch->Add(ML("Find &Previous") & HK("FindPrev", "Shift+F3"), "", "FindPrev", @mClick, , , False)
+	miAddProcedure = miEdit->Add(("Add &Procedure") & "..." & HK("AddProcedure"), "", "AddProcedure", @mClick, , , False)
+	miAddType = miEdit->Add(("Add &Type") & "..." & HK("AddType"), "", "AddType", @mClick, , , False)
+	Var miSearch = mnuMain.Add(("&Search"), "", "Search")
+	miFind = miSearch->Add(("&Find") & "..." & HK("Find", "Ctrl+F"), "Find", "Find", @mClick, , , False)
+	miReplace = miSearch->Add(("&Replace") & "..."  & HK("Replace", "Ctrl+H"), "", "Replace", @mClick, , , False)
+	miFindNext = miSearch->Add(("Find &Next") & HK("FindNext", "F3"), "", "FindNext", @mClick, , , False)
+	miFindPrevious = miSearch->Add(("Find &Previous") & HK("FindPrev", "Shift+F3"), "", "FindPrev", @mClick, , , False)
 	miSearch->Add("-")
-	miSearch->Add(ML("Find In Files") & "..." & HK("FindInFiles", "Ctrl+Shift+F"), "", "FindInFiles", @mClick)
-	miSearch->Add(ML("Replace In Files") & "..." & HK("ReplaceInFiles", "Ctrl+Shift+H"), "", "ReplaceInFiles", @mClick)
+	miSearch->Add(("Find In Files") & "..." & HK("FindInFiles", "Ctrl+Shift+F"), "", "FindInFiles", @mClick)
+	miSearch->Add(("Replace In Files") & "..." & HK("ReplaceInFiles", "Ctrl+Shift+H"), "", "ReplaceInFiles", @mClick)
 	miSearch->Add("-")
-	miGoto = miSearch->Add(ML("&Goto") & HK("Goto", "Ctrl+G"), "", "Goto", @mClick, , , False)
+	miGoto = miSearch->Add(("&Goto") & HK("Goto", "Ctrl+G"), "", "Goto", @mClick, , , False)
 	miSearch->Add("-")
-	miDefine = miSearch->Add(ML("Go to &Definition") & HK("Define", "F2"), "", "Define", @mClick, , , False)
-	Var miBookmark = miSearch->Add(ML("Bookmarks"), "", "Bookmarks")
-	miToggleBookmark = miBookmark->Add(ML("Toggle Bookmark") & HK("ToggleBookmark", "F6"), "Bookmark", "ToggleBookmark", @mClick, , , False)
-	miNextBookmark = miBookmark->Add(ML("Next Bookmark") & HK("NextBookmark", "Ctrl+F6"), "", "NextBookmark", @mClick, , , False)
-	miPreviousBookmark = miBookmark->Add(ML("Previous Bookmark") & HK("PreviousBookmark", "Ctrl+Shift+F6"), "", "PreviousBookmark", @mClick, , , False)
-	miClearAllBookmarks = miBookmark->Add(ML("Clear All Bookmarks") & HK("ClearAllBookmarks"), "", "ClearAllBookmarks", @mClick, , , False)
+	miDefine = miSearch->Add(("Go to &Definition") & HK("Define", "F2"), "", "Define", @mClick, , , False)
+	Var miBookmark = miSearch->Add(("Bookmarks"), "", "Bookmarks")
+	miToggleBookmark = miBookmark->Add(("Toggle Bookmark") & HK("ToggleBookmark", "F6"), "Bookmark", "ToggleBookmark", @mClick, , , False)
+	miNextBookmark = miBookmark->Add(("Next Bookmark") & HK("NextBookmark", "Ctrl+F6"), "", "NextBookmark", @mClick, , , False)
+	miPreviousBookmark = miBookmark->Add(("Previous Bookmark") & HK("PreviousBookmark", "Ctrl+Shift+F6"), "", "PreviousBookmark", @mClick, , , False)
+	miClearAllBookmarks = miBookmark->Add(("Clear All Bookmarks") & HK("ClearAllBookmarks"), "", "ClearAllBookmarks", @mClick, , , False)
 	
-	Var miView = mnuMain.Add(ML("&View"), "", "View")
-	miCode = miView->Add(ML("Code") & HK("Code", "Ctrl+F7"), "Code", "Code", @mClick, , , False)
-	miForm = miView->Add(ML("Form") & HK("Form", "Shift+F7"), "Form", "Form", @mClick, , , False)
-	miCodeAndForm = miView->Add(ML("Code And Form") & HK("CodeAndForm", "Ctrl+Shift+F7"), "CodeAndForm", "CodeAndForm", @mClick, , , False)
+	Var miView = mnuMain.Add(("&View"), "", "View")
+	miCode = miView->Add(("Code") & HK("Code", "Ctrl+F7"), "Code", "Code", @mClick, , , False)
+	miForm = miView->Add(("Form") & HK("Form", "Shift+F7"), "Form", "Form", @mClick, , , False)
+	miCodeAndForm = miView->Add(("Code And Form") & HK("CodeAndForm", "Ctrl+Shift+F7"), "CodeAndForm", "CodeAndForm", @mClick, , , False)
 	miView->Add("-")
-	miGotoCodeForm = miView->Add(ML("Goto Code/Form") & HK("GotoCodeForm", "F7"), "GotoCodeForm", "GotoCodeForm", @mClick, , , False)
+	miGotoCodeForm = miView->Add(("Goto Code/Form") & HK("GotoCodeForm", "F7"), "GotoCodeForm", "GotoCodeForm", @mClick, , , False)
 	miView->Add("-")
-	mnuSplitHorizontally = miView->Add(ML("Split &Horizontally") & HK("SplitHorizontally"), "", "SplitHorizontally", @mClick, True, , False)
-	mnuSplitVertically = miView->Add(ML("Split &Vertically") & HK("SplitVertically"), "", "SplitVertically", @mClick, True, , False)
+	mnuSplitHorizontally = miView->Add(("Split &Horizontally") & HK("SplitHorizontally"), "", "SplitHorizontally", @mClick, True, , False)
+	mnuSplitVertically = miView->Add(("Split &Vertically") & HK("SplitVertically"), "", "SplitVertically", @mClick, True, , False)
 	miView->Add("-")
-	Var miFold = miView->Add(ML("Fold"), "", "Fold")
-	miCollapseAll = miFold->Add(ML("Collapse All") & HK("CollapseAll"), "", "CollapseAll", @mClick, , , False)
-	miUnCollapseAll = miFold->Add(ML("Expand All") & HK("UnCollapseAll"), "", "UnCollapseAll", @mClick, , , False)
+	Var miFold = miView->Add(("Fold"), "", "Fold")
+	miCollapseAll = miFold->Add(("Collapse All") & HK("CollapseAll"), "", "CollapseAll", @mClick, , , False)
+	miUnCollapseAll = miFold->Add(("Expand All") & HK("UnCollapseAll"), "", "UnCollapseAll", @mClick, , , False)
 	miFold->Add("-")
-	Var miFoldAdvanced = miFold->Add(ML("Advanced"), "", "FoldAdvanced")
-	miCollapseCurrent = miFoldAdvanced->Add(ML("Collapse Current") & HK("CollapseCurrent"), "", "CollapseCurrent", @mClick, , , False)
-	miCollapseAllProcedures = miFoldAdvanced->Add(ML("Collapse All Procedures") & HK("CollapseAllProcedures"), "", "CollapseAllProcedures", @mClick, , , False)
-	miUnCollapseCurrent = miFoldAdvanced->Add(ML("Expand Current") & HK("UnCollapseCurrent"), "", "UnCollapseCurrent", @mClick, , , False)
-	miUnCollapseAllProcedures = miFoldAdvanced->Add(ML("Expand All Procedures") & HK("UnCollapseAllProcedures"), "", "UnCollapseAllProcedures", @mClick, , , False)
+	Var miFoldAdvanced = miFold->Add(("Advanced"), "", "FoldAdvanced")
+	miCollapseCurrent = miFoldAdvanced->Add(("Collapse Current") & HK("CollapseCurrent"), "", "CollapseCurrent", @mClick, , , False)
+	miCollapseAllProcedures = miFoldAdvanced->Add(("Collapse All Procedures") & HK("CollapseAllProcedures"), "", "CollapseAllProcedures", @mClick, , , False)
+	miUnCollapseCurrent = miFoldAdvanced->Add(("Expand Current") & HK("UnCollapseCurrent"), "", "UnCollapseCurrent", @mClick, , , False)
+	miUnCollapseAllProcedures = miFoldAdvanced->Add(("Expand All Procedures") & HK("UnCollapseAllProcedures"), "", "UnCollapseAllProcedures", @mClick, , , False)
 	miView->Add("-")
-	miView->Add(ML("Project Explorer") & HK("ProjectExplorer", "Ctrl+R"), "Project", "ProjectExplorer", @mClick)
-	miView->Add(ML("Properties Window") & HK("PropertiesWindow", "F4"), "Property", "PropertiesWindow", @mClick)
-	miView->Add(ML("Events Window") & HK("EventsWindow", "Ctrl+E"), "Event", "EventsWindow", @mClick)
-	miView->Add(ML("Toolbox") & HK("Toolbox", "Ctrl+T"), "Tools", "Toolbox", @mClick)
-	Var miOtherWindows = miView->Add(ML("Other Windows"))
-	miOtherWindows->Add(ML("Output Window") & HK("OutputWindow"), "", "OutputWindow", @mClick)
-	miOtherWindows->Add(ML("Problems Window") & HK("ProblemsWindow"), "", "ProblemsWindow", @mClick)
-	miOtherWindows->Add(ML("Suggestions Window") & HK("SuggestionsWindow"), "", "SuggestionsWindow", @mClick)
-	miOtherWindows->Add(ML("Find Window") & HK("FindWindow"), "", "FindWindow", @mClick)
-	miOtherWindows->Add(ML("ToDo Window") & HK("ToDoWindow"), "", "ToDoWindow", @mClick)
-	miOtherWindows->Add(ML("Change Log Window") & HK("ChangeLogWindow"), "", "ChangeLogWindow", @mClick)
-	miOtherWindows->Add(ML("Immediate Window") & HK("ImmediateWindow"), "", "ImmediateWindow", @mClick)
-	Var miDebugWindows = miView->Add(ML("Debug Windows"))
-	miDebugWindows->Add(ML("Locals Window") & HK("LocalsWindow"), "", "LocalsWindow", @mClick)
-	miDebugWindows->Add(ML("Globals Window") & HK("GlobalsWindow"), "", "GlobalsWindow", @mClick)
+	miView->Add(("Project Explorer") & HK("ProjectExplorer", "Ctrl+R"), "Project", "ProjectExplorer", @mClick)
+	miView->Add(("Properties Window") & HK("PropertiesWindow", "F4"), "Property", "PropertiesWindow", @mClick)
+	miView->Add(("Events Window") & HK("EventsWindow", "Ctrl+E"), "Event", "EventsWindow", @mClick)
+	miView->Add(("Toolbox") & HK("Toolbox", "Ctrl+T"), "Tools", "Toolbox", @mClick)
+	Var miOtherWindows = miView->Add(("Other Windows"))
+	miOtherWindows->Add(("Output Window") & HK("OutputWindow"), "", "OutputWindow", @mClick)
+	miOtherWindows->Add(("Problems Window") & HK("ProblemsWindow"), "", "ProblemsWindow", @mClick)
+	miOtherWindows->Add(("Suggestions Window") & HK("SuggestionsWindow"), "", "SuggestionsWindow", @mClick)
+	miOtherWindows->Add(("Find Window") & HK("FindWindow"), "", "FindWindow", @mClick)
+	miOtherWindows->Add(("ToDo Window") & HK("ToDoWindow"), "", "ToDoWindow", @mClick)
+	miOtherWindows->Add(("Change Log Window") & HK("ChangeLogWindow"), "", "ChangeLogWindow", @mClick)
+	miOtherWindows->Add(("Immediate Window") & HK("ImmediateWindow"), "", "ImmediateWindow", @mClick)
+	Var miDebugWindows = miView->Add(("Debug Windows"))
+	miDebugWindows->Add(("Locals Window") & HK("LocalsWindow"), "", "LocalsWindow", @mClick)
+	miDebugWindows->Add(("Globals Window") & HK("GlobalsWindow"), "", "GlobalsWindow", @mClick)
 	'miDebugWindows->Add(ML("Procedures Window") & HK("ProceduresWindow"), "", "ProceduresWindow", @mclick)
-	miDebugWindows->Add(ML("Threads Window") & HK("ThreadsWindow"), "", "ThreadsWindow", @mClick)
-	miDebugWindows->Add(ML("Watch Window") & HK("WatchWindow"), "", "WatchWindow", @mClick)
+	miDebugWindows->Add(("Threads Window") & HK("ThreadsWindow"), "", "ThreadsWindow", @mClick)
+	miDebugWindows->Add(("Watch Window") & HK("WatchWindow"), "", "WatchWindow", @mClick)
 	miView->Add("-")
-	miImageManager = miView->Add(ML("Image Manager") & HK("ImageManager"), "", "ImageManager", @mClick, , , False)
+	miImageManager = miView->Add(("Image Manager") & HK("ImageManager"), "", "ImageManager", @mClick, , , False)
 	miView->Add("-")
-	miToolBars = miView->Add(ML("Toolbars") & HK("Toolbars"), "", "Toolbars", @mClick)
-	mnuStandardToolBar = miToolBars->Add(ML("Standard") & HK("Standard"), "", "Standard", @mClick, True)
-	mnuEditToolBar = miToolBars->Add(ML("Edit") & HK("Edit"), "", "Edit", @mClick, True)
-	mnuProjectToolBar = miToolBars->Add(ML("Project") & HK("Project"), "", "Project", @mClick, True)
-	mnuFormatToolBar = miToolBars->Add(ML("Format") & HK("FormFormat"), "", "FormFormat", @mClick, True)
-	mnuRunToolBar = miToolBars->Add(ML("Run") & HK("Run"), "", "Run", @mClick, True)
+	miToolBars = miView->Add(("Toolbars") & HK("Toolbars"), "", "Toolbars", @mClick)
+	mnuStandardToolBar = miToolBars->Add(("Standard") & HK("Standard"), "", "Standard", @mClick, True)
+	mnuEditToolBar = miToolBars->Add(("Edit") & HK("Edit"), "", "Edit", @mClick, True)
+	mnuProjectToolBar = miToolBars->Add(("Project") & HK("Project"), "", "Project", @mClick, True)
+	mnuFormatToolBar = miToolBars->Add(("Format") & HK("FormFormat"), "", "FormFormat", @mClick, True)
+	mnuRunToolBar = miToolBars->Add(("Run") & HK("Run"), "", "Run", @mClick, True)
 	
-	Var miProject = mnuMain.Add(ML("&Project"), "", "Project")
-	miProject->Add(ML("Add &Form") & HK("AddForm", "Ctrl+Alt+N"), "Form", "AddForm", @mClick)
-	miProject->Add(ML("Add &Module") & HK("AddModule","Ctrl+Alt+M"), "Module", "AddModule", @mClick)
-	miProject->Add(ML("Add &Include File") & HK("AddIncludeFile",""), "File", "AddIncludeFile", @mClick)
-	miProject->Add(ML("Add From Templates") & "..." & HK("AddFromTemplates"), "Add", "AddFromTemplates", @mClick)
-	miProject->Add(ML("Add Files") & "..." & HK("AddFilesToProject"), "Add", "AddFilesToProject", @mClick)
+	Var miProject = mnuMain.Add(("&Project"), "", "Project")
+	miProject->Add(("Add &Form") & HK("AddForm", "Ctrl+Alt+N"), "Form", "AddForm", @mClick)
+	miProject->Add(("Add &Module") & HK("AddModule","Ctrl+Alt+M"), "Module", "AddModule", @mClick)
+	miProject->Add(("Add &Include File") & HK("AddIncludeFile",""), "File", "AddIncludeFile", @mClick)
+	miProject->Add(("Add From Templates") & "..." & HK("AddFromTemplates"), "Add", "AddFromTemplates", @mClick)
+	miProject->Add(("Add Files") & "..." & HK("AddFilesToProject"), "Add", "AddFilesToProject", @mClick)
 	miProject->Add("-")
-	Var miProjectAdvanced = miProject->Add(ML("Advanced"), "", "ProjectAdvanced")
-	miProjectAdvanced->Add(ML("Add &User Control") & HK("AddUserControl", "Ctrl+Alt+U"), "UserControl", "AddUserControl", @mClick)
-	miProjectAdvanced->Add(ML("Add &Resource File") & HK("AddResoureFile",""), "Resource", "AddResourceFile", @mClick)
-	miProjectAdvanced->Add(ML("Add Ma&nifest File") & HK("AddManifestFile",""), "File", "AddManifestFile", @mClick)
+	Var miProjectAdvanced = miProject->Add(("Advanced"), "", "ProjectAdvanced")
+	miProjectAdvanced->Add(("Add &User Control") & HK("AddUserControl", "Ctrl+Alt+U"), "UserControl", "AddUserControl", @mClick)
+	miProjectAdvanced->Add(("Add &Resource File") & HK("AddResoureFile",""), "Resource", "AddResourceFile", @mClick)
+	miProjectAdvanced->Add(("Add Ma&nifest File") & HK("AddManifestFile",""), "File", "AddManifestFile", @mClick)
 	miProject->Add("-")
-	miRename = miProject->Add(ML("R&ename") & HK("Rename"), "Rename", "Rename", @mClick, , , False)
-	miRemoveFileFromProject = miProject->Add(ML("&Remove") & HK("RemoveFileFromProject"), "Remove", "RemoveFileFromProject", @mClick, , , False)
+	miRename = miProject->Add(("R&ename") & HK("Rename"), "Rename", "Rename", @mClick, , , False)
+	miRemoveFileFromProject = miProject->Add(("&Remove") & HK("RemoveFileFromProject"), "Remove", "RemoveFileFromProject", @mClick, , , False)
 	miProject->Add("-")
-	miOpenProjectFolder = miProject->Add(ML("&Open Project Folder") & HK("OpenProjectFolder"), "", "OpenProjectFolder", @mClick, , , False)
-	miProject->Add(ML("Import from Folder") & "..." & HK("OpenFolder", "Alt+O"), "", "OpenFolder", @mClick)
+	miOpenProjectFolder = miProject->Add(("&Open Project Folder") & HK("OpenProjectFolder"), "", "OpenProjectFolder", @mClick, , , False)
+	miProject->Add(("Import from Folder") & "..." & HK("OpenFolder", "Alt+O"), "", "OpenFolder", @mClick)
 	miProject->Add("-")
-	miProjectProperties = miProject->Add(ML("&Project Properties") & "..." & HK("ProjectProperties"), "", "ProjectProperties", @mClick, , , False)
+	miProjectProperties = miProject->Add(("&Project Properties") & "..." & HK("ProjectProperties"), "", "ProjectProperties", @mClick, , , False)
 	
-	miFormFormat = mnuMain.Add(ML("&Designer"), "", "FormFormat")
+	miFormFormat = mnuMain.Add(("&Designer"), "", "FormFormat")
 	miFormFormat->Enabled = False ' D1: no form open at startup; enabled by tabCode_SelChange/ApplyFormTabView when a form with controls is active
-	Var miAlign = miFormFormat->Add(ML("&Align"), "Align", "Align", @mClick)
-	miAlignLefts = miAlign->Add(ML("&Lefts") & HK("AlignLefts"), "AlignLefts", "AlignLefts", @mClick)
-	miAlignCenters = miAlign->Add(ML("&Centers") & HK("AlignLefts"), "AlignCenters", "AlignCenters", @mClick)
-	miAlignRights = miAlign->Add(ML("&Rights") & HK("AlignRights"), "AlignRights", "AlignRights", @mClick)
+	Var miAlign = miFormFormat->Add(("&Align"), "Align", "Align", @mClick)
+	miAlignLefts = miAlign->Add(("&Lefts") & HK("AlignLefts"), "AlignLefts", "AlignLefts", @mClick)
+	miAlignCenters = miAlign->Add(("&Centers") & HK("AlignLefts"), "AlignCenters", "AlignCenters", @mClick)
+	miAlignRights = miAlign->Add(("&Rights") & HK("AlignRights"), "AlignRights", "AlignRights", @mClick)
 	miAlign->Add("-")
-	miAlignTops = miAlign->Add(ML("&Tops") & HK("AlignTops"), "AlignTops", "AlignTops", @mClick)
-	miAlignMiddles = miAlign->Add(ML("&Middles") & HK("AlignMiddles"), "AlignMiddles", "AlignMiddles", @mClick)
-	miAlignBottoms = miAlign->Add(ML("&Bottoms") & HK("AlignBottoms"), "AlignBottoms", "AlignBottoms", @mClick)
+	miAlignTops = miAlign->Add(("&Tops") & HK("AlignTops"), "AlignTops", "AlignTops", @mClick)
+	miAlignMiddles = miAlign->Add(("&Middles") & HK("AlignMiddles"), "AlignMiddles", "AlignMiddles", @mClick)
+	miAlignBottoms = miAlign->Add(("&Bottoms") & HK("AlignBottoms"), "AlignBottoms", "AlignBottoms", @mClick)
 	miAlign->Add("-")
-	miAlignToGrid = miAlign->Add(ML("to &Grid") & HK("AlignToGrid"), "AlignToGrid", "AlignToGrid", @mClick)
-	Var miMakeSameSize = miFormFormat->Add(ML("&Make Same Size"), "MakeSameSize", "MakeSameSize", @mClick)
-	miMakeSameSizeWidth = miMakeSameSize->Add(ML("&Width") & HK("MakeSameSizeWidth"), "MakeSameSizeWidth", "MakeSameSizeWidth", @mClick)
-	miMakeSameSizeHeight = miMakeSameSize->Add(ML("&Height") & HK("MakeSameSizeHeight"), "MakeSameSizeHeight", "MakeSameSizeHeight", @mClick)
-	miMakeSameSizeBoth = miMakeSameSize->Add(ML("&Both") & HK("MakeSameSizeBoth"), "MakeSameSizeBoth", "MakeSameSizeBoth", @mClick)
+	miAlignToGrid = miAlign->Add(("to &Grid") & HK("AlignToGrid"), "AlignToGrid", "AlignToGrid", @mClick)
+	Var miMakeSameSize = miFormFormat->Add(("&Make Same Size"), "MakeSameSize", "MakeSameSize", @mClick)
+	miMakeSameSizeWidth = miMakeSameSize->Add(("&Width") & HK("MakeSameSizeWidth"), "MakeSameSizeWidth", "MakeSameSizeWidth", @mClick)
+	miMakeSameSizeHeight = miMakeSameSize->Add(("&Height") & HK("MakeSameSizeHeight"), "MakeSameSizeHeight", "MakeSameSizeHeight", @mClick)
+	miMakeSameSizeBoth = miMakeSameSize->Add(("&Both") & HK("MakeSameSizeBoth"), "MakeSameSizeBoth", "MakeSameSizeBoth", @mClick)
 	miFormFormat->Add("-")
-	miFormFormat->Add(ML("Size to Gri&d") & HK("SizeToGrid"), "SizeToGrid", "SizeToGrid", @mClick)
+	miFormFormat->Add(("Size to Gri&d") & HK("SizeToGrid"), "SizeToGrid", "SizeToGrid", @mClick)
 	miFormFormat->Add("-")
-	Var miHorizontalSpacing = miFormFormat->Add(ML("&Horizontal Spacing"), "HorizontalSpacing", "HorizontalSpacing", @mClick)
-	miHorizontalSpacingMakeEqual = miHorizontalSpacing->Add(ML("Make &Equal") & HK("HorizontalSpacingMakeEqual"), "HorizontalSpacingMakeEqual", "HorizontalSpacingMakeEqual", @mClick)
-	miHorizontalSpacingIncrease = miHorizontalSpacing->Add(ML("&Increase") & HK("HorizontalSpacingIncrease"), "HorizontalSpacingIncrease", "HorizontalSpacingIncrease", @mClick)
-	miHorizontalSpacingDecrease = miHorizontalSpacing->Add(ML("&Decrease") & HK("HorizontalSpacingDecrease"), "HorizontalSpacingDecrease", "HorizontalSpacingDecrease", @mClick)
-	miHorizontalSpacingRemove = miHorizontalSpacing->Add(ML("&Remove") & HK("HorizontalSpacingRemove"), "HorizontalSpacingRemove", "HorizontalSpacingRemove", @mClick)
-	Var miVerticalSpacing = miFormFormat->Add(ML("&Vertical Spacing"), "VerticalSpacing", "VerticalSpacing", @mClick)
-	miVerticalSpacingMakeEqual = miVerticalSpacing->Add(ML("Make &Equal") & HK("VerticalSpacingMakeEqual"), "VerticalSpacingMakeEqual", "VerticalSpacingMakeEqual", @mClick)
-	miVerticalSpacingIncrease = miVerticalSpacing->Add(ML("&Increase") & HK("VerticalSpacingIncrease"), "VerticalSpacingIncrease", "VerticalSpacingIncrease", @mClick)
-	miVerticalSpacingDecrease = miVerticalSpacing->Add(ML("&Decrease") & HK("VerticalSpacingDecrease"), "VerticalSpacingDecrease", "VerticalSpacingDecrease", @mClick)
-	miVerticalSpacingRemove = miVerticalSpacing->Add(ML("&Remove") & HK("VerticalSpacingRemove"), "VerticalSpacingRemove", "VerticalSpacingRemove", @mClick)
+	Var miHorizontalSpacing = miFormFormat->Add(("&Horizontal Spacing"), "HorizontalSpacing", "HorizontalSpacing", @mClick)
+	miHorizontalSpacingMakeEqual = miHorizontalSpacing->Add(("Make &Equal") & HK("HorizontalSpacingMakeEqual"), "HorizontalSpacingMakeEqual", "HorizontalSpacingMakeEqual", @mClick)
+	miHorizontalSpacingIncrease = miHorizontalSpacing->Add(("&Increase") & HK("HorizontalSpacingIncrease"), "HorizontalSpacingIncrease", "HorizontalSpacingIncrease", @mClick)
+	miHorizontalSpacingDecrease = miHorizontalSpacing->Add(("&Decrease") & HK("HorizontalSpacingDecrease"), "HorizontalSpacingDecrease", "HorizontalSpacingDecrease", @mClick)
+	miHorizontalSpacingRemove = miHorizontalSpacing->Add(("&Remove") & HK("HorizontalSpacingRemove"), "HorizontalSpacingRemove", "HorizontalSpacingRemove", @mClick)
+	Var miVerticalSpacing = miFormFormat->Add(("&Vertical Spacing"), "VerticalSpacing", "VerticalSpacing", @mClick)
+	miVerticalSpacingMakeEqual = miVerticalSpacing->Add(("Make &Equal") & HK("VerticalSpacingMakeEqual"), "VerticalSpacingMakeEqual", "VerticalSpacingMakeEqual", @mClick)
+	miVerticalSpacingIncrease = miVerticalSpacing->Add(("&Increase") & HK("VerticalSpacingIncrease"), "VerticalSpacingIncrease", "VerticalSpacingIncrease", @mClick)
+	miVerticalSpacingDecrease = miVerticalSpacing->Add(("&Decrease") & HK("VerticalSpacingDecrease"), "VerticalSpacingDecrease", "VerticalSpacingDecrease", @mClick)
+	miVerticalSpacingRemove = miVerticalSpacing->Add(("&Remove") & HK("VerticalSpacingRemove"), "VerticalSpacingRemove", "VerticalSpacingRemove", @mClick)
 	miFormFormat->Add("-")
-	Var miCenterInParent = miFormFormat->Add(ML("&Center in Parent"), "CenterInParent", "CenterInParent", @mClick)
-	miCenterInParentHorizontally = miCenterInParent->Add(ML("&Horizontally") & HK("CenterInParentHorizontally"), "CenterInParentHorizontally", "CenterInParentHorizontally", @mClick)
-	miCenterInParentVertically = miCenterInParent->Add(ML("&Vertically") & HK("CenterInParentVertically"), "CenterInParentVertically", "CenterInParentVertically", @mClick)
+	Var miCenterInParent = miFormFormat->Add(("&Center in Parent"), "CenterInParent", "CenterInParent", @mClick)
+	miCenterInParentHorizontally = miCenterInParent->Add(("&Horizontally") & HK("CenterInParentHorizontally"), "CenterInParentHorizontally", "CenterInParentHorizontally", @mClick)
+	miCenterInParentVertically = miCenterInParent->Add(("&Vertically") & HK("CenterInParentVertically"), "CenterInParentVertically", "CenterInParentVertically", @mClick)
 	miFormFormat->Add("-")
-	Var miOrder = miFormFormat->Add(ML("&Order"), "Order", "Order", @mClick)
-	miOrderBringToFront = miOrder->Add(ML("&Bring to Front") & HK("BringToFront"), "BringToFront", "BringToFront", @mClick)
-	miOrderSendToBack = miOrder->Add(ML("&Send to Back") & HK("SendToBack"), "SendToBack", "SendToBack", @mClick)
+	Var miOrder = miFormFormat->Add(("&Order"), "Order", "Order", @mClick)
+	miOrderBringToFront = miOrder->Add(("&Bring to Front") & HK("BringToFront"), "BringToFront", "BringToFront", @mClick)
+	miOrderSendToBack = miOrder->Add(("&Send to Back") & HK("SendToBack"), "SendToBack", "SendToBack", @mClick)
 	miFormFormat->Add("-")
-	miLockControls = miFormFormat->Add(ML("&Lock Controls") & HK("LockControls"), "LockControls", "LockControls", @mClick)
+	miLockControls = miFormFormat->Add(("&Lock Controls") & HK("LockControls"), "LockControls", "LockControls", @mClick)
 	
 	'' 13.3.A O2: Build + Debug + Run consolidated into one Run menu. "Build" survives as a command,
 	'' not a menu. Top-level = the 90% path; the rest lives in the two "More ... Options" submenus.
 	'' Captions are relabeled in the S2 pass; this pass only changes structure/grouping.
-	Var miRun = mnuMain.Add(ML("&Run"), "", "Run")
-	mnuStartWithCompile = miRun->Add(ML("&Run") & HK("StartWithCompile", "F5"), "StartWithCompile", "StartWithCompile", @mClick, , , False)
-	miCompile = miRun->Add(ML("&Build") & HK("Compile", "Ctrl+F9"), "Compile", "Compile", @mClick, , , False)
+	Var miRun = mnuMain.Add(("&Run"), "", "Run")
+	mnuStartWithCompile = miRun->Add(("&Run") & HK("StartWithCompile", "F5"), "StartWithCompile", "StartWithCompile", @mClick, , , False)
+	miCompile = miRun->Add(("&Build") & HK("Compile", "Ctrl+F9"), "Compile", "Compile", @mClick, , , False)
 	miRun->Add("-")
-	mnuEnd = miRun->Add(ML("&Stop") & HK("End"), "EndProgram", "End", @mClick, , , False)
-	mnuRestart = miRun->Add(ML("R&estart") & HK("Restart", "Shift+F5"), "", "Restart", @mClick, , , False)
+	mnuEnd = miRun->Add(("&Stop") & HK("End"), "EndProgram", "End", @mClick, , , False)
+	mnuRestart = miRun->Add(("R&estart") & HK("Restart", "Shift+F5"), "", "Restart", @mClick, , , False)
 	miRun->Add("-")
-	miStepInto = miRun->Add(ML("Step &Into") & HK("StepInto", "F8"), "StepInto", "StepInto", @mClick, , , False)
-	miStepOver = miRun->Add(ML("Step &Over") & HK("StepOver", "Shift+F8"), "StepOver", "StepOver", @mClick, , , False)
-	miToggleBreakpoint = miRun->Add(ML("&Toggle Breakpoint") & HK("Breakpoint", "F9"), "Breakpoint", "Breakpoint", @mClick, , , False)
+	miStepInto = miRun->Add(("Step &Into") & HK("StepInto", "F8"), "StepInto", "StepInto", @mClick, , , False)
+	miStepOver = miRun->Add(("Step &Over") & HK("StepOver", "Shift+F8"), "StepOver", "StepOver", @mClick, , , False)
+	miToggleBreakpoint = miRun->Add(("&Toggle Breakpoint") & HK("Breakpoint", "F9"), "Breakpoint", "Breakpoint", @mClick, , , False)
 	miRun->Add("-")
-	mnuUseDebugger = miRun->Add(ML("&Use Debugger") & HK("UseDebugger"), "", "UseDebugger", @mClick, True)
+	mnuUseDebugger = miRun->Add(("&Use Debugger") & HK("UseDebugger"), "", "UseDebugger", @mClick, True)
 	miRun->Add("-")
-	Var miMoreBuildOptions = miRun->Add(ML("&More Build Options"), "", "MoreBuildOptions")
-	miCompileAll = miMoreBuildOptions->Add(ML("&Rebuild All") & HK("CompileAll", "Ctrl+Alt+F9"), "", "CompileAll", @mClick, , , False)
-	miMakeClean = miMoreBuildOptions->Add(ML("&Clean") & HK("MakeClean"), "", "MakeClean", @mClick, , , False)
-	miSyntaxCheck = miMoreBuildOptions->Add(ML("&Syntax Check") & HK("SyntaxCheck"), "SyntaxCheck", "SyntaxCheck", @mClick, , , False)
-	miMake = miMoreBuildOptions->Add(ML("&Make") & HK("Make"), "Make", "Make", @mClick, , , False)
-	miMoreBuildOptions->Add(ML("&Parameters") & HK("Parameters"), "Parameters", "Parameters", @mClick)
-	mnuStart = miMoreBuildOptions->Add(ML("Run Without &Building") & HK("Start", "Ctrl+F5"), "Start", "Start", @mClick, , , False)
-	Var miMoreDebugOptions = miRun->Add(ML("More &Debug Options"), "", "MoreDebugOptions")
-	miStepOut = miMoreDebugOptions->Add(ML("Step O&ut") & HK("StepOut", "Ctrl+Shift+F8"), "StepOut", "StepOut", @mClick, , , False)
-	miRunToCursor = miMoreDebugOptions->Add(ML("&Run To Cursor") & HK("RunToCursor", "Ctrl+F8"), "RunToCursor", "RunToCursor", @mClick, , , False)
-	mnuContinue = miMoreDebugOptions->Add(ML("&Continue") & HK("Continue", "Ctrl+F5"), "Continue", "Continue", @mClick, , , False)
-	mnuBreak = miMoreDebugOptions->Add(ML("&Break") & HK("Break", "Ctrl+Break"), "Break", "Break", @mClick, , , False)
+	Var miMoreBuildOptions = miRun->Add(("&More Build Options"), "", "MoreBuildOptions")
+	miCompileAll = miMoreBuildOptions->Add(("&Rebuild All") & HK("CompileAll", "Ctrl+Alt+F9"), "", "CompileAll", @mClick, , , False)
+	miMakeClean = miMoreBuildOptions->Add(("&Clean") & HK("MakeClean"), "", "MakeClean", @mClick, , , False)
+	miSyntaxCheck = miMoreBuildOptions->Add(("&Syntax Check") & HK("SyntaxCheck"), "SyntaxCheck", "SyntaxCheck", @mClick, , , False)
+	miMake = miMoreBuildOptions->Add(("&Make") & HK("Make"), "Make", "Make", @mClick, , , False)
+	miMoreBuildOptions->Add(("&Parameters") & HK("Parameters"), "Parameters", "Parameters", @mClick)
+	mnuStart = miMoreBuildOptions->Add(("Run Without &Building") & HK("Start", "Ctrl+F5"), "Start", "Start", @mClick, , , False)
+	Var miMoreDebugOptions = miRun->Add(("More &Debug Options"), "", "MoreDebugOptions")
+	miStepOut = miMoreDebugOptions->Add(("Step O&ut") & HK("StepOut", "Ctrl+Shift+F8"), "StepOut", "StepOut", @mClick, , , False)
+	miRunToCursor = miMoreDebugOptions->Add(("&Run To Cursor") & HK("RunToCursor", "Ctrl+F8"), "RunToCursor", "RunToCursor", @mClick, , , False)
+	mnuContinue = miMoreDebugOptions->Add(("&Continue") & HK("Continue", "Ctrl+F5"), "Continue", "Continue", @mClick, , , False)
+	mnuBreak = miMoreDebugOptions->Add(("&Break") & HK("Break", "Ctrl+Break"), "Break", "Break", @mClick, , , False)
 	miMoreDebugOptions->Add("-")
-	miClearAllBreakpoints = miMoreDebugOptions->Add(ML("&Clear All Breakpoints") & HK("ClearAllBreakpoints", "Ctrl+Shift+F9"), "", "ClearAllBreakpoints", @mClick, , , False)
-	miAddWatch = miMoreDebugOptions->Add(ML("&Add Watch") & HK("AddWatch"), "", "AddWatch", @mClick, , , False)
-	miSetNextStatement = miMoreDebugOptions->Add(ML("Set &Next Statement") & HK("SetNextStatement"), "SetNextStatement", "SetNextStatement", @mClick, , , False)
-	miShowNextStatement = miMoreDebugOptions->Add(ML("Show Ne&xt Statement") & HK("ShowNextStatement"), "ShowNextStatement", "ShowNextStatement", @mClick, , , False)
+	miClearAllBreakpoints = miMoreDebugOptions->Add(("&Clear All Breakpoints") & HK("ClearAllBreakpoints", "Ctrl+Shift+F9"), "", "ClearAllBreakpoints", @mClick, , , False)
+	miAddWatch = miMoreDebugOptions->Add(("&Add Watch") & HK("AddWatch"), "", "AddWatch", @mClick, , , False)
+	miSetNextStatement = miMoreDebugOptions->Add(("Set &Next Statement") & HK("SetNextStatement"), "SetNextStatement", "SetNextStatement", @mClick, , , False)
+	miShowNextStatement = miMoreDebugOptions->Add(("Show Ne&xt Statement") & HK("ShowNextStatement"), "ShowNextStatement", "ShowNextStatement", @mClick, , , False)
 	miMoreDebugOptions->Add("-")
-	mnuUseProfiler = miMoreDebugOptions->Add(ML("Use &Profiler") & HK("UseProfiler"), "", "UseProfiler", @mClick, True)
-	miGDBCommand = miMoreDebugOptions->Add(ML("&GDB Command") & HK("GDBCommand"), "", "GDBCommand", @mClick, , , False)
+	mnuUseProfiler = miMoreDebugOptions->Add(("Use &Profiler") & HK("UseProfiler"), "", "UseProfiler", @mClick, True)
+	miGDBCommand = miMoreDebugOptions->Add(("&GDB Command") & HK("GDBCommand"), "", "GDBCommand", @mClick, , , False)
 
-	miXizmat = mnuMain.Add(ML("&Tools"), "", "Service")
-	miXizmat->Add(ML("&Command Prompt") & HK("CommandPrompt", "Alt+C"), "Console", "CommandPrompt", @mClick)
+	miXizmat = mnuMain.Add(("&Tools"), "", "Service")
+	miXizmat->Add(("&Command Prompt") & HK("CommandPrompt", "Alt+C"), "Console", "CommandPrompt", @mClick)
 	miXizmat->Add("-")
-	Var miToolsAdvanced = miXizmat->Add(ML("Advanced"), "", "ToolsAdvanced")
-	miToolsAdvanced->Add(ML("&Add-Ins") & "..." & HK("AddIns"), "", "AddIns", @mClick)
-	miToolsAdvanced->Add(ML("&External Tools") & "..." & HK("Tools"), "", "Tools", @mClick)
+	Var miToolsAdvanced = miXizmat->Add(("Advanced"), "", "ToolsAdvanced")
+	miToolsAdvanced->Add(("&Add-Ins") & "..." & HK("AddIns"), "", "AddIns", @mClick)
+	miToolsAdvanced->Add(("&External Tools") & "..." & HK("Tools"), "", "Tools", @mClick)
 	miXizmat->Add("-")
 	Dim As My.Sys.Drawing.BitmapType Bitm
 	Dim As WString * 1024 Buff
@@ -6083,15 +6083,15 @@ Sub CreateMenusAndToolBars
 		CloseFile_(Fn)
 	End If
 	miXizmat->Add("-")
-	miXizmat->Add(ML("&Options") & HK("Options"), "Tools", "Options", @mClick)
+	miXizmat->Add(("&Options") & HK("Options"), "Tools", "Options", @mClick)
 	
-	miWindow = mnuMain.Add(ML("&Window"), "", "Window")
+	miWindow = mnuMain.Add(("&Window"), "", "Window")
 	mnuWindowSeparator = miWindow->Add("-")
 	mnuWindowSeparator->Visible = False
 	
-	Var miHelp = mnuMain.Add(ML("&Help"), "", "Help")
-	miHelp->Add(ML("&Content") & HK("Content", "F1"), "Book", "Content", @mClick)
-	miHelps = miHelp->Add(ML("&Others"), "", "Others")
+	Var miHelp = mnuMain.Add(("&Help"), "", "Help")
+	miHelp->Add(("&Content") & HK("Content", "F1"), "Book", "Content", @mClick)
+	miHelps = miHelp->Add(("&Others"), "", "Others")
 	Dim As WString * 1024 sTmp2
 	For i As Integer = 0 To pHelps->Count - 1
 		sTmp = pHelps->Item(i)->Key 'iniSettings.ReadString("Helps", "Version_" & WStr(i), "")
@@ -6101,84 +6101,84 @@ Sub CreateMenusAndToolBars
 		End If
 	Next
 	miHelp->Add("-")
-	miHelp->Add(ML("FreeBasic WiKi") & HK("FreeBasicWiKi"), "Book", "FreeBasicWiKi", @mClick)
-	miHelp->Add(ML("FreeBasic Forums") & HK("FreeBasicForums"), "Forum", "FreeBasicForums", @mClick)
-	Var miGitHub = miHelp->Add(ML("GitHub"))
-	miGitHub->Add(ML("VisualFBEditor Repository") & HK("VisualFBEditorRepository"), "", "VisualFBEditorRepository", @mClick)
-	miGitHub->Add(ML("VisualFBEditor WiKi") & HK("VisualFBEditorWiKi"), "Book", "VisualFBEditorWiKi", @mClick)
+	miHelp->Add(("FreeBasic WiKi") & HK("FreeBasicWiKi"), "Book", "FreeBasicWiKi", @mClick)
+	miHelp->Add(("FreeBasic Forums") & HK("FreeBasicForums"), "Forum", "FreeBasicForums", @mClick)
+	Var miGitHub = miHelp->Add(("GitHub"))
+	miGitHub->Add(("VisualFBEditor Repository") & HK("VisualFBEditorRepository"), "", "VisualFBEditorRepository", @mClick)
+	miGitHub->Add(("VisualFBEditor WiKi") & HK("VisualFBEditorWiKi"), "Book", "VisualFBEditorWiKi", @mClick)
 	miGitHub->Add("-")
-	Var miGitHubAdvanced = miGitHub->Add(ML("Advanced"), "", "GitHubAdvanced")
-	miGitHubAdvanced->Add(ML("FreeBasic Repository") & HK("FreeBasicRepository"), "", "FreeBasicRepository", @mClick)
-	miGitHubAdvanced->Add(ML("VisualFBEditor Discussions") & HK("VisualFBEditorDiscussions"), "Forum", "VisualFBEditorDiscussions", @mClick)
-	miGitHubAdvanced->Add(ML("MyFbFramework Repository") & HK("MyFbFrameworkRepository"), "", "MyFbFrameworkRepository", @mClick)
-	miGitHubAdvanced->Add(ML("MyFbFramework WiKi") & HK("MyFbFrameworkWiKi"), "Book", "MyFbFrameworkWiKi", @mClick)
-	miGitHubAdvanced->Add(ML("MyFbFramework Discussions") & HK("MyFbFrameworkDiscussions"), "Forum", "MyFbFrameworkDiscussions", @mClick)
+	Var miGitHubAdvanced = miGitHub->Add(("Advanced"), "", "GitHubAdvanced")
+	miGitHubAdvanced->Add(("FreeBasic Repository") & HK("FreeBasicRepository"), "", "FreeBasicRepository", @mClick)
+	miGitHubAdvanced->Add(("VisualFBEditor Discussions") & HK("VisualFBEditorDiscussions"), "Forum", "VisualFBEditorDiscussions", @mClick)
+	miGitHubAdvanced->Add(("MyFbFramework Repository") & HK("MyFbFrameworkRepository"), "", "MyFbFrameworkRepository", @mClick)
+	miGitHubAdvanced->Add(("MyFbFramework WiKi") & HK("MyFbFrameworkWiKi"), "Book", "MyFbFrameworkWiKi", @mClick)
+	miGitHubAdvanced->Add(("MyFbFramework Discussions") & HK("MyFbFrameworkDiscussions"), "Forum", "MyFbFrameworkDiscussions", @mClick)
 	miHelp->Add("-")
-	miHelp->Add(ML("Tip of the Day"), "Book", "TipoftheDay", @mClick)
+	miHelp->Add(("Tip of the Day"), "Book", "TipoftheDay", @mClick)
 	miHelp->Add("-")
-	miHelp->Add(ML("&About") & HK("About"), "About", "About", @mClick)
+	miHelp->Add(("&About") & HK("About"), "About", "About", @mClick)
 	
 	'mnuForm.ImagesList = @imgList '<m>
-	mnuForm.Add(ML("Cu&t"), "Cut", "Cut", @mClick)
-	mnuForm.Add(ML("&Copy"), "Copy", "Copy", @mClick)
-	mnuForm.Add(ML("&Paste"), "Paste", "Paste", @mClick)
+	mnuForm.Add(("Cu&t"), "Cut", "Cut", @mClick)
+	mnuForm.Add(("&Copy"), "Copy", "Copy", @mClick)
+	mnuForm.Add(("&Paste"), "Paste", "Paste", @mClick)
 	
 	'mnuTabs.ImagesList = @imgList '<m>
-	miTabSetAsMain = mnuTabs.Add(ML("&Set as Main"), "", "SetAsMain", @mClick)
-	miTabReloadHistoryCode = mnuTabs.Add(ML("&Reload History Code"), "", "ReloadHistoryCode", @mClick)
+	miTabSetAsMain = mnuTabs.Add(("&Set as Main"), "", "SetAsMain", @mClick)
+	miTabReloadHistoryCode = mnuTabs.Add(("&Reload History Code"), "", "ReloadHistoryCode", @mClick)
 	mnuTabs.Add("-")
-	mnuTabs.Add(ML("&Close"), "Close", "Close", @mClick)
-	mnuTabs.Add(ML("Close All Without Current"), "", "CloseAllWithoutCurrent", @mClick)
-	mnuTabs.Add(ML("Close &All"), "", "CloseAll", @mClick)
+	mnuTabs.Add(("&Close"), "Close", "Close", @mClick)
+	mnuTabs.Add(("Close All Without Current"), "", "CloseAllWithoutCurrent", @mClick)
+	mnuTabs.Add(("Close &All"), "", "CloseAll", @mClick)
 	mnuTabs.Add("-")
-	mnuTabs.Add(ML("Split Up"), "", "SplitUp", @mClick)
-	mnuTabs.Add(ML("Split Down"), "", "SplitDown", @mClick)
-	mnuTabs.Add(ML("Split Left"), "", "SplitLeft", @mClick)
-	mnuTabs.Add(ML("Split Right"), "", "SplitRight", @mClick)
+	mnuTabs.Add(("Split Up"), "", "SplitUp", @mClick)
+	mnuTabs.Add(("Split Down"), "", "SplitDown", @mClick)
+	mnuTabs.Add(("Split Left"), "", "SplitLeft", @mClick)
+	mnuTabs.Add(("Split Right"), "", "SplitRight", @mClick)
 	mnuTabs.Add("-")
-	mnuTabs.Add(ML("Split &Horizontally"), "", "SplitHorizontally", @mClick)
-	mnuTabs.Add(ML("Split &Vertically"), "", "SplitVertically", @mClick)
+	mnuTabs.Add(("Split &Horizontally"), "", "SplitHorizontally", @mClick)
+	mnuTabs.Add(("Split &Vertically"), "", "SplitVertically", @mClick)
 	
 	'mnuVars.ImagesList = @imgList '<m>
-	mnuVars.Add(ML("Variable Dump"), "", "VariableDump", @mClick)
-	mnuVars.Add(ML("Pointed data Dump"), "", "PointedDataDump", @mClick)
+	mnuVars.Add(("Variable Dump"), "", "VariableDump", @mClick)
+	mnuVars.Add(("Pointed data Dump"), "", "PointedDataDump", @mClick)
 	mnuVars.Add("-")
-	mnuVars.Add(ML("Show String"), "", "ShowString", @mClick)
-	mnuVars.Add(ML("Show/Expand Variable"), "", "ShowExpandVariable", @mClick)
+	mnuVars.Add(("Show String"), "", "ShowString", @mClick)
+	mnuVars.Add(("Show/Expand Variable"), "", "ShowExpandVariable", @mClick)
 	
-	mnuWatch.Add(ML("Memory Dump"), "", "MemoryDumpWatch", @mClick)
+	mnuWatch.Add(("Memory Dump"), "", "MemoryDumpWatch", @mClick)
 	mnuWatch.Add("-")
-	mnuWatch.Add(ML("Show String"), "", "ShowStringWatch", @mClick)
-	mnuWatch.Add(ML("Show/Expand Variable"), "", "ShowExpandVariableWatch", @mClick)
+	mnuWatch.Add(("Show String"), "", "ShowStringWatch", @mClick)
+	mnuWatch.Add(("Show/Expand Variable"), "", "ShowExpandVariableWatch", @mClick)
 	
-	mnuProblems.Add(ML("Copy "), "", "ProblemsCopy", @mClick)
-	mnuProblems.Add(ML("Copy All"), "", "ProblemsCopyAll", @mClick)
+	mnuProblems.Add(("Copy "), "", "ProblemsCopy", @mClick)
+	mnuProblems.Add(("Copy All"), "", "ProblemsCopyAll", @mClick)
 	
-	mnuProcedures.Add(ML("Locate procedure (source)"), "", "LocateProcedure", @mClick)
-	mnuProcedures.Add(ML("Toggle sort by module or by procedure"), "", "ToggleSort", @mClick)
+	mnuProcedures.Add(("Locate procedure (source)"), "", "LocateProcedure", @mClick)
+	mnuProcedures.Add(("Toggle sort by module or by procedure"), "", "ToggleSort", @mClick)
 	mnuProcedures.Add("-")
-	mnuProcedures.Add(ML("Enable/disable"), "", "EnableDisable", @mClick)
+	mnuProcedures.Add(("Enable/disable"), "", "EnableDisable", @mClick)
 	
 	'mnuExplorer.ImagesList = @imgList '<m>
-	miSetAsMain = mnuExplorer.Add(ML("&Set As Main"), "", "SetAsMain", @mClick)
-	miClearStartUp = mnuExplorer.Add(ML("&Clear Start Up"), "", "ClearStartUp", @mClick)
+	miSetAsMain = mnuExplorer.Add(("&Set As Main"), "", "SetAsMain", @mClick)
+	miClearStartUp = mnuExplorer.Add(("&Clear Start Up"), "", "ClearStartUp", @mClick)
 	mnuExplorer.Add("-")
-	Var miAdd = mnuExplorer.Add(ML("&Add"), "Add", "Add", @mClick)
-	miAdd->Add(ML("Add &Form"), "Form", "AddForm", @mClick)
-	miAdd->Add(ML("Add &Module"), "Module", "AddModule", @mClick)
-	miAdd->Add(ML("Add &Include File"), "File", "AddIncludeFile", @mClick)
-	miAdd->Add(ML("Add &User Control"), "UserControl", "AddUserControl", @mClick)
-	miAdd->Add(ML("Add &Resource File"), "Resource", "AddResourceFile", @mClick)
-	miAdd->Add(ML("Add Ma&nifest File"), "File", "AddManifestFile", @mClick)
-	miAdd->Add(ML("Add From Templates") & "...", "", "AddFromTemplates", @mClick)
-	miAdd->Add(ML("Add Files") & "...", "", "AddFilesToProject", @mClick)
-	miExplorerRename = mnuExplorer.Add(ML("Rename"), "", "Rename", @mClick, , , False)
-	miRemoveFiles = mnuExplorer.Add(ML("&Remove"), "Remove", "RemoveFileFromProject", @mClick)
+	Var miAdd = mnuExplorer.Add(("&Add"), "Add", "Add", @mClick)
+	miAdd->Add(("Add &Form"), "Form", "AddForm", @mClick)
+	miAdd->Add(("Add &Module"), "Module", "AddModule", @mClick)
+	miAdd->Add(("Add &Include File"), "File", "AddIncludeFile", @mClick)
+	miAdd->Add(("Add &User Control"), "UserControl", "AddUserControl", @mClick)
+	miAdd->Add(("Add &Resource File"), "Resource", "AddResourceFile", @mClick)
+	miAdd->Add(("Add Ma&nifest File"), "File", "AddManifestFile", @mClick)
+	miAdd->Add(("Add From Templates") & "...", "", "AddFromTemplates", @mClick)
+	miAdd->Add(("Add Files") & "...", "", "AddFilesToProject", @mClick)
+	miExplorerRename = mnuExplorer.Add(("Rename"), "", "Rename", @mClick, , , False)
+	miRemoveFiles = mnuExplorer.Add(("&Remove"), "Remove", "RemoveFileFromProject", @mClick)
 	mnuExplorer.Add("-")
-	miExplorerOpenProjectFolder = mnuExplorer.Add(ML("Open Project Folder"), "", "OpenProjectFolder", @mClick, , , False)
-	miExplorerCloseProject = mnuExplorer.Add(ML("Close Project"), "", "CloseProject", @mClick, , , False)
+	miExplorerOpenProjectFolder = mnuExplorer.Add(("Open Project Folder"), "", "OpenProjectFolder", @mClick, , , False)
+	miExplorerCloseProject = mnuExplorer.Add(("Close Project"), "", "CloseProject", @mClick, , , False)
 	mnuExplorer.Add("-")
-	miExplorerProjectProperties = mnuExplorer.Add(ML("Project &Properties") & "...", "", "ProjectProperties", @mClick, , , False)
+	miExplorerProjectProperties = mnuExplorer.Add(("Project &Properties") & "...", "", "ProjectProperties", @mClick, , , False)
 	
 	'txtCommands.Left = 300
 	'txtCommands.AnchorRight = asAnchor
@@ -6193,20 +6193,20 @@ Sub CreateMenusAndToolBars
 	'tbStandard.DisabledImagesList = @imgListD
 	tbStandard.Flat = True
 	tbStandard.List = True
-	tbStandard.Buttons.Add tbsAutosize, "New", , @mClick, "New", , ML("New") & HK("New", "Ctrl+N", True), True
-	tbStandard.Buttons.Add tbsAutosize, "Open", , @mClick, "Open", ML("Open"), ML("Open") & HK("Open", "Ctrl+O", True), True
-	tbtSave = tbStandard.Buttons.Add(tbsAutosize, "Save", , @mClick, "Save", ML("Save"), ML("Save") & "..." & HK("Save", "Ctrl+S", True), True, ToolButtonState.tstNone)
-	tbtSaveAll = tbStandard.Buttons.Add(, "SaveAll", , @mClick, "SaveAll", , ML("Save &All") & HK("SaveAll", "Ctrl+Alt+Shift+S", True), True, ToolButtonState.tstNone)
+	tbStandard.Buttons.Add tbsAutosize, "New", , @mClick, "New", , ("New") & HK("New", "Ctrl+N", True), True
+	tbStandard.Buttons.Add tbsAutosize, "Open", , @mClick, "Open", ("Open"), ("Open") & HK("Open", "Ctrl+O", True), True
+	tbtSave = tbStandard.Buttons.Add(tbsAutosize, "Save", , @mClick, "Save", ("Save"), ("Save") & "..." & HK("Save", "Ctrl+S", True), True, ToolButtonState.tstNone)
+	tbtSaveAll = tbStandard.Buttons.Add(, "SaveAll", , @mClick, "SaveAll", , ("Save &All") & HK("SaveAll", "Ctrl+Alt+Shift+S", True), True, ToolButtonState.tstNone)
 	tbStandard.Buttons.Add tbsSeparator
-	tbtUndo = tbStandard.Buttons.Add(, "Undo", , @mClick, "Undo", , ML("Undo") & HK("Undo", "Ctrl+Z", True), True, ToolButtonState.tstNone)
-	tbtRedo = tbStandard.Buttons.Add(, "Redo", , @mClick, "Redo", , ML("Redo") & HK("Redo", "Ctrl+Shift+Z", True), True, ToolButtonState.tstNone)
+	tbtUndo = tbStandard.Buttons.Add(, "Undo", , @mClick, "Undo", , ("Undo") & HK("Undo", "Ctrl+Z", True), True, ToolButtonState.tstNone)
+	tbtRedo = tbStandard.Buttons.Add(, "Redo", , @mClick, "Redo", , ("Redo") & HK("Redo", "Ctrl+Shift+Z", True), True, ToolButtonState.tstNone)
 	tbStandard.Buttons.Add tbsSeparator
-	tbtCut = tbStandard.Buttons.Add(, "Cut", , @mClick, "Cut", , ML("Cut") & HK("Cut", "Ctrl+X", True), True, ToolButtonState.tstNone)
-	tbtCopy = tbStandard.Buttons.Add(, "Copy", , @mClick, "Copy", , ML("Copy") & HK("Copy", "Ctrl+C", True), True, ToolButtonState.tstNone)
-	tbtPaste = tbStandard.Buttons.Add(, "Paste", , @mClick, "Paste", , ML("Paste") & HK("Paste", "Ctrl+V", True), True, ToolButtonState.tstNone)
+	tbtCut = tbStandard.Buttons.Add(, "Cut", , @mClick, "Cut", , ("Cut") & HK("Cut", "Ctrl+X", True), True, ToolButtonState.tstNone)
+	tbtCopy = tbStandard.Buttons.Add(, "Copy", , @mClick, "Copy", , ("Copy") & HK("Copy", "Ctrl+C", True), True, ToolButtonState.tstNone)
+	tbtPaste = tbStandard.Buttons.Add(, "Paste", , @mClick, "Paste", , ("Paste") & HK("Paste", "Ctrl+V", True), True, ToolButtonState.tstNone)
 	tbStandard.Buttons.Add tbsSeparator
-	tbtFind = tbStandard.Buttons.Add(, "Find", , @mClick, "Find", , ML("Find") & HK("Find", "Ctrl+F", True), True, ToolButtonState.tstNone)
-	tbtUseDirect2D = tbStandard.Buttons.Add(tbsCheck, "UseDirect2D", , @mClick, "UseDirect2D", , ML("Use Direct2D (For Windows)") & HK("UseDirect2D"), True)
+	tbtFind = tbStandard.Buttons.Add(, "Find", , @mClick, "Find", , ("Find") & HK("Find", "Ctrl+F", True), True, ToolButtonState.tstNone)
+	tbtUseDirect2D = tbStandard.Buttons.Add(tbsCheck, "UseDirect2D", , @mClick, "UseDirect2D", , ("Use Direct2D (For Windows)") & HK("UseDirect2D"), True)
 	Var b = UseDirect2D
 	tbtUseDirect2D->Checked = UseDirect2D
 	UseDirect2D = b
@@ -6217,18 +6217,18 @@ Sub CreateMenusAndToolBars
 	'tbEdit.DisabledImagesList = @imgListD
 	tbEdit.Flat = True
 	tbEdit.List = True
-	tbtFormat = tbEdit.Buttons.Add(, "Format", , @mClick, "Format", , ML("Format") & HK("Format", "Ctrl+Tab", True), True, ToolButtonState.tstNone)
-	tbtUnformat = tbEdit.Buttons.Add(, "Unformat", , @mClick, "Unformat", , ML("Unformat") & HK("Unformat", "Shift+Ctrl+Tab", True), True, ToolButtonState.tstNone)
+	tbtFormat = tbEdit.Buttons.Add(, "Format", , @mClick, "Format", , ("Format") & HK("Format", "Ctrl+Tab", True), True, ToolButtonState.tstNone)
+	tbtUnformat = tbEdit.Buttons.Add(, "Unformat", , @mClick, "Unformat", , ("Unformat") & HK("Unformat", "Shift+Ctrl+Tab", True), True, ToolButtonState.tstNone)
 	tbEdit.Buttons.Add tbsSeparator
-	tbtSingleComment = tbEdit.Buttons.Add(, "Comment", , @mClick, "SingleComment", , ML("Single comment") & HK("SingleComment", "Ctrl+I", True), True, ToolButtonState.tstNone)
-	tbtBlockComment = tbEdit.Buttons.Add(, "BlockComment", , @mClick, "BlockComment", , ML("Block comment") & HK("BlockComment", "Ctrl+Alt+I", True), True, ToolButtonState.tstNone)
-	tbtUncommentBlock = tbEdit.Buttons.Add(, "UnComment", , @mClick, "UnComment", , ML("UnComment") & HK("UnComment", "Shift+Ctrl+I", True), True, ToolButtonState.tstNone)
+	tbtSingleComment = tbEdit.Buttons.Add(, "Comment", , @mClick, "SingleComment", , ("Single comment") & HK("SingleComment", "Ctrl+I", True), True, ToolButtonState.tstNone)
+	tbtBlockComment = tbEdit.Buttons.Add(, "BlockComment", , @mClick, "BlockComment", , ("Block comment") & HK("BlockComment", "Ctrl+Alt+I", True), True, ToolButtonState.tstNone)
+	tbtUncommentBlock = tbEdit.Buttons.Add(, "UnComment", , @mClick, "UnComment", , ("UnComment") & HK("UnComment", "Shift+Ctrl+I", True), True, ToolButtonState.tstNone)
 	tbEdit.Buttons.Add tbsSeparator
-	tbtCompleteWord = tbEdit.Buttons.Add(, "CompleteWord", , @mClick, "CompleteWord", , ML("Complete Word") & HK("CompleteWord", "Ctrl+Space", True), True, ToolButtonState.tstNone)
-	tbtParameterInfo = tbEdit.Buttons.Add(, "ParameterInfo", , @mClick, "InvokeParameterInfo", , ML("Parameter Info") & HK("ParameterInfo", "Ctrl+J", True), True)
+	tbtCompleteWord = tbEdit.Buttons.Add(, "CompleteWord", , @mClick, "CompleteWord", , ("Complete Word") & HK("CompleteWord", "Ctrl+Space", True), True, ToolButtonState.tstNone)
+	tbtParameterInfo = tbEdit.Buttons.Add(, "ParameterInfo", , @mClick, "InvokeParameterInfo", , ("Parameter Info") & HK("ParameterInfo", "Ctrl+J", True), True)
 	tbEdit.Buttons.Add tbsSeparator
-	tbtSyntaxCheck = tbEdit.Buttons.Add(, "SyntaxCheck", , @mClick, "SyntaxCheck", , ML("Syntax Check"), True, ToolButtonState.tstNone)
-	tbtSuggestions = tbEdit.Buttons.Add(, "Suggestions", , @mClick, "AnalyzeSuggestions", , ML("Suggestions"), True, ToolButtonState.tstNone)
+	tbtSyntaxCheck = tbEdit.Buttons.Add(, "SyntaxCheck", , @mClick, "SyntaxCheck", , ("Syntax Check"), True, ToolButtonState.tstNone)
+	tbtSuggestions = tbEdit.Buttons.Add(, "Suggestions", , @mClick, "AnalyzeSuggestions", , ("Suggestions"), True, ToolButtonState.tstNone)
 	'tbStandard.Buttons.Add tbsSeparator
 	'' 13.3.A O3: Build + Debug + Run toolbars consolidated into one Run toolbar (mirrors the O2
 	'' Run-menu consolidation and drops the ReBar from 7 bands to 5). Primary buttons (Run, Build,
@@ -6243,29 +6243,29 @@ Sub CreateMenusAndToolBars
 	tbRun.HotImagesList = @imgList
 	tbRun.Flat = True
 	tbRun.List = True
-	tbtStartWithCompile = tbRun.Buttons.Add(tbsAutosize, "StartWithCompile", , @mClick, "StartWithCompile", ML("Run"), ML("Run") & HK("StartWithCompile", "F5", True), True, ToolButtonState.tstNone)
-	tbtCompile = tbRun.Buttons.Add(tbsAutosize, "Compile", , @mClick, "Compile", ML("Build"), ML("Build") & HK("Compile", "Ctrl+F9", True), True, ToolButtonState.tstNone)
+	tbtStartWithCompile = tbRun.Buttons.Add(tbsAutosize, "StartWithCompile", , @mClick, "StartWithCompile", ("Run"), ("Run") & HK("StartWithCompile", "F5", True), True, ToolButtonState.tstNone)
+	tbtCompile = tbRun.Buttons.Add(tbsAutosize, "Compile", , @mClick, "Compile", ("Build"), ("Build") & HK("Compile", "Ctrl+F9", True), True, ToolButtonState.tstNone)
 	tbRun.Buttons.Add tbsSeparator
-	tbtEnd = tbRun.Buttons.Add(tbsAutosize, "EndProgram", , @mClick, "End", ML("Stop"), ML("Stop") & HK("End", , True), True, ToolButtonState.tstNone)
+	tbtEnd = tbRun.Buttons.Add(tbsAutosize, "EndProgram", , @mClick, "End", ("Stop"), ("Stop") & HK("End", , True), True, ToolButtonState.tstNone)
 	tbRun.Buttons.Add tbsSeparator
-	tbtStepInto = tbRun.Buttons.Add(, "StepInto", , @mClick, "StepInto", , ML("Step Into") & HK("StepInto", "F8", True), True)
-	tbtStepOver = tbRun.Buttons.Add(, "StepOver", , @mClick, "StepOver", , ML("Step Over") & HK("StepOver", "Shift+F8", True), True)
-	tbtToggleBreakpoint = tbRun.Buttons.Add(, "Breakpoint", , @mClick, "ToggleBreakpoint", , ML("Toggle Breakpoint") & HK("Breakpoint", "F9", True), True)
+	tbtStepInto = tbRun.Buttons.Add(, "StepInto", , @mClick, "StepInto", , ("Step Into") & HK("StepInto", "F8", True), True)
+	tbtStepOver = tbRun.Buttons.Add(, "StepOver", , @mClick, "StepOver", , ("Step Over") & HK("StepOver", "Shift+F8", True), True)
+	tbtToggleBreakpoint = tbRun.Buttons.Add(, "Breakpoint", , @mClick, "ToggleBreakpoint", , ("Toggle Breakpoint") & HK("Breakpoint", "F9", True), True)
 	tbRun.Buttons.Add tbsSeparator
-	tbtUseDebugger = tbRun.Buttons.Add(Cast(ToolButtonStyle, tbsCheck Or tbsAutosize), "UseDebugger", , @mClick, "TBUseDebugger", , ML("Use Debugger") & HK("UseDebugger", , True), True)
+	tbtUseDebugger = tbRun.Buttons.Add(Cast(ToolButtonStyle, tbsCheck Or tbsAutosize), "UseDebugger", , @mClick, "TBUseDebugger", , ("Use Debugger") & HK("UseDebugger", , True), True)
 	tbRun.Buttons.Add tbsSeparator
-	tbtStart = tbRun.Buttons.Add(, "Start", , @mClick, "Start", , ML("Run Without Building") & HK("Start", "Ctrl+F5", True), True, ToolButtonState.tstNone)
-	tbtBreak = tbRun.Buttons.Add(, "Break", , @mClick, "Break", , ML("Break") & HK("Break", "Ctrl+Pause", True), True, ToolButtonState.tstNone)
-	tbtStepOut = tbRun.Buttons.Add(, "StepOut", , @mClick, "StepOut", , ML("Step Out") & HK("StepOut", "Ctrl+Shift+F8", True), True)
-	tbtRunToCursor = tbRun.Buttons.Add(, "RunToCursor", , @mClick, "RunToCursor", , ML("Run To Cursor") & HK("RunToCursor", "Ctrl+F8", True), True)
+	tbtStart = tbRun.Buttons.Add(, "Start", , @mClick, "Start", , ("Run Without Building") & HK("Start", "Ctrl+F5", True), True, ToolButtonState.tstNone)
+	tbtBreak = tbRun.Buttons.Add(, "Break", , @mClick, "Break", , ("Break") & HK("Break", "Ctrl+Pause", True), True, ToolButtonState.tstNone)
+	tbtStepOut = tbRun.Buttons.Add(, "StepOut", , @mClick, "StepOut", , ("Step Out") & HK("StepOut", "Ctrl+Shift+F8", True), True)
+	tbtRunToCursor = tbRun.Buttons.Add(, "RunToCursor", , @mClick, "RunToCursor", , ("Run To Cursor") & HK("RunToCursor", "Ctrl+F8", True), True)
 	tbRun.Buttons.Add tbsSeparator
-	tbtSetNextStatement = tbRun.Buttons.Add(, "SetNextStatement", , @mClick, "SetNextStatement", , ML("Set Next Statement") & HK("SetNextStatement", , True), True)
-	tbtShowNextStatement = tbRun.Buttons.Add(, "ShowNextStatement", , @mClick, "ShowNextStatement", , ML("Show Next Statement") & HK("ShowNextStatement", , True), True)
+	tbtSetNextStatement = tbRun.Buttons.Add(, "SetNextStatement", , @mClick, "SetNextStatement", , ("Set Next Statement") & HK("SetNextStatement", , True), True)
+	tbtShowNextStatement = tbRun.Buttons.Add(, "ShowNextStatement", , @mClick, "ShowNextStatement", , ("Show Next Statement") & HK("ShowNextStatement", , True), True)
 	tbRun.Buttons.Add tbsSeparator
-	Var tbMake = tbRun.Buttons.Add(Cast(ToolButtonStyle, tbsAutosize Or tbsWholeDropdown), "Make", , @mClick, "Make", , ML("Make"), True)
+	Var tbMake = tbRun.Buttons.Add(Cast(ToolButtonStyle, tbsAutosize Or tbsWholeDropdown), "Make", , @mClick, "Make", , ("Make"), True)
 	dmiMake = tbMake->DropDownMenu.Add("Make", "", "Make", @mClick, , , False)
 	dmiMakeClean = tbMake->DropDownMenu.Add("Make clean", "", "MakeClean", @mClick, , , False)
-	tbRun.Buttons.Add , "Parameters", , @mClick, "Parameters", , ML("Parameters"), True
+	tbRun.Buttons.Add , "Parameters", , @mClick, "Parameters", , ("Parameters"), True
 	'tbStandard.Buttons.Add tbsSeparator
 	tbProject.Name = "Project"
 	tbProject.ImagesList = @imgList
@@ -6273,9 +6273,9 @@ Sub CreateMenusAndToolBars
 	'tbProject.DisabledImagesList = @imgListD
 	tbProject.Flat = True
 	tbProject.List = True
-	tbtNotSetted = tbProject.Buttons.Add(Cast(ToolButtonStyle, tbsAutosize Or tbsCheckGroup), "NotSetted", , @mClick, "NotSetted", , ML("Not Set"), True)
-	tbtConsole = tbProject.Buttons.Add(Cast(ToolButtonStyle, tbsAutosize Or tbsCheckGroup), "Console", , @mClick, "Console", , ML("Console"), True)
-	tbtGUI = tbProject.Buttons.Add(Cast(ToolButtonStyle, tbsAutosize Or tbsCheckGroup), "Form", , @mClick, "GUI", , ML("GUI"), True)
+	tbtNotSetted = tbProject.Buttons.Add(Cast(ToolButtonStyle, tbsAutosize Or tbsCheckGroup), "NotSetted", , @mClick, "NotSetted", , ("Not Set"), True)
+	tbtConsole = tbProject.Buttons.Add(Cast(ToolButtonStyle, tbsAutosize Or tbsCheckGroup), "Console", , @mClick, "Console", , ("Console"), True)
+	tbtGUI = tbProject.Buttons.Add(Cast(ToolButtonStyle, tbsAutosize Or tbsCheckGroup), "Form", , @mClick, "GUI", , ("GUI"), True)
 	tbProject.Buttons.Add tbsSeparator
 	Var tbButton = tbProject.Buttons.Add(tbsCustom)
 	tbButton->Width = 170
@@ -6285,39 +6285,39 @@ Sub CreateMenusAndToolBars
 	tbFormat.HotImagesList = @imgList
 	tbFormat.Flat = True
 	tbFormat.List = True
-	tbtAlignLefts = tbFormat.Buttons.Add(, "AlignLefts", , @mClick, "AlignLefts", , ML("Align Lefts"), True)
-	tbtAlignCenters = tbFormat.Buttons.Add(, "AlignCenters", , @mClick, "AlignCenters", , ML("Align Centers"), True)
-	tbtAlignRights = tbFormat.Buttons.Add(, "AlignRights", , @mClick, "AlignRights", , ML("Align Rights"), True)
+	tbtAlignLefts = tbFormat.Buttons.Add(, "AlignLefts", , @mClick, "AlignLefts", , ("Align Lefts"), True)
+	tbtAlignCenters = tbFormat.Buttons.Add(, "AlignCenters", , @mClick, "AlignCenters", , ("Align Centers"), True)
+	tbtAlignRights = tbFormat.Buttons.Add(, "AlignRights", , @mClick, "AlignRights", , ("Align Rights"), True)
 	tbFormat.Buttons.Add tbsSeparator
-	tbtAlignTops = tbFormat.Buttons.Add(, "AlignTops", , @mClick, "AlignTops", , ML("Align Tops"), True)
-	tbtAlignMiddles = tbFormat.Buttons.Add(, "AlignMiddles", , @mClick, "AlignMiddles", , ML("Align Middles"), True)
-	tbtAlignBottoms = tbFormat.Buttons.Add(, "AlignBottoms", , @mClick, "AlignBottoms", , ML("Align Bottoms"), True)
+	tbtAlignTops = tbFormat.Buttons.Add(, "AlignTops", , @mClick, "AlignTops", , ("Align Tops"), True)
+	tbtAlignMiddles = tbFormat.Buttons.Add(, "AlignMiddles", , @mClick, "AlignMiddles", , ("Align Middles"), True)
+	tbtAlignBottoms = tbFormat.Buttons.Add(, "AlignBottoms", , @mClick, "AlignBottoms", , ("Align Bottoms"), True)
 	tbFormat.Buttons.Add tbsSeparator
-	tbtAlignToGrid = tbFormat.Buttons.Add(, "AlignToGrid", , @mClick, "AlignToGrid", , ML("Align to Grid"), True)
+	tbtAlignToGrid = tbFormat.Buttons.Add(, "AlignToGrid", , @mClick, "AlignToGrid", , ("Align to Grid"), True)
 	tbFormat.Buttons.Add tbsSeparator
-	tbtMakeSameSizeWidth = tbFormat.Buttons.Add(, "MakeSameSizeWidth", , @mClick, "MakeSameSizeWidth", , ML("Make Same Width"), True)
-	tbtMakeSameSizeHeight = tbFormat.Buttons.Add(, "MakeSameSizeHeight", , @mClick, "MakeSameSizeHeight", , ML("Make Same Height"), True)
-	tbtMakeSameSizeBoth = tbFormat.Buttons.Add(, "MakeSameSizeBoth", , @mClick, "MakeSameSizeBoth", , ML("Make Same Size"), True)
+	tbtMakeSameSizeWidth = tbFormat.Buttons.Add(, "MakeSameSizeWidth", , @mClick, "MakeSameSizeWidth", , ("Make Same Width"), True)
+	tbtMakeSameSizeHeight = tbFormat.Buttons.Add(, "MakeSameSizeHeight", , @mClick, "MakeSameSizeHeight", , ("Make Same Height"), True)
+	tbtMakeSameSizeBoth = tbFormat.Buttons.Add(, "MakeSameSizeBoth", , @mClick, "MakeSameSizeBoth", , ("Make Same Size"), True)
 	tbFormat.Buttons.Add tbsSeparator
-	tbtSizeToGrid = tbFormat.Buttons.Add(, "SizeToGrid", , @mClick, "SizeToGrid", , ML("Size to Grid"), True)
+	tbtSizeToGrid = tbFormat.Buttons.Add(, "SizeToGrid", , @mClick, "SizeToGrid", , ("Size to Grid"), True)
 	tbFormat.Buttons.Add tbsSeparator
-	tbtHorizontalSpacingMakeEqual = tbFormat.Buttons.Add(, "HorizontalSpacingMakeEqual", , @mClick, "HorizontalSpacingMakeEqual", , ML("Make Equal Horizontal Space"), True)
-	tbtHorizontalSpacingIncrease = tbFormat.Buttons.Add(, "HorizontalSpacingIncrease", , @mClick, "HorizontalSpacingIncrease", , ML("Increase Horizontal Space"), True)
-	tbtHorizontalSpacingDecrease = tbFormat.Buttons.Add(, "HorizontalSpacingDecrease", , @mClick, "HorizontalSpacingDecrease", , ML("Decrease Horizontal Space"), True)
-	tbtHorizontalSpacingRemove = tbFormat.Buttons.Add(, "HorizontalSpacingRemove", , @mClick, "HorizontalSpacingRemove", , ML("Remove Horizontal Space"), True)
+	tbtHorizontalSpacingMakeEqual = tbFormat.Buttons.Add(, "HorizontalSpacingMakeEqual", , @mClick, "HorizontalSpacingMakeEqual", , ("Make Equal Horizontal Space"), True)
+	tbtHorizontalSpacingIncrease = tbFormat.Buttons.Add(, "HorizontalSpacingIncrease", , @mClick, "HorizontalSpacingIncrease", , ("Increase Horizontal Space"), True)
+	tbtHorizontalSpacingDecrease = tbFormat.Buttons.Add(, "HorizontalSpacingDecrease", , @mClick, "HorizontalSpacingDecrease", , ("Decrease Horizontal Space"), True)
+	tbtHorizontalSpacingRemove = tbFormat.Buttons.Add(, "HorizontalSpacingRemove", , @mClick, "HorizontalSpacingRemove", , ("Remove Horizontal Space"), True)
 	tbFormat.Buttons.Add tbsSeparator
-	tbtVerticalSpacingMakeEqual = tbFormat.Buttons.Add(, "VerticalSpacingMakeEqual", , @mClick, "VerticalSpacingMakeEqual", , ML("Make Equal Vertical Space"), True)
-	tbtVerticalSpacingIncrease = tbFormat.Buttons.Add(, "VerticalSpacingIncrease", , @mClick, "VerticalSpacingIncrease", , ML("Increase Vertical Space"), True)
-	tbtVerticalSpacingDecrease = tbFormat.Buttons.Add(, "VerticalSpacingDecrease", , @mClick, "VerticalSpacingDecrease", , ML("Decrease Vertical Space"), True)
-	tbtVerticalSpacingRemove = tbFormat.Buttons.Add(, "VerticalSpacingRemove", , @mClick, "VerticalSpacingRemove", , ML("Remove Vertical Space"), True)
+	tbtVerticalSpacingMakeEqual = tbFormat.Buttons.Add(, "VerticalSpacingMakeEqual", , @mClick, "VerticalSpacingMakeEqual", , ("Make Equal Vertical Space"), True)
+	tbtVerticalSpacingIncrease = tbFormat.Buttons.Add(, "VerticalSpacingIncrease", , @mClick, "VerticalSpacingIncrease", , ("Increase Vertical Space"), True)
+	tbtVerticalSpacingDecrease = tbFormat.Buttons.Add(, "VerticalSpacingDecrease", , @mClick, "VerticalSpacingDecrease", , ("Decrease Vertical Space"), True)
+	tbtVerticalSpacingRemove = tbFormat.Buttons.Add(, "VerticalSpacingRemove", , @mClick, "VerticalSpacingRemove", , ("Remove Vertical Space"), True)
 	tbFormat.Buttons.Add tbsSeparator
-	tbtCenterInParentHorizontally = tbFormat.Buttons.Add(, "CenterInParentHorizontally", , @mClick, "CenterInParentHorizontally", , ML("Center In Parent Horizontally"), True)
-	tbtCenterInParentVertically = tbFormat.Buttons.Add(, "CenterInParentVertically", , @mClick, "CenterInParentVertically", , ML("Center In Parent Vertically"), True)
+	tbtCenterInParentHorizontally = tbFormat.Buttons.Add(, "CenterInParentHorizontally", , @mClick, "CenterInParentHorizontally", , ("Center In Parent Horizontally"), True)
+	tbtCenterInParentVertically = tbFormat.Buttons.Add(, "CenterInParentVertically", , @mClick, "CenterInParentVertically", , ("Center In Parent Vertically"), True)
 	tbFormat.Buttons.Add tbsSeparator
-	tbtOrderBringToFront = tbFormat.Buttons.Add(, "BringToFront", , @mClick, "BringToFront", , ML("Bring to Front"), True)
-	tbtOrderSendToBack = tbFormat.Buttons.Add(, "SendToBack", , @mClick, "SendToBack", , ML("Send to Back"), True)
+	tbtOrderBringToFront = tbFormat.Buttons.Add(, "BringToFront", , @mClick, "BringToFront", , ("Bring to Front"), True)
+	tbtOrderSendToBack = tbFormat.Buttons.Add(, "SendToBack", , @mClick, "SendToBack", , ("Send to Back"), True)
 	tbFormat.Buttons.Add tbsSeparator
-	tbtLockControls = tbFormat.Buttons.Add(Cast(ToolButtonStyle, tbsCheck Or tbsAutosize), "LockControls", , @mClick, "TBLockControls", , ML("Lock Controls"), True)
+	tbtLockControls = tbFormat.Buttons.Add(Cast(ToolButtonStyle, tbsCheck Or tbsAutosize), "LockControls", , @mClick, "TBLockControls", , ("Lock Controls"), True)
 End Sub
 
 CreateMenusAndToolBars
@@ -6328,7 +6328,7 @@ Sub tbLeft_OnResize(ByRef Designer As My.Sys.Object, ByRef Sender As Control, Ne
 End Sub
 
 tbLeft.ImagesList = @imgList
-tbLeft.Buttons.Add tbsCheck, "Pinned", , @mClick, "PinLeft", "", ML("Pin"), , Cast(ToolButtonState, tstEnabled Or tstChecked)
+tbLeft.Buttons.Add tbsCheck, "Pinned", , @mClick, "PinLeft", "", ("Pin"), , Cast(ToolButtonState, tstEnabled Or tstChecked)
 tbLeft.Flat = True
 tbLeft.Width = 23
 tbLeft.Parent = @pnlLeftPin
@@ -6342,13 +6342,13 @@ tbExplorer.Align = DockStyle.alTop
 tbExplorer.AutoSize = True
 tbExplorer.ExtraMargins.Left = 2
 tbExplorer.ExtraMargins.Right = tbLeft.Width
-tbExplorer.Buttons.Add , "Add",, @mClick, "AddFilesToProject", , ML("Add"), True
-tbtRemoveFileFromProject = tbExplorer.Buttons.Add(, "Remove", , @mClick, "RemoveFileFromProject", , ML("&Remove"), True, ToolButtonState.tstNone)
+tbExplorer.Buttons.Add , "Add",, @mClick, "AddFilesToProject", , ("Add"), True
+tbtRemoveFileFromProject = tbExplorer.Buttons.Add(, "Remove", , @mClick, "RemoveFileFromProject", , ("&Remove"), True, ToolButtonState.tstNone)
 tbExplorer.Buttons.Add tbsSeparator
-Var tbFolder = tbExplorer.Buttons.Add(tbsWholeDropdown, "Folder", , @mClick, "Folder", , ML("Show Folders"), True)
-miShowWithFolders = tbFolder->DropDownMenu.Add(ML("Show With Folders"), "", "ShowWithFolders", @mClick, , , True)
-miShowWithoutFolders = tbFolder->DropDownMenu.Add(ML("Show Without Folders"), "", "ShowWithoutFolders", @mClick, , , True)
-miShowAsFolder = tbFolder->DropDownMenu.Add(ML("Show As Folder"), "", "ShowAsFolder", @mClick, , , False)
+Var tbFolder = tbExplorer.Buttons.Add(tbsWholeDropdown, "Folder", , @mClick, "Folder", , ("Show Folders"), True)
+miShowWithFolders = tbFolder->DropDownMenu.Add(("Show With Folders"), "", "ShowWithFolders", @mClick, , , True)
+miShowWithoutFolders = tbFolder->DropDownMenu.Add(("Show Without Folders"), "", "ShowWithoutFolders", @mClick, , , True)
+miShowAsFolder = tbFolder->DropDownMenu.Add(("Show As Folder"), "", "ShowAsFolder", @mClick, , , False)
 tbExplorer.Buttons.Add tbsSeparator
 Var tbSearch = tbExplorer.Buttons.Add(tbsCustom)
 txtExplorer.Width = 2
@@ -6370,9 +6370,9 @@ tbForm.Align = DockStyle.alTop
 tbForm.Flat = True
 tbForm.ExtraMargins.Left = 2
 tbForm.ExtraMargins.Right = tbLeft.Width
-tbForm.Buttons.Add tbsCheck, "Label", , @tbFormClick, "Text", "", ML("Text"), , Cast(ToolButtonState, tstChecked Or tstEnabled)
+tbForm.Buttons.Add tbsCheck, "Label", , @tbFormClick, "Text", "", ("Text"), , Cast(ToolButtonState, tstChecked Or tstEnabled)
 tbForm.Buttons.Add tbsSeparator
-tbForm.Buttons.Add , "Component", , @tbFormClick, "Components", "", ML("Add Components")
+tbForm.Buttons.Add , "Component", , @tbFormClick, "Components", "", ("Add Components")
 tbForm.Buttons.Add tbsSeparator
 Var FormSearch = tbForm.Buttons.Add(tbsCustom)
 txtForm.Width = 2
@@ -6881,12 +6881,12 @@ Sub tvExplorer_MouseUp(ByRef Designer As My.Sys.Object, ByRef Sender As Control,
 			miCloseProject->Enabled = False
 			miDeleteProject->Enabled = False
 		End If
-		miSetAsMain->Caption = ML("Set as Main")
+		miSetAsMain->Caption = ("Set as Main")
 		If tn->ImageKey = "Opened" Then
 			miSetAsMain->Enabled = False
 		End If
 	Else
-		miSetAsMain->Caption = ML("Set as Start Up")
+		miSetAsMain->Caption = ("Set as Start Up")
 	End If
 	Dim As String tmpKeyStr = " @Sub @StandartTypes @Property @Enum @EnumItem @Type @Function @Opened "
 	Dim As ExplorerElement Ptr eeMenu
@@ -6894,11 +6894,11 @@ Sub tvExplorer_MouseUp(ByRef Designer As My.Sys.Object, ByRef Sender As Control,
 	If CInt(tn = 0) OrElse CInt(eeMenu <> 0 AndAlso *eeMenu Is ControlTreeElement) OrElse CInt(tn <> 0 AndAlso InStr(tmpKeyStr, " @" & tn->ImageKey & " ")) Then
 		miSetAsMain->Enabled = IIf(tn <> 0 AndAlso tn->ParentNode <> 0, False, True)
 		miRemoveFiles->Enabled = False
-		miRemoveFiles->Caption = ML("Remove")
+		miRemoveFiles->Caption = ("Remove")
 	Else
 		miSetAsMain->Enabled = True
 		miRemoveFiles->Enabled = True
-		miRemoveFiles->Caption = ML("Remove") & " " & tn->Text
+		miRemoveFiles->Caption = ("Remove") & " " & tn->Text
 	End If
 End Sub
 
@@ -6927,7 +6927,7 @@ Sub tvExplorer_AfterLabelEdit(ByRef Designer As My.Sys.Object, ByRef Sender As T
 				bFileName = Left(bFileName, Len(bFileName) - 1)
 			End If
 				If MoveFile(ppe->FileName, bFileName.vptr) = 0 Then
-					MsgBox ML("Renaming error!") & " " & GetErrorString(GetLastError, , True)
+					MsgBox ("Renaming error!") & " " & GetErrorString(GetLastError, , True)
 					Cancel = True
 					Exit Sub
 				End If
@@ -6946,7 +6946,7 @@ Sub tvExplorer_AfterLabelEdit(ByRef Designer As My.Sys.Object, ByRef Sender As T
 			End If
 			If InStr(*ee->FileName, Any ":\/") > 0 Then
 					If MoveFile(ee->FileName, bFileName.vptr) = 0 Then
-						MsgBox ML("Renaming error!") & " " & GetErrorString(GetLastError, , True)
+						MsgBox ("Renaming error!") & " " & GetErrorString(GetLastError, , True)
 						Cancel = True
 						Exit Sub
 					End If
@@ -7049,11 +7049,11 @@ Function AddToTabControl(ByRef Caption As WString, ByRef NameOfTabPage As WStrin
 End Function
 
 
-tpProject = AddToTabControl(ML("Project"), "Project", "tabLeft", 0)
+tpProject = AddToTabControl(("Project"), "Project", "tabLeft", 0)
 
-tpToolbox = AddToTabControl(ML("Toolbox"), "Toolbox", "tabLeft", 1) ' ToolBox is better than "Form"
+tpToolbox = AddToTabControl(("Toolbox"), "Toolbox", "tabLeft", 1) ' ToolBox is better than "Form"
 tpToolbox->Name = "Toolbox"
-tpAIAgent = AddToTabControl(ML("AI Agent"), "AIAgent", "tabLeft", 2) ' ToolBox is better than "Form"
+tpAIAgent = AddToTabControl(("AI Agent"), "AIAgent", "tabLeft", 2) ' ToolBox is better than "Form"
 tpAIAgent->Name = "AIAgent"
 tpAIAgent->Add @tbAIAgent
 tpAIAgent->Add @pnlAIAgentModel
@@ -7106,7 +7106,7 @@ End Sub
 
 txtExplorer.OnChange = @txtExplorer_Change
 
-lblLeft.Text = ML("Main File") & ": " & ML("Automatic")
+lblLeft.Text = ("Main File") & ": " & ("Automatic")
 lblLeft.Align = DockStyle.alBottom
 lblLeft.Height = Max(8, DefaultFont.Size) / 72 * 96 + 5
 tpProject->Add @tbExplorer
@@ -7174,7 +7174,7 @@ End Sub
 Sub RefreshAIAgentModelsCombo()
 	If pAIAgents = 0 Then Return
 	cboAIAgentModels.Clear
-	cboAIAgentModels.AddItem ML("(not selected)")
+	cboAIAgentModels.AddItem ("(not selected)")
 	For i As Integer = 0 To pAIAgents->Count - 1
 		cboAIAgentModels.AddItem(pAIAgents->Item(i)->Key)
 	Next
@@ -7182,7 +7182,7 @@ Sub RefreshAIAgentModelsCombo()
 End Sub
 
 Sub cboAIAgentModels_Change(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-	If cboAIAgentModels.Text = ML("(not selected)") Then Return
+	If cboAIAgentModels.Text = ("(not selected)") Then Return
 	If pAIAgents->IndexOfKey(cboAIAgentModels.Text) < 0 Then
 		ShowMessages("AIAgents not found! ") & cboAIAgentModels.Text
 		Return
@@ -7203,16 +7203,16 @@ tbAIAgent.Align = DockStyle.alTop
 tbAIAgent.AutoSize = True
 tbAIAgent.Wrapable = True
 tbAIAgent.ExtraMargins.Right = tbLeft.Width
-tbAIAgent.Buttons.Add , "NewChat", , @mClick, "AINewChat", , ML("New Chat"), True
-tbAIAgent.Buttons.Add , "AddComment", , @mClick, "AIAddComment", , ML("Comment selected code"), True
-tbAIAgent.Buttons.Add , "OptimizeCode", , @mClick, "AIOptimizeCode", , ML("Optimize selected code"), True
-tbAIAgent.Buttons.Add , "Intellicode", , @mClick, "AIIntellicode", , ML("Generate code based on the requirements of the selected comment lines"), True
-tbAIAgent.Buttons.Add , "TracepointError", , @mClick, "AITracepointError", , ML("Explain the selected compiler error message"), True
-tbAIAgent.Buttons.Add , "WebBrowserItem", , @mClick, "AIWebBrowserItem", , ML("Ignore the constraints of the provided references and perform regular search and analysis. Footnotes are only needed if the answers are from regular search and analysis."), True
-tbAIAgent.Buttons.Add , "ConvertC", , @mClick, "AIConvertCtoFB", , ML("Convert the given C source code into equivalent FreeBasic source code."), True
-tbAIAgent.Buttons.Add , "Translate", , @mClick, "AITranslate", , ML("Output with MARKDOWN source code, translate the selected message to") & " " &  ML(App.CurLanguage), True
-tbAIAgent.Buttons.Add , "TranslateE", , @mClick, "AITranslateE", , ML("Output with MARKDOWN source code, translate the selected message to") & " " & ML("English"), True
-tbAIAgent.Buttons.Add , "Close", , @mClick, "AIRelease", , ML("Release the AI Agent"), True
+tbAIAgent.Buttons.Add , "NewChat", , @mClick, "AINewChat", , ("New Chat"), True
+tbAIAgent.Buttons.Add , "AddComment", , @mClick, "AIAddComment", , ("Comment selected code"), True
+tbAIAgent.Buttons.Add , "OptimizeCode", , @mClick, "AIOptimizeCode", , ("Optimize selected code"), True
+tbAIAgent.Buttons.Add , "Intellicode", , @mClick, "AIIntellicode", , ("Generate code based on the requirements of the selected comment lines"), True
+tbAIAgent.Buttons.Add , "TracepointError", , @mClick, "AITracepointError", , ("Explain the selected compiler error message"), True
+tbAIAgent.Buttons.Add , "WebBrowserItem", , @mClick, "AIWebBrowserItem", , ("Ignore the constraints of the provided references and perform regular search and analysis. Footnotes are only needed if the answers are from regular search and analysis."), True
+tbAIAgent.Buttons.Add , "ConvertC", , @mClick, "AIConvertCtoFB", , ("Convert the given C source code into equivalent FreeBasic source code."), True
+tbAIAgent.Buttons.Add , "Translate", , @mClick, "AITranslate", , ("Output with MARKDOWN source code, translate the selected message to") & " " &  (App.CurLanguage), True
+tbAIAgent.Buttons.Add , "TranslateE", , @mClick, "AITranslateE", , ("Output with MARKDOWN source code, translate the selected message to") & " " & ("English"), True
+tbAIAgent.Buttons.Add , "Close", , @mClick, "AIRelease", , ("Release the AI Agent"), True
 pnlAIAgentModel.Align = DockStyle.alTop
 pnlAIAgentModel.Height = Max(8, DefaultFont.Size) / 72 * 96 + 9
 pnlAIAgentModel.ExtraMargins.Right = tbLeft.Width
@@ -7318,7 +7318,7 @@ Sub tbProperties_ButtonClick(ByRef Designer As My.Sys.Object, ByRef Sender As My
 End Sub
 
 tbRight.ImagesList = @imgList
-tbRight.Buttons.Add tbsCheck, "Pinned", , @mClick, "PinRight", "", ML("Pin"), , Cast(ToolButtonState, tstEnabled Or tstChecked)
+tbRight.Buttons.Add tbsCheck, "Pinned", , @mClick, "PinRight", "", ("Pin"), , Cast(ToolButtonState, tstEnabled Or tstChecked)
 tbRight.Flat = True
 tbRight.Width = 23
 tbRight.Parent = @pnlRightPin
@@ -7327,9 +7327,9 @@ tbProperties.ImagesList = @imgList
 tbProperties.Align = DockStyle.alTop
 tbProperties.List = True
 tbProperties.ExtraMargins.Right = tbRight.Width
-tbProperties.Buttons.Add Cast(ToolButtonStyle, tbsCheck Or tbsAutosize), "Categorized", , @tbProperties_ButtonClick, "PropertyCategory", "", ML("Categorized"), , Cast(ToolButtonState, tstEnabled Or tstChecked)
+tbProperties.Buttons.Add Cast(ToolButtonStyle, tbsCheck Or tbsAutosize), "Categorized", , @tbProperties_ButtonClick, "PropertyCategory", "", ("Categorized"), , Cast(ToolButtonState, tstEnabled Or tstChecked)
 tbProperties.Buttons.Add tbsSeparator
-tbProperties.Buttons.Add tbsAutosize, "Property", , @tbProperties_ButtonClick, "Properties", "", ML("Properties"), , tstEnabled
+tbProperties.Buttons.Add tbsAutosize, "Property", , @tbProperties_ButtonClick, "Properties", "", ("Properties"), , tstEnabled
 tbProperties.Buttons.Add tbsShowText, "", , , "SelControlName", "", "", , ToolButtonState.tstNone
 tbProperties.Buttons.Add tbsSeparator
 Var PropertiesSearch = tbProperties.Buttons.Add(tbsCustom)
@@ -7343,7 +7343,7 @@ tbEvents.ImagesList = @imgList
 tbEvents.Align = DockStyle.alTop
 tbEvents.List = True
 tbEvents.ExtraMargins.Right = tbRight.Width
-tbEvents.Buttons.Add Cast(ToolButtonStyle, tbsAutosize Or tbsCheck), "Categorized", , @tbProperties_ButtonClick, "EventCategory", "", ML("Categorized"), , tstEnabled
+tbEvents.Buttons.Add Cast(ToolButtonStyle, tbsAutosize Or tbsCheck), "Categorized", , @tbProperties_ButtonClick, "EventCategory", "", ("Categorized"), , tstEnabled
 tbEvents.Buttons.Add tbsSeparator
 tbEvents.Buttons.Add tbsShowText, "", , , "SelControlName", "", "", , ToolButtonState.tstNone
 tbEvents.Buttons.Add tbsSeparator
@@ -7503,7 +7503,7 @@ Sub lvProperties_SelectedItemChanged(ByRef Designer As My.Sys.Object, ByRef Send
 		Var tbi = Cast(TypeElement Ptr, Globals.Enums.Object(Globals.Enums.IndexOf(te->EnumTypeName)))
 		If tbi Then
 			For i As Integer = 0 To tbi->Elements.Count - 1
-				cboPropertyValue.AddItem " " & i & " - " & MP(tbi->Elements.Item(i))
+				cboPropertyValue.AddItem " " & i & " - " & (tbi->Elements.Item(i))
 			Next i
 			If Val(Item->Text(1)) >= 0 AndAlso Val(Trim(Item->Text(1))) <= tbi->Elements.Count - 1 Then
 				bNotChange = True
@@ -7514,7 +7514,7 @@ Sub lvProperties_SelectedItemChanged(ByRef Designer As My.Sys.Object, ByRef Send
 		'CtrlEdit = @pnlPropertyValue
 		cboPropertyValue.Visible = True
 		cboPropertyValue.Clear
-		cboPropertyValue.AddItem " " & ML("(None)")
+		cboPropertyValue.AddItem " " & ("(None)")
 		For i As Integer = 1 To tb->cboClass.Items.Count - 1
 			Cpnt = tb->cboClass.Items.Item(i)->Object
 			If Cpnt <> 0 Then
@@ -7544,7 +7544,7 @@ Sub lvProperties_SelectedItemChanged(ByRef Designer As My.Sys.Object, ByRef Send
 			cboPropertyValue.Visible = True
 			cboPropertyValue.Clear
 			For i As Integer = 0 To tbi->Elements.Count - 1
-				cboPropertyValue.AddItem " " & i & " - " & MP(tbi->Elements.Item(i))
+				cboPropertyValue.AddItem " " & i & " - " & (tbi->Elements.Item(i))
 			Next i
 			If Val(Trim(Item->Text(1))) >= 0 AndAlso Val(Trim(Item->Text(1))) <= tbi->Elements.Count - 1 Then
 				bNotChange = True
@@ -7586,7 +7586,7 @@ Sub lvProperties_SelectedItemChanged(ByRef Designer As My.Sys.Object, ByRef Send
 	If LCase(App.CurLanguage) = "default" Then
 		txtLabelProperty.TextRTF = "{\urtf1\b " & GetItemText(Item) & "\b0\par " & te->Comment & "}"
 	Else
-		txtLabelProperty.TextRTF = "{\urtf1\b " & Replace(MC(GetItemText(Item)), !"\r\n", "\b0\par ") & "}"
+		txtLabelProperty.TextRTF = "{\urtf1\b " & Replace((GetItemText(Item)), !"\r\n", "\b0\par ") & "}"
 	End If
 	'Else
 	'	txtLabelProperty.Text = ""
@@ -7604,7 +7604,7 @@ Sub lvEvents_SelectedItemChanged(ByRef Designer As My.Sys.Object, ByRef Sender A
 	If LCase(App.CurLanguage) = "default" Then
 		txtLabelEvent.TextRTF = "{\urtf1\b " & Item->Text(0) & "\b0\par " & te->Comment & "}"
 	Else
-		txtLabelEvent.TextRTF = "{\urtf1\b " & Replace(MC(Item->Text(0)), !"\r\n", "\b0\par ") & "}"
+		txtLabelEvent.TextRTF = "{\urtf1\b " & Replace((Item->Text(0)), !"\r\n", "\b0\par ") & "}"
 	End If
 	'Else
 	'	txtLabelEvent.Text = ""
@@ -7735,8 +7735,8 @@ lvProperties.Align = DockStyle.alClient
 lvProperties.StateImages = @imgListStates
 lvProperties.Images = @imgListStates
 'lvProperties.ColumnHeaderHidden = True
-lvProperties.Columns.Add ML("Property"), , 70
-lvProperties.Columns.Add ML("Value"), , 50, , True
+lvProperties.Columns.Add ("Property"), , 70
+lvProperties.Columns.Add ("Value"), , 50, , True
 pnlPropertyValue.Add @btnPropertyValue
 pnlPropertyValue.Add @txtPropertyValue
 pnlPropertyValue.Add @pnlColor
@@ -7755,8 +7755,8 @@ lvProperties.OnCellEdited = @lvProperties_CellEdited
 lvProperties.OnItemExpanding = @lvProperties_ItemExpanding
 lvEvents.Align = DockStyle.alClient
 lvEvents.SortOrder = ssSortAscending
-lvEvents.Columns.Add ML("Event"), , 70
-lvEvents.Columns.Add ML("Value"), , -2
+lvEvents.Columns.Add ("Event"), , 70
+lvEvents.Columns.Add ("Value"), , -2
 lvEvents.OnSelectedItemChanged = @lvEvents_SelectedItemChanged
 lvEvents.OnItemKeyDown = @lvEvents_KeyDown
 lvEvents.OnItemDblClick = @lvEvents_ItemDblClick
@@ -7866,9 +7866,9 @@ Sub lvThreads_ItemActivate(ByRef Designer As My.Sys.Object, ByRef Sender As Tree
 End Sub
 
 lvThreads.Align = DockStyle.alClient
-lvThreads.Columns.Add ML("Procedure"), , 500
-lvThreads.Columns.Add ML("Line"), , 50
-lvThreads.Columns.Add ML("File"), , 500
+lvThreads.Columns.Add ("Procedure"), , 500
+lvThreads.Columns.Add ("Line"), , 50
+lvThreads.Columns.Add ("File"), , 500
 'lvThreads.StateImages = @imgListStates
 lvThreads.Images = @imgListStates
 lvThreads.OnItemActivate = @lvThreads_ItemActivate
@@ -7926,9 +7926,9 @@ End Sub
 lvLocals.Align = DockStyle.alClient
 lvLocals.ContextMenu = @mnuVars
 lvLocals.EditLabels = True
-lvLocals.Columns.Add ML("Variable"), , 150
-lvLocals.Columns.Add ML("Value"), , 500
-lvLocals.Columns.Add ML("Type"), , 500
+lvLocals.Columns.Add ("Variable"), , 150
+lvLocals.Columns.Add ("Value"), , 500
+lvLocals.Columns.Add ("Type"), , 500
 lvLocals.Columns.Column(1)->Editable = True
 'lvLocals.StateImages = @imgListStates
 lvLocals.Images = @imgListStates
@@ -7937,9 +7937,9 @@ lvLocals.OnItemExpanding = @lvVar_ItemExpanding
 lvGlobals.Align = DockStyle.alClient
 lvGlobals.ContextMenu = @mnuVars
 lvGlobals.EditLabels = True
-lvGlobals.Columns.Add ML("Variable"), , 150
-lvGlobals.Columns.Add ML("Value"), , 500
-lvGlobals.Columns.Add ML("Type"), , 500
+lvGlobals.Columns.Add ("Variable"), , 150
+lvGlobals.Columns.Add ("Value"), , 500
+lvGlobals.Columns.Add ("Type"), , 500
 lvGlobals.Columns.Column(1)->Editable = True
 'lvGlobals.StateImages = @imgListStates
 lvGlobals.Images = @imgListStates
@@ -7969,9 +7969,9 @@ Sub lvWatches_CellEdited(ByRef Designer As My.Sys.Object, ByRef Sender As TreeLi
 		End If
 	End If
 	If lvWatches.Nodes.Count = 1 Then
-		tpWatches->Caption = ML("Watches")
+		tpWatches->Caption = ("Watches")
 	Else
-		tpWatches->Caption = ML("Watches") & " (" & Str(lvWatches.Nodes.Count - 1) & " " & ML("Pos") & ")"
+		tpWatches->Caption = ("Watches") & " (" & Str(lvWatches.Nodes.Count - 1) & " " & ("Pos") & ")"
 	End If
 End Sub
 
@@ -7980,9 +7980,9 @@ lvProblems.ContextMenu = @mnuProblems
 lvWatches.Align = DockStyle.alClient
 lvWatches.ContextMenu = @mnuVars
 lvWatches.EditLabels = True
-lvWatches.Columns.Add ML("Variable"), , 150
-lvWatches.Columns.Add ML("Value"), , 500
-lvWatches.Columns.Add ML("Type"), , 500
+lvWatches.Columns.Add ("Variable"), , 150
+lvWatches.Columns.Add ("Value"), , 500
+lvWatches.Columns.Add ("Type"), , 500
 lvWatches.Columns.Column(0)->Editable = True
 lvWatches.Columns.Column(1)->Editable = True
 'lvWatches.StateImages = @imgListStates
@@ -7994,8 +7994,8 @@ lvWatches.Nodes.Add
 
 lvMemory.Align = DockStyle.alClient
 lvMemory.ContextMenu = @mnuVars
-lvMemory.Columns.Add ML("Address / delta"), , 150
-lvMemory.Columns.Add ML("Ascii value"), , 150
+lvMemory.Columns.Add ("Address / delta"), , 150
+lvMemory.Columns.Add ("Ascii value"), , 150
 'lvMemory.StateImages = @imgListStates
 lvMemory.Images = @imgListStates
 
@@ -8074,12 +8074,12 @@ End Sub
 
 lvProfiler.Align = DockStyle.alClient
 lvProfiler.OwnerData = True
-lvProfiler.Columns.Add ML("Function"), , 500
-lvProfiler.Columns.Add ML("Count"), , 100, ColumnFormat.cfRight
-lvProfiler.Columns.Add ML("Time"), , 100, ColumnFormat.cfRight
-lvProfiler.Columns.Add ML("Total, %"), , 100, ColumnFormat.cfRight
-lvProfiler.Columns.Add ML("Proc, %"), , 100, ColumnFormat.cfRight
-lvProfiler.Columns.Add ML("Mangled"), , 500
+lvProfiler.Columns.Add ("Function"), , 500
+lvProfiler.Columns.Add ("Count"), , 100, ColumnFormat.cfRight
+lvProfiler.Columns.Add ("Time"), , 100, ColumnFormat.cfRight
+lvProfiler.Columns.Add ("Total, %"), , 100, ColumnFormat.cfRight
+lvProfiler.Columns.Add ("Proc, %"), , 100, ColumnFormat.cfRight
+lvProfiler.Columns.Add ("Mangled"), , 500
 lvProfiler.StateImages = @imgListStates
 lvProfiler.Images = @imgListStates
 lvProfiler.OnItemExpanding = @lvProfiler_ItemExpanding
@@ -8118,12 +8118,12 @@ tabRight.OnSelChange = @tabRight_SelChange
 tabRight.Detachable = True
 tabRight.Reorderable = True
 'tabRight.TabPosition = tpRight
-tpProperties = AddToTabControl(ML("Properties"), "Properties", "tabRight", 0)
+tpProperties = AddToTabControl(("Properties"), "Properties", "tabRight", 0)
 tpProperties->Add @tbProperties
 tpProperties->Add @txtLabelProperty
 tpProperties->Add @splProperties
 tpProperties->Add @lvProperties
-tpEvents = AddToTabControl(ML("Events"), "Events", "tabRight", 1)
+tpEvents = AddToTabControl(("Events"), "Events", "tabRight", 1)
 tpEvents->Add @tbEvents
 tpEvents->Add @txtLabelEvent
 tpEvents->Add @splEvents
@@ -8317,7 +8317,7 @@ Sub txtImmediate_KeyDown(ByRef Designer As My.Sys.Object, ByRef Sender As Contro
 					WAdd(LogText, *ErrTitle & !"\r")
 				Wend
 			Else
-				MsgBox ML("Open file failure!") & Chr(13,10) & "  " & ExePath & "/Temp/Compile1.log"
+				MsgBox ("Open file failure!") & Chr(13,10) & "  " & ExePath & "/Temp/Compile1.log"
 			End If
 			CloseFile_(Fn)
 			Fn = FreeFile_
@@ -8333,7 +8333,7 @@ Sub txtImmediate_KeyDown(ByRef Designer As My.Sys.Object, ByRef Sender As Contro
 					WAdd(LogText, Trim(Buff) & !"\r")
 				Wend
 			Else
-				MsgBox ML("Open file failure!") & Chr(13,10) & "  " & ExePath & "/Temp/debug_compil2.log"
+				MsgBox ("Open file failure!") & Chr(13,10) & "  " & ExePath & "/Temp/debug_compil2.log"
 			End If
 			CloseFile_(Fn)
 			Key = 0
@@ -8355,7 +8355,7 @@ Sub txtImmediate_KeyDown(ByRef Designer As My.Sys.Object, ByRef Sender As Contro
 						frmMain.Update
 					Wend
 				Else
-					MsgBox ML("Open file failure!") & Chr(13,10) & "  " & *ExeName
+					MsgBox ("Open file failure!") & Chr(13,10) & "  " & *ExeName
 				End If
 				CloseFile_(Fn)
 				Kill *ExeName
@@ -8393,7 +8393,7 @@ Sub txtChangeLog_KeyDown(ByRef Designer As My.Sys.Object, ByRef Sender As Contro
 		If tb <> 0 Then
 			Dim As WString Ptr sTmp
 			WLet(sTmp, " {" & Replace(tb->Caption, "*", ""))
-			WAdd(sTmp, "|" & tb->cboFunction.Text & " Ln" & Val(Trim(Replace(pstBar->Panels[1]->Caption, ML("Row"), ""))) & "}")
+			WAdd(sTmp, "|" & tb->cboFunction.Text & " Ln" & Val(Trim(Replace(pstBar->Panels[1]->Caption, ("Row"), ""))) & "}")
 			txtChangeLog.SelText = *sTmp
 			WDeAllocate(sTmp)
 			mChangeLogEdited = True
@@ -8455,10 +8455,10 @@ lvToDo.Images = @imgList
 'lvToDo.StateImages = @imgList
 lvToDo.SmallImages = @imgList
 lvToDo.Align = DockStyle.alClient
-lvToDo.Columns.Add ML("Content"), , 500, cfLeft
-lvToDo.Columns.Add ML("Line"), , 50, cfRight
-lvToDo.Columns.Add ML("Column"), , 50, cfRight
-lvToDo.Columns.Add ML("File"), , 700, cfLeft
+lvToDo.Columns.Add ("Content"), , 500, cfLeft
+lvToDo.Columns.Add ("Line"), , 50, cfRight
+lvToDo.Columns.Add ("Column"), , 50, cfRight
+lvToDo.Columns.Add ("File"), , 700, cfLeft
 lvToDo.OnItemActivate = @lvToDo_ItemActivate
 
 Sub lvProblems_ItemActivate(ByRef Designer As My.Sys.Object, ByRef Sender As Control, ByVal itemIndex As Integer)
@@ -8470,9 +8470,9 @@ lvProblems.Images = @imgList
 'lvErrors.StateImages = @imgList
 lvProblems.SmallImages = @imgList
 lvProblems.Align = DockStyle.alClient
-lvProblems.Columns.Add ML("Content"), , 500, cfLeft
-lvProblems.Columns.Add ML("Line"), , 50, cfRight
-lvProblems.Columns.Add ML("File"), , 700, cfLeft
+lvProblems.Columns.Add ("Content"), , 500, cfLeft
+lvProblems.Columns.Add ("Line"), , 50, cfRight
+lvProblems.Columns.Add ("File"), , 700, cfLeft
 lvProblems.OnItemActivate = @lvProblems_ItemActivate
 'lvProblems.OnKeyDown = @lvErrors_KeyDown
 
@@ -8485,11 +8485,11 @@ lvSuggestions.Images = @imgList
 'lvErrors.StateImages = @imgList
 lvSuggestions.SmallImages = @imgList
 lvSuggestions.Align = DockStyle.alClient
-lvSuggestions.Columns.Add ML("Content"), , 500, cfLeft
-lvSuggestions.Columns.Add ML("Line"), , 50, cfRight
-lvSuggestions.Columns.Add ML("Column"), , 50, cfRight
-lvSuggestions.Columns.Add ML("File"), , 700, cfLeft
-lvSuggestions.Columns.Add ML("Project"), , 500, cfLeft
+lvSuggestions.Columns.Add ("Content"), , 500, cfLeft
+lvSuggestions.Columns.Add ("Line"), , 50, cfRight
+lvSuggestions.Columns.Add ("Column"), , 50, cfRight
+lvSuggestions.Columns.Add ("File"), , 700, cfLeft
+lvSuggestions.Columns.Add ("Project"), , 500, cfLeft
 lvSuggestions.OnItemActivate = @lvSuggestions_ItemActivate
 
 Sub lvSearch_ItemActivate(ByRef Designer As My.Sys.Object, ByRef Sender As Control, ByVal itemIndex As Integer)
@@ -8497,20 +8497,20 @@ Sub lvSearch_ItemActivate(ByRef Designer As My.Sys.Object, ByRef Sender As Contr
 	gSearchItemIndex = itemIndex
 	SelectSearchResult(Item->Text(3), Val(Item->Text(1)), Val(Item->Text(2)), Len(lvSearch.Text), Item->Tag)
 	If pfFind->Visible Then 'David Change
-		pfFind->Caption = ML("Find")+": " + WStr(gSearchItemIndex+1) + " of " + WStr(lvSearch.ListItems.Count)
+		pfFind->Caption = ("Find")+": " + WStr(gSearchItemIndex+1) + " of " + WStr(lvSearch.ListItems.Count)
 	End If
 End Sub
 
 lvSearch.Align = DockStyle.alClient
-lvSearch.Columns.Add ML("Line Text"), , 500, cfLeft
-lvSearch.Columns.Add ML("Line"), , 50, cfRight
-lvSearch.Columns.Add ML("Column"), , 50, cfRight
-lvSearch.Columns.Add ML("File"), , 700, cfLeft
+lvSearch.Columns.Add ("Line Text"), , 500, cfLeft
+lvSearch.Columns.Add ("Line"), , 50, cfRight
+lvSearch.Columns.Add ("Column"), , 50, cfRight
+lvSearch.Columns.Add ("File"), , 700, cfLeft
 lvSearch.OnItemActivate = @lvSearch_ItemActivate
 'lvSearch.OnKeyDown = @lvSearch_KeyDown
 
 Sub RestoreStatusText
-	pstBar->Panels[0]->Caption = ML("Press F1 for get more information")
+	pstBar->Panels[0]->Caption = ("Press F1 for get more information")
 End Sub
 
 Function GetBottomClosedStyle As Boolean
@@ -8634,13 +8634,13 @@ pnlBottom.Height = tabBottomHeight
 pnlBottom.OnResize = @pnlBottom_Resize
 
 tbBottom.ImagesList = @imgList
-tbBottom.Buttons.Add tbsCheck, "Pinned", , @mClick, "PinBottom", "", ML("Pin"), , Cast(ToolButtonState, tstEnabled Or tstChecked)
+tbBottom.Buttons.Add tbsCheck, "Pinned", , @mClick, "PinBottom", "", ("Pin"), , Cast(ToolButtonState, tstEnabled Or tstChecked)
 tbBottom.Buttons.Add tbsSeparator
-tbBottom.Buttons.Add , "Eraser", , @mClick, "EraseOutputWindow", "", ML("Clear Output"), , tstEnabled
-tbBottom.Buttons.Add , "Eraser", , @mClick, "EraseImmediateWindow", "", ML("Erase immediate window"), , tstEnabled
-tbBottom.Buttons.Add , "Add", , @mClick, "AddWatch", "", ML("Add Watch"), , Cast(ToolButtonState, tstEnabled Or tstWrap)
-tbBottom.Buttons.Add , "Remove", , @mClick, "RemoveWatch", "", ML("Remove Watch"), , tstEnabled
-tbBottom.Buttons.Add tbsCheck, "Update", , @mClick, "Update", "", ML("Update"), , tstEnabled
+tbBottom.Buttons.Add , "Eraser", , @mClick, "EraseOutputWindow", "", ("Clear Output"), , tstEnabled
+tbBottom.Buttons.Add , "Eraser", , @mClick, "EraseImmediateWindow", "", ("Erase immediate window"), , tstEnabled
+tbBottom.Buttons.Add , "Add", , @mClick, "AddWatch", "", ("Add Watch"), , Cast(ToolButtonState, tstEnabled Or tstWrap)
+tbBottom.Buttons.Add , "Remove", , @mClick, "RemoveWatch", "", ("Remove Watch"), , tstEnabled
+tbBottom.Buttons.Add tbsCheck, "Update", , @mClick, "Update", "", ("Update"), , tstEnabled
 tbBottom.Buttons.Item("EraseImmediateWindow")->Visible = False
 tbBottom.Buttons.Item("AddWatch")->Visible = False
 tbBottom.Buttons.Item("RemoveWatch")->Visible = False
@@ -8659,20 +8659,20 @@ ptabBottom->Align = DockStyle.alClient
 'ptabBottom->TabPosition = tpBottom
 ptabBottom->Detachable = True
 ptabBottom->Reorderable = True
-tpOutput = AddToTabControl(ML("Output"), "Output", "tabBottom", 0)
-tpProblems = AddToTabControl(ML("Problems"), "Problems", "tabBottom", 1)
-tpSuggestions = AddToTabControl(ML("Suggestions"), "Suggestions", "tabBottom", 2)
-tpFind = AddToTabControl(ML("Find"), "Find", "tabBottom", 3)
-tpToDo = AddToTabControl(ML("ToDo"), "ToDo", "tabBottom", 4)
-tpChangeLog = AddToTabControl(ML("Change Log"), "ChangeLog", "tabBottom", 5)
-tpImmediate = AddToTabControl(ML("Immediate"), "Immediate", "tabBottom", 6)
-tpLocals = AddToTabControl(ML("Locals"), "Locals", "tabBottom", 7)
-tpGlobals = AddToTabControl(ML("Globals"), "Globals", "tabBottom", 8)
-tpProcedures = AddToTabControl(ML("Procedures"), "Procedures", "tabBottom", 9)
-tpThreads = AddToTabControl(ML("Threads"), "Threads", "tabBottom", 10)
-tpWatches = AddToTabControl(ML("Watches"), "Watches", "tabBottom", 11)
-tpMemory = AddToTabControl(ML("Memory"), "Memory", "tabBottom", 12)
-tpProfiler = AddToTabControl(ML("Profiler"), "Profiler", "tabBottom", 13)
+tpOutput = AddToTabControl(("Output"), "Output", "tabBottom", 0)
+tpProblems = AddToTabControl(("Problems"), "Problems", "tabBottom", 1)
+tpSuggestions = AddToTabControl(("Suggestions"), "Suggestions", "tabBottom", 2)
+tpFind = AddToTabControl(("Find"), "Find", "tabBottom", 3)
+tpToDo = AddToTabControl(("ToDo"), "ToDo", "tabBottom", 4)
+tpChangeLog = AddToTabControl(("Change Log"), "ChangeLog", "tabBottom", 5)
+tpImmediate = AddToTabControl(("Immediate"), "Immediate", "tabBottom", 6)
+tpLocals = AddToTabControl(("Locals"), "Locals", "tabBottom", 7)
+tpGlobals = AddToTabControl(("Globals"), "Globals", "tabBottom", 8)
+tpProcedures = AddToTabControl(("Procedures"), "Procedures", "tabBottom", 9)
+tpThreads = AddToTabControl(("Threads"), "Threads", "tabBottom", 10)
+tpWatches = AddToTabControl(("Watches"), "Watches", "tabBottom", 11)
+tpMemory = AddToTabControl(("Memory"), "Memory", "tabBottom", 12)
+tpProfiler = AddToTabControl(("Profiler"), "Profiler", "tabBottom", 13)
 tpOutput->Add @txtOutput
 tpProblems->Add @lvProblems
 tpSuggestions->Add @lvSuggestions
@@ -8822,14 +8822,14 @@ Sub frmMain_ActiveControlChanged(ByRef Designer As My.Sys.Object, ByRef sender A
 		bEnabledIndentAndOutdent = True
 	End Select
 	If bEnabledIndentAndOutdent Then
-		If miIndent->Caption <> ML("Move focus forward") & !"\tTab" Then
-			miIndent->Caption = ML("Move focus forward") & !"\tTab"
-			miOutdent->Caption = ML("Move focus backward") & !"\tShift+Tab"
+		If miIndent->Caption <> ("Move focus forward") & !"\tTab" Then
+			miIndent->Caption = ("Move focus forward") & !"\tTab"
+			miOutdent->Caption = ("Move focus backward") & !"\tShift+Tab"
 		End If
 	Else
-		If miIndent->Caption <> ML("Indent") & !"\tTab" Then
-			miIndent->Caption = ML("Indent") & !"\tTab"
-			miOutdent->Caption = ML("Outdent") & !"\tShift+Tab"
+		If miIndent->Caption <> ("Indent") & !"\tTab" Then
+			miIndent->Caption = ("Indent") & !"\tTab"
+			miOutdent->Caption = ("Outdent") & !"\tShift+Tab"
 		End If
 	End If
 	miUndo->Enabled = bEnabled
@@ -9031,17 +9031,17 @@ Sub SetAutoColors
 	End If
 End Sub
 
-pfSplash->lblProcess.Text = ML("Load On Startup") & ": " & ML("Help")
+pfSplash->lblProcess.Text = ("Load On Startup") & ": " & ("Help")
 LoadHelp
-pfSplash->lblProcess.Text = ML("Load On Startup") & ": " & ML("Snippets")
+pfSplash->lblProcess.Text = ("Load On Startup") & ": " & ("Snippets")
 LoadSnippets
 
-pfSplash->lblProcess.Text = ML("Load On Startup") & ": " & ML("Toolbox")
+pfSplash->lblProcess.Text = ("Load On Startup") & ": " & ("Toolbox")
 
 Function CheckCompilerPaths As Boolean
 	Dim As UString CompilerExe = GetFullPath(GetBundledCompilerExe())
 	If FileExists(CompilerExe) Then Return True
-	MsgBox ML("Bundled compiler not found.") & !"\r" & CompilerExe, , mtWarning
+	MsgBox ("Bundled compiler not found.") & !"\r" & CompilerExe, , mtWarning
 	Return False
 End Function
 
@@ -9052,7 +9052,7 @@ Sub frmMain_Create(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	pnlToolBox_Resize *pnlToolBox.Designer, pnlToolBox, pnlToolBox.Width, pnlToolBox.Height + 1
 		SetProp(frmMain.Handle, "VisualFBEditorApp", @VisualFBEditorApp)
 	
-	pfSplash->lblProcess.Text = ML("Load On Startup") & ": " & ML("Toolbox")
+	pfSplash->lblProcess.Text = ("Load On Startup") & ": " & ("Toolbox")
 	LoadToolBox
 	RefreshAIAgentModelsCombo()
 	pnlToolBox_Resize *pnlToolBox.Designer, pnlToolBox, pnlToolBox.Width, pnlToolBox.Height
@@ -9148,21 +9148,19 @@ Sub frmMain_Create(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	tviewwch = tvWch.Handle
 	DragAcceptFiles(frmMain.Handle, True)
 
-	App.Title = App.Title & " (" & ML("64-bit") & ")"
+	App.Title = App.Title & " (" & ("64-bit") & ")"
 	frmMain.Text = App.Title
 	pfAbout->Label1.Text = App.Title
-		pfAbout->Label11.Text = ML("Version") & " " & pApp->Version
-	pfSplash->lblProcess.Text = ML("Load On Startup") & ": " & ML("Check compiler paths")
+		pfAbout->Label11.Text = ("Version") & " " & pApp->Version
+	pfSplash->lblProcess.Text = ("Load On Startup") & ": " & ("Check compiler paths")
 	
-	pfSplash->lblProcess.Text = ML("Load On Startup") & ": " & ML("Add-Ins")
+	pfSplash->lblProcess.Text = ("Load On Startup") & ": " & ("Add-Ins")
 	LoadAddIns
-	pfSplash->lblProcess.Text = ML("Load On Startup") & ": " & ML("Tools")
+	pfSplash->lblProcess.Text = ("Load On Startup") & ": " & ("Tools")
 	LoadTools
 	
 	bSharedFind = CheckCompilerPaths
-	
-	gLocalProperties = True
-	
+
 		'' 13.3.A: was a hardcoded "0 To 5" assuming 7 bands (maximize all but the last, Format).
 		'' Band count is now 5 after the O3 toolbar consolidation; compute the upper bound from
 		'' Bands.Count instead of a literal so this can't silently go stale again if the band count
@@ -9345,7 +9343,7 @@ Sub frmMain_ActivateApp(ByRef Designer As My.Sys.Object, ByRef Sender As Form)
 			tb = Cast(TabWindow Ptr, ptabCode->Tab(i))
 			If InStr(tb->FileName, "/") > 0 OrElse InStr(tb->FileName, "\") > 0 Then
 				If FileTimeToVariantTime(GetFileLastWriteTime(tb->FileName)) <> FileTimeToVariantTime(tb->DateFileTime) Then
-					If MsgBox(tb->FileName & !"\r" & ML("File was changed by another application. Reload it?"), ML("File Changed"), mtQuestion, btYesNo) = mrYes Then
+					If MsgBox(tb->FileName & !"\r" & ("File was changed by another application. Reload it?"), ("File Changed"), mtQuestion, btYesNo) = mrYes Then
 						tb->txtCode.Changing "Reload"
 						tb->txtCode.LoadFromFile(tb->FileName, tb->FileEncoding, tb->NewLineType)
 						tb->FileEncoding = FileEncodings.Utf8
@@ -9482,7 +9480,7 @@ Sub ToolBar_MouseUp(ByRef Designer As My.Sys.Object, ByRef Sender As Control, Mo
 	Sender.ContextMenu = miToolBars->SubMenu
 End Sub
 
-pfSplash->lblProcess.Text = ML("Load On Startup") & ": " & ML("Command bars")
+pfSplash->lblProcess.Text = ("Load On Startup") & ": " & ("Command bars")
 tbStandard.OnMouseUp = @ToolBar_MouseUp
 tbEdit.OnMouseUp = @ToolBar_MouseUp
 tbProject.OnMouseUp = @ToolBar_MouseUp
@@ -9534,7 +9532,7 @@ frmMain.Add @MainReBar
 '	tbStandard.Align = DockStyle.alTop
 '	frmMain.Add @tbStandard
 '#endif
-pfSplash->lblProcess.Text = ML("Load On Startup") & ": " & ML("Main Form")
+pfSplash->lblProcess.Text = ("Load On Startup") & ": " & ("Main Form")
 frmMain.Add @stBar
 'frmMain.Add @rbBottom
 frmMain.Add @pnlLeft

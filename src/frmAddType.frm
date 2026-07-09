@@ -35,7 +35,7 @@
 		' frmAddType
 		With This
 			.Name = "frmAddType"
-			.Text = ML("Add Type")
+			.Text = ("Add Type")
 			.BorderStyle = FormBorderStyle.FixedDialog
 			.MaximizeBox = False
 			.MinimizeBox = False
@@ -47,9 +47,9 @@
 		' lblName
 		With lblName
 			.Name = "lblName"
-			.Text = ML("Name") & ":"
+			.Text = ("Name") & ":"
 			.TabIndex = 0
-			.Caption = ML("Name") & ":"
+			.Caption = ("Name") & ":"
 			.SetBounds 10, 10, 90, 20
 			.Designer = @This
 			.Parent = @This
@@ -66,9 +66,9 @@
 		' cmdOK
 		With cmdOK
 			.Name = "cmdOK"
-			.Text = ML("OK")
+			.Text = ("OK")
 			.TabIndex = 36
-			.Caption = ML("OK")
+			.Caption = ("OK")
 			.SetBounds 150, 390, 80, 20
 			.Designer = @This
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @cmdOK_Click)
@@ -77,10 +77,10 @@
 		' cmdCancel
 		With cmdCancel
 			.Name = "cmdCancel"
-			.Text = ML("Cancel")
+			.Text = ("Cancel")
 			.TabIndex = 37
 			.ControlIndex = 2
-			.Caption = ML("Cancel")
+			.Caption = ("Cancel")
 			.SetBounds 240, 390, 80, 20
 			.Designer = @This
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @cmdCancel_Click)
@@ -89,9 +89,9 @@
 		' grbType
 		With grbType
 			.Name = "grbType"
-			.Text = ML("Type")
+			.Text = ("Type")
 			.TabIndex = 20
-			.Caption = ML("Type")
+			.Caption = ("Type")
 			.SetBounds 10, 270, 310, 50
 			.Designer = @This
 			.Parent = @This
@@ -99,9 +99,9 @@
 		' optClass
 		With optClass
 			.Name = "optClass"
-			.Text = ML("Class")
+			.Text = ("Class")
 			.TabIndex = 21
-			.Caption = ML("Class")
+			.Caption = ("Class")
 			.SetBounds 10, 20, 100, 20
 			.Designer = @This
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As RadioButton), @optClass_Click)
@@ -110,10 +110,10 @@
 		' optType
 		With optType
 			.Name = "optType"
-			.Text = ML("Type")
+			.Text = ("Type")
 			.TabIndex = 22
 			.ControlIndex = 0
-			.Caption = ML("Type")
+			.Caption = ("Type")
 			.SetBounds 110, 20, 100, 20
 			.Designer = @This
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As RadioButton), @optType_Click)
@@ -122,10 +122,10 @@
 		' optUnion
 		With optUnion
 			.Name = "optUnion"
-			.Text = ML("Union")
+			.Text = ("Union")
 			.TabIndex = 23
 			.ControlIndex = 1
-			.Caption = ML("Union")
+			.Caption = ("Union")
 			.SetBounds 210, 20, 90, 20
 			.Designer = @This
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As RadioButton), @optUnion_Click)
@@ -134,9 +134,9 @@
 		' grbScope
 		With grbScope
 			.Name = "grbScope"
-			.Text = ML("Scope")
+			.Text = ("Scope")
 			.TabIndex = 27
-			.Caption = ML("Scope")
+			.Caption = ("Scope")
 			.SetBounds 10, 330, 310, 50
 			.Designer = @This
 			.Parent = @This
@@ -144,10 +144,10 @@
 		' optPublicScope
 		With optPublicScope
 			.Name = "optPublicScope"
-			.Text = ML("Public")
+			.Text = ("Public")
 			.TabIndex = 28
-			.Caption = ML("Public")
-			.Hint = ML("With Public scope")
+			.Caption = ("Public")
+			.Hint = ("With Public scope")
 			.SetBounds 10, 20, 90, 20
 			.Designer = @This
 			.Parent = @grbScope
@@ -155,11 +155,11 @@
 		' optPrivateScope
 		With optPrivateScope
 			.Name = "optPrivateScope"
-			.Text = ML("Private")
+			.Text = ("Private")
 			.TabIndex = 29
 			.ControlIndex = 0
-			.Caption = ML("Private")
-			.Hint = ML("With Private scope")
+			.Caption = ("Private")
+			.Hint = ("With Private scope")
 			.SetBounds 110, 20, 80, 20
 			.Designer = @This
 			.Parent = @grbScope
@@ -167,10 +167,10 @@
 		' lblField
 		With lblField
 			.Name = "lblField"
-			.Text = ML("Field") & ":"
+			.Text = ("Field") & ":"
 			.TabIndex = 4
 			.ControlIndex = 0
-			.Caption = ML("Field") & ":"
+			.Caption = ("Field") & ":"
 			.SetBounds 10, 70, 90, 20
 			.Designer = @This
 			.Parent = @This
@@ -188,10 +188,10 @@
 		' lblType
 		With lblType
 			.Name = "lblType"
-			.Text = ML("Type") & ":"
+			.Text = ("Type") & ":"
 			.TabIndex = 8
 			.ControlIndex = 0
-			.Caption = ML("Type") & ":"
+			.Caption = ("Type") & ":"
 			.SetBounds 10, 180, 90, 20
 			.Designer = @This
 			.Parent = @This
@@ -209,10 +209,10 @@
 		' grbAccessControl
 		With grbAccessControl
 			.Name = "grbAccessControl"
-			.Text = ML("Access Control")
+			.Text = ("Access Control")
 			.TabIndex = 10
 			.ControlIndex = 7
-			.Caption = ML("Access Control")
+			.Caption = ("Access Control")
 			.SetBounds 10, 210, 310, 50
 			.Designer = @This
 			.Parent = @This
@@ -220,9 +220,9 @@
 		' optPublicAccess
 		With optPublicAccess
 			.Name = "optPublicAccess"
-			.Text = ML("Public")
+			.Text = ("Public")
 			.TabIndex = 11
-			.Caption = ML("Public")
+			.Caption = ("Public")
 			.SetBounds 10, 20, 100, 20
 			.Designer = @This
 			.Parent = @grbAccessControl
@@ -230,9 +230,9 @@
 		' optProtectedAccess
 		With optProtectedAccess
 			.Name = "optProtectedAccess"
-			.Text = ML("Protected")
+			.Text = ("Protected")
 			.TabIndex = 12
-			.Caption = ML("Protected")
+			.Caption = ("Protected")
 			.SetBounds 110, 20, 100, 20
 			.Designer = @This
 			.Parent = @grbAccessControl
@@ -240,9 +240,9 @@
 		' optPrivateAccess
 		With optPrivateAccess
 			.Name = "optPrivateAccess"
-			.Text = ML("Private")
+			.Text = ("Private")
 			.TabIndex = 13
-			.Caption = ML("Private")
+			.Caption = ("Private")
 			.SetBounds 210, 20, 80, 20
 			.Designer = @This
 			.Parent = @grbAccessControl
@@ -250,10 +250,10 @@
 		' lblDescription
 		With lblDescription
 			.Name = "lblDescription"
-			.Text = ML("Description") & ":"
+			.Text = ("Description") & ":"
 			.TabIndex = 6
 			.ControlIndex = 7
-			.Caption = ML("Description") & ":"
+			.Caption = ("Description") & ":"
 			.SetBounds 10, 100, 90, 20
 			.Designer = @This
 			.Parent = @This
@@ -274,10 +274,10 @@
 		' lblAlias
 		With lblAlias
 			.Name = "lblAlias"
-			.Text = ML("Alias") & ":"
+			.Text = ("Alias") & ":"
 			.TabIndex = 2
 			.ControlIndex = 0
-			.Caption = ML("Alias") & ":"
+			.Caption = ("Alias") & ":"
 			.SetBounds 10, 40, 90, 20
 			.Designer = @This
 			.Parent = @This
@@ -295,11 +295,11 @@
 		' optDefaultScope
 		With optDefaultScope
 			.Name = "optDefaultScope"
-			.Text = ML("Default")
+			.Text = ("Default")
 			.TabIndex = 30
 			.ControlIndex = 1
-			.Caption = ML("Default")
-			.Hint = ML("Without Public or Private scope")
+			.Caption = ("Default")
+			.Hint = ("Without Public or Private scope")
 			.SetBounds 210, 20, 90, 20
 			.Designer = @This
 			.Parent = @grbScope
@@ -307,10 +307,10 @@
 		' lblExtends
 		With lblExtends
 			.Name = "lblExtends"
-			.Text = ML("Extends") & ":"
+			.Text = ("Extends") & ":"
 			.TabIndex = 24
 			.ControlIndex = 8
-			.Caption = ML("Extends") & ":"
+			.Caption = ("Extends") & ":"
 			.SetBounds 10, 150, 90, 20
 			.Designer = @This
 			.Parent = @This
@@ -327,9 +327,9 @@
 		' chkRedefineClassKeyword
 		With chkRedefineClassKeyword
 			.Name = "chkRedefineClassKeyword"
-			.Text = ML("Redefine Class keyword")
+			.Text = ("Redefine Class keyword")
 			.TabIndex = 27
-			.Caption = ML("Redefine Class keyword")
+			.Caption = ("Redefine Class keyword")
 			.Visible = False
 			.Checked = True
 			.SetBounds 10, 390, 140, 20
@@ -348,7 +348,7 @@ End Sub
 
 Private Sub frmAddTypeType.cmdOK_Click(ByRef Sender As Control)
 	If Trim(txtName.Text) = "" Then
-		MsgBox ML("Invalid type name"), , mtError
+		MsgBox ("Invalid type name"), , mtError
 		Exit Sub
 	End If
 	Dim tb As TabWindow Ptr = Cast(TabWindow Ptr, ptabCode->SelectedTab)
@@ -554,7 +554,7 @@ Private Sub frmAddTypeType.Form_Create(ByRef Sender As Control)
 	txtField.Position = 0
 	Dim te As TypeElement Ptr
 	cboType.Clear
-	cboType.AddItem ML("(not selected)")
+	cboType.AddItem ("(not selected)")
 	For i As Integer = 0 To tb->txtCode.Content.Types.Count - 1
 		te = tb->txtCode.Content.Types.Object(i)
 		cboType.AddItem te->Name
@@ -562,7 +562,7 @@ Private Sub frmAddTypeType.Form_Create(ByRef Sender As Control)
 	Next
 	cboType.ItemIndex = 0
 	cboExtends.Clear
-	cboExtends.AddItem ML("(not selected)")
+	cboExtends.AddItem ("(not selected)")
 	For i As Integer = 0 To tb->txtCode.Content.Types.Count - 1
 		te = tb->txtCode.Content.Types.Object(i)
 		If te->TypeName <> "" AndAlso te->ElementType <> ElementTypes.E_TypeCopy Then 

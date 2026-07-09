@@ -16,7 +16,7 @@ pfFind = @fFind
 		With This
 			.Name = "frmFind"
 			.Opacity = 210
-			.Caption = ML("Find")
+			.Caption = ("Find")
 				.BorderStyle = FormBorderStyle.FixedDialog
 				.Icon.LoadFromResourceID(1)
 			.MinimizeBox = False
@@ -34,7 +34,7 @@ pfFind = @fFind
 			.Name = "btnReplaceShow"
 			.Text = "˅"
 			.TabIndex = 0
-			.Hint = ML("Expand to Replace Mode")
+			.Hint = ("Expand to Replace Mode")
 			.SetBounds 3, 2, 16, 21
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @btnReplaceShow_Click)
 			.Designer = @This
@@ -46,7 +46,7 @@ pfFind = @fFind
 			.TabIndex = 1
 			.Alignment = AlignmentConstants.taRight
 			.SetBounds 22, 4, 45, 16
-			.Text = ML("Find") & ":"
+			.Text = ("Find") & ":"
 			.Designer = @This
 			.Parent = @This
 		End With
@@ -63,7 +63,7 @@ pfFind = @fFind
 		'lblSearchIn
 		With lblSearchIn
 			.Name = "lblSearchIn"
-			.Text = ML("Search in:")
+			.Text = ("Search in:")
 			.TabIndex = 19
 			.Alignment = AlignmentConstants.taRight
 			.SetBounds 145, 4, 66, 16
@@ -74,12 +74,12 @@ pfFind = @fFind
 		With cboFindRange
 			.Name = "cboFindRange"
 			.Text = "cboFindRange"
-			.AddItem ML("Procedure")
-			.AddItem ML("Module")
-			.AddItem ML("Project")
-			.AddItem ML("Selected")
+			.AddItem ("Procedure")
+			.AddItem ("Module")
+			.AddItem ("Project")
+			.AddItem ("Selected")
 			.TabIndex = 3
-			.Hint = ML("Find Range")
+			.Hint = ("Find Range")
 			.SetBounds 213, 1, 66, 21
 			.OnSelected = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As ComboBoxEdit, ItemIndex As Integer), @cboFindRange_Selected)
 			.Designer = @This
@@ -89,9 +89,9 @@ pfFind = @fFind
 		With chkMatchCase
 			.Name = "chkMatchCase"
 			.TabIndex = 4
-			.Hint = ML("Match Case")
+			.Hint = ("Match Case")
 			.SetBounds 284, 1, 30, 21
-			.Text = ML("Match Case")
+			.Text = ("Match Case")
 			.Designer = @This
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As CheckBox), @chkBox_Click)
 			.Parent = @This
@@ -99,9 +99,9 @@ pfFind = @fFind
 		'chkMatchWholeWords
 		With chkMatchWholeWords
 			.Name = "chkMatchWholeWords"
-			.Text = ML("Whole Word")
+			.Text = ("Whole Word")
 			.TabIndex = 5
-			.Hint = ML("Match Whole Words")
+			.Hint = ("Match Whole Words")
 			.SetBounds 316, 1, 30, 21
 			.Designer = @This
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As CheckBox), @chkBox_Click)
@@ -110,10 +110,10 @@ pfFind = @fFind
 		'chkUsePatternMatching
 		With chkUsePatternMatching
 			.Name = "chkUsePatternMatching"
-			.Text = ML("Regex")
+			.Text = ("Regex")
 			.TabIndex = 6
-			.Hint = ML("Use Pattern Matching")
-			.Caption = ML("Regex")
+			.Hint = ("Use Pattern Matching")
+			.Caption = ("Regex")
 			.SetBounds 345, 1, 30, 21
 			.Designer = @This
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As CheckBox), @chkBox_Click)
@@ -122,9 +122,9 @@ pfFind = @fFind
 		'btnFindPrev
 		With btnFindPrev
 			.Name = "btnFindPrev"
-			.Text = ML("Find Previous")
+			.Text = ("Find Previous")
 			.TabIndex = 7
-			.Hint = ML("Find Previous") & " (" & HK("Find Previous", "Shift + F3") & ")"
+			.Hint = ("Find Previous") & " (" & HK("Find Previous", "Shift + F3") & ")"
 			.SetBounds 268, 1, 80, 22
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @btnFindPrev_Click)
 			.Designer = @This
@@ -133,10 +133,10 @@ pfFind = @fFind
 		'btnFind
 		With btnFind
 			.Name = "btnFind"
-			.Text = ML("Find Next")
+			.Text = ("Find Next")
 			.Default = True
 			.TabIndex = 8
-			.Hint = ML("Find Next") & " (" & HK("Find Next", "F3") & ")"
+			.Hint = ("Find Next") & " (" & HK("Find Next", "F3") & ")"
 			.SetBounds 350, 1, 80, 22
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @btnFind_Click)
 			.Designer = @This
@@ -145,7 +145,7 @@ pfFind = @fFind
 		'lblReplace
 		With lblReplace
 			.Name = "lblReplace"
-			.Text = ML("Replace") & ":"
+			.Text = ("Replace") & ":"
 			.TabIndex = 11
 			.Alignment = AlignmentConstants.taRight
 			.SetBounds 22, 35, 45, 16
@@ -165,9 +165,9 @@ pfFind = @fFind
 		'btnReplace
 		With btnReplace
 			.Name = "btnReplace"
-			.Text = ML("&Replace")
+			.Text = ("&Replace")
 			.TabIndex = 13
-			.Hint = ML("Replace")
+			.Hint = ("Replace")
 			.SetBounds 212, 32, 110, 22
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @btnReplace_Click)
 			.Designer = @This
@@ -176,9 +176,9 @@ pfFind = @fFind
 		'btnReplaceAll
 		With btnReplaceAll
 			.Name = "btnReplaceAll"
-			.Text = ML("Replace &All")
+			.Text = ("Replace &All")
 			.TabIndex = 14
-			.Hint = ML("Replace All")
+			.Hint = ("Replace All")
 			.SetBounds 326, 32, 102, 22
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @btnReplaceAll_Click)
 			.Designer = @This
@@ -188,9 +188,9 @@ pfFind = @fFind
 		'btnFindAll
 		With btnFindAll
 			.Name = "btnFindAll"
-			.Text = ML("All")
+			.Text = ("All")
 			.TabIndex = 15
-			.Hint = ML("Find All")
+			.Hint = ("Find All")
 			.Visible = False
 			.SetBounds 480, 3, 25, 23
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @btnFindAll_Click)
@@ -200,7 +200,7 @@ pfFind = @fFind
 		'btnCancel
 		With btnCancel
 			.Name = "btnCancel"
-			.Text = ML("&Cancel")
+			.Text = ("&Cancel")
 			.TabIndex = 16
 			.Visible = False
 			.Designer = @This
@@ -226,7 +226,7 @@ Public Function frmFind.Find(Down As Boolean, bNotShowResults As Boolean = False
 	Dim As Integer i, SearchCount, SearchLen
 	If txtFind.Text <> "" AndAlso Not txtFind.Contains(txtFind.Text) Then txtFind.AddItem txtFind.Text
 	If CInt(*gSearchSave <> txtFind.Text OrElse plvSearch->ListItems.Count < 1) OrElse CInt(tb > 0 AndAlso tb->txtCode.ModifiedLine = True AndAlso cboFindRange.ItemIndex <> 2) Then FindAll plvSearch, tpFind, , False : WLet(gSearchSave, txtFind.Text): tb->txtCode.ModifiedLine = False
-	If plvSearch->ListItems.Count < 1 Then This.Caption = ML("Find: No Results") : Return -1
+	If plvSearch->ListItems.Count < 1 Then This.Caption = ("Find: No Results") : Return -1
 	If cboFindRange.ItemIndex = 1 OrElse cboFindRange.ItemIndex = 2 Then
 		iSelStartLine = 0: iSelEndLine = tb->txtCode.LinesCount - 1: iSelStartChar = 0: iSelEndChar = Len(tb->txtCode.Lines(iSelEndLine))
 	ElseIf cboFindRange.ItemIndex = 0 Then
@@ -390,7 +390,7 @@ Public Function frmFind.Find(Down As Boolean, bNotShowResults As Boolean = False
 		End If
 	Else
 		gSearchItemIndex = plvSearch->SelectedItemIndex
-		If plvSearch->ListItems.Count < 1 Then This.Caption = ML("Find: No Results") : Return -1
+		If plvSearch->ListItems.Count < 1 Then This.Caption = ("Find: No Results") : Return -1
 		If mFormFind Then gSearchItemIndex = IIf(Down, gSearchItemIndex + 1, gSearchItemIndex - 1)
 		If gSearchItemIndex < 0 Then
 			gSearchItemIndex = SearchCount
@@ -559,7 +559,7 @@ Private Sub frmFind.ReplaceInProj(ByRef tSearch As WString="", ByRef tReplace As
 							If Open(f For Output Encoding "utf-8" As #Fn1) = 0 Then
 								Print #Fn1, *BuffOut
 							Else
-								MsgBox ML("Open file failure!") & " " & ML("in function") & " frmFindInFiles.ReplaceInFile" & Chr(13,10) & "  " & f
+								MsgBox ("Open file failure!") & " " & ("in function") & " frmFindInFiles.ReplaceInFile" & Chr(13,10) & "  " & f
 							End If
 							CloseFile_(Fn1)
 						End If
@@ -608,15 +608,15 @@ Sub FindSubProj(Param As Any Ptr)
 		.btnReplaceAll.Enabled = True
 		StopProgress
 		If *gSearchSave = WChr(84)+"ODO" Then
-			tpToDo->Caption = ML("ToDo") & " (" & plvToDo->ListItems.Count & " " & ML("Pos") & ")"
+			tpToDo->Caption = ("ToDo") & " (" & plvToDo->ListItems.Count & " " & ("Pos") & ")"
 			WLet(gSearchSave, "")
 			.cboFindRange.ItemIndex = 2
 		Else
 			WLet(gSearchSave, .txtFind.Text)
-			tpFind->Caption = ML("Find") & " (" & plvSearch->ListItems.Count & " " & ML("Pos") & ")"
+			tpFind->Caption = ("Find") & " (" & plvSearch->ListItems.Count & " " & ("Pos") & ")"
 		End If
 		If .Visible Then 'David Change
-			.Caption = ML("Find") + ": " + WStr(gSearchItemIndex + 1) + " of " + WStr(plvSearch->ListItems.Count)
+			.Caption = ("Find") + ": " + WStr(gSearchItemIndex + 1) + " of " + WStr(plvSearch->ListItems.Count)
 		End If
 	End With
 	ThreadsLeave
@@ -641,13 +641,13 @@ Sub ReplaceSubProj(Param As Any Ptr)
 	fFind.btnReplaceAll.Enabled = True
 	StopProgress
 	WLet(gSearchSave, fFind.txtFind.Text)
-	tpFind->Caption = ML("Replace") & " (" & plvSearch->ListItems.Count & " " & ML("Pos") & ")"
+	tpFind->Caption = ("Replace") & " (" & plvSearch->ListItems.Count & " " & ("Pos") & ")"
 	If plvSearch->ListItems.Count = 0 Then
-		fFind.Caption = ML("Find: No Results")
+		fFind.Caption = ("Find: No Results")
 	Else
 		If fFind.txtFind.Text <> "" AndAlso Not fFind.txtFind.Contains(fFind.txtFind.Text) Then fFind.txtFind.AddItem fFind.txtFind.Text
 		If Len(fFind.txtReplace.Text) > 0 AndAlso (Not fFind.txtReplace.Contains(fFind.txtReplace.Text)) Then fFind.txtReplace.AddItem fFind.txtReplace.Text
-		fFind.Caption = ML("Replace") + WStr(plvSearch->ListItems.Count) + " of " + WStr(plvSearch->ListItems.Count)
+		fFind.Caption = ("Replace") + WStr(plvSearch->ListItems.Count) + " of " + WStr(plvSearch->ListItems.Count)
 	End If
 	ThreadsLeave
 	MutexUnlock tlockToDo
@@ -659,7 +659,7 @@ Private Sub frmFind.btnFind_Click(ByRef Sender As Control)
 	mFormFind = True
 	Find True
 	If plvSearch->ListItems.Count < 1 OrElse gSearchItemIndex < 0 OrElse gSearchItemIndex > plvSearch->ListItems.Count - 1 Then btnFind.Enabled = True : Exit Sub
-	This.Caption = ML("Find") + ": " + WStr(gSearchItemIndex + 1) + " of " + WStr(plvSearch->ListItems.Count)
+	This.Caption = ("Find") + ": " + WStr(gSearchItemIndex + 1) + " of " + WStr(plvSearch->ListItems.Count)
 	btnFind.Enabled = True
 End Sub
 
@@ -669,7 +669,7 @@ Private Sub frmFind.btnFindPrev_Click(ByRef Sender As Control)
 	mFormFind = True
 	Find False
 	If plvSearch->ListItems.Count < 1 OrElse gSearchItemIndex < 0 OrElse gSearchItemIndex > plvSearch->ListItems.Count - 1 Then btnFindPrev.Enabled = True : Exit Sub
-	This.Caption = ML("Find") + ": " + WStr(gSearchItemIndex + 1) + " of " + WStr(plvSearch->ListItems.Count)
+	This.Caption = ("Find") + ": " + WStr(gSearchItemIndex + 1) + " of " + WStr(plvSearch->ListItems.Count)
 	btnFindPrev.Enabled = True
 End Sub
 
@@ -683,9 +683,9 @@ Private Function frmFind.FindAll(ByRef lvSearchResult As ListView Ptr, tTab As T
 	Dim Search As WString Ptr = @txtFind.Text
 	If tTab <> tpToDo AndAlso (Len(*Search) < 1) Then Return -1 ' OrElse CInt(*gSearchSave = *Search)
 	If tTab = tpFind Then
-		tTab->Caption = ML("Find")
+		tTab->Caption = ("Find")
 	Else
-		tTab->Caption = ML("ToDo")
+		tTab->Caption = ("ToDo")
 	End If
 	tTab->SelectTab
 	Dim As TreeNode Ptr tn = MainNode
@@ -778,11 +778,11 @@ Private Function frmFind.FindAll(ByRef lvSearchResult As ListView Ptr, tTab As T
 	If Not bNotShowResults Then
 		tTab->SelectTab
 		If lvSearchResult->ListItems.Count < 1 Then
-			This.Caption = ML("Find: No Results")
+			This.Caption = ("Find: No Results")
 		Else
 			If tSearch <> "" AndAlso Not txtFind.Contains(tSearch) Then txtFind.AddItem tSearch
 		End If
-		tTab->Caption = IIf(tTab = tpFind, ML("Find"), ML("ToDo")) & " (" & lvSearchResult->ListItems.Count & " " & ML("Pos") & ")"
+		tTab->Caption = IIf(tTab = tpFind, WStr("Find"), WStr("ToDo")) & " (" & lvSearchResult->ListItems.Count & " " & WStr("Pos") & ")"
 	End If
 End Function
 
@@ -794,7 +794,7 @@ Private Sub frmFind.btnReplace_Click(ByRef Sender As Control)
 	Dim Item As ListViewItem Ptr
 	mFormFind = False
 	If CInt(*gSearchSave <> txtFind.Text OrElse plvSearch->ListItems.Count < 1) OrElse CInt(tb > 0 AndAlso tb->txtCode.ModifiedLine = True AndAlso cboFindRange.ItemIndex <> 2) Then FindAll plvSearch, tpFind, , False : WLet(gSearchSave, txtFind.Text): tb->txtCode.ModifiedLine = False
-	If plvSearch->ListItems.Count < 1 Then This.Caption = ML("Find: No Results")  : Exit Sub
+	If plvSearch->ListItems.Count < 1 Then This.Caption = ("Find: No Results")  : Exit Sub
 	btnReplace.Enabled = False: btnReplaceAll.Enabled = False
 	Dim As Boolean bMatch = IIf(chkMatchCase.Checked, txt->SelText = txtFind.Text, LCase(txt->SelText) = LCase(txtFind.Text))
 	If bMatch Then
@@ -804,21 +804,21 @@ Private Sub frmFind.btnReplace_Click(ByRef Sender As Control)
 		plvSearch->ListItems.Remove gSearchItemIndex
 		If plvSearch->ListItems.Count < 1 Then
 			btnReplace.Enabled = True : btnReplaceAll.Enabled = True
-			This.Caption = ML("Find: No Results")  : btnReplace.Enabled = True : btnReplaceAll.Enabled = True : Exit Sub
+			This.Caption = ("Find: No Results")  : btnReplace.Enabled = True : btnReplaceAll.Enabled = True : Exit Sub
 		End If
 		If gSearchItemIndex >= plvSearch->ListItems.Count - 1 Then
 			gSearchItemIndex = IIf(gSearchItemIndex = plvSearch->ListItems.Count - 1, plvSearch->ListItems.Count - 1, 0)
 			Item = plvSearch->ListItems.Item(gSearchItemIndex)
 			SelectSearchResult(Item->Text(3), Val(Item->Text(1)), -1, -1, Item->Tag, *gSearchSave)
 			plvSearch->SelectedItemIndex = gSearchItemIndex
-			This.Caption = ML("Replace") + ": " + WStr(gSearchItemIndex + 1) + " of " + WStr(plvSearch->ListItems.Count)
+			This.Caption = ("Replace") + ": " + WStr(gSearchItemIndex + 1) + " of " + WStr(plvSearch->ListItems.Count)
 			btnReplace.Enabled = True : btnReplaceAll.Enabled = True
 			btnFind.SetFocus
 			Exit Sub
 		End If
 	End If
 	Find True
-	This.Caption = ML("Replace") + ": " + WStr(gSearchItemIndex + 1) + " of " + WStr(plvSearch->ListItems.Count)
+	This.Caption = ("Replace") + ": " + WStr(gSearchItemIndex + 1) + " of " + WStr(plvSearch->ListItems.Count)
 	btnReplace.Enabled = True : btnReplaceAll.Enabled = True
 	btnFind.SetFocus
 End Sub
@@ -838,7 +838,7 @@ Private Sub frmFind.btnReplaceAll_Click(ByRef Sender As Control)
 		If Tn > 0 Then
 			Dim As ExplorerElement Ptr ee = Tn->Tag
 			If ee > 0 AndAlso *ee->FileName <> "" Then
-				Select Case MsgBox(ML("Are you sure you want to replace in the project?") + WChr(13, 10) + *Search + WChr(13, 10) + "  " + ML("To") &  ":" + WChr(13, 10) + *tReplace, "Visual FB Editor", mtWarning, btYesNo)
+				Select Case MsgBox(("Are you sure you want to replace in the project?") + WChr(13, 10) + *Search + WChr(13, 10) + "  " + ("To") &  ":" + WChr(13, 10) + *tReplace, "Visual FB Editor", mtWarning, btYesNo)
 				Case mrYes:
 				Case mrNo: Return
 				End Select
@@ -892,13 +892,13 @@ Private Sub frmFind.btnReplaceAll_Click(ByRef Sender As Control)
 		tb->txtCode.Changed "ReplaceAll"
 		tb->txtCode.PaintControl(True)
 		tpFind->SelectTab
-		tpFind->Caption = ML("Replace") & " (" & plvSearch->ListItems.Count & " " & ML("Pos") & ")"
+		tpFind->Caption = ("Replace") & " (" & plvSearch->ListItems.Count & " " & ("Pos") & ")"
 		If plvSearch->ListItems.Count = 0 Then
-			This.Caption = ML("Find: No Results")
+			This.Caption = ("Find: No Results")
 		Else
 			If *Search <> "" AndAlso Not txtFind.Contains(*Search) Then txtFind.AddItem *Search
 			If Len(*tReplace) > 0 AndAlso (Not txtReplace.Contains(*tReplace)) Then txtReplace.AddItem *tReplace
-			This.Caption = ML("Replace") + ": " + WStr(plvSearch->ListItems.Count) + " of " + WStr(plvSearch->ListItems.Count)
+			This.Caption = ("Replace") + ": " + WStr(plvSearch->ListItems.Count) + " of " + WStr(plvSearch->ListItems.Count)
 		End If
 	End If
 	WLet(gSearchSave, "")
@@ -909,9 +909,9 @@ End Sub
 Private Sub frmFind.btnReplaceShow_Click(ByRef Sender As Control)
 	If Len(*gSearchSave) > 0 Then Clipboard.SetAsText *gSearchSave
 	If Sender.Name = btnReplaceShow.Name Then mFormFind = IIf(Height > 80, True, False)
-	This.Caption = IIf(mFormFind, ML("Find"), ML("Replace"))
+	This.Caption = IIf(mFormFind, ("Find"), ("Replace"))
 	btnReplaceShow.Caption = IIf(mFormFind, ">", "^")
-	btnReplaceShow.Hint = IIf(mFormFind, ML("Expand to Replace Mode"), ML("Narrowdown to Find mode"))
+	btnReplaceShow.Hint = IIf(mFormFind, ("Expand to Replace Mode"), ("Narrowdown to Find mode"))
 	btnReplace.Enabled = IIf(mFormFind, False, True)
 	btnReplaceAll.Enabled = IIf(mFormFind, False, True)
 	This.Size = Type<My.Sys.Drawing.Size>(433, IIf(mFormFind, 52, 82))

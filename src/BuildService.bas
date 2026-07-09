@@ -55,7 +55,7 @@ Function Compile(Parameter As String, bAll As Boolean) As Integer
 	ClearMessages
 	NodesCount = IIf(bAll, tvExplorer.Nodes.Count, 1)
 	lvProblems.ListItems.Clear
-	tpProblems->Caption = ML("Problems") '    'Inits
+	tpProblems->Caption = ("Problems") '    'Inits
 	ThreadsLeave()
 	For k As Integer = 0 To NodesCount - 1
 		ThreadsEnter()
@@ -74,7 +74,7 @@ Function Compile(Parameter As String, bAll As Boolean) As Integer
 		ThreadsLeave()
 		If Len(*ctx.MainFile) <= 0 Then
 			ThreadsEnter()
-			ShowMessages ML("No Main file specified for the project.") & "!"
+			ShowMessages ("No Main file specified for the project.") & "!"
 			ThreadsLeave()
 			CompileResult = 0
 			Continue For
@@ -89,14 +89,14 @@ Function Compile(Parameter As String, bAll As Boolean) As Integer
 		End If
 		If *ctx.FbcExe = "" Then
 			ThreadsEnter()
-			ShowMessages ML("Invalid defined compiler path.")
+			ShowMessages ("Invalid defined compiler path.")
 			ThreadsLeave()
 			CompileResult = 0
 			Continue For
 		Else
 			If Not FileExists(*ctx.FbcExe) Then
 				ThreadsEnter()
-				ShowMessages ML("File") & " """ & *ctx.FbcExe & """ " & ML("not found") & "!"
+				ShowMessages ("File") & " """ & *ctx.FbcExe & """ " & ("not found") & "!"
 				ThreadsLeave()
 				CompileResult = 0
 				Continue For
@@ -127,7 +127,7 @@ Function Compile(Parameter As String, bAll As Boolean) As Integer
 			If Dir(*ctx.ExeName) <> "" Then
 				If *ctx.ExeName = ExePath OrElse Kill(*ctx.ExeName) <> 0 Then
 					ThreadsEnter()
-					ShowMessages(Str(Time) & ": " &  ML("Cannot compile - the program is now running") & " " & *ctx.ExeName)
+					ShowMessages(Str(Time) & ": " &  ("Cannot compile - the program is now running") & " " & *ctx.ExeName)
 					ThreadsLeave()
 					Blocked = True
 					CompileResult = 0
@@ -271,7 +271,7 @@ Function Compile(Parameter As String, bAll As Boolean) As Integer
 		CompileSetProcessWorkDir ctx, Parameter, BatchMode
 		Dim As Boolean Log2_, ERRGoRc
 		ThreadsEnter()
-		ShowMessages(Str(Time) + ": " + IIf(Parameter = "MakeClean", ML("Clean"), ML("Compilation")) & ": " & *ctx.PipeCommand + WChr(13) + WChr(10))
+		ShowMessages(Str(Time) + ": " + IIf(Parameter = "MakeClean", ("Clean"), ("Compilation")) & ": " & *ctx.PipeCommand + WChr(13) + WChr(10))
 		ThreadsLeave()
 		Dim As Dictionary CompileCommands
 		CompileCommands.Add "", *ctx.PipeCommand
@@ -301,7 +301,7 @@ Function Compile(Parameter As String, bAll As Boolean) As Integer
 			sa.lpSecurityDescriptor = NULL
 			sa.bInheritHandle = True
 			If CreatePipe(@hReadPipe, @hWritePipe, @sa, ByVal 0) = 0 Then
-				ShowMessages(ML("Error: Couldn't Create Pipe"), False)
+				ShowMessages(("Error: Couldn't Create Pipe"), False)
 				CompileResult = 0
 				Continue For
 			End If
@@ -314,7 +314,7 @@ Function Compile(Parameter As String, bAll As Boolean) As Integer
 			lpWorkDir = ctx.ProcessWorkDir
 			If lpWorkDir = 0 OrElse *lpWorkDir = "" Then lpWorkDir = 0
 			If CreateProcess(ctx.PipeApplicationName, ctx.PipeCommand, @sa, @sa, 1, NORMAL_PRIORITY_CLASS Or CREATE_NEW_CONSOLE, ByVal 0, lpWorkDir, @si, @pi) = 0 Then
-				ShowMessages(ML("Error: Couldn't Create Process") & ": " & GetErrorString(GetLastError), False)
+				ShowMessages(("Error: Couldn't Create Process") & ": " & GetErrorString(GetLastError), False)
 				CompileResult = 0
 				Continue For
 			End If
@@ -373,17 +373,17 @@ Function Compile(Parameter As String, bAll As Boolean) As Integer
 						Else
 							If StartsWith(TmpStr, "FreeBASIC") Then
 								nPos = Len(*res(i)) + 1
-								TmpStr = Replace(Replace(*res(i), "FreeBASIC Compiler", ML("FreeBASIC Compiler")), "Version", ML("Version"))
+								TmpStr = Replace(Replace(*res(i), "FreeBASIC Compiler", ("FreeBASIC Compiler")), "Version", ("Version"))
 								Var Pos1 = InStr(TmpStr, "built for ")
 								If Pos1 > 0 Then
 									TmpStr = Left(TmpStr, Pos1 - 1) & MS("built for $1", Mid(TmpStr, Pos1 + 10))
 								End If
 							ElseIf StartsWith(TmpStr, "Copyright") Then
 								nPos = Len(*res(i)) + 1
-								TmpStr = Replace(Replace(*res(i), "Copyright", ML("Copyright")), "The FreeBASIC development team.", ML("The FreeBASIC development team."))
+								TmpStr = Replace(Replace(*res(i), "Copyright", ("Copyright")), "The FreeBASIC development team.", ("The FreeBASIC development team."))
 							End If
 							ThreadsEnter()
-							ShowMessages Str(Time) & ": " & ML(TmpStr) & " " & Trim(Mid(*res(i), nPos))
+							ShowMessages Str(Time) & ": " & (TmpStr) & " " & Trim(Mid(*res(i), nPos))
 							ThreadsLeave()
 						End If
 						_Deallocate(res(i)): res(i) = 0
@@ -404,14 +404,14 @@ Function Compile(Parameter As String, bAll As Boolean) As Integer
 		ThreadsEnter()
 		ShowMessages("")
 		If lvProblems.ListItems.Count <> 0 Then
-			tpProblems->Caption = ML("Problems") & IIf(NumberErr + NumberWarning + NumberInfo > 0, WStr(" (" & WStr(NumberErr + NumberWarning + NumberInfo) & " " & ML("Pos") & ")"), WStr(""))
+			tpProblems->Caption = ("Problems") & IIf(NumberErr + NumberWarning + NumberInfo > 0, WStr(" (" & WStr(NumberErr + NumberWarning + NumberInfo) & " " & ("Pos") & ")"), WStr(""))
 			Dim As UString Problems
-			Problems = IIf(NumberErr > 0, ML("Errors") & " (" & WStr(NumberErr) & " " & ML("Pos") & ")", WStr(""))
-			Problems &= IIf(NumberWarning > 0, IIf(Problems = "", WStr(""), WStr(", ")) & ML("Warnings") & " (" & WStr(NumberWarning) & " " & ML("Pos") & ")", WStr(""))
-			Problems &= IIf(NumberInfo > 0, IIf(Problems = "", WStr(""), WStr(", ")) & ML("Messages") & " (" & WStr(NumberInfo) & " " & ML("Pos") & ")", WStr(""))
+			Problems = IIf(NumberErr > 0, ("Errors") & " (" & WStr(NumberErr) & " " & ("Pos") & ")", WStr(""))
+			Problems &= IIf(NumberWarning > 0, IIf(Problems = "", WStr(""), WStr(", ")) & ("Warnings") & " (" & WStr(NumberWarning) & " " & ("Pos") & ")", WStr(""))
+			Problems &= IIf(NumberInfo > 0, IIf(Problems = "", WStr(""), WStr(", ")) & ("Messages") & " (" & WStr(NumberInfo) & " " & ("Pos") & ")", WStr(""))
 			ShowMessages(Str(Time) & ": " & MS("Found $1.", *Problems.vptr), False)
 		Else
-			tpProblems->Caption = ML("Problems")
+			tpProblems->Caption = ("Problems")
 		End If
 		ThreadsLeave()
 		For i As Integer = 0 To Tools.Count - 1
@@ -421,14 +421,14 @@ Function Compile(Parameter As String, bAll As Boolean) As Integer
 		If WasNotCreated Or Blocked Then
 			ThreadsEnter()
 			If Parameter <> "Check" Then
-				If lvProblems.ListItems.Count < 1 Then ShowMessages(Str(Time) & ": " & MS("Found $1.",  ML("Errors") & " (1) " & ML("Pos")), False)
-				ShowMessages(Str(Time) & ": " & ML("Do not build file.")) & " "  & ML("Elapsed Time") & ": " & Format(Timer - CompileElapsedTime, "#0.00") & " " & ML("Seconds")
+				If lvProblems.ListItems.Count < 1 Then ShowMessages(Str(Time) & ": " & MS("Found $1.",  ("Errors") & " (1) " & ("Pos")), False)
+				ShowMessages(Str(Time) & ": " & ("Do not build file.")) & " "  & ("Elapsed Time") & ": " & Format(Timer - CompileElapsedTime, "#0.00") & " " & ("Seconds")
 				If (Not Log2_) AndAlso lvProblems.ListItems.Count <> 0 Then tpProblems->SelectTab
 			ElseIf lvProblems.ListItems.Count <> 0 Then
-				ShowMessages(Str(Time) & ": " & ML("Checking ended.")) & " " & ML("Elapsed Time") & ": " & Format(Timer - CompileElapsedTime, "#0.00") & " " & ML("Seconds")
+				ShowMessages(Str(Time) & ": " & ("Checking ended.")) & " " & ("Elapsed Time") & ": " & Format(Timer - CompileElapsedTime, "#0.00") & " " & ("Seconds")
 				tpProblems->SelectTab
 			Else
-				ShowMessages(Str(Time) & ": " & ML("No errors or warnings were found.")) & " "  & ML("Elapsed Time") & ": " & Format(Timer - CompileElapsedTime, "#0.00") & " " & ML("Seconds")
+				ShowMessages(Str(Time) & ": " & ("No errors or warnings were found.")) & " "  & ("Elapsed Time") & ": " & Format(Timer - CompileElapsedTime, "#0.00") & " " & ("Seconds")
 			End If
 			StopProgress
 			ThreadsLeave()
@@ -437,13 +437,13 @@ Function Compile(Parameter As String, bAll As Boolean) As Integer
 			ThreadsEnter()
 			If InStr(*ctx.LogText, "warning") > 0 Then
 				If Parameter <> "Check" Then
-					ShowMessages(Str(Time) & ": " & ML("Layout has been successfully completed, but there are warnings.")) & " "  & ML("Elapsed Time") & ": " & Format(Timer - CompileElapsedTime, "#0.00") & " " & ML("Seconds")
+					ShowMessages(Str(Time) & ": " & ("Layout has been successfully completed, but there are warnings.")) & " "  & ("Elapsed Time") & ": " & Format(Timer - CompileElapsedTime, "#0.00") & " " & ("Seconds")
 				End If
 			Else
 				If Parameter <> "Check" Then
-					ShowMessages(Str(Time) & ": " & ML("Layout succeeded!")) & " "  & ML("Elapsed Time") & ": " & Format(Timer - CompileElapsedTime, "#0.00") & " " & ML("Seconds")
+					ShowMessages(Str(Time) & ": " & ("Layout succeeded!")) & " "  & ("Elapsed Time") & ": " & Format(Timer - CompileElapsedTime, "#0.00") & " " & ("Seconds")
 				Else
-					ShowMessages(Str(Time) & ": " & ML("Syntax errors not found!")) & " "  & ML("Elapsed Time") & ": " & Format(Timer - CompileElapsedTime, "#0.00") & " " & ML("Seconds")
+					ShowMessages(Str(Time) & ": " & ("Syntax errors not found!")) & " "  & ("Elapsed Time") & ": " & Format(Timer - CompileElapsedTime, "#0.00") & " " & ("Seconds")
 				End If
 			End If
 			StopProgress

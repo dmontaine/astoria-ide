@@ -152,7 +152,7 @@ Sub FormatProject(UnFormat As Any Ptr)
 	If tn2 <> 0 Then tn2 = GetParentNode(tn2)
 	If tn2 = 0 OrElse tn2->ImageKey <> "Project" Then Exit Sub
 	ThreadsEnter()
-	pstBar->Panels[0]->Caption = IIf(UnFormat, ML("UnFormat Project"), ML("Format Project")) &"... "
+	pstBar->Panels[0]->Caption = IIf(UnFormat, ("UnFormat Project"), ("Format Project")) &"... "
 	ThreadsLeave()
 	If tbCurrent <> 0 Then tbCurrent->txtCode.UpdateLock
 	ThreadsEnter()
@@ -204,7 +204,7 @@ Sub FormatProject(UnFormat As Any Ptr)
 	ThreadsLeave()
 	If tbCurrent <> 0 Then tbCurrent->txtCode.UpdateUnLock
 	ThreadsEnter()
-	pstBar->Panels[0]->Caption = ML("Press F1 for get more information")
+	pstBar->Panels[0]->Caption = ("Press F1 for get more information")
 	ThreadsLeave()
 End Sub
 
@@ -412,7 +412,7 @@ Function AddTab(ByRef FileName As WString, bNew As Boolean, TreeN As TreeNode Pt
 	If Not bFind Then
 		tb = _New( TabWindow(FileNameNew, bNew, TreeN))
 		If tb = 0 Then
-			MsgBox ML("Memory was not allocated")
+			MsgBox ("Memory was not allocated")
 			TabAdding = False
 			mAddingTab = False
 			Return 0
@@ -433,7 +433,7 @@ Function AddTab(ByRef FileName As WString, bNew As Boolean, TreeN As TreeNode Pt
 			If FileNameNew <> "" Then
 				pApp = @VisualFBEditorApp
 				pApp->MainForm = @frmMain
-				pstBar->Panels[1]->Caption = ML("Elapsed time") & ": Loading " & Format((Timer - timeElapse), "0.000s")
+				pstBar->Panels[1]->Caption = ("Elapsed time") & ": Loading " & Format((Timer - timeElapse), "0.000s")
 				timeElapse = Timer
 				.txtCode.LoadFromFile(FileNameNew, tb->FileEncoding, tb->NewLineType, True)
 				tb->FileEncoding = FileEncodings.Utf8
@@ -741,7 +741,7 @@ End Property
 
 Property TabWindow.FileName ByRef As WString
 	If WGet(FFileName) = "" Then
-		Return ML("Untitled")
+		Return ("Untitled")
 	Else
 		Return WGet(FFileName)
 	End If
@@ -906,7 +906,7 @@ Function TabWindow.SaveAs As Boolean
 	If pSaveD->Execute Then
 		WLet(LastOpenPath, GetFolderName(pSaveD->FileName))
 		If FileExists(pSaveD->FileName) Then
-			Select Case MsgBox(ML("Want to replace the file") & " """ & pSaveD->FileName & """?", App.Title, mtWarning, btYesNoCancel)
+			Select Case MsgBox(("Want to replace the file") & " """ & pSaveD->FileName & """?", App.Title, mtWarning, btYesNoCancel)
 			Case mrCancel: Return False
 			Case mrNo: Return SaveAs
 			End Select
@@ -1028,7 +1028,7 @@ End Function
 
 Function TabWindow.CloseTab(WithoutMessage As Boolean = False) As Boolean
 	If txtCode.Modified AndAlso Not WithoutMessage Then
-		Select Case MsgBox(ML("Want to save the file") & " """ & Caption & """?", "Visual FB Editor", mtWarning, btYesNoCancel)
+		Select Case MsgBox(("Want to save the file") & " """ & Caption & """?", "Visual FB Editor", mtWarning, btYesNoCancel)
 		Case mrYes: Save
 		Case mrNo:
 		Case mrCancel: Return False
@@ -1042,7 +1042,7 @@ Function TabWindow.CloseTab(WithoutMessage As Boolean = False) As Boolean
 				lvSuggestions.ListItems.Remove i
 			End If
 		Next
-		tpSuggestions->Caption = ML("Suggestions") & IIf(lvSuggestions.ListItems.Count = 0, WStr(""), WStr(" (") & lvSuggestions.ListItems.Count & WStr(" ") & ML("Pos") & WStr(")"))
+		tpSuggestions->Caption = WStr("Suggestions") & IIf(lvSuggestions.ListItems.Count = 0, WStr(""), WStr(" (") & lvSuggestions.ListItems.Count & WStr(" ") & WStr("Pos") & WStr(")"))
 		MutexUnlock tlockSuggestions
 	End If
 	Var ptabCode = Cast(TabControl Ptr, This.Parent)
@@ -1289,7 +1289,7 @@ Function TabWindow.ReadObjProperty(ByRef Obj As Any Ptr, ByRef PropertyName As S
 					End If
 				End If
 			ElseIf IsBase(.TypeName, "Component") Then
-				WLet(FLine, ML("(None)"))
+				WLet(FLine, ("(None)"))
 			End If
 		End Select
 	End With
@@ -1572,7 +1572,7 @@ Function TabWindow.WriteObjProperty(ByRef Obj As Any Ptr, ByRef PropertyName As 
 									End If
 								End If
 							End If
-						ElseIf Trim(*FLine3) = ML("(None)") Then
+						ElseIf Trim(*FLine3) = ("(None)") Then
 							If st <> 0 AndAlso st->WritePropertyFunc <> 0 Then Result = st->WritePropertyFunc(Obj, PropertyName, 0)
 						Else
 							Dim Pos1 As Integer = InStr(*FLine3, ".")
@@ -1647,9 +1647,9 @@ Sub TabWindow.FillAllProperties()
 	If Not txtCode.Focused Then
 		cboFunction.Items.Clear
 		If cboClass.ItemIndex = 0 Then
-			cboFunction.Items.Add WStr("(") & ML("Declarations") & ")" & WChr(0), , "Sub", "Sub"
+			cboFunction.Items.Add WStr("(") & ("Declarations") & ")" & WChr(0), , "Sub", "Sub"
 		Else
-			cboFunction.Items.Add "(" & ML("Events") & ")", , "Event", "Event"
+			cboFunction.Items.Add "(" & ("Events") & ")", , "Event", "Event"
 		End If
 		cboFunction.ItemIndex = 0
 	End If
@@ -1788,7 +1788,7 @@ Sub CheckBi(ByRef ptxtCode As EditControl Ptr, ByRef txtCodeBi As EditControl, B
 			ptxtCodeBi = ptxtCode
 			ptxtCodeBi->Changing "Unsur qo`shish"
 		Else
-			MsgBox ML("Memory was not allocated")
+			MsgBox ("Memory was not allocated")
 		End If
 	End If
 End Sub
@@ -2534,7 +2534,7 @@ Sub PropertyChanged(ByRef Sender As Control, ByRef Sender_Text As WString, IsCom
 		End If
 		If SenderText <> OldText OrElse Different Then
 			If CInt(PropertyName = "Name") AndAlso CInt(tb->cboClass.Items.Contains(SenderText)) Then
-				MsgBox ML("This name is exists!"), "VisualFBEditor", mtWarning
+				MsgBox ("This name is exists!"), "VisualFBEditor", mtWarning
 					Sender.Text = OldText
 				Exit Sub
 			End If
@@ -2817,7 +2817,7 @@ Sub cboClass_Change(ByRef Designer As My.Sys.Object, ByRef Sender As ComboBoxEdi
 	If ii = 0 Then
 		With tb->cboFunction
 			.Items.Clear
-			.Items.Add WStr("(") & ML("Declarations") & ")" & WChr(0), , "Sub", "Sub"
+			.Items.Add WStr("(") & ("Declarations") & ")" & WChr(0), , "Sub", "Sub"
 			.ItemIndex = 0
 			Dim As String imgKey = "Sub"
 			For i As Integer = 0 To tb->txtCode.Content.Functions.Count - 1
@@ -3634,7 +3634,7 @@ Sub DesignerDblClickControl(ByRef Sender As Designer, Ctrl As Any Ptr)
 		pfMenuEditor->CurrentMenu = Ctrl
 		pfMenuEditor->CurrentToolBar = 0
 		pfMenuEditor->CurrentStatusBar = 0
-		pfMenuEditor->Caption = ML("Menu Editor") & ": " & QWString(st->ReadPropertyFunc(Ctrl, "Name"))
+		pfMenuEditor->Caption = ("Menu Editor") & ": " & QWString(st->ReadPropertyFunc(Ctrl, "Name"))
 		pfMenuEditor->UpdateUnLock
 		pfMenuEditor->Repaint
 		pfMenuEditor->Show *pfrmMain
@@ -3649,7 +3649,7 @@ Sub DesignerDblClickControl(ByRef Sender As Designer, Ctrl As Any Ptr)
 		pfMenuEditor->CurrentMenu = 0
 		pfMenuEditor->CurrentToolBar = Ctrl
 		pfMenuEditor->CurrentStatusBar = 0
-		pfMenuEditor->Caption = ML("ToolBar Editor") & ": " & QWString(st->ReadPropertyFunc(Ctrl, "Name"))
+		pfMenuEditor->Caption = ("ToolBar Editor") & ": " & QWString(st->ReadPropertyFunc(Ctrl, "Name"))
 		pfMenuEditor->UpdateUnLock
 		pfMenuEditor->Repaint
 		pfMenuEditor->Show *pfrmMain
@@ -3664,7 +3664,7 @@ Sub DesignerDblClickControl(ByRef Sender As Designer, Ctrl As Any Ptr)
 		pfMenuEditor->CurrentMenu = 0
 		pfMenuEditor->CurrentToolBar = 0
 		pfMenuEditor->CurrentStatusBar = Ctrl
-		pfMenuEditor->Caption = ML("StatusBar Editor") & ": " & QWString(st->ReadPropertyFunc(Ctrl, "Name"))
+		pfMenuEditor->Caption = ("StatusBar Editor") & ": " & QWString(st->ReadPropertyFunc(Ctrl, "Name"))
 		pfMenuEditor->UpdateUnLock
 		pfMenuEditor->Repaint
 		pfMenuEditor->Show *pfrmMain
@@ -3672,7 +3672,7 @@ Sub DesignerDblClickControl(ByRef Sender As Designer, Ctrl As Any Ptr)
 		pfImageListEditor->tb = tb
 		pfImageListEditor->Des = @Sender
 		pfImageListEditor->CurrentImageList = Ctrl
-		pfImageListEditor->Caption = ML("ImageList Editor") & ": " & QWString(st->ReadPropertyFunc(Ctrl, "Name"))
+		pfImageListEditor->Caption = ("ImageList Editor") & ": " & QWString(st->ReadPropertyFunc(Ctrl, "Name"))
 		pfImageListEditor->Show *pfrmMain
 	Case Else
 		If tb->cboFunction.Items.Count > 1 Then
@@ -4681,7 +4681,7 @@ Function GetParameters(sWord As String, te As TypeElement Ptr, teOld As TypeElem
 						Link1 = te->FileName & "|" & WStr(te->StartLine) & "|" & FuncName & "|" & FuncName
 						ParametersList.Add te->Parameters
 						Parameters &= IIf(Parameters = "", "", !"\r") & ..Left(Parameter, iPos - 1) & "<a href=""" & Link1 & """>" & FuncName & "</a>" & Mid(Parameter, iPos + Len(sWord))
-						If te->Comment <> "" Then Comments &= "" & IIf(te->ElementType = E_Keyword  OrElse te->ElementType = E_KeywordFunction OrElse te->ElementType = E_KeywordOperator OrElse te->ElementType = E_KeywordSub, te->Comment, MC(te->Name))
+						If te->Comment <> "" Then Comments &= "" & IIf(te->ElementType = E_Keyword  OrElse te->ElementType = E_KeywordFunction OrElse te->ElementType = E_KeywordOperator OrElse te->ElementType = E_KeywordSub, te->Comment, WStr(te->Name))
 					End If
 				Next
 			End If
@@ -4696,7 +4696,7 @@ Function GetParameters(sWord As String, te As TypeElement Ptr, teOld As TypeElem
 						Link1 = te->FileName & "|" & Str(te->StartLine) & "|" & FuncName & "|" & FuncName
 						ParametersList.Add te->Parameters
 						Parameters &= IIf(Parameters = "", "", !"\r") & ..Left(Parameter, iPos - 1) & "<a href=""" & Link1 & """>" & FuncName & "</a>" & Mid(Parameter, iPos + Len(sWord))
-						If te->Comment <> "" Then Comments &= "" & MC(FuncName) 'te->Comment
+						If te->Comment <> "" Then Comments &= "" & (FuncName) 'te->Comment
 					End If
 				End If
 			Next
@@ -4711,7 +4711,7 @@ Function GetParameters(sWord As String, te As TypeElement Ptr, teOld As TypeElem
 						Link1 = te->FileName & "|" & Str(te->StartLine) & "|" & FuncName & "|" & FuncName
 						ParametersList.Add te->Parameters
 						Parameters &= IIf(Parameters = "", "", !"\r") & ..Left(Parameter, iPos - 1) & "<a href=""" & Link1 & """>" & FuncName & "</a>" & Mid(Parameter, iPos + Len(sWord))
-						If te->Comment <> "" Then Comments &= "" & MC(FuncName) 'te->Comment
+						If te->Comment <> "" Then Comments &= "" & (FuncName) 'te->Comment
 					End If
 				End If
 			Next
@@ -4786,7 +4786,7 @@ Function GetParameters(sWord As String, te As TypeElement Ptr, teOld As TypeElem
 									Link1 = te->FileName & "|" & Str(te->StartLine) & "|" & FuncName & "|" & FuncName
 									ParametersList.Add te->Parameters
 									Parameters &= IIf(Parameters = "", "", !"\r") & ..Left(Parameter, iPos - 1) & "<a href=""" & Link1 & """>" & FuncName & "</a>" & Mid(Parameter, iPos + Len(sWord))
-									If te->Comment <> "" Then Comments &= "" & MC(FuncName) 'te->Comment
+									If te->Comment <> "" Then Comments &= "" & (FuncName) 'te->Comment
 								End If
 							Next
 						End If
@@ -4802,7 +4802,7 @@ Function GetParameters(sWord As String, te As TypeElement Ptr, teOld As TypeElem
 									Link1 = te->FileName & "|" & Str(te->StartLine) & "|" & FuncName & "|" & FuncName
 									ParametersList.Add te->Parameters
 									Parameters &= IIf(Parameters = "", "", !"\r") & ..Left(Parameter, iPos - 1) & "<a href=""" & Link1 & """>" & FuncName & "</a>" & Mid(Parameter, iPos + Len(sWord))
-									If te->Comment <> "" Then Comments &= "" & MC(FuncName) 'te->Comment
+									If te->Comment <> "" Then Comments &= "" & (FuncName) 'te->Comment
 								End If
 							End If
 						Next
@@ -4817,7 +4817,7 @@ Function GetParameters(sWord As String, te As TypeElement Ptr, teOld As TypeElem
 									Link1 = te->FileName & "|" & Str(te->StartLine) & "|" & FuncName & "|" & FuncName
 									ParametersList.Add te->Parameters
 									Parameters &= IIf(Parameters = "", "", !"\r") & ..Left(Parameter, iPos - 1) & "<a href=""" & Link1 & """>" & FuncName & "</a>" & Mid(Parameter, iPos + Len(sWord))
-									If te->Comment <> "" Then Comments &= "" & MC(FuncName) 'te->Comment
+									If te->Comment <> "" Then Comments &= "" & (FuncName) 'te->Comment
 								End If
 							End If
 						Next
@@ -4847,7 +4847,7 @@ Function GetParameters(sWord As String, te As TypeElement Ptr, teOld As TypeElem
 			Next n
 			Erase res1
 			ParametersList.Add te->Parameters
-			If te->Comment <> "" Then Comments &= "" & IIf(te->ElementType = E_Keyword  OrElse te->ElementType = E_KeywordFunction OrElse te->ElementType = E_KeywordOperator OrElse te->ElementType = E_KeywordSub, te->Comment, MC(te->Name))
+			If te->Comment <> "" Then Comments &= "" & IIf(te->ElementType = E_Keyword  OrElse te->ElementType = E_KeywordFunction OrElse te->ElementType = E_KeywordOperator OrElse te->ElementType = E_KeywordSub, te->Comment, WStr(te->Name))
 		End If
 		If CBool(FECLine > 0) AndAlso FECLine->InAsm AndAlso ShowKeywordsToolTip Then
 			Index = GlobalAsmFunctionsHelp.IndexOf(sWord)
@@ -4888,7 +4888,7 @@ Function GetParameters(sWord As String, te As TypeElement Ptr, teOld As TypeElem
 							Link1 = te->FileName & "|" & Str(te->StartLine) & "|" & FuncName & "|" & FuncName
 							Parameters &= IIf(Parameters = "", "", !"\r") & ..Left(Parameter, iPos - 1) & "<a href=""" & Link1 & """>" & FuncName & "</a>" & Mid(Parameter, iPos + Len(sWord))
 							ParametersList.Add te->Parameters
-							If te->Comment <> "" Then Comments &= "" & IIf(te->ElementType = E_Keyword  OrElse te->ElementType = E_KeywordFunction OrElse te->ElementType = E_KeywordOperator OrElse te->ElementType = E_KeywordSub, te->Comment, MC(te->Name))
+							If te->Comment <> "" Then Comments &= "" & IIf(te->ElementType = E_Keyword  OrElse te->ElementType = E_KeywordFunction OrElse te->ElementType = E_KeywordOperator OrElse te->ElementType = E_KeywordSub, te->Comment, WStr(te->Name))
 						End If
 					Else
 						Exit For
@@ -4944,7 +4944,7 @@ Function GetParameters(sWord As String, te As TypeElement Ptr, teOld As TypeElem
 									Next n
 									Erase res
 									ParametersList.Add te->Parameters
-									If te->Comment <> "" Then Comments &= "" & IIf(te->ElementType = E_Keyword  OrElse te->ElementType = E_KeywordFunction OrElse te->ElementType = E_KeywordOperator OrElse te->ElementType = E_KeywordSub, te->Comment, MC(te->Name))
+									If te->Comment <> "" Then Comments &= "" & IIf(te->ElementType = E_Keyword  OrElse te->ElementType = E_KeywordFunction OrElse te->ElementType = E_KeywordOperator OrElse te->ElementType = E_KeywordSub, te->Comment, WStr(te->Name))
 								End If
 							End If
 						End If
@@ -5035,9 +5035,9 @@ Sub OnSelChangeEdit(ByRef Designer As My.Sys.Object, ByRef Sender As Control, By
 	Else
 		UnicodeStr = ""
 	End If
-	pstBar->Panels[1]->Caption = ML("Row") + " " + WStr(iSelEndLine + 1) + " : " + WStr(tb->txtCode.LinesCount) + WSpace(2) + _
-	ML("Column") + " " + WStr(iSelEndChar + 1) + " : " + WStr(Len(tb->txtCode.Lines(iSelEndLine)) + 1) + WSpace(2) + _
-	ML("Selection") + " " + WStr(tb->txtCode.SelTextLength ) + " " + UnicodeStr
+	pstBar->Panels[1]->Caption = ("Row") + " " + WStr(iSelEndLine + 1) + " : " + WStr(tb->txtCode.LinesCount) + WSpace(2) + _
+	("Column") + " " + WStr(iSelEndChar + 1) + " : " + WStr(Len(tb->txtCode.Lines(iSelEndLine)) + 1) + WSpace(2) + _
+	("Selection") + " " + WStr(tb->txtCode.SelTextLength ) + " " + UnicodeStr
 	If Not tb->txtCode.ToolTipShowed Then Exit Sub
 	Dim sLine As WString Ptr = @tb->txtCode.Lines(iSelEndLine)
 	If sLine= 0 OrElse Trim(*sLine, Any !"\t ") = "" Then Return
@@ -6717,7 +6717,7 @@ Sub AnalyzeTab(Param As Any Ptr)
 												MutexLock tlockSuggestions
 												ThreadsEnter
 												Dim As Integer ii = 0, AddIndex = -1
-												Dim As UString ErrorText = ML("Error: Identifier not declared") & ", " & Matn & ". " & ML("Declare it")
+												Dim As UString ErrorText = ("Error: Identifier not declared") & ", " & Matn & ". " & ("Declare it")
 												Dim As UString FileName_ = ecc->FileName
 												Dim As UString ProjectFileName_
 												If Project Then ProjectFileName_ = *Project->FileName
@@ -6879,7 +6879,7 @@ Sub AnalyzeTab(Param As Any Ptr)
 		If CBool(te->ElementType = E_Constructor) OrElse CBool(te->ElementType = E_Destructor) OrElse CBool(te->ElementType = E_ByValParameter) OrElse CBool(te->ElementType = E_ByRefParameter) Then Continue For
 		If (te->ElementType = E_Enum OrElse te->ElementType = E_Type OrElse te->ElementType = E_Union) AndAlso te->Name = "" Then Continue For
 		Dim As Integer ii = 0, AddIndex = -1, MatnBoshi = te->StartChar, z = te->StartLine
-		Dim As UString ErrorText = ML("Warning: Identifier not used") & ", " & te->Name & ", " & ML("delete it if not needed")
+		Dim As UString ErrorText = ("Warning: Identifier not used") & ", " & te->Name & ", " & ("delete it if not needed")
 		Dim As UString FileName_ = te->FileName
 		Dim As UString ProjectFileName_
 		If Project Then ProjectFileName_ = *Project->FileName
@@ -6942,8 +6942,8 @@ Sub AnalyzeTab(Param As Any Ptr)
 		End If
 		lvSuggestions.ListItems.Remove ii
 	Loop
-	If tpSuggestions->Caption <> ML("Suggestions") & IIf(lvSuggestions.ListItems.Count, WStr(" (") & lvSuggestions.ListItems.Count & WStr(" ") & ML("Pos") & WStr(")"), WStr("")) Then
-		tpSuggestions->Caption = ML("Suggestions") & IIf(lvSuggestions.ListItems.Count, WStr(" (") & lvSuggestions.ListItems.Count & WStr(" ") & ML("Pos") & WStr(")"), WStr(""))
+	If tpSuggestions->Caption <> WStr("Suggestions") & IIf(lvSuggestions.ListItems.Count, WStr(" (") & lvSuggestions.ListItems.Count & WStr(" ") & WStr("Pos") & WStr(")"), WStr("")) Then
+		tpSuggestions->Caption = WStr("Suggestions") & IIf(lvSuggestions.ListItems.Count, WStr(" (") & lvSuggestions.ListItems.Count & WStr(" ") & WStr("Pos") & WStr(")"), WStr(""))
 	End If
 	ThreadsLeave
 	MutexUnlock tlockSuggestions
@@ -8177,7 +8177,7 @@ Sub Suggestions
 	If Project Then
 		tbOrProject = Project
 		If Project->Contents.Count = 0 Then
-			pstBar->Panels[0]->Caption = ML("Loading project contents ...")
+			pstBar->Panels[0]->Caption = ("Loading project contents ...")
 			For i As Integer = 0 To Project->Files_.Count - 1
 				If EndsWith(Project->Files_.Item(i), ".bas") OrElse EndsWith(Project->Files_.Item(i), ".frm") OrElse EndsWith(Project->Files_.Item(i), ".bi") OrElse EndsWith(Project->Files_.Item(i), ".inc") Then
 					ecc = _New(EditControlContent)
@@ -8191,7 +8191,7 @@ Sub Suggestions
 			Next
 			RestoreStatusText
 			If LoadFunctionsCount > 0 Then
-				MsgBox ML("Project content loaded. IntelliSense is not fully loaded yet.")
+				MsgBox ("Project content loaded. IntelliSense is not fully loaded yet.")
 				Exit Sub
 			End If
 		End If
@@ -8205,7 +8205,7 @@ Sub Suggestions
 		End If
 	End If
 	If LoadFunctionsCount > 0 Then
-		MsgBox ML("IntelliSense is not fully loaded yet!")
+		MsgBox ("IntelliSense is not fully loaded yet!")
 		Exit Sub
 	End If
 	tpSuggestions->SelectTab
@@ -8381,13 +8381,13 @@ Sub TabWindow.FormDesign(NotForms As Boolean = False)
 	If pApp->MainForm = 0 Then pApp->MainForm = @frmMain
 	If bNotDesign OrElse FormClosing Then Exit Sub
 	If txtCode.LinesCount > 50000 Then
-		pstBar->Panels[0]->Caption = ML("This file is too large for the Form Designer (over 50,000 lines) - showing code only.")
+		pstBar->Panels[0]->Caption = ("This file is too large for the Form Designer (over 50,000 lines) - showing code only.")
 		Exit Sub
 	End If
 	If Not txtCode.SyntaxEdit Then
 		If cboClass.Items.Count = 0 Then
 			cboClass.Items.Clear
-			cboClass.Items.Add "(" & ML("General") & ")" & Chr(0), , "DropDown", "DropDown"
+			cboClass.Items.Add "(" & ("General") & ")" & Chr(0), , "DropDown", "DropDown"
 			cboClass.ItemIndex = 0
 		End If
 		Exit Sub
@@ -8473,7 +8473,7 @@ Sub TabWindow.FormDesign(NotForms As Boolean = False)
 	End If
 	If CInt(NotForms = False) Then
 		cboClass.Items.Clear
-		cboClass.Items.Add "(" & ML("General") & ")" & Chr(0), , "DropDown", "DropDown"
+		cboClass.Items.Add "(" & ("General") & ")" & Chr(0), , "DropDown", "DropDown"
 		cboClass.ItemIndex = 0
 	End If
 	'LoadFunctionsWithContent FileName, Project, txtCode.Content
@@ -9924,9 +9924,9 @@ Sub TabWindow.FormDesign(NotForms As Boolean = False)
 		Next
 		Dim FLineNew As WString Ptr
 		If lvToDo.ListItems.Count = 0 Then
-			WLet(FLineNew, ML("ToDo"))
+			WLet(FLineNew, ("ToDo"))
 		Else
-			WLet(FLineNew, ML("ToDo") & " (" & Str(lvToDo.ListItems.Count) & ")")
+			WLet(FLineNew, ("ToDo") & " (" & Str(lvToDo.ListItems.Count) & ")")
 		End If
 		If tpToDo->Caption <> *FLineNew Then tpToDo->Caption = *FLineNew
 		WDeAllocate(FLineNew)
@@ -10171,32 +10171,32 @@ Sub TabWindow_Resize(ByRef Designer As My.Sys.Object, ByRef Sender As Control, N
 End Sub
 
 'mnuCode.ImagesList = pimgList '<m>
-mnuCode.Add(ML("Cu&t") & !"\tCtrl+X", "Cut", "Cut", @mClick)
-mnuCode.Add(ML("&Copy") & !"\tCtrl+C", "Copy", "Copy", @mClick)
-mnuCode.Add(ML("&Paste") & !"\tCtrl+V", "Paste", "Paste", @mClick)
+mnuCode.Add(("Cu&t") & !"\tCtrl+X", "Cut", "Cut", @mClick)
+mnuCode.Add(("&Copy") & !"\tCtrl+C", "Copy", "Copy", @mClick)
+mnuCode.Add(("&Paste") & !"\tCtrl+V", "Paste", "Paste", @mClick)
 mnuCode.Add("-")
-Var miToogle = mnuCode.Add(ML("Toggle"), "", "Toggle")
-miToogle->Add(ML("Breakpoint"), "Breakpoint", "Breakpoint", @mClick)
-miToogle->Add(ML("Bookmark"), "Bookmark", "ToggleBookmark", @mClick)
+Var miToogle = mnuCode.Add(("Toggle"), "", "Toggle")
+miToogle->Add(("Breakpoint"), "Breakpoint", "Breakpoint", @mClick)
+miToogle->Add(("Bookmark"), "Bookmark", "ToggleBookmark", @mClick)
 mnuCode.Add("-")
-mnuCode.Add(ML("Add Watch"), "", "AddWatch", @mClick)
-mnuCode.Add(ML("Run To Cursor"), "", "RunToCursor", @mClick)
-mnuCode.Add(ML("Set Next Statement"), "", "SetNextStatement", @mClick)
+mnuCode.Add(("Add Watch"), "", "AddWatch", @mClick)
+mnuCode.Add(("Run To Cursor"), "", "RunToCursor", @mClick)
+mnuCode.Add(("Set Next Statement"), "", "SetNextStatement", @mClick)
 mnuCode.Add("-")
-mnuCode.Add(ML("Define"), "", "Define", @mClick)
+mnuCode.Add(("Define"), "", "Define", @mClick)
 mnuCode.Add("-")
-mnuCode.Add(ML("Convert to Lowercase"), "", "ConvertToLowercase", @mClick)
-mnuCode.Add(ML("Convert to Uppercase"), "", "ConvertToUppercase", @mClick)
-mnuCode.Add(ML("Capitalize only the first letter"), "", "ConvertToUppercaseFirstLetter", @mClick)
+mnuCode.Add(("Convert to Lowercase"), "", "ConvertToLowercase", @mClick)
+mnuCode.Add(("Convert to Uppercase"), "", "ConvertToUppercase", @mClick)
+mnuCode.Add(("Capitalize only the first letter"), "", "ConvertToUppercaseFirstLetter", @mClick)
 mnuCode.Add("-")
-mnuCode.Add(ML("Convert to Unicode Hex String"), "", "ConvertToHexStrUnicode", @mClick)
-mnuCode.Add(ML("Convert From Unicode Hex String"), "", "ConvertFromHexStrUnicode", @mClick)
+mnuCode.Add(("Convert to Unicode Hex String"), "", "ConvertToHexStrUnicode", @mClick)
+mnuCode.Add(("Convert From Unicode Hex String"), "", "ConvertFromHexStrUnicode", @mClick)
 mnuCode.Add("-")
-mnuCode.Add(ML("Split Lines"), "", "SplitLines", @mClick)
-mnuCode.Add(ML("Combine Lines"), "", "CombineLines", @mClick)
+mnuCode.Add(("Split Lines"), "", "SplitLines", @mClick)
+mnuCode.Add(("Combine Lines"), "", "CombineLines", @mClick)
 mnuCode.Add("-")
-mnuCode.Add(ML("Sort Lines"), "", "SortLines", @mClick)
-mnuCode.Add(ML("Format With Basis Word"), "", "FormatWithBasisWord", @mClick)
+mnuCode.Add(("Sort Lines"), "", "SortLines", @mClick)
+mnuCode.Add(("Format With Basis Word"), "", "FormatWithBasisWord", @mClick)
 
 Sub pnlForm_Message(ByRef Designer As My.Sys.Object, ByRef Sender As Control, ByRef msg As Message)
 	Dim As Panel Ptr pnl = Cast(Panel Ptr, @Sender)
@@ -10341,11 +10341,11 @@ Sub tabCode_MouseUp(ByRef Designer As My.Sys.Object, ByRef Sender As Control, Mo
 		Dim tn As TreeNode Ptr = tb->tn
 		If tn = 0 Then Exit Sub
 		If tn->ParentNode <> 0 Then
-			miTabSetAsMain->Caption = ML("Set as Main")
+			miTabSetAsMain->Caption = ("Set as Main")
 		Else
-			miTabSetAsMain->Caption = ML("Set as Start Up")
+			miTabSetAsMain->Caption = ("Set as Start Up")
 		End If
-		miTabReloadHistoryCode->Enabled = tb->FileName <> "" AndAlso tb->FileName <> ML("Untitled")
+		miTabReloadHistoryCode->Enabled = tb->FileName <> "" AndAlso tb->FileName <> ("Untitled")
 		Var SplitEnabled = .TabCount > 1
 		mnuTabs.Item("SplitUp")->Enabled = SplitEnabled
 		mnuTabs.Item("SplitDown")->Enabled = SplitEnabled
@@ -10433,7 +10433,7 @@ Constructor TabWindow(ByRef wFileName As WString, bNewForm As Boolean, TreeN As 
 	txtCode.OnSplitHorizontallyChange = @OnSplitHorizontallyChangeEdit
 	txtCode.OnSplitVerticallyChange = @OnSplitVerticallyChangeEdit
 	untitledCounter += 1
-	txtCode.Content.FileName = ML("Untitled") & WStr(untitledCounter)
+	txtCode.Content.FileName = ("Untitled") & WStr(untitledCounter)
 	txtCode.Tag = @This
 	txtCode.ShowHint = False
 	'CheckedFiles.Sorted = True
@@ -10496,7 +10496,7 @@ Constructor TabWindow(ByRef wFileName As WString, bNewForm As Boolean, TreeN As 
 	cboFunction.OnSelected = @cboFunction_Change
 	'cboFunction.Width = cboClass.Width
 	'cboFunction.Sort = True
-	cboFunction.Items.Add WStr("(") & ML("Declarations") & ")" & WChr(0), , "Sub", "Sub"
+	cboFunction.Items.Add WStr("(") & ("Declarations") & ")" & WChr(0), , "Sub", "Sub"
 	cboFunction.ItemIndex = 0
 	
 	tbrTop.Align = DockStyle.alTop
@@ -10511,9 +10511,9 @@ Constructor TabWindow(ByRef wFileName As WString, bNewForm As Boolean, TreeN As 
 	'btnFunction->Width = btnClass->Width 
 	'btnFunction->Left + btnFunction->Width + 1
 	tbrTop.Buttons.Add tbsSeparator
-	tbrTop.Buttons.Add tbsCheckGroup, "Code", , , "Code", , ML("Show Code"), True ' Show the toollips
-	tbrTop.Buttons.Add tbsCheckGroup, "Form", , , "Form", , ML("Show Form"), True ' Show the toollips
-	tbrTop.Buttons.Add tbsCheckGroup, "CodeAndForm", , , "CodeAndForm", , ML("Show Code And Form"), True '
+	tbrTop.Buttons.Add tbsCheckGroup, "Code", , , "Code", , ("Show Code"), True ' Show the toollips
+	tbrTop.Buttons.Add tbsCheckGroup, "Form", , , "Form", , ("Show Form"), True ' Show the toollips
+	tbrTop.Buttons.Add tbsCheckGroup, "CodeAndForm", , , "CodeAndForm", , ("Show Code And Form"), True '
 	tbrTop.OnButtonClick = @tbrTop_ButtonClick
 	tbrTop.Flat = True
 	'pnlToolbar.Align = DockStyle.alRight
@@ -10532,7 +10532,7 @@ Constructor TabWindow(ByRef wFileName As WString, bNewForm As Boolean, TreeN As 
 		'txtCode.LoadFromFile(wFileName, False)
 		This.Caption = GetFileName(FileName)
 	Else
-		This.Caption = ML("Untitled") & WStr(untitledCounter) & "*"
+		This.Caption = ("Untitled") & WStr(untitledCounter) & "*"
 	End If
 	IsNew = bNewForm OrElse wFileName = ""
 	pnlForm.Top = -500
@@ -10812,7 +10812,7 @@ Function SplitError(ByRef sLine As WString, ByRef ErrFileName As WString Ptr, By
 		WLet(ErrFileName, Left(sLine, Pos2 - 1))
 	End If
 	If StartsWith(*ErrFileName, "In file included from") Then
-		WLet(ErrTitle, MLCompilerFun(Trim(Left(sLine, 22))))
+		WLet(ErrTitle, (Trim(Left(sLine, 22))))
 		WLetEx(ErrFileName, Mid(*ErrFileName, 23))
 	Else
 		Pos3 = InStr(Pos1, sLine, ":")
@@ -10837,17 +10837,17 @@ Function SplitError(ByRef sLine As WString, ByRef ErrFileName As WString Ptr, By
 				If Pos1 > 1 Then Pos2 = Pos1
 			End If
 			If InStr(Mid(sLine, Pos2),", found") = 1 Then
-				WLet(ErrTitle, ML(bFlagErr) + Dots + MLCompilerFun(Trim(Mid(sLine, Pos3 + 1, Pos2 - Pos3 - 1))) + ", " + ML("found") + (Mid(sLine, Pos2 + Len(", found"))))
+				WLet(ErrTitle, (bFlagErr) + Dots + (Trim(Mid(sLine, Pos3 + 1, Pos2 - Pos3 - 1))) + ", " + ("found") + (Mid(sLine, Pos2 + Len(", found"))))
 			ElseIf InStr(Mid(sLine, Pos2), " in ") = 1 Then
-				WLet(ErrTitle, ML(bFlagErr) + Dots + MLCompilerFun(Trim(Mid(sLine, Pos3 + 1, Pos2 - Pos3 - 1))) + ", " + ML("found") + (Mid(sLine, Pos2 + Len(" in "))))
+				WLet(ErrTitle, (bFlagErr) + Dots + (Trim(Mid(sLine, Pos3 + 1, Pos2 - Pos3 - 1))) + ", " + ("found") + (Mid(sLine, Pos2 + Len(" in "))))
 			ElseIf InStr(Mid(sLine, Pos2),", before") = 1 Then
-				WLet(ErrTitle, ML(bFlagErr) + Dots + MLCompilerFun(Trim(Mid(sLine, Pos3 + 1, Pos2 - Pos3 - 1))) + ", " + ML("before") + (Mid(sLine, Pos2 + Len(", before"))))
+				WLet(ErrTitle, (bFlagErr) + Dots + (Trim(Mid(sLine, Pos3 + 1, Pos2 - Pos3 - 1))) + ", " + ("before") + (Mid(sLine, Pos2 + Len(", before"))))
 			ElseIf InStr(Mid(sLine, Pos2),", after") = 1 Then
-				WLet(ErrTitle, ML(bFlagErr) + Dots + MLCompilerFun(Trim(Mid(sLine, Pos3 + 1, Pos2 - Pos3 - 1))) + ", " + ML("after") + (Mid(sLine, Pos2 + Len(", after"))))
+				WLet(ErrTitle, (bFlagErr) + Dots + (Trim(Mid(sLine, Pos3 + 1, Pos2 - Pos3 - 1))) + ", " + ("after") + (Mid(sLine, Pos2 + Len(", after"))))
 			ElseIf InStr(Mid(sLine, Pos2),", exiting") = 1 Then
-				WLet(ErrTitle, ML(bFlagErr) + Dots + MLCompilerFun(Trim(Mid(sLine, Pos3 + 1, Pos2 - Pos3 - 1))) + ", " + ML("Exit") + (Mid(sLine, Pos2 + Len(", exiting"))))
+				WLet(ErrTitle, (bFlagErr) + Dots + (Trim(Mid(sLine, Pos3 + 1, Pos2 - Pos3 - 1))) + ", " + ("Exit") + (Mid(sLine, Pos2 + Len(", exiting"))))
 			ElseIf InStr(Mid(sLine, Pos2),", at parameter") = 1 Then
-				WLet(ErrTitle, ML(bFlagErr) + Dots + MLCompilerFun(Trim(Mid(sLine, Pos3 + 1, Pos2 - Pos3 - 1))) + ", " + ML("at parameter") + (Mid(sLine, Pos2 + Len(", at parameter"))))
+				WLet(ErrTitle, (bFlagErr) + Dots + (Trim(Mid(sLine, Pos3 + 1, Pos2 - Pos3 - 1))) + ", " + ("at parameter") + (Mid(sLine, Pos2 + Len(", at parameter"))))
 				'at parameter
 			Else
 				If Pos2 > Pos3 Then
@@ -10860,14 +10860,14 @@ Function SplitError(ByRef sLine As WString, ByRef ErrFileName As WString Ptr, By
 					End If
 					Dim As WString * 250 tStr = Trim(Mid(sLine, Pos3 + 1, Pos2 - Pos3))
 					If Right(tStr, 1) = "," Then tStr = Trim(Mid(sLine, Pos3 + 1, Pos2 - Pos3 - 1)) 'Strange. Sometime got letter ","
-					WLet(ErrTitle, ML(bFlagErr) + Dots + MLCompilerFun(tStr) & IIf(Mid(sLine, Pos2 + 1) <> "", WStr(", ") & Mid(sLine, Pos2 + 2), WStr("")))
+					WLet(ErrTitle, (bFlagErr) + Dots + (tStr) & IIf(Mid(sLine, Pos2 + 1) <> "", WStr(", ") & Mid(sLine, Pos2 + 2), WStr("")))
 				Else
-					WLet(ErrTitle, ML(bFlagErr) + Dots + MLCompilerFun(Trim(Mid(sLine, Pos3 + 1))))
+					WLet(ErrTitle, (bFlagErr) + Dots + (Trim(Mid(sLine, Pos3 + 1))))
 				End If
 			End If
 		Else
 			'WLet(ErrTitle, Mid(sLine, Pos1 + 1))
-			WLet(ErrTitle, ML(bFlagErr) & IIf(bFlagErr = "", "", ": ") & MLCompilerFun(Trim(Mid(sLine, Pos3 + 1))))
+			WLet(ErrTitle, (bFlagErr) & IIf(bFlagErr = "", "", ": ") & (Trim(Mid(sLine, Pos3 + 1))))
 		End If
 	End If
 	If bFlagErr = "Warning"  Then
@@ -10881,27 +10881,27 @@ End Function
 
 Function Err2Description(Code As Integer) ByRef As WString
 	Select Case Code
-	Case 0: Return ML("No error")
-	Case 1: Return ML("Illegal function call")
-	Case 2: Return ML("File not found signal")
-	Case 3, 1073741819:  Return ML("File I/O error")
-	Case 4: Return ML("Out of memory")
-	Case 5: Return ML("Illegal resume")
-	Case 6, 3221226356: Return ML("Out of bounds array access")
-	Case 7: Return ML("Null Pointer Access")
-	Case 8: Return ML("No privileges")
-	Case 9: Return ML("Interrupted signal")
-	Case 10: Return ML("Illegal instruction signal")
-	Case 11: Return ML("Floating point error signal")
-	Case 12: Return ML("Segmentation violation signal")
-	Case 13: Return ML("Termination request signal")
-	Case 14: Return ML("Abnormal termination signal")
-	Case 15: Return ML("Quit request signal")
-	Case 16: Return ML("Return without gosub")
-	Case 17: Return ML("End of file")
-	Case 193: Return ML("Could not execute:Bad executable format")
-	Case 3221225477: Return ML("Stack Overflow")
-	Case 3221225781: Return ML("The application could not run as the required library was not found")
+	Case 0: Return ("No error")
+	Case 1: Return ("Illegal function call")
+	Case 2: Return ("File not found signal")
+	Case 3, 1073741819:  Return ("File I/O error")
+	Case 4: Return ("Out of memory")
+	Case 5: Return ("Illegal resume")
+	Case 6, 3221226356: Return ("Out of bounds array access")
+	Case 7: Return ("Null Pointer Access")
+	Case 8: Return ("No privileges")
+	Case 9: Return ("Interrupted signal")
+	Case 10: Return ("Illegal instruction signal")
+	Case 11: Return ("Floating point error signal")
+	Case 12: Return ("Segmentation violation signal")
+	Case 13: Return ("Termination request signal")
+	Case 14: Return ("Abnormal termination signal")
+	Case 15: Return ("Quit request signal")
+	Case 16: Return ("Return without gosub")
+	Case 17: Return ("End of file")
+	Case 193: Return ("Could not execute:Bad executable format")
+	Case 3221225477: Return ("Stack Overflow")
+	Case 3221225781: Return ("The application could not run as the required library was not found")
 	Case Else: Return WStr("")
 	End Select
 End Function
@@ -10918,7 +10918,7 @@ Sub PipeCmd(ByRef file As WString, ByRef cmd As WString, MainThread As Boolean =
 		SI.dwFlags = STARTF_USESHOWWINDOW
 		If CreateProcess(0, cmdW, 0, 0, 1, NORMAL_PRIORITY_CLASS, 0, 0, @SI, @PI) = 0 Then
 			Dim As Integer result = GetLastError()
-			MsgBox ML("Error: Couldn't Create Process") & Chr(13, 10) & GetErrorString(result) & Chr(13, 10) & cmd
+			MsgBox ("Error: Couldn't Create Process") & Chr(13, 10) & GetErrorString(result) & Chr(13, 10) & cmd
 			Exit Sub
 		End If
 		WaitForSingleObject(PI.hProcess, INFINITE)
@@ -10963,7 +10963,7 @@ Function GetMainFile(bSaveTab As Boolean = False, ByRef Project As ProjectElemen
 				End If
 				Return WGet(Project->MainFileName)
 			Else
-				MsgBox ML("Project Main File don't set")
+				MsgBox ("Project Main File don't set")
 			End If
 		ElseIf ee = 0 OrElse ee->FileName = 0 OrElse *ee->FileName = "" Then
 			For j As Integer = 0 To TabPanels.Count - 1
@@ -11440,7 +11440,7 @@ Function GetFirstCompileLine(ByRef FileName As WString, ByRef Project As Project
 	Dim As Boolean bFromTab
 	Dim As TabWindow Ptr tb
 	Var FileOpenResult = -1
-	If FileName = ML("Untitled") Then
+	If FileName = ("Untitled") Then
 		tb = Cast(TabWindow Ptr, ptabCode->SelectedTab)
 		If tb <> 0 Then
 			FileOpenResult = 0
@@ -11789,7 +11789,7 @@ Sub RunPr(Debugger As String, ByRef ProjectFileName As WString, ByRef ProjectCom
 					WLet(ExeFileName, Replace(WGet(TerminalPath), UnixSlash, WindowsSlash))
 				End If
 			End If
-			ShowMessages(Time & ": " & ML("Run") & ": " & *CmdL + " ...")
+			ShowMessages(Time & ": " & ("Run") & ": " & *CmdL + " ...")
 			If InStr(FirstLine & CompileLine, "-s gui") Then
 				#define BufferSize 2048
 				Dim si As STARTUPINFO
@@ -11807,7 +11807,7 @@ Sub RunPr(Debugger As String, ByRef ProjectFileName As WString, ByRef ProjectCom
 				sa.bInheritHandle = True
 				
 				If CreatePipe(@hReadPipe, @hWritePipe, @sa, 0) = 0 Then
-					ShowMessages(ML("Error: Couldn't Create Pipe"), False)
+					ShowMessages(("Error: Couldn't Create Pipe"), False)
 					If Workdir Then _Deallocate(Workdir)
 					If CmdL Then _Deallocate(CmdL)
 					ChangeEnabledDebug True, False, False
@@ -11822,7 +11822,7 @@ Sub RunPr(Debugger As String, ByRef ProjectFileName As WString, ByRef ProjectCom
 				iClass = NORMAL_PRIORITY_CLASS Or CREATE_UNICODE_ENVIRONMENT Or CREATE_NEW_CONSOLE
 				ChDir(GetFolderName(*ExeFileName))
 				If CreateProcess(0, *CmdL, @sa, @sa, 1, iClass, 0, 0, @si, @pi) = 0 Then
-					ShowMessages(ML("Error: Couldn't Create Process"), False)
+					ShowMessages(("Error: Couldn't Create Process"), False)
 					If Workdir Then _Deallocate(Workdir)
 					If CmdL Then _Deallocate(CmdL)
 					ChangeEnabledDebug True, False, False
@@ -11879,7 +11879,7 @@ Sub RunPr(Debugger As String, ByRef ProjectFileName As WString, ByRef ProjectCom
 				CloseHandle pi.hThread
 				CloseHandle hReadPipe
 				result1 = GetLastError()
-				ShowMessages(Time & ": " & ML("Application finished. Returned code") & ": " & IIf(result1 = ERROR_BROKEN_PIPE, "0 - " & Err2Description(0), result1  & " - " & GetErrorString(result1)))
+				ShowMessages(Time & ": " & ("Application finished. Returned code") & ": " & IIf(result1 = ERROR_BROKEN_PIPE, "0 - " & Err2Description(0), result1  & " - " & GetErrorString(result1)))
 				CheckProfiler *Workdir, *ExeFileName
 			Else
 				Dim SInfo As STARTUPINFO
@@ -11899,11 +11899,11 @@ Sub RunPr(Debugger As String, ByRef ProjectFileName As WString, ByRef ProjectCom
 					prun = False
 					Result = ExitCode
 					'Result = Shell(Debugger & """" & *ExeFileName + """")
-					ShowMessages(Time & ": " & ML("Application finished. Returned code") & ": " & Result & " - " & Err2Description(Result))
+					ShowMessages(Time & ": " & ("Application finished. Returned code") & ": " & Result & " - " & Err2Description(Result))
 					CheckProfiler *Workdir, *ExeFileName
 				Else
 					Result = GetLastError()
-					ShowMessages(Time & ": " & ML("Application do not run. Error code") & ": " & Result & " - " & GetErrorString(Result))
+					ShowMessages(Time & ": " & ("Application do not run. Error code") & ": " & Result & " - " & GetErrorString(Result))
 				End If
 				'		Else
 				'			WLet CmdL, """" & WGet(TerminalPath) & """ /K ""cd /D """ & *Workdir & """ & " & *CmdL & """", True
@@ -12530,7 +12530,7 @@ Sub TabWindow.Define
 	Dim As String FromClassName
 	Dim sLine As WString Ptr = @txtCode.Lines(iSelEndLine)
 	If sLine= 0 OrElse Trim(*sLine) = "" Then
-		pstBar->Panels[0]->Caption = ML("No word at cursor")
+		pstBar->Panels[0]->Caption = ("No word at cursor")
 		Exit Sub
 	End If
 	posR = 0
@@ -12550,7 +12550,7 @@ Sub TabWindow.Define
 	Dim As String TypeName, OldTypeName, Parameters, sWord = txtCode.GetWordAt(iSelEndLine, iSelEndChar, False, False, iWordStartChar, iWordEndChar)
 	Dim As TypeElement Ptr te, te1, te2, teOld, teTypeOld
 	If sWord = "" Then
-		pstBar->Panels[0]->Caption = ML("No word at cursor")
+		pstBar->Panels[0]->Caption = ("No word at cursor")
 		Exit Sub
 	End If
 	If ECLine Then
@@ -12900,11 +12900,11 @@ Sub TabWindow.Define
 			Next
 		End If
 		If .Count = 0 Then
-			pstBar->Panels[0]->Caption = ML("No definition found for") & " '" & sWord & "'"
+			pstBar->Panels[0]->Caption = ("No definition found for") & " '" & sWord & "'"
 		ElseIf .Count = 1 Then
 			SelectSearchResult .Item(0)->Text(4), Val(.Item(0)->Text(2)), IIf(.Item(0)->Text(3) = "0", -1, Val(.Item(0)->Text(3))), , .Item(0)->Tag, sWord
 		Else
-			pfTrek->Text = ML("Definitions for") & " '" & sWord & "' (" & WStr(.Count) & ")"
+			pfTrek->Text = ("Definitions for") & " '" & sWord & "' (" & WStr(.Count) & ")"
 			If pfTrek->ShowModal(frmMain) = ModalResults.OK Then
 				Var item = pfTrek->SelectedItem
 				If item <> 0 Then

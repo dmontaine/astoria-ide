@@ -6,7 +6,7 @@
 		' frmTrek
 		With This
 			.Name = "frmTrek"
-			.Text = ML("Trek")
+			.Text = ("Trek")
 				.Icon.LoadFromResourceID(1)
 			.MinimizeBox = False
 			.BorderStyle = FormBorderStyle.Sizable
@@ -24,12 +24,12 @@
 			.Name = "lvTrek"
 			.TabIndex = 0
 			.SetBounds 8, 8, 808, 168
-			.Columns.Add ML("Name"), , 150, cfLeft
-			.Columns.Add ML("Parameters"), , 150, cfLeft
-			.Columns.Add ML("Line"), , 50, cfRight
-			.Columns.Add ML("Column"), , 50, cfRight
-			.Columns.Add ML("File"), , 400, cfLeft
-			.Columns.Add ML("Comment"), , 0, cfLeft
+			.Columns.Add ("Name"), , 150, cfLeft
+			.Columns.Add ("Parameters"), , 150, cfLeft
+			.Columns.Add ("Line"), , 50, cfRight
+			.Columns.Add ("Column"), , 50, cfRight
+			.Columns.Add ("File"), , 400, cfLeft
+			.Columns.Add ("Comment"), , 0, cfLeft
 			.OnItemActivate = @lvTrek_ItemActivate
 			.Anchor.Top = AnchorStyle.asAnchor
 			.Anchor.Right = AnchorStyle.asAnchor
@@ -41,7 +41,7 @@
 		' cmdOK
 		With cmdOK
 			.Name = "cmdOK"
-			.Text = ML("OK")
+			.Text = ("OK")
 			.TabIndex = 3
 			.SetBounds 650, 208, 80, 24
 			.Default = True
@@ -53,7 +53,7 @@
 		' cmdCancel
 		With cmdCancel
 			.Name = "cmdCancel"
-			.Text = ML("Cancel")
+			.Text = ("Cancel")
 			.TabIndex = 4
 			.SetBounds 736, 208, 80, 24
 			.OnClick = @cmdCancel_Click
@@ -76,7 +76,7 @@
 		' lblLabelComment
 		With lblLabelComment
 			.Name = "lblLabelComment"
-			.Text = ML("Comment") & ":"
+			.Text = ("Comment") & ":"
 			.TabIndex = 1
 			.SetBounds 8, 184, 64, 16
 			.Anchor.Top = AnchorStyle.asNone

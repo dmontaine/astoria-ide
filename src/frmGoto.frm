@@ -27,7 +27,7 @@ pfGoto = @fGoto
 	Constructor frmGoto
 		With This
 			.Name = "frmGoto"
-			.Caption = ML("Goto")
+			.Caption = ("Goto")
 				.Icon.LoadFromResourceID(1)
 			.MinimizeBox = False
 			.MaximizeBox = False
@@ -40,7 +40,7 @@ pfGoto = @fGoto
 		End With
 		
 		With lblFind
-			.Caption = ML("Go to line:")
+			.Caption = ("Go to line:")
 			.Align = DockStyle.alLeft
 			.CenterImage = True
 			.ID = 1095
@@ -59,26 +59,26 @@ pfGoto = @fGoto
 		End With
 		
 		With btnCancel
-			.Caption = ML("&Cancel")
+			.Caption = ("&Cancel")
 			.Anchor.Right = AnchorStyle.asNone
 			.Align = DockStyle.alRight
 			.ExtraMargins.Left = 10
 			.SetBounds 184, 0, 100, 20
 			.Parent = @Panel2
 			.Designer = @This
-			.Text = ML("&Cancel")
+			.Text = ("&Cancel")
 			.OnClick = @_btnCancel_Click_
 		End With
 		
 		With btnFind
-			.Caption = ML("&Go")
+			.Caption = ("&Go")
 			.Default = True
 			.Align = DockStyle.alRight
 			.SetBounds 74, 0, 100, 20
 			.Anchor.Right = AnchorStyle.asNone
 			.Designer = @This
 			.Parent = @Panel2
-			.Text = ML("&Go")
+			.Text = ("&Go")
 			.OnClick = @_btnFind_Click_
 		End With
 		' VerticalBox1

@@ -6,7 +6,7 @@
 		' frmTemplates
 		With This
 			.Name = "frmTemplates"
-			.Text = ML("New") & "..."
+			.Text = ("New") & "..."
 				.Icon.LoadFromResourceID(1)
 			.Designer = @This
 			.BorderStyle = FormBorderStyle.Sizable
@@ -36,7 +36,7 @@
 			.Name = "tpNew"
 			.TabIndex = 1
 			.SetBounds 0, 22, 618, 329
-			.Text = ML("New")
+			.Text = ("New")
 			.UseVisualStyleBackColor = True
 			.Parent = @TabControl1
 		End With
@@ -69,7 +69,7 @@
 			.TabIndex = 3
 			.SetBounds 126, 10, 490, 314
 			.Designer = @This
-			.Columns.Add ML("Template"), , 500, cfLeft
+			.Columns.Add ("Template"), , 500, cfLeft
 			.OnItemActivate = @lvTemplates_ItemActivate_
 			.OnSelectedItemChanged = @lvTemplates_SelectedItemChanged_
 			.Parent = @tpNew
@@ -77,7 +77,7 @@
 		' cmdCancel
 		With cmdCancel
 			.Name = "cmdCancel"
-			.Text = ML("Cancel")
+			.Text = ("Cancel")
 			.Align = DockStyle.alRight
 			.ExtraMargins.Bottom = 10
 			.ExtraMargins.Top = 0
@@ -91,7 +91,7 @@
 		' cmdOK
 		With cmdOK
 			.Name = "cmdOK"
-			.Text = ML("OK")
+			.Text = ("OK")
 			.Align = DockStyle.alRight
 			.ExtraMargins.Top = 0
 			.ExtraMargins.Right = 10
@@ -105,7 +105,7 @@
 		' tpExisting
 		With tpExisting
 			.Name = "tpExisting"
-			.Text = ML("Existing")
+			.Text = ("Existing")
 			.TabIndex = 4
 			.UseVisualStyleBackColor = True
 			.SetBounds 2, 22, 615, 326
@@ -114,7 +114,7 @@
 		' tpRecent
 		With tpRecent
 			.Name = "tpRecent"
-			.Text = ML("Recent")
+			.Text = ("Recent")
 			.TabIndex = 6
 			.UseVisualStyleBackColor = True
 			.SetBounds 0, 22, 618, 329
@@ -134,10 +134,10 @@
 			.SmallImages = @imgList
 			.SetBounds 126, 10, 491, 313
 			.Parent = @tpRecent
-			.Columns.Add ML("File"), , 150
+			.Columns.Add ("File"), , 150
 			.Designer = @This
 			.OnItemActivate = @lvRecent_ItemActivate_
-			.Columns.Add ML("Path"), , 300
+			.Columns.Add ("Path"), , 300
 		End With
 		' OpenFileControl1
 		With OpenFileControl1
@@ -148,7 +148,7 @@
 			.SetBounds 0, 0, 615, 326
 			.Designer = @This
 			.InitialDir = GetFullPath(*ProjectsPath)
-			.Filter = ML("FreeBasic Files") & " (*.vfs, *.vfp, *.bas, *.frm, *.bi, *.inc, *.rc)|*.vfs;*.vfp;*.bas;*.frm;*.bi;*.inc;*.rc|" & ML("VisualFBEditor Project Group") & " (*.vfs)|*.vfs|" & ML("VisualFBEditor Project") & " (*.vfp)|*.vfp|" & ML("FreeBasic Module") & " (*.bas)|*.bas|" & ML("FreeBasic Form Module") & " (*.frm)|*.frm|" & ML("FreeBasic Include File") & " (*.bi)|*.bi|" & ML("Other Include File") & " (*.inc)|*.inc|" & ML("Resource File") & " (*.rc)|*.rc|" & ML("All Files") & "|*.*|"
+			.Filter = ("FreeBasic Files") & " (*.vfs, *.vfp, *.bas, *.frm, *.bi, *.inc, *.rc)|*.vfs;*.vfp;*.bas;*.frm;*.bi;*.inc;*.rc|" & ("VisualFBEditor Project Group") & " (*.vfs)|*.vfs|" & ("VisualFBEditor Project") & " (*.vfp)|*.vfp|" & ("FreeBasic Module") & " (*.bas)|*.bas|" & ("FreeBasic Form Module") & " (*.frm)|*.frm|" & ("FreeBasic Include File") & " (*.bi)|*.bi|" & ("Other Include File") & " (*.inc)|*.inc|" & ("Resource File") & " (*.rc)|*.rc|" & ("All Files") & "|*.*|"
 			.OnFileActivate = @OpenFileControl1_FileActivate_
 			.Parent = @tpExisting
 		End With
@@ -174,9 +174,9 @@
 			.ExtraMargins.Right = 10
 			.SetBounds 0, 10, 120, 313
 			.Parent = @tpRecent
-			.Nodes.Add ML("Folders")
-			.Nodes.Add ML("Projects")
-			.Nodes.Add ML("Files")
+			.Nodes.Add ("Folders")
+			.Nodes.Add ("Projects")
+			.Nodes.Add ("Files")
 			.Designer = @This
 			.OnSelChanged = @tvRecent_SelChanged_
 		End With
@@ -192,9 +192,9 @@
 		' lblSaveLocation
 		With lblSaveLocation
 			.Name = "lblSaveLocation"
-			.Text = ML("Save location:")
+			.Text = ("Save location:")
 			.TabIndex = 17
-			.Caption = ML("Save location:")
+			.Caption = ("Save location:")
 			.SetBounds 10, 3, 110, 20
 			.Parent = @pnlSaveLocation
 		End With
@@ -229,12 +229,12 @@
 		' cmdAdd
 		With cmdAdd
 			.Name = "cmdAdd"
-			.Text = ML("Add")
+			.Text = ("Add")
 			.TabIndex = 11
 			.Align = DockStyle.alLeft
 			.ExtraMargins.Right = 10
 			.ExtraMargins.Bottom = 10
-			.Caption = ML("Add")
+			.Caption = ("Add")
 			.SetBounds 0, 0, 88, 20
 			.Designer = @This
 			.OnClick = @cmdAdd_Click_
@@ -243,7 +243,7 @@
 		' cmdChange
 		With cmdChange
 			.Name = "cmdChange"
-			.Text = ML("Chan&ge")
+			.Text = ("Chan&ge")
 			.TabIndex = 12
 			.Align = DockStyle.alLeft
 			.ExtraMargins.Right = 10
@@ -256,7 +256,7 @@
 		' cmdRemove
 		With cmdRemove
 			.Name = "cmdRemove"
-			.Text = ML("&Remove")
+			.Text = ("&Remove")
 			.TabIndex = 13
 			.Align = DockStyle.alLeft
 			.ExtraMargins.Right = 10
@@ -269,7 +269,7 @@
 		' cmdClear
 		With cmdClear
 			.Name = "cmdClear"
-			.Text = ML("&Clear")
+			.Text = ("&Clear")
 			.TabIndex = 14
 			.Align = DockStyle.alLeft
 			.ExtraMargins.Right = 10
@@ -328,10 +328,10 @@ Private Sub frmTemplates.cmdOK_Click(ByRef Sender As Control)
 		If lvTemplates.SelectedItemIndex > -1 Then
 			If pnlSaveLocation.Visible Then
 				If FolderExists(GetFullPath(txtSaveLocation.Text)) Then
-					MsgBox ML("Selected folder exists, change the project folder!")
+					MsgBox ("Selected folder exists, change the project folder!")
 					Me.BringToFront
 				ElseIf Not FolderExists(GetFolderName(GetFullPath(txtSaveLocation.Text), False)) Then
-					MsgBox ML("Parent folder not exists, change the parent folder!")
+					MsgBox ("Parent folder not exists, change the parent folder!")
 					Me.BringToFront
 				Else
 					SelectedTemplate = ExePath & WindowsSlash & "Templates" & WindowsSlash & Templates.Item(lvTemplates.SelectedItemIndex)
@@ -351,7 +351,7 @@ Private Sub frmTemplates.cmdOK_Click(ByRef Sender As Control)
 				Me.CloseForm
 			End If
 		Else
-			MsgBox ML("Select template!")
+			MsgBox ("Select template!")
 			Me.BringToFront
 		End If
 	Case 1
@@ -360,7 +360,7 @@ Private Sub frmTemplates.cmdOK_Click(ByRef Sender As Control)
 			ModalResult = ModalResults.OK
 			Me.CloseForm
 		Else
-			MsgBox ML("Select file!")
+			MsgBox ("Select file!")
 			Me.BringToFront
 		End If
 	Case 2
@@ -369,7 +369,7 @@ Private Sub frmTemplates.cmdOK_Click(ByRef Sender As Control)
 			ModalResult = ModalResults.OK
 			Me.CloseForm
 		Else
-			MsgBox ML("Select recent file!")
+			MsgBox ("Select recent file!")
 			Me.BringToFront
 		End If
 	End Select
@@ -393,7 +393,7 @@ Private Sub frmTemplates.tvTemplates_SelChanged(ByRef Sender As TreeView, ByRef 
 			ImageName = "App" +..Left(TemplateName, IfNegative(InStr(TemplateName, " ") - 1, Len(TemplateName)))
 			'Debug.Print " ImageName= " & ImageName & " " & imgList32.IndexOf(ImageName) 
 			If imgList32.IndexOf(ImageName) < 0 Then ImageName = "AppGUI"
-			lvTemplates.ListItems.Add ML(TemplateName), ImageName
+			lvTemplates.ListItems.Add (TemplateName), ImageName
 			If FileExists(ExePath & "/Templates/Projects/" & TemplateName & "/" & f) Then
 				Templates.Add "Projects" & WindowsSlash & f, lvTemplates.ListItems.Item(lvTemplates.ListItems.Count - 1)
 			Else
@@ -420,7 +420,7 @@ Private Sub frmTemplates.tvTemplates_SelChanged(ByRef Sender As TreeView, ByRef 
 				IconName = "File32"
 			End If
 			If imgList32.IndexOf(IconName) < 0 Then IconName = "AppGUI"
-			lvTemplates.ListItems.Add ML(TemplateName), IconName
+			lvTemplates.ListItems.Add (TemplateName), IconName
 			Templates.Add "Files" & WindowsSlash & f
 			f = Dir()
 		Wend
@@ -630,9 +630,9 @@ Private Sub frmTemplates.Form_Create(ByRef Sender As Control)
 	ModalResult = ModalResults.Cancel
 	tvTemplates.Nodes.Clear
 	If OnlyFiles = False Then
-		tvTemplates.Nodes.Add ML("Projects"), "Projects"
+		tvTemplates.Nodes.Add ("Projects"), "Projects"
 	End If
-	tvTemplates.Nodes.Add ML("Files"), "Files"
+	tvTemplates.Nodes.Add ("Files"), "Files"
 	tvTemplates_SelChanged tvTemplates, *tvTemplates.Nodes.Item(0)
 	tvRecent_SelChanged tvRecent, *tvRecent.Nodes.Item(0)
 	RecentChanged = False

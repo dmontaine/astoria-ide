@@ -13,43 +13,43 @@
 	Constructor frmParameters
 		This.Name = "frmParameters"
 		This.Text = "Parameters"
-		This.Caption = ML("Parameters")
+		This.Caption = ("Parameters")
 		This.StartPosition = FormStartPosition.CenterParent
 		This.CancelButton = @cmdCancel
 		This.DefaultButton = @cmdOK
 		This.OnCreate = @Form_Create
 		This.SetBounds 0, 0, 742, 360
 		grbCompile.Name = "grbCompile"
-		grbCompile.Text = ML("Compile")
+		grbCompile.Text = ("Compile")
 		grbCompile.TabIndex = 0
 		grbCompile.SetBounds 8, 8, 712, 58
 		grbCompile.Parent = @This
 		grbMake.Name = "grbMake"
-		grbMake.Text = ML("Make")
+		grbMake.Text = ("Make")
 		grbMake.TabIndex = 7
 		grbMake.SetBounds 8, 72, 712, 88
 		grbMake.Parent = @This
 		grbRun.Name = "grbRun"
-		grbRun.Text = ML("Run")
+		grbRun.Text = ("Run")
 		grbRun.TabIndex = 14
 		grbRun.SetBounds 8, 168, 712, 58
 		grbRun.Parent = @This
 		With grbDebug
 			.Name = "grbDebug"
-			.Text = ML("Debug")
+			.Text = ("Debug")
 			.TabIndex = 18
 			.SetBounds 8, 232, 712, 58
 			.Parent = @This
 		End With
 		cmdOK.Name = "cmdOK"
 		cmdOK.Default = True
-		cmdOK.Text = ML("OK")
+		cmdOK.Text = ("OK")
 		cmdOK.TabIndex = 25
 		cmdOK.SetBounds 528, 300, 96, 24
 		cmdOK.OnClick = @cmdOK_Click
 		cmdOK.Parent = @This
 		cmdCancel.Name = "cmdCancel"
-		cmdCancel.Text = ML("Cancel")
+		cmdCancel.Text = ("Cancel")
 		cmdCancel.TabIndex = 26
 		cmdCancel.SetBounds 624, 300, 96, 24
 		cmdCancel.OnClick = @cmdCancel_Click
@@ -81,29 +81,29 @@
 		End With
 		With lblfbc64
 			.Name = "lblfbc64"
-			.Text = ML("Command line") & ":"
+			.Text = ("Command line") & ":"
 			.TabIndex = 4
 			.SetBounds 16, 24, 120, 16
-			.Caption = ML("Command line") & ":"
+			.Caption = ("Command line") & ":"
 			.Parent = @grbCompile
 		End With
 		With lblMake1
 			.Name = "lblMake1"
-			.Text = ML("make") & " 1:"
+			.Text = ("make") & " 1:"
 			.TabIndex = 8
 			.SetBounds 16, 24, 76, 16
 			.Parent = @grbMake
 		End With
 		With llblMake2
 			.Name = "llblMake2"
-			.Text = ML("make") & " 2:"
+			.Text = ("make") & " 2:"
 			.TabIndex = 11
 			.SetBounds 16, 48, 76, 16
 			.Parent = @grbMake
 		End With
 		With lblRun
 			.Name = "lblRun"
-			.Text = ML("run") & ":"
+			.Text = ("run") & ":"
 			.TabIndex = 15
 			.SetBounds 16, 24, 256, 16
 			.Parent = @grbRun
@@ -144,7 +144,7 @@
 		End With
 		With lblDebug64
 			.Name = "lblDebug64"
-			.Text = ML("debug") & ":"
+			.Text = ("debug") & ":"
 			.TabIndex = 22
 			.SetBounds 16, 28, 266, 17
 			.Parent = @grbDebug

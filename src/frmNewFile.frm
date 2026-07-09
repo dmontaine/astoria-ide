@@ -5,7 +5,7 @@
 	Constructor frmNewFile
 		With This
 			.Name = "frmNewFile"
-			.Text = ML("New File")
+			.Text = ("New File")
 				.Icon.LoadFromResourceID(1)
 			.Designer = @This
 			.BorderStyle = FormBorderStyle.FixedDialog
@@ -38,7 +38,7 @@
 		' lblName
 		With lblName
 			.Name = "lblName"
-			.Text = ML("Name") & ":"
+			.Text = ("Name") & ":"
 			.Align = DockStyle.alLeft
 			.TabIndex = 4
 			.ExtraMargins.Top = 8
@@ -60,7 +60,7 @@
 		' cmdCancel
 		With cmdCancel
 			.Name = "cmdCancel"
-			.Text = ML("Cancel")
+			.Text = ("Cancel")
 			.Align = DockStyle.alRight
 			.ExtraMargins.Bottom = 8
 			.ExtraMargins.Top = 4
@@ -74,7 +74,7 @@
 		' cmdOK
 		With cmdOK
 			.Name = "cmdOK"
-			.Text = ML("OK")
+			.Text = ("OK")
 			.Align = DockStyle.alRight
 			.ExtraMargins.Top = 4
 			.ExtraMargins.Right = 10
@@ -100,7 +100,7 @@
 			.TabIndex = 2
 			.SetBounds 10, 32, 621, 303
 			.Designer = @This
-			.Columns.Add ML("Template"), , 500, cfLeft
+			.Columns.Add ("Template"), , 500, cfLeft
 			.OnItemActivate = @lvTemplates_ItemActivate_
 			.OnItemClick = @lvTemplates_ItemClick_
 			.Parent = @This
@@ -108,7 +108,7 @@
 		' lblFileTemplates
 		With lblFileTemplates
 			.Name = "lblFileTemplates"
-			.Text = ML("File Templates")
+			.Text = ("File Templates")
 			.TabIndex = 0
 			.SetBounds 10, 10, 300, 18
 			.Parent = @This
@@ -119,13 +119,13 @@
 
 Private Sub frmNewFile.UpdateNamePrompt()
 	If lvTemplates.SelectedItemIndex = -1 Then
-		lblName.Text = ML("Name") & ":"
+		lblName.Text = ("Name") & ":"
 	Else
 		Dim As String sTemplateFile = TemplateFiles.Item(lvTemplates.SelectedItemIndex)
 		Dim dotPos As Integer = InStr(sTemplateFile, ".")
 		Dim As String sTemplateLabel = sTemplateFile
 		If dotPos > 0 Then sTemplateLabel = ..Left(sTemplateFile, dotPos - 1)
-		lblName.Text = ML("New") & " " & ML(sTemplateLabel) & " " & ML("Name") & ":"
+		lblName.Text = ("New") & " " & (sTemplateLabel) & " " & ("Name") & ":"
 	End If
 End Sub
 
@@ -136,19 +136,19 @@ Private Sub frmNewFile.cmdOK_Click(ByRef Sender As Control)
 	SelectedTemplate = ""
 	SelectedName = ""
 	If lvTemplates.SelectedItemIndex = -1 Then
-		MsgBox ML("Select template!")
+		MsgBox ("Select template!")
 		Me.BringToFront
 		Exit Sub
 	End If
 	SelectedName = Trim(txtName.Text, Any !" \t" + Chr(10) + Chr(13))
 	If SelectedName = "" Then
-		MsgBox ML("Enter a name.")
+		MsgBox ("Enter a name.")
 		txtName.SetFocus
 		Me.BringToFront
 		Exit Sub
 	End If
 	If Not IsValidProjectItemName(SelectedName) Then
-		MsgBox ML("Enter a valid name without paths or file extensions."), , mtWarning
+		MsgBox ("Enter a valid name without paths or file extensions."), , mtWarning
 		txtName.SetFocus
 		Me.BringToFront
 		Exit Sub
@@ -211,7 +211,7 @@ Private Sub frmNewFile.Form_Create(ByRef Sender As Control)
 				IconName = "File32"
 			End If
 			If imgList32.IndexOf(IconName) < 0 Then IconName = "File32"
-			lvTemplates.ListItems.Add ML(sTemplateLabel), IconName
+			lvTemplates.ListItems.Add (sTemplateLabel), IconName
 			TemplateFiles.Add f
 		End If
 		f = Dir()

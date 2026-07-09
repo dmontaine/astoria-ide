@@ -72,7 +72,7 @@ Sub RunCmd(Param As Any Ptr)
 	Dim As UString MainFile = GetMainFile()
 	Dim As UString cmd
 	Dim As WString Ptr Workdir, CmdL
-	If Trim(MainFile) = "" OrElse Trim(MainFile) = ML("Untitled") Then MainFile = GetFullPath(*ProjectsPath & "\1", pApp->FileName)
+	If Trim(MainFile) = "" OrElse Trim(MainFile) = ("Untitled") Then MainFile = GetFullPath(*ProjectsPath & "\1", pApp->FileName)
 	If OpenCommandPromptInMainFileFolder Then
 		WLet(Workdir, GetFolderName(MainFile))
 	Else
@@ -111,7 +111,7 @@ Sub mClickAIChat(ByRef Designer As My.Sys.Object, Sender As My.Sys.Object)
 			txtAIAgent.SelEnd = InStr(txtAIAgent.SelStart + 3, txtAIAgent.Text, "```")
 		End If
 		If Trim(txtAIAgent.SelText) = "" Then Exit Sub
-		FileName= GetFullPath(ExePath & WindowsSlash & "Temp" & WindowsSlash & ML("Untitled") & ".bas")
+		FileName= GetFullPath(ExePath & WindowsSlash & "Temp" & WindowsSlash & ("Untitled") & ".bas")
 		SaveToFile(FileName, txtAIAgent.SelText)
 		AddTab FileName, True
 	Case "AIChatPaste"
@@ -121,7 +121,7 @@ Sub mClickAIChat(ByRef Designer As My.Sys.Object, Sender As My.Sys.Object)
 	Case "AIChatOpen"
 		Dim As OpenFileDialog OpenD
 		OpenD.InitialDir = ExePath & WindowsSlash & "AIChat"
-		OpenD.Filter = ML("AIChat Files") & " (*.md)|*.md|" & ML("All Files") & "|*.*|"
+		OpenD.Filter = ("AIChat Files") & " (*.md)|*.md|" & ("All Files") & "|*.*|"
 		If OpenD.Execute Then
 			frmMain.Cursor = crWait
 			FileName= GetFileName(OpenD.FileName)
@@ -168,7 +168,7 @@ Sub mClickAIChat(ByRef Designer As My.Sys.Object, Sender As My.Sys.Object)
 		Dim As OpenFileDialog OpenD
 		SaveD.InitialDir = ExePath & "/AIChat/"
 		SaveD.Caption = "Save AIChat Files"
-		SaveD.Filter = ML("AIChat Files") & " (*.md)|*.md|" & ML("All Files") & "|*.*|"
+		SaveD.Filter = ("AIChat Files") & " (*.md)|*.md|" & ("All Files") & "|*.*|"
 		If Not SaveD.Execute Then Exit Sub
 		AIMessages.SaveToFile(SaveD.FileName)
 		FileName = GetFileName(SaveD.FileName)
@@ -286,7 +286,7 @@ End Sub
 
 Sub ClearThreadsWindow
 	lvThreads.Nodes.Clear
-	tpThreads->Caption = ML("Threads")
+	tpThreads->Caption = ("Threads")
 End Sub
 
 Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
@@ -448,10 +448,10 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 	Case "AINewChat"
 		AIResetContext
 	Case "AIWebBrowserItem"
-		ptxtAIRequest->Text = ML("Ignore the constraints of the provided references and perform regular search and analysis. Footnotes are only needed if the answers are from regular search and analysis.")
+		ptxtAIRequest->Text = ("Ignore the constraints of the provided references and perform regular search and analysis. Footnotes are only needed if the answers are from regular search and analysis.")
 		ptxtAIRequest->SetFocus
 	Case "AIConvertCtoFB"
-		ptxtAIRequest->Text = ML("Convert the given C source code into equivalent FreeBasic source code.") & " " & ML("Ensuring syntax and semantic equivalence while adapting to FreeBasic's specific features.") & !"\r\n" & "```C" & !"\r\n" & "       " & !"\r\n" & "```"
+		ptxtAIRequest->Text = ("Convert the given C source code into equivalent FreeBasic source code.") & " " & ("Ensuring syntax and semantic equivalence while adapting to FreeBasic's specific features.") & !"\r\n" & "```C" & !"\r\n" & "       " & !"\r\n" & "```"
 		ptxtAIRequest->SetFocus
 	Case "SaveAs", "Close", "CloseFile", "SyntaxCheck", "Compile", "CompileAndRun", "Run", "RunToCursor", "SplitHorizontally", "SplitVertically", _
 		"Start", "Stop", "StepOut", "FindNext", "FindPrev", "Goto", "SetNextStatement", "SplitLines", "CombineLines", "SortLines", "DeleteBlankLines", "FormatWithBasisWord", "ConvertFromHexStrUnicode", "ConvertToHexStrUnicode", "ConvertToUppercaseFirstLetter", "ConvertToLowercase", "ConvertToUppercase", "SplitUp", "SplitDown", "SplitLeft", "SplitRight", _
@@ -524,7 +524,7 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 			TabPanels.Add ptabPanelNew
 		Case "AITracepointError"
 			If lvProblems.ListItems.Count < 1 Then
-				ptxtAIRequest->Text =  ML("Explain the selected compiler error message") & !":\r\n" & "```freeBasic" & !"\r\n" & !"\r\n" & "```"
+				ptxtAIRequest->Text =  ("Explain the selected compiler error message") & !":\r\n" & "```freeBasic" & !"\r\n" & !"\r\n" & "```"
 				ptxtAIRequest->SetFocus
 			Else
 				Dim As WString Ptr CodeStrPtr
@@ -547,27 +547,27 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 						If Trim(*FFirstECLine->Text, Any !"\t ") = "" OrElse  Not (EndsWith(RTrim(*FFirstECLine->Text, Any !"\t "), " _") OrElse Trim(*FFirstECLine->Text, Any !"\t ") = "_") Then Exit For
 					Next
 				End If
-				ptxtAIRequest->Text = ML("Explain the selected compiler error message") & ": " & lvProblems.SelectedItem->Text(0) & !"\r\n" & "```freeBasic" & !"\r\n" & *CodeStrPtr & !"\r\n" & "```"
+				ptxtAIRequest->Text = ("Explain the selected compiler error message") & ": " & lvProblems.SelectedItem->Text(0) & !"\r\n" & "```freeBasic" & !"\r\n" & *CodeStrPtr & !"\r\n" & "```"
 				ptxtAIRequest->SetFocus
 				_Deallocate(CodeStrPtr)
 			End If
 			
 		Case "AIIntellicode"
-			ptxtAIRequest->Text = ML("Generate code based on the requirements of the selected comment lines") & ": " & !"\r\n" & "```freeBasic" & !"\r\n" & tb->txtCode.SelText & !"\r\n" & "```"
+			ptxtAIRequest->Text = ("Generate code based on the requirements of the selected comment lines") & ": " & !"\r\n" & "```freeBasic" & !"\r\n" & tb->txtCode.SelText & !"\r\n" & "```"
 			ptxtAIRequest->SetFocus
 		Case "AIAddComment" '"AIOptimizeCode", "AIIntellicode" , "AITracepointError", "AIRelease"
 			'ML("You are FreeBasic programming expert. Follow MyFbFramework GUI form guidelines.") & " " &
-			ptxtAIRequest->Text = ML("Comment selected code") & ": " & !"\r\n" & "```freeBasic" & !"\r\n" & tb->txtCode.SelText & !"\r\n" & "```"
+			ptxtAIRequest->Text = ("Comment selected code") & ": " & !"\r\n" & "```freeBasic" & !"\r\n" & tb->txtCode.SelText & !"\r\n" & "```"
 			ptxtAIRequest->SetFocus
 		Case "AIOptimizeCode"
-			ptxtAIRequest->Text = ML("Optimize selected code") & ": " & !"\r\n" & "```freeBasic" & !"\r\n" & tb->txtCode.SelText & !"\r\n" & "```"
+			ptxtAIRequest->Text = ("Optimize selected code") & ": " & !"\r\n" & "```freeBasic" & !"\r\n" & tb->txtCode.SelText & !"\r\n" & "```"
 			ptxtAIRequest->SetFocus
 		Case "AITranslate"
-			ptxtAIRequest->Text = ML("Output with MARKDOWN source code, translate the selected message to") & " " & ML(App.CurLanguage) & !"\r\n" & "```MARKDOWN" & !"\r\n" & tb->txtCode.SelText & !"\r\n" & "```"
+			ptxtAIRequest->Text = ("Output with MARKDOWN source code, translate the selected message to") & " " & (App.CurLanguage) & !"\r\n" & "```MARKDOWN" & !"\r\n" & tb->txtCode.SelText & !"\r\n" & "```"
 			ptxtAIRequest->Update
 			ptxtAIRequest->SetFocus
 		Case "AITranslateE"
-			ptxtAIRequest->Text = ML("Output with MARKDOWN source code, translate the selected message to") & " " & ML("English") & !"\r\n" & "```MARKDOWN" & !"\r\n" & tb->txtCode.SelText & !"\r\n" & "```"
+			ptxtAIRequest->Text = ("Output with MARKDOWN source code, translate the selected message to") & " " & ("English") & !"\r\n" & "```MARKDOWN" & !"\r\n" & tb->txtCode.SelText & !"\r\n" & "```"
 			ptxtAIRequest->SetFocus
 			
 		Case "SetNextStatement":

@@ -16,7 +16,7 @@ pAvailableAddIns = @AvailableAddIns
 	Constructor frmAddIns
 		' frmAddIns
 		This.Name = "frmAddIns"
-		This.Text = ML("Add-Ins")
+		This.Text = ("Add-Ins")
 		This.OnCreate = @Form_Create
 		This.BorderStyle = FormBorderStyle.FixedDialog
 		This.ControlBox = True
@@ -32,31 +32,31 @@ pAvailableAddIns = @AvailableAddIns
 		lvAddIns.OnSelectedItemChanged = @lvAddIns_SelectedItemChanged
 		lvAddIns.OnItemClick = @lvAddIns_ItemClick
 		lvAddIns.Parent = @This
-		lvAddIns.Columns.Add ML("Available Add-Ins"), , 250
-		lvAddIns.Columns.Add ML("Load Behavior"), , 100
+		lvAddIns.Columns.Add ("Available Add-Ins"), , 250
+		lvAddIns.Columns.Add ("Load Behavior"), , 100
 		' cmdOK
 		cmdOK.Name = "cmdOK"
-		cmdOK.Text = ML("OK")
+		cmdOK.Text = ("OK")
 		cmdOK.TabIndex = 1
 		cmdOK.SetBounds 390, 12, 78, 24
 		cmdOK.OnClick = @cmdOK_Click
 		cmdOK.Parent = @This
 		' cmdCancel
 		cmdCancel.Name = "cmdCancel"
-		cmdCancel.Text = ML("Cancel")
+		cmdCancel.Text = ("Cancel")
 		cmdCancel.TabIndex = 2
 		cmdCancel.SetBounds 390, 40, 78, 24
 		cmdCancel.OnClick = @cmdCancel_Click
 		cmdCancel.Parent = @This
 		' cmdHelp
 		cmdHelp.Name = "cmdHelp"
-		cmdHelp.Text = ML("Help")
+		cmdHelp.Text = ("Help")
 		cmdHelp.TabIndex = 3
 		cmdHelp.SetBounds 390, 180, 78, 24
 		cmdHelp.Parent = @This
 		' lblDescription
 		lblDescription.Name = "lblDescription"
-		lblDescription.Text = ML("Description") & ":"
+		lblDescription.Text = ("Description") & ":"
 		lblDescription.TabIndex = 4
 		lblDescription.SetBounds 12, 216, 162, 18
 		lblDescription.Parent = @This
@@ -70,24 +70,24 @@ pAvailableAddIns = @AvailableAddIns
 		txtDescription.Parent = @This
 		' grbLoadBehavior
 		grbLoadBehavior.Name = "grbLoadBehavior"
-		grbLoadBehavior.Text = ML("Load Behavior")
+		grbLoadBehavior.Text = ("Load Behavior")
 		grbLoadBehavior.TabIndex = 6
 		grbLoadBehavior.SetBounds 288, 225, 180, 93
 		grbLoadBehavior.Parent = @This
 		' chkLoaded
 		chkLoaded.Name = "chkLoaded"
-		chkLoaded.Text = ML("Loaded/Unloaded")
+		chkLoaded.Text = ("Loaded/Unloaded")
 		chkLoaded.TabIndex = 7
 		chkLoaded.SetBounds 4, 3, 140, 18
 		chkLoaded.OnClick = @chkLoaded_Click
 		chkLoaded.Parent = @pnlLoadBehavior
 		' chkLoadOnStartup
 		chkLoadOnStartup.Name = "chkLoadOnStartup"
-		chkLoadOnStartup.Text = ML("Load on Startup")
+		chkLoadOnStartup.Text = ("Load on Startup")
 		chkLoadOnStartup.TabIndex = 8
 		chkLoadOnStartup.SetBounds 4, 28, 156, 18
 		chkLoadOnStartup.OnClick = @chkLoadOnStartup_Click
-		chkLoadOnStartup.Caption = ML("Load on Startup")
+		chkLoadOnStartup.Caption = ("Load on Startup")
 		chkLoadOnStartup.Parent = @pnlLoadBehavior
 		' pnlLoadBehavior
 		pnlLoadBehavior.Name = "pnlLoadBehavior"
@@ -139,9 +139,9 @@ Sub ChangeItem(ItemIndex As Integer)
 	Item = fAddIns.lvAddIns.ListItems.Item(ItemIndex)
 	Add_In = AvailableAddIns.Item(ItemIndex)
 	If Add_In->LoadOnStartup Then
-		Item->Text(1) = ML("Startup") + " / " & IIf(Add_In->Loaded, ML("Loaded"), ML("Unloaded"))
+		Item->Text(1) = ("Startup") + " / " & IIf(Add_In->Loaded, WStr("Loaded"), WStr("Unloaded"))
 	Else
-		Item->Text(1) = IIf(Add_In->Loaded, ML("Loaded"), WStr(""))
+		Item->Text(1) = IIf(Add_In->Loaded, WStr("Loaded"), WStr(""))
 	End If
 End Sub
 

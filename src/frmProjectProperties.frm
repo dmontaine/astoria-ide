@@ -19,7 +19,7 @@ pfProjectProperties = @fProjectProperties
 	Constructor frmProjectProperties
 		' frmProjectProperties
 		This.Name = "frmProjectProperties"
-		This.Text = ML("Project Properties")
+		This.Text = ("Project Properties")
 		This.BorderStyle = FormBorderStyle.Fixed3D
 		This.MaximizeBox = False
 		This.MinimizeBox = False
@@ -32,14 +32,14 @@ pfProjectProperties = @fProjectProperties
 		This.OnCreate = @_Form_Create
 		' tpGeneral
 		tpGeneral.Name = "tpGeneral"
-		tpGeneral.Text = ML("General")
+		tpGeneral.Text = ("General")
 		tpGeneral.TabIndex = 1
 		tpGeneral.SetBounds 2, 22, 487, 356
 		tpGeneral.UseVisualStyleBackColor = True
 		tpGeneral.Parent = @tabProperties
 		' tpMake
 		tpMake.Name = "tpMake"
-		tpMake.Text = ML("Version")
+		tpMake.Text = ("Version")
 		tpMake.TabIndex = 19
 		tpMake.SetBounds 2, 22, 487, 316
 		tpMake.Visible = True
@@ -47,7 +47,7 @@ pfProjectProperties = @fProjectProperties
 		tpMake.Parent = @tabProperties
 		' tpCompile
 		tpCompile.Name = "tpCompile"
-		tpCompile.Text = ML("Compile")
+		tpCompile.Text = ("Compile")
 		tpCompile.TabIndex = 44
 		tpCompile.SetBounds 2, 22, 487, 346
 		tpCompile.Visible = True
@@ -55,7 +55,7 @@ pfProjectProperties = @fProjectProperties
 		tpCompile.Parent = @tabProperties
 		' cmdOK
 		cmdOK.Name = "cmdOK"
-		cmdOK.Text = ML("OK")
+		cmdOK.Text = ("OK")
 		cmdOK.TabIndex = 84
 		cmdOK.SetBounds 161, 389, 106, 34
 		cmdOK.OnClick = @cmdOK_Click
@@ -63,7 +63,7 @@ pfProjectProperties = @fProjectProperties
 		cmdOK.Parent = @This
 		' cmdCancel
 		cmdCancel.Name = "cmdCancel"
-		cmdCancel.Text = ML("Cancel")
+		cmdCancel.Text = ("Cancel")
 		cmdCancel.TabIndex = 85
 		cmdCancel.SetBounds 269, 389, 120, 34
 		cmdCancel.OnClick = @cmdCancel_Click
@@ -77,7 +77,7 @@ pfProjectProperties = @fProjectProperties
 		tabProperties.Parent = @This
 		' lblProjectType
 		lblProjectType.Name = "lblProjectType"
-		lblProjectType.Text = ML("Project Type") & ":"
+		lblProjectType.Text = ("Project Type") & ":"
 		lblProjectType.TabIndex = 2
 		lblProjectType.SetBounds 10, 8, 144, 18
 		lblProjectType.Parent = @tpGeneral
@@ -89,7 +89,7 @@ pfProjectProperties = @fProjectProperties
 		cboProjectType.Parent = @tpGeneral
 		' lblMainFile
 		lblMainFile.Name = "lblMainFile"
-		lblMainFile.Text = ML("Main File") & ":"
+		lblMainFile.Text = ("Main File") & ":"
 		lblMainFile.TabIndex = 4
 		lblMainFile.SetBounds 224, 8, 252, 18
 		lblMainFile.Parent = @tpGeneral
@@ -102,7 +102,7 @@ pfProjectProperties = @fProjectProperties
 		cboMainFile.Parent = @tpGeneral
 		' lblProjectName
 		lblProjectName.Name = "lblProjectName"
-		lblProjectName.Text = ML("Project Name") & ":"
+		lblProjectName.Text = ("Project Name") & ":"
 		lblProjectName.TabIndex = 10
 		lblProjectName.SetBounds 10, 182, 204, 18
 		lblProjectName.Parent = @tpGeneral
@@ -114,7 +114,7 @@ pfProjectProperties = @fProjectProperties
 		txtProjectName.Parent = @tpGeneral
 		' lblProjectDescription
 		lblProjectDescription.Name = "lblProjectDescription"
-		lblProjectDescription.Text = ML("Project Description") & ":"
+		lblProjectDescription.Text = ("Project Description") & ":"
 		lblProjectDescription.TabIndex = 17
 		lblProjectDescription.SetBounds 10, 298, 220, 18
 		lblProjectDescription.Parent = @tpGeneral
@@ -126,62 +126,62 @@ pfProjectProperties = @fProjectProperties
 		txtProjectDescription.Parent = @tpGeneral
 		' grbVersionNumber
 		grbVersionNumber.Name = "grbVersionNumber"
-		grbVersionNumber.Text = ML("Version Number")
+		grbVersionNumber.Text = ("Version Number")
 		grbVersionNumber.TabIndex = 20
 		grbVersionNumber.SetBounds 10, 8, 228, 122
 		grbVersionNumber.Parent = @tpMake
 		' grbApplication
 		grbApplication.Name = "grbApplication"
-		grbApplication.Text = ML("Application")
+		grbApplication.Text = ("Application")
 		grbApplication.TabIndex = 30
 		grbApplication.SetBounds 253, 8, 225, 122
 		grbApplication.Parent = @tpMake
 		' grbVersionInformation
 		grbVersionInformation.Name = "grbVersionInformation"
-		grbVersionInformation.Text = ML("Version Information")
+		grbVersionInformation.Text = ("Version Information")
 		grbVersionInformation.TabIndex = 38
 		grbVersionInformation.SetBounds 9, 136, 469, 211
 		grbVersionInformation.Parent = @tpMake
 		' lblIcon
 		lblIcon.Name = "lblIcon"
-		lblIcon.Text = ML("Icon") & ":"
+		lblIcon.Text = ("Icon") & ":"
 		lblIcon.TabIndex = 33
 		lblIcon.SetBounds 0, 37, 34, 18
 		lblIcon.Parent = @picApplication
 		' lblTitle
 		lblTitle.Name = "lblTitle"
-		lblTitle.Text = ML("Title") & ":"
+		lblTitle.Text = ("Title") & ":"
 		lblTitle.TabIndex = 31
 		lblTitle.SetBounds 0, 11, 34, 18
 		lblTitle.Parent = @picApplication
 		' chkAutoIncrementVersion
 		chkAutoIncrementVersion.Name = "chkAutoIncrementVersion"
-		chkAutoIncrementVersion.Text = ML("Auto Increment Version")
+		chkAutoIncrementVersion.Text = ("Auto Increment Version")
 		chkAutoIncrementVersion.TabIndex = 29
 		chkAutoIncrementVersion.SetBounds 6, 70, 204, 18
 		chkAutoIncrementVersion.Parent = @picVersionNumber
 		' lblMajor
 		lblMajor.Name = "lblMajor"
-		lblMajor.Text = ML("Major") & ":"
+		lblMajor.Text = ("Major") & ":"
 		lblMajor.TabIndex = 21
 		lblMajor.SetBounds 5, 12, 52, 18
 		lblMajor.Parent = @picVersionNumber
 		' lblMinor
 		lblMinor.Name = "lblMinor"
-		lblMinor.Text = ML("Minor") & ":"
+		lblMinor.Text = ("Minor") & ":"
 		lblMinor.TabIndex = 23
 		lblMinor.SetBounds 58, 12, 52, 18
 		lblMinor.Parent = @picVersionNumber
 		' lblRevision
 		lblRevision.Name = "lblRevision"
-		lblRevision.Text = ML("Revision") & ":"
+		lblRevision.Text = ("Revision") & ":"
 		lblRevision.TabIndex = 25
 		lblRevision.SetBounds 109, 12, 48, 18
 		lblRevision.BorderStyle = BorderStyles.bsNone
 		lblRevision.Parent = @picVersionNumber
 		' lblBuild
 		lblBuild.Name = "lblBuild"
-		lblBuild.Text = ML("Build") & ":"
+		lblBuild.Text = ("Build") & ":"
 		lblBuild.TabIndex = 27
 		lblBuild.SetBounds 171, 12, 36, 18
 		lblBuild.Parent = @picVersionNumber
@@ -194,19 +194,19 @@ pfProjectProperties = @fProjectProperties
 		cboResourceFile.Parent = @tpGeneral
 		' lblResourceFile
 		lblResourceFile.Name = "lblResourceFile"
-		lblResourceFile.Text = ML("Resource File") & " (" & ML("For Windows") & "):"
+		lblResourceFile.Text = ("Resource File") & " (" & ("For Windows") & "):"
 		lblResourceFile.TabIndex = 8
 		lblResourceFile.SetBounds 224, 66, 262, 18
 		lblResourceFile.Parent = @tpGeneral
 		' lblType
 		lblType.Name = "lblType"
-		lblType.Text = ML("Type") & ":"
+		lblType.Text = ("Type") & ":"
 		lblType.TabIndex = 40
 		lblType.SetBounds 7, 0, 82, 18
 		lblType.Parent = @picVersionInformation
 		' lblValue
 		lblValue.Name = "lblValue"
-		lblValue.Text = ML("Value") & ":"
+		lblValue.Text = ("Value") & ":"
 		lblValue.TabIndex = 42
 		lblValue.SetBounds 237, 0, 136, 18
 		lblValue.Parent = @picVersionInformation
@@ -218,50 +218,50 @@ pfProjectProperties = @fProjectProperties
 		txtHelpFileName.Parent = @tpGeneral
 		' lblHelpFileName
 		lblHelpFileName.Name = "lblHelpFileName"
-		lblHelpFileName.Text = ML("Help File") & ":"
+		lblHelpFileName.Text = ("Help File") & ":"
 		lblHelpFileName.TabIndex = 14
 		lblHelpFileName.SetBounds 10, 240, 172, 18
 		lblHelpFileName.Parent = @tpGeneral
 		' grbCompileMode
 		grbCompileMode.Name = "grbCompileMode"
-		grbCompileMode.Text = ML("Compile Mode")
+		grbCompileMode.Text = ("Compile Mode")
 		grbCompileMode.TabIndex = 87
 		grbCompileMode.SetBounds 10, 10, 200, 60
 		grbCompileMode.Parent = @tpCompile
 		' optDevelopment
 		optDevelopment.Name = "optDevelopment"
-		optDevelopment.Text = ML("Development (-g, no optimization)")
+		optDevelopment.Text = ("Development (-g, no optimization)")
 		optDevelopment.TabIndex = 48
 		optDevelopment.Checked = True
 		optDevelopment.SetBounds 16, 20, 175, 20
 		optDevelopment.Parent = @grbCompileMode
 		' optFinal
 		optFinal.Name = "optFinal"
-		optFinal.Text = ML("Final (-O2, no debug info)")
+		optFinal.Text = ("Final (-O2, no debug info)")
 		optFinal.TabIndex = 49
 		optFinal.SetBounds 16, 42, 175, 20
 		optFinal.Parent = @grbCompileMode
 		' tpIncludes
 		With tpIncludes
 			.Name = "tpIncludes"
-			.Text = ML("Includes")
+			.Text = ("Includes")
 			.TabIndex = 95
-			.Caption = ML("Includes")
+			.Caption = ("Includes")
 			.UseVisualStyleBackColor = True
 			.SetBounds 65182, 22, 487, 356
 			.Designer = @This
 			.Parent = @tabProperties
 		End With
 		' Initialization
-		cboProjectType.AddItem ML("Executable")
-		cboProjectType.AddItem ML("Dynamic library")
-		cboProjectType.AddItem ML("Static library")
-		cboSubsystem.AddItem ML("(not selected)")
-		cboSubsystem.AddItem ML("Console")
-		cboSubsystem.AddItem ML("GUI")
+		cboProjectType.AddItem ("Executable")
+		cboProjectType.AddItem ("Dynamic library")
+		cboProjectType.AddItem ("Static library")
+		cboSubsystem.AddItem ("(not selected)")
+		cboSubsystem.AddItem ("Console")
+		cboSubsystem.AddItem ("GUI")
 		' cmdAdvancedOptions
 		cmdAdvancedOptions.Name = "cmdAdvancedOptions"
-		cmdAdvancedOptions.Text = ML("Compiler Warnings")
+		cmdAdvancedOptions.Text = ("Compiler Warnings")
 		cmdAdvancedOptions.TabIndex = 55
 		cmdAdvancedOptions.SetBounds 220, 42, 224, 24
 		cmdAdvancedOptions.OnClick = @cmdAdvancedOptions_Click
@@ -327,13 +327,13 @@ pfProjectProperties = @fProjectProperties
 			.Parent = @picVersionNumber
 		End With
 		' Initialization
-		lstType.AddItem ML("Company Name")
-		lstType.AddItem ML("File Description")
-		lstType.AddItem ML("Internal Name")
-		lstType.AddItem ML("Legal Copyright")
-		lstType.AddItem ML("Legal Trademarks")
-		lstType.AddItem ML("Original Filename")
-		lstType.AddItem ML("Product Name")
+		lstType.AddItem ("Company Name")
+		lstType.AddItem ("File Description")
+		lstType.AddItem ("Internal Name")
+		lstType.AddItem ("Legal Copyright")
+		lstType.AddItem ("Legal Trademarks")
+		lstType.AddItem ("Original Filename")
+		lstType.AddItem ("Product Name")
 		' pnlVersionNumber
 		With picVersionNumber
 			.Name = "picVersionNumber"
@@ -376,7 +376,7 @@ pfProjectProperties = @fProjectProperties
 		' chkPassAllModuleFilesToCompiler
 		With chkPassAllModuleFilesToCompiler
 			.Name = "chkPassAllModuleFilesToCompiler"
-			.Text = ML("Pass All Module Files To Compiler")
+			.Text = ("Pass All Module Files To Compiler")
 			.TabIndex = 16
 			.SetBounds 11, 120, 192, 22
 
@@ -393,7 +393,7 @@ pfProjectProperties = @fProjectProperties
 		' lblSubsystem
 		With lblSubsystem
 			.Name = "lblSubsystem"
-			.Text = ML("Subsystem") & " (" & ML("For Windows") & "):"
+			.Text = ("Subsystem") & " (" & ("For Windows") & "):"
 			.TabIndex = 6
 			.SetBounds 10, 66, 202, 18
 
@@ -414,7 +414,7 @@ pfProjectProperties = @fProjectProperties
 		' chkManifest
 		With chkManifest
 			.Name = "chkManifest"
-			.Text = ML("Manifest")
+			.Text = ("Manifest")
 			.TabIndex = 36
 
 			.SetBounds 4, 59, 130, 20
@@ -425,7 +425,7 @@ pfProjectProperties = @fProjectProperties
 		' chkRunAsAdministrator
 		With chkRunAsAdministrator
 			.Name = "chkRunAsAdministrator"
-			.Text = ML("Run as administrator")
+			.Text = ("Run as administrator")
 			.TabIndex = 37
 
 			.SetBounds 30, 80, 170, 20
@@ -435,7 +435,7 @@ pfProjectProperties = @fProjectProperties
 		' chkOpenProjectAsFolder
 		With chkOpenProjectAsFolder
 			.Name = "chkOpenProjectAsFolder"
-			.Text = ML("Open Project As Folder")
+			.Text = ("Open Project As Folder")
 			.TabIndex = 90
 			.ControlIndex = 14
 
@@ -446,9 +446,9 @@ pfProjectProperties = @fProjectProperties
 		' grbIncludePaths
 		With grbIncludePaths
 			.Name = "grbIncludePaths"
-			.Text = ML("Include Paths")
+			.Text = ("Include Paths")
 			.TabIndex = 96
-			.Caption = ML("Include Paths")
+			.Caption = ("Include Paths")
 			.Margins.Top = 20
 			.Margins.Right = 15
 			.Margins.Left = 15
@@ -460,9 +460,9 @@ pfProjectProperties = @fProjectProperties
 		' grbLibraryPaths
 		With grbLibraryPaths
 			.Name = "grbLibraryPaths"
-			.Text = ML("Library Paths")
+			.Text = ("Library Paths")
 			.TabIndex = 97
-			.Caption = ML("Library Paths")
+			.Caption = ("Library Paths")
 			.Margins.Top = 22
 			.Margins.Right = 15
 			.Margins.Left = 15
@@ -474,9 +474,9 @@ pfProjectProperties = @fProjectProperties
 		' lblComponents
 		With lblComponents
 			.Name = "lblComponents"
-			.Text = ML("Components") & ":"
+			.Text = ("Components") & ":"
 			.TabIndex = 101
-			.Caption = ML("Components") & ":"
+			.Caption = ("Components") & ":"
 			.Align = DockStyle.alTop
 			.SetBounds 0, 0, 440, 20
 			.Designer = @This
@@ -496,9 +496,9 @@ pfProjectProperties = @fProjectProperties
 		' lblOthers
 		With lblOthers
 			.Name = "lblOthers"
-			.Text = ML("Others") & ":"
+			.Text = ("Others") & ":"
 			.TabIndex = 102
-			.Caption = ML("Others") & ":"
+			.Caption = ("Others") & ":"
 			.Align = DockStyle.alTop
 			.ExtraMargins.Top = 0
 			.SetBounds 0, 10, 437, 20
@@ -678,13 +678,13 @@ Private Sub frmProjectProperties.cmdOK_Click(ByRef Designer As My.Sys.Object, By
 		WLet(ppe->ApplicationIcon, .txtIcon.Text)
 		ppe->Manifest = .chkManifest.Checked 
 		ppe->RunAsAdministrator = .chkRunAsAdministrator.Checked 
-		WLet(ppe->CompanyName, .Types.Get(ML("Company Name")))
-		WLet(ppe->FileDescription, .Types.Get(ML("File Description")))
-		WLet(ppe->InternalName, .Types.Get(ML("Internal Name")))
-		WLet(ppe->LegalCopyright, .Types.Get(ML("Legal Copyright")))
-		WLet(ppe->LegalTrademarks, .Types.Get(ML("Legal Trademarks")))
-		WLet(ppe->OriginalFilename, .Types.Get(ML("Original Filename")))
-		WLet(ppe->ProductName, .Types.Get(ML("Product Name")))
+		WLet(ppe->CompanyName, .Types.Get(("Company Name")))
+		WLet(ppe->FileDescription, .Types.Get(("File Description")))
+		WLet(ppe->InternalName, .Types.Get(("Internal Name")))
+		WLet(ppe->LegalCopyright, .Types.Get(("Legal Copyright")))
+		WLet(ppe->LegalTrademarks, .Types.Get(("Legal Trademarks")))
+		WLet(ppe->OriginalFilename, .Types.Get(("Original Filename")))
+		WLet(ppe->ProductName, .Types.Get(("Product Name")))
 		If .optDevelopment.Checked Then ppe->CompileMode = Development Else ppe->CompileMode = Final
 		ppe->Components.Clear
 		For i As Integer = 0 To .lstComponents.ItemCount - 1
@@ -758,8 +758,8 @@ Public Sub frmProjectProperties.RefreshProperties()
 		.cboResourceFile.Clear
 		.MainFiles.Clear
 		.ResourceFiles.Clear
-		.cboMainFile.AddItem ML("(not selected)")
-		.cboResourceFile.AddItem ML("(not selected)")
+		.cboMainFile.AddItem ("(not selected)")
+		.cboResourceFile.AddItem ("(not selected)")
 		Dim As Boolean bSetted = False
 		If ptn->ImageKey = "Project" OrElse ee AndAlso *ee Is ProjectElement Then
 			.ProjectTreeNode = ptn
@@ -805,13 +805,13 @@ Public Sub frmProjectProperties.RefreshProperties()
 				.chkManifest.Checked = ppe->Manifest
 				.chkManifest_Click(.chkManifest)
 				.chkRunAsAdministrator.Checked = ppe->RunAsAdministrator
-				.Types.Set ML("Company Name"), *ppe->CompanyName
-				.Types.Set ML("File Description"), *ppe->FileDescription
-				.Types.Set ML("Internal Name"), *ppe->InternalName
-				.Types.Set ML("Legal Copyright"), *ppe->LegalCopyright
-				.Types.Set ML("Legal Trademarks"), *ppe->LegalTrademarks
-				.Types.Set ML("Original Filename"), *ppe->OriginalFilename
-				.Types.Set ML("Product Name"), *ppe->ProductName
+				.Types.Set ("Company Name"), *ppe->CompanyName
+				.Types.Set ("File Description"), *ppe->FileDescription
+				.Types.Set ("Internal Name"), *ppe->InternalName
+				.Types.Set ("Legal Copyright"), *ppe->LegalCopyright
+				.Types.Set ("Legal Trademarks"), *ppe->LegalTrademarks
+				.Types.Set ("Original Filename"), *ppe->OriginalFilename
+				.Types.Set ("Product Name"), *ppe->ProductName
 				.optDevelopment.Checked = (ppe->CompileMode = Development)
 				.optFinal.Checked = (ppe->CompileMode = Final)
 				For i As Integer = 0 To ppe->Components.Count - 1
@@ -923,18 +923,18 @@ Private Sub frmProjectProperties.cmdAddComponent_Click(ByRef Sender As Control)
 		Dim As UString controlsRoot = WinOsPath(ExePath & WindowsSlash & "Controls")
 		Dim As UString selected = WinOsPath(pfPath->txtPath.Text)
 		If Not StartsWith(LCase(selected), LCase(controlsRoot)) Then
-			MsgBox ML("Control libraries must be in the editor Controls folder.") & ":" & WChr(13, 10) & WChr(13, 10) & FormatMsgPathU(selected), , mtWarning
+			MsgBox ("Control libraries must be in the editor Controls folder.") & ":" & WChr(13, 10) & WChr(13, 10) & FormatMsgPathU(selected), , mtWarning
 			Return
 		End If
 		Dim As UString vfpPath = GetControlLibraryVfpPath(selected)
 		If vfpPath = "" Then
-			MsgBox ML("Control library must be a subfolder of Controls."), , mtWarning
+			MsgBox ("Control library must be a subfolder of Controls."), , mtWarning
 			Return
 		End If
 		If Not lstComponents.Items.Contains(vfpPath) Then
 			lstComponents.AddItem vfpPath
 		Else
-			MsgBox ML("This path is exists!")
+			MsgBox ("This path is exists!")
 		End If
 	End If
 End Sub
@@ -951,7 +951,7 @@ Private Sub frmProjectProperties.cmdAddOtherInclude_Click(ByRef Sender As Contro
 		If Not lstOtherIncludes.Items.Contains(pfPath->txtPath.Text) Then
 			lstOtherIncludes.AddItem pfPath->txtPath.Text
 		Else
-			MsgBox ML("This path is exists!")
+			MsgBox ("This path is exists!")
 		End If
 	End If
 End Sub
@@ -968,7 +968,7 @@ Private Sub frmProjectProperties.cmdAddLibrary_Click(ByRef Sender As Control)
 		If Not lstLibraryPaths.Items.Contains(pfPath->txtPath.Text) Then
 			lstLibraryPaths.AddItem pfPath->txtPath.Text
 		Else
-			MsgBox ML("This path is exists!")
+			MsgBox ("This path is exists!")
 		End If
 	End If
 End Sub

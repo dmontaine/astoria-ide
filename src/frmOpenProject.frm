@@ -12,7 +12,7 @@
 
 			.Name = "frmOpenProject"
 
-			.Text = ML("Open Project")
+			.Text = ("Open Project")
 
 				.Icon.LoadFromResourceID(1)
 
@@ -52,7 +52,7 @@
 
 			.Name = "cmdBrowse"
 
-			.Text = ML("Browse") & "..."
+			.Text = ("Browse") & "..."
 
 			.Align = DockStyle.alNone
 
@@ -77,7 +77,7 @@
 		' cmdOpenNew  (leftmost; closes this dialog and opens the New Project window instead)
 		With cmdOpenNew
 			.Name = "cmdOpenNew"
-			.Text = ML("Open New Project")
+			.Text = ("Open New Project")
 			.Align = DockStyle.alNone
 			.TabIndex = 6
 			.SetBounds 10, 0, 130, 20
@@ -92,7 +92,7 @@
 
 			.Name = "cmdCancel"
 
-			.Text = ML("Cancel")
+			.Text = ("Cancel")
 
 			.Align = DockStyle.alRight
 
@@ -120,7 +120,7 @@
 
 			.Name = "cmdOK"
 
-			.Text = ML("OK")
+			.Text = ("OK")
 
 			.Align = DockStyle.alRight
 
@@ -182,7 +182,7 @@
 
 			.Name = "tpProjects"
 
-			.Text = ML("Projects")
+			.Text = ("Projects")
 
 			.TabIndex = 0
 
@@ -224,9 +224,9 @@
 
 			.Designer = @This
 
-			.Columns.Add ML("File"), , 150
+			.Columns.Add ("File"), , 150
 
-			.Columns.Add ML("Path"), , 450
+			.Columns.Add ("Path"), , 450
 
 			.OnItemActivate = @lvProjects_ItemActivate_
 
@@ -240,7 +240,7 @@
 
 			.Name = "tpExamples"
 
-			.Text = ML("Examples")
+			.Text = ("Examples")
 
 			.TabIndex = 1
 
@@ -282,9 +282,9 @@
 
 			.Designer = @This
 
-			.Columns.Add ML("File"), , 150
+			.Columns.Add ("File"), , 150
 
-			.Columns.Add ML("Path"), , 450
+			.Columns.Add ("Path"), , 450
 
 			.OnItemActivate = @lvExamples_ItemActivate_
 
@@ -322,7 +322,7 @@ Private Sub frmOpenProject.cmdOK_Click(ByRef Sender As Control)
 
 		Else
 
-			MsgBox ML("Select project!")
+			MsgBox ("Select project!")
 
 			Me.BringToFront
 
@@ -340,7 +340,7 @@ Private Sub frmOpenProject.cmdOK_Click(ByRef Sender As Control)
 
 		Else
 
-			MsgBox ML("Select project!")
+			MsgBox ("Select project!")
 
 			Me.BringToFront
 
@@ -378,7 +378,7 @@ Private Sub frmOpenProject.cmdBrowse_Click(ByRef Sender As Control)
 
 		If SelectedFile = "" Then
 
-			MsgBox ML("No project file (.vfp) found in the selected folder."), , mtWarning
+			MsgBox ("No project file (.vfp) found in the selected folder."), , mtWarning
 
 			Me.BringToFront
 

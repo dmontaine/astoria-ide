@@ -89,7 +89,7 @@ Common Shared As Boolean AutoIncrement
 Common Shared As Boolean AutoComplete
 Common Shared As Boolean AutoSuggestions, ProjectAutoSuggestions
 Common Shared As Boolean AutoCreateRC
-Common Shared As Boolean AutoCreateBakFiles, gLocalProperties
+Common Shared As Boolean AutoCreateBakFiles
 Common Shared As Boolean AddRelativePathsToRecent
 Common Shared As Boolean UseMakeOnStartWithCompile
 Common Shared As Boolean CreateNonStaticEventHandlers, CreateFormTypesWithoutTypeWord

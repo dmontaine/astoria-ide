@@ -5,7 +5,7 @@
 		' frmAdvancedOptions
 		With This
 			.Name = "frmAdvancedOptions"
-			.Text = ML("Compiler Warnings")
+			.Text = ("Compiler Warnings")
 			.Name = "frmAdvancedOptions"
 			.StartPosition = FormStartPosition.CenterParent
 			.BorderStyle = FormBorderStyle.FixedDialog
@@ -16,7 +16,7 @@
 		' Label1
 		With Label1
 			.Name = "Label1"
-			.Text = ML("Select which compiler warnings to display:")
+			.Text = ("Select which compiler warnings to display:")
 			.TabIndex = 0
 			.SetBounds 10, 10, 320, 30
 			.Parent = @This
@@ -24,7 +24,7 @@
 		' chkShowUnusedLabelWarnings
 		With chkShowUnusedLabelWarnings
 			.Name = "chkShowUnusedLabelWarnings"
-			.Text = ML("Show unused label warnings")
+			.Text = ("Show unused label warnings")
 			.TabIndex = 1
 			.SetBounds 10, 50, 240, 20
 			.Parent = @This
@@ -32,7 +32,7 @@
 		' chkShowUnusedFunctionWarnings
 		With chkShowUnusedFunctionWarnings
 			.Name = "chkShowUnusedFunctionWarnings"
-			.Text = ML("Show unused function warnings")
+			.Text = ("Show unused function warnings")
 			.TabIndex = 2
 			.SetBounds 10, 70, 240, 20
 			.Parent = @This
@@ -40,7 +40,7 @@
 		' chkShowUnusedVariableWarnings
 		With chkShowUnusedVariableWarnings
 			.Name = "chkShowUnusedVariableWarnings"
-			.Text = ML("Show unused variable warnings")
+			.Text = ("Show unused variable warnings")
 			.TabIndex = 3
 			.SetBounds 10, 90, 240, 20
 			.Parent = @This
@@ -48,7 +48,7 @@
 		' chkShowUnusedButSetVariableWarnings
 		With chkShowUnusedButSetVariableWarnings
 			.Name = "chkShowUnusedButSetVariableWarnings"
-			.Text = ML("Show unused but set variable warnings")
+			.Text = ("Show unused but set variable warnings")
 			.TabIndex = 4
 			.SetBounds 10, 110, 240, 20
 			.Parent = @This
@@ -56,7 +56,7 @@
 		' chkShowMainWarnings
 		With chkShowMainWarnings
 			.Name = "chkShowMainWarnings"
-			.Text = ML("Show entry-point warnings")
+			.Text = ("Show entry-point warnings")
 			.TabIndex = 5
 			.SetBounds 10, 130, 240, 20
 			.Parent = @This
@@ -73,7 +73,7 @@
 		' cmdCancel
 		With cmdCancel
 			.Name = "cmdCancel"
-			.Text = ML("&Cancel")
+			.Text = ("&Cancel")
 			.Align = DockStyle.alRight
 			.ExtraMargins.Bottom = 10
 			.ExtraMargins.Right = 10
@@ -87,7 +87,7 @@
 		' cmdOK
 		With cmdOK
 			.Name = "cmdOK"
-			.Text = ML("&OK")
+			.Text = ("&OK")
 			.Align = DockStyle.alRight
 			.ExtraMargins.Bottom = 10
 			.ExtraMargins.Right = 10

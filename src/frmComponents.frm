@@ -47,7 +47,7 @@
 		' frmComponents
 		With This
 			.Name = "frmComponents"
-			.Text = ML("Components")
+			.Text = ("Components")
 			.Designer = @This
 			.OnCreate = @Form_Create_
 			.ControlBox = True
@@ -67,7 +67,7 @@
 		' cmdApply
 		With cmdApply
 			.Name = "cmdApply"
-			.Text = ML("&Apply")
+			.Text = ("&Apply")
 			.TabIndex = 11
 			.Align = DockStyle.alRight
 			.ExtraMargins.Right = 5
@@ -81,7 +81,7 @@
 		' cmdCancel
 		With cmdCancel
 			.Name = "cmdCancel"
-			.Text = ML("&Cancel")
+			.Text = ("&Cancel")
 			.TabIndex = 10
 			.Align = DockStyle.alRight
 			.ControlIndex = 0
@@ -96,7 +96,7 @@
 		' cmdOK
 		With cmdOK
 			.Name = "cmdOK"
-			.Text = ML("&OK")
+			.Text = ("&OK")
 			.TabIndex = 9
 			.Align = DockStyle.alRight
 			.ControlIndex = 0
@@ -124,7 +124,7 @@
 		' tbpControls
 		With tbpControls
 			.Name = "tbpControls"
-			.Text = ML("Controls")
+			.Text = ("Controls")
 			.TabIndex = 1
 			.UseVisualStyleBackColor = True
 			.SetBounds 1, 22, 428, 311
@@ -171,7 +171,7 @@
 		' lblLocation
 		With lblLocation
 			.Name = "lblLocation"
-			.Text = ML("Location") & ": "
+			.Text = ("Location") & ": "
 			.TabIndex = 7
 			.Align = DockStyle.alClient
 			.ExtraMargins.Top = 25
@@ -186,7 +186,7 @@
 		' cmdBrowse
 		With cmdBrowse
 			.Name = "cmdBrowse"
-			.Text = ML("Browse") & "..."
+			.Text = ("Browse") & "..."
 			.TabIndex = 4
 			.Align = DockStyle.alTop
 			.ExtraMargins.Top = 10
@@ -200,7 +200,7 @@
 		' chkSelectedItemsOnly
 		With chkSelectedItemsOnly
 			.Name = "chkSelectedItemsOnly"
-			.Text = ML("Selected Items Only")
+			.Text = ("Selected Items Only")
 			.TabIndex = 5
 			.Align = DockStyle.alTop
 			.ExtraMargins.Top = 10
@@ -342,7 +342,7 @@ End Sub
 
 Private Sub frmComponentsType.chlControls_Change(ByRef Sender As ListControl)
 	grbInformation.Text = chlControls.Text
-	If chlControls.ItemIndex <> -1 Then lblLocation.Text = ML("Location") & ": " & Paths.Item(chlControls.ItemIndex)
+	If chlControls.ItemIndex <> -1 Then lblLocation.Text = ("Location") & ": " & Paths.Item(chlControls.ItemIndex)
 End Sub
 
 Private Sub frmComponentsType.cmdBrowse_Click(ByRef Sender As Control)

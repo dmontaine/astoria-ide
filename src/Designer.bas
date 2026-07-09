@@ -122,7 +122,7 @@ Namespace My.Sys.Forms
 			mnuDesigner.Item("OrderSeparator")->Visible = False
 			mnuDesigner.Item("BringToFront")->Visible = False
 			mnuDesigner.Item("SendToBack")->Visible = False
-			mnuDesigner.Item(0)->Caption = ML("Default event")
+			mnuDesigner.Item(0)->Caption = ("Default event")
 			mnuDesigner.Item(0)->Image = "Code"
 		Else
 			mnuDesigner.Item("LockControls")->Visible = False
@@ -138,19 +138,19 @@ Namespace My.Sys.Forms
 			If st AndAlso st->ReadPropertyFunc Then
 				Select Case QWString(st->ReadPropertyFunc(SelectedControl, "ClassName"))
 				Case "MainMenu", "PopupMenu"
-					mnuDesigner.Item(0)->Caption = ML("Menu Editor")
+					mnuDesigner.Item(0)->Caption = ("Menu Editor")
 					mnuDesigner.Item(0)->Image = ""
 				Case "ToolBar"
-					mnuDesigner.Item(0)->Caption = ML("ToolBar Editor")
+					mnuDesigner.Item(0)->Caption = ("ToolBar Editor")
 					mnuDesigner.Item(0)->Image = ""
 				Case "StatusBar"
-					mnuDesigner.Item(0)->Caption = ML("StatusBar Editor")
+					mnuDesigner.Item(0)->Caption = ("StatusBar Editor")
 					mnuDesigner.Item(0)->Image = ""
 				Case "ImageList"
-					mnuDesigner.Item(0)->Caption = ML("ImageList Editor")
+					mnuDesigner.Item(0)->Caption = ("ImageList Editor")
 					mnuDesigner.Item(0)->Image = ""
 				Case Else
-					mnuDesigner.Item(0)->Caption = ML("Default event")
+					mnuDesigner.Item(0)->Caption = ("Default event")
 					mnuDesigner.Item(0)->Image = "Code"
 				End Select
 			End If
@@ -2923,23 +2923,23 @@ SymbolsFailed:
 	End Destructor
 End Namespace
 
-mnuDesigner.Add(ML("Default event"), "Code", "Default", @PopupClick)
+mnuDesigner.Add(("Default event"), "Code", "Default", @PopupClick)
 mnuDesigner.Add("-")
-mnuDesigner.Add(ML("Lock Controls"), "LockControls", "LockControls", @PopupClick)
-mnuDesigner.Add(ML("Copy") & !"\t Ctrl+C", "Copy", "Copy", @PopupClick)
-mnuDesigner.Add(ML("Cut") & !"\t Ctrl+X", "Cut", "Cut", @PopupClick)
-mnuDesigner.Add(ML("Paste") & !"\t Ctrl+V", "Paste", "Paste", @PopupClick)
-mnuDesigner.Add(ML("Delete"), "", "Delete", @PopupClick)
+mnuDesigner.Add(("Lock Controls"), "LockControls", "LockControls", @PopupClick)
+mnuDesigner.Add(("Copy") & !"\t Ctrl+C", "Copy", "Copy", @PopupClick)
+mnuDesigner.Add(("Cut") & !"\t Ctrl+X", "Cut", "Cut", @PopupClick)
+mnuDesigner.Add(("Paste") & !"\t Ctrl+V", "Paste", "Paste", @PopupClick)
+mnuDesigner.Add(("Delete"), "", "Delete", @PopupClick)
 mnuDesigner.Add("-", "", "DuplicateSeparator")
-mnuDesigner.Add(ML("Duplicate") & !"\t Ctrl+D", "", "Duplicate", @mClick)
+mnuDesigner.Add(("Duplicate") & !"\t Ctrl+D", "", "Duplicate", @mClick)
 mnuDesigner.Add("-", "", "OrderSeparator")
-mnuDesigner.Add(ML("Bring to Front"), "BringToFront", "BringToFront", @PopupClick)
-mnuDesigner.Add(ML("Send to Back"), "SendToBack", "SendToBack", @PopupClick)
+mnuDesigner.Add(("Bring to Front"), "BringToFront", "BringToFront", @PopupClick)
+mnuDesigner.Add(("Send to Back"), "SendToBack", "SendToBack", @PopupClick)
 mnuDesigner.Add("-", "", "ShowPanelSeparator")
-mnuDesigner.Add(ML("Previous Layer") & !"\t Ctrl+PgUp", "", "PreviousLayer", @PopupClick)
-mnuDesigner.Add(ML("Next Layer") & !"\t Ctrl+PgDn", "", "NextLayer", @PopupClick)
-mnuShowPanelDesigner = mnuDesigner.Add(ML("Show Panel"), "", "ShowPanel")
+mnuDesigner.Add(("Previous Layer") & !"\t Ctrl+PgUp", "", "PreviousLayer", @PopupClick)
+mnuDesigner.Add(("Next Layer") & !"\t Ctrl+PgDn", "", "NextLayer", @PopupClick)
+mnuShowPanelDesigner = mnuDesigner.Add(("Show Panel"), "", "ShowPanel")
 mnuDesigner.Add("-")
-mnuDesigner.Add(ML("Properties"), "Property", "Properties", @PopupClick)
+mnuDesigner.Add(("Properties"), "Property", "Properties", @PopupClick)
 
 

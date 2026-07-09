@@ -1208,7 +1208,7 @@ End Function
 			
 		Loop
 		
-		tpGlobals->Caption = ML("Globals") & " (" & lvGlobals.Nodes.Count & " " & ML("Pos") & ")"
+		tpGlobals->Caption = ("Globals") & " (" & lvGlobals.Nodes.Count & " " & ("Pos") & ")"
 		
 		Return iIndex
 		
@@ -1283,7 +1283,7 @@ End Function
 		If lvThreads.Nodes.Count > 0 Then
 			lvThreads.Nodes.Item(0)->Expand
 		End If
-		tpThreads->Caption = ML("Threads") & " (" & lvThreads.Nodes.Count & " " & ML("Pos") & ")"
+		tpThreads->Caption = ("Threads") & " (" & lvThreads.Nodes.Count & " " & ("Pos") & ")"
 		
 		Return 1
 		
@@ -1467,7 +1467,7 @@ End Function
 			
 		Loop
 		
-		tpLocals->Caption = ML("Locals") & " (" & lvLocals.Nodes.Count & " " & ML("Pos") & ")"
+		tpLocals->Caption = ("Locals") & " (" & lvLocals.Nodes.Count & " " & ("Pos") & ")"
 		
 		Return 1
 		
@@ -1656,7 +1656,7 @@ End Function
 			
 			ThreadsEnter
 			
-			MsgBox(ML("The debugger could not be found. Try reinstalling the IDE."), "Visual FB Editor", mtError)
+			MsgBox(("The debugger could not be found. Try reinstalling the IDE."), "Visual FB Editor", mtError)
 			
 			ThreadsLeave
 			
@@ -1668,7 +1668,7 @@ End Function
 			
 			ThreadsEnter
 			
-			MsgBox(ML("The program to debug could not be found. Build the project first."), "Visual FB Editor", mtError)
+			MsgBox(("The program to debug could not be found. Build the project first."), "Visual FB Editor", mtError)
 			
 			ThreadsLeave
 			
@@ -1678,7 +1678,7 @@ End Function
 		
 		ThreadsEnter
 		
-		ShowMessages(ML("Wait, process loading..."))
+		ShowMessages(("Wait, process loading..."))
 		
 		lvLocals.Nodes.Clear
 		
@@ -2033,7 +2033,7 @@ End Function
 					If Not bGDBLocked Then MutexLock tlockGDB: bGDBLocked = True
 					If cmd = !"q\n" Then
 						ThreadsEnter
-						ShowMessages ML("Debugging finished.")
+						ShowMessages ("Debugging finished.")
 						If bGDBLocked Then MutexUnlock tlockGDB: bGDBLocked = False
 						deinit
 						ThreadsLeave
@@ -2381,16 +2381,16 @@ End Function
 
 Private Sub hard_closing(errormsg As String)
 	ThreadsEnter
-	MsgBox(ML("The debugger ran into a problem and had to stop.") & Chr(13) & Chr(13) & errormsg, "Visual FB Editor", mtError)
+	MsgBox(("The debugger ran into a problem and had to stop.") & Chr(13) & Chr(13) & errormsg, "Visual FB Editor", mtError)
 	ThreadsLeave
 End Sub
 
 Private Function kill_process(text As String) As Integer
 	Dim As Long retcode,lasterr
 	If prun Then ''debuggee waiting or running Then
-		If MsgBox(ML("Stop the running program?") & " " & text + Chr(10) + Chr(10) + _
-			ML("Any unsaved data in the program will be lost.") + Chr(10) + _
-			ML("If possible, try closing the program normally first."), "Visual FB Editor", mtWarning, btYesNo) = mrYes Then
+		If MsgBox(("Stop the running program?") & " " & text + Chr(10) + Chr(10) + _
+			("Any unsaved data in the program will be lost.") + Chr(10) + _
+			("If possible, try closing the program normally first."), "Visual FB Editor", mtWarning, btYesNo) = mrYes Then
 			flagkill = True
 				retcode=TerminateProcess(dbghand,999)
 				lasterr=GetLastError
@@ -2427,7 +2427,7 @@ Sub RunWithDebug(Debugger As String, ByRef ProjectFileName As WString, ByRef Pro
 	Wend
 	If Pos1 = 0 Then Pos1 = Len(exename)
 	WLet(Workdir, Left(exename, Pos1))
-		ShowMessages(Time & ": " & ML("Run") & ": " & exename & " ...")
+		ShowMessages(Time & ": " & ("Run") & ": " & exename & " ...")
 		tvVar.Visible = False
 		lvLocals.Visible = True
 		tvThd.Visible = False
@@ -2435,14 +2435,14 @@ Sub RunWithDebug(Debugger As String, ByRef ProjectFileName As WString, ByRef Pro
 		tvWch.Visible = False
 		lvWatches.Visible = True
 		If load_file(exename, GetFullPath(ExePath & "\" & BUNDLED_GDB_PATH)) Then
-			ShowMessages(Time & ": " & ML("Debugging finished."))
+			ShowMessages(Time & ": " & ("Debugging finished."))
 			ChangeEnabledDebug True, False, False
 			Exit Sub
 		End If
 		tpLocals->SelectTab
 		iFlagStartDebug = 1
 		run_debug(1)
-		ShowMessages(Time & ": " & ML("Application finished. Returned code") & ": " & Result & " - " & Err2Description(Result))
+		ShowMessages(Time & ": " & ("Application finished. Returned code") & ": " & Result & " - " & Err2Description(Result))
 		CheckProfiler GetFolderName(exename), exename
 		ChangeEnabledDebug True, False, False
 	If Workdir <> 0 Then _Deallocate( Workdir)

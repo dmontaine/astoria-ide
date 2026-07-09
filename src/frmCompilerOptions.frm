@@ -22,7 +22,7 @@
 		' frmCompilerOptions
 		With This
 			.Name = "frmCompilerOptions"
-			.Text = ML("Compiler Options")
+			.Text = ("Compiler Options")
 			.Designer = @This
 			.ShowCaption = True
 			.OnCreate = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @Form_Create)
@@ -99,10 +99,10 @@ Private Sub frmCompilerOptionsType.Form_Create(ByRef Sender As Control)
 			Buff = Trim(Buff)
 			Pos1 = InStr(Buff, "  ")
 			lvCompilerOptions.ListItems.Add .Left(Buff, Pos1 - 1)
-			lvCompilerOptions.ListItems.Item(lvCompilerOptions.ListItems.Count - 1)->Text(1) = ML(Trim(Mid(Buff, Pos1)))
+			lvCompilerOptions.ListItems.Item(lvCompilerOptions.ListItems.Count - 1)->Text(1) = (Trim(Mid(Buff, Pos1)))
 		Loop
 	Else
-		MsgBox ML("Open file failure!") & Chr(13, 10) & CompilerOptionsFile
+		MsgBox ("Open file failure!") & Chr(13, 10) & CompilerOptionsFile
 	End If
 	CloseFile_(Fn)
 End Sub

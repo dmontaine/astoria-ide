@@ -46,7 +46,7 @@ Dim Shared  As WString Ptr BuffTips(Any)
 		' frmTipOfDay
 		With This
 			.Name = "frmTipOfDay"
-			.Text = ML("Tip of the Day")
+			.Text = ("Tip of the Day")
 			This.BorderStyle = FormBorderStyle.FixedDialog
 			This.MaximizeBox = False
 			This.MinimizeBox = False
@@ -61,7 +61,7 @@ Dim Shared  As WString Ptr BuffTips(Any)
 		' cmdPreviousTip
 		With cmdPreviousTip
 			.Name = "cmdPreviousTip"
-			.Text = ML("Previous Tip")
+			.Text = ("Previous Tip")
 			.TabIndex = 2
 			.SetBounds 220, 280, 90, 24
 			.Designer = @This
@@ -71,7 +71,7 @@ Dim Shared  As WString Ptr BuffTips(Any)
 		' cmdNextTip
 		With cmdNextTip
 			.Name = "cmdNextTip"
-			.Text = ML("Next Tip")
+			.Text = ("Next Tip")
 			.TabIndex = 3
 			.SetBounds 320, 280, 90, 24
 			.Designer = @This
@@ -81,7 +81,7 @@ Dim Shared  As WString Ptr BuffTips(Any)
 		' cmdClose
 		With cmdClose
 			.Name = "cmdClose"
-			.Text = ML("Close")
+			.Text = ("Close")
 			.TabIndex = 4
 			.SetBounds 420, 280, 90, 24
 			.Designer = @This
@@ -91,7 +91,7 @@ Dim Shared  As WString Ptr BuffTips(Any)
 		' chkDoNotShow
 		With chkDoNotShow
 			.Name = "chkDoNotShow"
-			.Text = ML("Don't show tips")
+			.Text = ("Don't show tips")
 			.TabIndex = 1
 			.SetBounds 20, 282, 180, 20
 			.Designer = @This
@@ -183,7 +183,7 @@ Private Sub frmTipOfDayType.Form_Create(ByRef Sender As Control)
 		Dim As WString * MAX_PATH imageFileName = ExePath & "/Help/Tip of the Day/images/" & Right("0000" & ShowTipoftheDayIndex, 4) & IIf(g_darkModeEnabled, "D", "") & ".png"
 		If Dir(imageFileName) <> "" Then lblImage.Graphic.LoadFromFile(imageFileName, lblImage.Width, lblImage.Height)
 	Else
-		MsgBox ML("File") & " """ & GetOSPath(ExePath & "/Help/Tip of the Day/") & App.CurLanguage & ".tip"" " & ML("not found!")
+		MsgBox ("File") & " """ & GetOSPath(ExePath & "/Help/Tip of the Day/") & App.CurLanguage & ".tip"" " & ("not found!")
 	End If
 	CloseFile_(Fn)
 	chkDoNotShow.Checked = Not ShowTipoftheDay 

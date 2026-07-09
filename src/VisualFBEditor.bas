@@ -678,7 +678,7 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 	Case "AddUserControl":                  AddFromTemplate ExePath + "/Templates/Files/User Control.bas"
 	Case "AddResource":                     AddFromTemplate ExePath + "/Templates/Files/Resource.rc"
 	Case "AddManifest":                     AddFromTemplate ExePath + "/Templates/Files/Manifest.xml"
-	Case "Undo", "Redo", "CutCurrentLine", "Cut", "Copy", "Paste", "SelectAll", "Duplicate", "SingleComment", "BlockComment", "UnComment", _
+	Case "Undo", "Redo", "CutCurrentLine", "Cut", "Copy", "Paste", "SelectAll", "Duplicate", "SingleComment", "UnComment", _
 		"Indent", "Outdent", "Format", "Unformat", "AddSpaces", "Breakpoint", "ToggleBookmark", "CollapseAll", "UnCollapseAll", "CollapseAllProcedures", "UnCollapseAllProcedures", _
 		"CollapseCurrent", "UnCollapseCurrent", "CompleteWord", "Define", _
 		"AlignLefts", "AlignCenters", "AlignRights", "AlignTops", "AlignMiddles", "AlignBottoms", "AlignToGrid", "MakeSameSizeWidth", "MakeSameSizeHeight", "MakeSameSizeBoth", "SizeToGrid", _
@@ -750,8 +750,7 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 				Case "Paste":                       ec->PasteFromClipboard
 				Case "Duplicate":                   ec->DuplicateLine
 				Case "SelectAll":                   ec->SelectAll
-				Case "SingleComment":               ec->CommentSingle
-				Case "BlockComment":                ec->CommentBlock
+				Case "SingleComment":               ec->ToggleComment
 				Case "UnComment":                   ec->UnComment
 				Case "Indent":                      ec->Indent
 				Case "Outdent":                     ec->Outdent

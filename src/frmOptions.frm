@@ -157,15 +157,6 @@ pfOptions = @fOptions
 		pnlHelp.TabIndex = 75
 		pnlHelp.SetBounds 188, 4, 427, 400
 		pnlHelp.Parent = @pplGeneral
-		' pnlDefaults
-		With pnlDefaults
-			.Name = "pnlDefaults"
-			.Text = ""
-			.Align = DockStyle.alClient
-			.TabIndex = 75
-			.SetBounds 188, 4, 427, 400
-			.Parent = @pplGeneral
-		End With
 		' pnlAIAgent
 		pnlAIAgent.Name = "pnlAIAgent"
 		pnlAIAgent.Text = ""
@@ -280,21 +271,6 @@ pfOptions = @fOptions
 			.TabIndex = 84
 			'.SetBounds 10, 0, 417, 400
 			.Parent = @pnlCompiler
-		End With
-		' grbDefaults
-		With grbDefaults
-			.Name = "grbDefaults"
-			.Text = ("Default Settings for New Files")
-			.AutoSize = false
-			.Align = DockStyle.alClient
-			.ExtraMargins.Left = 0
-			.Margins.Top = 20
-			.Margins.Right = 15
-			.Margins.Left = 15
-			.Margins.Bottom = 15
-			.TabIndex = 84
-			.SetBounds 0, 0, 417, 400
-			.Parent = @pnlDefaults
 		End With
 		' grbShortcuts
 		With grbShortcuts
@@ -2363,17 +2339,6 @@ pfOptions = @fOptions
 			.Designer = @This
 			.Parent = @pnlChangeEndingType
 		End With
-		' vbxDefaults
-		With vbxDefaults
-			.Name = "vbxDefaults"
-			.Text = "VerticalBox1"
-			.TabIndex = 273
-			.Align = DockStyle.alTop
-			.Spacing = 10
-			.SetBounds 15, 20, 387, 62
-			.Designer = @This
-			.Parent = @grbDefaults
-		End With
 		' vbxIncludePaths
 		With vbxIncludePaths
 			.Name = "vbxIncludePaths"
@@ -2990,7 +2955,6 @@ Private Sub frmOptions.Form_Create(ByRef Designer As My.Sys.Object, ByRef Sender
 		tnGeneral->Nodes.Add(("Shortcuts"), "Shortcuts")
 		tnEditor->Nodes.Add(("Colors And Fonts"), "ColorsAndFonts")
 		tnEditor->Nodes.Add(("Other Editors"), "OtherEditors")
-		tnEditor->Nodes.Add(("Defaults"), "Defaults")
 		tnDebugger->Nodes.Add(("Terminal"), "Terminal")
 		Var tnHelp = .tvOptions.Nodes.Add(("Help"), "Help")
 		tnHelp->Nodes.Add(("AI Agent"), "AIAgent")
@@ -4361,7 +4325,6 @@ Private Sub frmOptions.TreeView1_SelChange(ByRef Designer As My.Sys.Object, ByRe
 		.pnlGeneral.Visible = Key = "General"
 		.pnlCodeEditor.Visible = Key = "CodeEditor"
 		.pnlShortcuts.Visible = Key = "Shortcuts"
-		.pnlDefaults.Visible = Key = "Defaults"
 		.pnlColorsAndFonts.Visible = Key = "ColorsAndFonts"
 		.pnlOtherEditors.Visible = Key = "OtherEditors"
 		.pnlCompiler.Visible = Key = "Compiler"

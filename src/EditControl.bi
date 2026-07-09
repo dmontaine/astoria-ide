@@ -678,8 +678,8 @@ Namespace My.Sys.Forms
 		Declare Sub Indent
 		Declare Sub Outdent
 		Declare Sub CommentSingle
-		Declare Sub CommentBlock
 		Declare Sub UnComment
+		Declare Sub ToggleComment
 		Declare Constructor
 		Declare Destructor
 		OnChange                  As Sub(ByRef Designer As My.Sys.Object, ByRef Sender As EditControl)

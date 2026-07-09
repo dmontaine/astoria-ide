@@ -113,14 +113,14 @@ Dim Shared As MainMenu mnuMain
 Dim Shared As MenuItem Ptr mnuStartWithCompile, mnuStart, mnuContinue, mnuBreak, mnuEnd, mnuRestart, mnuStandardToolBar, mnuEditToolBar, mnuProjectToolBar, mnuFormatToolBar, mnuRunToolBar, mnuSplit, mnuSplitHorizontally, mnuSplitVertically, mnuWindowSeparator, miRecentFiles, miSetAsMain, miClearStartUp, miTabSetAsMain, miTabReloadHistoryCode, miRemoveFiles, miToolBars
 Dim Shared As MenuItem Ptr miRecentAIChat,  miFileAIChat
 Dim Shared As MenuItem Ptr miSaveProject, miSaveProjectAs, miCloseProject, miDeleteProject, miNewFile, miOpenFile, miCloseFile, miDeleteFile, miSaveFile, miSaveFileAs, miPrint, miPrintPreview, miPageSetup, miOpenProjectFolder, miProjectProperties, miExplorerOpenProjectFolder, miExplorerRename, miExplorerProjectProperties, miExplorerCloseProject, miRename, miRemoveFileFromProject
-Dim Shared As MenuItem Ptr miUndo, miRedo, miCutCurrentLine, miCut, miCopy, miPaste, miSingleComment, miBlockComment, miUncommentBlock, miDuplicate, miSelectAll, miIndent, miOutdent, miFormat, miUnformat, miFormatProject, miUnformatProject, miAddSpaces, miDeleteBlankLines, miSuggestions, miCompleteWord, miParameterInfo, miStepInto, miStepOver, miStepOut, miRunToCursor, miGDBCommand, miAddWatch, miToggleBreakpoint, miClearAllBreakpoints, miSetNextStatement, miShowNextStatement
+Dim Shared As MenuItem Ptr miUndo, miRedo, miCutCurrentLine, miCut, miCopy, miPaste, miSingleComment, miDuplicate, miSelectAll, miIndent, miOutdent, miFormat, miUnformat, miFormatProject, miUnformatProject, miAddSpaces, miDeleteBlankLines, miSuggestions, miCompleteWord, miParameterInfo, miStepInto, miStepOver, miStepOut, miRunToCursor, miGDBCommand, miAddWatch, miToggleBreakpoint, miClearAllBreakpoints, miSetNextStatement, miShowNextStatement
 Dim Shared As MenuItem Ptr dmiMake, dmiMakeClean
 Dim Shared As MenuItem Ptr miCode, miForm, miCodeAndForm, miGotoCodeForm, miCollapseCurrent, miCollapseAllProcedures, miCollapseAll, miUnCollapseCurrent, miUnCollapseAllProcedures, miUnCollapseAll, miImageManager, miAddProcedure, miAddType, miFind, miReplace, miFindNext, miFindPrevious, miGoto, miDefine, miToggleBookmark, miNextBookmark, miPreviousBookmark, miClearAllBookmarks, miSyntaxCheck, miCompile, miCompileAll, miMake, miMakeClean
 Dim Shared As MenuItem Ptr miAlignLefts, miAlignCenters, miAlignRights, miAlignTops, miAlignMiddles, miAlignBottoms, miAlignToGrid, miMakeSameSizeWidth, miMakeSameSizeHeight, miMakeSameSizeBoth, miSizeToGrid, miHorizontalSpacingMakeEqual, miHorizontalSpacingIncrease, miHorizontalSpacingDecrease, miHorizontalSpacingRemove, miVerticalSpacingMakeEqual, miVerticalSpacingIncrease, miVerticalSpacingDecrease, miVerticalSpacingRemove, miCenterInParentHorizontally, miCenterInParentVertically, miOrderBringToFront, miOrderSendToBack, miLockControls
 Dim Shared As MenuItem Ptr miFormFormat ' D1 (2026-07-07): top-level Designer menu; disabled when no form with controls is active
 Dim Shared As MenuItem Ptr miShowWithFolders, miShowWithoutFolders, miShowAsFolder
 Dim Shared As ToolButton Ptr tbtAlignLefts, tbtAlignCenters, tbtAlignRights, tbtAlignTops, tbtAlignMiddles, tbtAlignBottoms, tbtAlignToGrid, tbtMakeSameSizeWidth, tbtMakeSameSizeHeight, tbtMakeSameSizeBoth, tbtSizeToGrid, tbtHorizontalSpacingMakeEqual, tbtHorizontalSpacingIncrease, tbtHorizontalSpacingDecrease, tbtHorizontalSpacingRemove, tbtVerticalSpacingMakeEqual, tbtVerticalSpacingIncrease, tbtVerticalSpacingDecrease, tbtVerticalSpacingRemove, tbtCenterInParentHorizontally, tbtCenterInParentVertically, tbtOrderBringToFront, tbtOrderSendToBack, tbtLockControls
-Dim Shared As ToolButton Ptr tbtSave, tbtSaveAll, tbtSyntaxCheck, tbtSuggestions, tbtCompile, tbtUndo, tbtRedo, tbtCut, tbtCopy, tbtPaste, tbtBlockComment, tbtSingleComment, tbtUncommentBlock, tbtFormat, tbtUnformat, tbtCompleteWord, tbtParameterInfo, tbtFind, tbtUseDirect2D, tbtRemoveFileFromProject, tbtStartWithCompile, tbtStart, tbtBreak, tbtEnd, tbtUseDebugger, tbtNotSetted, tbtConsole, tbtGUI, tbtStepInto, tbtStepOver, tbtStepOut, tbtRunToCursor, tbtToggleBreakpoint, tbtSetNextStatement, tbtShowNextStatement
+Dim Shared As ToolButton Ptr tbtSave, tbtSaveAll, tbtSyntaxCheck, tbtSuggestions, tbtCompile, tbtUndo, tbtRedo, tbtCut, tbtCopy, tbtPaste, tbtSingleComment, tbtFormat, tbtUnformat, tbtCompleteWord, tbtParameterInfo, tbtFind, tbtUseDirect2D, tbtRemoveFileFromProject, tbtStartWithCompile, tbtStart, tbtBreak, tbtEnd, tbtUseDebugger, tbtNotSetted, tbtConsole, tbtGUI, tbtStepInto, tbtStepOver, tbtStepOut, tbtRunToCursor, tbtToggleBreakpoint, tbtSetNextStatement, tbtShowNextStatement
 Dim Shared As SaveFileDialog SaveD
 Dim Shared As ReBar MainReBar, rbLeft, rbRight, rbBottom
 	Dim Shared As PageSetupDialog PageSetupD
@@ -5682,7 +5682,6 @@ Sub CreateMenusAndToolBars
 	imgList.Add "Event", "Event"
 	imgList.Add "Collapsed", "Collapsed"
 	imgList.Add "Categorized", "Categorized"
-	imgList.Add "BlockComment", "BlockComment"
 	imgList.Add "Comment", "Comment"
 	imgList.Add "UnComment", "UnComment"
 	imgList.Add "Print", "Print"
@@ -5842,9 +5841,7 @@ Sub CreateMenusAndToolBars
 	miCopy = miEdit->Add(("&Copy") & HK("Copy", "Ctrl+C"), "Copy", "Copy", @mClick, , , False)
 	miPaste = miEdit->Add(("&Paste") & HK("Paste", "Ctrl+V"), "Paste", "Paste", @mClick, , , False)
 	miEdit->Add("-")
-	miSingleComment = miEdit->Add(("&Single Comment") & HK("SingleComment", "Ctrl+I"), "Comment", "SingleComment", @mClick, , , False)
-	miBlockComment = miEdit->Add(("&Block Comment") & HK("BlockComment", "Ctrl+Alt+I"), "BlockComment", "BlockComment", @mClick, , , False)
-	miUncommentBlock = miEdit->Add(("&Uncomment Block") & HK("UnComment", "Ctrl+Shift+I"), "UnComment", "UnComment", @mClick, , , False)
+	miSingleComment = miEdit->Add(("&Toggle Comment") & HK("SingleComment", "Ctrl+I"), "Comment", "SingleComment", @mClick, , , False)
 	miEdit->Add("-")
 	miDuplicate = miEdit->Add(("&Duplicate") & HK("Duplicate", "Ctrl+D"), "", "Duplicate", @mClick, , , False)
 	miEdit->Add("-")
@@ -6220,9 +6217,7 @@ Sub CreateMenusAndToolBars
 	tbtFormat = tbEdit.Buttons.Add(, "Format", , @mClick, "Format", , ("Format") & HK("Format", "Ctrl+Tab", True), True, ToolButtonState.tstNone)
 	tbtUnformat = tbEdit.Buttons.Add(, "Unformat", , @mClick, "Unformat", , ("Unformat") & HK("Unformat", "Shift+Ctrl+Tab", True), True, ToolButtonState.tstNone)
 	tbEdit.Buttons.Add tbsSeparator
-	tbtSingleComment = tbEdit.Buttons.Add(, "Comment", , @mClick, "SingleComment", , ("Single comment") & HK("SingleComment", "Ctrl+I", True), True, ToolButtonState.tstNone)
-	tbtBlockComment = tbEdit.Buttons.Add(, "BlockComment", , @mClick, "BlockComment", , ("Block comment") & HK("BlockComment", "Ctrl+Alt+I", True), True, ToolButtonState.tstNone)
-	tbtUncommentBlock = tbEdit.Buttons.Add(, "UnComment", , @mClick, "UnComment", , ("UnComment") & HK("UnComment", "Shift+Ctrl+I", True), True, ToolButtonState.tstNone)
+	tbtSingleComment = tbEdit.Buttons.Add(, "Comment", , @mClick, "SingleComment", , ("Toggle comment") & HK("SingleComment", "Ctrl+I", True), True, ToolButtonState.tstNone)
 	tbEdit.Buttons.Add tbsSeparator
 	tbtCompleteWord = tbEdit.Buttons.Add(, "CompleteWord", , @mClick, "CompleteWord", , ("Complete Word") & HK("CompleteWord", "Ctrl+Space", True), True, ToolButtonState.tstNone)
 	tbtParameterInfo = tbEdit.Buttons.Add(, "ParameterInfo", , @mClick, "InvokeParameterInfo", , ("Parameter Info") & HK("ParameterInfo", "Ctrl+J", True), True)
@@ -8845,10 +8840,6 @@ Sub frmMain_ActiveControlChanged(ByRef Designer As My.Sys.Object, ByRef sender A
 	tbtPaste->Enabled = bEnabled
 	miSingleComment->Enabled = bEnabledEditControl
 	tbtSingleComment->Enabled = bEnabledEditControl
-	tbtBlockComment->Enabled = bEnabledEditControl
-	miBlockComment->Enabled = bEnabledEditControl
-	miUncommentBlock->Enabled = bEnabledEditControl
-	tbtUncommentBlock->Enabled = bEnabledEditControl
 	miDuplicate->Enabled = bEnabledEditControl Or bEnabledPanel
 	miSelectAll->Enabled = bEnabled
 	miIndent->Enabled = bEnabledEditControl OrElse bEnabledIndentAndOutdent

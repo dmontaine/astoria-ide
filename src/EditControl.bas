@@ -2933,36 +2933,6 @@ Namespace My.Sys.Forms
 		ShowCaretPos True
 	End Sub
 	
-	Sub EditControl.CommentBlock
-		UpdateLock
-		Dim n As Integer
-		Dim As Integer iSelStartLine, iSelEndLine, iSelStartChar, iSelEndChar
-		GetSelection iSelStartLine, iSelEndLine, iSelStartChar, iSelEndChar
-		Changing("Blokli izoh qilish")
-		iSelEndLine = iSelEndLine - IIf(iSelEndChar = 0, 1, 0)
-		For i As Integer = iSelStartLine To iSelEndLine
-			FECLine = Content.Lines.Items[i]
-			If i = iSelStartLine Or i = iSelEndLine Then
-				If i = iSelStartLine Then
-					n = Len(*FECLine->Text) - Len(LTrim(*FECLine->Text, Any !"\t "))
-					WLetEx(FECLine->Text, Mid(*FECLine->Text, 1, n) & "/'" & Mid(*FECLine->Text, n + 1))
-					FECLine->CommentIndex += 1
-					If i = FSelEndLine And FSelEndChar <> 0 Then FSelEndChar += 2
-					If i = FSelStartLine And FSelStartChar <> 0 Then FSelStartChar += 2
-					If i = iSelEndLine Then WAdd(FECLine->Text, " '/") 'Support working with one line
-				ElseIf i = iSelEndLine Then
-					WAdd(FECLine->Text, "'/")
-				End If
-			Else
-				FECLine->CommentIndex += 1
-			End If
-			ChangeCollapsibility i
-		Next i
-		Changed("Blokli izoh qilish")
-		UpdateUnLock
-		ShowCaretPos True
-	End Sub
-	
 	Sub EditControl.UnComment
 		UpdateLock
 		Dim As Integer n, CommentFlag
@@ -3000,7 +2970,23 @@ Namespace My.Sys.Forms
 		UpdateUnLock
 		ShowCaretPos True
 	End Sub
-	
+
+	' C1: single hotkey/menu entry for both directions -- comments the selection if it
+	' isn't already commented, uncomments it (single- or block-style, UnComment already
+	' handles both) if it is. Checked against only the first selected line, matching
+	' UnComment's own per-line detection.
+	Sub EditControl.ToggleComment
+		Dim As Integer iSelStartLine, iSelEndLine, iSelStartChar, iSelEndChar
+		GetSelection iSelStartLine, iSelEndLine, iSelStartChar, iSelEndChar
+		FECLine = Content.Lines.Items[iSelStartLine]
+		Dim As WString * 2048 t = Trim(*FECLine->Text, Any !"\t ")
+		If .Left(t, 2) = "/'" OrElse Right(t, 2) = "'/" OrElse .Left(t, 1) = "'" Then
+			UnComment
+		Else
+			CommentSingle
+		End If
+	End Sub
+
 	Sub EditControl.ScrollToCaret
 		ShowCaretPos True
 	End Sub

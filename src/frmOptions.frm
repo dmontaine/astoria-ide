@@ -3841,7 +3841,10 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		If IniValueChangedBool(piniSettings, "Options", "PropertiesLocal", gLocalProperties) Then
 			piniSettings->WriteBool("Options", "PropertiesLocal", gLocalProperties) 'David Change
 		End If
-		pfrmMain->Menu->ImagesList = IIf(DisplayMenuIcons, pimgList, 0)
+		' Not applied live: setting Menu->ImagesList immediately drops the icon lookup for the
+		' whole menu, but already-rendered items keep their cached icon, leaving a half-applied
+		' state (most icons gone, a few stuck) that contradicts the "next run" message below.
+		' SettingsService.bas's startup path already sets this correctly from DisplayMenuIcons.
 		MainReBar.Visible = ShowMainToolBar
 		pfrmMain->RequestAlign
 			txtLabelProperty.BackColor = clBtnFace

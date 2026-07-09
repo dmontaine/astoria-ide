@@ -110,6 +110,10 @@ Private Sub frmSave.Form_Show_(ByRef Designer As My.Sys.Object, ByRef Sender As 
 	(*Cast(frmSave Ptr, Sender.Designer)).Form_Show(Sender)
 End Sub
 Private Sub frmSave.Form_Show(ByRef Sender As Form)
+	'' B1: SelectAll only works once lstFiles has a real window handle, which callers
+	'' can't guarantee before ShowModal creates it -- do it here instead, once the
+	'' control is actually live, so everything listed starts pre-selected as intended.
+	lstFiles.SelectAll
 End Sub
 
 Private Sub frmSave.Form_Create_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)

@@ -789,7 +789,7 @@ Namespace My.Sys.Forms
 					If OnHandleIsAllocated Then OnHandleIsAllocated(This)
 					If OnCreate Then OnCreate(*Designer, This)
 					If Not FEnabled Then Enabled = FEnabled
-						If FVisible Then If ClassName = "Form" Then This.Show Else ShowWindow(FHandle, SW_SHOWNORMAL)
+							If FVisible Then If ClassName = "Form" Then This.Show Else ShowWindow(FHandle, SW_SHOWNORMAL)
 						Update
 						If FAllowDrop Then
 							FDropTarget.m_hWnd = FHandle

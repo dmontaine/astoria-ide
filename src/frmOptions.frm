@@ -3263,6 +3263,27 @@ Sub SetColors
 	End With
 End Sub
 
+' Dirty-check helpers for cmdApply_Click: skip a WriteXxx call when the INI already
+' holds the value being applied, so Apply only touches keys that actually changed.
+' Factored out (rather than inlined at each of the ~300 call sites) because inlining
+' the KeyExists+Read+compare logic per site previously ballooned cmdApply_Click into
+' a single ~8000-line generated function that crashed the GCC backend at -O2.
+Private Function IniValueChangedBool(ByVal Ini As IniFile Ptr, ByRef Section As WString, ByRef Key As WString, NewValue As Boolean) As Boolean
+	Return (Ini->KeyExists(Section, Key) = -1) OrElse (Ini->ReadBool(Section, Key) <> NewValue)
+End Function
+
+Private Function IniValueChangedInt(ByVal Ini As IniFile Ptr, ByRef Section As WString, ByRef Key As WString, NewValue As Integer) As Boolean
+	Return (Ini->KeyExists(Section, Key) = -1) OrElse (Ini->ReadInteger(Section, Key) <> NewValue)
+End Function
+
+Private Function IniValueChangedFloat(ByVal Ini As IniFile Ptr, ByRef Section As WString, ByRef Key As WString, NewValue As Double) As Boolean
+	Return (Ini->KeyExists(Section, Key) = -1) OrElse (Ini->ReadFloat(Section, Key) <> NewValue)
+End Function
+
+Private Function IniValueChangedStr(ByVal Ini As IniFile Ptr, ByRef Section As WString, ByRef Key As WString, ByRef NewValue As WString) As Boolean
+	Return (Ini->KeyExists(Section, Key) = -1) OrElse (Ini->ReadString(Section, Key) <> NewValue)
+End Function
+
 Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	On Error Goto ErrorHandler
 	fOptions.LastApplySucceeded = True
@@ -3446,20 +3467,46 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 			WLet(DefaultAIAgent, IIf(.cboAIAgent.ItemIndex = 0, "", .cboAIAgent.Text))
 			WLet(CurrentAIAgent, *DefaultAIAgent)
 		End If
-		piniSettings->WriteString "AIAgents", "DefaultAIAgent", *DefaultAIAgent
+		If IniValueChangedStr(piniSettings, "AIAgents", "DefaultAIAgent", *DefaultAIAgent) Then
+			piniSettings->WriteString "AIAgents", "DefaultAIAgent", *DefaultAIAgent
+		End If
 		For i As Integer = 0 To pAIAgents->Count - 1
-			piniSettings->WriteString "AIAgents", "Version_" & WStr(i), Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->Name
-			piniSettings->WriteString "AIAgents", "ModelName_" & WStr(i), Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->ModelName
-			piniSettings->WriteString "AIAgents", "Provider_" & WStr(i), Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->Provider
-			piniSettings->WriteString "AIAgents", "Host_" & WStr(i),  Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->Host
-			piniSettings->WriteInteger "AIAgents", "Port_" & WStr(i),  Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->Port
-			piniSettings->WriteString "AIAgents", "Address_" & WStr(i),  Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->Address
-			piniSettings->WriteString "AIAgents", "APIKey_" & WStr(i),  Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->APIKey
-			piniSettings->WriteString "AIAgents", "Response_Format_" & WStr(i),  Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->Response_Format
-			piniSettings->WriteFloat "AIAgents", "Temperature_" & WStr(i),  Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->Temperature
-			piniSettings->WriteFloat "AIAgents", "Top_P_" & WStr(i),  Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->Top_P
-			piniSettings->WriteBool "AIAgents", "Stream_" & WStr(i),  Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->Stream
-			piniSettings->WriteInteger "AIAgents", "ContentSize_" & WStr(i),  Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->ContentSize \ 1024
+			If IniValueChangedStr(piniSettings, "AIAgents", "Version_" & WStr(i), Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->Name) Then
+				piniSettings->WriteString "AIAgents", "Version_" & WStr(i), Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->Name
+			End If
+			If IniValueChangedStr(piniSettings, "AIAgents", "ModelName_" & WStr(i), Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->ModelName) Then
+				piniSettings->WriteString "AIAgents", "ModelName_" & WStr(i), Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->ModelName
+			End If
+			If IniValueChangedStr(piniSettings, "AIAgents", "Provider_" & WStr(i), Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->Provider) Then
+				piniSettings->WriteString "AIAgents", "Provider_" & WStr(i), Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->Provider
+			End If
+			If IniValueChangedStr(piniSettings, "AIAgents", "Host_" & WStr(i), Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->Host) Then
+				piniSettings->WriteString "AIAgents", "Host_" & WStr(i), Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->Host
+			End If
+			If IniValueChangedInt(piniSettings, "AIAgents", "Port_" & WStr(i), Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->Port) Then
+				piniSettings->WriteInteger "AIAgents", "Port_" & WStr(i), Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->Port
+			End If
+			If IniValueChangedStr(piniSettings, "AIAgents", "Address_" & WStr(i), Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->Address) Then
+				piniSettings->WriteString "AIAgents", "Address_" & WStr(i), Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->Address
+			End If
+			If IniValueChangedStr(piniSettings, "AIAgents", "APIKey_" & WStr(i), Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->APIKey) Then
+				piniSettings->WriteString "AIAgents", "APIKey_" & WStr(i), Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->APIKey
+			End If
+			If IniValueChangedStr(piniSettings, "AIAgents", "Response_Format_" & WStr(i), Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->Response_Format) Then
+				piniSettings->WriteString "AIAgents", "Response_Format_" & WStr(i), Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->Response_Format
+			End If
+			If IniValueChangedFloat(piniSettings, "AIAgents", "Temperature_" & WStr(i), Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->Temperature) Then
+				piniSettings->WriteFloat "AIAgents", "Temperature_" & WStr(i), Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->Temperature
+			End If
+			If IniValueChangedFloat(piniSettings, "AIAgents", "Top_P_" & WStr(i), Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->Top_P) Then
+				piniSettings->WriteFloat "AIAgents", "Top_P_" & WStr(i), Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->Top_P
+			End If
+			If IniValueChangedBool(piniSettings, "AIAgents", "Stream_" & WStr(i), Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->Stream) Then
+				piniSettings->WriteBool "AIAgents", "Stream_" & WStr(i), Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->Stream
+			End If
+			If IniValueChangedInt(piniSettings, "AIAgents", "ContentSize_" & WStr(i), Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->ContentSize \ 1024) Then
+				piniSettings->WriteInteger "AIAgents", "ContentSize_" & WStr(i), Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->ContentSize \ 1024
+			End If
 			If *CurrentAIAgent = Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->Name Then
 				AIAgentModelName = Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->ModelName
 				AIAgentProvider = Cast(ModelInfo Ptr, pAIAgents->Item(i)->Object)->Provider
@@ -3495,12 +3542,22 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 			i += 1
 		Loop
 		piniSettings->KeyRemove "Compilers", "DefaultCompiler64"
-		piniSettings->WriteString "Parameters", "Compiler64Arguments", *Compiler64Arguments
-		piniSettings->WriteString "MakeTools", "DefaultMakeTool", *DefaultMakeTool
+		If IniValueChangedStr(piniSettings, "Parameters", "Compiler64Arguments", *Compiler64Arguments) Then
+			piniSettings->WriteString "Parameters", "Compiler64Arguments", *Compiler64Arguments
+		End If
+		If IniValueChangedStr(piniSettings, "MakeTools", "DefaultMakeTool", *DefaultMakeTool) Then
+			piniSettings->WriteString "MakeTools", "DefaultMakeTool", *DefaultMakeTool
+		End If
 		For i As Integer = 0 To pMakeTools->Count - 1
-			piniSettings->WriteString "MakeTools", "Version_" & WStr(i), pMakeTools->Item(i)->Key
-			piniSettings->WriteString "MakeTools", "Path_" & WStr(i), pMakeTools->Item(i)->Text
-			piniSettings->WriteString "MakeTools", "Command_" & WStr(i), Cast(ToolType Ptr, pMakeTools->Item(i)->Object)->Parameters
+			If IniValueChangedStr(piniSettings, "MakeTools", "Version_" & WStr(i), pMakeTools->Item(i)->Key) Then
+				piniSettings->WriteString "MakeTools", "Version_" & WStr(i), pMakeTools->Item(i)->Key
+			End If
+			If IniValueChangedStr(piniSettings, "MakeTools", "Path_" & WStr(i), pMakeTools->Item(i)->Text) Then
+				piniSettings->WriteString "MakeTools", "Path_" & WStr(i), pMakeTools->Item(i)->Text
+			End If
+			If IniValueChangedStr(piniSettings, "MakeTools", "Command_" & WStr(i), Cast(ToolType Ptr, pMakeTools->Item(i)->Object)->Parameters) Then
+				piniSettings->WriteString "MakeTools", "Command_" & WStr(i), Cast(ToolType Ptr, pMakeTools->Item(i)->Object)->Parameters
+			End If
 		Next
 		i = pMakeTools->Count
 		Do Until piniSettings->KeyExists("MakeTools", "Version_" & WStr(i)) = -1
@@ -3509,11 +3566,19 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 			piniSettings->KeyRemove "MakeTools", "Command_" & WStr(i)
 			i += 1
 		Loop
-		piniSettings->WriteString "Terminals", "DefaultTerminal", *DefaultTerminal
+		If IniValueChangedStr(piniSettings, "Terminals", "DefaultTerminal", *DefaultTerminal) Then
+			piniSettings->WriteString "Terminals", "DefaultTerminal", *DefaultTerminal
+		End If
 		For i As Integer = 0 To pTerminals->Count - 1
-			piniSettings->WriteString "Terminals", "Version_" & WStr(i), pTerminals->Item(i)->Key
-			piniSettings->WriteString "Terminals", "Path_" & WStr(i), pTerminals->Item(i)->Text
-			piniSettings->WriteString "Terminals", "Command_" & WStr(i), Cast(ToolType Ptr, pTerminals->Item(i)->Object)->Parameters
+			If IniValueChangedStr(piniSettings, "Terminals", "Version_" & WStr(i), pTerminals->Item(i)->Key) Then
+				piniSettings->WriteString "Terminals", "Version_" & WStr(i), pTerminals->Item(i)->Key
+			End If
+			If IniValueChangedStr(piniSettings, "Terminals", "Path_" & WStr(i), pTerminals->Item(i)->Text) Then
+				piniSettings->WriteString "Terminals", "Path_" & WStr(i), pTerminals->Item(i)->Text
+			End If
+			If IniValueChangedStr(piniSettings, "Terminals", "Command_" & WStr(i), Cast(ToolType Ptr, pTerminals->Item(i)->Object)->Parameters) Then
+				piniSettings->WriteString "Terminals", "Command_" & WStr(i), Cast(ToolType Ptr, pTerminals->Item(i)->Object)->Parameters
+			End If
 		Next
 		i = pTerminals->Count
 		Do Until piniSettings->KeyExists("Terminals", "Version_" & WStr(i)) = -1
@@ -3523,10 +3588,18 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 			i += 1
 		Loop
 		For i As Integer = 0 To pOtherEditors->Count - 1
-			piniSettings->WriteString "OtherEditors", "Version_" & WStr(i), pOtherEditors->Item(i)->Key
-			piniSettings->WriteString "OtherEditors", "Extensions_" & WStr(i), Cast(ToolType Ptr, pOtherEditors->Item(i)->Object)->Extensions
-			piniSettings->WriteString "OtherEditors", "Path_" & WStr(i), pOtherEditors->Item(i)->Text
-			piniSettings->WriteString "OtherEditors", "Command_" & WStr(i), Cast(ToolType Ptr, pOtherEditors->Item(i)->Object)->Parameters
+			If IniValueChangedStr(piniSettings, "OtherEditors", "Version_" & WStr(i), pOtherEditors->Item(i)->Key) Then
+				piniSettings->WriteString "OtherEditors", "Version_" & WStr(i), pOtherEditors->Item(i)->Key
+			End If
+			If IniValueChangedStr(piniSettings, "OtherEditors", "Extensions_" & WStr(i), Cast(ToolType Ptr, pOtherEditors->Item(i)->Object)->Extensions) Then
+				piniSettings->WriteString "OtherEditors", "Extensions_" & WStr(i), Cast(ToolType Ptr, pOtherEditors->Item(i)->Object)->Extensions
+			End If
+			If IniValueChangedStr(piniSettings, "OtherEditors", "Path_" & WStr(i), pOtherEditors->Item(i)->Text) Then
+				piniSettings->WriteString "OtherEditors", "Path_" & WStr(i), pOtherEditors->Item(i)->Text
+			End If
+			If IniValueChangedStr(piniSettings, "OtherEditors", "Command_" & WStr(i), Cast(ToolType Ptr, pOtherEditors->Item(i)->Object)->Parameters) Then
+				piniSettings->WriteString "OtherEditors", "Command_" & WStr(i), Cast(ToolType Ptr, pOtherEditors->Item(i)->Object)->Parameters
+			End If
 		Next
 		Do Until piniSettings->KeyExists("OtherEditors", "Version_" & WStr(i)) = -1
 			piniSettings->KeyRemove "OtherEditors", "Version_" & WStr(i)
@@ -3535,10 +3608,16 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 			piniSettings->KeyRemove "OtherEditors", "Command_" & WStr(i)
 			i += 1
 		Loop
-		piniSettings->WriteString "Helps", "DefaultHelp", *DefaultHelp
+		If IniValueChangedStr(piniSettings, "Helps", "DefaultHelp", *DefaultHelp) Then
+			piniSettings->WriteString "Helps", "DefaultHelp", *DefaultHelp
+		End If
 		For i As Integer = 0 To pHelps->Count - 1
-			piniSettings->WriteString "Helps", "Version_" & WStr(i), pHelps->Item(i)->Key
-			piniSettings->WriteString "Helps", "Path_" & WStr(i), pHelps->Item(i)->Text
+			If IniValueChangedStr(piniSettings, "Helps", "Version_" & WStr(i), pHelps->Item(i)->Key) Then
+				piniSettings->WriteString "Helps", "Version_" & WStr(i), pHelps->Item(i)->Key
+			End If
+			If IniValueChangedStr(piniSettings, "Helps", "Path_" & WStr(i), pHelps->Item(i)->Text) Then
+				piniSettings->WriteString "Helps", "Path_" & WStr(i), pHelps->Item(i)->Text
+			End If
 		Next
 		i = pHelps->Count
 		Do Until piniSettings->KeyExists("Helps", "Version_" & WStr(i)) = -1
@@ -3547,7 +3626,9 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 			i += 1
 		Loop
 		For i As Integer = 0 To pIncludePaths->Count - 1
-			piniSettings->WriteString "IncludePaths", "Path_" & WStr(i), pIncludePaths->Item(i)
+			If IniValueChangedStr(piniSettings, "IncludePaths", "Path_" & WStr(i), pIncludePaths->Item(i)) Then
+				piniSettings->WriteString "IncludePaths", "Path_" & WStr(i), pIncludePaths->Item(i)
+			End If
 		Next
 		i = pIncludePaths->Count
 		Do Until piniSettings->KeyExists("IncludePaths", "Path_" & WStr(i)) = -1
@@ -3555,81 +3636,211 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 			i += 1
 		Loop
 		For i As Integer = 0 To pLibraryPaths->Count - 1
-			piniSettings->WriteString "LibraryPaths", "Path_" & WStr(i), pLibraryPaths->Item(i)
+			If IniValueChangedStr(piniSettings, "LibraryPaths", "Path_" & WStr(i), pLibraryPaths->Item(i)) Then
+				piniSettings->WriteString "LibraryPaths", "Path_" & WStr(i), pLibraryPaths->Item(i)
+			End If
 		Next
 		i = pLibraryPaths->Count
 		Do Until piniSettings->KeyExists("LibraryPaths", "Path_" & WStr(i)) = -1
 			piniSettings->KeyRemove "LibraryPaths", "Path_" & WStr(i)
 			i += 1
 		Loop
-		piniSettings->WriteBool "Options", "IncludeMFFPath", IncludeMFFPath
-		piniSettings->WriteString "Options", "MFFPath", *MFFPath
-		piniSettings->WriteString "Options", "ProjectsPath", *ProjectsPath
-		piniSettings->WriteString "Options", "Language", Languages.Item(.cboLanguage.ItemIndex)
-		piniSettings->WriteInteger "Options", "TabWidth", TabWidth
-		piniSettings->WriteInteger "Options", "HistoryLimit", HistoryLimit
-		piniSettings->WriteInteger "Options", "IntellisenseLimit", IntellisenseLimit
-		piniSettings->WriteInteger "Options", "HistoryCodeDays", HistoryCodeDays
-		piniSettings->WriteInteger "Options", "AutoSaveCharMax", AutoSaveCharMax
-		piniSettings->WriteInteger "Options", "HistoryCodeCleanDay", HistoryCodeCleanDay
-		piniSettings->WriteBool "Options", "UseMakeOnStartWithCompile", UseMakeOnStartWithCompile
-		piniSettings->WriteBool "Options", "LimitDebug", LimitDebug
-		piniSettings->WriteBool "Options", "DisplayWarningsInDebug", DisplayWarningsInDebug
-		piniSettings->WriteBool "Options", "TurnOnEnvironmentVariables", TurnOnEnvironmentVariables
-		piniSettings->WriteString "Options", "EnvironmentVariables", *EnvironmentVariables
-		piniSettings->WriteBool "Options", "AutoIncrement", AutoIncrement
-		piniSettings->WriteBool "Options", "AutoIndentation", AutoIndentation
-		piniSettings->WriteBool "Options", "AutoComplete", AutoComplete
-		piniSettings->WriteBool "Options", "AutoSuggestions", AutoSuggestions
-		piniSettings->WriteBool "Options", "AutoCreateRC", AutoCreateRC
-		piniSettings->WriteBool "Options", "AutoCreateBakFiles", AutoCreateBakFiles
-		piniSettings->WriteBool "Options", "AddRelativePathsToRecent", AddRelativePathsToRecent
-		piniSettings->WriteString "Options", "DefaultProjectFile", WGet(DefaultProjectFile)
-		piniSettings->WriteInteger "Options", "AutoSaveBeforeCompiling", AutoSaveBeforeCompiling
-		piniSettings->WriteBool "Options", "ShowSpaces", ShowSpaces
-		piniSettings->WriteBool "Options", "ShowKeywordsTooltip", ShowKeywordsToolTip
-		piniSettings->WriteBool "Options", "ShowTooltipsAtTheTop", ShowTooltipsAtTheTop
-		piniSettings->WriteBool "Options", "ShowSymbolsTooltipsOnMouseHover", GlobalSettings.ShowSymbolsTooltipsOnMouseHover
-		piniSettings->WriteBool "Options", "ShowClassesExplorerOnOpenWindow", GlobalSettings.ShowClassesExplorerOnOpenWindow
-		piniSettings->WriteBool "Options", "ShowHorizontalSeparatorLines", ShowHorizontalSeparatorLines
-		piniSettings->WriteBool "Options", "ShowHolidayFrame", ShowHolidayFrame
-		piniSettings->WriteBool "Options", "UseDirect2D", UseDirect2D
-		piniSettings->WriteBool "Options", "HighlightBrackets", HighlightBrackets
-		piniSettings->WriteBool "Options", "HighlightCurrentLine", HighlightCurrentLine
-		piniSettings->WriteBool "Options", "HighlightCurrentWord", HighlightCurrentWord
-		piniSettings->WriteBool "Options", "TabAsSpaces", TabAsSpaces
-		piniSettings->WriteInteger "Options", "CodeEditorHoverTime", CodeEditorHoverTime
-		piniSettings->WriteInteger "Options", "GridSize", GridSize
-		piniSettings->WriteBool "Options", "ShowAlignmentGrid", ShowAlignmentGrid
-		piniSettings->WriteBool "Options", "SnapToGrid", SnapToGridOption
-		piniSettings->WriteBool "Options", "CreateNonStaticEventHandlers", CreateNonStaticEventHandlers
-		piniSettings->WriteBool "Options", "PlaceStaticEventHandlersAfterTheConstructor", PlaceStaticEventHandlersAfterTheConstructor
-		piniSettings->WriteBool "Options", "CreateStaticEventHandlersWithAnUnderscoreAtTheBeginning", CreateStaticEventHandlersWithAnUnderscoreAtTheBeginning
-		piniSettings->WriteBool "Options", "CreateEventHandlersWithoutStaticEventHandlerIfEventAllowsIt", CreateEventHandlersWithoutStaticEventHandlerIfEventAllowsIt
-		piniSettings->WriteBool "Options", "CreateFormTypesWithoutTypeWord", CreateFormTypesWithoutTypeWord
-		piniSettings->WriteBool "Options", "OpenCommandPromptInMainFileFolder", OpenCommandPromptInMainFileFolder
-		piniSettings->WriteString "Options", "CommandPromptFolder", *CommandPromptFolder
-		piniSettings->WriteBool "Options", "SyntaxHighlightingIdentifiers", SyntaxHighlightingIdentifiers
-		piniSettings->WriteBool "Options", "ChangeIdentifiersCase", ChangeIdentifiersCase
-		piniSettings->WriteBool "Options", "ChangeKeywordsCase", ChangeKeyWordsCase
-		piniSettings->WriteBool "Options", "ChangeEndingType", ChangeEndingType
-		piniSettings->WriteInteger "Options", "ChoosedIdentifiersCase", ChoosedIdentifiersCase
-		piniSettings->WriteInteger "Options", "ChoosedKeywordsCase", ChoosedKeyWordsCase
-		piniSettings->WriteInteger "Options", "ChoosedConstructions", ChoosedConstructions
-		piniSettings->WriteBool "Options", "AddSpacesToOperators", AddSpacesToOperators
+		If IniValueChangedBool(piniSettings, "Options", "IncludeMFFPath", IncludeMFFPath) Then
+			piniSettings->WriteBool "Options", "IncludeMFFPath", IncludeMFFPath
+		End If
+		If IniValueChangedStr(piniSettings, "Options", "MFFPath", *MFFPath) Then
+			piniSettings->WriteString "Options", "MFFPath", *MFFPath
+		End If
+		If IniValueChangedStr(piniSettings, "Options", "ProjectsPath", *ProjectsPath) Then
+			piniSettings->WriteString "Options", "ProjectsPath", *ProjectsPath
+		End If
+		If IniValueChangedStr(piniSettings, "Options", "Language", Languages.Item(.cboLanguage.ItemIndex)) Then
+			piniSettings->WriteString "Options", "Language", Languages.Item(.cboLanguage.ItemIndex)
+		End If
+		If IniValueChangedInt(piniSettings, "Options", "TabWidth", TabWidth) Then
+			piniSettings->WriteInteger "Options", "TabWidth", TabWidth
+		End If
+		If IniValueChangedInt(piniSettings, "Options", "HistoryLimit", HistoryLimit) Then
+			piniSettings->WriteInteger "Options", "HistoryLimit", HistoryLimit
+		End If
+		If IniValueChangedInt(piniSettings, "Options", "IntellisenseLimit", IntellisenseLimit) Then
+			piniSettings->WriteInteger "Options", "IntellisenseLimit", IntellisenseLimit
+		End If
+		If IniValueChangedInt(piniSettings, "Options", "HistoryCodeDays", HistoryCodeDays) Then
+			piniSettings->WriteInteger "Options", "HistoryCodeDays", HistoryCodeDays
+		End If
+		If IniValueChangedInt(piniSettings, "Options", "AutoSaveCharMax", AutoSaveCharMax) Then
+			piniSettings->WriteInteger "Options", "AutoSaveCharMax", AutoSaveCharMax
+		End If
+		If IniValueChangedInt(piniSettings, "Options", "HistoryCodeCleanDay", HistoryCodeCleanDay) Then
+			piniSettings->WriteInteger "Options", "HistoryCodeCleanDay", HistoryCodeCleanDay
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "UseMakeOnStartWithCompile", UseMakeOnStartWithCompile) Then
+			piniSettings->WriteBool "Options", "UseMakeOnStartWithCompile", UseMakeOnStartWithCompile
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "LimitDebug", LimitDebug) Then
+			piniSettings->WriteBool "Options", "LimitDebug", LimitDebug
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "DisplayWarningsInDebug", DisplayWarningsInDebug) Then
+			piniSettings->WriteBool "Options", "DisplayWarningsInDebug", DisplayWarningsInDebug
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "TurnOnEnvironmentVariables", TurnOnEnvironmentVariables) Then
+			piniSettings->WriteBool "Options", "TurnOnEnvironmentVariables", TurnOnEnvironmentVariables
+		End If
+		If IniValueChangedStr(piniSettings, "Options", "EnvironmentVariables", *EnvironmentVariables) Then
+			piniSettings->WriteString "Options", "EnvironmentVariables", *EnvironmentVariables
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "AutoIncrement", AutoIncrement) Then
+			piniSettings->WriteBool "Options", "AutoIncrement", AutoIncrement
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "AutoIndentation", AutoIndentation) Then
+			piniSettings->WriteBool "Options", "AutoIndentation", AutoIndentation
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "AutoComplete", AutoComplete) Then
+			piniSettings->WriteBool "Options", "AutoComplete", AutoComplete
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "AutoSuggestions", AutoSuggestions) Then
+			piniSettings->WriteBool "Options", "AutoSuggestions", AutoSuggestions
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "AutoCreateRC", AutoCreateRC) Then
+			piniSettings->WriteBool "Options", "AutoCreateRC", AutoCreateRC
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "AutoCreateBakFiles", AutoCreateBakFiles) Then
+			piniSettings->WriteBool "Options", "AutoCreateBakFiles", AutoCreateBakFiles
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "AddRelativePathsToRecent", AddRelativePathsToRecent) Then
+			piniSettings->WriteBool "Options", "AddRelativePathsToRecent", AddRelativePathsToRecent
+		End If
+		If IniValueChangedStr(piniSettings, "Options", "DefaultProjectFile", WGet(DefaultProjectFile)) Then
+			piniSettings->WriteString "Options", "DefaultProjectFile", WGet(DefaultProjectFile)
+		End If
+		If IniValueChangedInt(piniSettings, "Options", "AutoSaveBeforeCompiling", AutoSaveBeforeCompiling) Then
+			piniSettings->WriteInteger "Options", "AutoSaveBeforeCompiling", AutoSaveBeforeCompiling
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "ShowSpaces", ShowSpaces) Then
+			piniSettings->WriteBool "Options", "ShowSpaces", ShowSpaces
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "ShowKeywordsTooltip", ShowKeywordsToolTip) Then
+			piniSettings->WriteBool "Options", "ShowKeywordsTooltip", ShowKeywordsToolTip
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "ShowTooltipsAtTheTop", ShowTooltipsAtTheTop) Then
+			piniSettings->WriteBool "Options", "ShowTooltipsAtTheTop", ShowTooltipsAtTheTop
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "ShowSymbolsTooltipsOnMouseHover", GlobalSettings.ShowSymbolsTooltipsOnMouseHover) Then
+			piniSettings->WriteBool "Options", "ShowSymbolsTooltipsOnMouseHover", GlobalSettings.ShowSymbolsTooltipsOnMouseHover
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "ShowClassesExplorerOnOpenWindow", GlobalSettings.ShowClassesExplorerOnOpenWindow) Then
+			piniSettings->WriteBool "Options", "ShowClassesExplorerOnOpenWindow", GlobalSettings.ShowClassesExplorerOnOpenWindow
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "ShowHorizontalSeparatorLines", ShowHorizontalSeparatorLines) Then
+			piniSettings->WriteBool "Options", "ShowHorizontalSeparatorLines", ShowHorizontalSeparatorLines
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "ShowHolidayFrame", ShowHolidayFrame) Then
+			piniSettings->WriteBool "Options", "ShowHolidayFrame", ShowHolidayFrame
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "UseDirect2D", UseDirect2D) Then
+			piniSettings->WriteBool "Options", "UseDirect2D", UseDirect2D
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "HighlightBrackets", HighlightBrackets) Then
+			piniSettings->WriteBool "Options", "HighlightBrackets", HighlightBrackets
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "HighlightCurrentLine", HighlightCurrentLine) Then
+			piniSettings->WriteBool "Options", "HighlightCurrentLine", HighlightCurrentLine
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "HighlightCurrentWord", HighlightCurrentWord) Then
+			piniSettings->WriteBool "Options", "HighlightCurrentWord", HighlightCurrentWord
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "TabAsSpaces", TabAsSpaces) Then
+			piniSettings->WriteBool "Options", "TabAsSpaces", TabAsSpaces
+		End If
+		If IniValueChangedInt(piniSettings, "Options", "CodeEditorHoverTime", CodeEditorHoverTime) Then
+			piniSettings->WriteInteger "Options", "CodeEditorHoverTime", CodeEditorHoverTime
+		End If
+		If IniValueChangedInt(piniSettings, "Options", "GridSize", GridSize) Then
+			piniSettings->WriteInteger "Options", "GridSize", GridSize
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "ShowAlignmentGrid", ShowAlignmentGrid) Then
+			piniSettings->WriteBool "Options", "ShowAlignmentGrid", ShowAlignmentGrid
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "SnapToGrid", SnapToGridOption) Then
+			piniSettings->WriteBool "Options", "SnapToGrid", SnapToGridOption
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "CreateNonStaticEventHandlers", CreateNonStaticEventHandlers) Then
+			piniSettings->WriteBool "Options", "CreateNonStaticEventHandlers", CreateNonStaticEventHandlers
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "PlaceStaticEventHandlersAfterTheConstructor", PlaceStaticEventHandlersAfterTheConstructor) Then
+			piniSettings->WriteBool "Options", "PlaceStaticEventHandlersAfterTheConstructor", PlaceStaticEventHandlersAfterTheConstructor
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "CreateStaticEventHandlersWithAnUnderscoreAtTheBeginning", CreateStaticEventHandlersWithAnUnderscoreAtTheBeginning) Then
+			piniSettings->WriteBool "Options", "CreateStaticEventHandlersWithAnUnderscoreAtTheBeginning", CreateStaticEventHandlersWithAnUnderscoreAtTheBeginning
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "CreateEventHandlersWithoutStaticEventHandlerIfEventAllowsIt", CreateEventHandlersWithoutStaticEventHandlerIfEventAllowsIt) Then
+			piniSettings->WriteBool "Options", "CreateEventHandlersWithoutStaticEventHandlerIfEventAllowsIt", CreateEventHandlersWithoutStaticEventHandlerIfEventAllowsIt
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "CreateFormTypesWithoutTypeWord", CreateFormTypesWithoutTypeWord) Then
+			piniSettings->WriteBool "Options", "CreateFormTypesWithoutTypeWord", CreateFormTypesWithoutTypeWord
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "OpenCommandPromptInMainFileFolder", OpenCommandPromptInMainFileFolder) Then
+			piniSettings->WriteBool "Options", "OpenCommandPromptInMainFileFolder", OpenCommandPromptInMainFileFolder
+		End If
+		If IniValueChangedStr(piniSettings, "Options", "CommandPromptFolder", *CommandPromptFolder) Then
+			piniSettings->WriteString "Options", "CommandPromptFolder", *CommandPromptFolder
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "SyntaxHighlightingIdentifiers", SyntaxHighlightingIdentifiers) Then
+			piniSettings->WriteBool "Options", "SyntaxHighlightingIdentifiers", SyntaxHighlightingIdentifiers
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "ChangeIdentifiersCase", ChangeIdentifiersCase) Then
+			piniSettings->WriteBool "Options", "ChangeIdentifiersCase", ChangeIdentifiersCase
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "ChangeKeywordsCase", ChangeKeyWordsCase) Then
+			piniSettings->WriteBool "Options", "ChangeKeywordsCase", ChangeKeyWordsCase
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "ChangeEndingType", ChangeEndingType) Then
+			piniSettings->WriteBool "Options", "ChangeEndingType", ChangeEndingType
+		End If
+		If IniValueChangedInt(piniSettings, "Options", "ChoosedIdentifiersCase", ChoosedIdentifiersCase) Then
+			piniSettings->WriteInteger "Options", "ChoosedIdentifiersCase", ChoosedIdentifiersCase
+		End If
+		If IniValueChangedInt(piniSettings, "Options", "ChoosedKeywordsCase", ChoosedKeyWordsCase) Then
+			piniSettings->WriteInteger "Options", "ChoosedKeywordsCase", ChoosedKeyWordsCase
+		End If
+		If IniValueChangedInt(piniSettings, "Options", "ChoosedConstructions", ChoosedConstructions) Then
+			piniSettings->WriteInteger "Options", "ChoosedConstructions", ChoosedConstructions
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "AddSpacesToOperators", AddSpacesToOperators) Then
+			piniSettings->WriteBool "Options", "AddSpacesToOperators", AddSpacesToOperators
+		End If
 		
-		piniSettings->WriteString "Options", "CurrentTheme", *CurrentTheme
+		If IniValueChangedStr(piniSettings, "Options", "CurrentTheme", *CurrentTheme) Then
+			piniSettings->WriteString "Options", "CurrentTheme", *CurrentTheme
+		End If
 		
-		piniSettings->WriteString "Options", "EditorFontName", *EditorFontName
-		piniSettings->WriteInteger "Options", "EditorFontSize", EditorFontSize
-		piniSettings->WriteString "Options", "InterfaceFontName", *InterfaceFontName
-		piniSettings->WriteInteger "Options", "InterfaceFontSize", InterfaceFontSize
+		If IniValueChangedStr(piniSettings, "Options", "EditorFontName", *EditorFontName) Then
+			piniSettings->WriteString "Options", "EditorFontName", *EditorFontName
+		End If
+		If IniValueChangedInt(piniSettings, "Options", "EditorFontSize", EditorFontSize) Then
+			piniSettings->WriteInteger "Options", "EditorFontSize", EditorFontSize
+		End If
+		If IniValueChangedStr(piniSettings, "Options", "InterfaceFontName", *InterfaceFontName) Then
+			piniSettings->WriteString "Options", "InterfaceFontName", *InterfaceFontName
+		End If
+		If IniValueChangedInt(piniSettings, "Options", "InterfaceFontSize", InterfaceFontSize) Then
+			piniSettings->WriteInteger "Options", "InterfaceFontSize", InterfaceFontSize
+		End If
 		
-		piniSettings->WriteBool "Options", "DisplayMenuIcons", DisplayMenuIcons
-		piniSettings->WriteBool "Options", "ShowMainToolbar", ShowMainToolBar
-		piniSettings->WriteBool "Options", "DarkMode", DarkMode
+		If IniValueChangedBool(piniSettings, "Options", "DisplayMenuIcons", DisplayMenuIcons) Then
+			piniSettings->WriteBool "Options", "DisplayMenuIcons", DisplayMenuIcons
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "ShowMainToolbar", ShowMainToolBar) Then
+			piniSettings->WriteBool "Options", "ShowMainToolbar", ShowMainToolBar
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "DarkMode", DarkMode) Then
+			piniSettings->WriteBool "Options", "DarkMode", DarkMode
+		End If
 		'piniSettings->WriteBool "Options", "ShowToolBoxLocal", gLocalToolBox
-		piniSettings->WriteBool("Options", "PropertiesLocal", gLocalProperties) 'David Change
+		If IniValueChangedBool(piniSettings, "Options", "PropertiesLocal", gLocalProperties) Then
+			piniSettings->WriteBool("Options", "PropertiesLocal", gLocalProperties) 'David Change
+		End If
 		pfrmMain->Menu->ImagesList = IIf(DisplayMenuIcons, pimgList, 0)
 		MainReBar.Visible = ShowMainToolBar
 		pfrmMain->RequestAlign
@@ -3638,229 +3849,629 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 			fAddIns.txtDescription.BackColor = clBtnFace
 		
 		piniTheme->Load ExePath & "/Settings/Themes/" & *CurrentTheme & ".ini"
-		piniTheme->WriteInteger("Colors", "BookmarksForeground", Bookmarks.ForegroundOption, True)
-		piniTheme->WriteInteger("Colors", "BookmarksBackground", Bookmarks.BackgroundOption, True)
-		piniTheme->WriteInteger("Colors", "BookmarksFrame", Bookmarks.FrameOption, True)
-		piniTheme->WriteInteger("Colors", "BookmarksIndicator", Bookmarks.IndicatorOption, True)
-		piniTheme->WriteInteger("FontStyles", "BookmarksBold", Bookmarks.Bold)
-		piniTheme->WriteInteger("FontStyles", "BookmarksItalic", Bookmarks.Italic)
-		piniTheme->WriteInteger("FontStyles", "BookmarksUnderline", Bookmarks.Underline)
-		piniTheme->WriteInteger("Colors", "BreakpointsForeground", Breakpoints.ForegroundOption, True)
-		piniTheme->WriteInteger("Colors", "BreakpointsBackground", Breakpoints.BackgroundOption, True)
-		piniTheme->WriteInteger("Colors", "BreakpointsFrame", Breakpoints.FrameOption, True)
-		piniTheme->WriteInteger("Colors", "BreakpointsIndicator", Breakpoints.IndicatorOption, True)
-		piniTheme->WriteInteger("FontStyles", "BreakpointsBold", Breakpoints.Bold)
-		piniTheme->WriteInteger("FontStyles", "BreakpointsItalic", Breakpoints.Italic)
-		piniTheme->WriteInteger("FontStyles", "BreakpointsUnderline", Breakpoints.Underline)
-		piniTheme->WriteInteger("Colors", "CommentsForeground", Comments.ForegroundOption, True)
-		piniTheme->WriteInteger("Colors", "CommentsBackground", Comments.BackgroundOption, True)
-		piniTheme->WriteInteger("Colors", "CommentsFrame", Comments.FrameOption, True)
-		piniTheme->WriteInteger("FontStyles", "CommentsBold", Comments.Bold)
-		piniTheme->WriteInteger("FontStyles", "CommentsItalic", Comments.Italic)
-		piniTheme->WriteInteger("FontStyles", "CommentsUnderline", Comments.Underline)
-		piniTheme->WriteInteger("Colors", "CurrentBracketsForeground", CurrentBrackets.ForegroundOption, True)
-		piniTheme->WriteInteger("Colors", "CurrentBracketsBackground", CurrentBrackets.BackgroundOption, True)
-		piniTheme->WriteInteger("Colors", "CurrentBracketsFrame", CurrentBrackets.FrameOption, True)
-		piniTheme->WriteInteger("FontStyles", "CurrentBracketsBold", CurrentBrackets.Bold)
-		piniTheme->WriteInteger("FontStyles", "CurrentBracketsItalic", CurrentBrackets.Italic)
-		piniTheme->WriteInteger("FontStyles", "CurrentBracketsUnderline", CurrentBrackets.Underline)
-		piniTheme->WriteInteger("Colors", "CurrentLineForeground", CurrentLine.ForegroundOption, True)
-		piniTheme->WriteInteger("Colors", "CurrentLineBackground", CurrentLine.BackgroundOption, True)
-		piniTheme->WriteInteger("Colors", "CurrentLineFrame", CurrentLine.FrameOption, True)
-		piniTheme->WriteInteger("Colors", "CurrentWordForeground", CurrentWord.ForegroundOption, True)
-		piniTheme->WriteInteger("Colors", "CurrentWordBackground", CurrentWord.BackgroundOption, True)
-		piniTheme->WriteInteger("Colors", "CurrentWordFrame", CurrentWord.FrameOption, True)
-		piniTheme->WriteInteger("FontStyles", "CurrentWordBold", CurrentWord.Bold)
-		piniTheme->WriteInteger("FontStyles", "CurrentWordItalic", CurrentWord.Italic)
-		piniTheme->WriteInteger("FontStyles", "CurrentWordUnderline", CurrentWord.Underline)
-		piniTheme->WriteInteger("Colors", "ExecutionLineForeground", ExecutionLine.ForegroundOption, True)
-		piniTheme->WriteInteger("Colors", "ExecutionLineBackground", ExecutionLine.BackgroundOption, True)
-		piniTheme->WriteInteger("Colors", "ExecutionLineFrame", ExecutionLine.FrameOption, True)
-		piniTheme->WriteInteger("Colors", "ExecutionLineIndicator", ExecutionLine.IndicatorOption, True)
-		piniTheme->WriteInteger("Colors", "FoldLinesForeground", FoldLines.ForegroundOption, True)
-		piniTheme->WriteInteger("Colors", "IdentifiersForeground", Identifiers.ForegroundOption, True)
-		piniTheme->WriteInteger("Colors", "IdentifiersBackground", Identifiers.BackgroundOption, True)
-		piniTheme->WriteInteger("Colors", "IdentifiersFrame", Identifiers.FrameOption, True)
-		piniTheme->WriteInteger("FontStyles", "IdentifiersBold", Identifiers.Bold)
-		piniTheme->WriteInteger("FontStyles", "IdentifiersItalic", Identifiers.Italic)
-		piniTheme->WriteInteger("FontStyles", "IdentifiersUnderline", Identifiers.Underline)
+		If IniValueChangedInt(piniTheme, "Colors", "BookmarksForeground", Bookmarks.ForegroundOption) Then
+			piniTheme->WriteInteger("Colors", "BookmarksForeground", Bookmarks.ForegroundOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "BookmarksBackground", Bookmarks.BackgroundOption) Then
+			piniTheme->WriteInteger("Colors", "BookmarksBackground", Bookmarks.BackgroundOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "BookmarksFrame", Bookmarks.FrameOption) Then
+			piniTheme->WriteInteger("Colors", "BookmarksFrame", Bookmarks.FrameOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "BookmarksIndicator", Bookmarks.IndicatorOption) Then
+			piniTheme->WriteInteger("Colors", "BookmarksIndicator", Bookmarks.IndicatorOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "BookmarksBold", Bookmarks.Bold) Then
+			piniTheme->WriteInteger("FontStyles", "BookmarksBold", Bookmarks.Bold)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "BookmarksItalic", Bookmarks.Italic) Then
+			piniTheme->WriteInteger("FontStyles", "BookmarksItalic", Bookmarks.Italic)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "BookmarksUnderline", Bookmarks.Underline) Then
+			piniTheme->WriteInteger("FontStyles", "BookmarksUnderline", Bookmarks.Underline)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "BreakpointsForeground", Breakpoints.ForegroundOption) Then
+			piniTheme->WriteInteger("Colors", "BreakpointsForeground", Breakpoints.ForegroundOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "BreakpointsBackground", Breakpoints.BackgroundOption) Then
+			piniTheme->WriteInteger("Colors", "BreakpointsBackground", Breakpoints.BackgroundOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "BreakpointsFrame", Breakpoints.FrameOption) Then
+			piniTheme->WriteInteger("Colors", "BreakpointsFrame", Breakpoints.FrameOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "BreakpointsIndicator", Breakpoints.IndicatorOption) Then
+			piniTheme->WriteInteger("Colors", "BreakpointsIndicator", Breakpoints.IndicatorOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "BreakpointsBold", Breakpoints.Bold) Then
+			piniTheme->WriteInteger("FontStyles", "BreakpointsBold", Breakpoints.Bold)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "BreakpointsItalic", Breakpoints.Italic) Then
+			piniTheme->WriteInteger("FontStyles", "BreakpointsItalic", Breakpoints.Italic)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "BreakpointsUnderline", Breakpoints.Underline) Then
+			piniTheme->WriteInteger("FontStyles", "BreakpointsUnderline", Breakpoints.Underline)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "CommentsForeground", Comments.ForegroundOption) Then
+			piniTheme->WriteInteger("Colors", "CommentsForeground", Comments.ForegroundOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "CommentsBackground", Comments.BackgroundOption) Then
+			piniTheme->WriteInteger("Colors", "CommentsBackground", Comments.BackgroundOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "CommentsFrame", Comments.FrameOption) Then
+			piniTheme->WriteInteger("Colors", "CommentsFrame", Comments.FrameOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "CommentsBold", Comments.Bold) Then
+			piniTheme->WriteInteger("FontStyles", "CommentsBold", Comments.Bold)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "CommentsItalic", Comments.Italic) Then
+			piniTheme->WriteInteger("FontStyles", "CommentsItalic", Comments.Italic)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "CommentsUnderline", Comments.Underline) Then
+			piniTheme->WriteInteger("FontStyles", "CommentsUnderline", Comments.Underline)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "CurrentBracketsForeground", CurrentBrackets.ForegroundOption) Then
+			piniTheme->WriteInteger("Colors", "CurrentBracketsForeground", CurrentBrackets.ForegroundOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "CurrentBracketsBackground", CurrentBrackets.BackgroundOption) Then
+			piniTheme->WriteInteger("Colors", "CurrentBracketsBackground", CurrentBrackets.BackgroundOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "CurrentBracketsFrame", CurrentBrackets.FrameOption) Then
+			piniTheme->WriteInteger("Colors", "CurrentBracketsFrame", CurrentBrackets.FrameOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "CurrentBracketsBold", CurrentBrackets.Bold) Then
+			piniTheme->WriteInteger("FontStyles", "CurrentBracketsBold", CurrentBrackets.Bold)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "CurrentBracketsItalic", CurrentBrackets.Italic) Then
+			piniTheme->WriteInteger("FontStyles", "CurrentBracketsItalic", CurrentBrackets.Italic)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "CurrentBracketsUnderline", CurrentBrackets.Underline) Then
+			piniTheme->WriteInteger("FontStyles", "CurrentBracketsUnderline", CurrentBrackets.Underline)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "CurrentLineForeground", CurrentLine.ForegroundOption) Then
+			piniTheme->WriteInteger("Colors", "CurrentLineForeground", CurrentLine.ForegroundOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "CurrentLineBackground", CurrentLine.BackgroundOption) Then
+			piniTheme->WriteInteger("Colors", "CurrentLineBackground", CurrentLine.BackgroundOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "CurrentLineFrame", CurrentLine.FrameOption) Then
+			piniTheme->WriteInteger("Colors", "CurrentLineFrame", CurrentLine.FrameOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "CurrentWordForeground", CurrentWord.ForegroundOption) Then
+			piniTheme->WriteInteger("Colors", "CurrentWordForeground", CurrentWord.ForegroundOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "CurrentWordBackground", CurrentWord.BackgroundOption) Then
+			piniTheme->WriteInteger("Colors", "CurrentWordBackground", CurrentWord.BackgroundOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "CurrentWordFrame", CurrentWord.FrameOption) Then
+			piniTheme->WriteInteger("Colors", "CurrentWordFrame", CurrentWord.FrameOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "CurrentWordBold", CurrentWord.Bold) Then
+			piniTheme->WriteInteger("FontStyles", "CurrentWordBold", CurrentWord.Bold)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "CurrentWordItalic", CurrentWord.Italic) Then
+			piniTheme->WriteInteger("FontStyles", "CurrentWordItalic", CurrentWord.Italic)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "CurrentWordUnderline", CurrentWord.Underline) Then
+			piniTheme->WriteInteger("FontStyles", "CurrentWordUnderline", CurrentWord.Underline)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "ExecutionLineForeground", ExecutionLine.ForegroundOption) Then
+			piniTheme->WriteInteger("Colors", "ExecutionLineForeground", ExecutionLine.ForegroundOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "ExecutionLineBackground", ExecutionLine.BackgroundOption) Then
+			piniTheme->WriteInteger("Colors", "ExecutionLineBackground", ExecutionLine.BackgroundOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "ExecutionLineFrame", ExecutionLine.FrameOption) Then
+			piniTheme->WriteInteger("Colors", "ExecutionLineFrame", ExecutionLine.FrameOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "ExecutionLineIndicator", ExecutionLine.IndicatorOption) Then
+			piniTheme->WriteInteger("Colors", "ExecutionLineIndicator", ExecutionLine.IndicatorOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "FoldLinesForeground", FoldLines.ForegroundOption) Then
+			piniTheme->WriteInteger("Colors", "FoldLinesForeground", FoldLines.ForegroundOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "IdentifiersForeground", Identifiers.ForegroundOption) Then
+			piniTheme->WriteInteger("Colors", "IdentifiersForeground", Identifiers.ForegroundOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "IdentifiersBackground", Identifiers.BackgroundOption) Then
+			piniTheme->WriteInteger("Colors", "IdentifiersBackground", Identifiers.BackgroundOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "IdentifiersFrame", Identifiers.FrameOption) Then
+			piniTheme->WriteInteger("Colors", "IdentifiersFrame", Identifiers.FrameOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "IdentifiersBold", Identifiers.Bold) Then
+			piniTheme->WriteInteger("FontStyles", "IdentifiersBold", Identifiers.Bold)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "IdentifiersItalic", Identifiers.Italic) Then
+			piniTheme->WriteInteger("FontStyles", "IdentifiersItalic", Identifiers.Italic)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "IdentifiersUnderline", Identifiers.Underline) Then
+			piniTheme->WriteInteger("FontStyles", "IdentifiersUnderline", Identifiers.Underline)
+		End If
 		
-		piniTheme->WriteInteger("Colors", "ByRefParametersForeground",  IIf(ColorByRefParameters.ForegroundOption = Identifiers.ForegroundOption, -1, ColorByRefParameters.ForegroundOption), True)
-		piniTheme->WriteInteger("Colors", "ByRefParametersBackground", IIf(ColorByRefParameters.BackgroundOption = Identifiers.BackgroundOption, -1, ColorByRefParameters.BackgroundOption), True)
-		piniTheme->WriteInteger("Colors", "ByRefParametersFrame", IIf(ColorByRefParameters.FrameOption = Identifiers.FrameOption, -1, ColorByRefParameters.FrameOption), True)
-		piniTheme->WriteInteger("FontStyles", "ByRefParametersBold", ColorByRefParameters.Bold)
-		piniTheme->WriteInteger("FontStyles", "ByRefParametersItalic", ColorByRefParameters.Italic)
-		piniTheme->WriteInteger("FontStyles", "ByRefParametersUnderline", ColorByRefParameters.Underline)
+		If IniValueChangedInt(piniTheme, "Colors", "ByRefParametersForeground", IIf(ColorByRefParameters.ForegroundOption = Identifiers.ForegroundOption, -1, ColorByRefParameters.ForegroundOption)) Then
+			piniTheme->WriteInteger("Colors", "ByRefParametersForeground", IIf(ColorByRefParameters.ForegroundOption = Identifiers.ForegroundOption, -1, ColorByRefParameters.ForegroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "ByRefParametersBackground", IIf(ColorByRefParameters.BackgroundOption = Identifiers.BackgroundOption, -1, ColorByRefParameters.BackgroundOption)) Then
+			piniTheme->WriteInteger("Colors", "ByRefParametersBackground", IIf(ColorByRefParameters.BackgroundOption = Identifiers.BackgroundOption, -1, ColorByRefParameters.BackgroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "ByRefParametersFrame", IIf(ColorByRefParameters.FrameOption = Identifiers.FrameOption, -1, ColorByRefParameters.FrameOption)) Then
+			piniTheme->WriteInteger("Colors", "ByRefParametersFrame", IIf(ColorByRefParameters.FrameOption = Identifiers.FrameOption, -1, ColorByRefParameters.FrameOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "ByRefParametersBold", ColorByRefParameters.Bold) Then
+			piniTheme->WriteInteger("FontStyles", "ByRefParametersBold", ColorByRefParameters.Bold)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "ByRefParametersItalic", ColorByRefParameters.Italic) Then
+			piniTheme->WriteInteger("FontStyles", "ByRefParametersItalic", ColorByRefParameters.Italic)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "ByRefParametersUnderline", ColorByRefParameters.Underline) Then
+			piniTheme->WriteInteger("FontStyles", "ByRefParametersUnderline", ColorByRefParameters.Underline)
+		End If
 		
-		piniTheme->WriteInteger("Colors", "ByValParametersForeground",  IIf(ColorByValParameters.ForegroundOption = Identifiers.ForegroundOption, -1, ColorByValParameters.ForegroundOption), True)
-		piniTheme->WriteInteger("Colors", "ByValParametersBackground", IIf(ColorByValParameters.BackgroundOption = Identifiers.BackgroundOption, -1, ColorByValParameters.BackgroundOption), True)
-		piniTheme->WriteInteger("Colors", "ByValParametersFrame", IIf(ColorByValParameters.FrameOption = Identifiers.FrameOption, -1, ColorByValParameters.FrameOption), True)
-		piniTheme->WriteInteger("FontStyles", "ByValParametersBold", ColorByValParameters.Bold)
-		piniTheme->WriteInteger("FontStyles", "ByValParametersItalic", ColorByValParameters.Italic)
-		piniTheme->WriteInteger("FontStyles", "ByValParametersUnderline", ColorByValParameters.Underline)
+		If IniValueChangedInt(piniTheme, "Colors", "ByValParametersForeground", IIf(ColorByValParameters.ForegroundOption = Identifiers.ForegroundOption, -1, ColorByValParameters.ForegroundOption)) Then
+			piniTheme->WriteInteger("Colors", "ByValParametersForeground", IIf(ColorByValParameters.ForegroundOption = Identifiers.ForegroundOption, -1, ColorByValParameters.ForegroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "ByValParametersBackground", IIf(ColorByValParameters.BackgroundOption = Identifiers.BackgroundOption, -1, ColorByValParameters.BackgroundOption)) Then
+			piniTheme->WriteInteger("Colors", "ByValParametersBackground", IIf(ColorByValParameters.BackgroundOption = Identifiers.BackgroundOption, -1, ColorByValParameters.BackgroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "ByValParametersFrame", IIf(ColorByValParameters.FrameOption = Identifiers.FrameOption, -1, ColorByValParameters.FrameOption)) Then
+			piniTheme->WriteInteger("Colors", "ByValParametersFrame", IIf(ColorByValParameters.FrameOption = Identifiers.FrameOption, -1, ColorByValParameters.FrameOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "ByValParametersBold", ColorByValParameters.Bold) Then
+			piniTheme->WriteInteger("FontStyles", "ByValParametersBold", ColorByValParameters.Bold)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "ByValParametersItalic", ColorByValParameters.Italic) Then
+			piniTheme->WriteInteger("FontStyles", "ByValParametersItalic", ColorByValParameters.Italic)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "ByValParametersUnderline", ColorByValParameters.Underline) Then
+			piniTheme->WriteInteger("FontStyles", "ByValParametersUnderline", ColorByValParameters.Underline)
+		End If
 		
-		piniTheme->WriteInteger("Colors", "CommonVariablesForeground",  IIf(ColorCommonVariables.ForegroundOption = Identifiers.ForegroundOption, -1, ColorCommonVariables.ForegroundOption), True)
-		piniTheme->WriteInteger("Colors", "CommonVariablesBackground", IIf(ColorCommonVariables.BackgroundOption = Identifiers.BackgroundOption, -1, ColorCommonVariables.BackgroundOption), True)
-		piniTheme->WriteInteger("Colors", "CommonVariablesFrame", IIf(ColorCommonVariables.FrameOption = Identifiers.FrameOption, -1, ColorCommonVariables.FrameOption), True)
-		piniTheme->WriteInteger("FontStyles", "CommonVariablesBold", ColorCommonVariables.Bold)
-		piniTheme->WriteInteger("FontStyles", "CommonVariablesItalic", ColorCommonVariables.Italic)
-		piniTheme->WriteInteger("FontStyles", "CommonVariablesUnderline", ColorCommonVariables.Underline)
+		If IniValueChangedInt(piniTheme, "Colors", "CommonVariablesForeground", IIf(ColorCommonVariables.ForegroundOption = Identifiers.ForegroundOption, -1, ColorCommonVariables.ForegroundOption)) Then
+			piniTheme->WriteInteger("Colors", "CommonVariablesForeground", IIf(ColorCommonVariables.ForegroundOption = Identifiers.ForegroundOption, -1, ColorCommonVariables.ForegroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "CommonVariablesBackground", IIf(ColorCommonVariables.BackgroundOption = Identifiers.BackgroundOption, -1, ColorCommonVariables.BackgroundOption)) Then
+			piniTheme->WriteInteger("Colors", "CommonVariablesBackground", IIf(ColorCommonVariables.BackgroundOption = Identifiers.BackgroundOption, -1, ColorCommonVariables.BackgroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "CommonVariablesFrame", IIf(ColorCommonVariables.FrameOption = Identifiers.FrameOption, -1, ColorCommonVariables.FrameOption)) Then
+			piniTheme->WriteInteger("Colors", "CommonVariablesFrame", IIf(ColorCommonVariables.FrameOption = Identifiers.FrameOption, -1, ColorCommonVariables.FrameOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "CommonVariablesBold", ColorCommonVariables.Bold) Then
+			piniTheme->WriteInteger("FontStyles", "CommonVariablesBold", ColorCommonVariables.Bold)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "CommonVariablesItalic", ColorCommonVariables.Italic) Then
+			piniTheme->WriteInteger("FontStyles", "CommonVariablesItalic", ColorCommonVariables.Italic)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "CommonVariablesUnderline", ColorCommonVariables.Underline) Then
+			piniTheme->WriteInteger("FontStyles", "CommonVariablesUnderline", ColorCommonVariables.Underline)
+		End If
 		
-		piniTheme->WriteInteger("Colors", "ComponentsForeground", IIf(ColorComps.ForegroundOption = Identifiers.ForegroundOption, -1, ColorComps.ForegroundOption), True)
-		piniTheme->WriteInteger("Colors", "ComponentsBackground", IIf(ColorComps.BackgroundOption = Identifiers.BackgroundOption, -1, ColorComps.BackgroundOption), True)
-		piniTheme->WriteInteger("Colors", "ComponentsFrame", IIf(ColorComps.FrameOption = Identifiers.FrameOption, -1, ColorComps.FrameOption), True)
-		piniTheme->WriteInteger("FontStyles", "ComponentsBold", ColorComps.Bold)
-		piniTheme->WriteInteger("FontStyles", "ComponentsItalic", ColorComps.Italic)
-		piniTheme->WriteInteger("FontStyles", "ComponentsUnderline", ColorComps.Underline)
+		If IniValueChangedInt(piniTheme, "Colors", "ComponentsForeground", IIf(ColorComps.ForegroundOption = Identifiers.ForegroundOption, -1, ColorComps.ForegroundOption)) Then
+			piniTheme->WriteInteger("Colors", "ComponentsForeground", IIf(ColorComps.ForegroundOption = Identifiers.ForegroundOption, -1, ColorComps.ForegroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "ComponentsBackground", IIf(ColorComps.BackgroundOption = Identifiers.BackgroundOption, -1, ColorComps.BackgroundOption)) Then
+			piniTheme->WriteInteger("Colors", "ComponentsBackground", IIf(ColorComps.BackgroundOption = Identifiers.BackgroundOption, -1, ColorComps.BackgroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "ComponentsFrame", IIf(ColorComps.FrameOption = Identifiers.FrameOption, -1, ColorComps.FrameOption)) Then
+			piniTheme->WriteInteger("Colors", "ComponentsFrame", IIf(ColorComps.FrameOption = Identifiers.FrameOption, -1, ColorComps.FrameOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "ComponentsBold", ColorComps.Bold) Then
+			piniTheme->WriteInteger("FontStyles", "ComponentsBold", ColorComps.Bold)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "ComponentsItalic", ColorComps.Italic) Then
+			piniTheme->WriteInteger("FontStyles", "ComponentsItalic", ColorComps.Italic)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "ComponentsUnderline", ColorComps.Underline) Then
+			piniTheme->WriteInteger("FontStyles", "ComponentsUnderline", ColorComps.Underline)
+		End If
 		
-		piniTheme->WriteInteger("Colors", "ConstantsForeground", IIf(ColorConstants.ForegroundOption = Identifiers.ForegroundOption, -1, ColorConstants.ForegroundOption), True)
-		piniTheme->WriteInteger("Colors", "ConstantsBackground", IIf(ColorConstants.BackgroundOption = Identifiers.BackgroundOption, -1, ColorConstants.BackgroundOption), True)
-		piniTheme->WriteInteger("Colors", "ConstantsFrame", IIf(ColorConstants.FrameOption = Identifiers.FrameOption, -1, ColorConstants.FrameOption), True)
-		piniTheme->WriteInteger("FontStyles", "ConstantsBold", ColorConstants.Bold)
-		piniTheme->WriteInteger("FontStyles", "ConstantsItalic", ColorConstants.Italic)
-		piniTheme->WriteInteger("FontStyles", "ConstantsUnderline", ColorConstants.Underline)
+		If IniValueChangedInt(piniTheme, "Colors", "ConstantsForeground", IIf(ColorConstants.ForegroundOption = Identifiers.ForegroundOption, -1, ColorConstants.ForegroundOption)) Then
+			piniTheme->WriteInteger("Colors", "ConstantsForeground", IIf(ColorConstants.ForegroundOption = Identifiers.ForegroundOption, -1, ColorConstants.ForegroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "ConstantsBackground", IIf(ColorConstants.BackgroundOption = Identifiers.BackgroundOption, -1, ColorConstants.BackgroundOption)) Then
+			piniTheme->WriteInteger("Colors", "ConstantsBackground", IIf(ColorConstants.BackgroundOption = Identifiers.BackgroundOption, -1, ColorConstants.BackgroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "ConstantsFrame", IIf(ColorConstants.FrameOption = Identifiers.FrameOption, -1, ColorConstants.FrameOption)) Then
+			piniTheme->WriteInteger("Colors", "ConstantsFrame", IIf(ColorConstants.FrameOption = Identifiers.FrameOption, -1, ColorConstants.FrameOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "ConstantsBold", ColorConstants.Bold) Then
+			piniTheme->WriteInteger("FontStyles", "ConstantsBold", ColorConstants.Bold)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "ConstantsItalic", ColorConstants.Italic) Then
+			piniTheme->WriteInteger("FontStyles", "ConstantsItalic", ColorConstants.Italic)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "ConstantsUnderline", ColorConstants.Underline) Then
+			piniTheme->WriteInteger("FontStyles", "ConstantsUnderline", ColorConstants.Underline)
+		End If
 		
-		piniTheme->WriteInteger("Colors", "DefinesForeground", IIf(ColorDefines.ForegroundOption = Identifiers.ForegroundOption, -1, ColorDefines.ForegroundOption), True)
-		piniTheme->WriteInteger("Colors", "DefinesBackground", IIf(ColorDefines.BackgroundOption = Identifiers.BackgroundOption, -1, ColorDefines.BackgroundOption), True)
-		piniTheme->WriteInteger("Colors", "DefinesFrame", IIf(ColorDefines.FrameOption = Identifiers.FrameOption, -1, ColorDefines.FrameOption), True)
-		piniTheme->WriteInteger("FontStyles", "DefinesBold", ColorDefines.Bold)
-		piniTheme->WriteInteger("FontStyles", "DefinesItalic", ColorDefines.Italic)
-		piniTheme->WriteInteger("FontStyles", "DefinesUnderline", ColorDefines.Underline)
+		If IniValueChangedInt(piniTheme, "Colors", "DefinesForeground", IIf(ColorDefines.ForegroundOption = Identifiers.ForegroundOption, -1, ColorDefines.ForegroundOption)) Then
+			piniTheme->WriteInteger("Colors", "DefinesForeground", IIf(ColorDefines.ForegroundOption = Identifiers.ForegroundOption, -1, ColorDefines.ForegroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "DefinesBackground", IIf(ColorDefines.BackgroundOption = Identifiers.BackgroundOption, -1, ColorDefines.BackgroundOption)) Then
+			piniTheme->WriteInteger("Colors", "DefinesBackground", IIf(ColorDefines.BackgroundOption = Identifiers.BackgroundOption, -1, ColorDefines.BackgroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "DefinesFrame", IIf(ColorDefines.FrameOption = Identifiers.FrameOption, -1, ColorDefines.FrameOption)) Then
+			piniTheme->WriteInteger("Colors", "DefinesFrame", IIf(ColorDefines.FrameOption = Identifiers.FrameOption, -1, ColorDefines.FrameOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "DefinesBold", ColorDefines.Bold) Then
+			piniTheme->WriteInteger("FontStyles", "DefinesBold", ColorDefines.Bold)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "DefinesItalic", ColorDefines.Italic) Then
+			piniTheme->WriteInteger("FontStyles", "DefinesItalic", ColorDefines.Italic)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "DefinesUnderline", ColorDefines.Underline) Then
+			piniTheme->WriteInteger("FontStyles", "DefinesUnderline", ColorDefines.Underline)
+		End If
 		
-		piniTheme->WriteInteger("Colors", "FieldsForeground", IIf(ColorFields.ForegroundOption = Identifiers.ForegroundOption, -1, ColorFields.ForegroundOption), True)
-		piniTheme->WriteInteger("Colors", "FieldsBackground", IIf(ColorFields.BackgroundOption = Identifiers.BackgroundOption, -1, ColorFields.BackgroundOption), True)
-		piniTheme->WriteInteger("Colors", "FieldsFrame", IIf(ColorFields.FrameOption = Identifiers.FrameOption, -1, ColorFields.FrameOption), True)
-		piniTheme->WriteInteger("FontStyles", "FieldsBold", ColorFields.Bold)
-		piniTheme->WriteInteger("FontStyles", "FieldsItalic", ColorFields.Italic)
-		piniTheme->WriteInteger("FontStyles", "FieldsUnderline", ColorFields.Underline)
+		If IniValueChangedInt(piniTheme, "Colors", "FieldsForeground", IIf(ColorFields.ForegroundOption = Identifiers.ForegroundOption, -1, ColorFields.ForegroundOption)) Then
+			piniTheme->WriteInteger("Colors", "FieldsForeground", IIf(ColorFields.ForegroundOption = Identifiers.ForegroundOption, -1, ColorFields.ForegroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "FieldsBackground", IIf(ColorFields.BackgroundOption = Identifiers.BackgroundOption, -1, ColorFields.BackgroundOption)) Then
+			piniTheme->WriteInteger("Colors", "FieldsBackground", IIf(ColorFields.BackgroundOption = Identifiers.BackgroundOption, -1, ColorFields.BackgroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "FieldsFrame", IIf(ColorFields.FrameOption = Identifiers.FrameOption, -1, ColorFields.FrameOption)) Then
+			piniTheme->WriteInteger("Colors", "FieldsFrame", IIf(ColorFields.FrameOption = Identifiers.FrameOption, -1, ColorFields.FrameOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "FieldsBold", ColorFields.Bold) Then
+			piniTheme->WriteInteger("FontStyles", "FieldsBold", ColorFields.Bold)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "FieldsItalic", ColorFields.Italic) Then
+			piniTheme->WriteInteger("FontStyles", "FieldsItalic", ColorFields.Italic)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "FieldsUnderline", ColorFields.Underline) Then
+			piniTheme->WriteInteger("FontStyles", "FieldsUnderline", ColorFields.Underline)
+		End If
 		
-		piniTheme->WriteInteger("Colors", "GlobalFunctionsForeground", IIf(ColorGlobalFunctions.ForegroundOption = Identifiers.ForegroundOption, -1, ColorGlobalFunctions.ForegroundOption), True)
-		piniTheme->WriteInteger("Colors", "GlobalFunctionsBackground", IIf(ColorGlobalFunctions.BackgroundOption = Identifiers.BackgroundOption, -1, ColorGlobalFunctions.BackgroundOption), True)
-		piniTheme->WriteInteger("Colors", "GlobalFunctionsFrame", IIf(ColorGlobalFunctions.FrameOption = Identifiers.FrameOption, -1, ColorGlobalFunctions.FrameOption), True)
-		piniTheme->WriteInteger("FontStyles", "GlobalFunctionsBold", ColorGlobalFunctions.Bold)
-		piniTheme->WriteInteger("FontStyles", "GlobalFunctionsItalic", ColorGlobalFunctions.Italic)
-		piniTheme->WriteInteger("FontStyles", "GlobalFunctionsUnderline", ColorGlobalFunctions.Underline)
+		If IniValueChangedInt(piniTheme, "Colors", "GlobalFunctionsForeground", IIf(ColorGlobalFunctions.ForegroundOption = Identifiers.ForegroundOption, -1, ColorGlobalFunctions.ForegroundOption)) Then
+			piniTheme->WriteInteger("Colors", "GlobalFunctionsForeground", IIf(ColorGlobalFunctions.ForegroundOption = Identifiers.ForegroundOption, -1, ColorGlobalFunctions.ForegroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "GlobalFunctionsBackground", IIf(ColorGlobalFunctions.BackgroundOption = Identifiers.BackgroundOption, -1, ColorGlobalFunctions.BackgroundOption)) Then
+			piniTheme->WriteInteger("Colors", "GlobalFunctionsBackground", IIf(ColorGlobalFunctions.BackgroundOption = Identifiers.BackgroundOption, -1, ColorGlobalFunctions.BackgroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "GlobalFunctionsFrame", IIf(ColorGlobalFunctions.FrameOption = Identifiers.FrameOption, -1, ColorGlobalFunctions.FrameOption)) Then
+			piniTheme->WriteInteger("Colors", "GlobalFunctionsFrame", IIf(ColorGlobalFunctions.FrameOption = Identifiers.FrameOption, -1, ColorGlobalFunctions.FrameOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "GlobalFunctionsBold", ColorGlobalFunctions.Bold) Then
+			piniTheme->WriteInteger("FontStyles", "GlobalFunctionsBold", ColorGlobalFunctions.Bold)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "GlobalFunctionsItalic", ColorGlobalFunctions.Italic) Then
+			piniTheme->WriteInteger("FontStyles", "GlobalFunctionsItalic", ColorGlobalFunctions.Italic)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "GlobalFunctionsUnderline", ColorGlobalFunctions.Underline) Then
+			piniTheme->WriteInteger("FontStyles", "GlobalFunctionsUnderline", ColorGlobalFunctions.Underline)
+		End If
 		
-		piniTheme->WriteInteger("Colors", "EnumMembersForeground", IIf(ColorEnumMembers.ForegroundOption = Identifiers.ForegroundOption, -1, ColorEnumMembers.ForegroundOption), True)
-		piniTheme->WriteInteger("Colors", "EnumMembersBackground", IIf(ColorEnumMembers.BackgroundOption = Identifiers.BackgroundOption, -1, ColorEnumMembers.BackgroundOption), True)
-		piniTheme->WriteInteger("Colors", "EnumMembersFrame", IIf(ColorEnumMembers.FrameOption = Identifiers.FrameOption, -1, ColorEnumMembers.FrameOption), True)
-		piniTheme->WriteInteger("FontStyles", "EnumMembersBold", ColorEnumMembers.Bold)
-		piniTheme->WriteInteger("FontStyles", "EnumMembersItalic", ColorEnumMembers.Italic)
-		piniTheme->WriteInteger("FontStyles", "EnumMembersUnderline", ColorEnumMembers.Underline)
+		If IniValueChangedInt(piniTheme, "Colors", "EnumMembersForeground", IIf(ColorEnumMembers.ForegroundOption = Identifiers.ForegroundOption, -1, ColorEnumMembers.ForegroundOption)) Then
+			piniTheme->WriteInteger("Colors", "EnumMembersForeground", IIf(ColorEnumMembers.ForegroundOption = Identifiers.ForegroundOption, -1, ColorEnumMembers.ForegroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "EnumMembersBackground", IIf(ColorEnumMembers.BackgroundOption = Identifiers.BackgroundOption, -1, ColorEnumMembers.BackgroundOption)) Then
+			piniTheme->WriteInteger("Colors", "EnumMembersBackground", IIf(ColorEnumMembers.BackgroundOption = Identifiers.BackgroundOption, -1, ColorEnumMembers.BackgroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "EnumMembersFrame", IIf(ColorEnumMembers.FrameOption = Identifiers.FrameOption, -1, ColorEnumMembers.FrameOption)) Then
+			piniTheme->WriteInteger("Colors", "EnumMembersFrame", IIf(ColorEnumMembers.FrameOption = Identifiers.FrameOption, -1, ColorEnumMembers.FrameOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "EnumMembersBold", ColorEnumMembers.Bold) Then
+			piniTheme->WriteInteger("FontStyles", "EnumMembersBold", ColorEnumMembers.Bold)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "EnumMembersItalic", ColorEnumMembers.Italic) Then
+			piniTheme->WriteInteger("FontStyles", "EnumMembersItalic", ColorEnumMembers.Italic)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "EnumMembersUnderline", ColorEnumMembers.Underline) Then
+			piniTheme->WriteInteger("FontStyles", "EnumMembersUnderline", ColorEnumMembers.Underline)
+		End If
 		
-		piniTheme->WriteInteger("Colors", "GlobalEnumsForeground", IIf(ColorGlobalEnums.ForegroundOption = Identifiers.ForegroundOption, -1, ColorGlobalEnums.ForegroundOption), True)
-		piniTheme->WriteInteger("Colors", "GlobalEnumsBackground", IIf(ColorGlobalEnums.BackgroundOption = Identifiers.BackgroundOption, -1, ColorGlobalEnums.BackgroundOption), True)
-		piniTheme->WriteInteger("Colors", "GlobalEnumsFrame", IIf(ColorGlobalEnums.FrameOption = Identifiers.FrameOption, -1, ColorGlobalEnums.FrameOption), True)
-		piniTheme->WriteInteger("FontStyles", "GlobalEnumsBold", ColorGlobalEnums.Bold)
-		piniTheme->WriteInteger("FontStyles", "GlobalEnumsItalic", ColorGlobalEnums.Italic)
-		piniTheme->WriteInteger("FontStyles", "GlobalEnumsUnderline", ColorGlobalEnums.Underline)
+		If IniValueChangedInt(piniTheme, "Colors", "GlobalEnumsForeground", IIf(ColorGlobalEnums.ForegroundOption = Identifiers.ForegroundOption, -1, ColorGlobalEnums.ForegroundOption)) Then
+			piniTheme->WriteInteger("Colors", "GlobalEnumsForeground", IIf(ColorGlobalEnums.ForegroundOption = Identifiers.ForegroundOption, -1, ColorGlobalEnums.ForegroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "GlobalEnumsBackground", IIf(ColorGlobalEnums.BackgroundOption = Identifiers.BackgroundOption, -1, ColorGlobalEnums.BackgroundOption)) Then
+			piniTheme->WriteInteger("Colors", "GlobalEnumsBackground", IIf(ColorGlobalEnums.BackgroundOption = Identifiers.BackgroundOption, -1, ColorGlobalEnums.BackgroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "GlobalEnumsFrame", IIf(ColorGlobalEnums.FrameOption = Identifiers.FrameOption, -1, ColorGlobalEnums.FrameOption)) Then
+			piniTheme->WriteInteger("Colors", "GlobalEnumsFrame", IIf(ColorGlobalEnums.FrameOption = Identifiers.FrameOption, -1, ColorGlobalEnums.FrameOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "GlobalEnumsBold", ColorGlobalEnums.Bold) Then
+			piniTheme->WriteInteger("FontStyles", "GlobalEnumsBold", ColorGlobalEnums.Bold)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "GlobalEnumsItalic", ColorGlobalEnums.Italic) Then
+			piniTheme->WriteInteger("FontStyles", "GlobalEnumsItalic", ColorGlobalEnums.Italic)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "GlobalEnumsUnderline", ColorGlobalEnums.Underline) Then
+			piniTheme->WriteInteger("FontStyles", "GlobalEnumsUnderline", ColorGlobalEnums.Underline)
+		End If
 		
-		piniTheme->WriteInteger("Colors", "LineLabelsForeground", IIf(ColorLineLabels.ForegroundOption = Identifiers.ForegroundOption, -1, ColorLineLabels.ForegroundOption), True)
-		piniTheme->WriteInteger("Colors", "LineLabelsBackground", IIf(ColorLineLabels.BackgroundOption = Identifiers.BackgroundOption, -1, ColorLineLabels.BackgroundOption), True)
-		piniTheme->WriteInteger("Colors", "LineLabelsFrame", IIf(ColorLineLabels.FrameOption = Identifiers.FrameOption, -1, ColorLineLabels.FrameOption), True)
-		piniTheme->WriteInteger("FontStyles", "LineLabelsBold", ColorLineLabels.Bold)
-		piniTheme->WriteInteger("FontStyles", "LineLabelsItalic", ColorLineLabels.Italic)
-		piniTheme->WriteInteger("FontStyles", "LineLabelsUnderline", ColorLineLabels.Underline)
+		If IniValueChangedInt(piniTheme, "Colors", "LineLabelsForeground", IIf(ColorLineLabels.ForegroundOption = Identifiers.ForegroundOption, -1, ColorLineLabels.ForegroundOption)) Then
+			piniTheme->WriteInteger("Colors", "LineLabelsForeground", IIf(ColorLineLabels.ForegroundOption = Identifiers.ForegroundOption, -1, ColorLineLabels.ForegroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "LineLabelsBackground", IIf(ColorLineLabels.BackgroundOption = Identifiers.BackgroundOption, -1, ColorLineLabels.BackgroundOption)) Then
+			piniTheme->WriteInteger("Colors", "LineLabelsBackground", IIf(ColorLineLabels.BackgroundOption = Identifiers.BackgroundOption, -1, ColorLineLabels.BackgroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "LineLabelsFrame", IIf(ColorLineLabels.FrameOption = Identifiers.FrameOption, -1, ColorLineLabels.FrameOption)) Then
+			piniTheme->WriteInteger("Colors", "LineLabelsFrame", IIf(ColorLineLabels.FrameOption = Identifiers.FrameOption, -1, ColorLineLabels.FrameOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "LineLabelsBold", ColorLineLabels.Bold) Then
+			piniTheme->WriteInteger("FontStyles", "LineLabelsBold", ColorLineLabels.Bold)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "LineLabelsItalic", ColorLineLabels.Italic) Then
+			piniTheme->WriteInteger("FontStyles", "LineLabelsItalic", ColorLineLabels.Italic)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "LineLabelsUnderline", ColorLineLabels.Underline) Then
+			piniTheme->WriteInteger("FontStyles", "LineLabelsUnderline", ColorLineLabels.Underline)
+		End If
 		
-		piniTheme->WriteInteger("Colors", "LocalVariablesForeground", IIf(ColorLocalVariables.ForegroundOption = Identifiers.ForegroundOption, -1, ColorLocalVariables.ForegroundOption), True)
-		piniTheme->WriteInteger("Colors", "LocalVariablesBackground", IIf(ColorLocalVariables.BackgroundOption = Identifiers.BackgroundOption, -1, ColorLocalVariables.BackgroundOption), True)
-		piniTheme->WriteInteger("Colors", "LocalVariablesFrame", IIf(ColorLocalVariables.FrameOption = Identifiers.FrameOption, -1, ColorLocalVariables.FrameOption), True)
-		piniTheme->WriteInteger("FontStyles", "LocalVariablesBold", ColorLocalVariables.Bold)
-		piniTheme->WriteInteger("FontStyles", "LocalVariablesItalic", ColorLocalVariables.Italic)
-		piniTheme->WriteInteger("FontStyles", "LocalVariablesUnderline", ColorLocalVariables.Underline)
+		If IniValueChangedInt(piniTheme, "Colors", "LocalVariablesForeground", IIf(ColorLocalVariables.ForegroundOption = Identifiers.ForegroundOption, -1, ColorLocalVariables.ForegroundOption)) Then
+			piniTheme->WriteInteger("Colors", "LocalVariablesForeground", IIf(ColorLocalVariables.ForegroundOption = Identifiers.ForegroundOption, -1, ColorLocalVariables.ForegroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "LocalVariablesBackground", IIf(ColorLocalVariables.BackgroundOption = Identifiers.BackgroundOption, -1, ColorLocalVariables.BackgroundOption)) Then
+			piniTheme->WriteInteger("Colors", "LocalVariablesBackground", IIf(ColorLocalVariables.BackgroundOption = Identifiers.BackgroundOption, -1, ColorLocalVariables.BackgroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "LocalVariablesFrame", IIf(ColorLocalVariables.FrameOption = Identifiers.FrameOption, -1, ColorLocalVariables.FrameOption)) Then
+			piniTheme->WriteInteger("Colors", "LocalVariablesFrame", IIf(ColorLocalVariables.FrameOption = Identifiers.FrameOption, -1, ColorLocalVariables.FrameOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "LocalVariablesBold", ColorLocalVariables.Bold) Then
+			piniTheme->WriteInteger("FontStyles", "LocalVariablesBold", ColorLocalVariables.Bold)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "LocalVariablesItalic", ColorLocalVariables.Italic) Then
+			piniTheme->WriteInteger("FontStyles", "LocalVariablesItalic", ColorLocalVariables.Italic)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "LocalVariablesUnderline", ColorLocalVariables.Underline) Then
+			piniTheme->WriteInteger("FontStyles", "LocalVariablesUnderline", ColorLocalVariables.Underline)
+		End If
 		
-		piniTheme->WriteInteger("Colors", "MacrosForeground", IIf(ColorMacros.ForegroundOption = Identifiers.ForegroundOption, -1, ColorMacros.ForegroundOption), True)
-		piniTheme->WriteInteger("Colors", "MacrosBackground", IIf(ColorMacros.BackgroundOption = Identifiers.BackgroundOption, -1, ColorMacros.BackgroundOption), True)
-		piniTheme->WriteInteger("Colors", "MacrosFrame", IIf(ColorMacros.FrameOption = Identifiers.FrameOption, -1, ColorMacros.FrameOption), True)
-		piniTheme->WriteInteger("FontStyles", "MacrosBold", ColorMacros.Bold)
-		piniTheme->WriteInteger("FontStyles", "MacrosItalic", ColorMacros.Italic)
-		piniTheme->WriteInteger("FontStyles", "MacrosUnderline", ColorMacros.Underline)
+		If IniValueChangedInt(piniTheme, "Colors", "MacrosForeground", IIf(ColorMacros.ForegroundOption = Identifiers.ForegroundOption, -1, ColorMacros.ForegroundOption)) Then
+			piniTheme->WriteInteger("Colors", "MacrosForeground", IIf(ColorMacros.ForegroundOption = Identifiers.ForegroundOption, -1, ColorMacros.ForegroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "MacrosBackground", IIf(ColorMacros.BackgroundOption = Identifiers.BackgroundOption, -1, ColorMacros.BackgroundOption)) Then
+			piniTheme->WriteInteger("Colors", "MacrosBackground", IIf(ColorMacros.BackgroundOption = Identifiers.BackgroundOption, -1, ColorMacros.BackgroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "MacrosFrame", IIf(ColorMacros.FrameOption = Identifiers.FrameOption, -1, ColorMacros.FrameOption)) Then
+			piniTheme->WriteInteger("Colors", "MacrosFrame", IIf(ColorMacros.FrameOption = Identifiers.FrameOption, -1, ColorMacros.FrameOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "MacrosBold", ColorMacros.Bold) Then
+			piniTheme->WriteInteger("FontStyles", "MacrosBold", ColorMacros.Bold)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "MacrosItalic", ColorMacros.Italic) Then
+			piniTheme->WriteInteger("FontStyles", "MacrosItalic", ColorMacros.Italic)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "MacrosUnderline", ColorMacros.Underline) Then
+			piniTheme->WriteInteger("FontStyles", "MacrosUnderline", ColorMacros.Underline)
+		End If
 		
-		piniTheme->WriteInteger("Colors", "GlobalNamespacesForeground", IIf(ColorGlobalNamespaces.ForegroundOption = Identifiers.ForegroundOption, -1, ColorGlobalNamespaces.ForegroundOption), True)
-		piniTheme->WriteInteger("Colors", "GlobalNamespacesBackground", IIf(ColorGlobalNamespaces.BackgroundOption = Identifiers.BackgroundOption, -1, ColorGlobalNamespaces.BackgroundOption), True)
-		piniTheme->WriteInteger("Colors", "GlobalNamespacesFrame", IIf(ColorGlobalNamespaces.FrameOption = Identifiers.FrameOption, -1, ColorGlobalNamespaces.FrameOption), True)
-		piniTheme->WriteInteger("FontStyles", "GlobalNamespacesBold", ColorGlobalNamespaces.Bold)
-		piniTheme->WriteInteger("FontStyles", "GlobalNamespacesItalic", ColorGlobalNamespaces.Italic)
-		piniTheme->WriteInteger("FontStyles", "GlobalNamespacesUnderline", ColorGlobalNamespaces.Underline)
+		If IniValueChangedInt(piniTheme, "Colors", "GlobalNamespacesForeground", IIf(ColorGlobalNamespaces.ForegroundOption = Identifiers.ForegroundOption, -1, ColorGlobalNamespaces.ForegroundOption)) Then
+			piniTheme->WriteInteger("Colors", "GlobalNamespacesForeground", IIf(ColorGlobalNamespaces.ForegroundOption = Identifiers.ForegroundOption, -1, ColorGlobalNamespaces.ForegroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "GlobalNamespacesBackground", IIf(ColorGlobalNamespaces.BackgroundOption = Identifiers.BackgroundOption, -1, ColorGlobalNamespaces.BackgroundOption)) Then
+			piniTheme->WriteInteger("Colors", "GlobalNamespacesBackground", IIf(ColorGlobalNamespaces.BackgroundOption = Identifiers.BackgroundOption, -1, ColorGlobalNamespaces.BackgroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "GlobalNamespacesFrame", IIf(ColorGlobalNamespaces.FrameOption = Identifiers.FrameOption, -1, ColorGlobalNamespaces.FrameOption)) Then
+			piniTheme->WriteInteger("Colors", "GlobalNamespacesFrame", IIf(ColorGlobalNamespaces.FrameOption = Identifiers.FrameOption, -1, ColorGlobalNamespaces.FrameOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "GlobalNamespacesBold", ColorGlobalNamespaces.Bold) Then
+			piniTheme->WriteInteger("FontStyles", "GlobalNamespacesBold", ColorGlobalNamespaces.Bold)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "GlobalNamespacesItalic", ColorGlobalNamespaces.Italic) Then
+			piniTheme->WriteInteger("FontStyles", "GlobalNamespacesItalic", ColorGlobalNamespaces.Italic)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "GlobalNamespacesUnderline", ColorGlobalNamespaces.Underline) Then
+			piniTheme->WriteInteger("FontStyles", "GlobalNamespacesUnderline", ColorGlobalNamespaces.Underline)
+		End If
 		
-		piniTheme->WriteInteger("Colors", "PropertiesForeground",  IIf(ColorProperties.ForegroundOption = Identifiers.ForegroundOption, -1, ColorProperties.ForegroundOption), True)
-		piniTheme->WriteInteger("Colors", "PropertiesBackground", IIf(ColorProperties.BackgroundOption = Identifiers.BackgroundOption, -1, ColorProperties.BackgroundOption), True)
-		piniTheme->WriteInteger("Colors", "PropertiesFrame", IIf(ColorProperties.FrameOption = Identifiers.FrameOption, -1, ColorProperties.FrameOption), True)
-		piniTheme->WriteInteger("FontStyles", "PropertiesBold", ColorProperties.Bold)
-		piniTheme->WriteInteger("FontStyles", "PropertiesItalic", ColorProperties.Italic)
-		piniTheme->WriteInteger("FontStyles", "PropertiesUnderline", ColorProperties.Underline)
+		If IniValueChangedInt(piniTheme, "Colors", "PropertiesForeground", IIf(ColorProperties.ForegroundOption = Identifiers.ForegroundOption, -1, ColorProperties.ForegroundOption)) Then
+			piniTheme->WriteInteger("Colors", "PropertiesForeground", IIf(ColorProperties.ForegroundOption = Identifiers.ForegroundOption, -1, ColorProperties.ForegroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "PropertiesBackground", IIf(ColorProperties.BackgroundOption = Identifiers.BackgroundOption, -1, ColorProperties.BackgroundOption)) Then
+			piniTheme->WriteInteger("Colors", "PropertiesBackground", IIf(ColorProperties.BackgroundOption = Identifiers.BackgroundOption, -1, ColorProperties.BackgroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "PropertiesFrame", IIf(ColorProperties.FrameOption = Identifiers.FrameOption, -1, ColorProperties.FrameOption)) Then
+			piniTheme->WriteInteger("Colors", "PropertiesFrame", IIf(ColorProperties.FrameOption = Identifiers.FrameOption, -1, ColorProperties.FrameOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "PropertiesBold", ColorProperties.Bold) Then
+			piniTheme->WriteInteger("FontStyles", "PropertiesBold", ColorProperties.Bold)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "PropertiesItalic", ColorProperties.Italic) Then
+			piniTheme->WriteInteger("FontStyles", "PropertiesItalic", ColorProperties.Italic)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "PropertiesUnderline", ColorProperties.Underline) Then
+			piniTheme->WriteInteger("FontStyles", "PropertiesUnderline", ColorProperties.Underline)
+		End If
 		
-		piniTheme->WriteInteger("Colors", "SharedVariablesForeground", IIf(ColorSharedVariables.ForegroundOption = Identifiers.ForegroundOption, -1, ColorSharedVariables.ForegroundOption), True)
-		piniTheme->WriteInteger("Colors", "SharedVariablesBackground", IIf(ColorSharedVariables.BackgroundOption = Identifiers.BackgroundOption, -1, ColorSharedVariables.BackgroundOption), True)
-		piniTheme->WriteInteger("Colors", "SharedVariablesFrame", IIf(ColorSharedVariables.FrameOption = Identifiers.FrameOption, -1, ColorSharedVariables.FrameOption), True)
-		piniTheme->WriteInteger("FontStyles", "SharedVariablesBold", ColorSharedVariables.Bold)
-		piniTheme->WriteInteger("FontStyles", "SharedVariablesItalic", ColorSharedVariables.Italic)
-		piniTheme->WriteInteger("FontStyles", "SharedVariablesUnderline", ColorSharedVariables.Underline)
+		If IniValueChangedInt(piniTheme, "Colors", "SharedVariablesForeground", IIf(ColorSharedVariables.ForegroundOption = Identifiers.ForegroundOption, -1, ColorSharedVariables.ForegroundOption)) Then
+			piniTheme->WriteInteger("Colors", "SharedVariablesForeground", IIf(ColorSharedVariables.ForegroundOption = Identifiers.ForegroundOption, -1, ColorSharedVariables.ForegroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "SharedVariablesBackground", IIf(ColorSharedVariables.BackgroundOption = Identifiers.BackgroundOption, -1, ColorSharedVariables.BackgroundOption)) Then
+			piniTheme->WriteInteger("Colors", "SharedVariablesBackground", IIf(ColorSharedVariables.BackgroundOption = Identifiers.BackgroundOption, -1, ColorSharedVariables.BackgroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "SharedVariablesFrame", IIf(ColorSharedVariables.FrameOption = Identifiers.FrameOption, -1, ColorSharedVariables.FrameOption)) Then
+			piniTheme->WriteInteger("Colors", "SharedVariablesFrame", IIf(ColorSharedVariables.FrameOption = Identifiers.FrameOption, -1, ColorSharedVariables.FrameOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "SharedVariablesBold", ColorSharedVariables.Bold) Then
+			piniTheme->WriteInteger("FontStyles", "SharedVariablesBold", ColorSharedVariables.Bold)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "SharedVariablesItalic", ColorSharedVariables.Italic) Then
+			piniTheme->WriteInteger("FontStyles", "SharedVariablesItalic", ColorSharedVariables.Italic)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "SharedVariablesUnderline", ColorSharedVariables.Underline) Then
+			piniTheme->WriteInteger("FontStyles", "SharedVariablesUnderline", ColorSharedVariables.Underline)
+		End If
 		
-		piniTheme->WriteInteger("Colors", "SubsForeground", IIf(ColorSubs.ForegroundOption = Identifiers.ForegroundOption, -1, ColorSubs.ForegroundOption), True)
-		piniTheme->WriteInteger("Colors", "SubsBackground", IIf(ColorSubs.BackgroundOption = Identifiers.BackgroundOption, -1, ColorSubs.BackgroundOption), True)
-		piniTheme->WriteInteger("Colors", "SubsFrame", IIf(ColorSubs.FrameOption = Identifiers.FrameOption, -1, ColorSubs.FrameOption), True)
-		piniTheme->WriteInteger("FontStyles", "SubsBold", ColorSubs.Bold)
-		piniTheme->WriteInteger("FontStyles", "SubsItalic", ColorSubs.Italic)
-		piniTheme->WriteInteger("FontStyles", "SubsUnderline", ColorSubs.Underline)
+		If IniValueChangedInt(piniTheme, "Colors", "SubsForeground", IIf(ColorSubs.ForegroundOption = Identifiers.ForegroundOption, -1, ColorSubs.ForegroundOption)) Then
+			piniTheme->WriteInteger("Colors", "SubsForeground", IIf(ColorSubs.ForegroundOption = Identifiers.ForegroundOption, -1, ColorSubs.ForegroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "SubsBackground", IIf(ColorSubs.BackgroundOption = Identifiers.BackgroundOption, -1, ColorSubs.BackgroundOption)) Then
+			piniTheme->WriteInteger("Colors", "SubsBackground", IIf(ColorSubs.BackgroundOption = Identifiers.BackgroundOption, -1, ColorSubs.BackgroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "SubsFrame", IIf(ColorSubs.FrameOption = Identifiers.FrameOption, -1, ColorSubs.FrameOption)) Then
+			piniTheme->WriteInteger("Colors", "SubsFrame", IIf(ColorSubs.FrameOption = Identifiers.FrameOption, -1, ColorSubs.FrameOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "SubsBold", ColorSubs.Bold) Then
+			piniTheme->WriteInteger("FontStyles", "SubsBold", ColorSubs.Bold)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "SubsItalic", ColorSubs.Italic) Then
+			piniTheme->WriteInteger("FontStyles", "SubsItalic", ColorSubs.Italic)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "SubsUnderline", ColorSubs.Underline) Then
+			piniTheme->WriteInteger("FontStyles", "SubsUnderline", ColorSubs.Underline)
+		End If
 		
-		piniTheme->WriteInteger("Colors", "GlobalTypesForeground", IIf(ColorGlobalTypes.ForegroundOption = Identifiers.ForegroundOption, -1, ColorGlobalTypes.ForegroundOption), True)
-		piniTheme->WriteInteger("Colors", "GlobalTypesBackground", IIf(ColorGlobalTypes.BackgroundOption = Identifiers.BackgroundOption, -1, ColorGlobalTypes.BackgroundOption), True)
-		piniTheme->WriteInteger("Colors", "GlobalTypesFrame", IIf(ColorGlobalTypes.FrameOption = Identifiers.FrameOption, -1, ColorGlobalTypes.FrameOption), True)
-		piniTheme->WriteInteger("FontStyles", "GlobalTypesBold", ColorGlobalTypes.Bold)
-		piniTheme->WriteInteger("FontStyles", "GlobalTypesItalic", ColorGlobalTypes.Italic)
-		piniTheme->WriteInteger("FontStyles", "GlobalTypesUnderline", ColorGlobalTypes.Underline)
+		If IniValueChangedInt(piniTheme, "Colors", "GlobalTypesForeground", IIf(ColorGlobalTypes.ForegroundOption = Identifiers.ForegroundOption, -1, ColorGlobalTypes.ForegroundOption)) Then
+			piniTheme->WriteInteger("Colors", "GlobalTypesForeground", IIf(ColorGlobalTypes.ForegroundOption = Identifiers.ForegroundOption, -1, ColorGlobalTypes.ForegroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "GlobalTypesBackground", IIf(ColorGlobalTypes.BackgroundOption = Identifiers.BackgroundOption, -1, ColorGlobalTypes.BackgroundOption)) Then
+			piniTheme->WriteInteger("Colors", "GlobalTypesBackground", IIf(ColorGlobalTypes.BackgroundOption = Identifiers.BackgroundOption, -1, ColorGlobalTypes.BackgroundOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "GlobalTypesFrame", IIf(ColorGlobalTypes.FrameOption = Identifiers.FrameOption, -1, ColorGlobalTypes.FrameOption)) Then
+			piniTheme->WriteInteger("Colors", "GlobalTypesFrame", IIf(ColorGlobalTypes.FrameOption = Identifiers.FrameOption, -1, ColorGlobalTypes.FrameOption), True)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "GlobalTypesBold", ColorGlobalTypes.Bold) Then
+			piniTheme->WriteInteger("FontStyles", "GlobalTypesBold", ColorGlobalTypes.Bold)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "GlobalTypesItalic", ColorGlobalTypes.Italic) Then
+			piniTheme->WriteInteger("FontStyles", "GlobalTypesItalic", ColorGlobalTypes.Italic)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "GlobalTypesUnderline", ColorGlobalTypes.Underline) Then
+			piniTheme->WriteInteger("FontStyles", "GlobalTypesUnderline", ColorGlobalTypes.Underline)
+		End If
 		
-		piniTheme->WriteInteger("Colors", "IndicatorLinesForeground", IndicatorLines.ForegroundOption, True)
+		If IniValueChangedInt(piniTheme, "Colors", "IndicatorLinesForeground", IndicatorLines.ForegroundOption) Then
+			piniTheme->WriteInteger("Colors", "IndicatorLinesForeground", IndicatorLines.ForegroundOption, True)
+		End If
 		
 		For k As Integer = 0 To UBound(Keywords)
-			piniTheme->WriteInteger("Colors", Replace(KeywordLists.Item(k), " ", "") & "Foreground", Keywords(k).ForegroundOption, True)
-			piniTheme->WriteInteger("Colors", Replace(KeywordLists.Item(k), " ", "") & "Background", Keywords(k).BackgroundOption, True)
-			piniTheme->WriteInteger("Colors", Replace(KeywordLists.Item(k), " ", "") & "Frame", Keywords(k).FrameOption, True)
-			piniTheme->WriteInteger("FontStyles", Replace(KeywordLists.Item(k), " ", "") & "Bold", Keywords(k).Bold)
-			piniTheme->WriteInteger("FontStyles", Replace(KeywordLists.Item(k), " ", "") & "Italic", Keywords(k).Italic)
-			piniTheme->WriteInteger("FontStyles", Replace(KeywordLists.Item(k), " ", "") & "Underline", Keywords(k).Underline)
+			If IniValueChangedInt(piniTheme, "Colors", Replace(KeywordLists.Item(k), " ", "") & "Foreground", Keywords(k).ForegroundOption) Then
+				piniTheme->WriteInteger("Colors", Replace(KeywordLists.Item(k), " ", "") & "Foreground", Keywords(k).ForegroundOption, True)
+			End If
+			If IniValueChangedInt(piniTheme, "Colors", Replace(KeywordLists.Item(k), " ", "") & "Background", Keywords(k).BackgroundOption) Then
+				piniTheme->WriteInteger("Colors", Replace(KeywordLists.Item(k), " ", "") & "Background", Keywords(k).BackgroundOption, True)
+			End If
+			If IniValueChangedInt(piniTheme, "Colors", Replace(KeywordLists.Item(k), " ", "") & "Frame", Keywords(k).FrameOption) Then
+				piniTheme->WriteInteger("Colors", Replace(KeywordLists.Item(k), " ", "") & "Frame", Keywords(k).FrameOption, True)
+			End If
+			If IniValueChangedInt(piniTheme, "FontStyles", Replace(KeywordLists.Item(k), " ", "") & "Bold", Keywords(k).Bold) Then
+				piniTheme->WriteInteger("FontStyles", Replace(KeywordLists.Item(k), " ", "") & "Bold", Keywords(k).Bold)
+			End If
+			If IniValueChangedInt(piniTheme, "FontStyles", Replace(KeywordLists.Item(k), " ", "") & "Italic", Keywords(k).Italic) Then
+				piniTheme->WriteInteger("FontStyles", Replace(KeywordLists.Item(k), " ", "") & "Italic", Keywords(k).Italic)
+			End If
+			If IniValueChangedInt(piniTheme, "FontStyles", Replace(KeywordLists.Item(k), " ", "") & "Underline", Keywords(k).Underline) Then
+				piniTheme->WriteInteger("FontStyles", Replace(KeywordLists.Item(k), " ", "") & "Underline", Keywords(k).Underline)
+			End If
 		Next k
 		
-		piniTheme->WriteInteger("Colors", "LineNumbersForeground", LineNumbers.ForegroundOption, True)
-		piniTheme->WriteInteger("Colors", "LineNumbersBackground", LineNumbers.BackgroundOption, True)
-		piniTheme->WriteInteger("FontStyles", "LineNumbersBold", LineNumbers.Bold)
-		piniTheme->WriteInteger("FontStyles", "LineNumbersItalic", LineNumbers.Italic)
-		piniTheme->WriteInteger("FontStyles", "LineNumbersUnderline", LineNumbers.Underline)
-		piniTheme->WriteInteger("Colors", "NormalTextForeground", NormalText.ForegroundOption, True)
-		piniTheme->WriteInteger("Colors", "NormalTextBackground", NormalText.BackgroundOption, True)
-		piniTheme->WriteInteger("Colors", "NormalTextFrame", NormalText.FrameOption, True)
-		piniTheme->WriteInteger("FontStyles", "NormalTextBold", NormalText.Bold)
-		piniTheme->WriteInteger("FontStyles", "NormalTextItalic", NormalText.Italic)
-		piniTheme->WriteInteger("FontStyles", "NormalTextUnderline", NormalText.Underline)
-		piniTheme->WriteInteger("Colors", "NumbersForeground", Numbers.ForegroundOption, True)
-		piniTheme->WriteInteger("Colors", "NumbersBackground", Numbers.BackgroundOption, True)
-		piniTheme->WriteInteger("Colors", "NumbersFrame", Numbers.FrameOption, True)
-		piniTheme->WriteInteger("FontStyles", "NumbersBold", Numbers.Bold)
-		piniTheme->WriteInteger("FontStyles", "NumbersItalic", Numbers.Italic)
-		piniTheme->WriteInteger("FontStyles", "NumbersUnderline", Numbers.Underline)
-		piniTheme->WriteInteger("Colors", "OperatorsForeground", ColorOperators.ForegroundOption, True)
-		piniTheme->WriteInteger("Colors", "OperatorsBackground", ColorOperators.BackgroundOption, True)
-		piniTheme->WriteInteger("Colors", "OperatorsFrame", ColorOperators.FrameOption, True)
-		piniTheme->WriteInteger("FontStyles", "OperatorsBold", ColorOperators.Bold)
-		piniTheme->WriteInteger("FontStyles", "OperatorsItalic", ColorOperators.Italic)
-		piniTheme->WriteInteger("FontStyles", "OperatorsUnderline", ColorOperators.Underline)
-		piniTheme->WriteInteger("Colors", "RealNumbersForeground", RealNumbers.ForegroundOption, True)
-		piniTheme->WriteInteger("Colors", "RealNumbersBackground", RealNumbers.BackgroundOption, True)
-		piniTheme->WriteInteger("Colors", "RealNumbersFrame", RealNumbers.FrameOption, True)
-		piniTheme->WriteInteger("FontStyles", "RealNumbersBold", RealNumbers.Bold)
-		piniTheme->WriteInteger("FontStyles", "RealNumbersItalic", RealNumbers.Italic)
-		piniTheme->WriteInteger("FontStyles", "RealNumbersUnderline", RealNumbers.Underline)
-		piniTheme->WriteInteger("Colors", "SelectionForeground", Selection.ForegroundOption, True)
-		piniTheme->WriteInteger("Colors", "SelectionBackground", Selection.BackgroundOption, True)
-		piniTheme->WriteInteger("Colors", "SelectionFrame", Selection.FrameOption, True)
-		piniTheme->WriteInteger("Colors", "SpaceIdentifiersForeground", SpaceIdentifiers.ForegroundOption, True)
-		piniTheme->WriteInteger("Colors", "StringsForeground", Strings.ForegroundOption, True)
-		piniTheme->WriteInteger("Colors", "StringsBackground", Strings.BackgroundOption, True)
-		piniTheme->WriteInteger("Colors", "StringsFrame", Strings.FrameOption, True)
-		piniTheme->WriteInteger("FontStyles", "StringsBold", Strings.Bold)
-		piniTheme->WriteInteger("FontStyles", "StringsItalic", Strings.Italic)
-		piniTheme->WriteInteger("FontStyles", "StringsUnderline", Strings.Underline)
+		If IniValueChangedInt(piniTheme, "Colors", "LineNumbersForeground", LineNumbers.ForegroundOption) Then
+			piniTheme->WriteInteger("Colors", "LineNumbersForeground", LineNumbers.ForegroundOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "LineNumbersBackground", LineNumbers.BackgroundOption) Then
+			piniTheme->WriteInteger("Colors", "LineNumbersBackground", LineNumbers.BackgroundOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "LineNumbersBold", LineNumbers.Bold) Then
+			piniTheme->WriteInteger("FontStyles", "LineNumbersBold", LineNumbers.Bold)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "LineNumbersItalic", LineNumbers.Italic) Then
+			piniTheme->WriteInteger("FontStyles", "LineNumbersItalic", LineNumbers.Italic)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "LineNumbersUnderline", LineNumbers.Underline) Then
+			piniTheme->WriteInteger("FontStyles", "LineNumbersUnderline", LineNumbers.Underline)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "NormalTextForeground", NormalText.ForegroundOption) Then
+			piniTheme->WriteInteger("Colors", "NormalTextForeground", NormalText.ForegroundOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "NormalTextBackground", NormalText.BackgroundOption) Then
+			piniTheme->WriteInteger("Colors", "NormalTextBackground", NormalText.BackgroundOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "NormalTextFrame", NormalText.FrameOption) Then
+			piniTheme->WriteInteger("Colors", "NormalTextFrame", NormalText.FrameOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "NormalTextBold", NormalText.Bold) Then
+			piniTheme->WriteInteger("FontStyles", "NormalTextBold", NormalText.Bold)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "NormalTextItalic", NormalText.Italic) Then
+			piniTheme->WriteInteger("FontStyles", "NormalTextItalic", NormalText.Italic)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "NormalTextUnderline", NormalText.Underline) Then
+			piniTheme->WriteInteger("FontStyles", "NormalTextUnderline", NormalText.Underline)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "NumbersForeground", Numbers.ForegroundOption) Then
+			piniTheme->WriteInteger("Colors", "NumbersForeground", Numbers.ForegroundOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "NumbersBackground", Numbers.BackgroundOption) Then
+			piniTheme->WriteInteger("Colors", "NumbersBackground", Numbers.BackgroundOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "NumbersFrame", Numbers.FrameOption) Then
+			piniTheme->WriteInteger("Colors", "NumbersFrame", Numbers.FrameOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "NumbersBold", Numbers.Bold) Then
+			piniTheme->WriteInteger("FontStyles", "NumbersBold", Numbers.Bold)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "NumbersItalic", Numbers.Italic) Then
+			piniTheme->WriteInteger("FontStyles", "NumbersItalic", Numbers.Italic)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "NumbersUnderline", Numbers.Underline) Then
+			piniTheme->WriteInteger("FontStyles", "NumbersUnderline", Numbers.Underline)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "OperatorsForeground", ColorOperators.ForegroundOption) Then
+			piniTheme->WriteInteger("Colors", "OperatorsForeground", ColorOperators.ForegroundOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "OperatorsBackground", ColorOperators.BackgroundOption) Then
+			piniTheme->WriteInteger("Colors", "OperatorsBackground", ColorOperators.BackgroundOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "OperatorsFrame", ColorOperators.FrameOption) Then
+			piniTheme->WriteInteger("Colors", "OperatorsFrame", ColorOperators.FrameOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "OperatorsBold", ColorOperators.Bold) Then
+			piniTheme->WriteInteger("FontStyles", "OperatorsBold", ColorOperators.Bold)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "OperatorsItalic", ColorOperators.Italic) Then
+			piniTheme->WriteInteger("FontStyles", "OperatorsItalic", ColorOperators.Italic)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "OperatorsUnderline", ColorOperators.Underline) Then
+			piniTheme->WriteInteger("FontStyles", "OperatorsUnderline", ColorOperators.Underline)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "RealNumbersForeground", RealNumbers.ForegroundOption) Then
+			piniTheme->WriteInteger("Colors", "RealNumbersForeground", RealNumbers.ForegroundOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "RealNumbersBackground", RealNumbers.BackgroundOption) Then
+			piniTheme->WriteInteger("Colors", "RealNumbersBackground", RealNumbers.BackgroundOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "RealNumbersFrame", RealNumbers.FrameOption) Then
+			piniTheme->WriteInteger("Colors", "RealNumbersFrame", RealNumbers.FrameOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "RealNumbersBold", RealNumbers.Bold) Then
+			piniTheme->WriteInteger("FontStyles", "RealNumbersBold", RealNumbers.Bold)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "RealNumbersItalic", RealNumbers.Italic) Then
+			piniTheme->WriteInteger("FontStyles", "RealNumbersItalic", RealNumbers.Italic)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "RealNumbersUnderline", RealNumbers.Underline) Then
+			piniTheme->WriteInteger("FontStyles", "RealNumbersUnderline", RealNumbers.Underline)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "SelectionForeground", Selection.ForegroundOption) Then
+			piniTheme->WriteInteger("Colors", "SelectionForeground", Selection.ForegroundOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "SelectionBackground", Selection.BackgroundOption) Then
+			piniTheme->WriteInteger("Colors", "SelectionBackground", Selection.BackgroundOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "SelectionFrame", Selection.FrameOption) Then
+			piniTheme->WriteInteger("Colors", "SelectionFrame", Selection.FrameOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "SpaceIdentifiersForeground", SpaceIdentifiers.ForegroundOption) Then
+			piniTheme->WriteInteger("Colors", "SpaceIdentifiersForeground", SpaceIdentifiers.ForegroundOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "StringsForeground", Strings.ForegroundOption) Then
+			piniTheme->WriteInteger("Colors", "StringsForeground", Strings.ForegroundOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "StringsBackground", Strings.BackgroundOption) Then
+			piniTheme->WriteInteger("Colors", "StringsBackground", Strings.BackgroundOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "Colors", "StringsFrame", Strings.FrameOption) Then
+			piniTheme->WriteInteger("Colors", "StringsFrame", Strings.FrameOption, True)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "StringsBold", Strings.Bold) Then
+			piniTheme->WriteInteger("FontStyles", "StringsBold", Strings.Bold)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "StringsItalic", Strings.Italic) Then
+			piniTheme->WriteInteger("FontStyles", "StringsItalic", Strings.Italic)
+		End If
+		If IniValueChangedInt(piniTheme, "FontStyles", "StringsUnderline", Strings.Underline) Then
+			piniTheme->WriteInteger("FontStyles", "StringsUnderline", Strings.Underline)
+		End If
 		
 		LoadTheme
 		SyncOptionsColorsFromGlobals

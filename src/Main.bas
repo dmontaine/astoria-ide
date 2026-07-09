@@ -9289,6 +9289,14 @@ Sub frmMain_Show(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Var bWorkspaceLoaded = LoadWorkspace()
 		mApplyingWorkspaceLoad = False
 		RunDeferredFormDesign()
+		' Reloaded-project startup gap: AddProject's tn->SelectItem (called from inside LoadWorkspace)
+		' silently no-ops because the tree control's Win32 handle isn't realized yet at that point in
+		' startup -- so tvExplorer.SelectedNode is still 0 here, not just un-refreshed. Re-select the
+		' project node now that the handle exists, then refresh menu state, so Close Project/Save
+		' Project/etc. are correct from the first frame instead of only after a manual tree click.
+		Var tnLoadedProject = GetOpenProjectNode()
+		If tnLoadedProject <> 0 Then tnLoadedProject->SelectItem
+		ChangeMenuItemsEnabled
 		' Nothing to reopen (fresh install, or a workspace with no surviving project/tabs): prompt the
 		' user with File > New Project so they choose the project type, instead of landing on an empty
 		' IDE. This is the original design intent (see the commented Case 1: NewProject below) and a

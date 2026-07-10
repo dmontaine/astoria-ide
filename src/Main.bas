@@ -9192,6 +9192,13 @@ Sub frmMain_Create(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	WLet(RecentFile, SanitizeIniOptionalPath(iniSettings.ReadString("MainWindow", "RecentFile", "")))
 	WLet(RecentProject, SanitizeIniOptionalPath(iniSettings.ReadString("MainWindow", "RecentProject", "")))
 	WLet(RecentFolder, SanitizeIniOptionalPath(iniSettings.ReadString("MainWindow", "RecentFolder", "")))
+	'' Values above may be a portable ".\"-relative path (see MakePathPortable, SaveWorkspace's
+	'' same convention) -- resolve against the CURRENT ExePath so a moved/renamed install folder
+	'' still finds them. Guard on non-empty first: GetFullPath("") returns ExePath itself, not "".
+	If *RecentFiles <> "" Then WLet(RecentFiles, GetFullPath(*RecentFiles))
+	If *RecentFile <> "" Then WLet(RecentFile, GetFullPath(*RecentFile))
+	If *RecentProject <> "" Then WLet(RecentProject, GetFullPath(*RecentProject))
+	If *RecentFolder <> "" Then WLet(RecentFolder, GetFullPath(*RecentFolder))
 	'' 13.3.A O3: minimal default-visible toolbar set is Standard + Run only; Edit/Project default to
 	'' hidden (Format already defaulted to hidden). This only changes behavior for a FRESH install --
 	'' ReadBool's default only applies when the INI key is absent, so an existing user's saved
@@ -9538,10 +9545,10 @@ Sub frmMain_Close(ByRef Designer As My.Sys.Object, ByRef Sender As Form, ByRef A
 	
 	SaveMRU
 	
-	iniSettings.WriteString("MainWindow", "RecentFiles", *RecentFiles)
-	iniSettings.WriteString("MainWindow", "RecentFile", *RecentFile)
-	iniSettings.WriteString("MainWindow", "RecentProject", *RecentProject)
-	iniSettings.WriteString("MainWindow", "RecentFolder", *RecentFolder)
+	iniSettings.WriteString("MainWindow", "RecentFiles", MakePathPortable(*RecentFiles))
+	iniSettings.WriteString("MainWindow", "RecentFile", MakePathPortable(*RecentFile))
+	iniSettings.WriteString("MainWindow", "RecentProject", MakePathPortable(*RecentProject))
+	iniSettings.WriteString("MainWindow", "RecentFolder", MakePathPortable(*RecentFolder))
 	If mChangeLogEdited Then txtChangeLog.SaveToFile(ExePath & WindowsSlash & StringExtract(MainNode->Text, ".") & "_Change.log") '
 	UnLoadAddins
 	Exit Sub

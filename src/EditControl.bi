@@ -179,6 +179,10 @@ Namespace My.Sys.Forms
 		'' B1: "Delete File" queues project-member files for removal instead of
 		'' deleting immediately -- see DeleteEditorFile/SaveProject in Main.bas.
 		PendingDelete As Boolean
+		'' New project files are staged here first (FileName points into Temp/, not the
+		'' project folder) so an in-progress/never-saved project doesn't leave real files
+		'' scattered outside it -- see CreatePendingProjectFile/SaveProjectFile/CloseProject.
+		PendingInTemp As Boolean
 		Declare Destructor
 	End Type
 	

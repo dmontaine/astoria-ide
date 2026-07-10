@@ -218,6 +218,7 @@ LoadSettings
 #include once "frmImageManager.bi"
 #include once "frmOptions.bi"
 #include once "frmTemplates.bi"
+#include once "frmNewFileName.bi"
 #include once "frmNewProject.bi"
 #include once "frmNewFile.bi"
 #include once "frmOpenProject.bi"
@@ -852,59 +853,91 @@ Function AddProject(ByRef FileName As WString, pFilesList As WStringList Ptr, tn
 				If Parameter = "File" OrElse Parameter = "*File" Then
 					bMain = StartsWith(Buff, "*")
 					Buff = Trim(Mid(Buff, Pos1+1 ))
-					ee = _New( ExplorerElement)
-					If CInt(InStr(Buff, ":") = 0) OrElse CInt(StartsWith(Buff, "/")) Then
-							WLet(ee->FileName, GetFolderName(FileName) & Replace(Buff, "/", "\"))
-					Else
-						WLet(ee->FileName, Buff)
-					End If
-					If bNew Then
-						WLet(ee->TemplateFileName, WGet(ee->FileName))
-						WLet(ee->FileName, GetFileName(Buff))
-					End If
 					If Not inFolder Then
 						tn1 = GetTreeNodeChild(tn, Buff)
 					End If
-					Dim As Boolean FileEx = CInt(FileExists(*ee->FileName)) OrElse CInt(bNew)
-					If bMain Then
-						If EndsWith(LCase(*ee->FileName), ".rc") OrElse EndsWith(LCase(*ee->FileName), ".res") Then  ' Then
-							WLet(ppe->ResourceFileName, *ee->FileName)
-						ElseIf EndsWith(LCase(*ee->FileName), ".xpm") Then
-							WLet(ppe->IconResourceFileName, *ee->FileName)
-						ElseIf LCase(GetFileName(*ee->FileName)) = "makefile" Then
-							If WGet(ppe->BatchCompilationFileNameWindows) = "" Then WLet(ppe->BatchCompilationFileNameWindows, *ee->FileName)
-							If WGet(ppe->BatchCompilationFileNameLinux) = "" Then WLet(ppe->BatchCompilationFileNameLinux, *ee->FileName)
-						ElseIf EndsWith(LCase(*ee->FileName), ".bat") Then
-							WLet(ppe->BatchCompilationFileNameWindows, *ee->FileName)
-						ElseIf EndsWith(LCase(*ee->FileName), ".sh") OrElse InStr(*ee->FileName, ".") = 0 Then
-							WLet(ppe->BatchCompilationFileNameLinux, *ee->FileName)
+					Dim As Boolean bFileCreated = True
+					If bNew Then
+						'' New-project scaffolding: prompt for a real name up front (same
+						'' custom dialog AddFromTemplate uses) and stage the file under
+						'' Temp/ instead of leaving it purely in-memory with a bare,
+						'' unresolved name -- see CreatePendingProjectFile. Cancelling
+						'' just skips this file (no node, no disk file) rather than
+						'' aborting the whole new-project creation.
+						Dim As UString TemplateSrc
+						If CInt(InStr(Buff, ":") = 0) OrElse CInt(StartsWith(Buff, "/")) Then
+							TemplateSrc = GetFolderName(FileName) & Replace(Buff, "/", "\")
 						Else
-							WLet(ppe->MainFileName, *ee->FileName)
+							TemplateSrc = Buff
 						End If
-					End If
-					IconName = GetIconName(*ee->FileName, ppe)
-					If Not FileEx Then IconName = "New"
-					If Not inFolder Then
-						tn2 = tn1->Nodes.Add(GetFileName(*ee->FileName) & ZvFile,, *ee->FileName, IconName, IconName, True)
-						If IconName = "Form" Then tn2->Nodes.Add ""
-						If bMain Then
-							If MainNode = 0 Then SetMainNode GetParentNode(tn1)
-							If bNew AndAlso IconName <> "MainRes" Then AddTab *ee->TemplateFileName, bNew, tn2
-						End If
-					End If
-					If EndsWith(LCase(*ee->FileName), ".bas") OrElse EndsWith(LCase(*ee->FileName), ".frm") OrElse EndsWith(LCase(*ee->FileName), ".bi") OrElse EndsWith(LCase(*ee->FileName), ".inc") Then
-						pFiles->Add *ee->FileName, ppe
-						If Not LoadPaths.Contains(*ee->FileName) Then LoadPaths.Add *ee->FileName
-						ThreadCounter(ThreadCreate_(@LoadOnlyFilePath, @LoadPaths.Item(LoadPaths.IndexOf(*ee->FileName))))
-					End If
-					ppe->Files_.Add *ee->FileName
-					If inFolder Then
-						ppe->Files.Add *ee->FileName
-						_Delete( ee)
+						tn2 = CreatePendingProjectFile(TemplateSrc, GetFileName(TemplateSrc, False), IIf(inFolder, tn, tn1), False)
+						bFileCreated = (tn2 <> 0)
+						If bFileCreated Then ee = Cast(ExplorerElement Ptr, tn2->Tag)
 					Else
-						tn2->Tag = ee
+						ee = _New( ExplorerElement)
+						If CInt(InStr(Buff, ":") = 0) OrElse CInt(StartsWith(Buff, "/")) Then
+								WLet(ee->FileName, GetFolderName(FileName) & Replace(Buff, "/", "\"))
+						Else
+							WLet(ee->FileName, Buff)
+						End If
 					End If
-					If bNew Then tn1->Expand
+					If bFileCreated Then
+						Dim As Boolean FileEx = CInt(FileExists(*ee->FileName)) OrElse CInt(bNew)
+						If bMain Then
+							If EndsWith(LCase(*ee->FileName), ".rc") OrElse EndsWith(LCase(*ee->FileName), ".res") Then  ' Then
+								WLet(ppe->ResourceFileName, *ee->FileName)
+							ElseIf EndsWith(LCase(*ee->FileName), ".xpm") Then
+								WLet(ppe->IconResourceFileName, *ee->FileName)
+							ElseIf LCase(GetFileName(*ee->FileName)) = "makefile" Then
+								If WGet(ppe->BatchCompilationFileNameWindows) = "" Then WLet(ppe->BatchCompilationFileNameWindows, *ee->FileName)
+								If WGet(ppe->BatchCompilationFileNameLinux) = "" Then WLet(ppe->BatchCompilationFileNameLinux, *ee->FileName)
+							ElseIf EndsWith(LCase(*ee->FileName), ".bat") Then
+								WLet(ppe->BatchCompilationFileNameWindows, *ee->FileName)
+							ElseIf EndsWith(LCase(*ee->FileName), ".sh") OrElse InStr(*ee->FileName, ".") = 0 Then
+								WLet(ppe->BatchCompilationFileNameLinux, *ee->FileName)
+							Else
+								WLet(ppe->MainFileName, *ee->FileName)
+							End If
+						End If
+						IconName = GetIconName(*ee->FileName, ppe)
+						If Not FileEx Then IconName = "New"
+						If Not inFolder Then
+							If bNew Then
+								'' Node + ExplorerElement already created by
+								'' CreatePendingProjectFile -- just refresh the icon now
+								'' that bMain-based ppe fields (e.g. MainRes) are known.
+								tn2->ImageKey = IconName
+								tn2->SelectedImageKey = IconName
+							Else
+								tn2 = tn1->Nodes.Add(GetFileName(*ee->FileName) & ZvFile,, *ee->FileName, IconName, IconName, True)
+							End If
+							If IconName = "Form" Then tn2->Nodes.Add ""
+							If bMain Then
+								If MainNode = 0 Then SetMainNode GetParentNode(tn1)
+								If bNew AndAlso IconName <> "MainRes" Then
+									Dim As TabWindow Ptr tbNew = AddTab(*ee->FileName, True, tn2)
+									'' See CreatePendingProjectFile's matching comment: AddTab's
+									'' bNew=True path sets .FileName from the tree node's text
+									'' (no folder), not the path just loaded -- override it back.
+									If tbNew <> 0 Then tbNew->FileName = *ee->FileName
+									tn2->SelectItem
+								End If
+							End If
+						End If
+						If EndsWith(LCase(*ee->FileName), ".bas") OrElse EndsWith(LCase(*ee->FileName), ".frm") OrElse EndsWith(LCase(*ee->FileName), ".bi") OrElse EndsWith(LCase(*ee->FileName), ".inc") Then
+							pFiles->Add *ee->FileName, ppe
+							If Not LoadPaths.Contains(*ee->FileName) Then LoadPaths.Add *ee->FileName
+							ThreadCounter(ThreadCreate_(@LoadOnlyFilePath, @LoadPaths.Item(LoadPaths.IndexOf(*ee->FileName))))
+						End If
+						ppe->Files_.Add *ee->FileName
+						If inFolder Then
+							ppe->Files.Add *ee->FileName
+							If Not bNew Then _Delete( ee)
+						ElseIf Not bNew Then
+							tn2->Tag = ee
+						End If
+						If bNew Then tn1->Expand
+					End If
 				ElseIf Parameter = "ProjectType" Then
 					ppe->ProjectType = Val(Mid(Buff, Pos1 + 1))
 				ElseIf Parameter = "Subsystem" Then
@@ -1255,27 +1288,37 @@ Sub AddNewProjectFile(ByRef Template As WString, ByRef ItemName As WString)
 	Dim As UString fileExt = ""
 	Dim extPos As Integer = InStrRev(templateFile, ".")
 	If extPos > 0 Then fileExt = Mid(templateFile, extPos)
-	Dim As UString destPath = WinOsPath(projectDir & WindowsSlash & itemBaseName & fileExt)
-	If FileExistsU(destPath) Then
-		MsgBox ("File already exists") & ":" & WChr(13, 10) & WChr(13, 10) & FormatMsgPathU(destPath), , mtWarning
+	'' Existence/collision checks still look at the eventual real (project-folder)
+	'' destination -- that's the name a user would recognize as "already exists" -- even
+	'' though the file itself is staged under Temp/ until the project is saved.
+	Dim As UString finalPath = WinOsPath(projectDir & WindowsSlash & itemBaseName & fileExt)
+	If FileExistsU(finalPath) Then
+		MsgBox ("File already exists") & ":" & WChr(13, 10) & WChr(13, 10) & FormatMsgPathU(finalPath), , mtWarning
 		Return
 	End If
-	If Not CopyFileU(Template, destPath) Then
-		MsgBox ("Create file failure!") & ":" & WChr(13, 10) & WChr(13, 10) & FormatMsgPathU(destPath), , mtWarning
-		Return
-	End If
-	Dim tn1 As TreeNode Ptr = GetTreeNodeChild(tnP, destPath)
-	Dim As WString Ptr destPathPtr
-	WLet(destPathPtr, destPath)
-	If ContainsFileName(tn1, *destPathPtr) Then
-		WDeAllocate(destPathPtr)
+	Dim tn1 As TreeNode Ptr = GetTreeNodeChild(tnP, finalPath)
+	Dim As WString Ptr finalPathPtr
+	WLet(finalPathPtr, finalPath)
+	Dim As Boolean bCollides = ContainsFileName(tn1, *finalPathPtr)
+	WDeAllocate(finalPathPtr)
+	If bCollides Then
 		MsgBox ("This path is exists!"), , mtWarning
 		Return
 	End If
-	Dim As String IconName = GetIconName(destPath)
+	'' Stage in Temp/ rather than writing directly into the project folder -- moved into
+	'' place (silently, no dialog) by SaveProjectFile once the project is actually saved;
+	'' deleted by CloseProject if the project closes without saving. Same convention as
+	'' CreatePendingProjectFile (used by AddFromTemplate/new-project seeding).
+	Dim As UString tempPath = WinOsPath(ExePath & WindowsSlash & "Temp" & WindowsSlash & itemBaseName & fileExt)
+	If Not EnsureDirectoryExists(ExePath & WindowsSlash & "Temp") OrElse Not CopyFileU(Template, tempPath) Then
+		MsgBox ("Create file failure!") & ":" & WChr(13, 10) & WChr(13, 10) & FormatMsgPathU(tempPath), , mtWarning
+		Return
+	End If
+	Dim As String IconName = GetIconName(tempPath)
 	Dim As ExplorerElement Ptr ee = _New(ExplorerElement)
-	WLet(ee->FileName, destPath)
+	WLet(ee->FileName, tempPath)
 	WLet(ee->TemplateFileName, "")
+	ee->PendingInTemp = True
 	Dim As UString treeLabel = itemBaseName & fileExt & "*"
 	Dim tn3 As TreeNode Ptr = tn1->Nodes.Add(treeLabel, , , IconName, IconName, True)
 	tn3->Tag = ee
@@ -1283,12 +1326,19 @@ Sub AddNewProjectFile(ByRef Template As WString, ByRef ItemName As WString)
 	If Not tnP->IsExpanded Then tnP->Expand
 	If Not tn1->IsExpanded Then tn1->Expand
 	tn3->SelectItem
-	AddTab *destPathPtr, EndsWith(LCase(fileExt), ".frm"), tn3
-	WDeAllocate(destPathPtr)
+	Dim As WString Ptr tempPathPtr
+	WLet(tempPathPtr, tempPath)
+	Dim As Boolean bIsForm = EndsWith(LCase(fileExt), ".frm")
+	Dim As TabWindow Ptr tbNew = AddTab(*tempPathPtr, bIsForm, tn3)
+	'' Forms go through AddTab's bNew=True path, which sets the tab's own .FileName from
+	'' the tree node's text (no folder) rather than the path just loaded -- see the
+	'' matching comment in CreatePendingProjectFile for why this needs overriding.
+	If bIsForm AndAlso tbNew <> 0 Then tbNew->FileName = *tempPathPtr
+	WDeAllocate(tempPathPtr)
 	If EndsWith(LCase(fileExt), ".bas") OrElse EndsWith(LCase(fileExt), ".frm") OrElse EndsWith(LCase(fileExt), ".bi") OrElse EndsWith(LCase(fileExt), ".inc") Then
-		ppe->Files_.Add destPath
-		If Not LoadPaths.Contains(destPath) Then LoadPaths.Add destPath
-		ThreadCounter(ThreadCreate_(@LoadOnlyFilePath, @LoadPaths.Item(LoadPaths.IndexOf(destPath))))
+		ppe->Files_.Add tempPath
+		If Not LoadPaths.Contains(tempPath) Then LoadPaths.Add tempPath
+		ThreadCounter(ThreadCreate_(@LoadOnlyFilePath, @LoadPaths.Item(LoadPaths.IndexOf(tempPath))))
 	End If
 End Sub
 
@@ -1602,6 +1652,44 @@ End Sub
 Function SaveProjectFile(ppe As ProjectElement Ptr, ee As ExplorerElement Ptr, tn As TreeNode Ptr) As Boolean
 	If ppe = 0 OrElse ee = 0 OrElse tn = 0 Then Return False
 	Dim As TabWindow Ptr tb = GetTabFromTn(tn)
+	If ee->PendingInTemp Then
+		'' The name was already chosen up front at file-creation time (see
+		'' CreatePendingProjectFile/AddNewProjectFile) -- move the staged Temp/ copy into
+		'' the project folder now, silently, instead of prompting again with a system
+		'' Save dialog.
+		If tb <> 0 AndAlso tb->Modified Then
+			'' tb->Save (public) dispatches to the private SaveTab since FFileName
+			'' already has a real path (the Temp copy) -- just flushes latest edits there.
+			If Not tb->Save Then Return False
+		End If
+		Dim As UString projectDir = GetFolderNameU(WGet(ppe->FileName))
+		Dim As UString destPath = WinOsPath(projectDir & GetFileName(*ee->FileName))
+		If Not EnsureDirectoryExists(projectDir) Then Return False
+		If FileExistsU(destPath) Then Kill destPath
+		'' Copy+delete rather than FB's `Name...As` -- Temp/ (always under ExePath) and
+		'' the project folder (chosen freely via Save Project As) aren't guaranteed to be
+		'' on the same drive, and `Name` fails across volumes.
+		If Not CopyFileU(*ee->FileName, destPath) Then
+			MsgBox ("Couldn't save the project file - check that the folder still exists and isn't read-only") & "." & WChr(13,10) & destPath, "Visual FB Editor", mtError
+			Return False
+		End If
+		Kill *ee->FileName
+		If WGet(ppe->MainFileName) = WGet(ee->FileName) Then WLet(ppe->MainFileName, destPath)
+		If WGet(ppe->ResourceFileName) = WGet(ee->FileName) Then WLet(ppe->ResourceFileName, destPath)
+		If WGet(ppe->IconResourceFileName) = WGet(ee->FileName) Then WLet(ppe->IconResourceFileName, destPath)
+		If WGet(ppe->BatchCompilationFileNameWindows) = WGet(ee->FileName) Then WLet(ppe->BatchCompilationFileNameWindows, destPath)
+		If WGet(ppe->BatchCompilationFileNameLinux) = WGet(ee->FileName) Then WLet(ppe->BatchCompilationFileNameLinux, destPath)
+		WLet(ee->FileName, destPath)
+		ee->PendingInTemp = False
+		tn->Text = GetFileName(destPath)
+		If tb <> 0 Then
+			tb->FileName = destPath
+			tb->Caption = GetFileName(destPath)
+			If tb->mi <> 0 Then tb->mi->Caption = tb->Caption
+			AddMRUFile destPath
+		End If
+		Return True
+	End If
 	If tb <> 0 Then
 		If tb->Modified Then Return tb->Save
 	ElseIf InStr(WGet(ee->FileName), "\") = 0 AndAlso InStr(WGet(ee->FileName), "/") = 0 Then
@@ -2126,6 +2214,38 @@ Sub OpenProjectTemplate(ByVal TabIndex As Integer = 0)
 	End If
 End Sub
 
+'' Marks a just-opened, freshly-materialized new project (see NewProject/frmNewProject)
+'' and its main file dirty ("*"), matching how every other new-file creation path already
+'' looks. The file already sits on disk (frmNewProject commits it immediately, since the
+'' user chose the project's name/location up front, unlike Add Module/Add Form's Temp
+'' staging), but from the user's perspective it's still a freshly-created, not-yet-reviewed
+'' file, so it should read the same way in the tree.
+Sub MarkNewProjectModified()
+	Dim As TreeNode Ptr tnP = GetOpenProjectNode()
+	If tnP = 0 Then Return
+	Dim As ProjectElement Ptr ppe = Cast(ProjectElement Ptr, tnP->Tag)
+	If ppe = 0 Then Return
+	If Not EndsWith(tnP->Text, "*") Then tnP->Text &= "*"
+	Dim As UString mainFile = WGet(ppe->MainFileName)
+	If mainFile = "" Then Return
+	For i As Integer = 0 To tnP->Nodes.Count - 1
+		Dim As TreeNode Ptr tn1 = tnP->Nodes.Item(i)
+		Dim As ExplorerElement Ptr ee = tn1->Tag
+		If ee <> 0 AndAlso EqualPaths(WGet(ee->FileName), mainFile) Then
+			If Not EndsWith(tn1->Text, "*") Then tn1->Text &= "*"
+			Return
+		End If
+		For j As Integer = 0 To tn1->Nodes.Count - 1
+			Dim As TreeNode Ptr tn2 = tn1->Nodes.Item(j)
+			Dim As ExplorerElement Ptr ee2 = tn2->Tag
+			If ee2 <> 0 AndAlso EqualPaths(WGet(ee2->FileName), mainFile) Then
+				If Not EndsWith(tn2->Text, "*") Then tn2->Text &= "*"
+				Return
+			End If
+		Next j
+	Next i
+End Sub
+
 Sub NewProject()
 	Dim fNewProject As frmNewProject
 	pfNewProject = @fNewProject
@@ -2133,6 +2253,7 @@ Sub NewProject()
 		If pfNewProject->SelectedProjectFile <> "" Then
 			If Not PrepareForAnotherProjectU(pfNewProject->SelectedProjectFile) Then Return
 			OpenFilesU pfNewProject->SelectedProjectFile
+			MarkNewProjectModified()
 		ElseIf pfNewProject->SelectedFolder <> "" Then
 			AddFolderU pfNewProject->SelectedFolder
 		ElseIf pfNewProject->SelectedTemplate <> "" Then
@@ -2161,6 +2282,60 @@ Function ContainsFileName(tn As TreeNode Ptr, ByRef FileName As WString) As Bool
 	Return False
 End Function
 
+'' Shows a lightweight name-entry dialog (frmNewFileName -- Name + OK/Cancel, no folder
+'' browsing) and, on OK, stages the new file under ExePath/Temp instead of writing it
+'' directly into the project folder -- SaveProjectFile moves it into place (silently, no
+'' further dialog) once the project is actually saved; CloseProject deletes the staged
+'' copy if the project closes without saving. Returns the new TreeNode Ptr, or 0 if the
+'' user cancelled (in which case nothing at all -- no node, no file -- is created).
+Function CreatePendingProjectFile(ByRef TemplatePath As WString, ByRef SuggestedBaseName As WString, tnParent As TreeNode Ptr, bOpenTab As Boolean = True) As TreeNode Ptr
+	If tnParent = 0 Then Return 0
+	Dim As UString TemplateFile = GetFileNameU(TemplatePath)
+	Dim As UString FileExt = ""
+	Dim As Integer extPos = InStrRev(TemplateFile, ".")
+	If extPos > 0 Then FileExt = Mid(TemplateFile, extPos)
+	Dim As UString TypeLabel = TemplateFile
+	If extPos > 0 Then TypeLabel = Left(TemplateFile, extPos - 1)
+	Dim fNewFileName As frmNewFileName
+	pfNewFileName = @fNewFileName
+	fNewFileName.Prompt = ("New") & " " & TypeLabel & " " & ("Name") & ":"
+	fNewFileName.DefaultName = SuggestedBaseName
+	fNewFileName.TargetExt = FileExt
+	fNewFileName.TargetNode = tnParent
+	If fNewFileName.ShowModal(frmMain) <> ModalResults.OK Then Return 0
+	Dim As UString ChosenName = fNewFileName.SelectedName
+	Dim As UString TempPath = WinOsPath(ExePath & WindowsSlash & "Temp" & WindowsSlash & ChosenName & FileExt)
+	If Not EnsureDirectoryExists(ExePath & WindowsSlash & "Temp") OrElse Not CopyFileU(TemplatePath, TempPath) Then
+		MsgBox ("Create file failure!") & ":" & WChr(13, 10) & WChr(13, 10) & FormatMsgPathU(TempPath), , mtWarning
+		Return 0
+	End If
+	Dim As String IconName = GetIconName(TemplatePath)
+	Dim As ExplorerElement Ptr ee = _New(ExplorerElement)
+	WLet(ee->FileName, TempPath)
+	WLet(ee->TemplateFileName, "")
+	ee->PendingInTemp = True
+	Dim As TreeNode Ptr tnNew = tnParent->Nodes.Add(ChosenName & FileExt & "*", , , IconName, IconName, True)
+	tnNew->Tag = ee
+	If bOpenTab Then
+		'' Open the tab before selecting the node -- SelectItem fires the tree's single-click
+		'' auto-open (tvExplorer_SelChange -> OpenPlainFileTreeNode), which for a brand-new
+		'' node would otherwise open its own independent tab before AddTab below runs (same
+		'' ordering requirement AddFromTemplate had before this helper absorbed its logic).
+		Dim As TabWindow Ptr tbNew = AddTab(TempPath, True, tnNew)
+		'' AddTab's bNew=True path sets the tab's own .FileName from the tree node's text
+		'' (e.g. "Module2.bas", no folder) rather than the path just loaded -- needed for
+		'' its Form1-name-substitution logic, which reads TreeN->Text directly and isn't
+		'' affected by overriding FileName afterward. Without this override, the tab's
+		'' FFileName has no path separator, so closing the project via the "modified
+		'' files" prompt -- which can call tb->Save directly on this exact tab, not just
+		'' SaveProjectFile -- takes the no-path branch and pops the system Save dialog,
+		'' exactly the thing this whole feature exists to avoid.
+		If tbNew <> 0 Then tbNew->FileName = TempPath
+		tnNew->SelectItem
+	End If
+	Return tnNew
+End Function
+
 Sub AddFromTemplate(ByRef Template As WString)
 	Dim As TreeNode Ptr ptn, tn1, tn3, tnSelecte
 	tnSelecte = tvExplorer.SelectedNode
@@ -2178,41 +2353,25 @@ Sub AddFromTemplate(ByRef Template As WString)
 			Else
 				tn1 = GetTreeNodeChild(ptn, Template)
 			End If
-			Dim As String IconName = GetIconName(Template)
 			Dim As UString FileName = Replace(GetFileName(Template), " ", "")
 			Dim As UString FileExt
-			Dim As ExplorerElement Ptr ee
 			Dim Pos1 As Integer = InStrRev(FileName, ".")
 			If Pos1 > 0 Then
 				FileExt = Mid(FileName, Pos1)
 				FileName = Left(FileName, Pos1 - 1)
 			End If
-			Dim NewName As UString
+			Dim As UString SuggestedName
 			Dim As Integer n = 0
 			Do
 				n = n + 1
-				NewName = FileName & Str(n) & FileExt
-			Loop While tn1->Nodes.Contains(*NewName.vptr) OrElse tn1->Nodes.Contains(WStr(NewName & "*"))
-			tn3 = tn1->Nodes.Add(NewName & "*", , , IconName, IconName, True)
-			ee = _New( ExplorerElement)
-			WLet(ee->FileName, NewName)
-			WLet(ee->TemplateFileName, Template)
-			tn3->Tag = ee
-			If Not EndsWith(ptn->Text, "*") Then ptn->Text &= "*"
-			If Not ptn->IsExpanded Then ptn->Expand
-			If Not tn1->IsExpanded Then tn1->Expand
-			'' Open the tab before selecting the node -- SelectItem fires the tree's
-			'' single-click auto-open (tvExplorer_SelChange -> OpenPlainFileTreeNode),
-			'' which for a brand-new template-backed node opens its own tab from the
-			'' template file. If that runs first, AddTab below can't recognize it as
-			'' the same file (a bNew tab's .FileName comes from the tree node's text,
-			'' not the template path, so AddTab's by-path dedup never matches) and
-			'' creates a second, independent tab for the same node -- doubled up in
-			'' the save-changes list, and the second Save-As collides with the first.
-			'' Opening the tab first means OpenPlainFileTreeNode's own tb->tn=Item
-			'' check (its first, path-independent check) finds it already open.
-			AddTab *ee->TemplateFileName, True, tn3
-			tn3->SelectItem
+				SuggestedName = FileName & Str(n)
+			Loop While tn1->Nodes.Contains(WStr(SuggestedName & FileExt)) OrElse tn1->Nodes.Contains(WStr(SuggestedName & FileExt & "*"))
+			tn3 = CreatePendingProjectFile(Template, SuggestedName, tn1)
+			If tn3 <> 0 Then
+				If Not EndsWith(ptn->Text, "*") Then ptn->Text &= "*"
+				If Not ptn->IsExpanded Then ptn->Expand
+				If Not tn1->IsExpanded Then tn1->Expand
+			End If
 		End If
 	End If
 	If tn3 = 0 Then
@@ -2593,7 +2752,15 @@ Function CloseProject(tn As TreeNode Ptr, WithoutMessage As Boolean = False) As 
 			'		End If
 			'	Next i
 			'Next jj
-			If tn->Nodes.Item(j)->Tag <> 0 Then _Delete(Cast(ExplorerElement Ptr, tn->Nodes.Item(j)->Tag)): tn->Nodes.Item(j)->Tag = 0 ' null after free: Nodes.Remove below fires tvExplorer_SelChange, which derefs Tag in an Is-check
+			If tn->Nodes.Item(j)->Tag <> 0 Then
+				Dim As ExplorerElement Ptr eeClose = Cast(ExplorerElement Ptr, tn->Nodes.Item(j)->Tag)
+				'' Never got a real project-folder home (project closed without saving) --
+				'' delete the staged Temp/ copy instead of leaving it there forever. If it
+				'' *was* saved, SaveProjectFile already cleared PendingInTemp, so this is a
+				'' no-op in that case.
+				If eeClose->PendingInTemp AndAlso Dir(*eeClose->FileName) <> "" Then Kill *eeClose->FileName
+				_Delete(eeClose): tn->Nodes.Item(j)->Tag = 0 ' null after free: Nodes.Remove below fires tvExplorer_SelChange, which derefs Tag in an Is-check
+			End If
 		Else
 			For k As Integer = tn->Nodes.Item(j)->Nodes.Count - 1 To 0 Step - 1 '
 				'For jj As Integer = 0 To TabPanels.Count - 1
@@ -2606,7 +2773,11 @@ Function CloseProject(tn As TreeNode Ptr, WithoutMessage As Boolean = False) As 
 				'		End If
 				'	Next i
 				'Next jj
-				If tn->Nodes.Item(j)->Nodes.Item(k)->Tag <> 0 Then _Delete(Cast(ExplorerElement Ptr, tn->Nodes.Item(j)->Nodes.Item(k)->Tag)): tn->Nodes.Item(j)->Nodes.Item(k)->Tag = 0 ' null after free (dangling-Tag Is-check crash)
+				If tn->Nodes.Item(j)->Nodes.Item(k)->Tag <> 0 Then
+					Dim As ExplorerElement Ptr eeClose2 = Cast(ExplorerElement Ptr, tn->Nodes.Item(j)->Nodes.Item(k)->Tag)
+					If eeClose2->PendingInTemp AndAlso Dir(*eeClose2->FileName) <> "" Then Kill *eeClose2->FileName
+					_Delete(eeClose2): tn->Nodes.Item(j)->Nodes.Item(k)->Tag = 0 ' null after free (dangling-Tag Is-check crash)
+				End If
 			Next k
 		End If
 	Next

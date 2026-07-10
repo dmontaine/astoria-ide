@@ -151,35 +151,143 @@ Private Sub frmNewProject.cmdOK_Click(ByRef Sender As Control)
 	End If
 	Dim As String TemplateName = TemplateNames.Item(lvTemplates.SelectedItemIndex)
 	Dim As UString projectsPathInput = Trim(*ProjectsPath, Any !" \t" + Chr(10) + Chr(13))
-	SelectedTemplate = WinOsPath(ExePath & "/Templates/Projects/" & TemplateName & ".vfp")
-	SelectedFolder = WinOsPath(GetFullPathU(projectsPathInput & "/" & ProjectName))
-	SelectedProjectFile = SelectedFolder & WindowsSlash & GetFileNameU(SelectedFolder) & ".vfp"
+	Dim As UString localTemplate = WinOsPath(ExePath & "/Templates/Projects/" & TemplateName & ".vfp")
+	Dim As UString localFolder = WinOsPath(GetFullPathU(projectsPathInput & "/" & ProjectName))
+	Dim As UString localProjectFile = localFolder & WindowsSlash & GetFileNameU(localFolder) & ".vfp"
 	If Not FolderExistsU(GetFullPathU(projectsPathInput)) Then
 		MsgBox ("Parent folder not exists, change the parent folder!")
 		Me.BringToFront
 		Exit Sub
-	ElseIf FolderExistsU(SelectedFolder) Then
+	ElseIf FolderExistsU(localFolder) Then
 		MsgBox ("Selected folder exists, change the project name!")
 		Me.BringToFront
 		Exit Sub
 	End If
-	If Not EnsureDirectoryExists(SelectedFolder) Then
-		MsgBox ("Could not create project folder!")
-		Me.BringToFront
-		Exit Sub
-	End If
-	Dim As UString TemplateFolder = WinOsPath(ExePath & "/Templates/Projects/" & TemplateName)
-	If FolderExistsU(TemplateFolder) Then FolderCopy TemplateFolder, SelectedFolder
-	If Not FileExistsU(SelectedTemplate) Then
+	If Not FileExistsU(localTemplate) Then
 		MsgBox ("Template not found!")
 		Me.BringToFront
 		Exit Sub
 	End If
-	If Not CopyFileU(SelectedTemplate, SelectedProjectFile) Then
-		MsgBox ("Could not create project file!")
-		Me.BringToFront
-		Exit Sub
+	'' Find the template's own default file (every shipped project template has exactly
+	'' one) so its real name can be asked for up front, instead of silently copying the
+	'' template's own file name straight into the new project.
+	Dim As UString TemplateFolder = WinOsPath(ExePath & "/Templates/Projects/" & TemplateName)
+	Dim As UString TemplateMainFile = ""
+	If FolderExistsU(TemplateFolder) Then
+		Dim As UInteger Attr
+		Dim As String f = Dir(TemplateFolder & WindowsSlash & "*", fbReadOnly Or fbHidden Or fbSystem Or fbDirectory Or fbArchive, Attr)
+		Do While f <> ""
+			If (Attr And fbDirectory) = 0 AndAlso f <> "." AndAlso f <> ".." Then
+				TemplateMainFile = f
+				Exit Do
+			End If
+			f = Dir(Attr)
+		Loop
 	End If
+	If TemplateMainFile = "" Then
+		'' No default file shipped with this template -- just create the folder and
+		'' copy the .vfp as-is (shouldn't happen for any of the current templates).
+		If Not EnsureDirectoryExists(localFolder) Then
+			MsgBox ("Could not create project folder!")
+			Me.BringToFront
+			Exit Sub
+		End If
+		If Not CopyFileU(localTemplate, localProjectFile) Then
+			MsgBox ("Could not create project file!")
+			Me.BringToFront
+			Exit Sub
+		End If
+	Else
+		Dim As UString mainFileExt = ""
+		Dim As Integer extPos = InStrRev(TemplateMainFile, ".")
+		Dim As UString suggestedName = TemplateMainFile
+		If extPos > 0 Then
+			mainFileExt = Mid(TemplateMainFile, extPos)
+			suggestedName = ..Left(TemplateMainFile, extPos - 1)
+		End If
+		Dim fNewFileName As frmNewFileName
+		pfNewFileName = @fNewFileName
+		fNewFileName.Prompt = ("New") & " " & suggestedName & " " & ("Name") & ":"
+		fNewFileName.DefaultName = suggestedName
+		fNewFileName.TargetExt = mainFileExt
+		fNewFileName.TargetNode = 0
+		'' Cancelling here cancels the whole New Project action, not just the file --
+		'' nothing has been written to disk yet, so there's nothing to clean up.
+		If fNewFileName.ShowModal(This) <> ModalResults.OK Then
+			Me.BringToFront
+			Exit Sub
+		End If
+		Dim As UString chosenName = fNewFileName.SelectedName
+		If Not EnsureDirectoryExists(localFolder) Then
+			MsgBox ("Could not create project folder!")
+			Me.BringToFront
+			Exit Sub
+		End If
+		Dim As UString mainFileDest = localFolder & WindowsSlash & chosenName & mainFileExt
+		If Not CopyFileU(TemplateFolder & WindowsSlash & TemplateMainFile, mainFileDest) Then
+			MsgBox ("Could not create the module/form file") & ":" & WChr(13,10) & WChr(13,10) & mainFileDest & WChr(13,10) & WChr(13,10) & ("Windows error") & " " & Str(GetLastError())
+			Me.BringToFront
+			Exit Sub
+		End If
+		'' Rewrite the template's own File=/*File= line -- it points at
+		'' "<TemplateName>/<original name>" (the template's own on-disk layout), which
+		'' needs to become the flat, chosen name actually copied above. Read the whole
+		'' template into memory and close it BEFORE opening the destination for writing --
+		'' this app runs background worker threads that also do file I/O (IntelliSense
+		'' parsing etc.), so two simultaneously-open handles from this thread's own read+
+		'' write loop is avoided as a precaution, not just for tidiness.
+		Dim As WString Ptr localTemplatePtr, localProjectFilePtr
+		WLet(localTemplatePtr, localTemplate)
+		WLet(localProjectFilePtr, localProjectFile)
+		Dim As WStringList vfpLines
+		Dim As Integer FnIn = FreeFile_
+		'' Open(... Encoding "utf-8") fails with "path not found" on a file that has no
+		'' UTF-8 BOM (every shipped .vfp template is plain ASCII/no-BOM) -- confirmed by
+		'' direct reproduction, not a path-construction bug. Every other file-read in this
+		'' codebase already falls back through encodings ending in a plain Open for exactly
+		'' this reason (see AddProject's own .vfp parsing) -- this call was missing it.
+		Dim As Integer OpenInResult = Open(*localTemplatePtr For Input Encoding "utf-8" As #FnIn)
+		If OpenInResult <> 0 Then OpenInResult = Open(*localTemplatePtr For Input Encoding "utf-16" As #FnIn)
+		If OpenInResult <> 0 Then OpenInResult = Open(*localTemplatePtr For Input Encoding "utf-32" As #FnIn)
+		If OpenInResult <> 0 Then OpenInResult = Open(*localTemplatePtr For Input As #FnIn)
+		If OpenInResult <> 0 Then
+			MsgBox ("Could not open the template project file for reading") & ":" & WChr(13,10) & WChr(13,10) & localTemplate & WChr(13,10) & WChr(13,10) & ("Open error code") & " " & Str(OpenInResult)
+			Me.BringToFront
+			WDeAllocate(localTemplatePtr)
+			WDeAllocate(localProjectFilePtr)
+			Exit Sub
+		End If
+		Dim As WString * 1024 vfpLine
+		Do Until EOF(FnIn)
+			Line Input #FnIn, vfpLine
+			If StartsWith(vfpLine, "*File=") Then
+				vfpLines.Add "*File=" & chosenName & mainFileExt
+			ElseIf StartsWith(vfpLine, "File=") Then
+				vfpLines.Add "File=" & chosenName & mainFileExt
+			Else
+				vfpLines.Add vfpLine
+			End If
+		Loop
+		CloseFile_(FnIn)
+		Dim As Integer FnOut = FreeFile_
+		Dim As Integer OpenOutResult = Open(*localProjectFilePtr For Output Encoding "utf-8" As #FnOut)
+		If OpenOutResult <> 0 Then
+			MsgBox ("Could not create the project file for writing") & ":" & WChr(13,10) & WChr(13,10) & localProjectFile & WChr(13,10) & WChr(13,10) & ("Open error code") & " " & Str(OpenOutResult)
+			Me.BringToFront
+			WDeAllocate(localTemplatePtr)
+			WDeAllocate(localProjectFilePtr)
+			Exit Sub
+		End If
+		For i As Integer = 0 To vfpLines.Count - 1
+			Print #FnOut, vfpLines.Item(i)
+		Next i
+		CloseFile_(FnOut)
+		WDeAllocate(localTemplatePtr)
+		WDeAllocate(localProjectFilePtr)
+	End If
+	SelectedTemplate = localTemplate
+	SelectedFolder = localFolder
+	SelectedProjectFile = localProjectFile
 	ModalResult = ModalResults.OK
 	Me.CloseForm
 End Sub

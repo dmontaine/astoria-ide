@@ -32,16 +32,18 @@ This document captures project history, completed work, open items, and workflow
 | **Debugger** | GDB-only; Step, Continue, Break, Step Out, command queue, and debug-tab show/hide all working; 3 GDB items pending owner smoke test (§7) |
 | **Build** | `Compile.bat` for release, `CompileDebug.bat` for debug; `NOPAUSE=1` for agent runs |
 
-**Active work:** **AI Agent subsystem removal** (owner decision, 2026-07-09 — see "⭐ NEXT SUB-PROJECT" below) is the current priority, ahead of all other backlog. AI1–AI13 done (Sonnet, 2026-07-10), compile-clean, uncommitted; needs an owner smoke-test and AI14 (Opus final review + commit) before it's done. All other work — including the §13.3 step-by-step UI review (View menu next) and the deferred Phase F structural items — is paused until the AI removal sub-project completes, per the owner's explicit sequencing instruction.
+**Active work:** **§13.3 step-by-step UI review — next up: the View menu** (File + Edit complete; Search → Define reliability pass shipped with S1–S4). This is the resumed backlog after the AI Agent subsystem removal completed.
+
+The **AI Agent subsystem removal** (owner decision, 2026-07-09 — see "⭐ COMPLETED SUB-PROJECT" below) is **DONE**: AI1–AI14 complete, compile-clean, committed (`924a814`) and pushed, Opus-reviewed (`7e9c228`) and owner-reviewed (2026-07-10). With it closed, the sequencing hold it placed on the rest of the backlog is lifted — the §13.3 View-menu review and the deferred Phase F structural items (low priority) are unblocked.
 
 Prior to that: Opus's "Next Steps" review (`Next Steps - Opus.md`, 2026-07-07) evaluated three prior AI reviews against the actual source and produced a verified, sequenced backlog. **Every phase is done and committed, including R5 (bounded GDB read, done 2026-07-08) and E1 (Apply dirty-tracking, done in a background-task worktree and merged into `main` 2026-07-08)** — see below. 13.3.A S1–S7 are **all committed** (Opus-reviewed). A Run-toolbar persistence regression the owner found post-S4 (my own S3 migration latching Run permanently visible) was root-caused and fixed 2026-07-07 — see the S5–S7 review outcome below.  
 **Open items consolidated:** see [Open Items](#open-items) below.
 
 ---
 
-## ⭐ NEXT SUB-PROJECT — AI Agent subsystem removal (owner-approved 2026-07-09)
+## ⭐ COMPLETED SUB-PROJECT — AI Agent subsystem removal (owner-approved 2026-07-09, DONE 2026-07-10)
 
-**This is the current priority. All AI removal tasks (AI1–AI14) are to be completed before resuming any other backlog item** (§13.3 View-menu review, C2, B1, etc.).
+**DONE.** All AI removal tasks (AI1–AI14) complete, compile-clean, committed (`924a814`) + pushed, Opus-reviewed (`7e9c228`) and owner-reviewed. The sequencing hold this placed on the rest of the backlog is lifted; next active item is the §13.3 View-menu review. Owner call on AI10's `VisualFBEditor IDE Environment.md`: **delete** (declined restore, 2026-07-10) — recoverable from git history at `924a814^` if ever wanted. Task detail retained below for the record.
 
 **Owner decision (2026-07-09):** remove the built-in AI Agent subsystem from the IDE entirely. This **reverses the earlier 2026-07-03 "13.7 Enhance AI integration" plan** — it was **the owner's own decision** to reverse that direction. Rationale: a self-maintained multi-provider AI client (OpenAI/DeepSeek/Claude/Mistral/Ollama/OpenRouter, streaming + context management) is a whole subsystem to maintain that isn't this tool's focus, and external tools (Claude Code, Cursor, DeepSeek-based tools) are advancing far faster than a solo-maintained internal client could track — the same anti-scope-creep discipline that motivates this fork. The `ROADMAP.md` §13.7 section is marked REVERSED with the full reasoning.
 

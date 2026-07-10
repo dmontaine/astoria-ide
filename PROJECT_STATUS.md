@@ -7,6 +7,8 @@
 **Local path:** `C:\Users\don\Astoria-IDE`  
 **Owner:** bigriverguy (`dmontaine@gmail.com`)
 
+**Last updated:** 2026-07-09 (**AI Agent subsystem removal scoped & queued as the next sub-project** — owner reversed the earlier 13.7 "enhance AI" plan and decided to remove the built-in AI subsystem entirely; see "⭐ NEXT SUB-PROJECT" below. Also committed/pushed the pre-existing Help ▸ GitHub menu removal to GitHub.)
+
 This document captures project history, completed work, open items, and workflow rules for continuing development without re-discovering context.
 
 ---
@@ -28,6 +30,42 @@ This document captures project history, completed work, open items, and workflow
 
 **Active work:** Opus's "Next Steps" review (`Next Steps - Opus.md`, 2026-07-07) evaluated three prior AI reviews against the actual source and produced a verified, sequenced backlog. **Every phase is now done and committed, including R5 (bounded GDB read, done 2026-07-08) and E1 (Apply dirty-tracking, done in a background-task worktree and merged into `main` 2026-07-08)** — see below. 13.3.A S1–S7 are **all committed** (Opus-reviewed). A Run-toolbar persistence regression the owner found post-S4 (my own S3 migration latching Run permanently visible) was root-caused and fixed 2026-07-07 — see the S5–S7 review outcome below. Next: resume §13.3 step-by-step UI review with the **View menu** (File + Edit complete; Search → Define reliability pass shipped with S1–S4), or the deferred Phase F structural items (low priority).  
 **Open items consolidated:** see [Open Items](#open-items) below.
+
+---
+
+## ⭐ NEXT SUB-PROJECT — AI Agent subsystem removal (owner-approved 2026-07-09)
+
+**This is the current priority. All AI removal tasks (AI1–AI14) are to be completed before resuming any other backlog item** (§13.3 View-menu review, C2, B1, etc.).
+
+**Owner decision (2026-07-09):** remove the built-in AI Agent subsystem from the IDE entirely. This **reverses the earlier 2026-07-03 "13.7 Enhance AI integration" plan** — it was **the owner's own decision** to reverse that direction. Rationale: a self-maintained multi-provider AI client (OpenAI/DeepSeek/Claude/Mistral/Ollama/OpenRouter, streaming + context management) is a whole subsystem to maintain that isn't this tool's focus, and external tools (Claude Code, Cursor, DeepSeek-based tools) are advancing far faster than a solo-maintained internal client could track — the same anti-scope-creep discipline that motivates this fork. The `ROADMAP.md` §13.7 section is marked REVERSED with the full reasoning.
+
+**Scope decisions (owner-confirmed):**
+- **Remove all vestiges of AI in all locations** — code, forms, settings, resources, docs.
+- **Keep `Examples/AiAgent/`** — a third-party MyFbFramework control demo (CM.Wang, ©2025), independent of the IDE's built-in feature; it is itself an example of the "wire your own external AI" pattern.
+- **No new AI launcher feature.** A purpose-built external-AI launcher was evaluated and **dropped as redundant**: the existing **Tools ▸ External Tools** dialog (`frmTools.frm`) already lets users register any external program (path + parameters + file-extension association), which is exactly the "users can add AI agent links to external tools" path the owner intended. Nothing to build.
+
+**Why this is one atomic pass (not stageable):** the AI state globals live in `src/Main.bi` and are referenced across four core files, so there is no half-removed state that compiles. Work stays uncommitted until compile-clean **and** owner smoke-test (this project's standard gate), then commits as one change.
+
+### Tasks (execute in order AI1 → AI14)
+
+Each task below is a discrete definition. Owner = who should do it (**Sonnet** = mechanical/contained execution; **Opus** = judgment calls, reasoning-bearing docs, and review).
+
+- **AI1 — Delete the AI-specific files.** Remove `src/AIService.bas` (823 lines), `src/AIService.bi` (22), `src/frmAIAgent.frm` (594), and `Resources/AIAgent/*.ini` (`Address.ini`, `Host.ini`, `ModelName.ini`, `Provider.ini` — dropdown seed lists for the deleted config dialog). **Owner: Sonnet.**
+- **AI2 — Update the project manifest.** Remove the three `File=` entries (`AIService.bi`, `frmAIAgent.frm`, `AIService.bas`) from `src/VisualFBEditor.vfp`. **Owner: Sonnet.**
+- **AI3 — Remove the dangling includes.** Delete `#include once "frmAIAgent.frm"` from `src/Temp.bas:9` (this — not the manifest — is the form's actual compile path) and `#include once "AIService.bi"` from `src/Main.bi:289`. **Owner: Sonnet.**
+- **AI4 — Remove the AI global-state block from `src/Main.bi`.** The ~10-line `Common Shared` cluster: `pHTTPAIAgent`, `bAIAgentFirstRun`, `AIAgentPort`, `AIAgentContentSize`, `AIAgentStream`, `AIAgentTop_P`, `AIAgentTemperature`, `AIAgentHost/Address/APIKey/ModelName/Provider/Name`, `AIRTF_HEADER`, `AIEditorFontName`, `DefaultAIAgent`, `CurrentAIAgent`, and the `pAIAgents` Dictionary. Referenced by all four core files — miss any and the build breaks with undefined symbols. **Owner: Sonnet.**
+- **AI5 — Remove the AI chat panel + tab + chat MRU from `src/Main.bas`** (~169 refs — the largest single edit; the chat panel UI lives here, not in a form). Includes the `pnlAIAgent` left-panel tab (3rd tab, `tabLeft` index 2) and the `AIChat*` recent-chat file logic. **Owner: Sonnet (draft) → Opus spot-review of the diff before compile.**
+- **AI6 — Remove the AI Agent Options page** from `src/frmOptions.frm` (~213 refs) and its implementation in `src/Temp.bas`. Verify removing the `pnlAIAgent` page does not mis-renumber sibling page `TabIndex`es. **Owner: Sonnet.**
+- **AI7 — Remove the AIChat menu dispatch from `src/VisualFBEditor.bas`** (~80 refs): the `mClickAIChat` handler and its `AIChatEdit`/`AIChatPaste`/`AIChatPasteCode`/`AIChatOpen`/`AIChatSave`/`AIChatSaveAs` cases (the "Recent AI Chat" save/load-as-`.md` feature). **Owner: Sonnet.**
+- **AI8 — Remove AI settings from `src/SettingsService.bas`** (~51 refs): `SeedDefaultAIAgents` and all AI agent load/save (host/port/key/model/temperature/provider). **Owner: Sonnet.**
+- **AI9 — Clean the shipped default INI.** Strip `AIAgentParent`/`AIAgentIndex`, the `[AIAgents]` section (`DefaultAIAgent=...`), and `[MRUAIChat]` from `Settings/VisualFBEditor64.ini` so a fresh install ships no AI residue. Do **not** migrate existing users' own INIs. **Owner: Sonnet.**
+- **AI10 — Delete `Help/AI prompt/`** (`KnowledgeBase/VisualFBEditor IDE Environment.md` + `MyFbFramework GUI Form Interface Guidelines.md/.json`) and `Resources/KnowledgeBase.png` — these existed solely to feed the AI's context. *(Note for owner: the 2,874-line `VisualFBEditor IDE Environment.md` is a full menu/feature reference that has standalone value as maintainer documentation; if you'd rather keep it, relocate it out of the AI folder instead of deleting. Default per "remove all vestiges": delete.)* **Owner: Sonnet, pending that one-line owner call.**
+- **AI11 — Compile-clean gate + owner smoke-test.** Build clean (0 errors); confirm the left panel now shows 2 tabs (Project/Toolbox, no AI Agent); Options has no AI Agent page; no orphaned AI menu items or dispatch cases; app launches and runs. **Owner: Sonnet (run) → Opus verify.**
+- **AI12 — `git grep` stale-reference sweep** for every removed symbol (`AIAgent`, `AIService`, `AIChat`, `AIMessages`, `AIRequest`, `SeedDefaultAIAgents`, `frmAIAgent`, `bInAIThread`, `pAIAgents`, `pHTTPAIAgent`) across `src/` — the project's "clean compile is not sufficient" rule. Zero hits expected (outside `Examples/AiAgent/`). **Owner: Sonnet.**
+- **AI13 — Documentation cleanup.** Remove the AI Agent row from `src/THREADING.md`; drop/strike backlog item **C3** ("move Recent AI Chat into AI Agent panel" — now moot); update any Options keep-lists that still name "Help/AI Agent"; confirm no PROJECT_STATUS.md / ROADMAP.md section still describes AI as present or planned. **Owner: Opus** (records reasoning, not just deletion).
+- **AI14 — Final full-diff review, then commit (single atomic commit).** Confirm no stray refs, coherent message, `.exe` rebuilt. **Owner: Opus.**
+
+**Opus start-tasks (done 2026-07-09, this session):** scoping + evaluation ([`Documents/sonnet_ai_recommendation.md`](../../Documents/sonnet_ai_recommendation.md)), this sub-project write-up, the §13.7 reversal in ROADMAP.md, and committing/pushing the pre-existing working state (Help ▸ GitHub menu removal) to GitHub. **No further Opus setup is required before AI1** — Sonnet can begin the removal.
 
 ---
 
@@ -113,7 +151,7 @@ While live-testing E1's Options ▸ Apply, owner found: unchecking "Display icon
 #### P4 outcome — attempted, live-tested, reverted (Opus, 2026-07-07)
 
 Implemented the **surgical** version: debounce only the single hot edit-path caller (`OnLineChangeEdit`, `TabWindow.bas:3248`) via a 300 ms one-shot timer (`TimerProcDesign` in `Main.bas`, mirroring the `TimerProcGDB` NULL-window pattern), coalescing toward a full rebuild, operating on the *current* tab at fire time (no captured pointer), re-checking every guard the grey-panel fix trusts. Compiled clean; **owner live-tested**. Result: **regression** — changing a control's **Location** via the property list no longer updated the control (Caption still did, because the grid applies caption straight to the live control, whereas Location relies on the `FormDesign` rebuild the debounce delayed). Root problem: **`OnLineChangeEdit` is not the "rapid-typing hot path" — it is the common funnel for *every* text change**, including discrete edits (property-grid apply, paste, and the line-changes undo/redo generate) that need an *immediate* designer refresh. A blanket debounce there is the wrong shape. **Reverted to `640e94e` (nothing committed).** A correct P4 would have to debounce *only* genuine consecutive keystroke-typing while keeping discrete edits synchronous — substantially more invasive surgery in the grey-panel code, for a typing-lag nobody has reported as a pain point. **Parked as not worth the risk/reward** unless designer responsiveness becomes an actual complaint. Design + change-surface map preserved in this session's history if ever revisited.
-- **Sonnet (mechanical / contained):** ~~**E1**~~ (Apply dirty-tracking — **done 2026-07-08**, see above); ~~**C1**~~ Comment→Toggle-Comment merge — **done 2026-07-08, owner-verified, see "C1: Toggle Comment merge" below**; **C2** move Bubble Help/Suggest Options/Parameter Info into Options; **C3** move Recent AI Chat into AI Agent panel; ~~**C4**~~ `.lng` translation system — **owner escalated scope from "hide the UI" to full code-level removal 2026-07-08, done, see "C4: full language-system removal" below, owner smoke-test pending**; **C5** GitHub submenu reduction (after owner names the 2 items); **B1** `DeleteEditorFile` `.vfp` dirty-sync; ~~**B2**~~ `frmNewProject` template icons — **checked 2026-07-08, not reproducible**: owner confirmed all 5 default templates (Windows/Console/Dynamic/Static/Control) show correct icons at &gt;100% display scaling. Traced the load path (`ImageList.Add` → `BitmapType.LoadFromResourceName`'s disk-file fallback reading `Resources/App*.png`, all correctly 32×32) and found no defect; closing as already-working rather than risk an unnecessary change. **B3** `OpenRecentFiles()` dialog; **O1/O2** Terminal / Other Editors removal *only if owner opts to remove* (default: leave — working features, harmless).
+- **Sonnet (mechanical / contained):** ~~**E1**~~ (Apply dirty-tracking — **done 2026-07-08**, see above); ~~**C1**~~ Comment→Toggle-Comment merge — **done 2026-07-08, owner-verified, see "C1: Toggle Comment merge" below**; **C2** move Bubble Help/Suggest Options/Parameter Info into Options; ~~**C3**~~ move Recent AI Chat into AI Agent panel — **superseded 2026-07-09**: the AI Agent panel is being removed entirely (see ⭐ AI Agent subsystem removal sub-project above), so Recent AI Chat is deleted rather than moved; ~~**C4**~~ `.lng` translation system — **owner escalated scope from "hide the UI" to full code-level removal 2026-07-08, done, see "C4: full language-system removal" below, owner smoke-test pending**; ~~**C5**~~ GitHub submenu reduction — **owner escalated to full removal 2026-07-09**: rather than pick which 2 items to keep, deleted the entire Help ▸ GitHub topic (2 top-level items + 5-item Advanced submenu, all 7 pointing at the un-forked upstream `XusinboyBekchanov/VisualFBEditor`/`MyFbFramework` repos anyway) and its `mClick` dispatch cases in `VisualFBEditor.bas`, including an already-orphaned `GitHubWebSite` case with no menu item pointing to it. Also removed the corresponding blank/bound `HotKeys.txt` entries. Compile-clean; **owner smoke-test still needed**; **B1** `DeleteEditorFile` `.vfp` dirty-sync; ~~**B2**~~ `frmNewProject` template icons — **checked 2026-07-08, not reproducible**: owner confirmed all 5 default templates (Windows/Console/Dynamic/Static/Control) show correct icons at &gt;100% display scaling. Traced the load path (`ImageList.Add` → `BitmapType.LoadFromResourceName`'s disk-file fallback reading `Resources/App*.png`, all correctly 32×32) and found no defect; closing as already-working rather than risk an unnecessary change. **B3** `OpenRecentFiles()` dialog; **O1/O2** Terminal / Other Editors removal *only if owner opts to remove* (default: leave — working features, harmless).
 - **Do Not Attempt (fragile-core churn, no audience payoff):** **F1** split the oversized files (`TabWindow`/`Main`/`EditControl` — pure maintainability, high FB compile-break risk); **F2** MFF library-path consolidation (the wart is already harmless; the fix reworks the grey-panel-bug code — risk ≫ reward). Leave both unless a real bug forces the issue.
 
 #### C4: full language-system removal (Sonnet, 2026-07-08, compile-clean — **owner smoke-test needed before commit**)
@@ -812,7 +850,7 @@ All items above passed **before** the owner separately found the critical `_WIN3
 - [ ] **13.4 Rename the project** (e.g. "ABStudio") — deeper than cosmetic; dedicated pass needed (§13.4)
 - [ ] **13.5 Standard Windows installer** — Inno Setup or WiX; depends on project rename decision (§13.5)
 - [ ] **13.6 Full review/expansion of Examples/** — re-verify all examples compile; fix `WellCOM` DllMain; add appealing demos (§13.6)
-- [ ] **13.7 Enhance AI integration** — deeper codebase-aware context, AI-assisted debugging, inline suggestions (§13.7)
+- [x] ~~**13.7 Enhance AI integration**~~ — **REVERSED by owner 2026-07-09**: AI subsystem being removed entirely instead (see ⭐ AI Agent subsystem removal sub-project above; ROADMAP.md §13.7)
 - [ ] **Upstream sync strategy** — this fork intentionally diverges; merge only with explicit plan
 - [ ] **Wiki/docs** — fork-specific documentation
 - [ ] **Basic CI** — run `Compile.bat` on push
@@ -1038,7 +1076,7 @@ Full enhancement specs archived in [ROADMAP.md](ROADMAP.md). Quick reference:
 | 13.4 | Rename project ("ABStudio") | Unscheduled — dedicated pass needed |
 | 13.5 | Standard Windows installer | Unscheduled — depends on 13.4 |
 | 13.6 | Full review/expansion of Examples/ | Unscheduled — doc/polish phase |
-| 13.7 | Enhance AI integration | Unscheduled — not yet scoped |
+| 13.7 | ~~Enhance AI integration~~ | **Reversed (owner, 2026-07-09)** — AI subsystem being removed entirely; see AI-removal sub-project |
 | 13.8 | Design-workspace status bar | Deferred — non-trivial |
 | 13.9 | Blank Designer page on cold-open | Deferred — cosmetic only |
 | 13.10 | Dark mode popup menus + input polish | Deferred |

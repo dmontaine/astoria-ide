@@ -780,14 +780,6 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 	Case "Content":                         ThreadCounter(ThreadCreate_(@RunHelp))
 	Case "FreeBasicForums":                 OpenUrl "https://www.freebasic.net/forum/index.php"
 	Case "FreeBasicWiKi":                   OpenUrl "https://www.freebasic.net/wiki/wikka.php?wakka=PageIndex"
-	Case "GitHubWebSite":                   OpenUrl "https://github.com"
-	Case "FreeBasicRepository":             OpenUrl "https://github.com/freebasic/fbc"
-	Case "VisualFBEditorRepository":        OpenUrl "https://github.com/XusinboyBekchanov/VisualFBEditor"
-	Case "VisualFBEditorWiKi":              OpenUrl "https://github.com/XusinboyBekchanov/VisualFBEditor/wiki"
-	Case "VisualFBEditorDiscussions":       OpenUrl "https://github.com/XusinboyBekchanov/VisualFBEditor/discussions"
-	Case "MyFbFrameworkRepository":         OpenUrl "https://github.com/XusinboyBekchanov/MyFbFramework"
-	Case "MyFbFrameworkWiKi":               OpenUrl "https://github.com/XusinboyBekchanov/MyFbFramework/wiki"
-	Case "MyFbFrameworkDiscussions":        OpenUrl "https://github.com/XusinboyBekchanov/MyFbFramework/discussions"
 	Case "About":                           pfAbout->Show *pfrmMain : pfAbout->CenterToParent
 	Case "TipoftheDay":                     pfTipOfDay->ShowModal *pfrmMain : pfTipOfDay->CenterToParent
 	End Select

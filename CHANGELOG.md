@@ -1,6 +1,6 @@
 # VFBE Win64 Fork — Changelog
 
-**Repository:** [codeberg.org/bigriverguy/VFBEWin64](https://codeberg.org/bigriverguy/VFBEWin64)
+**Repository:** [github.com/dmontaine/astoria-ide](https://github.com/dmontaine/astoria-ide)
 
 This file archives completed work and the full commit history. For current status and open items, see [`PROJECT_STATUS.md`](PROJECT_STATUS.md).
 

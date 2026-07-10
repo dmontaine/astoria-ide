@@ -3,7 +3,7 @@
 **Last updated:** 2026-07-08 (**C4 — full `.lng`/translation-capability removal (English-only)**, compile-clean, **owner smoke-test needed before commit** — see "C4: full language-system removal" below. Earlier same day: **E1 merged into `main`** (`b078d99`) from its background-task worktree, compile-clean, owner-verified. While testing E1, owner found **"Close Project" greyed out on startup with a reloaded project** — root-caused and fixed, owner-verified: see "Startup Close-Project-greyed fix" below.)
 
 **Last updated:** 2026-07-07 (**Close Project crash+hang root-caused & fixed** — GDB-traced to a dangling tree-node `.Tag` use-after-free in `tvExplorer_SelChange` + tabs never closing; fixed via null-after-free, robust tab-close by node ancestry, and a safety bail. Also: **empty-workspace startup now prompts File → New Project** (owner design), and the **New Project / Open Project dialogs cross-navigate** via new "Open Existing Project" / "Open New Project" buttons. D1 Designer-menu greying now complete (incl. the form-close gap, fixed via `ChangeMenuItemsEnabled`). Earlier same day: Opus "Next Steps" backlog fully worked through except R5/E1/`.lng` cleanup; 13.3.A S1–S7 all Opus-reviewed & committed)  
-**Repository:** [codeberg.org/bigriverguy/VFBEWin64](https://codeberg.org/bigriverguy/VFBEWin64)  
+**Repository:** [github.com/dmontaine/astoria-ide](https://github.com/dmontaine/astoria-ide)  
 **Local path:** `C:\Users\dmont\VisualFBEditor`  
 **Owner:** bigriverguy (`dmontaine@gmail.com`)
 
@@ -542,11 +542,11 @@ Common thread: **approachability and cohesion over power-user configurability.**
 ### Git remote
 
 ```
-origin  git@codeberg.org:bigriverguy/VFBEWin64.git
+origin  https://github.com/dmontaine/astoria-ide.git
 branch  main
 ```
 
-SSH key: `~/.ssh/id_ed25519_codeberg` (Host `codeberg.org` in `~/.ssh/config`).
+(Previously hosted on Codeberg (`bigriverguy/VFBEWin64`); migrated to GitHub 2026-07-09, Codeberg no longer used.)
 
 **Note:** Git may not be on PATH in all shells; full path:
 

@@ -171,7 +171,7 @@ Flagging the rename itself as a **larger mechanical undertaking than it looks**,
 - Window class names / mutex or single-instance-detection strings (if any) in `src/VisualFBEditor.bas` / `Main.bas` — renaming these changes on-disk identity, not just cosmetics
 - Splash screen, About dialog, title bar text, `App.Title` (`src/Main.bas` per §3a warnings-fix notes)
 - INI file name/path (`Settings/VisualFBEditor64.ini`) — needs a migration story if existing users' settings shouldn't be silently orphaned; see the INI key migration convention in §9
-- Repository name on Codeberg (`VFBEWin64`) — a rename here changes clone URLs for anyone already tracking it
+- Repository name on GitHub (`dmontaine/astoria-ide`, migrated from Codeberg's `VFBEWin64` 2026-07-09) — a rename here changes clone URLs for anyone already tracking it
 - Every doc file (`README.md`, `PROJECT_STATUS.md`, `src/BUILD.md`, `src/THREADING.md`) and likely dozens of in-code comments/strings referencing "VisualFBEditor" or "VFBE"
 - Decide scope up front: cosmetic rename only (title/About/docs) vs. full identity rename (binaries, repo, INI, window classes) — the second is much larger and should be scheduled as its own tier.
 

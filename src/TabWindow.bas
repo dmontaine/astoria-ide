@@ -349,17 +349,15 @@ Sub ApplyFormTabView(tb As TabWindow Ptr)
 		miCodeAndForm->Enabled = bFormFile
 		miGotoCodeForm->Enabled = bFormFile
 		miFormFormat->Enabled = False ' D1: no controls to design
-		tb->tbrTop.Buttons.Item("Form")->Enabled = bFormFile
-		tb->tbrTop.Buttons.Item("CodeAndForm")->Enabled = bFormFile
-		tb->tbrTop.Buttons.Item("Code")->Checked = True: tbrTop_ButtonClick *tb->tbrTop.Designer, tb->tbrTop, *tb->tbrTop.Buttons.Item("Code")
+		tb->SetFormViewsEnabled(bFormFile)
+		tb->ShowView("Code")
 	Else
 		miForm->Enabled = True
 		miCodeAndForm->Enabled = True
 		miGotoCodeForm->Enabled = True
 		miFormFormat->Enabled = True ' D1: form with controls is active
-		tb->tbrTop.Buttons.Item("Form")->Enabled = True
-		tb->tbrTop.Buttons.Item("CodeAndForm")->Enabled = True
-		tb->tbrTop.Buttons.Item("CodeAndForm")->Checked = True: tbrTop_ButtonClick *tb->tbrTop.Designer, tb->tbrTop, *tb->tbrTop.Buttons.Item("CodeAndForm")
+		tb->SetFormViewsEnabled(True)
+		tb->ShowView("CodeAndForm")
 		RefreshDesignSurface(tb)
 	End If
 	mApplyingFormTabView = False
@@ -3250,10 +3248,10 @@ Sub OnLineChangeEdit(ByRef Designer As My.Sys.Object, ByRef Sender As Control, B
 						End If
 					End If
 				End If
-				If tb->tbrTop.Buttons.Item("Code")->Checked AndAlso CBool(OldLine = -1 OrElse (OldLine >= tb->ConstructorStart AndAlso OldLine <= tb->ConstructorEnd)) Then
+				If CBool(tb->CurrentView() = "Code") AndAlso CBool(OldLine = -1 OrElse (OldLine >= tb->ConstructorStart AndAlso OldLine <= tb->ConstructorEnd)) Then
 					tb->FormNeedDesign = True
 				End If
-				tb->FormDesign bNotDesignForms OrElse tb->tbrTop.Buttons.Item("Code")->Checked OrElse (CBool(OldLine < tb->ConstructorStart) AndAlso CBool(OldLine <> -1)) OrElse CBool(OldLine > tb->ConstructorEnd) 'Not EndsWith(tb->cboFunction.Text, " [Constructor]")
+				tb->FormDesign bNotDesignForms OrElse CBool(tb->CurrentView() = "Code") OrElse (CBool(OldLine < tb->ConstructorStart) AndAlso CBool(OldLine <> -1)) OrElse CBool(OldLine > tb->ConstructorEnd) 'Not EndsWith(tb->cboFunction.Text, " [Constructor]")
 			End With
 			TextChanged = False
 			End If
@@ -3687,9 +3685,8 @@ Sub DesignerDblClickControl(ByRef Sender As Designer, Ctrl As Any Ptr)
 			Case Else
 				If iItem <> 0 Then FindEvent tb, iItem->Object, "OnClick"
 			End Select
-			If tb->tbrTop.Buttons.Item("CodeAndForm")->Checked Then
-				tb->tbrTop.Buttons.Item("Code")->Checked = True
-				tbrTop_ButtonClick *tb->tbrTop.Designer, tb->tbrTop, *tb->tbrTop.Buttons.Item("Code")
+			If tb->CurrentView() = "CodeAndForm" Then
+				tb->ShowView("Code")
 				If GlobalSettings.ShowClassesExplorerOnOpenWindow Then
 					If tb->cboFunction.ItemIndex > -1 Then
 						Dim te As TypeElement Ptr = tb->cboFunction.ItemData(tb->cboFunction.ItemIndex)
@@ -9615,7 +9612,7 @@ Sub TabWindow.FormDesign(NotForms As Boolean = False)
 						This.Visible = True
 						pnlForm.Visible = True
 						splForm.Visible = True
-						If Not tbrTop.Buttons.Item("CodeAndForm")->Checked Then tbrTop.Buttons.Item("CodeAndForm")->Checked = True
+						If CurrentView() <> "CodeAndForm" Then SyncViewTab("CodeAndForm")
 							If pnlForm.Handle = 0 Then pnlForm.CreateWnd
 						Des = _New( My.Sys.Forms.Designer(@pnlForm))
 						If Des = 0 Then FLine= 0: bNotDesign = False: pfrmMain->UpdateUnLock: Exit Sub
@@ -10096,49 +10093,102 @@ Sub TabWindow.FormDesign(NotForms As Boolean = False)
 	"in module " & ZGet(Ermn()) & " (Handler file: " & __FILE__ & ") "
 End Sub
 
-Sub tbrTop_ButtonClick(ByRef Designer As My.Sys.Object, ByRef Sender As ToolBar, ByRef Button As ToolButton)
-	'Var tb = Cast(TabWindow Ptr, Cast(ToolButton Ptr, @Button)->Ctrl->Parent->Parent->Parent)
-	Var tb = Cast(TabWindow Ptr, Cast(ToolButton Ptr, @Button)->Ctrl->Parent)
+' Map a view name to its fixed tab index (0 = Code+Form, 1 = Code, 2 = Form). -1 if unknown.
+Private Function ViewNameToIndex(ByRef ViewName As String) As Integer
+	Select Case ViewName
+	Case "CodeAndForm": Return 0
+	Case "Code":        Return 1
+	Case "Form":        Return 2
+	End Select
+	Return -1
+End Function
+
+' Apply the panel visibility for a view. This is the old tbrTop_ButtonClick body, unchanged in
+' behaviour; it does NOT touch the tcView selection (callers keep the tab strip in sync).
+Sub TabWindow.ApplyView(ByRef ViewName As String)
+	Select Case ViewName
+	Case "Code"
+		pnlCode.Visible = True
+		pnlForm.Visible = False
+		splForm.Visible = False
+	Case "Form"
+		pnlCode.Visible = False
+		pnlForm.Align = DockStyle.alClient
+		pnlForm.Visible = True
+		splForm.Visible = False
+		LastButton = ViewName
+		If bNotDesign = False AndAlso mApplyingFormTabView = False Then
+			If FormNeedDesign Then
+				FormDesign
+				FormNeedDesign = False
+			End If
+		End If
+		tpToolbox->SelectTab
+	Case "CodeAndForm"
+		pnlForm.Align = DockStyle.alRight
+		pnlForm.Width = 350
+		pnlForm.Visible = True
+		splForm.Visible = True
+		pnlCode.Visible = True
+		LastButton = ViewName
+		If bNotDesign = False AndAlso mApplyingFormTabView = False Then
+			If FormNeedDesign Then
+				FormDesign
+				FormNeedDesign = False
+			End If
+		End If
+		tpToolbox->SelectTab
+	Case Else
+		Exit Sub
+	End Select
+	mViewName = ViewName
+	RequestAlign
+End Sub
+
+' Switch to a view: sync the tab strip (suppressing the change event) then apply it. Robust
+' whether or not the tab control's window handle exists yet.
+Sub TabWindow.ShowView(ByRef ViewName As String)
+	Dim As Integer idx = ViewNameToIndex(ViewName)
+	If idx = -1 Then Exit Sub
+	mInViewSwitch = True
+	tcView.SelectedTabIndex = idx
+	mInViewSwitch = False
+	ApplyView(ViewName)
+End Sub
+
+' Point the tab strip at a view without changing panel visibility (used where the caller has
+' already set the panels inline).
+Sub TabWindow.SyncViewTab(ByRef ViewName As String)
+	Dim As Integer idx = ViewNameToIndex(ViewName)
+	If idx = -1 Then Exit Sub
+	mInViewSwitch = True
+	tcView.SelectedTabIndex = idx
+	mInViewSwitch = False
+	mViewName = ViewName
+End Sub
+
+Function TabWindow.CurrentView() As String
+	Return mViewName
+End Function
+
+Sub TabWindow.SetFormViewsEnabled(Value As Boolean)
+	mFormViewsEnabled = Value
+End Sub
+
+Sub tcView_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As TabControl, NewIndex As Integer)
+	Var tb = Cast(TabWindow Ptr, Sender.Tag)
 	If tb = 0 Then Exit Sub
-	With *tb
-		Select Case Button.Name
-		Case "Code"
-			.pnlCode.Visible = True
-			.pnlForm.Visible = False
-			.splForm.Visible = False
-			'tpProject->SelectTab
-		Case "Form"
-			'If tb->cboClass.Items.Count < 2 Then Exit Sub
-			.pnlCode.Visible = False
-			.pnlForm.Align = DockStyle.alClient
-			.pnlForm.Visible = True
-			.splForm.Visible = False
-			.LastButton = Button.Name
-			If .bNotDesign = False AndAlso mApplyingFormTabView = False Then
-				If tb->FormNeedDesign Then
-					.FormDesign
-					tb->FormNeedDesign = False
-				End If
-			End If
-			tpToolbox->SelectTab
-		Case "CodeAndForm"
-			'If tb->cboClass.Items.Count < 2 Then Exit Sub
-			.pnlForm.Align = DockStyle.alRight
-			.pnlForm.Width = 350
-			.pnlForm.Visible = True
-			.splForm.Visible = True
-			.pnlCode.Visible = True
-			.LastButton = Button.Name
-			If .bNotDesign = False AndAlso mApplyingFormTabView = False Then
-				If tb->FormNeedDesign Then
-					.FormDesign
-					tb->FormNeedDesign = False
-				End If
-			End If
-			tpToolbox->SelectTab
-		End Select
-		.RequestAlign
-	End With
+	If tb->mInViewSwitch Then Exit Sub          ' programmatic sync; don't re-apply
+	' Only Code (index 1) is selectable on non-form-capable files: bounce the form views back to it.
+	If NewIndex <> 1 AndAlso tb->mFormViewsEnabled = False Then
+		tb->ShowView("Code")
+		Exit Sub
+	End If
+	Select Case NewIndex
+	Case 0: tb->ApplyView("CodeAndForm")
+	Case 1: tb->ApplyView("Code")
+	Case 2: tb->ApplyView("Form")
+	End Select
 End Sub
 
 Sub cboIntellisense_DropDown(ByRef Designer As My.Sys.Object, ByRef Sender As ComboBoxEdit)
@@ -10510,12 +10560,20 @@ Constructor TabWindow(ByRef wFileName As WString, bNewForm As Boolean, TreeN As 
 	btnFunction->Expand = True
 	'btnFunction->Width = btnClass->Width 
 	'btnFunction->Left + btnFunction->Width + 1
-	tbrTop.Buttons.Add tbsSeparator
-	tbrTop.Buttons.Add tbsCheckGroup, "Code", , , "Code", , ("Show Code"), True ' Show the toollips
-	tbrTop.Buttons.Add tbsCheckGroup, "Form", , , "Form", , ("Show Form"), True ' Show the toollips
-	tbrTop.Buttons.Add tbsCheckGroup, "CodeAndForm", , , "CodeAndForm", , ("Show Code And Form"), True '
-	tbrTop.OnButtonClick = @tbrTop_ButtonClick
 	tbrTop.Flat = True
+	' View selector strip: replaces the old Code / Form / Code+Form toolbar toggle buttons with tabs.
+	' Fixed tab order: 0 = Code+Form (default), 1 = Code, 2 = Form. The panels are NOT parented into
+	' the tab pages; tcView is a header-only selector and tcView_SelChange drives panel visibility.
+	tcView.Align = DockStyle.alTop
+	tcView.Height = 26
+	tcView.FlatButtons = True
+	tcView.Tag = @This
+	tcView.AddTab(("Code And Form"))
+	tcView.AddTab(("Code"))
+	tcView.AddTab(("Form"))
+	tcView.OnSelChange = @tcView_SelChange
+	mViewName = "CodeAndForm"
+	mFormViewsEnabled = True
 	'pnlToolbar.Align = DockStyle.alRight
 	
 
@@ -10538,6 +10596,7 @@ Constructor TabWindow(ByRef wFileName As WString, bNewForm As Boolean, TreeN As 
 	pnlForm.Top = -500
 		pnlForm.Style = pnlForm.Style Or WS_HSCROLL Or WS_VSCROLL
 	pnlCode.Add @txtCode
+	This.Add @tcView
 	This.Add @tbrTop
 	This.Add @pnlForm
 	This.Add @splForm

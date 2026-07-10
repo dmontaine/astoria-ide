@@ -184,6 +184,9 @@ Public:
 	bQuitThread As Boolean
 	LastThread As Any Ptr
 	LastButton As String
+	mViewName As String           ' current view: "Code" / "Form" / "CodeAndForm" (replaces the old tbrTop toggle-button state)
+	mFormViewsEnabled As Boolean  ' whether Form / Code+Form are selectable (form-capable file)
+	mInViewSwitch As Boolean      ' re-entrancy guard while syncing the tcView selection
 	Project As ProjectElement Ptr
 	'CheckedFiles As WStringList
 	'OldIncludes As WStringList
@@ -202,6 +205,7 @@ Public:
 	pnlForm As Panel
 	tbrLeft As ToolBar
 	tbrTop As ToolBar
+	tcView As TabControl          ' Code / Form / Code+Form view selector (top tab strip)
 	pnlToolbar As Panel
 	txtCode As EditControl
 	cboClass As ComboBoxEx
@@ -249,6 +253,11 @@ Public:
 	Declare Sub Define
 	Declare Sub ClearTypes
 	Declare Sub FormDesign(NotForms As Boolean = False)
+	Declare Sub ApplyView(ByRef ViewName As String)     ' apply pnlCode/pnlForm/splForm visibility for a view
+	Declare Sub ShowView(ByRef ViewName As String)      ' switch to a view (updates the tab strip + applies it)
+	Declare Sub SyncViewTab(ByRef ViewName As String)   ' silently point the tab strip at a view (no visibility change)
+	Declare Function CurrentView() As String            ' "Code" / "Form" / "CodeAndForm"
+	Declare Sub SetFormViewsEnabled(Value As Boolean)   ' allow/deny Form + Code+Form selection (form-capable file)
 	Declare Constructor(ByRef wFileName As WString = "", bNewForm As Boolean = False, TreeN As TreeNode Ptr = 0)
 	Declare Destructor
 End Type
@@ -368,7 +377,7 @@ Declare Sub OnKeyPressEdit(ByRef Designer As My.Sys.Object, ByRef Sender As Cont
 
 Declare Sub OnSelChangeEdit(ByRef Designer As My.Sys.Object, ByRef Sender As Control, ByVal CurrentLine As Integer, ByVal CurrentCharIndex As Integer)
 
-Declare Sub tbrTop_ButtonClick(ByRef Designer As My.Sys.Object, ByRef Sender As ToolBar, ByRef Button As ToolButton)
+Declare Sub tcView_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As TabControl, NewIndex As Integer)
 
 Declare Sub cboIntellisense_DropDown(ByRef Designer As My.Sys.Object, ByRef Sender As ComboBoxEdit)
 

@@ -62,6 +62,7 @@ This file archives completed work and the full commit history. For current statu
 - [x] **Debugger backend: GDB** — `gas64` confirmed dead (no debug info emitted); Integrated stabs debugger + ToGAS/ToLLVM/ToCLANG code removed
 - [x] **Development/Final compile-mode toggle finalized** — both `-gen gcc`, Development = `-O0 -g`, Final = `-O2`
 - [x] **General options page checkbox overlap** — fixed via explicit ControlIndex values + `RequestAlign` on page switch
+- [x] **Code/Designer view tabs** (Lazarus-style) — replaced the per-tab Code/Form/Code+Form toolbar toggle buttons with a top tab strip (`tcView`), order **Code And Form** (default) / **Code** / **Form**. Switching logic centralized into `TabWindow` methods (`ShowView`/`ApplyView`/`SyncViewTab`/`CurrentView`/`SetFormViewsEnabled`); the ~20 former `tbrTop.Buttons.Item(...)->Checked` call sites across `Main.bas`/`TabWindow.bas`/`VisualFBEditor.bas` now use those. Header-only strip (panels not reparented), so the designer-creation path is unchanged; non-form files bounce form views back to Code.
 
 ---
 

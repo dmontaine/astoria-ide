@@ -371,7 +371,7 @@ Sub ClearDebugPanels()
 End Sub
 
 Sub SetCodeVisible(tb As TabWindow Ptr)
-	If tb->tbrTop.Buttons.Item("Form")->Checked = True Then tb->tbrTop.Buttons.Item("Code")->Checked = True: tbrTop_ButtonClick *tb->tbrTop.Designer, tb->tbrTop, *tb->tbrTop.Buttons.Item("Code")
+	If tb->CurrentView() = "Form" Then tb->ShowView("Code")
 End Sub
 
 Sub SelectError(ByRef FileName As WString, iLine As Integer, tabw As TabWindow Ptr = 0)
@@ -652,9 +652,8 @@ Sub SelectControlTreeNode(cte As ControlTreeElement Ptr)
 	Dim As SymbolsType Ptr st = tb->Des->SymbolsReadProperty(Ctrl)
 	If st = 0 Then Exit Sub
 	If Not tb->IsSelected Then tb->SelectTab
-	If tb->tbrTop.Buttons.Item("Code")->Checked Then
-		tb->tbrTop.Buttons.Item("CodeAndForm")->Checked = True
-		tbrTop_ButtonClick *tb->tbrTop.Designer, tb->tbrTop, *tb->tbrTop.Buttons.Item("CodeAndForm")
+	If tb->CurrentView() = "Code" Then
+		tb->ShowView("CodeAndForm")
 	End If
 	RevealAncestorPanels tb->Des, Ctrl
 	Dim As Any Ptr iParentCtrl = tb->Des->GetParentControl(Ctrl)
@@ -6829,9 +6828,8 @@ Sub OpenPlainFileTreeNode(ByRef Item As TreeNode, ee As ExplorerElement Ptr)
 			tb = Cast(TabWindow Ptr, ptabCode->Tabs[i])
 			If tb->tn = @Item Then
 				ptabCode->SelectedTabIndex = ptabCode->Tabs[i]->Index
-				If tb->Des <> 0 AndAlso tb->tbrTop.Buttons.Item("Code")->Checked Then
-					tb->tbrTop.Buttons.Item("CodeAndForm")->Checked = True
-					tbrTop_ButtonClick *tb->tbrTop.Designer, tb->tbrTop, *tb->tbrTop.Buttons.Item("CodeAndForm")
+				If tb->Des <> 0 AndAlso tb->CurrentView() = "Code" Then
+					tb->ShowView("CodeAndForm")
 				End If
 				tb->txtCode.SetFocus
 				t = True
@@ -8252,8 +8250,7 @@ Sub tabCode_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As TabContro
 		miCodeAndForm->Enabled = True
 		miGotoCodeForm->Enabled = True
 		miFormFormat->Enabled = True ' D1: form with controls is active
-		tb->tbrTop.Buttons.Item("Form")->Enabled = True
-		tb->tbrTop.Buttons.Item("CodeAndForm")->Enabled = True
+		tb->SetFormViewsEnabled(True)
 	Else
 		lvProperties.Nodes.Clear
 		lvEvents.Nodes.Clear
@@ -8262,10 +8259,9 @@ Sub tabCode_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As TabContro
 		miCodeAndForm->Enabled = bFormFile
 		miGotoCodeForm->Enabled = bFormFile
 		miFormFormat->Enabled = False ' D1: no controls to design (Designer ops need existing controls)
-		tb->tbrTop.Buttons.Item("Form")->Enabled = bFormFile
-		tb->tbrTop.Buttons.Item("CodeAndForm")->Enabled = bFormFile
+		tb->SetFormViewsEnabled(bFormFile)
 		If mApplyingDeferredFormDesign = False AndAlso mApplyingFormTabView = False Then
-			tb->tbrTop.Buttons.Item("Code")->Checked = True: tbrTop_ButtonClick *tb->tbrTop.Designer, tb->tbrTop, *tb->tbrTop.Buttons.Item("Code")
+			tb->ShowView("Code")
 		End If
 		'SetRightClosedStyle True, True
 	End If

@@ -59,7 +59,6 @@ Common Shared As HelpOptions HelpOption
 Declare Sub PopupClick(ByRef Designer As My.Sys.Object, ByRef Sender As My.Sys.Object)
 Declare Sub ShowPanelMenuItem_Click(ByRef Sender As MenuItem)
 Declare Sub mClick(ByRef Designer As My.Sys.Object, Sender As My.Sys.Object)
-Declare Sub mClickAIChat(ByRef Designer As My.Sys.Object, Sender As My.Sys.Object)
 Declare Sub mClickMRU(ByRef Designer As My.Sys.Object, Sender As My.Sys.Object)
 Declare Sub mClickHelp(ByRef Designer As My.Sys.Object, Sender As My.Sys.Object)
 Declare Sub mClickTool(ByRef Designer As My.Sys.Object, Sender As My.Sys.Object)
@@ -71,10 +70,10 @@ Common Shared As SaveFileDialog Ptr pSaveD
 Common Shared As ListView Ptr plvSearch, plvToDo
 Common Shared As StatusBar Ptr pstBar 'David Changed
 Common Shared As TreeListView Ptr plvProperties, plvEvents
-Common Shared As ImageList Ptr pimgList, pimgListTools, pimgListAIProviders32, pimgListAIModels32
+Common Shared As ImageList Ptr pimgList, pimgListTools
 Common Shared As ProgressBar Ptr pprProgress
 Common Shared As CommandButton Ptr pbtnPropertyValue
-Common Shared As TextBox Ptr ptxtPropertyValue, ptxtAIRequest
+Common Shared As TextBox Ptr ptxtPropertyValue
 Common Shared As ToolBar Ptr ptbStandard
 Common Shared As ToolButton Ptr SelectedTool
 Common Shared As TreeNode Ptr SelectedToolNode
@@ -82,7 +81,6 @@ Common Shared As TabControl Ptr ptabCode, ptabLeft, ptabBottom, ptabRight
 Common Shared As TreeView Ptr ptvExplorer
 Common Shared As IniFile Ptr piniSettings, piniTheme
 Common Shared As MenuItem Ptr mnuUseDebugger, mnuUseProfiler, miHelps, miXizmat, miWindow
-Common Shared As HTTPConnection Ptr pHTTPAIAgent
 Common Shared As FileEncodings DefaultFileFormat
 Common Shared As NewLineTypes DefaultNewLineFormat
 Common Shared As Boolean AutoIncrement
@@ -96,7 +94,7 @@ Common Shared As Boolean CreateNonStaticEventHandlers, CreateFormTypesWithoutTyp
 Common Shared As Boolean PlaceStaticEventHandlersAfterTheConstructor, CreateStaticEventHandlersWithAnUnderscoreAtTheBeginning, CreateEventHandlersWithoutStaticEventHandlerIfEventAllowsIt
 Common Shared As Boolean LimitDebug, DisplayWarningsInDebug, TurnOnEnvironmentVariables
 Common Shared As Boolean UseDebugger, ParameterInfoShow, LockControls
-Common Shared As Boolean CompileGUI, bAIAgentFirstRun
+Common Shared As Boolean CompileGUI
 Common Shared As Boolean mFormFindInFile
 Common Shared As Boolean InDebug, FormClosing, Restarting, FastRunning, RunningToCursor
 Common Shared As Boolean HighlightCurrentLine, HighlightCurrentWord, HighlightBrackets
@@ -111,20 +109,17 @@ Common Shared As Integer IncludeMFFPath
 Common Shared As Integer gSearchItemIndex
 Common Shared As Integer InterfaceFontSize
 Common Shared As Integer LastOpenedFileType
-Common Shared As Integer LoadFunctionsCount, AIAgentPort, AIAgentContentSize
-Common Shared As Boolean AIAgentStream
-Common Shared As Double  AIAgentTop_P, AIAgentTemperature 'Between 0 and 2.
+Common Shared As Integer LoadFunctionsCount
 Const TARGET_COMPILE_DEFINE As String = "__USE_WINAPI__ -d _WIN32_WINNT=&h0A00"
 Const BUNDLED_COMPILER_FOLDER As String = "Compiler"
 Const BUNDLED_COMPILER_EXE As String = "fbc64.exe"
 Const BUNDLED_GDB_PATH As String = "Debuggers\gdb-11.2.90.20220320-x86_64\bin\gdb.exe"
-Common Shared As String  AIAgentHost, AIAgentAddress, AIAgentAPIKey, AIAgentModelName, AIAgentProvider, AIAgentName, AIRTF_HEADER, AIEditorFontName
 Common Shared As WString Ptr DefaultProjectFile
 Common Shared As WString Ptr InterfaceFontName
 Common Shared As WString Ptr gSearchSave, EnvironmentVariables
 Common Shared As WString Ptr ProjectsPath, LastOpenPath, CommandPromptFolder
 Common Shared As WString Ptr DefaultHelp, HelpPath, KeywordsHelpPath, AsmKeywordsHelpPath, DefaultBuildConfiguration
-Common Shared As WString Ptr DefaultMakeTool, CurrentMakeTool1, CurrentMakeTool2, DefaultAIAgent, CurrentAIAgent
+Common Shared As WString Ptr DefaultMakeTool, CurrentMakeTool1, CurrentMakeTool2
 Common Shared As WString Ptr DefaultTerminal, CurrentTerminal
 Common Shared As WString Ptr DefaultCompiler64, CurrentCompiler64
 Common Shared As WString Ptr MakeToolPath1, MakeToolPath2, TerminalPath, Compiler64Path
@@ -155,20 +150,6 @@ Type ToolType
 	Declare Function GetCommand(ByRef FileName As WString = "", WithoutProgram As Boolean = False) As UString
 End Type
 
-Type ModelInfo
-	Name As String
-	Host As String
-	Address As String
-	APIKey As String
-	ModelName As String
-	Provider As String
-	Port As Integer
-	Stream As Boolean
-	ContentSize As Integer
-	Temperature As Single 'Between 0 and 2.
-	Top_P As Single ' <= 1
-	Response_Format As String 'json_object
-End Type
 'Type FileType
 '	FileName As UString
 '	DateChanged As Double
@@ -188,7 +169,7 @@ Common Shared As List Ptr pTools, pControlLibraries
 Common Shared As WStringOrStringList Ptr pComps, pGlobalNamespaces, pGlobalTypes, pGlobalEnums, pGlobalDefines, pGlobalFunctions, pGlobalTypeProcedures, pGlobalArgs
 Common Shared As WStringList Ptr pAddIns, pIncludeFiles, pLoadPaths, pIncludePaths, pLibraryPaths
 'Common Shared As WStringList Ptr pLocalTypes, pLocalEnums, pLocalProcedures, pLocalFunctions, pLocalFunctionsOthers, pLocalArgs,
-Common Shared As Dictionary Ptr pHelps, pCompilers, pMakeTools, pTerminals, pOtherEditors, pAIAgents
+Common Shared As Dictionary Ptr pHelps, pCompilers, pMakeTools, pTerminals, pOtherEditors
 
 Enum LoadParam
 	OnlyFilePath
@@ -286,7 +267,6 @@ Declare Function GetChangedCommas(ByRef Value As WString, FromSecond As Boolean 
 #include once "SettingsService.bi"
 #include once "PathUtils.bi"
 #include once "BuildService.bi"
-#include once "AIService.bi"
 Declare Function GetXY(XorY As Integer) As Integer
 	Declare Function FileTimeToVariantTime(ByRef FT As FILETIME) As DATE_
 	Declare Function GetFileLastWriteTime(ByRef FileName As WString) As FILETIME

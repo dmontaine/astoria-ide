@@ -12,7 +12,7 @@ Defined in `Controls/MyFbFramework/mff/Component.bas` and declared in `Component
 
 **Purpose:** Worker threads that update controls or call `ShowMessages` wrap those calls in `ThreadsEnter()` / `ThreadsLeave()` for API consistency with the framework.
 
-**Usage pattern** (throughout `Main.bas`, `VisualFBEditor.bas`, `TabWindow.bas`, `AIService.bas`):
+**Usage pattern** (throughout `Main.bas`, `VisualFBEditor.bas`, `TabWindow.bas`):
 
 ```freebasic
 ThreadsEnter()
@@ -46,7 +46,6 @@ ThreadCounter(ThreadCreate_(@WorkerSub, optionalParam))
 | Command prompt | Tools | `RunCmd` | Spawns external shell |
 | Run / Debug | Run menu | `CompileAndRun`, `StartDebugging`, `StartDebuggingWithCompile`, `RunProgram` | Compile and/or launch debuggee |
 | IntelliSense | Tab open / edit | `LoadFunctionsSub`, `LoadOnlyFilePath`, … | Background include parsing |
-| AI Agent | AI panel | `AIRequest` via `ThreadCreate(@AIRequest)` | HTTP chat; uses `bInAIThread` flag |
 | Debug engine | Debugger | `start_pgm`, `attach_debuggee` (`Debug.bas`) | Separate from menu worker pattern |
 
 GDB integrated debugger additionally uses `tlockGDB` and timer callbacks (`TimerProcGDB`).
@@ -84,8 +83,7 @@ This prevents two threads from advancing the debuggee or updating breakpoint sta
 1. **Wrap UI calls** in `ThreadsEnter` / `ThreadsLeave` (compile output, Problems list, progress bar, message pane, debug toolbar state).
 2. **Protect shared data** with the appropriate `tlock*` mutex when multiple workers can touch the same tab, include list, or GDB pipe.
 3. **Do not call blocking UI dialogs** (`MsgBox`, modal `InputBox`) from worker threads without marshaling to the main thread.
-4. **AI requests** set `bInAIThread = True` and use `ThreadsEnter`/`ThreadsLeave` when updating `txtAIAgent` and related controls.
-5. **Check `FormClosing`** in long-running load threads before touching UI or global lists.
-6. **Prefer `ThreadCounter`** for menu-spawned work so handles remain tracked; detach AI threads explicitly with `ThreadDetach` before starting a new `AIThread`.
+4. **Check `FormClosing`** in long-running load threads before touching UI or global lists.
+5. **Prefer `ThreadCounter`** for menu-spawned work so handles remain tracked.
 
-When adding new background work, follow an existing neighbor (compile → `CompileProgram`; formatting → `FormatProject`; AI → `AIRequest`).
+When adding new background work, follow an existing neighbor (compile → `CompileProgram`; formatting → `FormatProject`).

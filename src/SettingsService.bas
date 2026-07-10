@@ -6,13 +6,9 @@
 '#########################################################
 
 #include once "SettingsService.bi"
-#include once "AIService.bi"
 #include once "PathUtils.bi"
 
-Const INDEXED_SETTINGS_SECTION_COUNT As Integer = 8
-Const DEFAULT_AI_PORT As Integer = 443
-Const DEFAULT_AI_TEMPERATURE As Double = 0.6
-Const DEFAULT_AI_CONTENTSIZE_KB As Integer = 100
+Const INDEXED_SETTINGS_SECTION_COUNT As Integer = 7
 
 Function GetBundledCompilerFolder() As UString
 	Return ExePath & "/" & BUNDLED_COMPILER_FOLDER
@@ -69,7 +65,6 @@ End Sub
 
 Private Function NoMoreIndexedSettingsKeys(i As Integer) As Boolean
 	Dim As Integer keySum = 0
-	keySum += iniSettings.KeyExists("AIAgents", "Version_" & WStr(i))
 	keySum += iniSettings.KeyExists("MakeTools", "Version_" & WStr(i))
 	keySum += iniSettings.KeyExists("Terminals", "Version_" & WStr(i))
 	keySum += iniSettings.KeyExists("BuildConfigurations", "Name_" & WStr(i))
@@ -80,96 +75,13 @@ Private Function NoMoreIndexedSettingsKeys(i As Integer) As Boolean
 	Return keySum = -INDEXED_SETTINGS_SECTION_COUNT
 End Function
 
-Private Sub AddSeededAIAgent(ByRef AgentName As WString, ByRef HostName As WString = "openrouter.ai", ByRef AddressPath As WString = "api/v1/chat/completions")
-	If AgentName = "" OrElse AIAgents.ContainsKey(AgentName) Then Return
-	Dim As ModelInfo Ptr Info = _New(ModelInfo)
-	Dim As Integer Sep = InStr(AgentName, "|")
-	Info->Name = AgentName
-	If Sep > 0 Then
-		Info->ModelName = Left(AgentName, Sep - 1)
-		Info->Provider = Mid(AgentName, Sep + 1)
-	Else
-		Info->ModelName = AgentName
-		Info->Provider = "OpenRouter"
-	End If
-	Info->Port = DEFAULT_AI_PORT
-	Info->Host = HostName
-	Info->Address = AddressPath
-	Info->APIKey = ""
-	Info->Response_Format = ""
-	Info->Temperature = DEFAULT_AI_TEMPERATURE
-	Info->Top_P = 0
-	Info->Stream = True
-	Info->ContentSize = DEFAULT_AI_CONTENTSIZE_KB * 1024
-	AIAgents.Add AgentName, Info->Host, Info
-	If *CurrentAIAgent = AgentName Then
-		AIAgentModelName = Info->ModelName
-		AIAgentProvider = Info->Provider
-		AIAgentHost = Info->Host
-		AIAgentPort = Info->Port
-		AIAgentAddress = Info->Address
-		AIAgentAPIKey = NormalizeAIAgentAPIKey(Info->APIKey)
-		AIAgentTemperature = Info->Temperature
-		AIAgentStream = Info->Stream
-		AIAgentContentSize = Info->ContentSize
-		AIPostDataFirstTime = True
-		AIIncludeFileNameList.Clear
-	End If
-End Sub
-
-' When the INI has no [AIAgents] Version_N entries yet (first run / minimal INI),
-' seed the default model catalog from upstream VisualFBEditor64.ini so the AI Agent
-' dropdown lists the full set instead of only DefaultAIAgent.
-Private Sub SeedDefaultAIAgents()
-	' Kept deliberately small (owner decision, 2026-07-07): a handful of recognizable,
-	' well-known defaults rather than the full provider catalog. Use "Add AI Agent" in
-	' Options to add any other cloud model by hand.
-	AddSeededAIAgent(*DefaultAIAgent)
-	AddSeededAIAgent("google/gemini-2.5-pro-exp-03-25:free|OpenRouter")
-	AddSeededAIAgent("deepseek-chat|DeepSeek", "api.deepseek.com", "v1/chat/completions")
-End Sub
-
 Sub LoadSettings
 	LoadSettingsIni()
 	Dim As UString Temp
 	Dim As ToolType Ptr Tool
-	Dim As ModelInfo Ptr Info
 	Dim i As Integer = 0
-	WLet(DefaultAIAgent, iniSettings.ReadString("AIAgents", "DefaultAIAgent", "deepseek/deepseek-chat-v3-0324:free|OpenRouter"))
-	WLet(CurrentAIAgent, *DefaultAIAgent)
-	If iniSettings.KeyExists("AIAgents", "Version_0") = -1 Then SeedDefaultAIAgents()
 	cboBuildConfiguration.AddItem ("No options")
 	Do
-		Temp = iniSettings.ReadString("AIAgents", "Version_" & WStr(i), "")
-		If Temp <> "" Then
-			Info = _New(ModelInfo)
-			Info->Name = Temp
-			Info->ModelName = iniSettings.ReadString("AIAgents", "ModelName_" & WStr(i), "deepseek/deepseek-chat-v3-0324:free")
-			Info->Provider = iniSettings.ReadString("AIAgents", "Provider_" & WStr(i), "OpenRouter")
-			Info->Port = iniSettings.ReadInteger("AIAgents", "Port_" & WStr(i), DEFAULT_AI_PORT)
-			Info->Host = iniSettings.ReadString("AIAgents", "Host_" & WStr(i), "openrouter.ai")
-			Info->Address = iniSettings.ReadString("AIAgents", "Address_" & WStr(i), "api/v1/chat/completions")
-			Info->APIKey = NormalizeAIAgentAPIKey(iniSettings.ReadString("AIAgents", "APIKey_" & WStr(i), ""))
-			Info->Response_Format = iniSettings.ReadString("AIAgents", "Response_Format_" & WStr(i), "")
-			Info->Temperature = iniSettings.ReadFloat("AIAgents", "Temperature_" & WStr(i), DEFAULT_AI_TEMPERATURE)
-			Info->Top_P = iniSettings.ReadFloat("AIAgents", "Top_P_" & WStr(i), 0)
-			Info->Stream = iniSettings.ReadBool("AIAgents", "Stream_" & WStr(i), True)
-			Info->ContentSize = iniSettings.ReadInteger("AIAgents", "ContentSize_" & WStr(i), DEFAULT_AI_CONTENTSIZE_KB) * 1024
-			AIAgents.Add Temp, Info->Host, Info
-			If *CurrentAIAgent = Temp Then
-				AIAgentModelName = Info->ModelName
-				AIAgentProvider = Info->Provider
-				AIAgentHost = Info->Host
-				AIAgentPort = Info->Port
-				AIAgentAddress  = Info->Address
-				AIAgentAPIKey = NormalizeAIAgentAPIKey(Info->APIKey)
-				AIAgentTemperature = Info->Temperature
-				AIAgentStream  = Info->Stream
-				AIAgentContentSize  = Info->ContentSize
-				AIPostDataFirstTime= True
-				AIIncludeFileNameList.Clear
-			End If
-		End If
 		Temp = iniSettings.ReadString("MakeTools", "Version_" & WStr(i), "")
 		If Temp <> "" Then
 			Tool = _New(ToolType)
@@ -334,13 +246,6 @@ End Sub
 
 Sub SaveMRU
 	Dim As Integer i, MRUStart
-	MRUStart = Max(MRUAIChat.Count - miRecentMax, 0)
-	For i = MRUStart To MRUAIChat.Count - 1
-		iniSettings.WriteString("MRUAIChat", "MRUAIChat_0" & WStr(i - MRUStart), MRUAIChat.Item(i))
-	Next
-	For i = i To miRecentMax
-		iniSettings.KeyRemove("MRUAIChat", "MRUAIChat_0" & WStr(i))
-	Next
 	MRUStart = Max(MRUFiles.Count - miRecentMax, 0)
 	For i = MRUStart To MRUFiles.Count - 1
 		iniSettings.WriteString("MRUFiles", "MRUFile_0" & WStr(i - MRUStart), MRUFiles.Item(i))

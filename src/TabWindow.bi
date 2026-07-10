@@ -21,7 +21,6 @@
 #include once "mff/Splitter.bi"
 #include once "mff/ProgressBar.bi"
 #include once "file.bi"
-#include once "MD2RTF.bi"
 
 Common Shared As TreeNode Ptr MainNode
 

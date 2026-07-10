@@ -110,12 +110,6 @@ Using My.Sys.Forms
 		Declare Sub txtColorFrame_KeyPress(ByRef Sender As Control, Key As Integer)
 		Declare Static Sub _txtColorIndicator_KeyPress(ByRef Designer As My.Sys.Object, ByRef Sender As Control, Key As Integer)
 		Declare Sub txtColorIndicator_KeyPress(ByRef Sender As Control, Key As Integer)
-		Declare Sub cmdAddAIAgent_Click(ByRef Sender As Control)
-		Declare Sub cmdRemoveAIAgent_Click(ByRef Sender As Control)
-		Declare Sub cmdChangeAIAgent_Click(ByRef Sender As Control)
-		Declare Sub cmdClearAIAgent_Click(ByRef Sender As Control)
-		Declare Sub cboAIAgent_Selected(ByRef Sender As ComboBoxEdit, ItemIndex As Integer)
-		Declare Sub lvAIAgentTypes_ItemActivate(ByRef Sender As ListView, ByVal ItemIndex As Integer)
 		Declare Sub cboInterfaceTheme_Change(ByRef Sender As ComboBoxEdit)
 		Declare Sub lstInterfaceColorKeys_Change(ByRef Sender As ListControl)
 		Declare Sub cmdInterfaceThemeAdd_Click(ByRef Sender As Control)
@@ -129,12 +123,12 @@ Using My.Sys.Forms
 		Dim As CommandButton cmdOK, cmdCancel, cmdApply, cmdMFFPath, cmdAddInclude, cmdRemoveInclude, cmdAddLibrary, cmdRemoveLibrary, cmdChangeTerminal, cmdAdd, cmdRemove, cmdForeground, cmdFont, cmdProjectsPath, cmdBackground, cmdIndicator, cmdAddTerminal, cmdRemoveTerminal, cmdClearTerminals, cmdSetShortcut
 		Dim As Label lblBlack, lblCompiler64, lblCompiler64Path, lblTabSize, lblHistoryLimit, lblGridSize, lblFont, lblProjectsPath, lblForeground, lblBackground, lblIndicator, lblOthers, lblShortcut
 		Dim As ScrollControl pnlGeneral, pnlCodeEditor, pnlDesigner, sccColors, sccInterfaceColors
-		Dim As Panel pnlThemes, pnlShortcuts, pnlColorsAndFonts, pnlCompiler, pnlDebugger, pnlTerminal, pnlHelp, pnlIncludeMFFPath, pnlInterfaceFont, pnlGrid, pnlOtherEditors, pnlLine, pnlProjectsPath, pnlSelectShortcut, pnlAutoSaveCharMax, pnlAIAgent
-		Dim As HorizontalBox hbxEditors, hbxHelp, hbxTerminal, hbxColors, hbxThemeCommands, hbxForeground, hbxBackground, hbxFrame, hbxIndicator, pnlCommands, hbxAIAgent, hbxIncludePaths, hbxLibraryPaths, hbxInterfaceColors, hbxInterfaceThemeCommands, hbxInterfaceColor
+		Dim As Panel pnlThemes, pnlShortcuts, pnlColorsAndFonts, pnlCompiler, pnlDebugger, pnlTerminal, pnlHelp, pnlIncludeMFFPath, pnlInterfaceFont, pnlGrid, pnlOtherEditors, pnlLine, pnlProjectsPath, pnlSelectShortcut, pnlAutoSaveCharMax
+		Dim As HorizontalBox hbxEditors, hbxHelp, hbxTerminal, hbxColors, hbxThemeCommands, hbxForeground, hbxBackground, hbxFrame, hbxIndicator, pnlCommands, hbxIncludePaths, hbxLibraryPaths, hbxInterfaceColors, hbxInterfaceThemeCommands, hbxInterfaceColor
 		Dim As Panel pnlChangeKeywordsCase, pnlChangeIdentifiersCase, pnlTreatTabAsSpaces, pnlTabSize, pnlHistoryLimit, pnlIntellisenseLimit, pnlHistoryFileSavingDays, pnlChangeEndingType, pnlCodeEditorHoverTime
 		Dim As TextBox txtColorForeground, txtColorBackground, txtColorIndicator, txtColorFrame
 		Dim As TextBox txtMFFpath, txtTabSize, txtHistoryLimit, txtGridSize, txtProjectsPath, txtInFolder, txtIntellisenseLimit, txtHistoryCodeDays,  txtFoldsHtml(0), txtFoldsLng, txtAutoSaveCharMax, txtCodeEditorHoverTime, txtInterfaceColor
-		Dim As ComboBoxEdit cboIdentifiersCase, cboCase, cboTabStyle, cboTheme, cboTerminal, cboHelp, cboAIAgent, cboConstructions, cboInterfaceTheme
+		Dim As ComboBoxEdit cboIdentifiersCase, cboCase, cboTabStyle, cboTheme, cboTerminal, cboHelp, cboConstructions, cboInterfaceTheme
 		Dim As CheckBox chkAutoCreateRC, chkAutoSaveCurrentFileBeforeCompiling, chkEnableAutoComplete, chkTabAsSpaces, chkAutoIndentation, chkShowSpaces, chkShowAlignmentGrid, chkSnapToGrid, chkChangeKeywordsCase, chkBold, chkItalic, chkUnderline
 		Dim As HotKey hkShortcut
 		Dim OpenD As OpenFileDialog
@@ -153,14 +147,14 @@ Using My.Sys.Forms
 		Dim As Boolean HotKeysChanged
 		Dim As Integer LibraryPathsCount
 		Dim As ListControl lstIncludePaths, lstLibraryPaths, lstColorKeys, lstInterfaceColorKeys
-		Dim As GroupBox grbGrid, grbColors, grbThemes, grbFont, grbDefaultCompilers, grbDefaultTerminal, grbTerminalPaths, grbIncludePaths, grbLibraryPaths, grbDefaultHelp, grbHelpPaths, grbWhenCompiling, grbShortcuts, grbOtherEditors, grbCommandPromptOptions, grbAIAgent, grbAIAgentType, grbDefaultAIAgent, grbDisplay, grbCompletion, grbIntelliSense, grbHistory
-		Dim As ListView lvTerminalPaths, lvHelpPaths, lvShortcuts, lvOtherEditors, lvAIAgentTypes
+		Dim As GroupBox grbGrid, grbColors, grbThemes, grbFont, grbDefaultCompilers, grbDefaultTerminal, grbTerminalPaths, grbIncludePaths, grbLibraryPaths, grbDefaultHelp, grbHelpPaths, grbWhenCompiling, grbShortcuts, grbOtherEditors, grbCommandPromptOptions, grbDisplay, grbCompletion, grbIntelliSense, grbHistory
+		Dim As ListView lvTerminalPaths, lvHelpPaths, lvShortcuts, lvOtherEditors
 		Dim As Label lblInterfaceFont
 		Dim As CommandButton cmdInterfaceFont
 		Dim As Label lblInterfaceFontLabel
 		Dim As CheckBox chkDisplayIcons, chkShowMainToolbar, chkAutoCreateBakFiles, chkShowToolBoxLocal
 		Dim As Label lblFrame, lblOpenCommandPromptIn, lblIntellisenseLimit, lblHistoryDay, lbAutoSaveCharMax, lblCodeEditorHoverTime, lblInterfaceColor
-		Dim As CommandButton cmdFrame, cmdAddHelp, cmdChangeHelp, cmdRemoveHelp, cmdClearHelps, cmdAddEditor, cmdChangeEditor, cmdRemoveEditor, cmdClearEditor, cmdInFolder, cmdReplaceInFiles(0), cmdClearAIAgent, cmdRemoveAIAgent, cmdChangeAIAgent, cmdAddAIAgent, cmdInterfaceThemeAdd, cmdInterfaceThemeRemove, cmdInterfaceColor
+		Dim As CommandButton cmdFrame, cmdAddHelp, cmdChangeHelp, cmdRemoveHelp, cmdClearHelps, cmdAddEditor, cmdChangeEditor, cmdRemoveEditor, cmdClearEditor, cmdInFolder, cmdReplaceInFiles(0), cmdInterfaceThemeAdd, cmdInterfaceThemeRemove, cmdInterfaceColor
 		Dim As CheckBox chkFrame, chkForeground, chkBackground, chkIndicator
 		Dim As CheckBox chkHighlightCurrentWord
 		Dim As CheckBox chkHighlightCurrentLine

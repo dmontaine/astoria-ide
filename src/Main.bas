@@ -96,12 +96,12 @@ pfSplash->lblSplash1.Text = "(" & ("Version") & " " & pApp->Version & "  " & ("6
 pApp->DoEvents
 
 Dim Shared As VisualFBEditor.Application VisualFBEditorApp
-Dim Shared As ComboBoxEdit cboBuildConfiguration, cboAIAgentModels
+Dim Shared As ComboBoxEdit cboBuildConfiguration
 Dim Shared As IniFile iniSettings, iniTheme, iniInterfaceTheme
 Dim Shared As SearchBox txtExplorer, txtForm, txtProperties, txtEvents
-Dim Shared As ToolBar tbStandard, tbEdit, tbRun, tbProject, tbExplorer, tbForm, tbAIAgent, tbProperties, tbEvents, tbBottom, tbLeft, tbRight, tbFormat
+Dim Shared As ToolBar tbStandard, tbEdit, tbRun, tbProject, tbExplorer, tbForm, tbProperties, tbEvents, tbBottom, tbLeft, tbRight, tbFormat
 Dim Shared As StatusBar stBar
-Dim Shared As Splitter splLeft, splRight, splBottom, splAIAgent, splProperties, splEvents
+Dim Shared As Splitter splLeft, splRight, splBottom, splProperties, splEvents
 Dim Shared As ListControl lstLeft
 Dim Shared As CheckBox chkLeft
 Dim Shared As RadioButton radButton
@@ -111,7 +111,6 @@ Dim Shared As Panel pnlLeft, pnlRight, pnlBottom, pnlBottomTab, pnlLeftPin, pnlR
 Dim Shared As TrackBar trLeft
 Dim Shared As MainMenu mnuMain
 Dim Shared As MenuItem Ptr mnuStartWithCompile, mnuStart, mnuContinue, mnuBreak, mnuEnd, mnuRestart, mnuStandardToolBar, mnuEditToolBar, mnuProjectToolBar, mnuFormatToolBar, mnuRunToolBar, mnuSplit, mnuSplitHorizontally, mnuSplitVertically, mnuWindowSeparator, miRecentFiles, miSetAsMain, miClearStartUp, miTabSetAsMain, miTabReloadHistoryCode, miRemoveFiles, miToolBars
-Dim Shared As MenuItem Ptr miRecentAIChat,  miFileAIChat
 Dim Shared As MenuItem Ptr miSaveProject, miSaveProjectAs, miCloseProject, miDeleteProject, miNewFile, miOpenFile, miCloseFile, miDeleteFile, miSaveFile, miSaveFileAs, miPrint, miPrintPreview, miPageSetup, miOpenProjectFolder, miProjectProperties, miExplorerOpenProjectFolder, miExplorerRename, miExplorerProjectProperties, miExplorerCloseProject, miRename, miRemoveFileFromProject
 Dim Shared As MenuItem Ptr miUndo, miRedo, miCutCurrentLine, miCut, miCopy, miPaste, miSingleComment, miDuplicate, miSelectAll, miIndent, miOutdent, miFormat, miUnformat, miFormatProject, miUnformatProject, miAddSpaces, miDeleteBlankLines, miSuggestions, miCompleteWord, miParameterInfo, miStepInto, miStepOver, miStepOut, miRunToCursor, miGDBCommand, miAddWatch, miToggleBreakpoint, miClearAllBreakpoints, miSetNextStatement, miShowNextStatement
 Dim Shared As MenuItem Ptr dmiMake, dmiMakeClean
@@ -130,34 +129,26 @@ Dim Shared As ReBar MainReBar, rbLeft, rbRight, rbBottom
 Dim Shared As List Tools, TabPanels, ControlLibraries
 Dim Shared As WStringOrStringList Comps, GlobalAsmFunctionsHelp, GlobalFunctionsHelp, Snippets, TypesInFunc, EnumsInFunc
 'Dim Shared As WStringOrStringList GlobalNamespaces, GlobalTypes, GlobalEnums, GlobalDefines, GlobalFunctions, GlobalTypeProcedures, GlobalArgs
-Dim Shared As WStringList AddIns, IncludeFiles, LoadPaths, IncludePaths, LibraryPaths, MRUAIChat, MRUFiles, MRUFolders, MRUProjects, ProfilingFunctions
-Dim Shared As WString Ptr RecentFiles, RecentFile, RecentProject, RecentFolder, RecentAIChat
-Dim Shared As Dictionary Helps, HotKeys, Compilers, MakeTools, Terminals, OtherEditors, BuildConfigurations, AIAgents
+Dim Shared As WStringList AddIns, IncludeFiles, LoadPaths, IncludePaths, LibraryPaths, MRUFiles, MRUFolders, MRUProjects, ProfilingFunctions
+Dim Shared As WString Ptr RecentFiles, RecentFile, RecentProject, RecentFolder
+Dim Shared As Dictionary Helps, HotKeys, Compilers, MakeTools, Terminals, OtherEditors, BuildConfigurations
 Dim Shared As ListView lvProblems, lvSuggestions, lvSearch, lvToDo, lvMemory
 Dim Shared As ProgressBar prProgress
 Dim Shared As CommandButton btnPropertyValue
-Dim Shared As TextBox txtPropertyValue, txtExpand, txtAIRequest
-Dim Shared As RichTextBox txtLabelProperty, txtLabelEvent, txtAIAgent
+Dim Shared As TextBox txtPropertyValue, txtExpand
+Dim Shared As RichTextBox txtLabelProperty, txtLabelEvent
 Dim Shared As ComboBoxEdit cboPropertyValue
-Dim Shared As PopupMenu mnuForm, mnuVars, mnuWatch, mnuExplorer, mnuTabs, mnuProcedures, mnuProblems, mnuAIChat
-Dim Shared As ImageList imgList, imgListD, imgListTools, imgListStates, imgList32, imgListAIProviders32, imgListAIModels32
+Dim Shared As PopupMenu mnuForm, mnuVars, mnuWatch, mnuExplorer, mnuTabs, mnuProcedures, mnuProblems
+Dim Shared As ImageList imgList, imgListD, imgListTools, imgListStates, imgList32
 Dim Shared As TreeListView lvProperties, lvEvents, lvLocals, lvGlobals, lvThreads, lvWatches, lvProfiler
 Dim Shared As TreeView tvToolBox
 Dim Shared As TreeNode Ptr tnToolControls, tnToolContainers, tnToolComponents, tnToolDialogs
-Dim Shared As Panel pnlToolBox, pnlAIAgent, pnlAIAgentModel
-Dim Shared As HTTPConnection HTTPAIAgent
-Dim Shared As Boolean bInAIThread, bInThingk, bInNOTThingk, AIBold, AIPostDataFirstTime
-Dim Shared As Dictionary AIMessages, AIContext
-Dim Shared As WStringList AIIncludeFileNameList
-Dim Shared As Any Ptr AIThread
-Dim Shared As WString Ptr AISystem_PromoptPtr, AIPostDataPtr_1st, AIPostDataPtr_2nd, AIBodyWStringPtr, AIBodyWStringSavePtr, AIAssistantsAnswersPtr
-Dim Shared As String AIPostData, AIPostDataInitStr, AIBodyStringBuff
-Dim Shared As Integer AIPostDataSize
+Dim Shared As Panel pnlToolBox
 Dim Shared As TabControl tabLeft, tabRight, tabBottom ', tabDebug
 Dim Shared As TreeView tvExplorer, tvVar, tvPrc, tvThd, tvWch
 Dim Shared As TextBox txtOutput, txtImmediate
 Dim Shared As TextBox txtChangeLog ' Add Change Log
-Dim Shared As TabPage Ptr tpProject, tpToolbox, tpProperties, tpEvents, tpOutput, tpProblems, tpSuggestions, tpFind, tpToDo, tpChangeLog, tpImmediate, tpLocals, tpGlobals, tpProcedures, tpThreads, tpWatches, tpMemory, tpProfiler, tpAIAgent
+Dim Shared As TabPage Ptr tpProject, tpToolbox, tpProperties, tpEvents, tpOutput, tpProblems, tpSuggestions, tpFind, tpToDo, tpChangeLog, tpImmediate, tpLocals, tpGlobals, tpProcedures, tpThreads, tpWatches, tpMemory, tpProfiler
 Dim Shared As Form frmMain
 Dim Shared As Integer tabItemHeight
 Dim Shared As Integer miRecentMax =20 'David Changed
@@ -176,8 +167,6 @@ pMakeTools = @MakeTools
 pTerminals = @Terminals
 pOtherEditors = @OtherEditors
 pHelps = @Helps
-pAIAgents = @AIAgents
-pHTTPAIAgent = @HTTPAIAgent
 plvSearch = @lvSearch
 plvToDo = @lvToDo '
 ptbStandard = @tbStandard
@@ -194,8 +183,6 @@ ptabBottom = @tabBottom
 ptabRight = @tabRight
 pimgList = @imgList
 pimgListTools = @imgListTools
-pimgListAIProviders32 = @imgListAIProviders32
-pimgListAIModels32 = @imgListAIModels32
 pIncludeFiles = @IncludeFiles
 pLoadPaths = @LoadPaths
 pIncludePaths = @IncludePaths
@@ -1484,25 +1471,6 @@ Sub AddMRU(ByRef FileFolderName As WString, ByRef MRUFilesFolders As WStringList
 	miRecentFilesFolders->Add("-")
 	miRecentFilesFolders->Add(("Clear Recently Opened"), "", "Clear" & MRUType, @mClickMRU)
 	If miRecentFilesFolders->Enabled = False Then miRecentFilesFolders->Enabled = True
-End Sub
-
-Sub AddMRUAIChat(ByRef FileName As WString)
-	Dim As UString FileName_
-	If AddRelativePathsToRecent Then
-		FileName_ = GetShortFileName(FileName, ExePath & WindowsSlash & WindowsSlash)
-	Else
-		FileName_ = FileName
-	End If
-	Dim As Integer i = MRUAIChat.IndexOf(FileName_)
-	If i <> -1 Then MRUAIChat.Remove i
-	MRUAIChat.Add FileName_
-	miRecentAIChat->Clear
-	For i = 0 To MRUAIChat.Count - 1
-		miRecentAIChat->Add(MRUAIChat.Item(i), "", MRUAIChat.Item(i), @mClickAIChat, , i)
-	Next
-	miRecentAIChat->Add("-")
-	miRecentAIChat->Add(("Clear Recently Opened"), "", "ClearAIChat", @mClickAIChat)
-	If miRecentAIChat->Enabled = False Then miRecentAIChat->Enabled = True
 End Sub
 
 Sub AddMRUFile(ByRef FileName As WString)
@@ -5468,10 +5436,6 @@ Sub LoadToolBox(ForLibrary As Library Ptr = 0)
 				WAdd(FileContentPtr, Chr(13, 10) & "(No events defined)")
 			End If
 			'SaveToFile(wikiFolder & Comps.Item(i) & ".md", *FileContentPtr, FileEncoding, NewLineType)
-			'If tbi->ControlType <> 0 Then
-				'Debug.Print Comps.Item(i)
-				AIContext.Add(Comps.Item(i), *FileContentPtr)
-			'End If
 			_Deallocate(FileContentPtr ): FileContentPtr = 0
 		Next i
 		WLet(FileContentPtr, "## " & "Globals Enums")
@@ -5495,7 +5459,6 @@ Sub LoadToolBox(ForLibrary As Library Ptr = 0)
 			Next
 		Next i
 		'SaveToFile(wikiFolder & "Globals Enums.md", *FileContentPtr, FileEncoding, NewLineType)
-		AIContext.Add("Globals Enums", *FileContentPtr)
 		_Deallocate(FileContentPtr ): FileContentPtr = 0
 		If FileContentPtr1 Then Deallocate(FileContentPtr1 ): FileContentPtr1 = 0
 		WLet(FileContentPtr1, "## Globals Procedures")
@@ -5510,7 +5473,6 @@ For i = 0 To Globals.Functions.Count - 1
 			WAdd(FileContentPtr1, "|`" & IIf(tbi->ElementType = ElementTypes.E_Function, "Function", IIf(tbi->ElementType = ElementTypes.E_Sub, "Sub", IIf(tbi->ElementType = ElementTypes.E_Define, "#define", IIf(tbi->ElementType = ElementTypes.E_Macro, "#macro", "")))) & " " & tbi->Parameters & "`|")
 		Next i
 		'SaveToFile(wikiFolder & "Globals Procedures.md", *FileContentPtr1, FileEncoding, NewLineType)
-		AIContext.Add("Globals Procedures", *FileContentPtr1)
 		_Deallocate(FileContentPtr1 ): FileContentPtr1 = 0
 		'WLet(FileContentPtr1, "## Globals Args")
 		'For i = 0 To Globals.Args.Count - 1
@@ -6061,27 +6023,7 @@ Sub CreateMenusAndToolBars
 		If Trim(sTmp) <> "" Then MRUFiles.Add sTmp
 	Next
 	SanitizeMRUListsOnLoad()
-	
-	mnuAIChat.Add(("&Edit"), "Edit", "AIChatEdit", @mClickAIChat, , , True)
-	mnuAIChat.Add("-")
-	mnuAIChat.Add(("&Open") & "..." , "Open", "AIChatOpen", @mClickAIChat, , , True)
-	mnuAIChat.Add(("&Paste"), "Paste", "AIChatPaste", @mClickAIChat, , , True)
-	mnuAIChat.Add(("&Paste") & " Code", "Paste", "AIChatPasteCode", @mClickAIChat, , , True)
-	mnuAIChat.Add("-")
-	mnuAIChat.Add(("&Save") , "Save", "AIChatSave", @mClickAIChat, , , True)
-	mnuAIChat.Add(("Save &As") & "...", "", "AIChatSaveAs", @mClickAIChat, , , True)
-	mnuAIChat.Add("-")
-	miRecentAIChat = mnuAIChat.Add(("Recent Files"), "", "RecentFiles", @mClickAIChat)
-	For i As Integer = 0 To miRecentMax
-		sTmp = iniSettings.ReadString("MRUAIChat", "MRUAIChat_0" & WStr(i), "")
-		If Trim(sTmp) <> "" AndAlso Dir(ExePath & "/AIChat/" & sTmp) <> "" Then
-			MRUAIChat.Add sTmp
-			miRecentAIChat->Add(sTmp, "", sTmp, @mClickAIChat)
-		End If
-	Next
-	miRecentAIChat->Add("-")
-	miRecentAIChat->Add(("Clear Recently Opened"), "", "ClearAIChat", @mClickAIChat)
-	
+
 	miFile->Add("-")
 	'' 13.3.A S5: Delete Project/Delete File regrouped into their own bracketed group, well away
 	'' from Close Project/Close File (safety -- a misclick on Delete is destructive, on Close is not).
@@ -7311,18 +7253,9 @@ tpProject = AddToTabControl(("Project"), "Project", "tabLeft", 0)
 
 tpToolbox = AddToTabControl(("Toolbox"), "Toolbox", "tabLeft", 1) ' ToolBox is better than "Form"
 tpToolbox->Name = "Toolbox"
-tpAIAgent = AddToTabControl(("AI Agent"), "AIAgent", "tabLeft", 2) ' ToolBox is better than "Form"
-tpAIAgent->Name = "AIAgent"
-tpAIAgent->Add @tbAIAgent
-tpAIAgent->Add @pnlAIAgentModel
-tpAIAgent->Add @pnlAIAgent
 
 leftSelectedTabIndex = iniSettings.ReadInteger("MainWindow", "LeftSelectedTab", 0)
 If leftSelectedTabIndex < 0 OrElse leftSelectedTabIndex >= tabLeft.TabCount Then leftSelectedTabIndex = 0
-
-pnlAIAgent.Align = DockStyle.alClient
-pnlAIAgent.Width = tabLeftWidth
-'pnlAIAgent.OnResize = @pnlAIAgent_Resize
 
 pnlLeftPin.Anchor.Right = AnchorStyle.asAnchor
 pnlLeftPin.Top = tabItemHeight
@@ -7393,178 +7326,6 @@ tpToolbox->Add @tbForm
 'pnlLeft.Width = 153
 'pnlLeft.Align = 1
 'pnlLeft.AddRange 1, @tabLeft
-Const AIAgentModelComboWidth As Integer = 240
-
-Sub cboAIAgentModels_UpdateHint()
-	cboAIAgentModels.Hint = cboAIAgentModels.Text
-	cboAIAgentModels.ShowHint = (Len(cboAIAgentModels.Text) > 0)
-End Sub
-
-Sub cboAIAgentModels_UpdateDropDownWidth()
-	If cboAIAgentModels.Handle = 0 Then Return
-	Dim As Integer iMaxWidth = AIAgentModelComboWidth
-	Dim As HDC Dc = GetDC(cboAIAgentModels.Handle)
-	If Dc = 0 Then Return
-	SelectObject(Dc, cboAIAgentModels.Font.Handle)
-	Dim As SIZE Sz
-	For i As Integer = 0 To cboAIAgentModels.ItemCount - 1
-		GetTextExtentPoint32W(Dc, @cboAIAgentModels.Item(i), Len(cboAIAgentModels.Item(i)), @Sz)
-		Dim As Integer w = cboAIAgentModels.UnScaleX(Sz.cx)
-		If w > iMaxWidth Then iMaxWidth = w
-	Next
-	ReleaseDC(cboAIAgentModels.Handle, Dc)
-	SendMessage(cboAIAgentModels.Handle, CB_SETDROPPEDWIDTH, cboAIAgentModels.ScaleX(iMaxWidth + 24), 0)
-End Sub
-
-Sub cboAIAgentModels_DropDown(ByRef Designer As My.Sys.Object, ByRef Sender As ComboBoxEdit)
-	cboAIAgentModels_UpdateDropDownWidth()
-End Sub
-
-Sub RestoreAIAgentModelSelection()
-	If DefaultAIAgent = 0 OrElse *DefaultAIAgent = "" Then Return
-	Dim As Integer idx = cboAIAgentModels.IndexOf(*DefaultAIAgent)
-	If idx < 0 Then Return
-	cboAIAgentModels.ItemIndex = idx
-	SyncCurrentAIAgentSettings(*DefaultAIAgent)
-	cboAIAgentModels_UpdateHint()
-End Sub
-
-Sub RefreshAIAgentModelsCombo()
-	If pAIAgents = 0 Then Return
-	cboAIAgentModels.Clear
-	cboAIAgentModels.AddItem ("(not selected)")
-	For i As Integer = 0 To pAIAgents->Count - 1
-		cboAIAgentModels.AddItem(pAIAgents->Item(i)->Key)
-	Next
-	RestoreAIAgentModelSelection()
-End Sub
-
-Sub cboAIAgentModels_Change(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-	If cboAIAgentModels.Text = ("(not selected)") Then Return
-	If pAIAgents->IndexOfKey(cboAIAgentModels.Text) < 0 Then
-		ShowMessages("AIAgents not found! ") & cboAIAgentModels.Text
-		Return
-	End If
-	If bInAIThread Then ThreadsEnter
-	SyncCurrentAIAgentSettings(cboAIAgentModels.Text)
-	WLet(DefaultAIAgent, *CurrentAIAgent)
-	iniSettings.WriteString("AIAgents", "DefaultAIAgent", *DefaultAIAgent)
-	AIIncludeFileNameList.Clear
-	If bInAIThread Then ThreadsLeave
-	cboAIAgentModels_UpdateHint()
-End Sub
-
-tbAIAgent.ImagesList = @imgList
-tbAIAgent.HotImagesList = @imgList
-tbAIAgent.Flat = True
-tbAIAgent.Align = DockStyle.alTop
-tbAIAgent.AutoSize = True
-tbAIAgent.Wrapable = True
-tbAIAgent.ExtraMargins.Right = tbLeft.Width
-tbAIAgent.Buttons.Add , "NewChat", , @mClick, "AINewChat", , ("New Chat"), True
-tbAIAgent.Buttons.Add , "AddComment", , @mClick, "AIAddComment", , ("Comment selected code"), True
-tbAIAgent.Buttons.Add , "OptimizeCode", , @mClick, "AIOptimizeCode", , ("Optimize selected code"), True
-tbAIAgent.Buttons.Add , "Intellicode", , @mClick, "AIIntellicode", , ("Generate code based on the requirements of the selected comment lines"), True
-tbAIAgent.Buttons.Add , "TracepointError", , @mClick, "AITracepointError", , ("Explain the selected compiler error message"), True
-tbAIAgent.Buttons.Add , "WebBrowserItem", , @mClick, "AIWebBrowserItem", , ("Ignore the constraints of the provided references and perform regular search and analysis. Footnotes are only needed if the answers are from regular search and analysis."), True
-tbAIAgent.Buttons.Add , "ConvertC", , @mClick, "AIConvertCtoFB", , ("Convert the given C source code into equivalent FreeBasic source code."), True
-tbAIAgent.Buttons.Add , "Translate", , @mClick, "AITranslate", , ("Output with MARKDOWN source code, translate the selected message to") & " " &  (App.CurLanguage), True
-tbAIAgent.Buttons.Add , "TranslateE", , @mClick, "AITranslateE", , ("Output with MARKDOWN source code, translate the selected message to") & " " & ("English"), True
-tbAIAgent.Buttons.Add , "Close", , @mClick, "AIRelease", , ("Release the AI Agent"), True
-pnlAIAgentModel.Align = DockStyle.alTop
-pnlAIAgentModel.Height = Max(8, DefaultFont.Size) / 72 * 96 + 9
-pnlAIAgentModel.ExtraMargins.Right = tbLeft.Width
-cboAIAgentModels.Align = DockStyle.alClient
-cboAIAgentModels.ExtraMargins.Left = 4
-cboAIAgentModels.ExtraMargins.Right = 4
-cboAIAgentModels.ExtraMargins.Top = 2
-cboAIAgentModels.ExtraMargins.Bottom = 2
-cboAIAgentModels.Parent = @pnlAIAgentModel
-cboAIAgentModels.OnChange = @cboAIAgentModels_Change
-cboAIAgentModels.OnDropDown = @cboAIAgentModels_DropDown
-cboAIAgentModels_UpdateHint()
-txtAIAgent.Align = DockStyle.alClient
-txtAIAgent.MaxLength = 0
-txtAIAgent.Multiline = True
-txtAIAgent.Font.Name = *EditorFontName
-txtAIAgent.Font.Size = EditorFontSize
-AIEditorFontName = *EditorFontName
-txtAIAgent.ReadOnly = True
-txtAIAgent.WordWraps = True
-txtAIAgent.MaxLength = 0
-txtAIAgent.ScrollBars = ScrollBarsType.Vertical
-txtAIAgent.ContextMenu = @mnuAIChat
-txtAIAgent.Parent = @pnlAIAgent
-
-If Dir(ExePath & "\Help\AI prompt\MyFbFramework GUI Form Interface Guidelines.md") <> "" Then
-	AIPostDataPtr_1st = LoadFromFile(ExePath & "\Help\AI prompt\MyFbFramework GUI Form Interface Guidelines.md")
-Else
-	WLet(AIPostDataPtr_1st, "You are an expert FreeBasic programming assistant specializing in the MyFbFramework (MFF) GUI library. Following Is MyFbFramework GUI Forms guidelines." & _
-	"When writing GUI form code, you MUST strictly adhere to the template provided below. Do not invent your own structure, do not use VB.NET specific syntax (use MFF equivalents like CommandButton instead of Button), and ensure all preprocessor directives start with a hash (#)." & _
-	" When working with GUI, strictly follow MyFbFramework GUI forms guidelines. If NO GUI is involved: 1. Ignore all reference constraints  2. Perform regular analysis 3. Apply standard procedures. " & _
-	" The MyFbFramework framework includes 35 controls: Chart, CheckBox, CheckedListBox, ComboBoxEdit, ComboBoxEx, CommandButton, DateTimePicker, Grid, Header, HotKey, HScrollBar, ImageBox, IPAddress, Label, LinkLabel, ListControl, ListView, MonthCalendar, NumericUpDown, OpenFileControl, PrintPreviewControl, ProgressBar, RadioButton, RichTextBox, ScrollBarControl, SearchBox, Splitter, StatusBar, TextBox, ToolBar, ToolPalette, ToolTips, TrackBar, TreeListView, TreeView, UpDown, VScrollBar," & _
-	" includes 13 Containers: Form, GroupBox, HorizontalBox, PagePanel, PageScroller, Panel, Picture, ReBar, ScrollControl, TabControl, TabPage, VerticalBox, UserControl," & _
-	" includes 10 Components: HTTPConnection, HTTPServer, ImageList, MainMenu, PopUpMenu, PrintDocument, Printer, SQLite3Component, TimerComponent," & _
-	" includes 8 Dialogs: ColorDialog, FolderBrowserDialog, FontDialog, OpenFileDialog, PageSetupDialog, PrintDialog, PrintPreviewDialog, SaveFileDialog." & _
-	" These project files use the .vfp extension." & _
-	" Avoid FreeBasic keywords (e.g., `Width`, `Height`, `Left`, `Pos`). Instead, use prefixes like `_` or `i` for differentiation." & _
-	" Use standard For loops instead of unsupported for each. " & _
-	" Mandatory explicit typing in `Dim` statements " & _
-	" Mandatory use [MyFbFramework](Readme.md) (MFF) as default GUI framework when unspecified." & _
-	" **Naming Convention** Required header preprocessor directive `#include once ""mff/<Component>.bi""` " & _
-	" Draw through `[Canvas](Canvas.md)` property of visible containers." & _
-	" `OnPaint` handlers must include: must accept the `ByRef Canvas As My.Sys.Drawing.Canvas` parameter to ensure correct graphic context delivery. \n" & _
-	" **Event Handling Patterns** Use controlName_eventName format for handlers. Declare event handlers OUTSIDE form class." & _
-	" Bind events using the Cast(Sub(ByRef Sender As Control), @ProcedureName) syntax.")
-End If
-
-If Dir(ExePath & "\Help\AI prompt\KnowledgeBase\VisualFBEditor IDE Environment.md") <> "" Then
-	WAdd(AIPostDataPtr_2nd, *LoadFromFile(ExePath & "\Help\AI prompt\KnowledgeBase\VisualFBEditor IDE Environment.md"))
-Else
-	WAdd(AIPostDataPtr_2nd, "The VisualFBEditor (commonly abbreviated as `VFBE`) IDE's main window includes a title bar, menu bar, and toolbar at the top; Project Explorer, Toolbox, and AI agent panels on the left; a message output panels at the bottom; and Properties and Events panels on the right." & _
-	" **title bar** The title bar displays the current project name, application name, and working status. VisualFBEditor operates in three states:" & _
-	" * Operational: Activated by selecting ""Run"" menu. Displays the project's runtime results. Returns to the design state via the ""Stop Debugging"" button." & _
-	" * Interrupted: Indicates a program interruption. Returns to the design state via the ""Stop Debugging"" button." & _
-	" **Message Output panels** The Message Output panels provide access to key functionalities through TabControl with the following components: ""Output"", ""Problems"", ""Suggestions"", ""Find"", ""ToDo"", ""Change Log"", ""Immediate"", ""Locals"", ""Globals"", ""Procedures"", ""Threads"",  ""Watches"", ""Memory"" and ""Profiler""." & _
-	" **menu bar** The menu bar provides access to key functionalities through menus such as ""File"", ""Edit"", ""Search"", ""View"", ""Project"", ""Build"", ""Run"", ""Service"", ""Window"" and ""Help.""" & _
-	"  * File: Manages projects and files (create, open, save, recent projects)." & _
-	"  * Edit: Provides source code editing features (cut, copy, paste, find, replace)." & _
-	"  * View: Opens various panes (Project Explorer, Class View, Properties, Events, Image Manager, Toolbox)." & _
-	"  * Project: Adds project components (Windows Form, User Control, Component, Module, Set as Start Project)." & _
-	"  * Build: Compiles and links modified files, displaying warnings and errors. Recompiles the project." & _
-	"  * Debug: Compiles and runs the project, manages processes, handles exceptions, traces execution, sets breakpoints." & _
-	"  * Service: Extends functionality with tools like the Debug Process dialog and Custom Toolbox window." & _
-	"  * Window: Manages window operations (new window, split, hide)." & _
-	"  * Help: Provides access to help resources.")
-	
-End If
-WLet(AISystem_PromoptPtr, "Please use " & App.CurLanguage & " for your responses unless otherwise instructed." & _
-"You are FreeBasic programming expert. Use the provided MyFbFramework (MFF) knowledge base (<context></context>)\n")
-AIContext.Add("MyFbFramework (MFF) GUI Form Interface Guidelines", *AIPostDataPtr_1st)
-AIContext.Add("VisualFBEditor (VFBE) IDE Environment", *AIPostDataPtr_2nd)
-
-AIPostDataInitStr  = _
-	"{""model"": """ & AIAgentModelName & """, " & _
-	"""stream"": " & IIf(AIAgentStream, "true", "false") & ", " & _
-	"""messages"": [" & "{""role"": ""system"", ""content"": """ & "Begin to sent file in chunks." & """}"
-HTTPAIAgent.OnComplete = @HTTPAIAgent_Complete
-AIPostDataFirstTime = True
-' AI JSON/HTTP/request helpers moved to AIService.bas
-txtAIRequest.Align = DockStyle.alBottom
-txtAIRequest.Height = 50
-txtAIRequest.MaxLength = 0
-txtAIRequest.Parent = @pnlAIAgent
-txtAIRequest.Font.Name = *EditorFontName
-txtAIRequest.Font.Size = EditorFontSize
-txtAIRequest.ScrollBars = ScrollBarsType.Vertical
-txtAIRequest.Multiline= True
-txtAIRequest.WantReturn = False
-txtAIRequest.WordWraps = True
-txtAIRequest.OnActivate = @txtAIRequest_Activate
-ptxtAIRequest = @txtAIRequest
-AIPostDataFirstTime = True
-splAIAgent.Parent = @pnlAIAgent
-splAIAgent.Align = SplitterAlignmentConstants.alBottom
 
 Sub tbProperties_ButtonClick(ByRef Designer As My.Sys.Object, ByRef Sender As My.Sys.Object)
 	Var tb = Cast(TabWindow Ptr, ptabCode->SelectedTab)
@@ -9308,7 +9069,6 @@ Sub frmMain_Create(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	
 	pfSplash->lblProcess.Text = ("Load On Startup") & ": " & ("Toolbox")
 	LoadToolBox
-	RefreshAIAgentModelsCombo()
 	pnlToolBox_Resize *pnlToolBox.Designer, pnlToolBox, pnlToolBox.Width, pnlToolBox.Height
 	
 	pfTemplates->Visible = False: pfTemplates->Parent = @frmMain: pfTemplates->CreateWnd
@@ -9527,8 +9287,6 @@ Sub frmMain_Show(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	UpdateBottomPinLayout
 	' CloseBottom in frmMain_Create runs before the form is shown; redo collapsed layout once docked.
 	If Not splBottom.Visible Then CloseBottom
-	RestoreAIAgentModelSelection()
-	RefreshAIAgentModelsCombo()
 
 	pfSplash->CloseForm
 	
@@ -9651,25 +9409,11 @@ Sub frmMain_Close(ByRef Designer As My.Sys.Object, ByRef Sender As Form, ByRef A
 	SaveWorkspace()
 	If Not CloseAllDocuments Then Action = 0: Return
 	FormClosing = True
-	If AIMessages.Count > 0 Then 
-		Dim As WString * MAX_PATH FileName = IIf(RecentAIChat, *RecentAIChat, WStr(Mid(FormatFileName(Left(AIMessages.Item(0)->Key, 50)) & Format(Now, "yyyymmdd_hhmm") & ".md", 16)))
-		If Not MRUAIChat.Contains(FileName) Then
-			MRUAIChat.Add FileName
-			miRecentAIChat->Add(FileName, "", FileName, @mClickAIChat)
-		End If
-		AIMessages.SaveToFile(ExePath & "/AIChat/" & FileName)
-		AIMessages.Clear
-	End If
 	If frmMain.WindowState <> WindowStates.wsMaximized Then
 		iniSettings.WriteInteger("MainWindow", "Width", frmMain.Width)
 		iniSettings.WriteInteger("MainWindow", "Height", frmMain.Height)
 	End If
 	iniSettings.WriteBool("MainWindow", "Maximized", frmMain.WindowState = WindowStates.wsMaximized)
-	If DefaultAIAgent AndAlso *DefaultAIAgent <> "" Then
-		iniSettings.WriteString("AIAgents", "DefaultAIAgent", *DefaultAIAgent)
-	ElseIf cboAIAgentModels.ItemIndex > 0 Then
-		iniSettings.WriteString("AIAgents", "DefaultAIAgent", cboAIAgentModels.Text)
-	End If
 	iniSettings.WriteBool("MainWindow", "ProjectFolders", ShowProjectFolders)
 	iniSettings.WriteBool("MainWindow", "ToolLabels", tbForm.Buttons.Item(0)->Checked)
 	iniSettings.WriteBool("MainWindow", "UseDebugger", UseDebugger)
@@ -9685,7 +9429,6 @@ Sub frmMain_Close(ByRef Designer As My.Sys.Object, ByRef Sender As Form, ByRef A
 	iniSettings.WriteBool("MainWindow", "ShowTipoftheDay", ShowTipoftheDay)
 	SaveTabPagePlacement("Project", tpProject)
 	SaveTabPagePlacement("ToolBox", tpToolbox)
-	SaveTabPagePlacement("AIAgent", tpAIAgent)
 	SaveTabPagePlacement("Properties", tpProperties)
 	SaveTabPagePlacement("Events", tpEvents)
 	SaveTabPagePlacement("Output", tpOutput)
@@ -9817,8 +9560,6 @@ Sub OnProgramQuit() Destructor
 	WDeAllocate(CurrentMakeTool2)
 	WDeAllocate(MakeToolPath1)
 	WDeAllocate(MakeToolPath2)
-	WDeAllocate(DefaultAIAgent)
-	WDeAllocate(CurrentAIAgent)
 	WDeAllocate(DefaultTerminal)
 	WDeAllocate(CurrentTerminal)
 	WDeAllocate(TerminalPath)
@@ -9830,17 +9571,10 @@ Sub OnProgramQuit() Destructor
 	WDeAllocate(Make2Arguments)
 	WDeAllocate(RunArguments)
 	WDeAllocate(Debug64Arguments)
-	WDeAllocate(RecentAIChat)
 	WDeAllocate(RecentFiles)
 	WDeAllocate(RecentFile)
 	WDeAllocate(RecentProject)
 	WDeAllocate(RecentFolder)
-	If AISystem_PromoptPtr Then _Deallocate(AISystem_PromoptPtr)
-	If AIPostDataPtr_1st Then _Deallocate(AIPostDataPtr_1st)
-	If AIPostDataPtr_2nd Then _Deallocate(AIPostDataPtr_2nd)
-	If AIBodyWStringPtr Then _Deallocate(AIBodyWStringPtr)
-	If AIBodyWStringSavePtr Then _Deallocate(AIBodyWStringSavePtr )
-	If AIAssistantsAnswersPtr Then _Deallocate(AIAssistantsAnswersPtr)
 	WDeAllocate(DefaultHelp)
 	WDeAllocate(HelpPath)
 	WDeAllocate(DefaultBuildConfiguration)
@@ -9885,11 +9619,6 @@ Sub OnProgramQuit() Destructor
 	For i As Integer = 0 To pOtherEditors->Count - 1
 		Tool = pOtherEditors->Item(i)->Object
 		_Delete(Tool)
-	Next i
-	Dim As ModelInfo Ptr Model
-	For i As Integer = 0 To pAIAgents->Count - 1
-		Model = pAIAgents->Item(i)->Object
-		_Delete(Model)
 	Next i
 	Dim As WStringOrStringList Ptr keywordlist
 	For i As Integer = 0 To KeywordLists.Count - 1
@@ -10005,5 +9734,4 @@ End Sub
 #include once "PathUtils.bas"
 #include once "Localization.bas"
 #include once "BuildService.bas"
-#include once "AIService.bas"
 

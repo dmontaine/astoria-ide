@@ -1,9 +1,6 @@
 *.7z
 *.bak
 Projects/*.exe
-lib*.dll*
-zlib*.dll*
-*.o
 src/*.c
 src/*.asm
 share

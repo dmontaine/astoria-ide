@@ -148,7 +148,7 @@
 			.SetBounds 0, 0, 615, 326
 			.Designer = @This
 			.InitialDir = GetFullPath(*ProjectsPath)
-			.Filter = ("FreeBasic Files") & " (*.vfs, *.vfp, *.bas, *.frm, *.bi, *.inc, *.rc)|*.vfs;*.vfp;*.bas;*.frm;*.bi;*.inc;*.rc|" & ("VisualFBEditor Project Group") & " (*.vfs)|*.vfs|" & ("VisualFBEditor Project") & " (*.vfp)|*.vfp|" & ("FreeBasic Module") & " (*.bas)|*.bas|" & ("FreeBasic Form Module") & " (*.frm)|*.frm|" & ("FreeBasic Include File") & " (*.bi)|*.bi|" & ("Other Include File") & " (*.inc)|*.inc|" & ("Resource File") & " (*.rc)|*.rc|" & ("All Files") & "|*.*|"
+			.Filter = ("FreeBasic Files") & " (*.vfs, *.vfp, *.bas, *.frm, *.bi, *.inc, *.rc)|*.vfs;*.vfp;*.bas;*.frm;*.bi;*.inc;*.rc|" & ("AstoriaIDE Project Group") & " (*.vfs)|*.vfs|" & ("AstoriaIDE Project") & " (*.vfp)|*.vfp|" & ("FreeBasic Module") & " (*.bas)|*.bas|" & ("FreeBasic Form Module") & " (*.frm)|*.frm|" & ("FreeBasic Include File") & " (*.bi)|*.bi|" & ("Other Include File") & " (*.inc)|*.inc|" & ("Resource File") & " (*.rc)|*.rc|" & ("All Files") & "|*.*|"
 			.OnFileActivate = @OpenFileControl1_FileActivate_
 			.Parent = @tpExisting
 		End With

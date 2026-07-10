@@ -29,6 +29,7 @@ Namespace My.Sys.Forms
 		FCancel     As Boolean
 		FDefault    As Boolean
 		FImageType  As Integer
+		FKeyArmed   As Boolean
 		AStyle(4)   As Integer
 		ADefault(2) As Integer
 			Declare Static Sub WndProc(ByRef message As Message)

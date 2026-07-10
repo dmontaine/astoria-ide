@@ -1,14 +1,14 @@
 ﻿'#########################################################
-'#  VisualFBEditor.bas                                   #
-'#  This file is part of VisualFBEditor                  #
+'#  AstoriaIDE.bas                                       #
+'#  This file is part of AstoriaIDE                      #
 '#  Authors: Xusinboy Bekchanov (bxusinboy@mail.ru)      #
 '#           Liu XiaLin (LiuZiQi.HK@hotmail.com)         #
 '#########################################################
 	#define _NOT_AUTORUN_FORMS_
 
-		#cmdline "-x ../VisualFBEditor64.exe"
+		#cmdline "-x ../astoria.exe"
 
-#define APP_TITLE "Visual FB Editor"
+#define APP_TITLE "Astoria IDE"
 #define VER_MAJOR "1"
 #define VER_MINOR "3"
 #define VER_PATCH "8"

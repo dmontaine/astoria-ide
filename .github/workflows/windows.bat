@@ -13,11 +13,11 @@ set FORCE_MFF=1
 
 curl -L -O https://github.com/XusinboyBekchanov/MyFbFramework/archive/master.zip
 
-PowerShell Expand-Archive -LiteralPath "master.zip" -DestinationPath "VisualFBEditor\Controls" -Force
+PowerShell Expand-Archive -LiteralPath "master.zip" -DestinationPath "AstoriaIDE\Controls" -Force
 
-7z\7za.exe x "FreeBASIC-1.10.0-winlibs-gcc-9.3.0.7z" -oVisualFBEditor\Compiler
+7z\7za.exe x "FreeBASIC-1.10.0-winlibs-gcc-9.3.0.7z" -oAstoriaIDE\Compiler
 
-cd VisualFBEditor\Controls
+cd AstoriaIDE\Controls
 
 Rename MyFbFramework-master MyFbFramework
 
@@ -29,9 +29,9 @@ if not exist ../mff64.dll exit 1
 
 cd ..\..\..\src
 
-"%FBC64%" "VisualFBEditor.bas" -s gui -gen gcc -mt -Wc -O2 -x "../VisualFBEditor64.exe" "VisualFBEditor.rc" -i "..\Controls\MyFbFramework"
+"%FBC64%" "AstoriaIDE.bas" -s gui -gen gcc -mt -Wc -O2 -x "../astoria.exe" "AstoriaIDE.rc" -i "..\Controls\MyFbFramework"
 
-if not exist ../VisualFBEditor64.exe exit 1
+if not exist ../astoria.exe exit 1
 
 cd ..
 ls

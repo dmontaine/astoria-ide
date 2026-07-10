@@ -1,6 +1,6 @@
 '#########################################################
 '#  frmFindInFiles.bas                                   #
-'#  This file is part of VisualFBEditor                  #
+'#  This file is part of AstoriaIDE                  #
 '#  Authors: Xusinboy Bekchanov (bxusinboy@mail.ru)      #
 '#           Liu XiaLin (LiuZiQi.HK@hotmail.com)         #
 '#########################################################
@@ -31,7 +31,7 @@ Using My.Sys.Forms
 		Declare Sub btnCancel_Click(ByRef Sender As Control)
 		Declare Sub FindSub(Param As Any Ptr)
 		Declare Sub ReplaceSub(Param As Any Ptr)
-		Declare Sub Find(ByRef lvSearchResult As ListView Ptr,ByRef Path As WString,ByRef Search As WString="")
+		Declare Sub Find(ByRef lvSearchResult As ListView Ptr, ByRef Path As WString = "", ByRef tSearch As WString = "")
 		Declare Sub ReplaceInFile(ByRef Path As WString ="", ByRef tSearch As WString="", ByRef tReplace As WString="")
 		Declare Static Sub btnReplace_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Static Sub Form_Resize(ByRef Designer As My.Sys.Object, ByRef Sender As Control, NewWidth As Integer, NewHeight As Integer)

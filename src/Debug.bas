@@ -1,6 +1,6 @@
 ﻿'#########################################################
 '#  Debug.bas                                            #
-'#  This file is part of VisualFBEditor                  #
+'#  This file is part of AstoriaIDE                  #
 '#  Authors: Laurent GRAS                                #
 '#           Xusinboy Bekchanov (bxusinboy@mail.ru)      #
 '#           Liu XiaLin (LiuZiQi.HK@hotmail.com)         #
@@ -1656,7 +1656,7 @@ End Function
 			
 			ThreadsEnter
 			
-			MsgBox(("The debugger could not be found. Try reinstalling the IDE."), "Visual FB Editor", mtError)
+			MsgBox(("The debugger could not be found. Try reinstalling the IDE."), "Astoria IDE", mtError)
 			
 			ThreadsLeave
 			
@@ -1668,7 +1668,7 @@ End Function
 			
 			ThreadsEnter
 			
-			MsgBox(("The program to debug could not be found. Build the project first."), "Visual FB Editor", mtError)
+			MsgBox(("The program to debug could not be found. Build the project first."), "Astoria IDE", mtError)
 			
 			ThreadsLeave
 			
@@ -2381,7 +2381,7 @@ End Function
 
 Private Sub hard_closing(errormsg As String)
 	ThreadsEnter
-	MsgBox(("The debugger ran into a problem and had to stop.") & Chr(13) & Chr(13) & errormsg, "Visual FB Editor", mtError)
+	MsgBox(("The debugger ran into a problem and had to stop.") & Chr(13) & Chr(13) & errormsg, "Astoria IDE", mtError)
 	ThreadsLeave
 End Sub
 
@@ -2390,7 +2390,7 @@ Private Function kill_process(text As String) As Integer
 	If prun Then ''debuggee waiting or running Then
 		If MsgBox(("Stop the running program?") & " " & text + Chr(10) + Chr(10) + _
 			("Any unsaved data in the program will be lost.") + Chr(10) + _
-			("If possible, try closing the program normally first."), "Visual FB Editor", mtWarning, btYesNo) = mrYes Then
+			("If possible, try closing the program normally first."), "Astoria IDE", mtWarning, btYesNo) = mrYes Then
 			flagkill = True
 				retcode=TerminateProcess(dbghand,999)
 				lasterr=GetLastError

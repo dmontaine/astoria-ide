@@ -1,6 +1,6 @@
 '#########################################################
 '#  Localization.bas                                     #
-'#  This file is part of VisualFBEditor                  #
+'#  This file is part of AstoriaIDE                  #
 '#  Authors: Xusinboy Bekchanov (bxusinboy@mail.ru)      #
 '#           Liu XiaLin (LiuZiQi.HK@hotmail.com)         #
 '#########################################################
@@ -12,7 +12,7 @@ Function MS cdecl(ByRef V As WString, ...) As UString
 	Dim args As Cva_List
 	Cva_Start(args, V)
 	For i As Integer = 1 To InStrCount(V, "$")
-		Result = Replace(Result, "$" & Trim(Str(i)), * (Cva_Arg(args, WString Ptr)))
+		Result = Replace(Result, "$" & Trim(Str(i)), * (Cva_Arg(args, ZString Ptr)))
 	Next
 	MS = Result
 	Cva_End(args)

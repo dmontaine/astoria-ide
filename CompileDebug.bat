@@ -14,9 +14,9 @@ if "%BUILD_MFF%"=="1" (
 	echo [%time%] Skipping mff64.dll ^(up to date; set FORCE_MFF=1 to rebuild^).
 )
 
-echo [%time%] Building VisualFBEditor64.exe ^(debug^)...
+echo [%time%] Building astoria.exe ^(debug^)...
 cd /d "%SRC_DIR%"
-"%FBC64%" "VisualFBEditor.bas" -s gui -gen gcc -mt -g -exx -x "../VisualFBEditor64.exe" "VisualFBEditor.rc" -i "..\Controls\MyFbFramework" %FBC_VERBOSE%
+"%FBC64%" "AstoriaIDE.bas" -s gui -gen gcc -mt -g -exx -x "../astoria.exe" "AstoriaIDE.rc" -i "..\Controls\MyFbFramework" %FBC_VERBOSE%
 if errorlevel 1 exit /b 1
 
 echo [%time%] Debug build complete.

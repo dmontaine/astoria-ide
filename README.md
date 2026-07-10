@@ -1,9 +1,9 @@
 Language: <b>English</b>
-# Visual FB Editor
+# Astoria IDE
 ## IDE for FreeBasic
 
 #### Introduction
-VisualFBEditor is the IDE for FreeBasic with visual designer, debugger, project support and etc. VisualFBEditor based on the library <a href="https://github.com/XusinboyBekchanov/Controls/MyFbFramework">MyFbFramework</a>.
+Astoria IDE is the IDE for FreeBasic with visual designer, debugger, project support and etc. It is a fork of <a href="https://github.com/XusinboyBekchanov/VisualFBEditor">VisualFBEditor</a>, based on the library <a href="https://github.com/XusinboyBekchanov/Controls/MyFbFramework">MyFbFramework</a>.
 
 #### Requirements:
 
@@ -20,20 +20,20 @@ VisualFBEditor is the IDE for FreeBasic with visual designer, debugger, project 
 
 #### Compilation:
 
-> **Note:** This fork builds the IDE as **64-bit Windows only** (native WinAPI). Run root `Compile.bat` to build `mff64.dll` and `VisualFBEditor64.exe`, or use the manual commands below. The bundled compiler is `Compiler\fbc64.exe`. Linux, GTK, and 32-bit IDE builds are not supported in this fork.
+> **Note:** This fork builds the IDE as **64-bit Windows only** (native WinAPI). Run root `Compile.bat` to build `mff64.dll` and `astoria.exe`, or use the manual commands below. The bundled compiler is `Compiler\fbc64.exe`. Linux, GTK, and 32-bit IDE builds are not supported in this fork.
 
 #### Quick build (recommended):
 ```shell
-  cd Path_to_VisualFBEditor
+  cd Path_to_AstoriaIDE
   Compile.bat
 ```
 
 #### Windows 64-bit (manual):
 ```shell
-  cd Path_to_VisualFBEditor/Controls/MyFbFramework/mff
+  cd Path_to_AstoriaIDE/Controls/MyFbFramework/mff
   fbc64 -b "mff.bi" "mff.rc" -dll -x "../mff64.dll"
-  cd Path_to_VisualFBEditor/src
-  fbc64 "VisualFBEditor.bas" -s gui -x "../VisualFBEditor64.exe" "VisualFBEditor.rc" -i "Path_to_VisualFBEditor/Controls/MyFbFramework"
+  cd Path_to_AstoriaIDE/src
+  fbc64 "AstoriaIDE.bas" -s gui -x "../astoria.exe" "AstoriaIDE.rc" -i "Path_to_AstoriaIDE/Controls/MyFbFramework"
 ```
 
 See also `src/BUILD.md` for the full build pipeline.

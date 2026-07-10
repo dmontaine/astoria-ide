@@ -8,6 +8,7 @@ This file archives completed work and the full commit history. For current statu
 
 ## Completed work
 
+- [x] Project renamed VisualFBEditor → **AstoriaIDE** (§13.4): source/project/resource files (`AstoriaIDE.bas/.rc/.vfp`), build scripts, output binary (`astoria.exe`), settings file (`Settings/astoria.ini`), splash/title-bar/dialog-title strings, README, and ~44 source-file header comments. Internal code identifiers (`VisualFBEditorApp`, `Namespace VisualFBEditor`, `WhenVisualFBEditorStarts`) deliberately left as-is — pure implementation detail, not user-facing. `frmAbout` excluded per owner's in-progress edits.
 - [x] Win64-only fork scope documented (`README.md`, `BUILD.md`)
 - [x] `Compile.bat` / `CompileDebug.bat` two-step build (mff + IDE)
 - [x] Batch 2.75.1 panel/layout cleanup

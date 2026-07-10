@@ -1,6 +1,6 @@
 '#########################################################
 '#  Designer.bi                                          #
-'#  This file is part of VisualFBEditor                  #
+'#  This file is part of AstoriaIDE                  #
 '#  Authors: Xusinboy Bekchanov (bxusinboy@mail.ru)      #
 '#           Liu XiaLin (LiuZiQi.HK@hotmail.com)         #
 '#           Nastase Eodor(nastasa.eodor@gmail.com)      #

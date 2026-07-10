@@ -4,7 +4,7 @@
 		' frmSave
 		With This
 			.Name = "frmSave"
-			.Text = "Visual FB Editor"
+			.Text = "Astoria IDE"
 				.BorderStyle = FormBorderStyle.FixedDialog
 				This.Icon.LoadFromResourceID(1)
 			.FormStyle = FormStyles.fsStayOnTop

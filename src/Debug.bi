@@ -1,6 +1,6 @@
 '#########################################################
 '#  Debug.bi                                             #
-'#  This file is part of VisualFBEditor                  #
+'#  This file is part of AstoriaIDE                  #
 '#  Authors: Xusinboy Bekchanov (bxusinboy@mail.ru)      #
 '#           Liu XiaLin (LiuZiQi.HK@hotmail.com)         #
 '#           Laurent GRAS                                #

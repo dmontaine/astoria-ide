@@ -1,6 +1,6 @@
 ﻿'#########################################################
 '#  frmFindInFiles.bas                                   #
-'#  This file is part of VisualFBEditor                  #
+'#  This file is part of AstoriaIDE                  #
 '#  Authors: Xusinboy Bekchanov (2018-2019)              #
 '#           Liu XiaLin (LiuZiQi.HK@hotmail.com)         #
 '#########################################################
@@ -193,7 +193,7 @@ pfFindFile = @fFindFile
 	End Destructor
 '#End Region
 
-Sub frmFindInFiles.Find(ByRef lvSearchResult As ListView Ptr, ByRef Path As WString = "", ByRef tSearch As WString = "")
+Sub frmFindInFiles.Find(ByRef lvSearchResult As ListView Ptr, ByRef Path As WString, ByRef tSearch As WString)
 	Dim f As WString * 1024
 	Dim Buffout As WString Ptr
 	Dim As Integer Result, Pos1
@@ -363,7 +363,7 @@ End Sub
 Private Sub frmFindInFiles.btnReplace_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	ReplaceInFiles
 End Sub
-Private Sub frmFindInFiles.ReplaceInFile(ByRef Path As WString ="", ByRef tSearch As WString="", ByRef tReplace As WString="")
+Private Sub frmFindInFiles.ReplaceInFile(ByRef Path As WString, ByRef tSearch As WString, ByRef tReplace As WString)
 	Dim f As WString * 255
 	Dim BuffOut As WString Ptr
 	Dim FNameOpen As WString * 255

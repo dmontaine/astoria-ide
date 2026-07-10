@@ -9,7 +9,7 @@ set "FBC64=%ROOT%\Compiler\fbc64.exe"
 set "MFF_DIR=%ROOT%\Controls\MyFbFramework\mff"
 set "MFF_DLL=%ROOT%\Controls\MyFbFramework\mff64.dll"
 set "SRC_DIR=%ROOT%\src"
-set "EXE_OUT=%ROOT%\VisualFBEditor64.exe"
+set "EXE_OUT=%ROOT%\astoria.exe"
 
 if defined VERBOSE (set "FBC_VERBOSE=-v") else (set "FBC_VERBOSE=")
 

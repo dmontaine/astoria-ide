@@ -227,8 +227,13 @@ Namespace My.Sys.Forms
 					OnDraw(*Designer, This, R, Dc)
 				Else
 				End If
-			Case WM_KEYUP
+			Case WM_KEYDOWN
 				If LoWord(msg.wParam) = VK_SPACE Or LoWord(msg.wParam) = VK_RETURN Then
+					FKeyArmed = True
+				End If
+			Case WM_KEYUP
+				If FKeyArmed AndAlso CBool(LoWord(msg.wParam) = VK_SPACE Or LoWord(msg.wParam) = VK_RETURN) Then
+					FKeyArmed = False
 					If OnClick Then OnClick(*Designer, This)
 					msg.Result = -1
 					Return

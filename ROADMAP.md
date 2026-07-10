@@ -160,7 +160,11 @@ Blocked on the taxonomy above (already specified). Files: menus live in `Main.ba
 
 `S3 (toolbars — highest daily-use win) → S1 → S2` (S2 depends on final structure), then `S4, S5, S6, S7` independently. Compile-clean + smoke-test gate on each (§9); §7 panel checklist only if S3 ends up touching panel layout.
 
-### 13.4 Rename the project (e.g. "ABStudio" — Astoria Basic Studio)
+### 13.4 Rename the project — **DONE (2026-07-10): renamed to "AstoriaIDE"**
+
+Full identity rename completed: output binary (`astoria.exe`), source/project/resource files (`AstoriaIDE.bas/.rc/.vfp`), build scripts, settings file (`Settings/astoria.ini`), splash screen, dialog titles, window title, README, and source header comments. See [`CHANGELOG.md`](CHANGELOG.md) for the full touch-point list. `frmAbout` intentionally left untouched (owner's in-progress edit). Internal code identifiers (`VisualFBEditorApp`, `Namespace VisualFBEditor`, `WhenVisualFBEditorStarts`) were left as-is — cosmetic/user-facing scope only, not a source-level refactor. GitHub repo name/clone URL was **not** changed (out of scope for this pass; would need separate owner action since it affects existing clone URLs).
+
+**Original planning note (superseded, retained for context):**
 
 **Owner's context (important — shapes how all of Tier 4 should be approached):** this is a hobby project, and the owner is explicitly willing to spend months building an elegant system from the source-code level up — timeline is not a constraint. The owner's diagnosis of what went wrong with the original upstream project: it tried to do too much, with too little central guidance or attention to detail, and eventually its contributor base collapsed to a single person doing peripheral maintenance because the system had become too difficult to manage as a whole.
 

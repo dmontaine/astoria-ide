@@ -1,6 +1,6 @@
 '#########################################################
 '#  frmFind.bas                                          #
-'#  This file is part of VisualFBEditor                  #
+'#  This file is part of AstoriaIDE                  #
 '#  Authors: Xusinboy Bekchanov (bxusinboy@mail.ru)      #
 '#           Liu XiaLin (LiuZiQi.HK@hotmail.com)         #
 '#########################################################
@@ -782,7 +782,7 @@ Private Function frmFind.FindAll(ByRef lvSearchResult As ListView Ptr, tTab As T
 		Else
 			If tSearch <> "" AndAlso Not txtFind.Contains(tSearch) Then txtFind.AddItem tSearch
 		End If
-		tTab->Caption = IIf(tTab = tpFind, WStr("Find"), WStr("ToDo")) & " (" & lvSearchResult->ListItems.Count & " " & WStr("Pos") & ")"
+		tTab->Caption = IIf((tTab = tpFind), WStr("Find"), WStr("ToDo")) & " (" & lvSearchResult->ListItems.Count & " " & WStr("Pos") & ")"
 	End If
 End Function
 
@@ -838,7 +838,7 @@ Private Sub frmFind.btnReplaceAll_Click(ByRef Sender As Control)
 		If Tn > 0 Then
 			Dim As ExplorerElement Ptr ee = Tn->Tag
 			If ee > 0 AndAlso *ee->FileName <> "" Then
-				Select Case MsgBox(("Are you sure you want to replace in the project?") + WChr(13, 10) + *Search + WChr(13, 10) + "  " + ("To") &  ":" + WChr(13, 10) + *tReplace, "Visual FB Editor", mtWarning, btYesNo)
+				Select Case MsgBox(("Are you sure you want to replace in the project?") + WChr(13, 10) + *Search + WChr(13, 10) + "  " + ("To") &  ":" + WChr(13, 10) + *tReplace, "Astoria IDE", mtWarning, btYesNo)
 				Case mrYes:
 				Case mrNo: Return
 				End Select

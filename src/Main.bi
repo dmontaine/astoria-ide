@@ -1,6 +1,6 @@
 ﻿'#########################################################
 '#  Main.bi                                              #
-'#  This file is part of VisualFBEditor                  #
+'#  This file is part of AstoriaIDE                      #
 '#  Authors: Xusinboy Bekchanov (bxusinboy@mail.ru)      #
 '#           Liu XiaLin (LiuZiQi.HK@hotmail.com)         #
 '#########################################################
@@ -27,7 +27,7 @@
 	#include once "mff/PrintPreviewDialog.bi"
 	#include once "mff/Printer.bi"
 
-		#define SettingsPath ExePath & "/Settings/VisualFBEditor64.ini"
+		#define SettingsPath ExePath & "/Settings/astoria.ini"
 	#define WorkspacePath ExePath & "/Settings/Workspace.ini"
 
 	#define WindowsSlash "\"
@@ -235,7 +235,7 @@ Declare Sub StopProgress()
 Declare Sub ThreadCounter(Id As Any Ptr)
 Declare Function EqualPaths(ByRef a As WString, ByRef b As WString) As Boolean
 Declare Sub ChangeEnabledDebug(bStart As Boolean, bBreak As Boolean, bEnd As Boolean)
-Declare Sub ClearThreadsWindow() ' Defined in VisualFBEditor.bas; forward-declared here since Main.bi pulls in Main.bas before VisualFBEditor.bas defines it
+Declare Sub ClearThreadsWindow() ' Defined in AstoriaIDE.bas; forward-declared here since Main.bi pulls in Main.bas before AstoriaIDE.bas defines it
 Declare Sub ChangeLockControls(bLockControls As Boolean, ChangeObject As Integer = -1)
 Declare Sub ChangeUseDebugger(bUseDebugger As Boolean, ChangeObject As Integer = -1)
 Declare Sub ChangeShowSymbolsTooltipsOnMouseHover(bEnabled As Boolean, ChangeObject As Integer = -1)

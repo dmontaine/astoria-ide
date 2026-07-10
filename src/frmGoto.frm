@@ -1,6 +1,6 @@
 '#########################################################
 '#  frmGoto.bas                                          #
-'#  This file is part of VisualFBEditor                  #
+'#  This file is part of AstoriaIDE                  #
 '#  Authors: Xusinboy Bekchanov (2018-2019)              #
 '#########################################################
 

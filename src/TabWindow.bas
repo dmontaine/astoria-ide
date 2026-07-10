@@ -1,6 +1,6 @@
 ﻿'#########################################################
 '#  TabWindow.bas                                        #
-'#  This file is part of VisualFBEditor                  #
+'#  This file is part of AstoriaIDE                  #
 '#  Authors: Xusinboy Bekchanov (bxusinboy@mail.ru)      #
 '#           Liu XiaLin (LiuZiQi.HK@hotmail.com)         #
 '#########################################################
@@ -1026,7 +1026,7 @@ End Function
 
 Function TabWindow.CloseTab(WithoutMessage As Boolean = False) As Boolean
 	If txtCode.Modified AndAlso Not WithoutMessage Then
-		Select Case MsgBox(("Want to save the file") & " """ & Caption & """?", "Visual FB Editor", mtWarning, btYesNoCancel)
+		Select Case MsgBox(("Want to save the file") & " """ & Caption & """?", "Astoria IDE", mtWarning, btYesNoCancel)
 		Case mrYes: Save
 		Case mrNo:
 		Case mrCancel: Return False
@@ -1040,7 +1040,7 @@ Function TabWindow.CloseTab(WithoutMessage As Boolean = False) As Boolean
 				lvSuggestions.ListItems.Remove i
 			End If
 		Next
-		tpSuggestions->Caption = WStr("Suggestions") & IIf(lvSuggestions.ListItems.Count = 0, WStr(""), WStr(" (") & lvSuggestions.ListItems.Count & WStr(" ") & WStr("Pos") & WStr(")"))
+		tpSuggestions->Caption = WStr("Suggestions") & IIf((lvSuggestions.ListItems.Count = 0), WStr(""), WStr(" (") & lvSuggestions.ListItems.Count & WStr(" ") & WStr("Pos") & WStr(")"))
 		MutexUnlock tlockSuggestions
 	End If
 	Var ptabCode = Cast(TabControl Ptr, This.Parent)
@@ -2532,7 +2532,7 @@ Sub PropertyChanged(ByRef Sender As Control, ByRef Sender_Text As WString, IsCom
 		End If
 		If SenderText <> OldText OrElse Different Then
 			If CInt(PropertyName = "Name") AndAlso CInt(tb->cboClass.Items.Contains(SenderText)) Then
-				MsgBox ("This name is exists!"), "VisualFBEditor", mtWarning
+				MsgBox ("This name is exists!"), "AstoriaIDE", mtWarning
 					Sender.Text = OldText
 				Exit Sub
 			End If
@@ -10459,7 +10459,7 @@ Constructor TabPanel
 End Constructor
 
 Constructor TabWindow(ByRef wFileName As WString, bNewForm As Boolean, TreeN As TreeNode Ptr)
-	WLet(FCaption, "Visual FB Editor")
+	WLet(FCaption, "Astoria IDE")
 	WLet(FFileName, "")
 	txtCode.Font.Name = *EditorFontName
 	txtCode.Font.Size = Max(8, EditorFontSize)

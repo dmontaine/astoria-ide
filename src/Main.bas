@@ -1,6 +1,6 @@
 ﻿'#########################################################
 '#  Main.bas                                             #
-'#  This file is part of VisualFBEditor                  #
+'#  This file is part of AstoriaIDE                  #
 '#  Authors: Xusinboy Bekchanov (bxusinboy@mail.ru)      #
 '#           Liu XiaLin (LiuZiQi.HK@hotmail.com)         #
 '#########################################################
@@ -350,7 +350,7 @@ End Sub
 
 ' Locals/Globals/Procedures/Threads/Watches/Memory/Profiler/Immediate only hold
 ' meaningful content during an active debug/profiling run. Cleared when a debug
-' session ends (Case "End" in VisualFBEditor.bas), and as a backstop on
+' session ends (Case "End" in AstoriaIDE.bas), and as a backstop on
 ' CloseProject/CloseAllDocuments.
 Sub ClearDebugPanels()
 	ClearThreadsWindow
@@ -1173,7 +1173,7 @@ Sub DeleteEditorFile()
 	'' "this project has unsaved changes".
 	Dim As TreeNode Ptr ptnProject = 0
 	If bNestedInProject Then ptnProject = GetParentNode(tn)
-	If MsgBox(("Are you sure you want to delete the file") & " """ & GetFileName(sFilePath) & """?", "Visual FB Editor", mtWarning, btYesNo) <> mrYes Then Exit Sub
+	If MsgBox(("Are you sure you want to delete the file") & " """ & GetFileName(sFilePath) & """?", "Astoria IDE", mtWarning, btYesNo) <> mrYes Then Exit Sub
 	'' Close this file's tab if it happens to be open in any panel; unlike the old
 	'' active-tab-only version, it's fine if there is none.
 	Dim tb As TabWindow Ptr
@@ -1637,7 +1637,7 @@ Function SaveProjectFile(ppe As ProjectElement Ptr, ee As ExplorerElement Ptr, t
 		'' the project folder (chosen freely via Save Project As) aren't guaranteed to be
 		'' on the same drive, and `Name` fails across volumes.
 		If Not CopyFileU(*ee->FileName, destPath) Then
-			MsgBox ("Couldn't save the project file - check that the folder still exists and isn't read-only") & "." & WChr(13,10) & destPath, "Visual FB Editor", mtError
+			MsgBox ("Couldn't save the project file - check that the folder still exists and isn't read-only") & "." & WChr(13,10) & destPath, "Astoria IDE", mtError
 			Return False
 		End If
 		Kill *ee->FileName
@@ -1708,11 +1708,11 @@ Function SaveProject(ByRef tnP As TreeNode Ptr, bWithQuestion As Boolean = False
 			'				SaveD.FileName = WGet(ppe->FileName)
 			'			End If
 		End If
-		SaveD.Filter = ("VisualFBEditor Project") & " (*.vfp)|*.vfp|"
+		SaveD.Filter = ("AstoriaIDE Project") & " (*.vfp)|*.vfp|"
 		If Not SaveD.Execute Then Return False
 		WLet(LastOpenPath, GetFolderName(SaveD.FileName))
 		If FileExists(SaveD.FileName) Then
-			Select Case MsgBox(("Are you sure you want to overwrite the project") & "?" & WChr(13,10) & SaveD.FileName, "Visual FB Editor", mtWarning, btYesNo)
+			Select Case MsgBox(("Are you sure you want to overwrite the project") & "?" & WChr(13,10) & SaveD.FileName, "Astoria IDE", mtWarning, btYesNo)
 			Case mrYes:
 			Case mrNo: Return SaveProject(tnPr, bWithQuestion)
 			End Select
@@ -1762,7 +1762,7 @@ Function SaveProject(ByRef tnP As TreeNode Ptr, bWithQuestion As Boolean = False
 	If Not EndsWith(LCase(*ppe->FileName), ".vfp") Then
 		OpenResult = Open(*ppe->FileName & "/" & GetFileName(*ppe->FileName) & ".vfp" For Output Encoding "utf-8" As #Fn)
 		If OpenResult <> 0 Then
-			MsgBox ("Couldn't save the project file - check that the folder still exists and isn't read-only") & "." & WChr(13,10) & *ppe->FileName, "Visual FB Editor", mtError
+			MsgBox ("Couldn't save the project file - check that the folder still exists and isn't read-only") & "." & WChr(13,10) & *ppe->FileName, "Astoria IDE", mtError
 			Return False
 		End If
 		For i As Integer = 0 To ppe->Files.Count - 1
@@ -1776,7 +1776,7 @@ Function SaveProject(ByRef tnP As TreeNode Ptr, bWithQuestion As Boolean = False
 	Else
 		OpenResult = Open(*ppe->FileName For Output Encoding "utf-8" As #Fn)
 		If OpenResult <> 0 Then
-			MsgBox ("Couldn't save the project file - check that the folder still exists and isn't read-only") & "." & WChr(13,10) & *ppe->FileName, "Visual FB Editor", mtError
+			MsgBox ("Couldn't save the project file - check that the folder still exists and isn't read-only") & "." & WChr(13,10) & *ppe->FileName, "Astoria IDE", mtError
 			Return False
 		End If
 		For i As Integer = 0 To tnPr->Nodes.Count - 1
@@ -2363,7 +2363,7 @@ Sub AddFilesToProject
 	Dim OpenD As OpenFileDialog
 	OpenD.Options.Include ofOldStyleDialog
 	OpenD.MultiSelect = True
-	OpenD.Filter = ("FreeBasic Files") & " (*.vfp, *.bas, *.frm, *.bi, *.inc; *.rc)|*.vfp;*.bas;*.frm;*.bi;*.inc;*.rc|" & ("VisualFBEditor Project") & " (*.vfp)|*.vfp|" & ("FreeBasic Module") & " (*.bas)|*.bas|" & ("FreeBasic Include File") & " (*.bi)|*.bi|" & ("Other Include File") & " (*.inc)|*.inc|" & ("Form Module") & " (*.frm)|*.frm|" & ("Resource File") & " (*.rc)|*.rc|" & ("All Files") & "|*.*|"
+	OpenD.Filter = ("FreeBasic Files") & " (*.vfp, *.bas, *.frm, *.bi, *.inc; *.rc)|*.vfp;*.bas;*.frm;*.bi;*.inc;*.rc|" & ("AstoriaIDE Project") & " (*.vfp)|*.vfp|" & ("FreeBasic Module") & " (*.bas)|*.bas|" & ("FreeBasic Include File") & " (*.bi)|*.bi|" & ("Other Include File") & " (*.inc)|*.inc|" & ("Form Module") & " (*.frm)|*.frm|" & ("Resource File") & " (*.rc)|*.rc|" & ("All Files") & "|*.*|"
 	If OpenD.Execute Then
 		Dim tn1 As TreeNode Ptr
 		For i As Integer = 0 To OpenD.FileNames.Count - 1
@@ -2749,7 +2749,7 @@ Function CloseProject(tn As TreeNode Ptr, WithoutMessage As Boolean = False) As 
 		End If
 	Next
 	'	If bProjectModified AndAlso Not WithoutMessage Then
-	'		Select Case MsgBox(ML("Want to save the project") & " """ & tn->Text & """?", "Visual FB Editor", mtWarning, btYesNoCancel)
+	'		Select Case MsgBox(ML("Want to save the project") & " """ & tn->Text & """?", "Astoria IDE", mtWarning, btYesNoCancel)
 	'		Case mrYES: If Not SaveProject(tn) Then Return False
 	'		Case mrNO:
 	'		Case mrCANCEL: Return False
@@ -2775,7 +2775,7 @@ Function DeleteProject() As Boolean
 	Dim As TreeNode Ptr tn = GetParentNode(ptvExplorer->SelectedNode)
 	If tn = 0 Then Return False
 	If tn->Tag = 0 Then Return False
-	If MsgBox(("Are you sure you want to delete the project") & " """ & tn->Text & """?", "Visual FB Editor", mtWarning, btYesNo) <> mrYes Then Return False
+	If MsgBox(("Are you sure you want to delete the project") & " """ & tn->Text & """?", "Astoria IDE", mtWarning, btYesNo) <> mrYes Then Return False
 	'' Read the project's path before CloseProject runs -- it frees tn->Tag (the
 	'' ProjectElement) and nulls it as part of its normal cleanup, so reading it
 	'' afterward dereferenced a freed/null pointer and crashed before the actual
@@ -9167,8 +9167,6 @@ Sub frmMain_Create(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 
 	App.Title = App.Title & " (" & ("64-bit") & ")"
 	frmMain.Text = App.Title
-	pfAbout->Label1.Text = App.Title
-		pfAbout->Label11.Text = ("Version") & " " & pApp->Version
 	pfSplash->lblProcess.Text = ("Load On Startup") & ": " & ("Check compiler paths")
 	
 	pfSplash->lblProcess.Text = ("Load On Startup") & ": " & ("Add-Ins")
@@ -9505,7 +9503,7 @@ frmMain.KeyPreview = True
 frmMain.Icon.LoadFromResourceID(1)
 'frmMain.StartPosition = FormStartPosition.DefaultBounds
 frmMain.MainForm = True
-	frmMain.Text = "Visual FB Editor (x64)"
+	frmMain.Text = "Astoria IDE (x64)"
 frmMain.OnActiveControlChange = @frmMain_ActiveControlChanged
 frmMain.OnActivateApp = @frmMain_ActivateApp
 frmMain.OnKeyDown = @frmMain_KeyDown
@@ -9518,7 +9516,7 @@ frmMain.OnMessage = @frmMain_Message
 frmMain.Menu = @mnuMain
 '' 13.3.A O3: bands are now Standard(0), Edit(1), Project(2), Run(3), Format(4) -- Build/Debug
 '' folded into Run, so the ReBar drops from 7 bands to 5. See the matching Item(N) updates in
-'' VisualFBEditor.bas's toolbar-toggle Cases and this Sub's own visibility/save code below.
+'' AstoriaIDE.bas's toolbar-toggle Cases and this Sub's own visibility/save code below.
 MainReBar.Add @tbStandard
 MainReBar.Add @tbEdit
 MainReBar.Add @tbProject

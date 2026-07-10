@@ -1,6 +1,6 @@
 '#########################################################
 '#  frmSplash.bas                                        #
-'#  This file is part of VisualFBEditor                  #
+'#  This file is part of AstoriaIDE                  #
 '#  Authors: Xusinboy Bekchanov (2018-2020)              #
 '#########################################################
 
@@ -11,8 +11,8 @@ Using My.Sys.Forms
 
 '#Region "Form"
 	Constructor frmSplash
-		This.Text = "Visual FB Editor"
-		This.Icon = "VisualFBEditor"
+		This.Text = "Astoria IDE"
+		This.Icon = "AstoriaIDE"
 		This.Cursor = crWait
 		This.BackColor = 0
 		This.SetBounds 0, 0, 412, 412
@@ -30,7 +30,7 @@ Using My.Sys.Forms
 		lblImage.Parent = @This
 		' lblSplash
 		lblSplash.SetBounds 8, 14, 398, 33
-		lblSplash.Text = "Visual FB Editor" & " " & pApp->GetVerInfo("ProductVersion")
+		lblSplash.Text = "Astoria IDE" & " " & pApp->GetVerInfo("ProductVersion")
 			lblSplash.Font.Name = "Times New Roman"
 		lblSplash.Font.Size = 20
 		lblSplash.Font.Bold = True

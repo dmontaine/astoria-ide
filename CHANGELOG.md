@@ -1,6 +1,6 @@
 # VFBE Win64 Fork — Changelog
 
-**Repository:** [github.com/dmontaine/astoria-ide](https://github.com/dmontaine/astoria-ide)
+**Repository:** [github.com/dmontaine/Astoria-IDE](https://github.com/dmontaine/Astoria-IDE) (Codeberg retired 2026-07-09)
 
 This file archives completed work and the full commit history. For current status and open items, see [`PROJECT_STATUS.md`](PROJECT_STATUS.md).
 

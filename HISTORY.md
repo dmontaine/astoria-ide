@@ -4,6 +4,12 @@
 
 ---
 
+## Codeberg retired, GitHub is now the sole remote (2026-07-09)
+
+`origin` switched from `git@codeberg.org:bigriverguy/VFBEWin64.git` to `https://github.com/dmontaine/Astoria-IDE`. The Codeberg repo (`bigriverguy/VFBEWin64`) received a final push replacing its README with a retirement notice pointing to the GitHub repo, and was left in that state — actually toggling Codeberg's "archived" flag requires the owner via the Codeberg web UI (Settings → Archive Repository), since no Codeberg API token was available to do this headlessly. All future sessions push to GitHub `origin main`.
+
+---
+
 ## RESOLVED â€” Form designer grey-panel bug (Opus session, 2026-07-06)
 
 **Status:** FIXED, compile-clean (release), user-verified across multiple sequential project opens. Committed and pushed.

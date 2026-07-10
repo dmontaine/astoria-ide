@@ -3,8 +3,8 @@
 **Last updated:** 2026-07-08 (**C4 — full `.lng`/translation-capability removal (English-only)**, compile-clean, **owner smoke-test needed before commit** — see "C4: full language-system removal" below. Earlier same day: **E1 merged into `main`** (`b078d99`) from its background-task worktree, compile-clean, owner-verified. While testing E1, owner found **"Close Project" greyed out on startup with a reloaded project** — root-caused and fixed, owner-verified: see "Startup Close-Project-greyed fix" below.)
 
 **Last updated:** 2026-07-07 (**Close Project crash+hang root-caused & fixed** — GDB-traced to a dangling tree-node `.Tag` use-after-free in `tvExplorer_SelChange` + tabs never closing; fixed via null-after-free, robust tab-close by node ancestry, and a safety bail. Also: **empty-workspace startup now prompts File → New Project** (owner design), and the **New Project / Open Project dialogs cross-navigate** via new "Open Existing Project" / "Open New Project" buttons. D1 Designer-menu greying now complete (incl. the form-close gap, fixed via `ChangeMenuItemsEnabled`). Earlier same day: Opus "Next Steps" backlog fully worked through except R5/E1/`.lng` cleanup; 13.3.A S1–S7 all Opus-reviewed & committed)  
-**Repository:** [github.com/dmontaine/astoria-ide](https://github.com/dmontaine/astoria-ide)  
-**Local path:** `C:\Users\dmont\VisualFBEditor`  
+**Repository:** [github.com/dmontaine/Astoria-IDE](https://github.com/dmontaine/Astoria-IDE) (Codeberg retired 2026-07-09 — see below)  
+**Local path:** `C:\Users\don\Astoria-IDE`  
 **Owner:** bigriverguy (`dmontaine@gmail.com`)
 
 This document captures project history, completed work, open items, and workflow rules for continuing development without re-discovering context.
@@ -542,11 +542,11 @@ Common thread: **approachability and cohesion over power-user configurability.**
 ### Git remote
 
 ```
-origin  https://github.com/dmontaine/astoria-ide.git
+origin  https://github.com/dmontaine/Astoria-IDE
 branch  main
 ```
 
-(Previously hosted on Codeberg (`bigriverguy/VFBEWin64`); migrated to GitHub 2026-07-09, Codeberg no longer used.)
+**Codeberg retired 2026-07-09** — `bigriverguy/VFBEWin64` on Codeberg is no longer the working repo; GitHub (`dmontaine/Astoria-IDE`) is now the sole remote. The Codeberg repo received a final push with its README replaced by a retirement notice pointing here. The old SSH key (`~/.ssh/id_ed25519_codeberg`, host `codeberg.org` in `~/.ssh/config`) is no longer used for this project.
 
 **Note:** Git may not be on PATH in all shells; full path:
 
@@ -897,7 +897,7 @@ Includes:
 
 - **Minimize scope** — smallest correct diff; match existing code style
 - **No commits** unless user explicitly asks
-- **Every session ends with a compile-clean commit + push to Codeberg** (added 2026-07-03; compile-clean gate added 2026-07-03 after a second-AI audit flagged the risk of pushing broken intermediate state) — run `Compile.bat` and confirm **0 errors** first. Only if the compile is clean should you commit any outstanding working-tree changes (status doc updates, INI/scratch state, etc.) with a sensible message, then `git push origin main`, as the last action before signing off for the day. If the compile fails and can't be fixed in-session, say so and hold off on the commit/push rather than pushing broken code. This is a standing instruction, not a one-time request — don't wait to be asked again in future sessions.
+- **Every session ends with a compile-clean commit + push to GitHub** (added 2026-07-03; compile-clean gate added 2026-07-03 after a second-AI audit flagged the risk of pushing broken intermediate state; **remote switched from Codeberg to GitHub 2026-07-09, Codeberg retired**) — run `Compile.bat` and confirm **0 errors** first. Only if the compile is clean should you commit any outstanding working-tree changes (status doc updates, INI/scratch state, etc.) with a sensible message, then `git push origin main`, as the last action before signing off for the day. If the compile fails and can't be fixed in-session, say so and hold off on the commit/push rather than pushing broken code. This is a standing instruction, not a one-time request — don't wait to be asked again in future sessions.
 - **INI key migration** (added 2026-07-03, second-AI audit) — new keys must ship with a default (never assume an existing user's INI has it); never rename or repurpose an existing key without a migration read of the old key name first, so existing users' settings aren't silently orphaned. Relevant now that §13.4's rename will touch `Settings/VisualFBEditor64.ini`, but applies to any INI key work.
 - **WinAPI only** — do not reintroduce GTK/Linux IDE paths
 - Close running IDE before rebuild

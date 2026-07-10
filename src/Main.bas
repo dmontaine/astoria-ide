@@ -1325,7 +1325,7 @@ Sub SaveWorkspace()
 	If tnP <> 0 Then
 		Dim ppe As ProjectElement Ptr = Cast(ProjectElement Ptr, tnP->Tag)
 		If ppe <> 0 AndAlso (InStr(WGet(ppe->FileName), "\") > 0 OrElse InStr(WGet(ppe->FileName), "/") > 0) Then
-			Print #Fn, "*File=" & Replace(WGet(ppe->FileName), "\", "/")
+			Print #Fn, "*File=" & Replace(MakePathPortable(WGet(ppe->FileName)), "\", "/")
 		End If
 	End If
 	Print #Fn, "UseDebugger=" & IIf(UseDebugger, "1", "0")
@@ -1338,7 +1338,7 @@ Sub SaveWorkspace()
 			tb = Cast(TabWindow Ptr, ptabCode->Tabs[i])
 			If tb <> 0 AndAlso FileExists(tb->FileName) Then
 				Zv = IIf(tb->IsSelected, "*", "")
-				Print #Fn, Zv & "File=" & Replace(tb->FileName, "\", "/")
+				Print #Fn, Zv & "File=" & Replace(MakePathPortable(tb->FileName), "\", "/")
 			End If
 		Next i
 	Next j
@@ -1378,12 +1378,12 @@ Function LoadWorkspace() As Boolean
 			If Pos1 <> 0 Then
 				n += 1
 				bMain = StartsWith(Buff, "*")
-				WLet(filn, Replace(Mid(Buff, Pos1 + 1), UnixSlash, WindowsSlash))
+				WLet(filn, GetFullPath(Replace(Mid(Buff, Pos1 + 1), UnixSlash, WindowsSlash)))
 				If bTabs Then
 					Var tb = AddTab(*filn, , , Not bMain)
 					If tb AndAlso tb->Index <> n - 1 Then ptabCode->ReorderTab(tb, n - 1, True)
 				ElseIf EndsWith(LCase(*filn), ".vfp") Then
-					If Not bProjectLoaded Then
+					If Not bProjectLoaded AndAlso FileExists(*filn) Then
 						AddProject(*filn, @Files)
 						bProjectLoaded = True
 					End If

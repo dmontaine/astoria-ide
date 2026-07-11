@@ -310,9 +310,13 @@ Private Sub frmTools.cmdAdd_Click(ByRef Designer As My.Sys.Object, ByRef Sender 
 	If pfPath->ShowModal(fTools) = ModalResults.OK Then
 		With fTools
 			'' T16 smoke-test finding: read the snapshot fields (frmPath.bi), not
-			'' txtVersion.Text/txtPath.Text directly -- CloseForm destroys pfPath's native
-			'' controls (Action defaults to 1, no OnClose override), so reading the live
-			'' controls here reads through a dangling handle and silently returns "".
+			'' txtVersion.Text/txtPath.Text directly. frmPath's Action defaults to 1
+			'' ("real close"), so its native controls may not survive past CloseForm --
+			'' reading the snapshot instead of the live control is the defensive-correct
+			'' habit regardless. (The actual reason "Add" appeared to do nothing was a
+			'' separate bug: frmPath.frm's Form_Close was unconditionally forcing
+			'' ModalResult back to Cancel on every close, including this OK path -- fixed
+			'' there, see Form_Close/Form_Create.)
 			Dim As UserToolType Ptr Tool = _New( UserToolType)
 			Tool->Name = pfPath->txtVersionText
 			Tool->Path = pfPath->txtPathText

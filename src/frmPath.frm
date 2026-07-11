@@ -250,13 +250,14 @@ Private Sub frmPath.cmdOK_Click(ByRef Sender As Control)
 	txtCommandLineText = txtCommandLine.Text
 	txtExtensionsText = txtExtensions.Text
 	cboTypeText = cboType.Text
-	'' T16 smoke-test finding: This.Action defaults to 1 ("real close", Form.bas ~608) and
-	'' frmPath sets no OnClose override, so CloseForm below actually destroys the native
-	'' controls rather than hiding them (same root cause as the pfSave/CloseAllDocuments bug
-	'' fixed in 331b570) -- every caller across the app that read txtVersion.Text/txtPath.Text
-	'' *after* ShowModal returned was reading through a dangling handle and silently getting
-	'' back empty strings. cboTypeText/txtCommandLineText/txtExtensionsText were already
-	'' snapshotted this way; txtVersion/txtPath were the two everyone actually needed.
+	'' T16 smoke-test finding: This.Action defaults to 1 ("real close", Form.bas ~608), so
+	'' CloseForm below is not guaranteed to leave the native controls intact for a caller to
+	'' read afterward (same class of issue as the pfSave/CloseAllDocuments bug fixed in
+	'' 331b570). Snapshotting here, matching the existing cboTypeText/txtCommandLineText/
+	'' txtExtensionsText pattern, is the defensive-correct habit regardless of whether this
+	'' particular case destroys them. (The bug that actually made "Add" silently do nothing
+	'' was separate and bigger: Form_Close was unconditionally forcing ModalResult back to
+	'' Cancel on every close, clobbering the OK just set below -- see Form_Close/Form_Create.)
 	txtVersionText = txtVersion.Text
 	txtPathText = txtPath.Text
 	This.ModalResult = ModalResults.OK
@@ -373,7 +374,14 @@ Private Sub frmPath.Form_Close_(ByRef Designer As My.Sys.Object, ByRef Sender As
 	(*Cast(frmPath Ptr, Sender.Designer)).Form_Close(Sender, Action)
 End Sub
 Private Sub frmPath.Form_Close(ByRef Sender As Form, ByRef Action As Integer)
-	This.ModalResult = ModalResults.Cancel
+	'' T16 follow-up root cause: OnClose fires on *every* WM_CLOSE, including the one
+	'' cmdOK_Click itself triggers via CloseForm -- unconditionally forcing Cancel here
+	'' clobbered the OK result cmdOK_Click had just set moments earlier, so ShowModal()
+	'' always reported Cancel regardless of which button was actually clicked. The
+	'' Cancel-by-default now lives in Form_Create instead (fires once per fresh show,
+	'' alongside the other per-use flag resets below), so it only applies if the dialog
+	'' is dismissed some other way (Alt+F4, the title-bar X) without cmdOK_Click/
+	'' cmdCancel_Click ever setting a real result.
 	ChooseFolder = False
 	ForConfiguration = False
 	WithoutVersion = False
@@ -394,6 +402,10 @@ Private Sub frmPath.Form_Create(ByRef Sender As Control)
 	lblPath.Text = IIf(ForConfiguration, ("Switches") & ":", IIf(WithKey, ("Resource Name / Path") & ":", ("Path") & ":"))
 	lblVersion.Text = IIf(ForConfiguration, ("Name") & ":", IIf(WithType, IIf(WithKey, ("Key") & ":", ("Resource Name") & ":"), ("Version") & ":"))
 	lblCommandLine.Text = IIf(WithType, ("Type") & ":", ("Command line") & ":")
+	'' Default result if the dialog gets dismissed without cmdOK_Click/cmdCancel_Click
+	'' explicitly setting one (Alt+F4, title-bar X) -- see the note in Form_Close for why
+	'' this moved here instead of staying there.
+	This.ModalResult = ModalResults.Cancel
 	txtCommandLineText = ""
 	txtExtensionsText = ""
 	cboTypeText = ""

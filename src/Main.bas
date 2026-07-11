@@ -194,6 +194,25 @@ pIncludePaths = @IncludePaths
 pLibraryPaths = @LibraryPaths
 pfSplash->lblProcess.Text = ("Load On Startup") & ": " & ("Settings")
 
+'' T2a: portable-model safety net (owner sign-off, T1: everything stays under ExePath, no
+'' APPDATA migration). Everything below -- LoadSettings and the rest of startup -- assumes
+'' ExePath\Settings is writable and fails silently if it isn't (e.g. a Program Files install
+'' without elevation). Probe it for real with an actual write instead of just checking ACLs,
+'' and fail loud with one clear, actionable message instead of limping on with a settings
+'' file that silently never saves.
+Dim As Integer ProbeFn
+Dim As Integer ProbeResult
+Dim As String ProbeFile
+ProbeFn = FreeFile_
+ProbeFile = ExePath & "/Settings/.writetest"
+ProbeResult = Open(ProbeFile For Output As #ProbeFn)
+If ProbeResult <> 0 Then
+	MsgBox "Astoria IDE needs to run from a folder you can write to " & WChr(&H2014) & " install per-user or move it out of Program Files.", "Astoria IDE", mtError
+	End 1
+End If
+CloseFile_(ProbeFn)
+Kill ProbeFile
+
 LoadLanguageTexts
 LoadSettings
 
@@ -9145,7 +9164,14 @@ Sub frmMain_Create(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Kill ExePath & "/DebugInfo.log"
 	End If
 	frmMain.Width = iniSettings.ReadInteger("MainWindow", "Width", 1024)
+	'' A key that exists but is blank (e.g. Width=) reads back as 0 -- IniFile's
+	'' ReadInteger only falls back to its default when the key is absent, not when
+	'' its value is empty (mff/IniFile.bas:298-312) -- which produced a near-0x0 main
+	'' window (owner-reported 2026-07-11). Guard the same way LeftWidth/BottomHeight
+	'' already do a few lines below.
+	If frmMain.Width < 400 Then frmMain.Width = 1024
 	frmMain.Height = iniSettings.ReadInteger("MainWindow", "Height", 768)
+	If frmMain.Height < 300 Then frmMain.Height = 768
 	tabLeftWidth = iniSettings.ReadInteger("MainWindow", "LeftWidth", DEFAULT_LEFT_PANEL_WIDTH)
 	If tabLeftWidth < 100 Then tabLeftWidth = DEFAULT_LEFT_PANEL_WIDTH
 	tabRightWidth = iniSettings.ReadInteger("MainWindow", "RightWidth", tabRightWidth)

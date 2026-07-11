@@ -395,7 +395,11 @@ Private Sub frmImageManager.cmdOK_Click(ByRef Sender As Control)
 		Fn = FreeFile_
 		Dim As Boolean bFinded
 		Dim As Integer Pos1
-		Open ResourceFile For Output Encoding "utf-8" As #Fn
+		Dim As Integer OpenResult2 = Open(ResourceFile For Output Encoding "utf-8" As #Fn)
+		If OpenResult2 <> 0 Then
+			MsgBox ("Couldn't save the resource file - check that it still exists and isn't read-only") & "." & WChr(13,10) & ResourceFile, "Astoria IDE", mtError
+			Exit Sub
+		End If
 		For i As Integer = 0 To Lines.Count - 1
 			Pos1 = InStr(Lines.Item(i), " BITMAP ")
 			If Pos1 = 0 Then Pos1 = InStr(Lines.Item(i), " PNG ")

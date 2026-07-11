@@ -238,7 +238,14 @@ Private Sub frmTools.cmdOK_Click(ByRef Designer As My.Sys.Object, ByRef Sender A
 	Var Fn = FreeFile_
 	Dim As UserToolType Ptr Tool, tt
 	Dim As MenuItem Ptr mi
-		Open ExePath & "/Tools/Tools.ini" For Output Encoding "utf8" As #Fn
+	Dim As Integer OpenResult2 = Open(ExePath & "/Tools/Tools.ini" For Output Encoding "utf8" As #Fn)
+	If OpenResult2 <> 0 Then
+		'' Bail before any of the destructive rebuild below (_Delete/pTools->Clear/menu
+		'' removal) runs -- otherwise a failed write would still tear down the working
+		'' in-memory tool list and close the dialog as if it had succeeded.
+		MsgBox ("Couldn't save your External Tools changes - check that the Tools folder still exists and isn't read-only") & "." & WChr(13,10) & ExePath & "/Tools/Tools.ini", "Astoria IDE", mtError
+		Exit Sub
+	End If
 	With fTools
 		For i As Integer = 0 To Tools.Count - 1
 			_Delete( Cast(UserToolType Ptr, pTools->Item(i)))

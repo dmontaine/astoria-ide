@@ -256,7 +256,17 @@ Function Compile(Parameter As String, bAll As Boolean) As Integer
 			CloseFile_(Fn1)
 			WDeAllocate(pBuff)
 			Dim As Integer Fn2 = FreeFile_
-			Open BatchFileFull For Output As #Fn2
+			Dim As Integer OpenResult2 = Open(BatchFileFull For Output As #Fn2)
+			If OpenResult2 <> 0 Then
+				'' T7/F-R2: this runs on Compile()'s worker thread (THREADING.md), so a
+				'' blocking MsgBox here would need marshaling this codebase doesn't have --
+				'' route through ShowMessages (Output panel), the channel this same function
+				'' already uses for compile status a few lines below, wrapped the same way.
+				ThreadsEnter()
+				ShowMessages(("Couldn't rewrite the batch compilation file - check that it still exists and isn't read-only") & "." & WChr(13,10) & BatchFileFull & WChr(13,10), False)
+				ThreadsLeave()
+				Return 0
+			End If
 			For i As Integer = 0 To Lines.Count - 1
 				If StartsWith(Lines.Item(i), "set FBC=") Then
 					Print #Fn2, "set FBC=" & *ctx.FbcExe

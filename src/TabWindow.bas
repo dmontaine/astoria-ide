@@ -2881,7 +2881,10 @@ Sub ConvertHToBi(ByRef FileName As WString)
 	If Result <> 0 Then Result = Open(FileName For Input Encoding "utf-8" As #fr)
 	If Result <> 0 Then Result = Open(FileName For Input As #fr)
 	If Result = 0 Then
-		Open Left(FileName, Len(FileName) - 2) & ".bi" For Output Encoding "utf-8" As #fw
+		Dim As Integer OpenResult2 = Open(Left(FileName, Len(FileName) - 2) & ".bi" For Output Encoding "utf-8" As #fw)
+		If OpenResult2 <> 0 Then
+			MsgBox ("Couldn't write the generated .bi file - check that the folder still exists and isn't read-only") & "." & WChr(13,10) & Left(FileName, Len(FileName) - 2) & ".bi", "Astoria IDE", mtError
+		Else
 		Do Until EOF(fr)
 			Line Input #fr, b
 			i = 0
@@ -3017,6 +3020,7 @@ Sub ConvertHToBi(ByRef FileName As WString)
 			Print #fw, b
 		Loop
 		CloseFile_(fw)
+		End If
 	End If
 	CloseFile_(fr)
 End Sub

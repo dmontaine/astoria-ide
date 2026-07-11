@@ -3116,18 +3116,22 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 			Dim As Integer Pos1, Fn = FreeFile_
 			Dim As MenuItem Ptr Item
 			Dim As String Key
-			Open ExePath & "/Settings/Others/HotKeys.txt" For Output As #Fn
-			For i As Integer = 0 To .lvShortcuts.ListItems.Count - 1
-				If .HotKeysPriv.Item(i) = "" Then Continue For
-				Item = .lvShortcuts.ListItems.Item(i)->Tag
-				Pos1 = InStr(Item->Caption, !"\t")
-				If Pos1 = 0 Then Pos1 = Len(Item->Caption) + 1
-				Key = .lvShortcuts.ListItems.Item(i)->Text(1)
-				Item->Caption = ..Left(Item->Caption, Pos1 - 1) & !"\t" & Key
-				Print #Fn, .HotKeysPriv.Item(i) & "=" & Key
-			Next
-			CloseFile_(Fn)
-			pfrmMain->Menu->ParentWindow = pfrmMain
+			Dim As Integer OpenResult2 = Open(ExePath & "/Settings/Others/HotKeys.txt" For Output As #Fn)
+			If OpenResult2 <> 0 Then
+				MsgBox ("Couldn't save your keyboard shortcut changes - check that the Settings folder still exists and isn't read-only") & "." & WChr(13,10) & ExePath & "/Settings/Others/HotKeys.txt", "Astoria IDE", mtError
+			Else
+				For i As Integer = 0 To .lvShortcuts.ListItems.Count - 1
+					If .HotKeysPriv.Item(i) = "" Then Continue For
+					Item = .lvShortcuts.ListItems.Item(i)->Tag
+					Pos1 = InStr(Item->Caption, !"\t")
+					If Pos1 = 0 Then Pos1 = Len(Item->Caption) + 1
+					Key = .lvShortcuts.ListItems.Item(i)->Text(1)
+					Item->Caption = ..Left(Item->Caption, Pos1 - 1) & !"\t" & Key
+					Print #Fn, .HotKeysPriv.Item(i) & "=" & Key
+				Next
+				CloseFile_(Fn)
+				pfrmMain->Menu->ParentWindow = pfrmMain
+			End If
 		End If
 		Dim i As Integer = 0
 		Do Until piniSettings->KeyExists("Compilers", "Version_" & WStr(i)) = -1

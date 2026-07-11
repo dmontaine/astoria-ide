@@ -8361,7 +8361,11 @@ Sub txtImmediate_KeyDown(ByRef Designer As My.Sys.Object, ByRef Sender As Contro
 			'
 			SaveAll
 			Dim As Integer Fn = FreeFile_
-			Open ExePath & "/Temp/FBTemp.bas" For Output Encoding "utf-8" As #Fn
+			Dim As Integer OpenResult2 = Open(ExePath & "/Temp/FBTemp.bas" For Output Encoding "utf-8" As #Fn)
+			If OpenResult2 <> 0 Then
+				MsgBox ("Couldn't write the Immediate window's scratch file - check that the Temp folder still exists and isn't read-only") & "." & WChr(13,10) & ExePath & "/Temp/FBTemp.bas", "Astoria IDE", mtError
+				Exit Sub
+			End If
 			'Print #Fn, "#Include Once " + Chr(34) + "mff/SysUtils.bas"+Chr(34)
 			For i As Integer =0 To iLine
 				If StartsWith(Trim(LCase(txtImmediate.Lines(i))),"import ") Then Print #Fn, Mid(Trim(txtImmediate.Lines(i)),7)

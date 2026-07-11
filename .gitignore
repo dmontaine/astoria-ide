@@ -8,6 +8,7 @@ etc
 *32.exe
 VisualFBEditor32*
 mff32*.dll
+*.dll.a
 VisualFBEditor.wiki
 docompile.bat
 Logs/

@@ -65,6 +65,8 @@ Prior to that: Opus's "Next Steps" review (`Next Steps - Opus.md`, 2026-07-07) e
 
 ### Execution order
 
+> **Read the `Order` column, not the task numbers.** T-IDs (T1–T17) are stable labels from the review; they do **not** indicate sequence. E.g. T2 runs at position 11 (Wave 3, Sonnet), after T3/T4/T7 — not right after T1. Wave 3 runs as one batch: T3 → T4 → T7 → T2a/T2b → T17, all held uncommitted until T16 (Fable review) passes, then one combined owner smoke test.
+
 | Order | Wave | Task | Model | Finding | Scope |
 |---|---|---|---|---|---|
 | 1 | 1 — hygiene | **T9 — Repo hygiene sweep** | Haiku | F-C2, F-C7 | Delete the `C:\Users\don\Downloads\AstoriaBridge.png` line (`src/Temp.rc:52`), then `git rm --cached` + gitignore `src/Temp.bas`, `src/Temp.rc`, `src/compile_out.txt`; add ignore rules for compiled example exes (`Examples/**/*64.exe`) and `Settings/Workspace.ini` |

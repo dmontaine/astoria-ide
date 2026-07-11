@@ -39,7 +39,7 @@ Using My.Sys.Forms
 		Dim As Boolean ChooseFolder, SetFileNameToVersion, WithoutVersion, WithoutCommandLine, WithExtensions, WithType, WithKey, ForConfiguration
 		Dim As UString ExeFileName
 		Dim As ComboBoxEdit cboType
-		Dim As UString cboTypeText, txtCommandLineText, txtExtensionsText
+		Dim As UString cboTypeText, txtCommandLineText, txtExtensionsText, txtVersionText, txtPathText
 		Dim As Panel hbxPath, hbxVersion, hbxCommandLine, hbxCommands
 		Dim As Panel VerticalBox1
 	End Type

@@ -309,11 +309,15 @@ Private Sub frmTools.cmdAdd_Click(ByRef Designer As My.Sys.Object, ByRef Sender 
 	pfPath->SetFileNameToVersion = True
 	If pfPath->ShowModal(fTools) = ModalResults.OK Then
 		With fTools
+			'' T16 smoke-test finding: read the snapshot fields (frmPath.bi), not
+			'' txtVersion.Text/txtPath.Text directly -- CloseForm destroys pfPath's native
+			'' controls (Action defaults to 1, no OnClose override), so reading the live
+			'' controls here reads through a dangling handle and silently returns "".
 			Dim As UserToolType Ptr Tool = _New( UserToolType)
-			Tool->Name = pfPath->txtVersion.Text
-			Tool->Path = pfPath->txtPath.Text
-			.lvTools.ListItems.Add pfPath->txtVersion.Text
-			.lvTools.ListItems.Item(.lvTools.ListItems.Count - 1)->Text(1) = pfPath->txtPath.Text
+			Tool->Name = pfPath->txtVersionText
+			Tool->Path = pfPath->txtPathText
+			.lvTools.ListItems.Add pfPath->txtVersionText
+			.lvTools.ListItems.Item(.lvTools.ListItems.Count - 1)->Text(1) = pfPath->txtPathText
 			.lvTools.ListItems.Item(.lvTools.ListItems.Count - 1)->Tag = Tool
 		End With
 	End If
@@ -330,11 +334,11 @@ Private Sub frmTools.cmdChange_Click(ByRef Designer As My.Sys.Object, ByRef Send
 		pfPath->SetFileNameToVersion = True
 		If pfPath->ShowModal(fTools) = ModalResults.OK Then
 			If Tool <> 0 Then
-				Tool->Name = pfPath->txtVersion.Text
-				Tool->Path = pfPath->txtPath.Text
+				Tool->Name = pfPath->txtVersionText
+				Tool->Path = pfPath->txtPathText
 			End If
-			.lvTools.SelectedItem->Text(0) = pfPath->txtVersion.Text
-			.lvTools.SelectedItem->Text(1) = pfPath->txtPath.Text
+			.lvTools.SelectedItem->Text(0) = pfPath->txtVersionText
+			.lvTools.SelectedItem->Text(1) = pfPath->txtPathText
 		End If
 		pfPath->SetFileNameToVersion = False
 	End With

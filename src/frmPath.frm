@@ -250,6 +250,15 @@ Private Sub frmPath.cmdOK_Click(ByRef Sender As Control)
 	txtCommandLineText = txtCommandLine.Text
 	txtExtensionsText = txtExtensions.Text
 	cboTypeText = cboType.Text
+	'' T16 smoke-test finding: This.Action defaults to 1 ("real close", Form.bas ~608) and
+	'' frmPath sets no OnClose override, so CloseForm below actually destroys the native
+	'' controls rather than hiding them (same root cause as the pfSave/CloseAllDocuments bug
+	'' fixed in 331b570) -- every caller across the app that read txtVersion.Text/txtPath.Text
+	'' *after* ShowModal returned was reading through a dangling handle and silently getting
+	'' back empty strings. cboTypeText/txtCommandLineText/txtExtensionsText were already
+	'' snapshotted this way; txtVersion/txtPath were the two everyone actually needed.
+	txtVersionText = txtVersion.Text
+	txtPathText = txtPath.Text
 	This.ModalResult = ModalResults.OK
 	This.CloseForm
 End Sub
@@ -388,5 +397,7 @@ Private Sub frmPath.Form_Create(ByRef Sender As Control)
 	txtCommandLineText = ""
 	txtExtensionsText = ""
 	cboTypeText = ""
+	txtVersionText = ""
+	txtPathText = ""
 End Sub
 

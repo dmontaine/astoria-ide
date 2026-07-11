@@ -465,22 +465,25 @@ Private Sub frmImageManager.lvImages_ItemActivate(ByRef Sender As ListView, ByVa
 		pfrmPath->WithKey = CurrentImageList <> 0
 		pfrmPath->SetFileNameToVersion = True
 		pfrmPath->ExeFileName = ExeFileName
+		'' T16 smoke-test finding: read the snapshot fields (frmPath.bi), not
+		'' txtVersion.Text/txtPath.Text directly -- see frmTools.frm's cmdAdd_Click for the
+		'' full explanation (CloseForm destroys pfrmPath's native controls on every close).
 		If pfrmPath->ShowModal(Me) = ModalResults.OK Then
-			If lvImages.SelectedItem->Text(0) = pfrmPath->txtVersion.Text OrElse lvImages.ListItems.IndexOf(pfrmPath->txtVersion.Text) = -1 Then
-				Var ImageIndex = ImageList1.IndexOf(pfrmPath->txtVersion.Text)
+			If lvImages.SelectedItem->Text(0) = pfrmPath->txtVersionText OrElse lvImages.ListItems.IndexOf(pfrmPath->txtVersionText) = -1 Then
+				Var ImageIndex = ImageList1.IndexOf(pfrmPath->txtVersionText)
 				If ImageIndex = -1 Then
 					If pfrmPath->cboTypeText = ("Resource") Then
-						ImageList1.AddFromFile GetResNamePath(pfrmPath->txtPath.Text, ResourceFile), pfrmPath->txtVersion.Text
+						ImageList1.AddFromFile GetResNamePath(pfrmPath->txtPathText, ResourceFile), pfrmPath->txtVersionText
 					Else
-						ImageList1.AddFromFile GetRelativePath(pfrmPath->txtPath.Text, ResourceFile), pfrmPath->txtVersion.Text
+						ImageList1.AddFromFile GetRelativePath(pfrmPath->txtPathText, ResourceFile), pfrmPath->txtVersionText
 					End If
 					lvImages.SelectedItem->ImageIndex = lvImages.ListItems.Count - 1
 				Else
 					lvImages.SelectedItem->ImageIndex = ImageIndex
 				End If
-				lvImages.SelectedItem->Text(0) = pfrmPath->txtVersion.Text
+				lvImages.SelectedItem->Text(0) = pfrmPath->txtVersionText
 				lvImages.SelectedItem->Text(1) = pfrmPath->cboTypeText
-				lvImages.SelectedItem->Text(2) = pfrmPath->txtPath.Text
+				lvImages.SelectedItem->Text(2) = pfrmPath->txtPathText
 			Else
 				MsgBox ("This name is exists!")
 			End If

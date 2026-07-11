@@ -4377,13 +4377,16 @@ Private Sub frmOptions.cmdAddTerminal_Click(ByRef Designer As My.Sys.Object, ByR
 	pfPath->txtVersion.Text = ""
 	pfPath->txtPath.Text = ""
 	pfPath->txtCommandLine.Text = ""
+	'' T16 smoke-test finding: read the snapshot fields (frmPath.bi), not the live controls
+	'' -- see frmTools.frm's cmdAdd_Click for the full explanation (CloseForm destroys
+	'' pfPath's native controls on every close; nothing here overrides that until now).
 	If pfPath->ShowModal(fOptions) = ModalResults.OK Then
 		With fOptions
-			If .cboTerminal.IndexOf(pfPath->txtVersion.Text) = -1 Then
-				.lvTerminalPaths.ListItems.Add pfPath->txtVersion.Text
-				.lvTerminalPaths.ListItems.Item(.lvTerminalPaths.ListItems.Count - 1)->Text(1) = pfPath->txtPath.Text
-				.lvTerminalPaths.ListItems.Item(.lvTerminalPaths.ListItems.Count - 1)->Text(2) = pfPath->txtCommandLine.Text
-				.cboTerminal.AddItem pfPath->txtVersion.Text
+			If .cboTerminal.IndexOf(pfPath->txtVersionText) = -1 Then
+				.lvTerminalPaths.ListItems.Add pfPath->txtVersionText
+				.lvTerminalPaths.ListItems.Item(.lvTerminalPaths.ListItems.Count - 1)->Text(1) = pfPath->txtPathText
+				.lvTerminalPaths.ListItems.Item(.lvTerminalPaths.ListItems.Count - 1)->Text(2) = pfPath->txtCommandLineText
+				.cboTerminal.AddItem pfPath->txtVersionText
 			Else
 				MsgBox ("This version is exists!")
 			End If
@@ -4398,12 +4401,12 @@ Private Sub frmOptions.cmdChangeTerminal_Click(ByRef Designer As My.Sys.Object, 
 		pfPath->txtPath.Text = .lvTerminalPaths.SelectedItem->Text(1)
 		pfPath->txtCommandLine.Text = .lvTerminalPaths.SelectedItem->Text(2)
 		If pfPath->ShowModal(fOptions) = ModalResults.OK Then
-			If .lvTerminalPaths.SelectedItem->Text(0) = pfPath->txtVersion.Text OrElse .cboTerminal.IndexOf(pfPath->txtVersion.Text) = -1 Then
+			If .lvTerminalPaths.SelectedItem->Text(0) = pfPath->txtVersionText OrElse .cboTerminal.IndexOf(pfPath->txtVersionText) = -1 Then
 				Var i = .cboTerminal.IndexOf(.lvTerminalPaths.SelectedItem->Text(0))
-				.cboTerminal.Item(i) = pfPath->txtVersion.Text
-				.lvTerminalPaths.SelectedItem->Text(0) = pfPath->txtVersion.Text
-				.lvTerminalPaths.SelectedItem->Text(1) = pfPath->txtPath.Text
-				.lvTerminalPaths.SelectedItem->Text(2) = pfPath->txtCommandLine.Text
+				.cboTerminal.Item(i) = pfPath->txtVersionText
+				.lvTerminalPaths.SelectedItem->Text(0) = pfPath->txtVersionText
+				.lvTerminalPaths.SelectedItem->Text(1) = pfPath->txtPathText
+				.lvTerminalPaths.SelectedItem->Text(2) = pfPath->txtCommandLineText
 			Else
 				MsgBox ("This version is exists!")
 			End If
@@ -4434,12 +4437,14 @@ Private Sub frmOptions.cmdAddHelp_Click(ByRef Designer As My.Sys.Object, ByRef S
 	pfPath->txtVersion.Text = ""
 	pfPath->txtPath.Text = ""
 	pfPath->WithoutCommandLine = True
+	'' T16 smoke-test finding: read the snapshot fields (frmPath.bi) -- see frmTools.frm's
+	'' cmdAdd_Click for the full explanation.
 	If pfPath->ShowModal(fOptions) = ModalResults.OK Then
 		With fOptions
-			If .cboHelp.IndexOf(pfPath->txtVersion.Text) = -1 Then
-				.lvHelpPaths.ListItems.Add pfPath->txtVersion.Text
-				.lvHelpPaths.ListItems.Item(.lvHelpPaths.ListItems.Count - 1)->Text(1) = pfPath->txtPath.Text
-				.cboHelp.AddItem pfPath->txtVersion.Text
+			If .cboHelp.IndexOf(pfPath->txtVersionText) = -1 Then
+				.lvHelpPaths.ListItems.Add pfPath->txtVersionText
+				.lvHelpPaths.ListItems.Item(.lvHelpPaths.ListItems.Count - 1)->Text(1) = pfPath->txtPathText
+				.cboHelp.AddItem pfPath->txtVersionText
 			Else
 				MsgBox ("This version is exists!")
 			End If
@@ -4454,11 +4459,11 @@ Private Sub frmOptions.cmdChangeHelp_Click(ByRef Designer As My.Sys.Object, ByRe
 		pfPath->txtPath.Text = .lvHelpPaths.SelectedItem->Text(1)
 		pfPath->WithoutCommandLine = True
 		If pfPath->ShowModal(fOptions) = ModalResults.OK Then
-			If .lvHelpPaths.SelectedItem->Text(0) = pfPath->txtVersion.Text OrElse .cboHelp.IndexOf(pfPath->txtVersion.Text) = -1 Then
+			If .lvHelpPaths.SelectedItem->Text(0) = pfPath->txtVersionText OrElse .cboHelp.IndexOf(pfPath->txtVersionText) = -1 Then
 				Var i = .cboHelp.IndexOf(.lvHelpPaths.SelectedItem->Text(0))
-				.cboHelp.Item(i) = pfPath->txtVersion.Text
-				.lvHelpPaths.SelectedItem->Text(0) = pfPath->txtVersion.Text
-				.lvHelpPaths.SelectedItem->Text(1) = pfPath->txtPath.Text
+				.cboHelp.Item(i) = pfPath->txtVersionText
+				.lvHelpPaths.SelectedItem->Text(0) = pfPath->txtVersionText
+				.lvHelpPaths.SelectedItem->Text(1) = pfPath->txtPathText
 			Else
 				MsgBox ("This version is exists!")
 			End If
@@ -4501,10 +4506,12 @@ End Sub
 Private Sub frmOptions.cmdAddInclude_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	pfPath->txtPath.Text = ""
 	pfPath->ChooseFolder = True
+	'' T16 smoke-test finding: read the snapshot field (frmPath.bi) -- see frmTools.frm's
+	'' cmdAdd_Click for the full explanation.
 	If pfPath->ShowModal(fOptions) = ModalResults.OK Then
 		With fOptions
-			If Not .lstIncludePaths.Items.Contains(pfPath->txtPath.Text) Then
-					.lstIncludePaths.AddItem pfPath->txtPath.Text
+			If Not .lstIncludePaths.Items.Contains(pfPath->txtPathText) Then
+					.lstIncludePaths.AddItem pfPath->txtPathText
 			Else
 				MsgBox ("This path is exists!")
 			End If
@@ -4517,8 +4524,8 @@ Private Sub frmOptions.cmdAddLibrary_Click(ByRef Designer As My.Sys.Object, ByRe
 	pfPath->ChooseFolder = True
 	If pfPath->ShowModal(fOptions) = ModalResults.OK Then
 		With fOptions
-			If Not .lstLibraryPaths.Items.Contains(pfPath->txtPath.Text) Then
-					.lstLibraryPaths.AddItem pfPath->txtPath.Text
+			If Not .lstLibraryPaths.Items.Contains(pfPath->txtPathText) Then
+					.lstLibraryPaths.AddItem pfPath->txtPathText
 			Else
 				MsgBox ("This path is exists!")
 			End If
@@ -4573,14 +4580,16 @@ Private Sub frmOptions.cmdAddEditor_Click(ByRef Sender As Control)
 	pfPath->txtPath.Text = ""
 	pfPath->txtCommandLine.Text = ""
 	pfPath->WithExtensions = True
+	'' T16 smoke-test finding: read the snapshot fields (frmPath.bi) -- see frmTools.frm's
+	'' cmdAdd_Click for the full explanation.
 	If pfPath->ShowModal(*pfrmMain) = ModalResults.OK Then
 		With lvOtherEditors.ListItems
 			Var ItemsCount = .Count
-			If .IndexOf(pfPath->txtVersion.Text) = -1 Then
-				.Add pfPath->txtVersion.Text
-				.Item(ItemsCount)->Text(1) = pfPath->txtExtensions.Text
-				.Item(ItemsCount)->Text(2) = pfPath->txtPath.Text
-				.Item(ItemsCount)->Text(3) = pfPath->txtCommandLine.Text
+			If .IndexOf(pfPath->txtVersionText) = -1 Then
+				.Add pfPath->txtVersionText
+				.Item(ItemsCount)->Text(1) = pfPath->txtExtensionsText
+				.Item(ItemsCount)->Text(2) = pfPath->txtPathText
+				.Item(ItemsCount)->Text(3) = pfPath->txtCommandLineText
 			Else
 				MsgBox ("This version is exists!")
 			End If
@@ -4600,12 +4609,12 @@ Private Sub frmOptions.cmdChangeEditor_Click(ByRef Sender As Control)
 		pfPath->txtCommandLine.Text = .SelectedItem->Text(3)
 		pfPath->WithExtensions = True
 		If pfPath->ShowModal(*pfrmMain) = ModalResults.OK Then
-			If .SelectedItem->Text(0) = pfPath->txtVersion.Text OrElse .ListItems.IndexOf(pfPath->txtVersion.Text) = -1 Then
+			If .SelectedItem->Text(0) = pfPath->txtVersionText OrElse .ListItems.IndexOf(pfPath->txtVersionText) = -1 Then
 				Var i = .ListItems.IndexOf(.SelectedItem->Text(0))
-				.SelectedItem->Text(0) = pfPath->txtVersion.Text
-				.SelectedItem->Text(1) = pfPath->txtExtensions.Text
-				.SelectedItem->Text(2) = pfPath->txtPath.Text
-				.SelectedItem->Text(3) = pfPath->txtCommandLine.Text
+				.SelectedItem->Text(0) = pfPath->txtVersionText
+				.SelectedItem->Text(1) = pfPath->txtExtensionsText
+				.SelectedItem->Text(2) = pfPath->txtPathText
+				.SelectedItem->Text(3) = pfPath->txtCommandLineText
 			Else
 				MsgBox ("This version is exists!")
 			End If

@@ -576,8 +576,10 @@ Private Sub frmTemplates.cmdChange_Click(ByRef Sender As Control)
 		End If
 		pfPath->txtPath.Text = lvRecent.SelectedItem->Text(1)
 		Dim As UString Path
+		'' T16 smoke-test finding: read the snapshot field (frmPath.bi), not txtPath.Text
+		'' directly -- see frmTools.frm's cmdAdd_Click for the full explanation.
 		If pfPath->ShowModal(Me) = ModalResults.OK Then
-			Path = pfPath->txtPath.Text
+			Path = pfPath->txtPathText
 		Else
 			Exit Sub
 		End If
@@ -608,7 +610,7 @@ Private Sub frmTemplates.cmdAdd_Click(ByRef Sender As Control)
 	pfPath->txtPath.Text = ""
 	Dim As UString Path
 	If pfPath->ShowModal(Me) = ModalResults.OK Then
-		Path = pfPath->txtPath.Text
+		Path = pfPath->txtPathText
 	Else
 		Exit Sub
 	End If

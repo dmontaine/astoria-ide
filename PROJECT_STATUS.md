@@ -1,5 +1,7 @@
 ﻿# VFBE Win64 Fork — Project Status & Handoff
 
+**Last updated:** 2026-07-10 (**Project renamed VisualFBEditor → AstoriaIDE**, `c93abbe` — full identity rename per ROADMAP §13.4, now marked done there: output binary `VisualFBEditor64.exe` → `astoria.exe`, source/project/resource files → `AstoriaIDE.bas/.rc/.vfp`/`AstoriaIDE.ico`, settings file `Settings/VisualFBEditor64.ini` → `Settings/astoria.ini` (existing settings preserved, not a fresh file), window title/splash screen/~15 dialog-title strings, README, and ~44 source-file header comments. Internal code identifiers — `VisualFBEditorApp`, `Namespace VisualFBEditor`, `WhenVisualFBEditorStarts` — deliberately left as-is (not user-facing). GitHub repo name/clone URL untouched (separate owner decision). Same commit replaced `frmAbout` with a fresh owner-authored dialog and cleared the build's last two compile warnings (ambiguous `=` in `IIf()` args, mismatched `Find()`/`ReplaceInFile()` param declarations) — compile is now genuinely 0 errors, 0 warnings. Same session: stale `Temp/Untitled.bas` scratch file deleted (`84b5bee`); and, just before, a Lazarus-style **Code/Form view top tab strip** (`tcView`) replaced the old per-tab Code/Form/Code+Form toolbar toggle buttons (`4b643af`, owner+Opus) — switching logic centralized into `TabWindow` methods (`ApplyView`/`ShowView`/`SyncViewTab`/`CurrentView`/`SetFormViewsEnabled`), ~20 former `tbrTop.Buttons.Item(...)->Checked` call sites migrated, compile-clean, owner-tested across all three views and both file types. See [CHANGELOG.md](CHANGELOG.md) for both UI-change entries.)
+
 **Last updated:** 2026-07-08 (**C4 — full `.lng`/translation-capability removal (English-only)**, compile-clean, **owner smoke-test needed before commit** — see "C4: full language-system removal" below. Earlier same day: **E1 merged into `main`** (`b078d99`) from its background-task worktree, compile-clean, owner-verified. While testing E1, owner found **"Close Project" greyed out on startup with a reloaded project** — root-caused and fixed, owner-verified: see "Startup Close-Project-greyed fix" below.)
 
 **Last updated:** 2026-07-07 (**Close Project crash+hang root-caused & fixed** — GDB-traced to a dangling tree-node `.Tag` use-after-free in `tvExplorer_SelChange` + tabs never closing; fixed via null-after-free, robust tab-close by node ancestry, and a safety bail. Also: **empty-workspace startup now prompts File → New Project** (owner design), and the **New Project / Open Project dialogs cross-navigate** via new "Open Existing Project" / "Open New Project" buttons. D1 Designer-menu greying now complete (incl. the form-close gap, fixed via `ChangeMenuItemsEnabled`). Earlier same day: Opus "Next Steps" backlog fully worked through except R5/E1/`.lng` cleanup; 13.3.A S1–S7 all Opus-reviewed & committed)  
@@ -17,22 +19,23 @@ This document captures project history, completed work, open items, and workflow
 
 ---
 
-## Current State (2026-07-06)
+## Current State (2026-07-10)
 
-**The IDE compiles clean (0 errors, 0 warnings), runs stable, and is under active UX polish.**
+**The IDE compiles clean (0 errors, 0 warnings), runs stable, is renamed to AstoriaIDE, and is under active UX polish.**
 
 | Area | Status |
 |------|--------|
-| **Core IDE** | Win64-only, compiles clean, self-hosted with bundled compiler (FBC 1.10.1) and GDB debugger |
-| **Form Designer** | Working — grey-panel bug root-caused and fixed (2026-07-06); per-form control tree + PagePanel layer navigation shipped |
+| **Core IDE** | Win64-only, compiles clean (0 errors, **0 warnings** as of `c93abbe`), self-hosted with bundled compiler (FBC 1.10.1) and GDB debugger |
+| **Identity** | Renamed VisualFBEditor → **AstoriaIDE** (2026-07-10, `c93abbe`) — binary `astoria.exe`, settings `Settings/astoria.ini`, source/project files `AstoriaIDE.bas/.rc/.vfp`; see ROADMAP §13.4 |
+| **Form Designer** | Working — grey-panel bug root-caused and fixed (2026-07-06); per-form control tree + PagePanel layer navigation shipped; Code/Form switching now via a top tab strip (`tcView`, 2026-07-10, `4b643af`), not toolbar toggle buttons |
 | **Dark mode** | Stable and enabled — title bar, menus, toolbars, tabs, central area all render dark; popup menus deferred (§13.10) |
 | **Dead code** | GTK/Linux/32-bit code physically deleted across `src/` and `mff/`; Integrated (stabs) debugger + alt-compiler backends removed; only `-gen gcc` remains |
-| **UI review** | In progress — **File** menu owner-approved (incl. Open Project); **Edit** menu owner-approved (all 25 items); **Search** → Define (F2) reliability improved (committed with S1–S4); **13.3.A S1–S7 all Opus-reviewed and committed** (see §13.3.A execution below); **View menu** is the next step-by-step target |
+| **UI review** | In progress — **File** menu owner-approved (incl. Open Project); **Edit** menu owner-approved (all 25 items); **Search** → Define (F2) reliability improved (committed with S1–S4); **13.3.A S1–S7 all Opus-reviewed and committed** (see §13.3.A execution below) — this already restructured the View menu (Fold submenu, Debug Windows split) as part of S1; **owner walkthrough/sign-off of the View menu** is the next step-by-step checkpoint |
 | **Panels** | Left/right/bottom panel pin/collapse/persistence all fixed and verified |
 | **Debugger** | GDB-only; Step, Continue, Break, Step Out, command queue, and debug-tab show/hide all working; 3 GDB items pending owner smoke test (§7) |
-| **Build** | `Compile.bat` for release, `CompileDebug.bat` for debug; `NOPAUSE=1` for agent runs |
+| **Build** | `Compile.bat` for release, `CompileDebug.bat` for debug; `NOPAUSE=1` for agent runs; output is now `astoria.exe` |
 
-**Active work:** **§13.3 step-by-step UI review — next up: the View menu** (File + Edit complete; Search → Define reliability pass shipped with S1–S4). This is the resumed backlog after the AI Agent subsystem removal completed.
+**Active work:** **§13.3 step-by-step UI review — next up: owner sign-off on the View menu** (File + Edit already signed off; the View-menu restructuring itself shipped as part of 13.3.A S1, so this checkpoint is a walkthrough/approval, not new design work). This is the resumed backlog after the AI Agent subsystem removal completed.
 
 The **AI Agent subsystem removal** (owner decision, 2026-07-09 — see "⭐ COMPLETED SUB-PROJECT" below) is **DONE**: AI1–AI14 complete, compile-clean, committed (`924a814`) and pushed, Opus-reviewed (`7e9c228`) and owner-reviewed (2026-07-10). With it closed, the sequencing hold it placed on the rest of the backlog is lifted — the §13.3 View-menu review and the deferred Phase F structural items (low priority) are unblocked.
 
@@ -547,9 +550,9 @@ This fork (**VFBEWin64**) is a **Win64-only** branch of upstream VisualFBEditor:
 **Build outputs (repo root):**
 
 - `mff64.dll` — `Controls\MyFbFramework\mff64.dll`
-- `VisualFBEditor64.exe` — main IDE
+- `astoria.exe` — main IDE (renamed from `VisualFBEditor64.exe`, 2026-07-10, §13.4)
 
-**Settings:** `Settings/VisualFBEditor64.ini` (runtime; path via `ExePath/Settings/...`)
+**Settings:** `Settings/astoria.ini` (renamed from `Settings/VisualFBEditor64.ini`, 2026-07-10 — existing settings preserved; runtime path via `ExePath/Settings/...`)
 
 ### Target audience
 
@@ -602,13 +605,13 @@ branch  main
 
 ### Build before running the IDE
 
-Close any running `VisualFBEditor64.exe` first (`mff64.dll` is locked while the IDE runs).
+Close any running `astoria.exe` first (`mff64.dll` is locked while the IDE runs).
 
 ```powershell
-cd C:\Users\dmont\VisualFBEditor
+cd C:\Users\don\Astoria-IDE
 set NOPAUSE=1
 Compile.bat
-.\VisualFBEditor64.exe
+.\astoria.exe
 ```
 
 - **Release:** `Compile.bat` (root)
@@ -732,7 +735,7 @@ All completed items have been archived to [CHANGELOG.md](CHANGELOG.md). See that
 
 > **Handoff note (Claude Code):** Bottom panel **implementation bugs are resolved**, and both left and right panel Pin-click bugs are also now fixed (§4, §6). Batch 2.75.3 (dead-code deletion) **has already happened** — the owner explicitly directed the team to proceed before this checklist was fully signed off, rather than treating it as a hard gate. This checklist is now a **regression-validation pass** covering both the original panel work and the since-completed dead-code deletion, not a pre-2.75.3 gate.
 
-Run a full pass on **latest** `VisualFBEditor64.exe` after `Compile.bat`. Check each box when verified.
+Run a full pass on **latest** `astoria.exe` (formerly `VisualFBEditor64.exe`, renamed §13.4) after `Compile.bat`. Check each box when verified.
 
 ### Debugger smoke test (new — added post-2.75.3)
 
@@ -812,7 +815,7 @@ All items above passed **before** the owner separately found the critical `_WIN3
 ### Optional / housekeeping
 
 - `docompile.bat` — gitignored local helper at repo root (owner convenience)
-- Consider `.gitignore` for `VisualFBEditor64.exe` if binary commits are undesired (currently committed like initial import)
+- Consider `.gitignore` for `astoria.exe` (formerly `VisualFBEditor64.exe`) if binary commits are undesired (currently committed like initial import)
 
 ---
 
@@ -855,10 +858,10 @@ All items above passed **before** the owner separately found the critical `_WIN3
 
 ### Unscheduled / future planning
 
-- [ ] **13.3 UI review** - File + Edit owner-approved; Search → Define (F2) reliability improved (uncommitted); **View menu** is next after Search sign-off. **Full designed approachability plan in [ROADMAP.md](ROADMAP.md) §13.3.A** (progressive-disclosure model, no easy/advanced mode; O1–O4 owner-approved 2026-07-06). **S1–S4 executed (Sonnet, 2026-07-06) — see [13.3.A execution](#133a-execution--s1s4-done-sonnet-session-2026-07-06--not-committed-awaiting-opus-review) above for full detail, issues found/fixed, and deferred items; uncommitted, awaiting Opus diff review before commit/push.** S5–S7 (Delete confirm dialogs, Options-dialog audit, docs cleanup) remain queued in ROADMAP.
+- [ ] **13.3 UI review** - File + Edit owner-approved; Search → Define (F2) reliability improved. **13.3.A S1–S7 executed and committed (Sonnet 2026-07-06/07, Opus-reviewed)** — see [13.3.A execution](#133a-execution--s1s4-done-sonnet-2026-07-06-opus-reviewed--committed-2026-07-07) above; this already restructured every menu including View (Fold submenu, Debug Windows split). **Owner walkthrough/sign-off of the View menu** is the next step-by-step checkpoint (design/implementation done, approval pending).
 - [ ] **13.2.1.1 Standardize indentation** — convert mixed tabs/spaces across all source files (§13.2)
-- [ ] **13.4 Rename the project** (e.g. "ABStudio") — deeper than cosmetic; dedicated pass needed (§13.4)
-- [ ] **13.5 Standard Windows installer** — Inno Setup or WiX; depends on project rename decision (§13.5)
+- [x] ~~**13.4 Rename the project**~~ — **DONE 2026-07-10** (`c93abbe`): renamed to **AstoriaIDE** (`astoria.exe`, `Settings/astoria.ini`, `AstoriaIDE.bas/.rc/.vfp`); see ROADMAP §13.4 for the full touch-point list. GitHub repo name/clone URL intentionally left unchanged (separate decision).
+- [ ] **13.5 Standard Windows installer** — Inno Setup or WiX; project-rename decision is now resolved (§13.4 done), so this is unblocked (§13.5)
 - [ ] **13.6 Full review/expansion of Examples/** — re-verify all examples compile; fix `WellCOM` DllMain; add appealing demos (§13.6)
 - [x] ~~**13.7 Enhance AI integration**~~ — **REVERSED by owner 2026-07-09**: AI subsystem being removed entirely instead (see ⭐ AI Agent subsystem removal sub-project above; ROADMAP.md §13.7)
 - [ ] **Upstream sync strategy** — this fork intentionally diverges; merge only with explicit plan
@@ -946,7 +949,7 @@ Includes:
 - **Minimize scope** — smallest correct diff; match existing code style
 - **No commits** unless user explicitly asks
 - **Every session ends with a compile-clean commit + push to GitHub** (added 2026-07-03; compile-clean gate added 2026-07-03 after a second-AI audit flagged the risk of pushing broken intermediate state; **remote switched from Codeberg to GitHub 2026-07-09, Codeberg retired**) — run `Compile.bat` and confirm **0 errors** first. Only if the compile is clean should you commit any outstanding working-tree changes (status doc updates, INI/scratch state, etc.) with a sensible message, then `git push origin main`, as the last action before signing off for the day. If the compile fails and can't be fixed in-session, say so and hold off on the commit/push rather than pushing broken code. This is a standing instruction, not a one-time request — don't wait to be asked again in future sessions.
-- **INI key migration** (added 2026-07-03, second-AI audit) — new keys must ship with a default (never assume an existing user's INI has it); never rename or repurpose an existing key without a migration read of the old key name first, so existing users' settings aren't silently orphaned. Relevant now that §13.4's rename will touch `Settings/VisualFBEditor64.ini`, but applies to any INI key work.
+- **INI key migration** (added 2026-07-03, second-AI audit) — new keys must ship with a default (never assume an existing user's INI has it); never rename or repurpose an existing key without a migration read of the old key name first, so existing users' settings aren't silently orphaned. This was the rule §13.4's rename followed when it renamed `Settings/VisualFBEditor64.ini` → `Settings/astoria.ini` (existing settings preserved, not a fresh file); applies to any INI key work going forward.
 - **WinAPI only** — do not reintroduce GTK/Linux IDE paths
 - Close running IDE before rebuild
 - `set NOPAUSE=1` for agent compile runs
@@ -960,10 +963,10 @@ Includes:
 
 | Area | Files |
 |------|--------|
-| Entry point | `src/VisualFBEditor.bas` (`_NOT_AUTORUN_FORMS_`) |
+| Entry point | `src/AstoriaIDE.bas` (renamed from `src/VisualFBEditor.bas`, §13.4) (`_NOT_AUTORUN_FORMS_`) |
 | Main UI & panels | `src/Main.bas`, `src/Main.bi` |
-| Toolbar / commands | `src/VisualFBEditor.bas` (`PinBottom`, etc.) |
-| Settings load/save | `src/SettingsService.bas`, `Settings/VisualFBEditor64.ini` |
+| Toolbar / commands | `src/AstoriaIDE.bas` (`PinBottom`, etc.) |
+| Settings load/save | `src/SettingsService.bas`, `Settings/astoria.ini` |
 | Tab editor chrome | `src/TabWindow.bas` |
 | Splash | `src/frmSplash.frm` |
 | Framework | `Controls/MyFbFramework/mff/` → `mff64.dll` (`TabControl.DetachTab` added 2026-07-05) |
@@ -1082,9 +1085,9 @@ Full enhancement specs archived in [ROADMAP.md](ROADMAP.md). Quick reference:
 |----|-------------|--------|
 | 13.1 | Evaluate later GCC version | **Closed** — evaluated, declined |
 | 13.2 | Structured programming pass (4 phases) | Phases 1-4 mostly complete; 2.1.1 indentation + 2.2.3 file splits deferred |
-| 13.3 | UI evaluation & modernization | **In progress** — File + Edit owner-approved; Search → Define (F2) reliability improved (uncommitted); View menu next |
-| 13.4 | Rename project ("ABStudio") | Unscheduled — dedicated pass needed |
-| 13.5 | Standard Windows installer | Unscheduled — depends on 13.4 |
+| 13.3 | UI evaluation & modernization | **In progress** — File + Edit owner-approved; 13.3.A S1–S7 committed (restructured every menu incl. View); owner sign-off on View menu next |
+| 13.4 | Rename project | **Done (2026-07-10)** — renamed to **AstoriaIDE** (`c93abbe`) |
+| 13.5 | Standard Windows installer | Unscheduled — 13.4 dependency now resolved |
 | 13.6 | Full review/expansion of Examples/ | Unscheduled — doc/polish phase |
 | 13.7 | ~~Enhance AI integration~~ | **Reversed (owner, 2026-07-09)** — AI subsystem being removed entirely; see AI-removal sub-project |
 | 13.8 | Design-workspace status bar | Deferred — non-trivial |

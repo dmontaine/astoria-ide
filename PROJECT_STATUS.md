@@ -950,6 +950,7 @@ All items above passed **before** the owner separately found the critical `_WIN3
 - [ ] **13.9 Blank Designer page on cold-open** — `PagePanel` page shows blank until a control is selected; cosmetic only (§13.9)
 - [ ] **13.10 Dark mode: owner-drawn popup menus + input-field polish** — `WM_DRAWITEM ODT_MENU` handler is an empty stub; input-field faces stay light (§13.10)
 - [ ] **13.11 Dark mode: dark dialog backgrounds** — `WM_ERASEBKGND` not filled with dark brush; gate on window class (§13.11)
+- [ ] **13.12 Dark mode: Options ▸ Apply doesn't fully re-theme open panels live** — owner smoke test 2026-07-11: toggling Dark Mode + Apply updates some controls immediately (a text box confirmed) but others stay light until relaunch; full theme is correct on next launch. `SetColors` (called on Apply) is a false lead — syntax-highlighting colors only, not the app theme; real mechanism is `App.DarkMode` → `SetDarkMode(Value, False)` (`Application.bas:53-56`), whose implementation wasn't located before this was deferred. See ROADMAP §13.12 for the traced call chain (§13.12)
 - [ ] **13.8 Design-workspace status bar** — three-cell status bar docked to `pnlForm`; researched, non-trivial (§13.8)
 
 ### Unscheduled / future planning
@@ -1191,6 +1192,7 @@ Full enhancement specs archived in [ROADMAP.md](ROADMAP.md). Quick reference:
 | 13.9 | Blank Designer page on cold-open | Deferred — cosmetic only |
 | 13.10 | Dark mode popup menus + input polish | Deferred |
 | 13.11 | Dark mode dialog backgrounds | Deferred |
+| 13.12 | Dark mode: Options Apply doesn't fully re-theme live | Deferred — owner smoke test 2026-07-11 |
 
 ---
 

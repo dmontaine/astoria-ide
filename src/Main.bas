@@ -36,6 +36,7 @@
 #include once "mff/HTTP.bi"
 #include once "fbthread.bi"
 #include once "vbcompat.bi"
+#include once "win/shellapi.bi"
 
 Using My.Sys.Forms
 Using My.Sys.Drawing
@@ -2823,11 +2824,27 @@ Function DeleteProject() As Boolean
 		'' silently no-ops "rd" if the project we just closed left us sitting inside
 		'' it. Step out to somewhere unrelated to the project first.
 		ChDir ExePath
-		'' Mechanical adaptation to PipeCmd's T3-reworked signature only --
-		'' UseShell:=True since "rd" is a cmd builtin, not a standalone exe.
-		'' This whole shelled delete (silent on failure) is T4's to replace
-		'' with SHFileOperationW; not touched here. See PROJECT_STATUS T3/T4.
-		PipeCmd "rd /s /q """ & ProjectPath & """", True
+		'' T4: native delete via SHFileOperationW instead of a shelled "rd /s /q" --
+		'' no cmd.exe round-trip, sends the folder to the Recycle Bin (FOF_ALLOWUNDO)
+		'' rather than a permanent delete, and a failure surfaces through our own
+		'' MsgBox (F1 feedback-channel policy: irreversible action = MsgBox tier)
+		'' instead of failing silently the way the shelled "rd" did.
+		'' pFrom must be double-null-terminated; ZeroMemory the whole fixed buffer
+		'' first so everything past the path's own terminator is guaranteed zero
+		'' rather than whatever was already on the stack.
+		Dim As WString * 1024 wDeletePath
+		ZeroMemory(@wDeletePath, SizeOf(wDeletePath))
+		wDeletePath = ProjectPath
+		Dim As SHFILEOPSTRUCTW fos
+		ZeroMemory(@fos, SizeOf(fos))
+		fos.wFunc = FO_DELETE
+		fos.pFrom = @wDeletePath
+		fos.fFlags = FOF_ALLOWUNDO Or FOF_NO_UI
+		Dim As Long DeleteResult = SHFileOperationW(@fos)
+		If DeleteResult <> 0 OrElse fos.fAnyOperationsAborted Then
+			MsgBox ("Couldn't delete the project folder") & ":" & WChr(13,10) & ProjectPath, "Astoria IDE", mtError
+			Return False
+		End If
 	End If
 	Return True
 End Function

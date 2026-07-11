@@ -5,7 +5,7 @@
 **Last updated:** 2026-07-08 (**C4 — full `.lng`/translation-capability removal (English-only)**, compile-clean, **owner smoke-test needed before commit** — see "C4: full language-system removal" below. Earlier same day: **E1 merged into `main`** (`b078d99`) from its background-task worktree, compile-clean, owner-verified. While testing E1, owner found **"Close Project" greyed out on startup with a reloaded project** — root-caused and fixed, owner-verified: see "Startup Close-Project-greyed fix" below.)
 
 **Last updated:** 2026-07-07 (**Close Project crash+hang root-caused & fixed** — GDB-traced to a dangling tree-node `.Tag` use-after-free in `tvExplorer_SelChange` + tabs never closing; fixed via null-after-free, robust tab-close by node ancestry, and a safety bail. Also: **empty-workspace startup now prompts File → New Project** (owner design), and the **New Project / Open Project dialogs cross-navigate** via new "Open Existing Project" / "Open New Project" buttons. D1 Designer-menu greying now complete (incl. the form-close gap, fixed via `ChangeMenuItemsEnabled`). Earlier same day: Opus "Next Steps" backlog fully worked through except R5/E1/`.lng` cleanup; 13.3.A S1–S7 all Opus-reviewed & committed)  
-**Repository:** [github.com/dmontaine/Astoria-IDE](https://github.com/dmontaine/Astoria-IDE) (Codeberg retired 2026-07-09 — see below)  
+**Repository:** [github.com/dmontaine/astoria-ide](https://github.com/dmontaine/astoria-ide) (renamed lowercase 2026-07-10, following the AstoriaIDE rebrand — GitHub redirects the old `Astoria-IDE` URL; Codeberg retired 2026-07-09 — see below)  
 **Local path:** `C:\Users\don\Astoria-IDE`  
 **Owner:** bigriverguy (`dmontaine@gmail.com`)
 
@@ -593,11 +593,11 @@ Common thread: **approachability and cohesion over power-user configurability.**
 ### Git remote
 
 ```
-origin  https://github.com/dmontaine/Astoria-IDE
+origin  https://github.com/dmontaine/astoria-ide.git
 branch  main
 ```
 
-**Codeberg retired 2026-07-09** — `bigriverguy/VFBEWin64` on Codeberg is no longer the working repo; GitHub (`dmontaine/Astoria-IDE`) is now the sole remote. The Codeberg repo received a final push with its README replaced by a retirement notice pointing here. The old SSH key (`~/.ssh/id_ed25519_codeberg`, host `codeberg.org` in `~/.ssh/config`) is no longer used for this project.
+**Codeberg retired 2026-07-09** — `bigriverguy/VFBEWin64` on Codeberg is no longer the working repo; GitHub (`dmontaine/astoria-ide`, renamed lowercase 2026-07-10 following the AstoriaIDE rebrand) is now the sole remote. The Codeberg repo received a final push with its README replaced by a retirement notice pointing here. The old SSH key (`~/.ssh/id_ed25519_codeberg`, host `codeberg.org` in `~/.ssh/config`) is no longer used for this project.
 
 **Note:** Git may not be on PATH in all shells; full path:
 

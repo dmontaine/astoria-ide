@@ -3027,6 +3027,7 @@ End Sub
 
 	Function TimerProcGDB() As Integer
 		If fcurlig < 1 AndAlso fcurlig <> -2 Then Return 1
+		DbgTrace("Timer.act", "fcurlig=" & fcurlig & " branch=" & IIf(fcurlig <> -2, "highlight", "output") & " file=" & DbgTraceEsc(CurrentFile))
 		ChangeEnabledDebug True, False, True
 		If fcurlig <> -2 Then
 			Dim As TabWindow Ptr tb = Cast(TabWindow Ptr, ptabCode->SelectedTab)
@@ -4714,6 +4715,7 @@ tlockSave = MutexCreate()
 tlockToDo = MutexCreate()
 tlockGDB = MutexCreate()
 tlockSuggestions = MutexCreate()
+tlockDbgTrace = MutexCreate()	' DR Phase 1 trace (strip after Phase 1)
 
 Sub StartOfLoadFunctions
 	LoadFunctionsCount += 1

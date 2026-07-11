@@ -237,7 +237,7 @@ Namespace My.Sys.Forms
 			MsgBox ("Don't set breakpoint to this line"), "AstoriaIDE", mtWarning
 			This.SetFocus
 		Else
-			FECLine->Breakpoint = Not FECLine->Breakpoint
+			DbgTrace("EC.Breakpoint", "line=" & FSelEndLine & " CurExecutedLine=" & This.CurExecutedLine & " CurEC_set=" & CInt(CurEC <> 0)) : FECLine->Breakpoint = Not FECLine->Breakpoint
 			PaintControl
 		End If
 	End Sub

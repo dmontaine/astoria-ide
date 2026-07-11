@@ -328,6 +328,9 @@ Sub EnqueueDebugCommand(cmd As String)
 		Dim As Integer tail = (DebugCommandQueueHead + DebugCommandQueueCount) Mod DEBUG_CMD_QUEUE_SIZE
 		DebugCommandQueue(tail) = cmd
 		DebugCommandQueueCount += 1
+		DbgTrace("ENQ", "cmd=" & DbgTraceEsc(cmd) & " count=" & DebugCommandQueueCount)
+	Else
+		DbgTrace("ENQ.DROP", "cmd=" & DbgTraceEsc(cmd) & " FULL count=" & DebugCommandQueueCount)
 	End If
 	MutexUnlock tlockGDB
 End Sub
@@ -349,6 +352,37 @@ Function DequeueDebugCommandLocked() As String
 	End If
 	Return cmd
 End Function
+
+' ==== DR Phase 1 debugger trace (instrumentation only; strip after Phase 1) ====
+' Uses its own mutex (tlockDbgTrace, created in Main.bas) so it never perturbs
+' tlockGDB. bDbgTrace gates it at runtime. Appends one line per event, prefixed
+' with GetTickCount + the calling thread id, to Settings\debug_trace.log so the
+' worker/UI interleaving (DR-1/3/6/7) and the fcurlig/paint handoff (DR-2/4) are
+' visible. DbgTrace only writes -- no behaviour change.
+Dim Shared As Boolean bDbgTrace = True
+
+Function DbgTraceEsc(ByRef s As String, ByVal iMax As Integer = 200) As String
+	Dim As String r = s
+	If Len(r) > iMax Then r = Left(r, iMax) & ".." & "(" & Len(s) & ")"
+	r = Replace(r, Chr(13), "\r")
+	r = Replace(r, Chr(10), "\n")
+	r = Replace(r, Chr(9), "\t")
+	r = Replace(r, Chr(26), "<1A>")
+	Return r
+End Function
+
+Sub DbgTrace(ByRef tag As String, ByRef info As String = "")
+	If Not bDbgTrace Then Exit Sub
+	If tlockDbgTrace = 0 Then Exit Sub
+	MutexLock tlockDbgTrace
+	Dim As Integer f = FreeFile
+	If Open(ExePath & "\Settings\debug_trace.log" For Append As #f) = 0 Then
+		Print #f, GetTickCount() & " tid=" & GetCurrentThreadId() & " [" & tag & "] " & info
+		Close #f
+	End If
+	MutexUnlock tlockDbgTrace
+End Sub
+' ==== end DR Phase 1 trace ====
 
 	Dim Shared As Long pIn, pOut
 	
@@ -452,6 +486,7 @@ End Function
 	Function readpipe(WithoutAnswer As Boolean = False, WithoutShowing As Boolean = False) As String
 
 		Dim As String sRet
+		DbgTrace("READ.enter", "wa=" & WithoutAnswer & " ws=" & WithoutShowing)
 
 			#define BufferSize 2048
 			Dim As Integer Count
@@ -469,9 +504,9 @@ End Function
 				' fixes a tight infinite loop the old blocking read hit (ReadFile returns 0 bytes
 				' repeatedly). Behaviour is unchanged whenever data is actually available.
 				Do
-					If FormClosing Then Return sOutput
+					If FormClosing Then DbgTrace("READ.bail", "FormClosing") : Return sOutput
 					dwAvail = 0
-					If PeekNamedPipe(hReadPipe, NULL, 0, NULL, @dwAvail, NULL) = 0 Then Return sOutput
+					If PeekNamedPipe(hReadPipe, NULL, 0, NULL, @dwAvail, NULL) = 0 Then DbgTrace("READ.bail", "peek=0 broken-pipe") : Return sOutput
 					If dwAvail > 0 Then Exit Do
 					Sleep 5, 1
 				Loop
@@ -483,12 +518,14 @@ End Function
 					writepipe !"\n"
 				End If
 				If Not WithoutShowing Then
+					DbgTrace("SHOWMSG.readpipe", DbgTraceEsc(sBuffer))
 					ShowMessages sBuffer, False
 				End If
 				'?sBuffer
 			Loop While Not (CBool(InStr(sOutput, Chr(10) & "(gdb) ")) OrElse CBool(InStr(sOutput, "~*~(gdb) ")) OrElse IIf(WithoutAnswer, CBool(sOutput = "(gdb) "), StartsWith(sOutput, "(gdb) ") AndAlso CBool(Len(sOutput) > 6 OrElse Count > 1)))
 			'WriteFile(hWritePipe, @s, Len(s), Cast(Any Ptr, @iNumberOfBytesWritten), NULL) =  '
 			sRet = sOutput
+			DbgTrace("READ.ret", "cnt=" & Count & " " & DbgTraceEsc(sRet))
 
 			'		Dim As Integer iTotalBytesAvail,iNumberOfBytesWritten
 			'		Dim As String sRet
@@ -518,7 +555,8 @@ End Function
 		
 		Sub writepipe(ByRef s As ZString, iTime As Long = 30)
 			Dim As Integer iNumberOfBytesWritten
-			WriteFile(hWritePipe, @s, Len(s), Cast(Any Ptr, @iNumberOfBytesWritten), NULL)
+			Dim As BOOL wok = WriteFile(hWritePipe, @s, Len(s), Cast(Any Ptr, @iNumberOfBytesWritten), NULL)
+			DbgTrace("WRITE", "ok=" & wok & " n=" & iNumberOfBytesWritten & " " & DbgTraceEsc(s))
 			'Sleep (iTime)
 		End Sub
 		
@@ -527,7 +565,7 @@ End Function
 		#undef Updateinfoxserver
 		Declare Sub Updateinfoxserver(ic As Long=100)
 		Sub Updateinfoxserver(ic As Long=100)
-			
+			DbgTrace("Updateinfox", "ic=" & ic & " (DoEvents x" & (ic + 1) & ")")
 			For i As Long = 0 To ic
 				
 				pApp->DoEvents
@@ -718,9 +756,10 @@ End Function
 	End Sub
 	
 	Function line_highlight(iFlagStepParam As Long = 0) As Long
-		
+
 		Dim As Long iFind = InStr(szDataForPipe, Chr(26, 26))
-		
+		DbgTrace("line_hl.enter", "annot=" & iFind & " raw=" & DbgTraceEsc(Left(szDataForPipe, 160)))
+
 		If iFind Then
 			
 				
@@ -763,6 +802,7 @@ End Function
 					'				End If
 					CurrentFile = sFile
 					fcurlig = Val(sLine)
+					DbgTrace("line_hl.parsed", "fcurlig=" & fcurlig & " sFile=" & DbgTraceEsc(sFile) & " sLine=" & DbgTraceEsc(sLine) & " sPos=" & DbgTraceEsc(sPos))
 					'				Dim As TabWindow Ptr tb = AddTab(sFile)
 					'				If tb Then
 					'					ChangeEnabledDebug True, False, True
@@ -1832,7 +1872,7 @@ End Function
 		' own refusal, so F9 on a comment line no longer plants a phantom GDB breakpoint while the
 		' editor (correctly) declines the local toggle. This is the "move the comment check ahead of
 		' set_bp" fix from the attempt-#1 post-mortem.
-		Dim As String sLineTrim = LTrim(*ecLine->Text, Any !"\t ")
+		DbgTrace("set_bp.enter", "line=" & iSelEndLine & " ecBP=" & ecLine->Breakpoint & " Running=" & Running) : Dim As String sLineTrim = LTrim(*ecLine->Text, Any !"\t ")
 		If CInt(sLineTrim = "") OrElse CInt(StartsWith(sLineTrim, "'")) OrElse CInt(StartsWith(LCase(sLineTrim) & " ", "rem ")) Then Exit Sub
 
 		' T6 (F-R1): the debug worker thread (run_debug) and this UI-thread call share the same pair of
@@ -1843,13 +1883,13 @@ End Function
 		' we hold it). If Running, the local breakpoint icon still toggles (in EditControl.Breakpoint) and
 		' run_debug re-sends every editor breakpoint on the next run.
 		MutexLock tlockGDB
-		If Running Then MutexUnlock tlockGDB : Exit Sub
+		If Running Then DbgTrace("set_bp.bail", "Running") : MutexUnlock tlockGDB : Exit Sub
 
 		If ecLine->Breakpoint Then
 
 			If Not Temporary Then
 
-				run_pipe_write(!"clear " & sTemp & !"\n")
+				DbgTrace("set_bp.clear", DbgTraceEsc(sTemp)) : run_pipe_write(!"clear " & sTemp & !"\n")
 
 				readpipe()
 
@@ -1859,13 +1899,13 @@ End Function
 
 		ElseIf Temporary Then
 			
-			run_pipe_write(!"tbreak " & sTemp & !"\n")
+			DbgTrace("set_bp.tbreak", DbgTraceEsc(sTemp)) : run_pipe_write(!"tbreak " & sTemp & !"\n")
 			
 			readpipe()
 			
 		Else
 			
-			run_pipe_write(!"break " & sTemp & !"\n")
+			DbgTrace("set_bp.break", DbgTraceEsc(sTemp)) : run_pipe_write(!"break " & sTemp & !"\n")
 			
 			readpipe()
 			
@@ -2055,6 +2095,7 @@ End Function
 			Do
 				Dim As String cmd = DequeueDebugCommandLocked()
 				If cmd <> "" Then
+					DbgTrace("LOOP.send", "cmd=" & DbgTraceEsc(cmd) & " Running(before)=" & Running & " qleft=" & DebugCommandQueueCount)
 					If Not bGDBLocked Then MutexLock tlockGDB: bGDBLocked = True
 					If cmd = !"q\n" Then
 						ThreadsEnter
@@ -2068,11 +2109,13 @@ End Function
 					End If
 					Running = True
 				ElseIf bPendingDebugPanelRefresh Then
+					DbgTrace("LOOP.refresh", "")
 					bPendingDebugPanelRefresh = False
 					If Not bGDBLocked Then MutexLock tlockGDB: bGDBLocked = True
 					RefreshDebugPanelsAfterStop()
 					If bGDBLocked Then MutexUnlock tlockGDB: bGDBLocked = False
 				ElseIf Running Then
+					DbgTrace("LOOP.read.begin", "")
 					If bGDBLocked Then MutexUnlock tlockGDB: bGDBLocked = False
 					Result = readpipe(True)
 					If Not bGDBLocked Then MutexLock tlockGDB: bGDBLocked = True
@@ -2132,7 +2175,7 @@ End Function
 						WatchIndex = -1
 					Else
 						fcurlig = -2
-						line_highlight iStateMenu
+						line_highlight iStateMenu : DbgTrace("LOOP.afterstop", "fcurlig=" & fcurlig)
 						If iFlagStartDebug = 0 Then
 							If bGDBLocked Then MutexUnlock tlockGDB: bGDBLocked = False
 							Exit Do
@@ -2263,7 +2306,7 @@ End Function
 				
 				readpipe()
 				
-				Var h = OpenProcess(PROCESS_ALL_ACCESS , 0 , iGlPid)
+				DbgTrace("kill_debug.terminate", "iGlPid=" & iGlPid) : Var h = OpenProcess(PROCESS_ALL_ACCESS , 0 , iGlPid)
 				
 				TerminateProcess(h , 1)
 				
@@ -2339,9 +2382,9 @@ End Function
 		
 		'If Len(sfiles_array(0)) Then
 		
-		writepipe(!"q\n")
+		DbgTrace("deinit.enter", "") : writepipe(!"q\n")
 		
-			CloseHandle(hReadPipe)
+			DbgTrace("deinit.closehandles+unlock", "") : CloseHandle(hReadPipe)
 			CloseHandle(hWritePipe)
 		
 		'EndIf

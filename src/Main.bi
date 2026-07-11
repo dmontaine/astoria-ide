@@ -33,6 +33,10 @@
 	#define WindowsSlash "\"
 	#define UnixSlash "/"
 
+	' --- DR Phase 1 debugger trace (instrumentation only; strip after Phase 1) ---
+	Declare Sub DbgTrace(ByRef tag As String, ByRef info As String = "")
+	Declare Function DbgTraceEsc(ByRef s As String, ByVal iMax As Integer = 200) As String
+
 	Type WStringOrStringList As WStringList
 	Type WStringOrStringListItem As WStringListItem
 
@@ -125,6 +129,7 @@ Common Shared As WString Ptr DefaultCompiler64, CurrentCompiler64
 Common Shared As WString Ptr MakeToolPath1, MakeToolPath2, TerminalPath, Compiler64Path
 Common Shared As WString Ptr Compiler64Arguments, Make1Arguments, Make2Arguments, RunArguments, Debug64Arguments
 Common Shared As Any Ptr tlock, tlockSave, tlockToDo, tlockGDB, tlockSuggestions
+Common Shared As Any Ptr tlockDbgTrace	' DR Phase 1 trace (strip after Phase 1)
 
 Type Library
 	Name As UString

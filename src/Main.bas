@@ -1461,15 +1461,25 @@ Sub AddMRUListOnly(ByRef FileFolderName As WString, ByRef MRUList As WStringList
 	MRUList.Add FileFolderName_
 End Sub
 
-Sub AddMRU(ByRef FileFolderName As WString, ByRef MRUFilesFolders As WStringList, miRecentFilesFolders As MenuItem Ptr, ByRef MRUType As String)
-	AddMRUListOnly FileFolderName, MRUFilesFolders
+'' B3: shared by AddMRU (one new file added this session) and the startup population
+'' below (the whole list, freshly loaded from the INI) -- rebuilds the submenu's items
+'' from whatever is currently in MRUFilesFolders and greys the parent item out when
+'' the list is empty, rather than leaving stale items or an always-enabled empty menu.
+Sub RebuildMRUMenu(ByRef MRUFilesFolders As WStringList, miRecentFilesFolders As MenuItem Ptr, ByRef MRUType As String)
 	miRecentFilesFolders->Clear
 	For i As Integer = 0 To MRUFilesFolders.Count - 1
 		miRecentFilesFolders->Add(MRUFilesFolders.Item(i), "", MRUFilesFolders.Item(i), @mClickMRU, , i)
 	Next
-	miRecentFilesFolders->Add("-")
-	miRecentFilesFolders->Add(("Clear Recently Opened"), "", "Clear" & MRUType, @mClickMRU)
-	If miRecentFilesFolders->Enabled = False Then miRecentFilesFolders->Enabled = True
+	If MRUFilesFolders.Count > 0 Then
+		miRecentFilesFolders->Add("-")
+		miRecentFilesFolders->Add(("Clear Recently Opened"), "", "Clear" & MRUType, @mClickMRU)
+	End If
+	miRecentFilesFolders->Enabled = (MRUFilesFolders.Count > 0)
+End Sub
+
+Sub AddMRU(ByRef FileFolderName As WString, ByRef MRUFilesFolders As WStringList, miRecentFilesFolders As MenuItem Ptr, ByRef MRUType As String)
+	AddMRUListOnly FileFolderName, MRUFilesFolders
+	RebuildMRUMenu MRUFilesFolders, miRecentFilesFolders, MRUType
 End Sub
 
 Sub AddMRUFile(ByRef FileName As WString)
@@ -6016,12 +6026,17 @@ Sub CreateMenusAndToolBars
 	Next
 
 	miRecentFiles = miFile->Add(("Recent Files"), "", "RecentFilesMRU", @mClick)
-	miRecentFiles->Visible = False
 	For i As Integer = 0 To miRecentMax
 		sTmp = SanitizeIniOptionalPath(iniSettings.ReadString("MRUFiles", "MRUFile_0" & WStr(i), ""))
 		If Trim(sTmp) <> "" Then MRUFiles.Add sTmp
 	Next
 	SanitizeMRUListsOnLoad()
+	'' B3: was stuck Visible = False here forever (never restored elsewhere) and never
+	'' populated from the just-loaded INI list -- the whole feature was inaccessible until
+	'' AddMRUFile happened to run later in the session (e.g. opening a file), at which point
+	'' it worked correctly but only because AddMRU rebuilds unconditionally, not because
+	'' anything here had shown it. Populate + enable/disable immediately instead.
+	RebuildMRUMenu MRUFiles, miRecentFiles, "Files"
 
 	miFile->Add("-")
 	'' 13.3.A S5: Delete Project/Delete File regrouped into their own bracketed group, well away

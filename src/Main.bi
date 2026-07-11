@@ -204,7 +204,8 @@ Declare Sub SanitizeMRUListsOnLoad()
 Declare Sub AddFromTemplates
 Declare Sub AddFilesToProject
 Declare Sub RestoreStatusText
-Declare Sub OpenUrl(ByVal url As String)
+Declare Sub OpenUrl(ByRef url As WString)
+Declare Sub RunOtherEditorTool(Param As Any Ptr)
 Declare Function AddProject(ByRef FileName As WString = "", pFilesList As WStringList Ptr = 0, tn As TreeNode Ptr = 0, bNew As Boolean = False) As TreeNode Ptr
 Declare Function CreatePendingProjectFile(ByRef TemplatePath As WString, ByRef SuggestedBaseName As WString, tnParent As TreeNode Ptr, bOpenTab As Boolean = True) As TreeNode Ptr
 Declare Function SaveProject(ByRef tn As TreeNode Ptr, bWithQuestion As Boolean = False) As Boolean

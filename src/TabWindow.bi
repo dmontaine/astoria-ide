@@ -394,7 +394,8 @@ Declare Sub lvProperties_ItemExpanding(ByRef Designer As My.Sys.Object, ByRef Se
 Declare Function SplitError(ByRef sLine As WString, ByRef ErrFileName As WString Ptr, ByRef ErrTitle As WString Ptr, ByRef ErrorLine As Integer) As UShort
 Declare Sub SelectError(ByRef FileName As WString, iLine As Integer, tabw As TabWindow Ptr = 0)
 
-Declare Sub PipeCmd(ByRef file As WString, ByRef cmd As WString, MainThread As Boolean = True)
+Declare Sub PipeCmd(ByRef cmd As WString, UseShell As Boolean = False)
+Declare Function CommandTargetIsBatchFile(ByRef cmd As WString) As Boolean
 
 
 Declare Sub GetIncludeFiles(ByRef Content As EditControlContent, Project As ProjectElement Ptr)

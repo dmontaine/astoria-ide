@@ -10964,24 +10964,54 @@ Function Err2Description(Code As Integer) ByRef As WString
 	End Select
 End Function
 
-Sub PipeCmd(ByRef file As WString, ByRef cmd As WString, MainThread As Boolean = True)
-	Dim As WString Ptr fileW, cmdW
-	'WLet fileW, file
-	'WLet cmdW, cmd
-		WLet(cmdW, "cmd /c """ + cmd + """|clip")
-		Dim PI As PROCESS_INFORMATION
-		Dim SI As STARTUPINFO
-		SI.wShowWindow = SW_HIDE
-		SI.cb = SizeOf(STARTUPINFO)
-		SI.dwFlags = STARTF_USESHOWWINDOW
-		If CreateProcess(0, cmdW, 0, 0, 1, NORMAL_PRIORITY_CLASS, 0, 0, @SI, @PI) = 0 Then
-			Dim As Integer result = GetLastError()
-			MsgBox ("Error: Couldn't Create Process") & Chr(13, 10) & GetErrorString(result) & Chr(13, 10) & cmd
-			Exit Sub
-		End If
-		WaitForSingleObject(PI.hProcess, INFINITE)
-		CloseHandle(PI.hProcess)
-		CloseHandle(PI.hThread)
+'' Whether cmd's leading (quoted-or-bare) token names a .bat/.cmd file --
+'' CreateProcess can't launch those directly (they aren't a Win32 image),
+'' so callers building a user-configured command line should route those
+'' through PipeCmd's UseShell:=True path instead of the default direct launch.
+Function CommandTargetIsBatchFile(ByRef cmd As WString) As Boolean
+	Dim As UString trimmed = Trim(cmd)
+	Dim As UString target
+	If Len(trimmed) > 0 AndAlso Left(trimmed, 1) = Chr(34) Then
+		Dim As Integer closeQuote = InStr(2, trimmed, Chr(34))
+		target = IIf(closeQuote > 0, Mid(trimmed, 2, closeQuote - 2), Mid(trimmed, 2))
+	Else
+		Dim As Integer spacePos = InStr(trimmed, " ")
+		target = IIf(spacePos > 0, Left(trimmed, spacePos - 1), trimmed)
+	End If
+	Dim As UString extLower = LCase(target)
+	Return CBool(EndsWith(extLower, ".bat") OrElse EndsWith(extLower, ".cmd"))
+End Function
+
+'' Runs cmd directly via CreateProcess (no shell wrapper) so filenames/args
+'' aren't re-parsed by cmd.exe. Pass UseShell:=True only when the command
+'' genuinely needs shell features CreateProcess can't provide on its own
+'' (I/O redirection, or a .bat/.cmd target -- see CommandTargetIsBatchFile).
+'' Previously this always ran through `cmd /c "..."|clip`, silently
+'' overwriting the clipboard on every call site (Open Containing Folder,
+'' external tools, Delete Project, ...) -- see PROJECT_STATUS Fable review
+'' remediation, T3 / finding F-S1.
+Sub PipeCmd(ByRef cmd As WString, UseShell As Boolean = False)
+	Dim As WString Ptr cmdW
+	If UseShell Then
+		WLet(cmdW, "cmd /c """ & cmd & """")
+	Else
+		WLet(cmdW, cmd)
+	End If
+	Dim PI As PROCESS_INFORMATION
+	Dim SI As STARTUPINFO
+	SI.wShowWindow = SW_HIDE
+	SI.cb = SizeOf(STARTUPINFO)
+	SI.dwFlags = STARTF_USESHOWWINDOW
+	If CreateProcess(0, cmdW, 0, 0, 1, NORMAL_PRIORITY_CLASS, 0, 0, @SI, @PI) = 0 Then
+		Dim As Integer result = GetLastError()
+		MsgBox ("Error: Couldn't Create Process") & Chr(13, 10) & GetErrorString(result) & Chr(13, 10) & cmd
+		WDeAllocate(cmdW)
+		Exit Sub
+	End If
+	WaitForSingleObject(PI.hProcess, INFINITE)
+	CloseHandle(PI.hProcess)
+	CloseHandle(PI.hThread)
+	WDeAllocate(cmdW)
 End Sub
 
 

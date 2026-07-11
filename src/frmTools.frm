@@ -383,8 +383,9 @@ Sub ExecuteTool(Param As Any Ptr)
 	Dim As UserToolType Ptr tt = Param
 	If tt = 0 Then Exit Sub
 	'Dim As TabWindow Ptr tb = Cast(TabWindow Ptr, ptabCode->SelectedTab)
-	'If tb = 0 Then 
-		PipeCmd "", tt->GetCommand(), False
+	'If tb = 0 Then
+		Dim As UString cmd = tt->GetCommand()
+		PipeCmd cmd, CommandTargetIsBatchFile(cmd)
 		'Shell tt->GetCommand()
 	'Else
 	'	?tt->GetCommand(tb->FileName)
@@ -396,8 +397,9 @@ Sub ExecuteToolInMainThread(Param As Any Ptr)
 	Dim As UserToolType Ptr tt = Param
 	If tt = 0 Then Exit Sub
 	'Dim As TabWindow Ptr tb = Cast(TabWindow Ptr, ptabCode->SelectedTab)
-	'If tb = 0 Then 
-		PipeCmd "", tt->GetCommand()
+	'If tb = 0 Then
+		Dim As UString cmd = tt->GetCommand()
+		PipeCmd cmd, CommandTargetIsBatchFile(cmd)
 		'Shell tt->GetCommand()
 	'Else
 	'	?tt->GetCommand(tb->FileName)

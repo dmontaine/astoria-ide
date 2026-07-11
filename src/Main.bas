@@ -1233,11 +1233,23 @@ Sub SaveEditorFileAs()
 	End If
 End Sub
 
-Sub OpenUrl(ByVal url As String)
-	Dim As String cmd
-		cmd =  "start /b " & url
-	'Shell cmd
-	PipeCmd "", cmd
+Sub OpenUrl(ByRef url As WString)
+	'' ShellExecuteW's "open" verb instead of shelling out through cmd /c
+	'' start /b <url> -- cmd splits on "&" (common in query strings), and
+	'' PipeCmd's old blanket wrapper also piped output to the clipboard.
+	'' See PROJECT_STATUS Fable review remediation, T3 / finding F-S5.
+	ShellExecuteW(0, WStr("open"), url, 0, 0, SW_SHOWNORMAL)
+End Sub
+
+'' Worker-thread body for launching a registered "Other Editor" on a file --
+'' keeps PipeCmd's blocking wait off the UI thread. Param owns the WString
+'' Ptr allocated by the caller via WLet; freed here once the launch returns.
+Sub RunOtherEditorTool(Param As Any Ptr)
+	Dim As WString Ptr cmd = Param
+	If cmd <> 0 Then
+		PipeCmd *cmd, CommandTargetIsBatchFile(*cmd)
+		WDeAllocate(cmd)
+	End If
 End Sub
 
 Function GetOpenProjectNode() As TreeNode Ptr
@@ -2430,8 +2442,10 @@ Sub OpenProjectFolder
 	Dim As ExplorerElement Ptr ee = ptn->Tag
 	If ee = 0 Then Exit Sub
 	If WGet(ee->FileName) <> "" Then
-			PipeCmd "", "explorer """ & Replace(GetFolderName(*ee->FileName), "/", "\") & """"
-			'Shell "explorer """ & Replace(GetFolderName(*ee->FileName), "/", "\") & """"
+			'' ShellExecuteW opens the folder in Explorer directly -- no need to
+			'' spawn explorer.exe via a shelled command line. See T3 / F-S1.
+			Dim As UString FolderPath = Replace(GetFolderName(*ee->FileName), "/", "\")
+			ShellExecuteW(0, WStr("open"), FolderPath, 0, 0, SW_SHOWNORMAL)
 	End If
 End Sub
 
@@ -2809,10 +2823,11 @@ Function DeleteProject() As Boolean
 		'' silently no-ops "rd" if the project we just closed left us sitting inside
 		'' it. Step out to somewhere unrelated to the project first.
 		ChDir ExePath
-		'' PipeCmd(file, cmd) only ever runs "cmd" -- "file" is unused (see every
-		'' other call site). This had the real command in "file" and an empty
-		'' string in "cmd", so it silently ran nothing.
-		PipeCmd "", "rd /s /q """ & ProjectPath & """"
+		'' Mechanical adaptation to PipeCmd's T3-reworked signature only --
+		'' UseShell:=True since "rd" is a cmd builtin, not a standalone exe.
+		'' This whole shelled delete (silent on failure) is T4's to replace
+		'' with SHFileOperationW; not touched here. See PROJECT_STATUS T3/T4.
+		PipeCmd "rd /s /q """ & ProjectPath & """", True
 	End If
 	Return True
 End Function
@@ -6902,7 +6917,13 @@ Sub tvExplorer_NodeActivate(ByRef Designer As My.Sys.Object, ByRef Sender As Con
 					If InStr(" " & LCase(Tool->Extensions) & ",", " " & LCase(Extension) & ",") > 0 Then
 						If Not FileExists(GetFullPath(Tool->Path)) Then Continue For
 						'Shell """" & Tool->GetCommand(*ee->FileName) & """"
-						PipeCmd "", Tool->GetCommand(*ee->FileName)
+						'' Off the UI thread: this handler runs on a tree double-click,
+						'' and PipeCmd waits for the launched program to exit -- which
+						'' could be the whole rest of the user's session with an
+						'' external editor left open. See T3 / F-S1 (UI stall).
+						Dim As WString Ptr OtherEditorCmd
+						WLet(OtherEditorCmd, Tool->GetCommand(*ee->FileName))
+						ThreadCounter(ThreadCreate_(@RunOtherEditorTool, OtherEditorCmd))
 						Exit Sub
 					End If
 				Next
@@ -8338,7 +8359,9 @@ Sub txtImmediate_KeyDown(ByRef Designer As My.Sys.Object, ByRef Sender As Contro
 			CloseFile_(Fn)
 			Dim As WString Ptr FbcExe, ExeName
 			WLet(FbcExe, GetFullPath(GetBundledCompilerExe()))
-			PipeCmd "", """" & *FbcExe & """ -b """ & ExePath & "/Temp/FBTemp.bas"" -i """ & ExePath & "/" & *MFFPath & """ > """ & ExePath & "/Temp/Compile1.log"" 2> """ & ExePath & "/Temp/Compile2.log"""
+			'' UseShell:=True -- this genuinely needs cmd's >/2> redirection,
+			'' unlike the other PipeCmd call sites. See T3 / F-S1.
+			PipeCmd """" & *FbcExe & """ -b """ & ExePath & "/Temp/FBTemp.bas"" -i """ & ExePath & "/" & *MFFPath & """ > """ & ExePath & "/Temp/Compile1.log"" 2> """ & ExePath & "/Temp/Compile2.log""", True
 			Dim As WString Ptr LogText
 			Dim Buff As WString * 2048 ' for V1.07 Line Input not working fine
 			Dim As WString Ptr ErrFileName, ErrTitle
@@ -8381,7 +8404,7 @@ Sub txtImmediate_KeyDown(ByRef Designer As My.Sys.Object, ByRef Sender As Contro
 				MsgBox !"Compile error:\r\r" & *LogText, , mtWarning
 			Else
 				WLet(ExeName, ExePath & "\Temp\FBTemp.exe") ' > output.txt
-				PipeCmd "",  *ExeName
+				PipeCmd *ExeName
 				Fn = FreeFile_
 				If Open Pipe(*ExeName For Input Encoding "utf-8" As #Fn) = 0 Then '
 					Dim As Integer i

@@ -9116,15 +9116,16 @@ Sub frmMain_Create(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	If *RecentFile <> "" Then WLet(RecentFile, GetFullPath(*RecentFile))
 	If *RecentProject <> "" Then WLet(RecentProject, GetFullPath(*RecentProject))
 	If *RecentFolder <> "" Then WLet(RecentFolder, GetFullPath(*RecentFolder))
-	'' 13.3.A O3: minimal default-visible toolbar set is Standard + Run only; Edit/Project default to
-	'' hidden (Format already defaulted to hidden). This only changes behavior for a FRESH install --
-	'' ReadBool's default only applies when the INI key is absent, so an existing user's saved
-	'' Edit/Project toolbar visibility is preserved untouched. Build/Debug toolbars are retired
-	'' (folded into Run); bands are now Standard(0), Edit(1), Project(2), Run(3), Format(4).
+	'' Default-visible toolbar set on a FRESH install is now ALL FIVE bands (owner decision,
+	'' 2026-07-10, reverses 13.3.A O3's "Standard + Run only" minimal default). ReadBool's default
+	'' only applies when the INI key is absent, so an existing user's saved toolbar visibility
+	'' (including someone who deliberately hid Edit/Project/Format under the old default) is
+	'' preserved untouched. Build/Debug toolbars are retired (folded into Run); bands are now
+	'' Standard(0), Edit(1), Project(2), Run(3), Format(4).
 	ShowStandardToolBar = iniSettings.ReadBool("MainWindow", "ShowStandardToolBar", True)
-	ShowEditToolBar = iniSettings.ReadBool("MainWindow", "ShowEditToolBar", False)
-	ShowProjectToolBar = iniSettings.ReadBool("MainWindow", "ShowProjectToolbar", False)
-	ShowFormatToolBar = iniSettings.ReadBool("MainWindow", "ShowFormatToolbar", False)
+	ShowEditToolBar = iniSettings.ReadBool("MainWindow", "ShowEditToolBar", True)
+	ShowProjectToolBar = iniSettings.ReadBool("MainWindow", "ShowProjectToolbar", True)
+	ShowFormatToolBar = iniSettings.ReadBool("MainWindow", "ShowFormatToolbar", True)
 	'' 13.3.A O3 migration (corrected 2026-07-07): Build + Debug toolbars were folded into Run.
 	'' On the FIRST launch after upgrade (ShowRunToolbar key absent), seed Run's visibility from the
 	'' retired ShowBuildToolbar/ShowDebugToolbar keys so the merged bar's Build/Stop/debug buttons

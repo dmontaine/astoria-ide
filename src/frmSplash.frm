@@ -30,7 +30,7 @@ Using My.Sys.Forms
 		lblImage.Parent = @This
 		' lblSplash
 		lblSplash.SetBounds 8, 14, 398, 33
-		lblSplash.Text = "Astoria IDE" & " " & pApp->GetVerInfo("ProductVersion")
+		lblSplash.Text = "Astoria IDE for Free Basic"
 			lblSplash.Font.Name = "Times New Roman"
 		lblSplash.Font.Size = 20
 		lblSplash.Font.Bold = True
@@ -65,7 +65,7 @@ Using My.Sys.Forms
 		' lblSplash1
 		With lblSplash1
 			.Name = "lblSplash1"
-			.Text = ("64-bit")
+			.Text = ("(version 1.0  Win64)")
 			.TabIndex = 3
 			.Alignment = AlignmentConstants.taCenter
 			.BackColor = 0

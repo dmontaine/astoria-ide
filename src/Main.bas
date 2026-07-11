@@ -92,7 +92,11 @@ Dim Shared As Boolean bQuitting
 #include once "frmSplash.bi"
 pfSplash->MainForm = False
 pfSplash->Show
-pfSplash->lblSplash1.Text = "(" & ("Version") & " " & pApp->Version & "  " & ("64-bit") & ")"
+'' Splash text (title + version line) is set once in frmSplash's own Constructor -- this used
+'' to immediately overwrite the version line here with a dynamic "(Version x.x.x.x  64-bit)"
+'' string, silently undoing that. Removed so the static splash text actually sticks.
+Dim Shared As Double SplashShownAt
+SplashShownAt = Timer
 pApp->DoEvents
 
 Dim Shared As VisualFBEditor.Application VisualFBEditorApp
@@ -9304,8 +9308,13 @@ Sub frmMain_Show(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	' CloseBottom in frmMain_Create runs before the form is shown; redo collapsed layout once docked.
 	If Not splBottom.Visible Then CloseBottom
 
+	'' Splash has no fixed display time -- it stays up for exactly as long as startup takes
+	'' (SplashShownAt captured right after Show). Holding it open for the same length of time
+	'' again here doubles its total visible duration (owner request, 2026-07-10).
+	Dim As Integer SplashExtraMs = CInt((Timer - SplashShownAt) * 1000)
+	If SplashExtraMs > 0 Then Sleep(SplashExtraMs)
 	pfSplash->CloseForm
-	
+
 	Var File = Command(-1)
 	Var Pos1 = InStr(File, "2>CON")
 	Var bFileOpening = False

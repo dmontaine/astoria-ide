@@ -120,7 +120,7 @@ Select CURSOR "../resources/Select.cur"
 #define VER_LEGALCOPYRIGHT_STR      "\0"
 
 #define VER_INTERNALNAME_STR        "\0"
-#define VER_ORIGINALFILENAME_STR    "astoria.exe\0"
+#define VER_ORIGINALFILENAME_STR    "\0"
 #define VER_PRODUCTNAME_STR         "AstoriaIDE\0"
 
 #define VER_LEGALTRADEMARKS1_STR    ""

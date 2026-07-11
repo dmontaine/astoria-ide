@@ -12,3 +12,8 @@ mff32*.dll
 VisualFBEditor.wiki
 docompile.bat
 Logs/
+src/Temp.bas
+src/Temp.rc
+src/compile_out.txt
+Examples/**/*64.exe
+Settings/Workspace.ini

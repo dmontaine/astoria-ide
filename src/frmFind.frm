@@ -570,13 +570,6 @@ Private Sub frmFind.ReplaceInProj(ByRef tSearch As WString="", ByRef tReplace As
 		End If
 	Next
 	
-	If LCase(tML) = LCase(tReplace) Then
-		Fn = FreeFile_
-		If Open(ExePath & "\Languages.txt" For Output Encoding "utf-8" As #Fn) = 0 Then
-			Print #Fn, *BuffOut
-		End If
-		CloseFile_(Fn)
-	End If
 	_Deallocate(BuffOut)
 End Sub
 

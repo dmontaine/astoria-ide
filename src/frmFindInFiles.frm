@@ -471,13 +471,6 @@ Private Sub frmFindInFiles.ReplaceInFile(ByRef Path As WString, ByRef tSearch As
 		Next
 	End If
 	txtReplace.Text = ""
-	If LCase(tML) = LCase(tReplace) Then
-		Fn = FreeFile_
-		If Open(ExePath & "\Languages.txt" For Output Encoding "utf-8" As #Fn) = 0 Then
-			Print #Fn, *BuffOut
-		End If
-		CloseFile_(Fn)
-	End If
 	WDeAllocate(BuffOut)
 	Folders.Clear
 	WDeAllocate(Temp)

@@ -433,7 +433,12 @@ End Function
 			si.hStdError   = hWriteChildPipe
 			si.hStdInput   = hReadChildPipe
 			
-			If CreateProcess(0, *szCmd & " " & *szCmdParam & " " & *szCmdParam2, 0, 0, True, DETACHED_PROCESS, 0, 0, @si, @pi) = 0 Then
+			' T5 (2026-07-11): quote the program path (szCmd) so a bundled-GDB path that contains a
+			' space -- e.g. a portable install unzipped under "C:\My Tools\" -- resolves the intended
+			' gdb.exe instead of CreateProcess splitting on the first space and launching the wrong (or
+			' no) binary. szCmdParam2 (the exe to debug) is already quoted by the caller; szCmdParam
+			' ("-f") has no spaces, so only szCmd needed wrapping.
+			If CreateProcess(0, Chr(34) & *szCmd & Chr(34) & " " & *szCmdParam & " " & *szCmdParam2, 0, 0, True, DETACHED_PROCESS, 0, 0, @si, @pi) = 0 Then
 				MessageBox(0,"Error creating a child process","",MB_ICONERROR)
 			End If
 			CloseHandle(hWriteChildPipe)

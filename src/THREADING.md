@@ -1,4 +1,4 @@
-# Visual FB Editor — Threading
+# AstoriaIDE — Threading
 
 This document describes how background work and UI updates are coordinated in the IDE.
 

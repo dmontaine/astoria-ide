@@ -1,15 +1,18 @@
-Language: <b>English</b>
 # Astoria IDE
 ## IDE for FreeBasic
 
 #### Introduction
-Astoria IDE is the IDE for FreeBasic with visual designer, debugger, project support and etc. It is a fork of <a href="https://github.com/XusinboyBekchanov/VisualFBEditor">VisualFBEditor</a>, based on the library <a href="https://github.com/XusinboyBekchanov/Controls/MyFbFramework">MyFbFramework</a>.
+Astoria IDE is the IDE for FreeBasic with visual designer, debugger, project support and etc. It is a fork of <a href="https://github.com/XusinboyBekchanov/VisualFBEditor">VisualFBEditor</a>, based on the library <a href="https://github.com/XusinboyBekchanov/MyFbFramework">MyFbFramework</a>.
 
 #### Requirements:
 
-* FreeBASIC Compiler V 1.10.0 or above: http://www.freebasic.net/
+None — this fork bundles the FreeBASIC compiler (`Compiler\fbc64.exe`, FBC 1.10.1) and the GDB debugger in-repo. Just clone and build; no separate FreeBASIC installation needed. Windows 64-bit only.
 
 #### Screenshots
+
+<!-- TODO(owner): these are inherited from upstream VisualFBEditor and show the
+     old UI/branding. Replace with current AstoriaIDE screenshots -- see
+     Fable review F-C5 / PROJECT_STATUS.md T12. -->
 ![VisualFBEditor-1](https://user-images.githubusercontent.com/35757455/197079538-16cc5d7d-150e-46f1-b673-f9fe7352ad17.png)
 ![VisualFBEditor-2](https://user-images.githubusercontent.com/35757455/197079581-596100e9-86be-4469-8aae-104309845b2c.png)
 ![VisualFBEditor-3](https://user-images.githubusercontent.com/35757455/197079617-4c4d6902-3809-40da-a746-46bcdf993a75.png)

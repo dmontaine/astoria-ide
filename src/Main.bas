@@ -6287,6 +6287,7 @@ Sub CreateMenusAndToolBars
 	miRun->Add("-")
 	miStepInto = miRun->Add(("Step &Into") & HK("StepInto", "F8"), "StepInto", "StepInto", @mClick, , , False)
 	miStepOver = miRun->Add(("Step &Over") & HK("StepOver", "Shift+F8"), "StepOver", "StepOver", @mClick, , , False)
+	miStepOut = miRun->Add(("Step O&ut") & HK("StepOut", "Ctrl+Shift+F8"), "StepOut", "StepOut", @mClick, , , False)
 	miToggleBreakpoint = miRun->Add(("&Toggle Breakpoint") & HK("Breakpoint", "F9"), "Breakpoint", "Breakpoint", @mClick, , , False)
 	miRun->Add("-")
 	mnuUseDebugger = miRun->Add(("&Use Debugger") & HK("UseDebugger"), "", "UseDebugger", @mClick, True)
@@ -6299,7 +6300,6 @@ Sub CreateMenusAndToolBars
 	miMoreBuildOptions->Add(("&Parameters") & HK("Parameters"), "Parameters", "Parameters", @mClick)
 	mnuStart = miMoreBuildOptions->Add(("Run Without &Building") & HK("Start", "Ctrl+F5"), "Start", "Start", @mClick, , , False)
 	Var miMoreDebugOptions = miRun->Add(("More &Debug Options"), "", "MoreDebugOptions")
-	miStepOut = miMoreDebugOptions->Add(("Step O&ut") & HK("StepOut", "Ctrl+Shift+F8"), "StepOut", "StepOut", @mClick, , , False)
 	miRunToCursor = miMoreDebugOptions->Add(("&Run To Cursor") & HK("RunToCursor", "Ctrl+F8"), "RunToCursor", "RunToCursor", @mClick, , , False)
 	mnuContinue = miMoreDebugOptions->Add(("&Continue") & HK("Continue", "Ctrl+F5"), "Continue", "Continue", @mClick, , , False)
 	mnuBreak = miMoreDebugOptions->Add(("&Break") & HK("Break", "Ctrl+Break"), "Break", "Break", @mClick, , , False)
@@ -6517,15 +6517,15 @@ Sub CreateMenusAndToolBars
 	tbRun.Buttons.Add tbsSeparator
 	tbtEnd = tbRun.Buttons.Add(tbsAutosize, "EndProgram", , @mClick, "End", ("Stop"), ("Stop") & HK("End", , True), True, ToolButtonState.tstNone)
 	tbRun.Buttons.Add tbsSeparator
-	tbtStepInto = tbRun.Buttons.Add(, "StepInto", , @mClick, "StepInto", , ("Step Into") & HK("StepInto", "F8", True), True)
-	tbtStepOver = tbRun.Buttons.Add(, "StepOver", , @mClick, "StepOver", , ("Step Over") & HK("StepOver", "Shift+F8", True), True)
+	tbtStepInto = tbRun.Buttons.Add(, "StepInto", , @mClick, "StepInto", , ("Step Into: run the current line, descending into any function it calls") & HK("StepInto", "F8", True), True)
+	tbtStepOver = tbRun.Buttons.Add(, "StepOver", , @mClick, "StepOver", , ("Step Over: run the current line, executing function calls without descending into them") & HK("StepOver", "Shift+F8", True), True)
 	tbtToggleBreakpoint = tbRun.Buttons.Add(, "Breakpoint", , @mClick, "ToggleBreakpoint", , ("Toggle Breakpoint") & HK("Breakpoint", "F9", True), True)
 	tbRun.Buttons.Add tbsSeparator
 	tbtUseDebugger = tbRun.Buttons.Add(Cast(ToolButtonStyle, tbsCheck Or tbsAutosize), "UseDebugger", , @mClick, "TBUseDebugger", , ("Use Debugger") & HK("UseDebugger", , True), True)
 	tbRun.Buttons.Add tbsSeparator
 	tbtStart = tbRun.Buttons.Add(, "Start", , @mClick, "Start", , ("Run Without Building") & HK("Start", "Ctrl+F5", True), True, ToolButtonState.tstNone)
 	tbtBreak = tbRun.Buttons.Add(, "Break", , @mClick, "Break", , ("Break") & HK("Break", "Ctrl+Pause", True), True, ToolButtonState.tstNone)
-	tbtStepOut = tbRun.Buttons.Add(, "StepOut", , @mClick, "StepOut", , ("Step Out") & HK("StepOut", "Ctrl+Shift+F8", True), True)
+	tbtStepOut = tbRun.Buttons.Add(, "StepOut", , @mClick, "StepOut", , ("Step Out: keep running until the current function returns to its caller") & HK("StepOut", "Ctrl+Shift+F8", True), True)
 	tbtRunToCursor = tbRun.Buttons.Add(, "RunToCursor", , @mClick, "RunToCursor", , ("Run To Cursor") & HK("RunToCursor", "Ctrl+F8", True), True)
 	tbRun.Buttons.Add tbsSeparator
 	tbtSetNextStatement = tbRun.Buttons.Add(, "SetNextStatement", , @mClick, "SetNextStatement", , ("Set Next Statement") & HK("SetNextStatement", , True), True)

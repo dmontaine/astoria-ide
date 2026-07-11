@@ -450,10 +450,9 @@ End Function
 	End Function
 	
 	Function readpipe(WithoutAnswer As Boolean = False, WithoutShowing As Boolean = False) As String
-		
+
 		Dim As String sRet
-		
-			
+
 			#define BufferSize 2048
 			Dim As Integer Count
 			Dim sBuffer As ZString * BufferSize
@@ -490,7 +489,7 @@ End Function
 			Loop While Not (CBool(InStr(sOutput, Chr(10) & "(gdb) ")) OrElse CBool(InStr(sOutput, "~*~(gdb) ")) OrElse IIf(WithoutAnswer, CBool(sOutput = "(gdb) "), StartsWith(sOutput, "(gdb) ") AndAlso CBool(Len(sOutput) > 6 OrElse Count > 1)))
 			'WriteFile(hWritePipe, @s, Len(s), Cast(Any Ptr, @iNumberOfBytesWritten), NULL) =  '
 			sRet = sOutput
-			
+
 			'		Dim As Integer iTotalBytesAvail,iNumberOfBytesWritten
 			'		Dim As String sRet
 			'		Static As ZString * 50000 sBuf
@@ -1810,7 +1809,7 @@ End Function
 		'	Dim As Integer iLine = sendmessage ( Cast(Any Ptr , pd.sci(iCursel)) ,  SCI_LINEFROMPOSITION , iPos , 0)
 		'
 		Dim As String sTemp = """" & Replace(tb->FileName, "\", "/") & """:" & iSelEndLine + 1
-		
+
 		'	For i As Long = 0 To UBound(sBP)
 		'
 		'		If iFlagSetup = 0 AndAlso sBP(i) = sTemp Then
@@ -1866,9 +1865,9 @@ End Function
 			'		Next
 			'
 		End If
-		
+
 	End Sub
-	
+
 	'Sub selection_line(iCursel As Integer , iPos As Integer , iLine As Integer)
 	'
 	'	If iCursel > UBound(pd.sci) OrElse iCursel < 0 Then Exit Sub
@@ -2025,7 +2024,7 @@ End Function
 
 			'run_pipe_write(!"r\n" , 300)
 			writepipe !"r\n"
-			
+
 			MutexLock tlockGDB
 			Dim As String Result
 			Dim As Boolean bGetPid = True

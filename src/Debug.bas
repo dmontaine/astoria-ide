@@ -1826,18 +1826,37 @@ End Function
 		'
 		'	Next
 		
-		If Cast(EditControlLine Ptr, tb->txtCode.Content.Lines.Items[iSelEndLine])->Breakpoint Then
-			
+		Dim As EditControlLine Ptr ecLine = Cast(EditControlLine Ptr, tb->txtCode.Content.Lines.Items[iSelEndLine])
+
+		' T6 (F-R1): skip blank/comment lines *before* touching GDB -- mirrors EditControl.Breakpoint's
+		' own refusal, so F9 on a comment line no longer plants a phantom GDB breakpoint while the
+		' editor (correctly) declines the local toggle. This is the "move the comment check ahead of
+		' set_bp" fix from the attempt-#1 post-mortem.
+		Dim As String sLineTrim = LTrim(*ecLine->Text, Any !"\t ")
+		If CInt(sLineTrim = "") OrElse CInt(StartsWith(sLineTrim, "'")) OrElse CInt(StartsWith(LCase(sLineTrim) & " ", "rem ")) Then Exit Sub
+
+		' T6 (F-R1): the debug worker thread (run_debug) and this UI-thread call share the same pair of
+		' pipe handles. Serialize on tlockGDB and never inject a break/tbreak/clear while the inferior is
+		' running -- attempt #1 hard-locked doing a blocking read off-prompt while holding the lock. When
+		' the inferior is stopped GDB is at the prompt, so the readpipe() calls below return promptly, and
+		' Running is only ever flipped by the worker under this same lock (so this test is race-free once
+		' we hold it). If Running, the local breakpoint icon still toggles (in EditControl.Breakpoint) and
+		' run_debug re-sends every editor breakpoint on the next run.
+		MutexLock tlockGDB
+		If Running Then MutexUnlock tlockGDB : Exit Sub
+
+		If ecLine->Breakpoint Then
+
 			If Not Temporary Then
-				
+
 				run_pipe_write(!"clear " & sTemp & !"\n")
-				
+
 				readpipe()
-				
+
 			End If
-			
+
 			'sendmessage ( Cast(Any Ptr , pd.sci(iCursel)) ,  SCI_MARKERDELETE , iLine , 0)
-			
+
 		ElseIf Temporary Then
 			
 			run_pipe_write(!"tbreak " & sTemp & !"\n")
@@ -1865,6 +1884,8 @@ End Function
 			'		Next
 			'
 		End If
+
+		MutexUnlock tlockGDB
 
 	End Sub
 

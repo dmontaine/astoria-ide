@@ -1,6 +1,5 @@
 cd ..
 cd ..
-cd ..
 
 curl -L -O https://www.7-zip.org/a/7za920.zip
 
@@ -13,11 +12,11 @@ set FORCE_MFF=1
 
 curl -L -O https://github.com/XusinboyBekchanov/MyFbFramework/archive/master.zip
 
-PowerShell Expand-Archive -LiteralPath "master.zip" -DestinationPath "AstoriaIDE\Controls" -Force
+PowerShell Expand-Archive -LiteralPath "master.zip" -DestinationPath "Controls" -Force
 
-7z\7za.exe x "FreeBASIC-1.10.0-winlibs-gcc-9.3.0.7z" -oAstoriaIDE\Compiler
+7z\7za.exe x "FreeBASIC-1.10.0-winlibs-gcc-9.3.0.7z" -oCompiler
 
-cd AstoriaIDE\Controls
+cd Controls
 
 Rename MyFbFramework-master MyFbFramework
 

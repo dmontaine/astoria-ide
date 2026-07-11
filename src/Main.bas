@@ -2851,9 +2851,14 @@ Function DeleteProject() As Boolean
 		'' pFrom must be double-null-terminated; ZeroMemory the whole fixed buffer
 		'' first so everything past the path's own terminator is guaranteed zero
 		'' rather than whatever was already on the stack.
+		'' F-T16-2 (T16 review): SHFileOperationW is a shell API and doesn't reliably
+		'' accept forward slashes; this codebase mixes "/" and "\" freely (ProjectPath
+		'' is derived from GetFolderName, which preserves whatever separator the
+		'' project's own path used). Normalize the same way OpenProjectFolder already
+		'' does before its own shell call.
 		Dim As WString * 1024 wDeletePath
 		ZeroMemory(@wDeletePath, SizeOf(wDeletePath))
-		wDeletePath = ProjectPath
+		wDeletePath = CanonicalWinPath(ProjectPath)
 		Dim As SHFILEOPSTRUCTW fos
 		ZeroMemory(@fos, SizeOf(fos))
 		fos.wFunc = FO_DELETE
@@ -8444,7 +8449,10 @@ Sub txtImmediate_KeyDown(ByRef Designer As My.Sys.Object, ByRef Sender As Contro
 				MsgBox !"Compile error:\r\r" & *LogText, , mtWarning
 			Else
 				WLet(ExeName, ExePath & "\Temp\FBTemp.exe") ' > output.txt
-				PipeCmd *ExeName
+				'' F-T16-3 (T16 review): CreateProcess needs the leading token quoted when
+				'' the path can contain spaces -- the old cmd /c wrapper this call used to
+				'' go through effectively quoted it; T3's direct-launch path doesn't.
+				PipeCmd """" & *ExeName & """"
 				Fn = FreeFile_
 				If Open Pipe(*ExeName For Input Encoding "utf-8" As #Fn) = 0 Then '
 					Dim As Integer i

@@ -264,7 +264,13 @@ Function Compile(Parameter As String, bAll As Boolean) As Integer
 				'' already uses for compile status a few lines below, wrapped the same way.
 				ThreadsEnter()
 				ShowMessages(("Couldn't rewrite the batch compilation file - check that it still exists and isn't read-only") & "." & WChr(13,10) & BatchFileFull & WChr(13,10), False)
+				'' F-T16-1 (T16 review): this is the function's only early return, and the
+				'' common exit below (StopProgress + CompileContextFree) is what every other
+				'' failure path relies on falling through to reach -- without replicating it
+				'' here, StartProgress's marquee never stops and ctx's allocations leak.
+				StopProgress
 				ThreadsLeave()
+				CompileContextFree(ctx)
 				Return 0
 			End If
 			For i As Integer = 0 To Lines.Count - 1

@@ -162,8 +162,9 @@
 		' BtnClose
 		With BtnClose
 			.Name = "BtnClose"
-			.Text = "CommandButton1"
+			.Text = "Close"
 			.TabIndex = 9
+			.Caption = "Close"
 			.SetBounds 205, 515, 85, 25
 			.Designer = @This
 			.OnClick = @BtnClose_Click_

@@ -12,7 +12,7 @@
 
 		This.Name = "frmAbout"
 		This.Text = ("About")
-		This.SetBounds 0, -45, 496, 350
+		This.SetBounds 0, -45, 496, 575
 		This.BorderStyle = FormBorderStyle.FixedDialog
 		This.MaximizeBox = False
 		This.MinimizeBox = False
@@ -32,6 +32,7 @@
 			.CenterImage = False
 			.ID = 1017
 			.Alignment = AlignmentConstants.taCenter
+			.Transparent = False
 			.SetBounds 7, 13, 475, 35
 			.Designer = @This
 			.Parent = @This
@@ -60,6 +61,7 @@
 			.Font.Size = 14
 			.Alignment = AlignmentConstants.taCenter
 			.ID = 1015
+			.Transparent = False
 			.SetBounds 5, 80, 485, 25
 			.Designer = @This
 			.Parent = @This
@@ -74,7 +76,7 @@
 			.Font.Size = 12
 			.Alignment = AlignmentConstants.taCenter
 			.ID = 1014
-			.SetBounds 5, 120, 485, 25
+			.SetBounds 5, 355, 485, 25
 			.Designer = @This
 			.Parent = @This
 		End With
@@ -88,7 +90,7 @@
 			.Font.Size = 12
 			.Alignment = AlignmentConstants.taCenter
 			.ID = 1013
-			.SetBounds 5, 145, 485, 25
+			.SetBounds 5, 380, 485, 25
 			.Designer = @This
 			.Parent = @This
 		End With
@@ -102,7 +104,7 @@
 			.Font.Size = 12
 			.Alignment = AlignmentConstants.taCenter
 			.ID = 1012
-			.SetBounds 5, 170, 485, 20
+			.SetBounds 5, 405, 485, 20
 			.Designer = @This
 			.Parent = @This
 		End With
@@ -116,7 +118,7 @@
 			.Caption = "Other Contributors: Cursor AI Agent, Kun Ai Aigent, Deepseek 4.5 Pro AI"
 			.Alignment = AlignmentConstants.taCenter
 			.ID = 1011
-			.SetBounds 5, 205, 485, 20
+			.SetBounds 5, 440, 485, 20
 			.Designer = @This
 			.Parent = @This
 		End With
@@ -130,7 +132,7 @@
 			.Alignment = AlignmentConstants.taCenter
 			.ID = 1010
 			.Font.Size = 9
-			.SetBounds 5, 230, 485, 15
+			.SetBounds 5, 465, 485, 15
 			.Designer = @This
 			.Parent = @This
 		End With
@@ -142,18 +144,29 @@
 			.Alignment = AlignmentConstants.taCenter
 			.ControlIndex = 2
 			.Caption = "License: GPL version 3.0 or later"
-			.SetBounds 5, 260, 485, 15
+			.SetBounds 5, 490, 485, 15
 			.Designer = @This
 			.Parent = @This
 		End With
-		' CommandButton1
-		With CommandButton1
-			.Name = "CommandButton1"
-			.Text = "OK"
-			.TabIndex = 9
-			.Caption = "OK"
-			.SetBounds 195, 290, 110, 25
+		' lblImage
+		With lblImage
+			.Name = "lblImage"
+			.Text = "lblImage"
+			.BackColor = 0
+			.ControlIndex = 0
+			.Graphic = "Logo"
+			.SetBounds 111, 116, 278, 220
 			.Designer = @This
+			.Parent = @This
+		End With
+		' BtnClose
+		With BtnClose
+			.Name = "BtnClose"
+			.Text = "CommandButton1"
+			.TabIndex = 9
+			.SetBounds 205, 515, 85, 25
+			.Designer = @This
+			.OnClick = @BtnClose_Click_
 			.Parent = @This
 		End With
 	End Constructor
@@ -167,4 +180,12 @@
 
 Private Sub frmAbout.Form_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	fAbout.CloseForm
+End Sub
+
+Private Sub frmAbout.BtnClose_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
+	(*Cast(frmAbout Ptr, Sender.Designer)).BtnClose_Click(Sender)
+End Sub
+
+Private Sub frmAbout.BtnClose_Click(ByRef Sender As Control)
+	Me.CloseForm
 End Sub

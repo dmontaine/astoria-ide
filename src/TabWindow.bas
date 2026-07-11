@@ -303,7 +303,6 @@ Sub ChangeMenuItemsEnabled
 	miSyntaxCheck->Enabled = bEnabled
 	tbtSyntaxCheck->Enabled = bEnabled
 	tbtSuggestions->Enabled = bEnabled
-	miSuggestions->Enabled = bEnabled
 	miCompile->Enabled = bEnabled
 	tbtCompile->Enabled = bEnabled
 	miCompileAll->Enabled = bEnabled

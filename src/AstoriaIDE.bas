@@ -266,14 +266,9 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 	Case "Compile":                             If SaveAllBeforeCompile Then ThreadCounter(ThreadCreate_(@CompileProgram))
 	Case "Make":                                If SaveAllBeforeCompile Then ThreadCounter(ThreadCreate_(@MakeExecute))
 	Case "MakeClean":                           If SaveAllBeforeCompile Then ThreadCounter(ThreadCreate_(@MakeClean))
-	Case "Suggestions":                         ChangeShowSymbolsTooltipsOnMouseHover Not GlobalSettings.ShowSymbolsTooltipsOnMouseHover, 1
-	Case "SuggestOptions":                      ChangeAutoComplete Not AutoComplete, 1
-	Case "ParameterInfo"
-		If (GetKeyState(VK_CONTROL) And 8000) <> 0 Then
-			If ParameterInfoShow Then ParameterInfo 0
-		Else
-			ChangeParameterInfo Not ParameterInfoShow, 1
-		End If
+	'' C2: "Suggestions"/"SuggestOptions" toggles removed with their Edit-menu items (moved to
+	'' Options); the old "ParameterInfo" toggle+Ctrl-invoke dual case is gone too -- the menu
+	'' item now dispatches straight to "InvokeParameterInfo" like the toolbar button.
 	Case "InvokeParameterInfo":                 If ParameterInfoShow Then ParameterInfo 0
 	Case "AnalyzeSuggestions":                  Suggestions
 	Case "FormatProject":                       ThreadCounter(ThreadCreate_(@FormatProject)) 'FormatProject 0

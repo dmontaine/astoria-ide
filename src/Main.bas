@@ -112,7 +112,7 @@ Dim Shared As TrackBar trLeft
 Dim Shared As MainMenu mnuMain
 Dim Shared As MenuItem Ptr mnuStartWithCompile, mnuStart, mnuContinue, mnuBreak, mnuEnd, mnuRestart, mnuStandardToolBar, mnuEditToolBar, mnuProjectToolBar, mnuFormatToolBar, mnuRunToolBar, mnuSplit, mnuSplitHorizontally, mnuSplitVertically, mnuWindowSeparator, miRecentFiles, miSetAsMain, miClearStartUp, miTabSetAsMain, miTabReloadHistoryCode, miRemoveFiles, miToolBars
 Dim Shared As MenuItem Ptr miSaveProject, miSaveProjectAs, miCloseProject, miDeleteProject, miNewFile, miOpenFile, miCloseFile, miDeleteFile, miSaveFile, miSaveFileAs, miPrint, miPrintPreview, miPageSetup, miOpenProjectFolder, miProjectProperties, miExplorerOpenProjectFolder, miExplorerRename, miExplorerProjectProperties, miExplorerCloseProject, miRename, miRemoveFileFromProject
-Dim Shared As MenuItem Ptr miUndo, miRedo, miCutCurrentLine, miCut, miCopy, miPaste, miSingleComment, miDuplicate, miSelectAll, miIndent, miOutdent, miFormat, miUnformat, miFormatProject, miUnformatProject, miAddSpaces, miDeleteBlankLines, miSuggestions, miCompleteWord, miParameterInfo, miStepInto, miStepOver, miStepOut, miRunToCursor, miGDBCommand, miAddWatch, miToggleBreakpoint, miClearAllBreakpoints, miSetNextStatement, miShowNextStatement
+Dim Shared As MenuItem Ptr miUndo, miRedo, miCutCurrentLine, miCut, miCopy, miPaste, miSingleComment, miDuplicate, miSelectAll, miIndent, miOutdent, miFormat, miUnformat, miFormatProject, miUnformatProject, miAddSpaces, miDeleteBlankLines, miParameterInfo, miStepInto, miStepOver, miStepOut, miRunToCursor, miGDBCommand, miAddWatch, miToggleBreakpoint, miClearAllBreakpoints, miSetNextStatement, miShowNextStatement
 Dim Shared As MenuItem Ptr dmiMake, dmiMakeClean
 Dim Shared As MenuItem Ptr miCode, miForm, miCodeAndForm, miGotoCodeForm, miCollapseCurrent, miCollapseAllProcedures, miCollapseAll, miUnCollapseCurrent, miUnCollapseAllProcedures, miUnCollapseAll, miImageManager, miAddProcedure, miAddType, miFind, miReplace, miFindNext, miFindPrevious, miGoto, miDefine, miToggleBookmark, miNextBookmark, miPreviousBookmark, miClearAllBookmarks, miSyntaxCheck, miCompile, miCompileAll, miMake, miMakeClean
 Dim Shared As MenuItem Ptr miAlignLefts, miAlignCenters, miAlignRights, miAlignTops, miAlignMiddles, miAlignBottoms, miAlignToGrid, miMakeSameSizeWidth, miMakeSameSizeHeight, miMakeSameSizeBoth, miSizeToGrid, miHorizontalSpacingMakeEqual, miHorizontalSpacingIncrease, miHorizontalSpacingDecrease, miHorizontalSpacingRemove, miVerticalSpacingMakeEqual, miVerticalSpacingIncrease, miVerticalSpacingDecrease, miVerticalSpacingRemove, miCenterInParentHorizontally, miCenterInParentVertically, miOrderBringToFront, miOrderSendToBack, miLockControls
@@ -2896,13 +2896,13 @@ Sub ChangeShowSymbolsTooltipsOnMouseHover(bEnabled As Boolean, ChangeObject As I
 			If tb <> 0 AndAlso tb->txtCode.MouseHoverToolTipShowed Then tb->txtCode.CloseMouseHoverToolTip
 		Next
 	End If
-	If miSuggestions <> 0 AndAlso miSuggestions->Checked <> bEnabled Then miSuggestions->Checked = bEnabled
+	'' C2: miSuggestions removed (Edit menu) -- the setting now lives only in Options.
 	iniSettings.WriteBool "Options", "ShowSymbolsTooltipsOnMouseHover", bEnabled
 End Sub
 
 Sub ChangeAutoComplete(bEnabled As Boolean, ChangeObject As Integer = -1)
 	AutoComplete = bEnabled
-	If miCompleteWord <> 0 AndAlso miCompleteWord->Checked <> bEnabled Then miCompleteWord->Checked = bEnabled
+	'' C2: miCompleteWord removed (Edit menu) -- the setting now lives only in Options.
 	iniSettings.WriteBool "Options", "AutoComplete", bEnabled
 End Sub
 
@@ -2914,7 +2914,8 @@ Sub ChangeParameterInfo(bEnabled As Boolean, ChangeObject As Integer = -1)
 			If tb <> 0 AndAlso tb->txtCode.ToolTipShowed Then tb->txtCode.CloseToolTip
 		Next
 	End If
-	If miParameterInfo <> 0 AndAlso miParameterInfo->Checked <> bEnabled Then miParameterInfo->Checked = bEnabled
+	'' C2: miParameterInfo is now a plain "invoke now" command, not a toggle -- it no longer
+	'' reflects this setting's Checked state (only the Options checkbox does).
 	iniSettings.WriteBool "Options", "ParameterInfoShow", bEnabled
 End Sub
 
@@ -6077,9 +6078,14 @@ Sub CreateMenusAndToolBars
 	miAddSpaces = miEditAdvanced->Add(("Add &Spaces") & HK("AddSpaces"), "", "AddSpaces", @mClick, , , False)
 	miDeleteBlankLines = miEditAdvanced->Add(("Merge Multiple Blank Lines"), "", "DeleteBlankLines", @mClick)
 	miEdit->Add("-")
-	miSuggestions = miEdit->Add(("Code - Bubble Help") & HK("Suggestions"), "", "Suggestions", @mClick, True)
-	miCompleteWord = miEdit->Add(("Code - Suggest Options"), "", "SuggestOptions", @mClick, True)
-	miParameterInfo = miEdit->Add(("Code - Parameter Info") & HK("ParameterInfo", "Ctrl+J"), "", "ParameterInfo", @mClick, True)
+	'' C2: Bubble Help / Suggest Options were on/off settings, not edit actions -- moved to
+	'' Options > Code Editor (chkShowSymbolsTooltipsOnMouseHover / chkEnableAutoComplete, which
+	'' already existed there and were already wired). Parameter Info keeps a menu entry because
+	'' its caption carries the Ctrl+J accelerator -- the framework's accelerator table is built
+	'' by scanning menu captions (Menus.bas ~1538), so removing the item would silently kill the
+	'' shortcut -- but it's no longer a toggle: it always invokes now (same as the toolbar
+	'' button), with the on/off "auto-show" setting moved to its own new Options checkbox.
+	miParameterInfo = miEdit->Add(("Code - Parameter Info") & HK("ParameterInfo", "Ctrl+J"), "", "InvokeParameterInfo", @mClick)
 	miEdit->Add("-")
 	miAddProcedure = miEdit->Add(("Add &Procedure") & "..." & HK("AddProcedure"), "", "AddProcedure", @mClick, , , False)
 	miAddType = miEdit->Add(("Add &Type") & "..." & HK("AddType"), "", "AddType", @mClick, , , False)

@@ -692,6 +692,20 @@ pfOptions = @fOptions
 
 		.Parent = @grbIntelliSense
 	End With
+			' chkParameterInfoShow -- C2: moved here from the Edit menu (was a checkable "Code -
+			' Parameter Info" toggle); the menu item is now a plain "invoke now" action instead.
+	With chkParameterInfoShow
+		.Name = "chkParameterInfoShow"
+		.Text = ("Show Parameter Info Automatically")
+		.TabIndex = 700
+		.ExtraMargins.Top = 0
+		.Align = DockStyle.alTop
+		.Constraints.Height = 21
+		.AutoSize = True
+		.SetBounds 0, 86, 166, 21
+		.Designer = @This
+		.Parent = @grbIntelliSense
+	End With
 		' chkShowSymbolsTooltipsOnMouseHover
 	With chkShowClassesExplorerOnOpenWindow
 		.Name = "ShowClassesExplorerOnOpenWindow"
@@ -2586,6 +2600,7 @@ Sub frmOptions.LoadSettings()
 		.chkShowKeywordsTooltip.Checked = ShowKeywordsToolTip
 		.chkShowTooltipsAtTheTop.Checked = ShowTooltipsAtTheTop
 		.chkShowSymbolsTooltipsOnMouseHover.Checked = GlobalSettings.ShowSymbolsTooltipsOnMouseHover
+		.chkParameterInfoShow.Checked = ParameterInfoShow
 		.chkShowClassesExplorerOnOpenWindow.Checked = GlobalSettings.ShowClassesExplorerOnOpenWindow
 		.chkShowHorizontalSeparatorLines.Checked = ShowHorizontalSeparatorLines
 		.chkShowHolidayFrame.Checked = ShowHolidayFrame
@@ -3062,6 +3077,8 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		ShowTooltipsAtTheTop = .chkShowTooltipsAtTheTop.Checked
 		GlobalSettings.ShowSymbolsTooltipsOnMouseHover = .chkShowSymbolsTooltipsOnMouseHover.Checked
 		ChangeShowSymbolsTooltipsOnMouseHover GlobalSettings.ShowSymbolsTooltipsOnMouseHover, 0
+		ParameterInfoShow = .chkParameterInfoShow.Checked
+		ChangeParameterInfo ParameterInfoShow, 0
 		GlobalSettings.ShowClassesExplorerOnOpenWindow = .chkShowClassesExplorerOnOpenWindow.Checked
 		ShowHorizontalSeparatorLines = .chkShowHorizontalSeparatorLines.Checked
 		ShowHolidayFrame = .chkShowHolidayFrame.Checked

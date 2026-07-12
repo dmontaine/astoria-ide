@@ -158,6 +158,10 @@ End Sub
 	Dim Shared As Boolean bClearVarPanelsPending
 	Dim Shared As Integer gPendingWatchIndex = -1
 	Dim Shared As String gPendingWatchResult
+	' DR-16: deinit() runs on the worker thread; stage its UI cleanup (toolbar/menu .Enabled
+	' writes + the execution-cursor clear/repaint) instead of calling ChangeEnabledDebug/
+	' DeleteDebugCursor directly from there. Applied on the UI thread by FlushDebugOutputOnUI.
+	Dim Shared As Boolean bDeinitCleanupPending
 
 	' Worker thread. Queue text for the Output pane instead of writing txtOutput directly.
 	Sub QueueShowMessages(ByRef msg As String, ChangeTab As Boolean = True)
@@ -1729,6 +1733,13 @@ Sub FlushDebugOutputOnUI()
 		lvLocals.Nodes.Clear
 		lvGlobals.Nodes.Clear
 	End If
+	If bDeinitCleanupPending Then
+		' DR-16: mirrors deinit()'s original direct calls, just moved to the UI thread. Order
+		' preserved (cursor clear before the toolbar/menu state update).
+		bDeinitCleanupPending = False
+		DeleteDebugCursor
+		ChangeEnabledDebug True, False, False
+	End If
 	If bOutputPending Then
 		Dim As String sText = gPendingOutputText
 		Dim As Boolean bTab = bOutputChangeTab
@@ -2197,10 +2208,14 @@ End Sub
 		iCounterUpdateVariables = 0
 		
 		fcurlig = -1
-		
-		DeleteDebugCursor
-		
-		ChangeEnabledDebug True, False, False
+
+		' DR-16: deinit() runs on the worker thread (see run_debug's LOOP.inferiorGone and 'q'-
+		' dequeue branches). DeleteDebugCursor reads/writes the shared CurEC control pointer and
+		' calls .Repaint; ChangeEnabledDebug writes 14+ toolbar/menu .Enabled properties -- both are
+		' unmarshaled UI-control touches from the worker (the same ThreadsEnter/ThreadsLeave-are-
+		' no-ops hazard class as DR-3/DR-7). Stage instead; FlushDebugOutputOnUI (UI thread, called
+		' every TimerProcGDB tick) applies both.
+		bDeinitCleanupPending = True
 		
 		'sCurentFileExe = ""
 		

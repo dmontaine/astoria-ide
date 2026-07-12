@@ -17,3 +17,7 @@ src/Temp.rc
 src/compile_out.txt
 Examples/**/*64.exe
 Settings/Workspace.ini
+# Debugger Reliability trace instrumentation output (local-only, per-machine)
+Settings/debug_trace.log
+Settings/*.pass1.log
+Settings/*.pass2.log

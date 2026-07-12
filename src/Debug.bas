@@ -2023,21 +2023,63 @@ End Sub
 		If StartsWith(Result, "{") Then lvWatches.Nodes.Item(WatchIndex)->Nodes.Add Else lvWatches.Nodes.Item(WatchIndex)->Nodes.Clear
 	End Sub
 	
-	Sub RefreshDebugPanelsAfterStop()
-		info_loc_variables_debug
-		If iStateMenu = 2 Then
-			info_all_variables_debug
+	' ==== 2D marshal (2026-07-11): worker reads raw GDB panel output; the UI thread fills controls ====
+' ThreadsEnter/ThreadsLeave are no-ops (Component.bas:257), so the worker touching lvLocals/lvGlobals/
+' lvThreads/lvWatches directly races the UI thread -- that is the DR-3 freeze (fill_locals vs the UI
+' thread's AddTab). The worker now only does pipe I/O and stores the raw replies here; the UI-thread
+' heartbeat TimerProcGDB calls FillDebugPanelsOnUI to parse+fill on the UI thread.
+Const DBG_WATCH_MAX = 64
+Dim Shared As String gRawLocals, gRawGlobals, gRawThreads
+Dim Shared As Boolean gHasGlobals
+Dim Shared As String gWatchNameSnap(DBG_WATCH_MAX - 1), gRawWatch(DBG_WATCH_MAX - 1)
+Dim Shared As Integer gWatchSnapCount
+Dim Shared As Boolean bPanelFillPending
+
+' UI thread only. Refresh the worker-visible snapshot of watch names so the worker never reads
+' lvWatches. Call from every watch-list mutation site (add/remove/rename/clear).
+Sub SnapshotWatchNames()
+	Dim As Integer n = lvWatches.Nodes.Count
+	If n > DBG_WATCH_MAX Then n = DBG_WATCH_MAX
+	For i As Integer = 0 To n - 1
+		gWatchNameSnap(i) = lvWatches.Nodes.Item(i)->Text(0)
+	Next
+	gWatchSnapCount = n
+End Sub
+
+' UI thread only (called every TimerProcGDB tick; cheap no-op unless the worker staged data).
+Sub FillDebugPanelsOnUI()
+	If Not bPanelFillPending Then Exit Sub
+	bPanelFillPending = False
+	fill_locals_variables(gRawLocals, 0)
+	If gHasGlobals Then fill_all_variables(gRawGlobals, 0)
+	fill_threads(gRawThreads, 0)
+	For i As Integer = 0 To gWatchSnapCount - 1
+		If Trim(gWatchNameSnap(i)) <> "" Then UpdateWatch i, gRawWatch(i)
+	Next
+End Sub
+
+' Worker thread. Read-only: send each panel query, store the raw GDB reply, flag the UI thread to
+' fill. No UI-control access here (that direct access was the DR-3 freeze).
+Sub RefreshDebugPanelsAfterStop()
+	run_pipe_write(!"_l_\n")
+	gRawLocals = readpipe(, True)
+	gHasGlobals = (iStateMenu = 2)
+	If gHasGlobals Then
+		run_pipe_write(!"_g_\n")
+		gRawGlobals = readpipe(, True)
+	End If
+	run_pipe_write(!"thread apply all bt\n")
+	gRawThreads = readpipe(, True)
+	For i As Integer = 0 To gWatchSnapCount - 1
+		If Trim(gWatchNameSnap(i)) = "" Then
+			gRawWatch(i) = ""
+		Else
+			writepipe "print " & UCase(gWatchNameSnap(i)) & !"\n"
+			gRawWatch(i) = readpipe(, True)
 		End If
-		info_threads_debug
-		ThreadsEnter
-		For i As Integer = 0 To lvWatches.Nodes.Count - 1
-			If Trim(lvWatches.Nodes.Item(i)->Text(0)) = "" Then Continue For
-			writepipe "print " & UCase(lvWatches.Nodes.Item(i)->Text(0)) & !"\n"
-			Dim As String watchResult = readpipe(, True)
-			UpdateWatch i, watchResult
-		Next
-		ThreadsLeave
-	End Sub
+	Next
+	bPanelFillPending = True
+End Sub
 	
 	Sub run_debug(iFlag As Long)
 		
@@ -2185,7 +2227,7 @@ End Sub
 							If bGDBLocked Then MutexUnlock tlockGDB: bGDBLocked = False
 							Exit Do
 						End If
-						Updateinfoxserver(100)
+						'Updateinfoxserver(100)  ' DR-13/2D (2026-07-11): removed off-thread DoEvents x101 on the worker. It dispatched the pending F8 WM_KEYDOWN without TranslateAccelerator (step swallowed) and reentered the message loop off-thread (DR-3 deadlock aggravator). Highlight still fires via TimerProcGDB (UI thread); panels via bPendingDebugPanelRefresh next iteration.
 						bPendingDebugPanelRefresh = True
 					End If
 					If bGDBLocked Then MutexUnlock tlockGDB: bGDBLocked = False

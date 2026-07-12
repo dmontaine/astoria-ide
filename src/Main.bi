@@ -37,6 +37,10 @@
 	Declare Sub DbgTrace(ByRef tag As String, ByRef info As String = "")
 	Declare Function DbgTraceEsc(ByRef s As String, ByVal iMax As Integer = 200) As String
 
+	' --- DR-3 slice 2D: worker->UI marshal of the debug panels (bodies in Debug.bas) ---
+	Declare Sub FillDebugPanelsOnUI()   ' UI thread: fill lvLocals/lvGlobals/lvThreads/lvWatches from staged raw data
+	Declare Sub SnapshotWatchNames()    ' UI thread: refresh the worker-visible watch-name snapshot
+
 	Type WStringOrStringList As WStringList
 	Type WStringOrStringListItem As WStringListItem
 

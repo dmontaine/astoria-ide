@@ -385,6 +385,7 @@ Sub ClearDebugPanels()
 	If tpGlobals <> 0 AndAlso tpGlobals->Parent <> 0 Then tpGlobals->Caption = ("Globals")
 	tvPrc.Nodes.Clear
 	lvWatches.Nodes.Clear
+	SnapshotWatchNames()   ' DR-3 2D: keep the worker-visible watch snapshot in sync
 	If tpWatches <> 0 AndAlso tpWatches->Parent <> 0 Then tpWatches->Caption = ("Watches")
 	tvWch.Nodes.Clear
 	tvThd.Nodes.Clear
@@ -3037,6 +3038,7 @@ End Sub
 
 
 	Function TimerProcGDB() As Integer
+		FillDebugPanelsOnUI()   ' DR-3 2D: fill debug panels on the UI thread (no-op unless the worker staged data)
 		If fcurlig < 1 AndAlso fcurlig <> -2 Then Return 1
 		DbgTrace("Timer.act", "fcurlig=" & fcurlig & " branch=" & IIf(fcurlig <> -2, "highlight", "output") & " file=" & DbgTraceEsc(CurrentFile))
 		ChangeEnabledDebug True, False, True
@@ -8093,6 +8095,7 @@ Sub lvWatches_CellEdited(ByRef Designer As My.Sys.Object, ByRef Sender As TreeLi
 	Else
 		tpWatches->Caption = ("Watches") & " (" & Str(lvWatches.Nodes.Count - 1) & " " & ("Pos") & ")"
 	End If
+	SnapshotWatchNames()   ' DR-3 2D: keep the worker-visible watch snapshot in sync
 End Sub
 
 lvProblems.ContextMenu = @mnuProblems

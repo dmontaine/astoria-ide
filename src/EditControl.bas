@@ -238,7 +238,7 @@ Namespace My.Sys.Forms
 			This.SetFocus
 		Else
 			DbgTrace("EC.Breakpoint", "line=" & FSelEndLine & " CurExecutedLine=" & This.CurExecutedLine & " CurEC_set=" & CInt(CurEC <> 0)) : FECLine->Breakpoint = Not FECLine->Breakpoint
-			PaintControl
+			PaintControl True
 		End If
 	End Sub
 	

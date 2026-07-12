@@ -1845,8 +1845,114 @@ End Sub
 		
 	End Function
 	
+	'' ==== 2C (DR-10) breakpoint-number map ==================================================
+	'' GDB's "clear LINESPEC" does NOT match a breakpoint set via break "<fullpath>":<line> on this
+	'' toolchain -- verified with gdb 11.2 on Module1.exe: clear by full path, by lowercase basename,
+	'' and even by the exact uppercased "MODULE1.BAS:20" that `info breakpoints` prints all return
+	'' "No breakpoint at ..." (FB emits an uppercased DWARF source name that clear won't resolve).
+	'' Only "delete <N>" reliably removes it. So we record the GDB breakpoint number parsed from each
+	'' "Breakpoint N at ..." reply, keyed by the linespec, and delete by number on clear.
+	'' Worker-thread-only (run_debug arming loop + the loop's armbp branch) -> no lock needed.
+	Const BP_MAP_MAX = 256
+	Dim Shared As String gBpKey(0 To BP_MAP_MAX - 1)
+	Dim Shared As Integer gBpNum(0 To BP_MAP_MAX - 1)
+	Dim Shared As Integer gBpMapCount
+
+	Sub BpMapReset()
+		gBpMapCount = 0
+	End Sub
+
+	Function NormBpKey(ByRef linespec As String) As String
+		Return UCase(Trim(linespec, Any Chr(10, 13, 32)))
+	End Function
+
+	'' Parse the GDB number from a "Breakpoint N at ..." / "Temporary breakpoint N at ..." reply.
+	'' Skips a leading "Note: breakpoint M also set at ..." line (matches the real one, not the Note).
+	Function ParseBpNumber(ByRef s As String) As Integer
+		Dim As Long p = InStr(s, "Temporary breakpoint ")
+		If p > 0 Then Return Val(Mid(s, p + Len("Temporary breakpoint ")))
+		p = InStr(s, "Breakpoint ")
+		If p > 0 Then Return Val(Mid(s, p + Len("Breakpoint ")))
+		Return 0
+	End Function
+
+	Sub BpMapPut(ByRef linespec As String, ByVal num As Integer)
+		If num <= 0 Then Exit Sub
+		Dim As String k = NormBpKey(linespec)
+		For i As Integer = 0 To gBpMapCount - 1
+			If gBpKey(i) = k Then gBpNum(i) = num : Exit Sub
+		Next
+		If gBpMapCount < BP_MAP_MAX Then
+			gBpKey(gBpMapCount) = k
+			gBpNum(gBpMapCount) = num
+			gBpMapCount += 1
+		End If
+	End Sub
+
+	'' Return the recorded GDB number for a linespec and remove the entry (0 if not tracked).
+	Function BpMapTake(ByRef linespec As String) As Integer
+		Dim As String k = NormBpKey(linespec)
+		For i As Integer = 0 To gBpMapCount - 1
+			If gBpKey(i) = k Then
+				Dim As Integer n = gBpNum(i)
+				For j As Integer = i To gBpMapCount - 2
+					gBpKey(j) = gBpKey(j + 1) : gBpNum(j) = gBpNum(j + 1)
+				Next
+				gBpMapCount -= 1
+				Return n
+			End If
+		Next
+		Return 0
+	End Function
+
+	'' The linespec portion of an enqueued "break <spec>\n" / "clear <spec>\n" command.
+	Function BpLinespec(ByRef cmd As String) As String
+		Dim As Long p = InStr(cmd, " ")
+		If p = 0 Then Return ""
+		Return Trim(Mid(cmd, p + 1), Any Chr(10, 13, 32))
+	End Function
+
+	'' 2C (DR-1/DR-10, 2026-07-12): the single arm-during-debug path for ALL breakpoint toggles
+	'' (menu, F9, gutter-click). Called from EditControl.Breakpoint AFTER the marker is toggled,
+	'' with bpOn = the marker's NEW state (True = a breakpoint now exists on this line -> arm it in
+	'' GDB; False = it was just removed -> clear it). Replaces set_bp's direct UI-thread pipe write
+	'' (the DR-1 race): we ENQUEUE the break/clear so the debug worker -- the single owner of the
+	'' pipe -- applies it at a safe point (its lockstep loop only dequeues while the inferior is
+	'' stopped at the prompt, and run_debug handles break/clear without running the inferior). When
+	'' not debugging this is a no-op: the editor marker alone is enough and run_debug re-sends every
+	'' editor breakpoint on the next launch. File/line are derived exactly as set_bp did.
+	Sub arm_breakpoint(bpOn As Boolean, Temporary As Boolean = False)
+
+		If iFlagStartDebug <> 1 Then Exit Sub
+
+		Dim As TabWindow Ptr tb = Cast(TabWindow Ptr, ptabCode->SelectedTab)
+		If tb = 0 Then Exit Sub
+
+		Dim As Integer iSelStartLine, iSelEndLine, iSelStartChar, iSelEndChar
+		tb->txtCode.GetSelection iSelStartLine, iSelEndLine, iSelStartChar, iSelEndChar
+
+		Dim As String sTemp = """" & Replace(tb->FileName, "\", "/") & """:" & iSelEndLine + 1
+
+		If Temporary Then
+			'' Run-to-cursor: a one-shot breakpoint at the caret, followed by continue_debug's 'c'.
+			'' Enqueued (not direct-written) so it stays in FIFO order ahead of the 'c' and the worker
+			'' -- not the UI thread -- owns the pipe.
+			DbgTrace("arm_breakpoint.enqueue", "tbreak " & DbgTraceEsc(sTemp))
+			EnqueueDebugCommand !"tbreak " & sTemp & !"\n"
+		ElseIf bpOn Then
+			DbgTrace("arm_breakpoint.enqueue", "break " & DbgTraceEsc(sTemp))
+			EnqueueDebugCommand !"break " & sTemp & !"\n"
+		Else
+			DbgTrace("arm_breakpoint.enqueue", "clear " & DbgTraceEsc(sTemp))
+			EnqueueDebugCommand !"clear " & sTemp & !"\n"
+		End If
+
+	End Sub
+
+	'' DEAD as of slice 2C (2026-07-12): superseded by arm_breakpoint (enqueue path). No callers
+	'' remain -- kept only so the 2C diff stays behavioural; delete in the Phase 4 dead-code sweep.
 	Sub set_bp(Temporary As Boolean = False)
-		
+
 		Dim As Long iFlagSetup
 		
 		Dim As TabWindow Ptr tb = Cast(TabWindow Ptr, ptabCode->SelectedTab)
@@ -2124,6 +2230,10 @@ End Sub
 				RunningToCursor = False
 			End If
 			
+			'' 2C (DR-10): fresh GDB session -> breakpoint numbers restart at 1, so reset the map, then
+			'' record each pre-run breakpoint's number keyed by its linespec (so a later toggle-off can
+			'' delete it by number -- "clear LINESPEC" does not work on this toolchain).
+			BpMapReset()
 			Dim As TabWindow Ptr tb
 			For jj As Integer = 0 To TabPanels.Count - 1
 				Var ptabCode = @Cast(TabPanel Ptr, TabPanels.Item(jj))->tabCode
@@ -2131,9 +2241,10 @@ End Sub
 					tb = Cast(TabWindow Ptr, ptabCode->Tabs[i])
 					For j As Integer = 0 To tb->txtCode.Content.Lines.Count - 1
 						If Not Cast(EditControlLine Ptr, tb->txtCode.Content.Lines.Items[j])->Breakpoint Then Continue For
-						
-						writepipe(!"break """ & Replace(tb->FileName, "\", "/") & """:" & WStr(j + 1) & !"\n")
-						readpipe()
+
+						Dim As String sSpec = """" & Replace(tb->FileName, "\", "/") & """:" & WStr(j + 1)
+						writepipe(!"break " & sSpec & !"\n")
+						BpMapPut(sSpec, ParseBpNumber(readpipe()))
 					Next
 				Next i
 			Next jj
@@ -2165,6 +2276,45 @@ End Sub
 						deinit
 						ThreadsLeave
 						Exit Do
+					ElseIf StartsWith(cmd, "break ") OrElse StartsWith(cmd, "tbreak ") OrElse StartsWith(cmd, "clear ") Then
+						'' 2C (DR-1/DR-10): a mid-session breakpoint arm/clear enqueued by arm_breakpoint.
+						'' GDB applies it at the prompt WITHOUT running the inferior, so read the prompt
+						'' reply and stay stopped -- do NOT set Running, highlight, or refresh panels (those
+						'' are for a real stop). The worker (single pipe owner) doing this in lockstep is what
+						'' dissolves the DR-1 race: the UI thread never touches the pipe. Only ever dequeued
+						'' while Not Running (stopped at the prompt), so the read returns promptly.
+						DbgTrace("LOOP.armbp", DbgTraceEsc(cmd))
+						If StartsWith(cmd, "clear ") Then
+							'' DR-10 clear bug: "clear LINESPEC" never matches on this toolchain; delete the
+							'' breakpoint by the GDB number we recorded when it was set (see the BpMap notes).
+							Dim As Integer bn = BpMapTake(BpLinespec(cmd))
+							If bn > 0 Then
+								DbgTrace("LOOP.armbp.delete", "num=" & bn)
+								writepipe("delete " & bn & !"\n")
+								'' "delete N" is SILENT in -f (fullname) mode: it emits only a bare "(gdb) "
+								'' prompt with no leading newline or text. readpipe must be told WithoutAnswer=True
+								'' so it terminates on an exact "(gdb) "; the default (False) waits for "\n(gdb) "
+								'' or a >6-char prompt and would spin forever on the 6-char bare prompt (freeze).
+								readpipe(True, True)
+							Else
+								'' Not tracked (never armed in GDB) -- the literal clear is a harmless no-op.
+								writepipe(cmd)
+								readpipe(, True)
+							End If
+						Else
+							writepipe(cmd)
+							Dim As String rbp = readpipe(, True)
+							'' Record the number only for a real "break" (a "tbreak" run-to-cursor is one-shot
+							'' and auto-deletes, so it never needs a later clear).
+							If StartsWith(cmd, "break ") Then BpMapPut(BpLinespec(cmd), ParseBpNumber(rbp))
+						End If
+						'' Release the lock before looping: an arm/clear does NOT set Running, so it never
+						'' passes through the read branch that would release it. Leaving it held would keep
+						'' tlockGDB locked through the idle-stopped Sleep, and the UI thread's next
+						'' EnqueueDebugCommand (e.g. Continue/Step) would block on it forever -- freezing the
+						'' IDE. The idle-stopped invariant is: lock free so the UI thread can enqueue.
+						If bGDBLocked Then MutexUnlock tlockGDB: bGDBLocked = False
+						Continue Do
 					Else
 						writepipe(cmd)
 					End If
@@ -2192,7 +2342,15 @@ End Sub
 							
 							Dim As String s = readpipe()
 							Result = Result & s
-							
+							'' DR-14 (2026-07-12): decide whether a live inferior exists BEFORE the pid parse
+							'' below mangles s. "info inferiors" shows "process NNNN" for a running inferior
+							'' and "<null>" for a dead one. If the program already exited at this first stop
+							'' (ran to completion or was terminated with no breakpoint bound), continuing or
+							'' refreshing panels against it hangs the worker forever on thread-apply-all-bt --
+							'' the DR-14 hang. This is the reliable signal: this GDB's exit line here was
+							'' "Program exited...", which the [Inferior/not-being-run string check below misses.
+							Dim As Boolean bInferiorDead = (Len(s) > 0) AndAlso (InStr(s, " process ") = 0)
+
 							If Len(s) Then
 								
 								Dim As Long iF1 = InStr(s, " process ")
@@ -2215,6 +2373,15 @@ End Sub
 								
 							End If
 						bGetPid = False
+						If bInferiorDead Then
+							'' DR-14: program already gone at the first stop -- shut the session down cleanly
+							'' on the worker (single pipe owner) instead of 'c'/refresh against a dead inferior.
+							DbgTrace("LOOP.inferiorGone", "info inferiors: no live process")
+							ShowMessages Result
+							deinit
+							bGDBLocked = False   '' deinit released tlockGDB
+							Exit Do
+						End If
 						If runtype <> RTSTEP Then
 							writepipe(!"c\n")
 							Running = True
@@ -2229,7 +2396,7 @@ End Sub
 					End If
 					szDataForPipe = Result
 					Running = False
-					If (InStr(Result, "[Inferior ") > 0) OrElse (InStr(Result, "not being run") > 0) Then
+					If (InStr(Result, "[Inferior ") > 0) OrElse (InStr(Result, "not being run") > 0) OrElse (InStr(Result, "Program exited") > 0) Then
 						'' 2B (DR-6) + DR-14: the inferior has exited or been terminated -- either it
 						'' ran to completion / crashed on its own (DR-14), or Stop-while-running just
 						'' killed it (kill_inferior_process). Do NOT fall through to the panel refresh:

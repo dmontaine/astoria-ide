@@ -238,7 +238,17 @@ Namespace My.Sys.Forms
 			This.SetFocus
 		Else
 			DbgTrace("EC.Breakpoint", "line=" & FSelEndLine & " CurExecutedLine=" & This.CurExecutedLine & " CurEC_set=" & CInt(CurEC <> 0)) : FECLine->Breakpoint = Not FECLine->Breakpoint
+			'' 2C: capture the toggled state NOW. FECLine is a shared class member that PaintControl
+			'' reuses as its paint-loop variable (EditControl.bas:4274), so after PaintControl it no
+			'' longer points at this line -- reading FECLine->Breakpoint below would give some other
+			'' line's state (almost always False), making every mid-session toggle enqueue a "clear"
+			'' and never a "break". Read it before PaintControl clobbers FECLine.
+			Dim As Boolean bBpOn = FECLine->Breakpoint
 			PaintControl True
+			'' 2C (DR-1/DR-10): every breakpoint toggle -- menu, F9, gutter-click -- reaches here, so
+			'' this is the one place to arm/clear it in a live debug session. Pass the marker's NEW
+			'' state; arm_breakpoint enqueues break/clear (no-op when not debugging).
+			arm_breakpoint(bBpOn)
 		End If
 	End Sub
 	

@@ -426,7 +426,9 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 			ClearThreadsWindow
 			If iFlagStartDebug = 1 Then
 				ChangeEnabledDebug False, True, True
-				set_bp True
+				'' 2C (DR-1): enqueue the one-shot cursor breakpoint instead of set_bp's direct pipe
+				'' write; the worker applies the tbreak, then continue_debug's 'c' runs to it.
+				arm_breakpoint True, True
 				continue_debug
 			Else
 				RunningToCursor = True
@@ -598,9 +600,9 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 				Case "Unformat":                    ec->UnformatCode
 				Case "AddSpaces":                   tb->AddSpaces
 				Case "Breakpoint":
-					If iFlagStartDebug = 1 Then
-						set_bp
-					End If
+					'' 2C (DR-1/DR-10): arming now lives inside ec->Breakpoint (via arm_breakpoint),
+					'' unifying the menu, F9 and gutter-click paths. The old direct set_bp call here
+					'' (UI-thread pipe write) was the DR-1 race and is gone.
 					ec->Breakpoint
 				Case "CollapseAll":                 ec->CollapseAll
 				Case "UnCollapseAll":               ec->UnCollapseAll

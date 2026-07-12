@@ -16,6 +16,11 @@
 	#include once "mff/D2D1/D2D1.bi"
 '#include once "Main.bi"
 
+'' 2C (DR-1/DR-10): EditControl.Breakpoint arms/clears a live GDB breakpoint via arm_breakpoint,
+'' which is defined later in Debug.bas. This unit compiles before those debug declarations, so
+'' forward-declare it here (a name-only dependency, no include of the debug layer).
+Declare Sub arm_breakpoint(bpOn As Boolean, Temporary As Boolean = False)
+
 Enum IdentifiersCase
 	OriginalCase
 	CapitalizedCase

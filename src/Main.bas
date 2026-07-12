@@ -2064,6 +2064,13 @@ Function CloseAllDocuments() As Boolean
 	Dim tnP As TreeNode Ptr
 	Dim Index As Integer
 		If iFlagStartDebug = 1 Then
+			'' DR-15: mirrors the Case "End" Stop-button fix (AstoriaIDE.bas ~312 / DR-6 2B).
+			'' GDB does not act on stdin (incl. "q") while the inferior is running freely in
+			'' synchronous all-stop mode, so the queued q above can sit unprocessed forever once
+			'' FormClosing short-circuits every readpipe -- deinit's bare "q\n" + close-handles
+			'' never reaches GDB, and the debuggee is left running (orphaned astoria.exe/debuggee
+			'' on close). kill_inferior_process() is race-free wrt the GDB pipe/handles/lock.
+			If Running Then kill_inferior_process()
 			EnqueueDebugCommand !"q\n"
 		End If
 	With *pfSave
@@ -9563,6 +9570,7 @@ End Sub
 
 Sub frmMain_Close(ByRef Designer As My.Sys.Object, ByRef Sender As Form, ByRef Action As Integer)
 	On Error Goto ErrorHandler
+	DbgTrace("Close.enter", "iFlagStartDebug=" & iFlagStartDebug & " Running=" & Running & " iGlPid=" & iGlPid)
 	SaveMainWindowPanelLayout()
 	SaveWorkspace()
 	If Not CloseAllDocuments Then Action = 0: Return

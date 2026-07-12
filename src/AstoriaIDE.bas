@@ -196,7 +196,7 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 	Case "OpenFolder":                          OpenFolder
 	Case "SaveProject":                         SaveProject ptvExplorer->SelectedNode
 	Case "SaveProjectAs":                       SaveProject ptvExplorer->SelectedNode, True
-	Case "CloseProject":                        CloseProject GetParentNode(ptvExplorer->SelectedNode)
+	Case "CloseProject":                        CloseProjectAndClean GetParentNode(ptvExplorer->SelectedNode)
 	Case "NewFile":                             NewFile
 	Case "OpenFile":                            OpenEditorFile
 	Case "CloseFile":                           CloseEditorFile

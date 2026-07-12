@@ -2093,9 +2093,10 @@ End Sub
 			
 			'If runtype = RTSTEP Then
 			
-			writepipe(!"b 1\n")
-			
-			readpipe()
+			'' DR-8 (2026-07-11): don't break at the program entry. 'b 1' stopped at the very
+			'' first source line, which for a framework app is an #include's module-init
+			'' (e.g. Brush.bas) -- not the user's code. Run to the user's breakpoints instead
+			'' (or run freely if there are none). Removed: writepipe(!"b 1\n") + readpipe().
 			
 			'End If
 			
@@ -2429,7 +2430,7 @@ End Sub
 		
 		'If Len(sfiles_array(0)) Then
 		
-		DbgTrace("deinit.enter", "") : writepipe(!"q\n")
+		DbgTrace("deinit.enter", "") : bCloseDebugTabsPending = True : writepipe(!"q\n")
 		
 			DbgTrace("deinit.closehandles+unlock", "") : CloseHandle(hReadPipe)
 			CloseHandle(hWritePipe)

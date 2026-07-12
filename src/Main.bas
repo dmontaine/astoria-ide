@@ -2831,6 +2831,16 @@ Function CloseProject(tn As TreeNode Ptr, WithoutMessage As Boolean = False) As 
 	Return True
 End Function
 
+' User-facing "Close Project" (File menu + Explorer right-click). Target-audience UX (owner,
+' 2026-07-11): closing a project resets to a clean, empty environment -- every open file closes
+' too -- and clears the saved session so the next app launch starts clean (doesn't reopen the
+' project). Internal CloseProject callers (CloseSession, CloseAllTabs' sweep) are unaffected.
+Sub CloseProjectAndClean(tn As TreeNode Ptr)
+	If Not CloseProject(tn) Then Exit Sub   ' user cancelled an unsaved-changes prompt -> leave things as-is
+	CloseAllTabs()                          ' close any remaining (standalone) files + any now-empty projects
+	If Not WorkspaceHasOpenItems() Then ClearWorkspaceFile()   ' clean next start, immediately (survives a force-kill)
+End Sub
+
 Function DeleteProject() As Boolean
 	Dim As TreeNode Ptr tn = GetParentNode(ptvExplorer->SelectedNode)
 	If tn = 0 Then Return False
@@ -3039,13 +3049,18 @@ End Sub
 
 	Function TimerProcGDB() As Integer
 		FillDebugPanelsOnUI()   ' DR-3 2D: fill debug panels on the UI thread (no-op unless the worker staged data)
+		If bCloseDebugTabsPending Then bCloseDebugTabsPending = False : CloseDebuggerOpenedTabs()   ' close-on-stop (UI thread)
 		If fcurlig < 1 AndAlso fcurlig <> -2 Then Return 1
 		DbgTrace("Timer.act", "fcurlig=" & fcurlig & " branch=" & IIf(fcurlig <> -2, "highlight", "output") & " file=" & DbgTraceEsc(CurrentFile))
 		ChangeEnabledDebug True, False, True
 		If fcurlig <> -2 Then
 			Dim As TabWindow Ptr tb = Cast(TabWindow Ptr, ptabCode->SelectedTab)
 			If tb = 0 OrElse Not EqualPaths(tb->FileName, CurrentFile) Then
+				' close-on-stop: if the debugger opens a file that wasn't already open, flag the
+				' new tab so it's closed again when debugging ends (framework #include etc.).
+				Dim As Boolean bWasOpen = (GetTab(CurrentFile) <> 0)
 				tb = AddTab(CurrentFile)
+				If tb <> 0 AndAlso Not bWasOpen Then tb->OpenedByDebugger = True
 			End If
 			If tb Then
 				CurEC = @tb->txtCode
@@ -3063,6 +3078,27 @@ End Sub
 		fcurlig = -1
 		Return 1
 	End Function
+
+	Sub CloseDebuggerOpenedTabs()
+		' UI thread (called from TimerProcGDB when deinit flags bCloseDebugTabsPending). Close the tabs
+		' the debugger auto-opened (OpenedByDebugger) now that the session ended, skipping any with
+		' unsaved edits. Re-scan after each close since CloseTab mutates the tab list.
+		Dim As Boolean bClosed
+		Do
+			bClosed = False
+			For jj As Integer = 0 To TabPanels.Count - 1
+				Var ptabCode = @Cast(TabPanel Ptr, TabPanels.Item(jj))->tabCode
+				For i As Integer = 0 To ptabCode->TabCount - 1
+					Dim As TabWindow Ptr tb = Cast(TabWindow Ptr, ptabCode->Tab(i))
+					If CInt(tb <> 0) AndAlso CInt(tb->OpenedByDebugger) AndAlso CInt(Not tb->Modified) Then
+						tb->OpenedByDebugger = False
+						If CloseTab(tb, True) Then bClosed = True : Exit For
+					End If
+				Next i
+				If bClosed Then Exit For
+			Next jj
+		Loop While bClosed
+	End Sub
 
 Function EqualPaths(ByRef a As WString, ByRef b As WString) As Boolean
 	Dim FileNameLeft As WString Ptr

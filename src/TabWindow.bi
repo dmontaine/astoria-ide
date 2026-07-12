@@ -180,6 +180,7 @@ Public:
 	Dim As Integer ConstructorStart, ConstructorEnd, lvPropertyWidth, FindFormPosiLeft, FindFormPosiTop, RightSelectedIndex, AutoSaveCharCount
 	ptn As TreeNode Ptr
 	tn As TreeNode Ptr
+	OpenedByDebugger As Boolean   ' DR-8/close-on-stop: tab auto-opened by the debugger (framework #include etc.); closed when debugging ends
 	mi As MenuItem Ptr
 	bQuitThread As Boolean
 	LastThread As Any Ptr

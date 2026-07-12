@@ -4207,12 +4207,6 @@ Namespace My.Sys.Forms
 			iC = 0
 			vlc = Min(LinesCount, VScrollPos + VisibleLinesCount(zz) + 2)
 			vlc1 = VisibleLinesCount(zz)
-			'' DR-4 instrument (temporary): capture the paint-state driving the visible-line count.
-			'' Fires once per full paint (OnlyCursor/blink paints early-return before here). Read the
-			'' EC.Paint line immediately after an EC.Breakpoint line = the toggle paint; the next EC.Paint
-			'' with no preceding EC.Breakpoint = the refocus paint that fixes it. If dwClientY is smaller
-			'' on the toggle paint than on the refocus paint, vlc1 is short -> lower viewport left blank.
-			DbgTrace("EC.Paint", "zz=" & zz & " path=" & IIf(pRenderTarget <> 0, "D2D", "GDI") & " dwClientY=" & dwClientY & " OlddwClientY=" & OlddwClientY & " dwCharY=" & dwCharY & " vlc1=" & vlc1 & " VScrollPos=" & VScrollPos & " LinesCount=" & LinesCount & " divX=" & CInt(bDividedX) & " divY=" & CInt(bDividedY))
 			IzohBoshi = 0
 			QavsBoshi = 0
 			MatnBoshi = 0
@@ -6965,7 +6959,15 @@ Namespace My.Sys.Forms
 						FSelEndChar = Len(*Cast(EditControlLine Ptr, Content.Lines.Item(FSelEndLine))->Text)
 					End If
 					If Not Focused Then This.SetFocus
-					ScrollToCaret
+					'' DR-4 (2026-07-12): a gutter/line-number click sets the caret to end-of-line (the
+					'' line-select behavior above), and ScrollToCaret then h-scrolls to reveal that end.
+					'' On a narrow window that shifts the whole viewport right -- short lines scroll off
+					'' the left, long lines show only their tail -- which looked like "text disappears on
+					'' breakpoint toggle" (window-width specific; the wider AMD window fit the lines so it
+					'' never scrolled). A gutter click is a breakpoint/line action and must not change the
+					'' horizontal scroll, so update the caret WITHOUT scrolling (ShowCaretPos False skips
+					'' the scroll block, gated by `If Scroll` at ShowCaretPos).
+					If X < LeftMargin Then ShowCaretPos False Else ScrollToCaret
 					OldnCaretPosX = nCaretPosX
 					OldCharIndex = GetOldCharIndex
 						SetCapture FHandle

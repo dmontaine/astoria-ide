@@ -2657,6 +2657,7 @@ Function CloseProject(tn As TreeNode Ptr, WithoutMessage As Boolean = False) As 
 	If tn->ImageKey <> "Project" AndAlso tn->ImageKey <> "MainProject" AndAlso tn->ImageKey <> "Opened" Then Return True
 	Dim tb As TabWindow Ptr
 	Dim As Boolean bProjectModified = EndsWith(tn->Text, "*")
+	DbgTrace("CloseProj.enter", "tn=" & Str(CInt(tn <> 0)))
 	If Not WithoutMessage Then
 		Dim tnP As TreeNode Ptr
 		Dim Index As Integer
@@ -2745,6 +2746,7 @@ Function CloseProject(tn As TreeNode Ptr, WithoutMessage As Boolean = False) As 
 			If bClosedTab Then Exit For
 		Next jj
 	Loop While bClosedTab
+	DbgTrace("CloseProj.tabsClosed", "")
 	' SAFETY: if any tab still references this project, bail WITHOUT freeing (no dangling-ref hang).
 	For jj As Integer = 0 To TabPanels.Count - 1
 		Var ptabCode = @Cast(TabPanel Ptr, TabPanels.Item(jj))->tabCode
@@ -2755,6 +2757,7 @@ Function CloseProject(tn As TreeNode Ptr, WithoutMessage As Boolean = False) As 
 			End If
 		Next i
 	Next jj
+	DbgTrace("CloseProj.safetyPassed", "")
 	For j As Integer = tn->Nodes.Count - 1 To 0 Step -1
 		If tn->Nodes.Item(j)->Nodes.Count = 0 Then
 			'For jj As Integer = 0 To TabPanels.Count - 1
@@ -2796,6 +2799,7 @@ Function CloseProject(tn As TreeNode Ptr, WithoutMessage As Boolean = False) As 
 			Next k
 		End If
 	Next
+	DbgTrace("CloseProj.nodesFreed", "")
 	'	If bProjectModified AndAlso Not WithoutMessage Then
 	'		Select Case MsgBox(ML("Want to save the project") & " """ & tn->Text & """?", "Astoria IDE", mtWarning, btYesNoCancel)
 	'		Case mrYES: If Not SaveProject(tn) Then Return False
@@ -2811,11 +2815,18 @@ Function CloseProject(tn As TreeNode Ptr, WithoutMessage As Boolean = False) As 
 	'miExplorerCloseProject->Enabled = False
 	'miProjectProperties->Enabled = False
 	'miExplorerProjectProperties->Enabled = False
+	DbgTrace("CloseProj.beforeNodesRemove", "")
 	If tvExplorer.Nodes.IndexOf(tn) <> -1 Then tvExplorer.Nodes.Remove tvExplorer.Nodes.IndexOf(tn)
+	DbgTrace("CloseProj.afterNodesRemove", "")
+	DbgTrace("CloseProj.clearAnalysis", "")
 	ClearAnalysisPanels()
+	DbgTrace("CloseProj.clearDebug", "")
 	ClearDebugPanels()
+	DbgTrace("CloseProj.changeUseDbg", "")
 	ChangeUseDebugger False, 1
+	DbgTrace("CloseProj.changeMenus", "")
 	ChangeMenuItemsEnabled
+	DbgTrace("CloseProj.done", "")
 	Return True
 End Function
 
@@ -7073,6 +7084,7 @@ Function GetParentNode(tn As TreeNode Ptr) As TreeNode Ptr
 End Function
 
 Sub tvExplorer_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As TreeView, ByRef Item As TreeNode)
+	DbgTrace("SelChange.enter", "tag=" & Str(CInt(Item.Tag <> 0)))
 	Static OldParentNode As TreeNode Ptr
 	Dim As ExplorerElement Ptr eeSel = Item.Tag
 	If eeSel <> 0 AndAlso *eeSel Is ControlTreeElement Then
@@ -7081,7 +7093,9 @@ Sub tvExplorer_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As TreeVi
 	End If
 	' A single click on any real editable file node (Forms, Includes, Modules, ...)
 	' opens it immediately, same as double-click would.
+	DbgTrace("SelChange.beforeOpen", "")
 	OpenTreeNodeOnSingleClick Item
+	DbgTrace("SelChange.afterOpen", "")
 	Dim As TreeNode Ptr ptn = tvExplorer.SelectedNode
 	If ptn = 0 Then Exit Sub 'David Change For Safty
 	ptn = GetParentNode(ptn)

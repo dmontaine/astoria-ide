@@ -2093,7 +2093,12 @@ End Sub
 			Var Pos1 = 0
 			Running = True
 			Do
-				Dim As String cmd = DequeueDebugCommandLocked()
+				Dim As String cmd
+				' 2A lockstep (DR-3): only pull the next queued command once the previous command's
+				' stop has been read (Not Running) and its panel refresh has run (Not pending).
+				' Sending a step mid-cycle desyncs the pipe -- RefreshDebugPanelsAfterStop's _l_ read
+				' then swallows the new step's stop annotation and the next readpipe blocks forever.
+				If (Not Running) AndAlso (Not bPendingDebugPanelRefresh) Then cmd = DequeueDebugCommandLocked()
 				If cmd <> "" Then
 					DbgTrace("LOOP.send", "cmd=" & DbgTraceEsc(cmd) & " Running(before)=" & Running & " qleft=" & DebugCommandQueueCount)
 					If Not bGDBLocked Then MutexLock tlockGDB: bGDBLocked = True

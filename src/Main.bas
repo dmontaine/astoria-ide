@@ -3056,6 +3056,7 @@ End Sub
 
 	Function TimerProcGDB() As Integer
 		FillDebugPanelsOnUI()   ' DR-3 2D: fill debug panels on the UI thread (no-op unless the worker staged data)
+		FlushDebugOutputOnUI()  ' DR-7: apply queued Output text / watch-edit / panel-clear (no-op unless staged)
 		If bCloseDebugTabsPending Then bCloseDebugTabsPending = False : CloseDebuggerOpenedTabs()   ' close-on-stop (UI thread)
 		If fcurlig < 1 AndAlso fcurlig <> -2 Then Return 1
 		DbgTrace("Timer.act", "fcurlig=" & fcurlig & " branch=" & IIf(fcurlig <> -2, "highlight", "output") & " file=" & DbgTraceEsc(CurrentFile))

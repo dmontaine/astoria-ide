@@ -41,6 +41,9 @@
 	Declare Sub FillDebugPanelsOnUI()   ' UI thread: fill lvLocals/lvGlobals/lvThreads/lvWatches from staged raw data
 	Declare Sub SnapshotWatchNames()    ' UI thread: refresh the worker-visible watch-name snapshot
 
+	' --- DR-7: worker->UI marshal of Output text + watch-edit result + session-start panel clear ---
+	Declare Sub FlushDebugOutputOnUI()  ' UI thread: apply queued ShowMessages/UpdateWatch/panel-clear
+
 	' --- close-on-stop: close debugger-auto-opened tabs when a debug session ends ---
 	Common Shared As Boolean bCloseDebugTabsPending   ' set by deinit (any thread), serviced by TimerProcGDB (UI thread)
 	Declare Sub CloseDebuggerOpenedTabs()             ' UI thread: close tabs flagged OpenedByDebugger (unmodified only)

@@ -148,7 +148,24 @@ End Sub
 	
 	Declare Function readpipe(WithoutAnswer As Boolean = False, WithoutShowing As Boolean = False) As String
 	Declare Function CreatePipeD(szCmd As WString Ptr , szCmdParam As WString Ptr = 0 , szCmdParam2 As WString Ptr = 0) As Long
-	
+
+	' ==== DR-7 marshal (2026-07-12): worker-thread staging for txtOutput/lvWatches/lvLocals/
+	' lvGlobals. See the FlushDebugOutputOnUI comment (near run_debug) for the full rationale;
+	' declared here (ahead of readpipe/load_file, both of which queue into this) rather than
+	' alongside FlushDebugOutputOnUI since FreeBASIC needs Dim Shared/Sub visible before use.
+	Dim Shared As String gPendingOutputText
+	Dim Shared As Boolean bOutputPending, bOutputChangeTab
+	Dim Shared As Boolean bClearVarPanelsPending
+	Dim Shared As Integer gPendingWatchIndex = -1
+	Dim Shared As String gPendingWatchResult
+
+	' Worker thread. Queue text for the Output pane instead of writing txtOutput directly.
+	Sub QueueShowMessages(ByRef msg As String, ChangeTab As Boolean = True)
+		gPendingOutputText &= msg & Chr(13, 10)
+		If ChangeTab Then bOutputChangeTab = True
+		bOutputPending = True
+	End Sub
+
 		Declare Sub writepipe(ByRef szBuf As ZString, iTime As Long = 30)
 		#define writepipefast writepipe
 	Declare Function fill_locals_variables(sBuf As String , iFlagAutoUpdate As Long = 0) As Long
@@ -289,7 +306,7 @@ End Sub
 				End If
 				If Not WithoutShowing Then
 					DbgTrace("SHOWMSG.readpipe", DbgTraceEsc(sBuffer))
-					ShowMessages sBuffer, False
+					QueueShowMessages(sBuffer, False)
 				End If
 				'?sBuffer
 			Loop While Not (CBool(InStr(sOutput, Chr(10) & "(gdb) ")) OrElse CBool(InStr(sOutput, "~*~(gdb) ")) OrElse IIf(WithoutAnswer, CBool(sOutput = "(gdb) "), StartsWith(sOutput, "(gdb) ") AndAlso CBool(Len(sOutput) > 6 OrElse Count > 1)))
@@ -1332,15 +1349,12 @@ End Sub
 			
 		End If
 		
-		ThreadsEnter
-		
-		ShowMessages(("Wait, process loading..."))
-		
-		lvLocals.Nodes.Clear
-		
-		lvGlobals.Nodes.Clear
-		
-		ThreadsLeave
+		'' DR-7 (2026-07-12): was a direct worker-thread ShowMessages + lvLocals/lvGlobals.Nodes.Clear
+		'' (ThreadsEnter/ThreadsLeave are no-ops -- the same unmarshaled-race hazard as the DR-3
+		'' freeze). Stage instead; the UI-thread FlushDebugOutputOnUI applies both.
+		QueueShowMessages(("Wait, process loading..."))
+
+		bClearVarPanelsPending = True
 		
 		'Updateinfoxserver(10)
 		
@@ -1699,7 +1713,36 @@ Sub RefreshDebugPanelsAfterStop()
 	Next
 	bPanelFillPending = True
 End Sub
-	
+
+' ==== DR-7 marshal (2026-07-12): worker never touches txtOutput/lvWatches/lvLocals/lvGlobals
+' directly. Residual from the 2D audit -- readpipe's own ShowMessages, run_debug's loop-body
+' ShowMessages calls, load_file's session-start panel clear, and the watch-edit result all ran
+' unmarshaled on the worker (same hazard class as the DR-3 freeze, just never observed hanging
+' here since these are lower-collision-probability than the per-step panel refresh 2D fixed).
+' The worker now only stages text/flags (gPendingOutputText etc., declared near readpipe() at the
+' top of this file since readpipe/load_file call QueueShowMessages before this point in the
+' source); the UI-thread heartbeat TimerProcGDB calls FlushDebugOutputOnUI to apply them.
+' UI thread only (called every TimerProcGDB tick; cheap no-op unless the worker staged data).
+Sub FlushDebugOutputOnUI()
+	If bClearVarPanelsPending Then
+		bClearVarPanelsPending = False
+		lvLocals.Nodes.Clear
+		lvGlobals.Nodes.Clear
+	End If
+	If bOutputPending Then
+		Dim As String sText = gPendingOutputText
+		Dim As Boolean bTab = bOutputChangeTab
+		gPendingOutputText = ""
+		bOutputPending = False
+		bOutputChangeTab = False
+		ShowMessages sText, bTab
+	End If
+	If gPendingWatchIndex <> -1 Then
+		UpdateWatch gPendingWatchIndex, gPendingWatchResult
+		gPendingWatchIndex = -1
+	End If
+End Sub
+
 	Sub run_debug(iFlag As Long)
 		
 		iFlagThreadSignal = 0
@@ -1769,11 +1812,9 @@ End Sub
 					DbgTrace("LOOP.send", "cmd=" & DbgTraceEsc(cmd) & " Running(before)=" & Running & " qleft=" & DebugCommandQueueCount)
 					If Not bGDBLocked Then MutexLock tlockGDB: bGDBLocked = True
 					If cmd = !"q\n" Then
-						ThreadsEnter
-						ShowMessages ("Debugging finished.")
+						QueueShowMessages(("Debugging finished."))
 						If bGDBLocked Then MutexUnlock tlockGDB: bGDBLocked = False
 						deinit
-						ThreadsLeave
 						Exit Do
 					ElseIf StartsWith(cmd, "break ") OrElse StartsWith(cmd, "tbreak ") OrElse StartsWith(cmd, "clear ") Then
 						'' 2C (DR-1/DR-10): a mid-session breakpoint arm/clear enqueued by arm_breakpoint.
@@ -1876,7 +1917,7 @@ End Sub
 							'' DR-14: program already gone at the first stop -- shut the session down cleanly
 							'' on the worker (single pipe owner) instead of 'c'/refresh against a dead inferior.
 							DbgTrace("LOOP.inferiorGone", "info inferiors: no live process")
-							ShowMessages Result
+							QueueShowMessages(Result)
 							deinit
 							bGDBLocked = False   '' deinit released tlockGDB
 							Exit Do
@@ -1890,7 +1931,7 @@ End Sub
 						End If
 					End If
 					If ShowResult Then
-						ShowMessages Result
+						QueueShowMessages(Result)
 						ShowResult = False
 					End If
 					szDataForPipe = Result
@@ -1904,15 +1945,17 @@ End Sub
 						'' Shut the session down cleanly right here on the worker thread (which owns the
 						'' pipe): deinit closes the handles + quits GDB, then leave the loop.
 						DbgTrace("LOOP.inferiorGone", DbgTraceEsc(Left(Result, 80)))
-						ShowMessages Result
+						QueueShowMessages(Result)
 						deinit
 						bGDBLocked = False   '' deinit released tlockGDB
 						Exit Do
 					End If
 					If WatchIndex <> -1 Then
-						ThreadsEnter
-						UpdateWatch WatchIndex, Result
-						ThreadsLeave
+						'' DR-7 (2026-07-12): was a direct worker-thread UpdateWatch call (touches
+						'' lvWatches -- the same hazard the 2D marshal fixed for the panel refresh
+						'' path). Stage instead; FlushDebugOutputOnUI applies it on the UI thread.
+						gPendingWatchIndex = WatchIndex
+						gPendingWatchResult = Result
 						WatchIndex = -1
 					Else
 						fcurlig = -2

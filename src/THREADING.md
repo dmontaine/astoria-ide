@@ -46,7 +46,7 @@ ThreadCounter(ThreadCreate_(@WorkerSub, optionalParam))
 | Command prompt | Tools | `RunCmd` | Spawns external shell |
 | Run / Debug | Run menu | `CompileAndRun`, `StartDebugging`, `StartDebuggingWithCompile`, `RunProgram` | Compile and/or launch debuggee |
 | IntelliSense | Tab open / edit | `LoadFunctionsSub`, `LoadOnlyFilePath`, … | Background include parsing |
-| Debug engine | Debugger | `start_pgm`, `attach_debuggee` (`Debug.bas`) | Separate from menu worker pattern |
+| Debug engine | Debugger | `RunProgramWithDebug`→`run_debug` (`Debug.bas`) | Single worker thread owns the GDB pipe; see `tlockGDB` below |
 
 GDB integrated debugger additionally uses `tlockGDB` and timer callbacks (`TimerProcGDB`).
 
@@ -61,22 +61,6 @@ Declared in `Main.bi`, created at startup in `Main.bas`:
 | `tlockToDo` | Find-in-files / To-Do list updates (`frmFind.frm`) |
 | `tlockGDB` | GDB debugger I/O and command queue (`Main.bas`, `Debug.bas`) |
 | `tlockSuggestions` | Per-tab autocomplete / suggestion rebuild (`TabWindow.bas`) |
-
-## Debug `blocker` mutex
-
-Separate from `tlock*`, defined at the top of `Debug.bas`:
-
-```freebasic
-Dim Shared As Any Ptr blocker
-blocker = MutexCreate
-```
-
-Used in the integrated IDE debugger event loop to serialize debuggee stop/resume handling between the debug thread and the timer-driven UI thread. Typical pattern:
-
-1. `MutexLock blocker` before processing a debug event.
-2. `MutexUnlock blocker` when the event is handled or when waiting on `CondWait(condid, blocker)` for the next event.
-
-This prevents two threads from advancing the debuggee or updating breakpoint state concurrently.
 
 ## Rules for UI updates from background threads
 

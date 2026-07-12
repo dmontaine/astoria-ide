@@ -8,261 +8,21 @@
 
 #include once "Debug.bi"
 
-'mutex for blocking second thread before continue
-Dim Shared As Any Ptr blocker
-blocker = MutexCreate
-
-''state of cc on each line can be KCC_ALL / KCC_NONE
-''could be partially true but should be the main state
-Dim Shared As KCC_STATE ccstate
-
-Dim Shared As Integer debugevent
-Dim Shared As Integer debugdata ''index of bp or address of BP (case BP on mem)
-Dim Shared As String  libelexception
-Dim Shared As Integer ssadr ''address of line for restoring breakcpu when singlestepping
-Dim Shared As Integer firsttime
-Dim Shared As Integer srcstart
-
-''codes when debuggee stopped and corresponding texts
-Dim Shared stopcode As Integer
-Dim Shared stoplibel(20) As String*17 =>{"","BP On line","BP perm/tempo","BP cond","BP var","BP mem"_
-,"BP count","Halt by user","Access violation","thread created","Exception"}
-
-''source files
-Dim Shared As String  source(SRCMAX)        ''source names with path
-Dim Shared As String  srcname(SRCMAX)       ''source names without path
-Dim Shared As tlist   srclist(SRCMAX)       ''to sort
-Dim Shared As Integer srclistfirst          ''first sorted element
-Dim Shared As Integer srccombocur           ''current combo choice
-Dim Shared As Any Ptr sourceptr(SRCMAX)     ''pointer doc scintilla
-Dim Shared As Any Ptr oldscintilla          ''last pointer for scintilla
-Dim Shared As UByte   sourcebuf(SRCSIZEMAX) ''buffer for loading source file
-Dim Shared As Integer sourcenb =-1          ''number of src, 0 based
-Dim Shared As Integer sourceix              ''source index when loading data
-Dim Shared As Any Ptr currentdoc            ''current doc pointer
-
-Dim Shared As Integer srcdisplayed			''index displayed source
-
-''lines
-Dim Shared As Integer linenb, rlineprev ''numbers of lines, index of previous executed line (rline)
-Dim Shared As Integer linenbprev ''used for dll
-Dim Shared As Integer lastline
-Dim Shared As tline rline(LINEMAX) ''1 based
-
-''current tab:line
-Dim Shared As Integer srccur   ''index source line to be executed
-Dim Shared As Integer linecur  ''line to be executed (inside source)
-Dim Shared As Integer rlinecur ''line to be executed
-
-''procedures
-Dim Shared As tproc proc(PROCMAX) ''list of procs in code
-Dim Shared As Integer procnb
-Dim Shared As Integer procnew ''used for finding address of first fbc line
-Dim Shared As Integer procmain
-Dim Shared As tlist   proclist(PROCMAX)
-Dim Shared As Integer proclistfirst ''first sorted element
-
-Dim Shared As Integer procsv,procsk,proccurad,procfn,procsort
-Dim Shared As tprocr procr(PROCRMAX) ''list of running proc
-Dim Shared As Integer procrnb
-Dim Shared As Integer prolog ''it's in the prologue (if 1)
-
-''arrays
-Dim Shared  As tarr arr(ARRMAX)
-Dim Shared As Integer arrnb
-
-''variables
-Dim Shared vrbloc      As Integer ''pointer of loc variables or components (init VGBLMAX+1)
-Dim Shared vrbgbl      As Integer ''pointer of globals or components
-Dim Shared vrbgblprev  As Integer ''for dll, previous value of vrbgbl, initial 1
-Dim Shared vrbptr      As Integer Ptr ''equal @vrbloc or @vrbgbl
-Dim Shared vrb(VARMAX) As tvrb ''1 based
-
-''running variables
-Dim Shared vrr(VRRMAX) As tvrr
-Dim Shared vrrnb As Integer
-
-''tracking arrays
-Dim Shared As ttrckarr trckarr(TRCKARRMAX)
-
-''udt/structures
-Dim Shared udt(TYPEMAX) As tudt,udtidx As Integer
-Dim Shared cudt(CTYPEMAX) As tcudt,cudtnb As Integer,cudtnbsav As Integer
-'in case of module or DLL the udt number is initialized each time
-Dim Shared As Integer udtcpt,udtmax 'current, max cpt
-
-''excluded lines
-Dim Shared As Integer excldnb
-Dim Shared As texcld excldlines(EXCLDMAX)
-
-''log
-Dim Shared As Any Ptr hlogbx
-Dim Shared As String vlog
-Dim Shared As Integer logtyp
-
-Dim Shared As Any Ptr heditorbx
-Dim Shared As Integer afterkilled ''what doing after debuggee killed
-''attach running exe
-Dim Shared As Any Ptr hattachbx
-
-Dim Shared As Integer threadlistidx ''used with multi action
-Dim Shared As Integer multiaction
-
-	''Threads
-	Dim Shared thread(THREADMAX) As tthread  ''zero based
-	Dim Shared threadlist(THREADMAX) As Integer
-	Dim Shared threadnb As Integer
-	Dim Shared threadcur As Integer
-	Dim Shared threadprv As Integer     'previous thread used when mutexunlock released thread or after thread create
-	Dim Shared threadcontext As HANDLE
-	Dim Shared threadhs As HANDLE       'handle thread to resume
-	Dim Shared dbgprocid As Integer     'pinfo.dwProcessId : debugged process id
-	Dim Shared dbgthreadID As Integer   'pinfo.dwThreadId : debugged thread id
-	Dim Shared dbghand As HANDLE  		'debugged proc handle
-	Dim Shared dbghthread As HANDLE     'debuggee thread handle
-	Dim Shared dbghfile  As HANDLE   	'debugged file handle
-	Dim Shared pinfo As PROCESS_INFORMATION
-	
-	''DLL
-	Dim Shared As tdll dlldata(DLLMAX) ''base 1
-	Dim Shared As Integer dllnb
-	
-	'dbg_prt2 "MutexLock00"
-	MutexLock blocker
-
-''miscellanous data
+'' Phase 4 dead-code sweep (2026-07-12): removed ~230 lines of Dim Shared globals,
+'' custom types (tline/tproc/tprocr/tarr/tvrb/tvrr/ttrckarr/tudt/tcudt/texcld/tthread/
+'' tdll/twtch/tbrkol/tbrkv/tedit/tftext/tvarfind/tshwexp/tvrp/tindexdata/tbrclist/
+'' udtstab/valeurs), and the 5MB `sourcebuf` -- all state for the removed integrated
+'' (stabs) debugger, confirmed dead via a full src/ cross-reference (each symbol
+'' checked case-insensitively; no live reader/writer found outside its own
+'' declaration). The `blocker` mutex (created + locked once at startup, never
+'' unlocked or contended) was equally inert and removed with it.
+'' KEPT -- still live, used by the non-debug "Run" path (kill_process/RunWithDebug):
+Dim Shared dbghand As HANDLE  		'debugged proc handle
 Dim Shared As Boolean prun=False    ''debuggee running
 Dim Shared As Integer runtype = RTOFF ''running type
-Dim Shared As Integer breakcpu=&hCC ''asm code for breakpoint
-Dim Shared As Integer breakadr ''address of last ABP kept in case of exception (RTCRASH)
-Dim Shared As Integer dsptyp=0      ''type of display : 0 normal/ 1 source/ 2 var/ 3 memory
-
-''put in a ctx with type ??
-Dim Shared As Boolean procnodll
-Dim Shared As Boolean skipline = False
-Dim Shared As Boolean flagmain
 Dim Shared As Boolean flagkill =False 'flag if killing process to avoid freeze in thread_del
-Dim Shared As Integer flagrestart=-1  'flag to indicate restart in fact number of bas files to avoid to reload those files
-Dim Shared As Integer flagwtch  =0     'flag =0 clean watched / 1 no cleaning in case of restart
-Dim Shared As Byte flaglog =0         ' flag for dbg_prt 0 --> no output / 1--> only screen / 2-->only file / 3 --> both
-Dim Shared As Byte flagtrace          ' flag for trace mode : 1 proc / +2 line
-Dim Shared As Byte flagverbose        ' flag for verbose mode
-Dim Shared As Byte flagascii          ' flag for dump displays only code ascii <128 by default just >32
-Dim Shared As Boolean flagupdate = True ''if true proc/var, dump and watched displayed
-Dim Shared As Boolean flagattach      ' flag for attach
-
-Dim Shared As Any Ptr hmain
-
-''for autostepping
-Dim Shared As Integer autostep = 50
-Dim Shared As Integer flaghalt
-
-''watched
-Dim Shared wtch(WTCHMAX) As twtch  ''zero based
-Dim Shared wtchcpt As Integer 'counter of watched value, used for the menu
-Dim Shared hwtchbx As Any Ptr    'handle
-Dim Shared wtchidx As Integer 'index for delete
-Const SAVED_FIELD_COUNT As Integer = 9
-Dim Shared wtchexe(SAVED_FIELD_COUNT, WTCHMAX) As String 'watched var (no memory for next execution)
-Dim Shared wtchnew As Integer 'to keep index after creating new watched
-
-''breakpoint on line
-Dim Shared As tbrkol brkol(BRKMAX)
-Dim Shared As Integer brknb
-Dim Shared As String brkexe(SAVED_FIELD_COUNT, BRKMAX) 'to save breakpoints by session
-Dim Shared As Any Ptr hbrkbx ''window for managing breakpoints
-Dim Shared As Boolean bpbox
-Dim Shared As Integer brkidx1 ''index for BP mem or cond
-Dim Shared As Integer brkidx2
-Dim Shared As Integer brkadr1 ''address for BP mem or cond
-Dim Shared As Integer brkadr2
-Dim Shared As Integer brkdatatype
-Dim Shared As Integer brkttb
-Dim Shared As valeurs brkdata2
-Dim Shared As Integer brktyp  ''type of BP mem/const or mem/mem
-Dim Shared As Any Ptr hbpcondbx ''dialog box for managing var/const cond BP
-Dim Shared As tbrclist listitem(VRRMAX)
-Dim Shared As Integer listcpt ''used when filling array for cond BP
-Dim Shared As Integer brkline(BRKMAX) ''used when deleting the BP one by one
-
-''breakpoint on variable/memory (when there is a change)
-Dim Shared As tbrkv brkv
-Dim Shared As Any Ptr hbrkvbx ''handle
-
-''call chain
-Dim Shared As Any Ptr hcchainbx
-Dim Shared As Any Ptr hlviewcchain
-Dim Shared As Integer procrsav(PROCRMAX) ''index of procr
-Dim Shared As Integer cchainthid
-
-''edit box
-Dim Shared As Any Ptr heditbx
-Dim Shared As tedit edit ''data when editing var or mem
-
-''find text box
-Dim Shared As Any Ptr hfindtextbx
-Dim Shared As tftext ftext
-
-''dump memory
-Dim Shared As Any Ptr hdumpbx ''window for handling dump
-Dim Shared dumplines As Integer =20 'nb lines(default 20)
-Dim Shared dumpadr   As Integer    'address for dump
-Dim Shared dumpbase  As Integer =0 'value dump dec=0 or hexa=50
-Dim Shared dumpadrbase   As Integer =1 'address display in dec (1) or hex (0)
-Dim Shared dumpnbcol As Integer
-Dim Shared dumptyp   As Integer =2
-
-Dim Shared htviewvar As Any Ptr 'running proc/var
-Dim Shared htviewprc As Any Ptr 'all proc
-Dim Shared htviewthd As Any Ptr 'all threads
-Dim Shared htviewwch As Any Ptr 'watched variables
-Dim Shared hlviewdmp As Any Ptr 'dump
-
-''variable find
-Dim Shared As tvarfind varfind
-
-''show/expand
-Dim Shared As tshwexp shwexp
-Dim Shared As Any Ptr hshwexpbx
-Dim Shared As Any Ptr htviewshw
-Dim Shared As tvrp vrp(VRPMAX)
-
-'' index selection
-#define KCOLMAX 30
-#define KLINEMAX 50
-
-Dim Shared As Any Ptr hindexbx
-Dim Shared As tindexdata indexdata
-
-udt(0).nm="Unknown"
-
-	udt(1).nm="long":udt(1).lg=Len(Long)
-udt(2).nm="Byte":udt(2).lg=Len(Byte)
-udt(3).nm="Ubyte":udt(3).lg=Len(UByte)
-udt(4).nm="Zstring":udt(4).lg=Len(Integer)
-udt(5).nm="Short":udt(5).lg=Len(Short)
-udt(6).nm="Ushort":udt(6).lg=Len(UShort)
-udt(7).nm="Void":udt(7).lg=Len(Integer)
-
-	udt(8).nm="Ulong":udt(8).lg=Len(ULong)
-
-	udt(9).nm="Integer":udt(9).lg=Len(Integer)
-
-	udt(10).nm="Uinteger":udt(10).lg=Len(UInteger)
-
-udt(11).nm="Single":udt(11).lg=Len(Single)
-udt(12).nm="Double":udt(12).lg=Len(Double)
-udt(13).nm="String":udt(13).lg=Len(String)
-udt(14).nm="Fstring":udt(14).lg=Len(Integer)
-udt(15).nm="fb_Object":udt(15).lg=Len(UInteger)
-udt(16).nm = "Boolean": udt(16).lg = Len(Boolean)
-udt(18).nm = "Wstring": udt(18).lg = Len(Integer)
-
 Dim Shared exename As WString * 300
 Dim Shared mainfolder As WString * 300 'debuggee main folder
-Dim Shared exedate As Double 'serial date
-Dim Shared As String compilerversion ''compiler version retrieved stabs code = 255
-Dim Shared As String cmdlimmediat
 
 '===================================================
 '' set/unset breakpoint markers
@@ -407,9 +167,7 @@ End Sub
 	Dim Shared As String CurrentFile
 	
 	Dim Shared As Integer iPosStartLast, iPosEndLast, iCurselLast, TimerID, WatchIndex
-	
-	Declare Function timer_data() As Integer
-	
+
 	Declare Sub continue_debug()
 	Declare Sub break_debug()
 	
@@ -598,9 +356,7 @@ End Sub
 		'killtimer(0, TimerID)
 		
 		writepipe(s, iTime)
-		
-		'TimerID = settimer(0, 0, 20, Cast(Any Ptr, @timer_data))
-		
+
 	End Sub
 	
 	Sub paste_updatevar(iFlagStepParam As Long , iFupd As Long)
@@ -905,163 +661,6 @@ End Sub
 	Declare Sub kill_debug()
 	Declare Sub kill_inferior_process()
 	Declare Sub get_read_data(iFlag As Long , iFlagAutoUpdate As Long = 0, WithoutShowing As Boolean = False)
-	
-	Function timer_data() As Integer
-		
-		Static As Long iReset , iReset2
-		
-		'?iFlagThreadSignal
-		
-		'If szDataForPipe <> "" Then ?szDataForPipe
-		
-		If iFlagThreadSignal = 10 Then
-			
-			iFlagThreadSignal = 4
-			
-			Dim As Long iFind = InStr(szDataForPipe , "[Inferior 1")
-			
-			Dim As Long iFind2 = InStr(szDataForPipe , "The program being debugged is not being run.")
-			
-			If iFind Then
-				
-				Dim As Long iFind10 = InStr(iFind , szDataForPipe , sEndOfLine)
-				
-				Dim As String s
-				
-				If iFind10 Then
-					
-					s = Mid(szDataForPipe , iFind , iFind10-iFind)
-					
-				Else
-					
-					s = Mid(szDataForPipe , iFind)
-					
-				End If
-				
-				kill_debug()
-				
-				'killtimer(0, TimerID)
-				
-				'			Setselecttexteditorgadget(E_EDITOR, -1 ,-1)
-				'
-				'			Pasteeditor(E_EDITOR, s)
-				ShowMessages s
-				'
-				'			Linescrolleditor(E_EDITOR,10000000)
-				
-			ElseIf iFind2 Then
-				
-				kill_debug()
-				
-				'killtimer(0, TimerID)
-				
-			Else
-				
-				line_highlight()
-				
-				If Len(szDataForPipe) AndAlso InStr(szDataForPipe , "Using the running image of child") = 0 Then
-					
-					'				Setselecttexteditorgadget(E_EDITOR, -1 ,-1)
-					'
-					'				Pasteeditor(E_EDITOR, szDataForPipe)
-					ShowMessages szDataForPipe
-					'
-					'				Linescrolleditor(E_EDITOR, 10000000)
-					
-				End If
-				
-			End If
-			
-			iReset = 0
-			
-		ElseIf iFlagThreadSignal = 11 Then
-			
-			iFlagThreadSignal = 0
-			
-			If Len(szDataForPipe) Then
-				
-				Dim As Long iFind2 = InStr(szDataForPipe , "The program being debugged is not being run.")
-				
-				If iFind2 Then
-					
-					kill_debug()
-					
-					'killtimer(0, TimerID)
-					
-				Else
-					
-					If line_highlight() = 0 Then
-						
-						'Setselecttexteditorgadget(E_EDITOR, -1 , -1)
-						
-						'Pasteeditor(E_EDITOR, szDataForPipe)
-						ShowMessages szDataForPipe
-						
-						'Linescrolleditor(E_EDITOR,10000000)
-						
-					End If
-					
-				End If
-				
-			End If
-			
-		ElseIf iFlagThreadSignal = 13 Then
-			
-			If iReset2 >= 10 Then
-				
-				memset(@szDataForPipe , 0 , 200000)
-				
-				get_read_data(11)
-				
-				iReset2 = 0
-				
-			Else
-				
-				iReset2+=1
-				
-			End If
-			
-		Else
-			
-			If iFlagThreadSignal Then Return True
-			
-			If iReset >= 20 Then
-				
-				iFlagThreadSignal = 0
-				
-				memset(@szDataForPipe , 0 , 200000)
-				
-				run_pipe_write(!"info program\n")
-				
-				get_read_data(10)
-				
-				iReset = 0
-				
-			Else
-				
-				iFlagThreadSignal = 0
-				
-				memset(@szDataForPipe , 0 , 200000)
-				
-				get_read_data(11)
-				
-				iReset+=1
-				
-			End If
-			
-		End If
-		
-		Select Case iFlagThreadSignal
-			
-		Case 4
-			
-			iFlagThreadSignal = 0
-			
-		End Select
-		
-		'Return True
-		
-	End Function
 	
 	Type TGLOBALSVAR
 		
@@ -1949,105 +1548,6 @@ End Sub
 
 	End Sub
 
-	'' DEAD as of slice 2C (2026-07-12): superseded by arm_breakpoint (enqueue path). No callers
-	'' remain -- kept only so the 2C diff stays behavioural; delete in the Phase 4 dead-code sweep.
-	Sub set_bp(Temporary As Boolean = False)
-
-		Dim As Long iFlagSetup
-		
-		Dim As TabWindow Ptr tb = Cast(TabWindow Ptr, ptabCode->SelectedTab)
-		'	Dim As Long iCursel = Panelgadgetgetcursel(E_PANEL)
-		
-		If tb = 0 Then Exit Sub
-		'	If iCursel > UBound(pd.sci) OrElse iCursel < 0 OrElse  iCursel > UBound(sfiles_array) Then Exit Sub
-		
-		Dim As Integer iSelStartLine, iSelEndLine, iSelStartChar, iSelEndChar
-		tb->txtCode.GetSelection iSelStartLine, iSelEndLine, iSelStartChar, iSelEndChar
-		'	Dim As Integer iPos = sendmessage ( Cast(Any Ptr , pd.sci(iCursel)) ,  SCI_GETCURRENTPOS , 0 , 0)
-		'
-		'	Dim As Integer iLine = sendmessage ( Cast(Any Ptr , pd.sci(iCursel)) ,  SCI_LINEFROMPOSITION , iPos , 0)
-		'
-		Dim As String sTemp = """" & Replace(tb->FileName, "\", "/") & """:" & iSelEndLine + 1
-
-		'	For i As Long = 0 To UBound(sBP)
-		'
-		'		If iFlagSetup = 0 AndAlso sBP(i) = sTemp Then
-		'
-		'			iFlagSetup = 1
-		'
-		'		EndIf
-		'
-		'		If iFlagSetup Then
-		'
-		'			If i <> UBound(sBP) Then sBP(i) = sBP(i+1)
-		'
-		'		EndIf
-		'
-		'	Next
-		
-		Dim As EditControlLine Ptr ecLine = Cast(EditControlLine Ptr, tb->txtCode.Content.Lines.Items[iSelEndLine])
-
-		' T6 (F-R1): skip blank/comment lines *before* touching GDB -- mirrors EditControl.Breakpoint's
-		' own refusal, so F9 on a comment line no longer plants a phantom GDB breakpoint while the
-		' editor (correctly) declines the local toggle. This is the "move the comment check ahead of
-		' set_bp" fix from the attempt-#1 post-mortem.
-		DbgTrace("set_bp.enter", "line=" & iSelEndLine & " ecBP=" & ecLine->Breakpoint & " Running=" & Running) : Dim As String sLineTrim = LTrim(*ecLine->Text, Any !"\t ")
-		If CInt(sLineTrim = "") OrElse CInt(StartsWith(sLineTrim, "'")) OrElse CInt(StartsWith(LCase(sLineTrim) & " ", "rem ")) Then Exit Sub
-
-		' T6 (F-R1): the debug worker thread (run_debug) and this UI-thread call share the same pair of
-		' pipe handles. Serialize on tlockGDB and never inject a break/tbreak/clear while the inferior is
-		' running -- attempt #1 hard-locked doing a blocking read off-prompt while holding the lock. When
-		' the inferior is stopped GDB is at the prompt, so the readpipe() calls below return promptly, and
-		' Running is only ever flipped by the worker under this same lock (so this test is race-free once
-		' we hold it). If Running, the local breakpoint icon still toggles (in EditControl.Breakpoint) and
-		' run_debug re-sends every editor breakpoint on the next run.
-		MutexLock tlockGDB
-		If Running Then DbgTrace("set_bp.bail", "Running") : MutexUnlock tlockGDB : Exit Sub
-
-		If ecLine->Breakpoint Then
-
-			If Not Temporary Then
-
-				DbgTrace("set_bp.clear", DbgTraceEsc(sTemp)) : run_pipe_write(!"clear " & sTemp & !"\n")
-
-				readpipe()
-
-			End If
-
-			'sendmessage ( Cast(Any Ptr , pd.sci(iCursel)) ,  SCI_MARKERDELETE , iLine , 0)
-
-		ElseIf Temporary Then
-			
-			DbgTrace("set_bp.tbreak", DbgTraceEsc(sTemp)) : run_pipe_write(!"tbreak " & sTemp & !"\n")
-			
-			readpipe()
-			
-		Else
-			
-			DbgTrace("set_bp.break", DbgTraceEsc(sTemp)) : run_pipe_write(!"break " & sTemp & !"\n")
-			
-			readpipe()
-			
-			'sendmessage ( Cast(Any Ptr , pd.sci(iCursel)) ,  SCI_MARKERADD , iLine , 0)
-			
-			'		For i As Long = 0 To UBound(sBP)
-			'
-			'			If Len(sBP(i)) = 0 Then
-			'
-			'				sBP(i) = sTemp
-			'
-			'				Exit For
-			'
-			'			EndIf
-			'
-			'		Next
-			'
-		End If
-
-		MutexUnlock tlockGDB
-
-	End Sub
-
 	'Sub selection_line(iCursel As Integer , iPos As Integer , iLine As Integer)
 	'
 	'	If iCursel > UBound(pd.sci) OrElse iCursel < 0 Then Exit Sub
@@ -2248,7 +1748,6 @@ End Sub
 					Next
 				Next i
 			Next jj
-			'TimerID = settimer(0, 0, 20, Cast(Any Ptr, @timer_data))
 
 			'run_pipe_write(!"r\n" , 300)
 			writepipe !"r\n"
@@ -2701,12 +2200,6 @@ End Sub
 		memset(@szDataForPipe , 0 , 200000)
 		
 	End Sub
-
-Private Sub hard_closing(errormsg As String)
-	ThreadsEnter
-	MsgBox(("The debugger ran into a problem and had to stop.") & Chr(13) & Chr(13) & errormsg, "Astoria IDE", mtError)
-	ThreadsLeave
-End Sub
 
 Private Function kill_process(text As String) As Integer
 	Dim As Long retcode,lasterr

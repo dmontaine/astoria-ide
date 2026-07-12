@@ -4207,6 +4207,12 @@ Namespace My.Sys.Forms
 			iC = 0
 			vlc = Min(LinesCount, VScrollPos + VisibleLinesCount(zz) + 2)
 			vlc1 = VisibleLinesCount(zz)
+			'' DR-4 instrument (temporary): capture the paint-state driving the visible-line count.
+			'' Fires once per full paint (OnlyCursor/blink paints early-return before here). Read the
+			'' EC.Paint line immediately after an EC.Breakpoint line = the toggle paint; the next EC.Paint
+			'' with no preceding EC.Breakpoint = the refocus paint that fixes it. If dwClientY is smaller
+			'' on the toggle paint than on the refocus paint, vlc1 is short -> lower viewport left blank.
+			DbgTrace("EC.Paint", "zz=" & zz & " path=" & IIf(pRenderTarget <> 0, "D2D", "GDI") & " dwClientY=" & dwClientY & " OlddwClientY=" & OlddwClientY & " dwCharY=" & dwCharY & " vlc1=" & vlc1 & " VScrollPos=" & VScrollPos & " LinesCount=" & LinesCount & " divX=" & CInt(bDividedX) & " divY=" & CInt(bDividedY))
 			IzohBoshi = 0
 			QavsBoshi = 0
 			MatnBoshi = 0

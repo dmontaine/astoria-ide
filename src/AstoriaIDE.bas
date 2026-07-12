@@ -310,11 +310,16 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 			break_debug()
 		End If
 	Case "End":
-		If Running Then
-			kill_debug()
-		Else
-			command_debug "q"
-		End If
+		'' 2B (DR-6): never readpipe / close handles / deinit from the UI thread -- that raced
+		'' the worker on the shared GDB pipe (two readers) and closed the handles while the worker
+		'' could be mid-ReadFile. Enqueue q so the worker runs its own deinit. If the inferior is
+		'' running freely, GDB won't act on 'interrupt' in all-stop synchronous mode (it isn't
+		'' reading its stdin while the inferior runs), so kill the inferior PROCESS directly -- that
+		'' unblocks the worker's readpipe, and the worker then detects the exit and shuts itself
+		'' down (see the loop's inferior-gone branch). Killing the process is race-free wrt the
+		'' GDB pipe/handles/lock (it touches none of them).
+		If Running Then kill_inferior_process()
+		command_debug "q"
 		ClearDebugPanels
 	Case "Restart"
 		ClearThreadsWindow

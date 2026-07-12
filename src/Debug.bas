@@ -514,6 +514,18 @@ End Sub
 				sBuffer = Left(sBuffer, bytesRead)
 				sOutput += sBuffer
 				Count = Count + 1
+				'' 2B (DR-6): capture the inferior pid from GDB's "[New Thread PID.TID]" startup line
+				'' as soon as it appears. The normal capture (bGetPid via `info inferiors`) only runs
+				'' after the first stop -- but a program with no breakpoint runs freely and never stops,
+				'' so iGlPid stayed 0 and Stop-while-running had no pid to TerminateProcess. Grab it here
+				'' mid-read so kill_inferior_process() works even for a never-stopping inferior.
+				If iGlPid = 0 Then
+					Dim As Integer iNewThread = InStr(sOutput, "[New Thread ")
+					If iNewThread > 0 Then
+						Dim As Integer iPidDot = InStr(iNewThread + 12, sOutput, ".")
+						If iPidDot > 0 Then iGlPid = Val(Mid(sOutput, iNewThread + 12, iPidDot - (iNewThread + 12)))
+					End If
+				End If
 				If sBuffer = "--Type <RET> for more, q to quit, c to continue without paging--" Then
 					writepipe !"\n"
 				End If
@@ -891,6 +903,7 @@ End Sub
 		sEndOfLine = Chr(13) & Chr(10)
 	
 	Declare Sub kill_debug()
+	Declare Sub kill_inferior_process()
 	Declare Sub get_read_data(iFlag As Long , iFlagAutoUpdate As Long = 0, WithoutShowing As Boolean = False)
 	
 	Function timer_data() As Integer
@@ -2216,6 +2229,20 @@ End Sub
 					End If
 					szDataForPipe = Result
 					Running = False
+					If (InStr(Result, "[Inferior ") > 0) OrElse (InStr(Result, "not being run") > 0) Then
+						'' 2B (DR-6) + DR-14: the inferior has exited or been terminated -- either it
+						'' ran to completion / crashed on its own (DR-14), or Stop-while-running just
+						'' killed it (kill_inferior_process). Do NOT fall through to the panel refresh:
+						'' RefreshDebugPanelsAfterStop would send _l_/thread-apply-all-bt to a dead
+						'' program and block forever reading a reply that never comes (the DR-14 hang).
+						'' Shut the session down cleanly right here on the worker thread (which owns the
+						'' pipe): deinit closes the handles + quits GDB, then leave the loop.
+						DbgTrace("LOOP.inferiorGone", DbgTraceEsc(Left(Result, 80)))
+						ShowMessages Result
+						deinit
+						bGDBLocked = False   '' deinit released tlockGDB
+						Exit Do
+					End If
 					If WatchIndex <> -1 Then
 						ThreadsEnter
 						UpdateWatch WatchIndex, Result
@@ -2259,11 +2286,24 @@ End Sub
 	End Sub
 	
 	Sub break_debug()
-		
+
 		MutexLock tlockGDB
 		writepipe(!"interrupt\n")
 		MutexUnlock tlockGDB
-		
+
+	End Sub
+
+	'' 2B (DR-6): terminate the running inferior process directly. Used by Stop-while-running
+	'' (Case "End"): GDB won't act on "interrupt" in all-stop synchronous mode while the inferior
+	'' runs (it isn't reading its stdin), so killing the process is the only way to unblock the
+	'' worker's blocked readpipe. This touches ONLY the inferior process handle -- never the GDB
+	'' pipe/handles/tlockGDB -- so it's race-free wrt the worker. The worker sees GDB report the
+	'' exit and shuts down via the loop's inferior-gone branch.
+	Sub kill_inferior_process()
+		If iGlPid Then
+			Var h = OpenProcess(PROCESS_ALL_ACCESS , 0 , iGlPid)
+			If h Then TerminateProcess(h , 1) : CloseHandle(h)
+		End If
 	End Sub
 	
 	Sub setvalue_debug(sNewValue As String)

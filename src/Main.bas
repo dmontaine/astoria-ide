@@ -6521,7 +6521,7 @@ Sub CreateMenusAndToolBars
 	tbRun.Buttons.Add tbsSeparator
 	tbtStepInto = tbRun.Buttons.Add(, "StepInto", , @mClick, "StepInto", , ("Step Into: run the current line, descending into any function it calls") & HK("StepInto", "F8", True), True)
 	tbtStepOver = tbRun.Buttons.Add(, "StepOver", , @mClick, "StepOver", , ("Step Over: run the current line, executing function calls without descending into them") & HK("StepOver", "Shift+F8", True), True)
-	tbtToggleBreakpoint = tbRun.Buttons.Add(, "Breakpoint", , @mClick, "ToggleBreakpoint", , ("Toggle Breakpoint") & HK("Breakpoint", "F9", True), True)
+	tbtToggleBreakpoint = tbRun.Buttons.Add(, "Breakpoint", , @mClick, "Breakpoint", , ("Toggle Breakpoint") & HK("Breakpoint", "F9", True), True)
 	tbRun.Buttons.Add tbsSeparator
 	tbtUseDebugger = tbRun.Buttons.Add(Cast(ToolButtonStyle, tbsCheck Or tbsAutosize), "UseDebugger", , @mClick, "TBUseDebugger", , ("Use Debugger") & HK("UseDebugger", , True), True)
 	tbRun.Buttons.Add tbsSeparator

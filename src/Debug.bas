@@ -633,40 +633,27 @@ End Sub
 			
 			If Len(s) Then
 				
+				'' Phase 4 (2026-07-12): removed the dead "[Inferior 1" Else branch here (called
+				'' paste_updatevar+deinit) -- unreachable. line_highlight has exactly one live
+				'' caller (run_debug's loop; get_read_data's Case 1 that also calls it is itself
+				'' dead, never invoked with iFlag=1 by any of its 3 live call sites) and that
+				'' caller's own upstream check (InStr(Result, "[Inferior ") > 0 -> deinit+Exit Do)
+				'' already intercepts and handles any "[Inferior " text before line_highlight is
+				'' ever called with it -- so the AndAlso InStr(s, "[Inferior 1") = 0 term below is
+				'' always vacuously true in practice (left as-is; harmless, not worth the extra
+				'' risk of rewriting the boolean for a cosmetic simplification).
 				If s <> "(gdb)" AndAlso s <> "Continuing." _
 					AndAlso InStr(s , "[Inferior 1") = 0 _
 					AndAlso InStr(s , "Using the running image of child") = 0  Then
-					
+
 					'				Setselecttexteditorgadget(E_EDITOR, -1 ,-1)
 					'
 					paste_updatevar(0 , 0)
 					'
 					'				Linescrolleditor(E_EDITOR,10000000)
-					
+
 					Return 1
-					
-				Else
-					
-					If InStr(s , "[Inferior 1") Then
-						
-						'					Setselecttexteditorgadget(E_EDITOR, -1 ,-1)
-						'
-						paste_updatevar(iFlagStepParam , 0)
-						'
-						'					Linescrolleditor(E_EDITOR,10000000)
-						'
-						ThreadsEnter
-						
-						deinit
-						
-						'ShowMessages(Time & ": " & ML("Application finished. Returned code") & ": 0 - " & Err2Description(0))
-						
-						ThreadsLeave()
-						
-						Return 1
-						
-					End If
-					
+
 				End If
 				
 			End If
@@ -679,7 +666,6 @@ End Sub
 	
 		sEndOfLine = Chr(13) & Chr(10)
 	
-	Declare Sub kill_debug()
 	Declare Sub kill_inferior_process()
 	Declare Sub get_read_data(iFlag As Long , iFlagAutoUpdate As Long = 0, WithoutShowing As Boolean = False)
 	
@@ -2071,61 +2057,6 @@ End Sub
 		'	memset(@szDataForPipe , 0 , 200000)
 		'
 		'	get_read_data(1 , iStateMenu)
-		
-	End Sub
-	
-	Sub kill_debug()
-		
-		iFlagThreadSignal = 0
-		
-		iFlagUpdateVariables = 0
-		
-		iCounterUpdateVariables = 0
-		
-		iFlagStartDebug = 0
-		
-		'	Setimagegadget(E_BUT_RUN , bmp(0))
-		'
-		'	Disablegadget(E_BUT_STEP_IN , 1)
-		'
-		'	Disablegadget(E_BUT_STEP_OUT , 1)
-		'
-		'	Disablegadget(E_BUT_CONTINUE , 1)
-		'
-		'	Disablegadget(E_BUT_KILL , 1)
-		'
-		'	Disablegadget(E_BUT_UPDATEL , 1)
-		'
-		'	Disablegadget(E_BUT_UPDATEGL , 1)
-		'
-		'	Disablegadget(E_BUT_COMMAND , 1)
-		
-			
-			If iGlPid Then
-				
-				'killtimer(0, TimerID)
-				
-				readpipe()
-				
-				DbgTrace("kill_debug.terminate", "iGlPid=" & iGlPid) : Var h = OpenProcess(PROCESS_ALL_ACCESS , 0 , iGlPid)
-				
-				TerminateProcess(h , 1)
-				
-				CloseHandle(h)
-				
-			End If
-			
-			'Updateinfoxserver(300)
-			
-		
-		'	Setselecttexteditorgadget(E_EDITOR, -1 , -1)
-		'
-		'	Pasteeditor(E_EDITOR, "Kill Program.")
-		ShowMessages "Kill Program."
-		'
-		'	Linescrolleditor(E_EDITOR,10000000)
-		
-		deinit
 		
 	End Sub
 	

@@ -27,18 +27,18 @@
 			.Align = DockStyle.alTop
 			.ImagesList = @imgList
 			.HotImagesList = @imgList
-			.Buttons.Add , "Add", , , "Add"
-			Var AddButton = .Buttons.Add(tbsWholeDropdown, "Add", , , "AddDropdown")
+			.Buttons.Add , "Add", , , "Add", , ("Add Image"), True
+			Var AddButton = .Buttons.Add(tbsWholeDropdown, "Add", , , "AddDropdown", , ("Add From..."), True)
 			Var AddFromResource = AddButton->DropDownMenu.Add(("Add From Resource"), "Add", "AddFromResource", @MenuItemClick_)
 			Var AddFromFile = AddButton->DropDownMenu.Add(("Add From File"), "Add", "AddFromFile", @MenuItemClick_)
 			AddFromResource->Designer = @This
 			AddFromFile->Designer = @This
-			.Buttons.Add , "Project", , , "Change"
-			.Buttons.Add , "Remove", , , "Remove"
+			.Buttons.Add , "Project", , , "Change", , ("Change Image"), True
+			.Buttons.Add , "Remove", , , "Remove", , ("Remove Image"), True
 			.Buttons.Add tbsSeparator
-			.Buttons.Add , "Up", , , "Up"
-			.Buttons.Add , "Down", , , "Down"
-			.Buttons.Add , "Sort", , , "Sort"
+			.Buttons.Add , "Up", , , "Up", , ("Move Image Up"), True
+			.Buttons.Add , "Down", , , "Down", , ("Move Image Down"), True
+			.Buttons.Add , "Sort", , , "Sort", , ("Sort Images"), True
 			.Designer = @This
 			.OnButtonClick = @tbToolbar_ButtonClick_
 			.Parent = @This

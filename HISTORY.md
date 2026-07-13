@@ -4,6 +4,20 @@
 
 ---
 
+## Run menu consolidated (2026-07-13)
+
+Open item: "Consolidate the Run menu so related commands are not split between the top level and More Build Options." Before: the Run menu had Run/Build/Stop/Restart/Step/Toggle Breakpoint/Use Debugger at the top level, plus a "More Build Options" submenu (`Main.bas` ~6386) burying Rebuild All, Clean, Syntax Check, Make, Parameters, and Run Without Building — six build-related commands a user wouldn't necessarily think to look for behind an extra submenu click.
+
+Asked the owner which consolidation direction to take (flatten the submenu into the top level, vs. move Run/Build into the submenu instead); owner chose **flatten into top level**. Removed the `miMoreBuildOptions` submenu container and re-parented its six `Add(...)` calls onto `miRun` directly, in the same relative order and position (right where the submenu used to sit, just before "More Debug Options" — which is untouched; the open item only named "More Build Options"). Added one separator (`miRun->Add("-")`) between the now-flattened build items and "More Debug Options" for visual grouping, since two adjacent submenu headers no longer needed one but six flat items followed immediately by a submenu did. Confirmed `miMoreBuildOptions` and the `"MoreBuildOptions"` key string had no other references anywhere (it was a local `Var`, not a shared menu-item variable, so nothing else could have pointed at it).
+
+Also checked a suspected hotkey collision while reading this code — "Run Without Building" and "Continue" (in the separate "More Debug Options" submenu) both bind `Ctrl+F5`. Turned out **not** to be a bug: both dispatch through the same `Case "Start", "Continue"` handler (`AstoriaIDE.bas:294`) — they're two differently-labeled menu entries for one action gated by debug state (not debugging → Start/Run Without Building; paused → Continue), so only one is ever enabled at a time. Left alone.
+
+**Follow-up, same session:** owner asked to flatten "More Debug Options" too. Same treatment: removed the `miMoreDebugOptions` submenu container, re-parented all ten `Add(...)` calls (Run To Cursor, Continue, Break, a separator, Clear All Breakpoints, Add Watch, Set/Show Next Statement, another separator, Use Profiler, GDB Command) onto `miRun` directly, in place. Confirmed no other references to `miMoreDebugOptions` or the `"MoreDebugOptions"` key string existed. The Run menu now has zero submenus — every command is a flat top-level item.
+
+Compile-clean, 0 warnings both times, rebuilt via `Compile.bat` with `NOPAUSE=1`. Not yet owner-verified in the running IDE.
+
+---
+
 ## View menu owner walkthrough — 6 bugs found and fixed (2026-07-13)
 
 Owner did a hands-on click-through of the View menu (the deferred sign-off item from §13.3). Six real bugs surfaced, each fixed and rebuilt clean in the same session:

@@ -1,6 +1,6 @@
 # Astoria-IDE — Project Status & Handoff
 
-**Last updated:** 2026-07-13 10:48:26 -07:00 (last push)
+**Last updated:** 2026-07-13 11:05:46 -07:00 (last push)
 **Repository:** [github.com/dmontaine/astoria-ide](https://github.com/dmontaine/astoria-ide)
 **Local path:** C:\Users\don\Astoria-IDE
 
@@ -32,6 +32,7 @@ All DR-1 through DR-16 defects are fixed and owner-verified. This retained ancho
   - **New-project subfolder layout:** owner decided each new project should get its own subfolder inside the configured Projects directory — already matched: `frmNewProject.frm` already creates each new project in its own `<ProjectsPath>\<ProjectName>\` subfolder (not flat), and `frmOpenProject.frm`'s project scan already expects that layout. No code change needed; decision recorded as confirming existing behavior.
   - **Default Projects Path:** owner decided the default must stay `./Projects` (relative to `ExePath`), never Documents, unless the user explicitly points it elsewhere via Tools ▸ Options ▸ General ▸ Projects Path — already matched: `SettingsService.bas` reads `iniSettings.ReadString("Options", "ProjectsPath", "./Projects")`. No code change needed.
   - **Theme storage:** already matched the decision — default and user themes both live in `Settings/Themes/` with no split location today. No code change needed; decision recorded as confirming existing behavior (in-place edits to a shipped theme's `.ini` remain expected behavior, not a bug, per this decision).
+- **Run menu fully consolidated:** removed both the "More Build Options" and "More Debug Options" submenus; all their items (Rebuild All, Clean, Syntax Check, Make, Parameters, Run Without Building, Run To Cursor, Continue, Break, Clear All Breakpoints, Add Watch, Set/Show Next Statement, Use Profiler, GDB Command) now sit directly in the top-level Run menu, per owner's chosen "flatten into top level" approach. No commands remain split off into a buried submenu. Rebuilt clean.
 - Nothing is awaiting an owner response. The remaining items below are deferred or ready for a new, explicitly selected task.
 
 ## Next ready work
@@ -44,7 +45,6 @@ For the reasoning, exact code locations, and prior hot-path findings, see [HISTO
 
 ### Immediate
 
-- [ ] Consolidate the Run menu so related commands are not split between the top level and **More Build Options**.
 - [ ] Audit toolbar buttons and add missing tooltips.
 - [ ] Add a missing-executable check and user-visible message to the non-debug RunProgram/RunPr path.
 

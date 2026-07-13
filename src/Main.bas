@@ -84,7 +84,7 @@ Dim Shared As Boolean bQuitting
 	End If
 	
 	' MyFbFramework must load before any other FB control DLL in Controls\ (shared fbrt runtime).
-	DyLibLoad(App.Path & "\Controls\MyFbFramework\mff64.dll")
+	DyLibLoad(App.Path & "\astoria.dll")
 	
 	InitDarkMode
 	' SetDarkMode is called from SettingsService's LoadSettings once the
@@ -5282,8 +5282,10 @@ Function GetTypeLink(ByRef TypeName As String, ByVal bMarkDown As Boolean = Fals
 End Function
 
 Function IsMyFbFrameworkLibrary(ByRef Path As UString) As Boolean
+	'' astoria.dll (built from Controls/MyFbFramework/mff) now lives at ExePath, next to
+	'' astoria.exe, not inside a "myfbframework"-named folder -- match by filename alone.
 	Dim As String pathText = LCase(Path)
-	Return InStr(pathText, "myfbframework") > 0 AndAlso Right(pathText, 9) = "mff64.dll"
+	Return Right(pathText, 11) = "astoria.dll"
 End Function
 
 Function GetMyFbFrameworkLibrary() As Library Ptr
@@ -5330,7 +5332,7 @@ Sub LoadToolBox(ForLibrary As Library Ptr = 0)
 	Dim As String IncludePath
 	Dim As UString MFF, Temp
 	Dim As UInteger Attr
-			MFF = IIf(i = 0, "Controls\MyFbFramework\mff64.dll", "")
+			MFF = IIf(i = 0, "astoria.dll", "")
 	If ForLibrary = 0 AndAlso ControlLibraries.Count = 0 Then
 		IncludeMFFPath = iniSettings.ReadBool("Options", "IncludeMFFPath", True)
 		WLet(MFFPath, SanitizeIniCriticalPath(iniSettings.ReadString("Options", "MFFPath", "./Controls/MyFbFramework"), "./Controls/MyFbFramework"))

@@ -1,6 +1,6 @@
 # Astoria-IDE — Project Status & Handoff
 
-**Last updated:** 2026-07-13 14:44:54 -07:00 (last push)
+**Last updated:** 2026-07-13 15:15:20 -07:00 (last push)
 **Repository:** [github.com/dmontaine/astoria-ide](https://github.com/dmontaine/astoria-ide)
 **Local path:** C:\Users\don\Astoria-IDE
 
@@ -39,6 +39,7 @@ All DR-1 through DR-16 defects are fixed and owner-verified. This retained ancho
 - **Debug-mode "Returned code" fixed:** `RunWithDebug` always displayed "Returned code: 0 - No error" regardless of the real outcome (its `Result` was never assigned). Now parses GDB's own completion text into the real exit code (decoding GDB's octal `"exited with code NN"` format), and correctly stays silent — rather than showing a fabricated code — when Stop-while-running force-kills the debuggee. Live-verified both the normal-completion and Stop-while-running cases; see [HISTORY.md](HISTORY.md) for the two follow-up bugs caught along the way (an `SCODE` naming collision, and the Stop-kill-vs-real-exit distinction).
 - Also investigated, not fixed: a one-off where a freshly-compiled test program's worker threads exited with `STATUS_CONTROL_C_EXIT` seconds after Start. Antivirus and a "second `run` sent while the first was still live" theory were both checked and ruled out; did not reproduce on a second isolated attempt. No code changed — see [HISTORY.md](HISTORY.md) for what was checked; revisit only if it recurs, capturing `Settings/debug_trace.log` immediately after.
 - **MFF hygiene pass closed:** `README_CN.md` and `changes_cn.txt` deleted (dead Chinese-language leftovers), with the `File=README_CN.md` entry removed from `MyFbFramework.vfp` and the dead language-switcher link removed from `Controls/MyFbFramework/README.md`. The other two items on this list were dropped rather than attempted: MFF control-library path consolidation has a standing **Do Not Attempt** verdict from a prior deep review (`P:\Astoria-Docs\Deferred Task Recommendations - Opus.md`, item F2) — it touches the exact code that caused the grey-panel Form Designer bug (`cc9e7dd`) for no user-facing benefit; the standalone-Canvas device-ownership issue (H-2) needs a dedicated test harness that doesn't exist yet before a fix can be attempted or verified (rationale in `7ff604c`). Both remain recoverable from git/doc history if a concrete reason to revisit ever comes up.
+- **MFF DLL renamed to `astoria.dll`, relocated to the repo root** (owner request, since MFF is now owned/forked code with significant local changes): source file names untouched, only the compiled build artifact moved. Touched build scripts (`Compile.bat`/`CompileDebug.bat`/`BuildCommon.bat`/`mff.bi`'s `#cmdline` fallback), the runtime `DyLibLoad` in `Main.bas`, `IsMyFbFrameworkLibrary`'s filename check, and — the part that made this more than a rename — `Controls/MyFbFramework/Settings.ini`'s `Lib64`/`HeadersFolder`/`SourcesFolder`/`IncludeFolder`/`Lib*Folder` keys, since the Designer's Toolbox/component-discovery system (`LoadToolBox`, `frmComponents.frm`) resolves all of those relative to wherever the DLL physically sits — moving the DLL out of `Controls/MyFbFramework/` while its headers/sources stay put would have broken that resolution (the exact grey-panel-bug failure class) had the ini values not been updated to explicit root-relative (`./Controls/MyFbFramework/...`) paths. A stale persisted `Settings/astoria.ini` `[ControlLibraries] Path_1` entry (pre-dating this session, pointing at the old location) caused MFF to briefly load as **two separate DLL instances** simultaneously after the rename — found and fixed after the first live test had already passed (it happened not to break rendering, but risked MFF's shared runtime state); the leftover old `mff64.dll`/`libmff64.dll.a` build artifacts were deleted. `Examples/Add-In`'s two sample files (which `DyLibLoad` the framework to hook into a running IDE) updated to the new path. Live-verified twice: Form Designer renders and the Toolbox populates correctly, both before and after the stale-duplicate fix.
 - Nothing is awaiting an owner response. The remaining items below are deferred or ready for a new, explicitly selected task.
 
 ## Next ready work
@@ -67,7 +68,7 @@ No immediate items open.
 
 ## Essential gotchas
 
-1. After any source change, rebuild and commit the **release** executable with Compile.bat; MFF source reachable from mff.bi also needs FORCE_MFF=1 so mff64.dll is rebuilt.
+1. After any source change, rebuild and commit the **release** executable with Compile.bat; MFF source reachable from mff.bi also needs FORCE_MFF=1 so astoria.dll is rebuilt.
 2. UseDebugger=false in Settings/astoria.ini may be stale because it is written on clean exit. The live **Run → Use Debugger** toggle is authoritative.
 3. Programs without a bound breakpoint run to exit. Breakpoints on comment lines do not bind.
 4. Trace logs are local-only and ignored by Git.
@@ -98,7 +99,7 @@ No immediate items open.
 | Toolbar and commands | src/AstoriaIDE.bas |
 | Settings | src/SettingsService.bas, Settings/astoria.ini |
 | Editor chrome | src/TabWindow.bas |
-| MFF framework | Controls/MyFbFramework/mff/ → mff64.dll |
+| MFF framework | Controls/MyFbFramework/mff/ → astoria.dll (built to repo root, next to astoria.exe) |
 | Build | Compile.bat, CompileDebug.bat |
 
 ## Reference material

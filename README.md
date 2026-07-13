@@ -23,7 +23,7 @@ None — this fork bundles the FreeBASIC compiler (`Compiler\fbc64.exe`, FBC 1.1
 
 #### Compilation:
 
-> **Note:** This fork builds the IDE as **64-bit Windows only** (native WinAPI). Run root `Compile.bat` to build `mff64.dll` and `astoria.exe`, or use the manual commands below. The bundled compiler is `Compiler\fbc64.exe`. Linux, GTK, and 32-bit IDE builds are not supported in this fork.
+> **Note:** This fork builds the IDE as **64-bit Windows only** (native WinAPI). Run root `Compile.bat` to build `astoria.dll` and `astoria.exe`, or use the manual commands below. The bundled compiler is `Compiler\fbc64.exe`. Linux, GTK, and 32-bit IDE builds are not supported in this fork.
 
 #### Quick build (recommended):
 ```shell
@@ -34,7 +34,7 @@ None — this fork bundles the FreeBASIC compiler (`Compiler\fbc64.exe`, FBC 1.1
 #### Windows 64-bit (manual):
 ```shell
   cd Path_to_AstoriaIDE/Controls/MyFbFramework/mff
-  fbc64 -b "mff.bi" "mff.rc" -dll -x "../mff64.dll"
+  fbc64 -b "mff.bi" "mff.rc" -dll -x "../../../astoria.dll"
   cd Path_to_AstoriaIDE/src
   fbc64 "AstoriaIDE.bas" -s gui -x "../astoria.exe" "AstoriaIDE.rc" -i "Path_to_AstoriaIDE/Controls/MyFbFramework"
 ```

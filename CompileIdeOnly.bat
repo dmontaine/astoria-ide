@@ -1,5 +1,5 @@
 @echo off
-REM Debug build of astoria.exe only (never rebuilds mff64.dll).
+REM Debug build of astoria.exe only (never rebuilds astoria.dll).
 REM Use after src-only edits. Same flags as CompileDebug.bat for the IDE step.
 REM Env: VERBOSE=1, NOPAUSE=1.
 

@@ -563,32 +563,36 @@ Namespace My.Sys.Forms
 	End Sub
 	
 	Private Sub ComboBoxEdit.SaveToFile(ByRef File As WString)
-		Dim As Integer F, i
+		Dim As Integer F, i, Result
 		Dim As WString Ptr s
 		F = FreeFile_
-		Open File For Output Encoding "utf-8" As #F
-		For i = 0 To ItemCount -1
-				Dim TextLen As Integer = Perform(CB_GETLBTEXTLEN, i, 0)
-				s = _CAllocate((TextLen + 1) * SizeOf(WString))
-				*s = WSpace(TextLen)
-				Perform(CB_GETLBTEXT, i, CInt(s))
-				Print #F, *s
-		Next i
-		CloseFile_(F)
+		Result = Open(File For Output Encoding "utf-8" As #F)
+		If Result = 0 Then
+			For i = 0 To ItemCount -1
+					Dim TextLen As Integer = Perform(CB_GETLBTEXTLEN, i, 0)
+					s = _CAllocate((TextLen + 1) * SizeOf(WString))
+					*s = WSpace(TextLen)
+					Perform(CB_GETLBTEXT, i, CInt(s))
+					Print #F, *s
+			Next i
+			CloseFile_(F)
+		End If
 		_Deallocate(s)
 	End Sub
-	
+
 	Private Sub ComboBoxEdit.LoadFromFile(ByRef FileName As WString)
-		Dim As Integer F, i
+		Dim As Integer F, i, Result
 		Dim As WString * 1024 s
 		F = FreeFile_
 		This.Clear
-		Open FileName For Input Encoding "utf-8" As #F
-		While Not EOF(F)
-			Line Input #F, s
-			This.AddItem s
-		Wend
-		CloseFile_(F)
+		Result = Open(FileName For Input Encoding "utf-8" As #F)
+		If Result = 0 Then
+			While Not EOF(F)
+				Line Input #F, s
+				This.AddItem s
+			Wend
+			CloseFile_(F)
+		End If
 	End Sub
 	
 	Private Operator ComboBoxEdit.Cast As Control Ptr

@@ -124,7 +124,7 @@ Namespace My.Sys.Drawing
 					ImportantColors As DWORD
 				End Type
 				Static As BitmapStruct BM
-				Dim As Integer F,x,y,Clr,Count = 0
+				Dim As Integer F,x,y,Clr,Count = 0,Result
 				ReDim PixelData(FWidth * FHeight - 1) As RGB3
 				For y = FHeight-1 To 0 Step -1
 					For x = 0 To FWidth - 1
@@ -151,12 +151,14 @@ Namespace My.Sys.Drawing
 				BM.bmpDataSize     = FWidth * FHeight * 3
 				BM.FileSize        = BM.bmpDataOffset + BM.bmpDataSize
 				F = FreeFile_
-				Open File For Binary Access Write As #F
-				Put #F,,BM
-				Put #F,,PixelData()
-				CloseFile_(F)
+				Result = Open(File For Binary Access Write As #F)
+				If Result = 0 Then
+					Put #F,,BM
+					Put #F,,PixelData()
+					CloseFile_(F)
+				End If
 				Erase PixelData
-			Return True
+			Return Result = 0
 		End Function
 	
 			Private Function BitmapType.LoadFromHICON(IcoHandle As HICON) As Boolean

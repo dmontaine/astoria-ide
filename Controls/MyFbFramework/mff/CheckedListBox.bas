@@ -266,32 +266,36 @@ Namespace My.Sys.Forms
 	
 	
 	Private Sub CheckedListBox.SaveToFile(ByRef FileName As WString)
-		Dim As Integer F, i
+		Dim As Integer F, i, Result
 		Dim As WString Ptr s
 		F = FreeFile_
-		Open FileName For Output Encoding "utf-8" As #F
-		For i = 0 To ItemCount - 1
-				Dim TextLen As Integer = Perform(LB_GETTEXTLEN, i, 0)
-				s = _CAllocate((Len(TextLen) + 1) * SizeOf(WString))
-				*s = Space(TextLen)
-				Perform(LB_GETTEXT, i, CInt(s))
-				Print #F, *s
-		Next i
-		CloseFile_(F)
+		Result = Open(FileName For Output Encoding "utf-8" As #F)
+		If Result = 0 Then
+			For i = 0 To ItemCount - 1
+					Dim TextLen As Integer = Perform(LB_GETTEXTLEN, i, 0)
+					s = _CAllocate((Len(TextLen) + 1) * SizeOf(WString))
+					*s = Space(TextLen)
+					Perform(LB_GETTEXT, i, CInt(s))
+					Print #F, *s
+			Next i
+			CloseFile_(F)
+		End If
 		_Deallocate(s)
 	End Sub
-	
+
 	Private Sub CheckedListBox.LoadFromFile(ByRef FileName As WString)
-		Dim As Integer F, i
+		Dim As Integer F, i, Result
 		Dim As WString * 1024 s
 		F = FreeFile_
 		This.Clear
-		Open FileName For Input Encoding "utf-8" As #F
+		Result = Open(FileName For Input Encoding "utf-8" As #F)
+		If Result = 0 Then
 		While Not EOF(F)
 			Line Input #F, s
 				Perform(LB_ADDSTRING, 0, CInt(@s))
 		Wend
-		CloseFile_(F)
+			CloseFile_(F)
+		End If
 	End Sub
 	
 	

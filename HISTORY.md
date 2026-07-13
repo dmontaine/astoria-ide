@@ -557,7 +557,7 @@ Owner escalated C4 from "hide the Options UI" to **removing the `.lng` translati
 
 ## Fable review remediation sub-project — full task table (CLOSED 2026-07-11; archived from PROJECT_STATUS.md per T14)
 
-_Archived when the queue closed (all tasks T1–T17 done; owner smoke-test list completed). A summary stub with the load-bearing outcomes remains in PROJECT_STATUS.md. Preserved verbatim except that in-document anchors were retargeted to PROJECT_STATUS.md where the target still lives there (the Debugger Reliability sub-project). The still-open debugger work (former T6) is tracked in PROJECT_STATUS.md, not here._
+_Archived when the queue closed (all tasks T1–T17 done; owner smoke-test list completed). A summary stub with the load-bearing outcomes remains in PROJECT_STATUS.md. The Debugger Reliability project (former T6) subsequently completed: DR-1 through DR-16 are fixed and owner-verified. Older links in this archive lead to the completed status section in PROJECT_STATUS.md._
 
 ### Progress narrative (the former "Also active" paragraph from Current State)
 
@@ -573,6 +573,8 @@ _Archived when the queue closed (all tasks T1–T17 done; owner smoke-test list 
 **Standing gates for every task (§9 rules, restated):** compile-clean (0 errors, `Compile.bat` with `set NOPAUSE=1`) before handoff; cross-reference `git grep` sweep before deleting/moving anything — a clean compile is not sufficient; owner smoke test before committing anything that changes runtime behavior; commits only per the session-end rule; smallest correct diff, matching existing style. **Model-assignment check (§9):** if the session's model is not the one a task's row assigns, warn the owner of the mismatch before doing any work and proceed only on per-task confirmation.
 
 ### Execution order
+
+> **Historical status note:** the table below preserves the 2026-07-11 work-state. The separate Debugger Reliability project later completed in full (DR-1 through DR-16 fixed and owner-verified).
 
 > **Read the `Order` column, not the task numbers.** T-IDs (T1–T17) are stable labels from the review; they do **not** indicate sequence. E.g. T2 runs at position 11 (Wave 3, Sonnet), after T3/T4/T7 — not right after T1. Wave 3 was originally planned as one batch (T3 → T4 → T7 → T2a/T2b → T17, held uncommitted until T16). **Owner changed this 2026-07-11: commit each Wave-3 task individually** as it lands, matching this project's normal per-session commit convention (§9), rather than batching. **T16's adversarial review must therefore cover each Wave-3 commit individually** when it runs, not one combined diff.
 

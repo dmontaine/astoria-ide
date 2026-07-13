@@ -1,6 +1,6 @@
 # Astoria-IDE — Project Status & Handoff
 
-**Last updated:** 2026-07-13 14:33:08 -07:00 (last push)
+**Last updated:** 2026-07-13 14:44:54 -07:00 (last push)
 **Repository:** [github.com/dmontaine/astoria-ide](https://github.com/dmontaine/astoria-ide)
 **Local path:** C:\Users\don\Astoria-IDE
 
@@ -38,6 +38,7 @@ All DR-1 through DR-16 defects are fixed and owner-verified. This retained ancho
 - **Missing-executable check added to Run:** the non-debug `RunProgram`/`RunPr` path (`TabWindow.bas`) now checks the target `.exe` exists before launching, matching the pre-flight check the debug path already had via `PrepareDebugSession()`. Rebuilt clean.
 - **Debug-mode "Returned code" fixed:** `RunWithDebug` always displayed "Returned code: 0 - No error" regardless of the real outcome (its `Result` was never assigned). Now parses GDB's own completion text into the real exit code (decoding GDB's octal `"exited with code NN"` format), and correctly stays silent — rather than showing a fabricated code — when Stop-while-running force-kills the debuggee. Live-verified both the normal-completion and Stop-while-running cases; see [HISTORY.md](HISTORY.md) for the two follow-up bugs caught along the way (an `SCODE` naming collision, and the Stop-kill-vs-real-exit distinction).
 - Also investigated, not fixed: a one-off where a freshly-compiled test program's worker threads exited with `STATUS_CONTROL_C_EXIT` seconds after Start. Antivirus and a "second `run` sent while the first was still live" theory were both checked and ruled out; did not reproduce on a second isolated attempt. No code changed — see [HISTORY.md](HISTORY.md) for what was checked; revisit only if it recurs, capturing `Settings/debug_trace.log` immediately after.
+- **MFF hygiene pass closed:** `README_CN.md` and `changes_cn.txt` deleted (dead Chinese-language leftovers), with the `File=README_CN.md` entry removed from `MyFbFramework.vfp` and the dead language-switcher link removed from `Controls/MyFbFramework/README.md`. The other two items on this list were dropped rather than attempted: MFF control-library path consolidation has a standing **Do Not Attempt** verdict from a prior deep review (`P:\Astoria-Docs\Deferred Task Recommendations - Opus.md`, item F2) — it touches the exact code that caused the grey-panel Form Designer bug (`cc9e7dd`) for no user-facing benefit; the standalone-Canvas device-ownership issue (H-2) needs a dedicated test harness that doesn't exist yet before a fix can be attempted or verified (rationale in `7ff604c`). Both remain recoverable from git/doc history if a concrete reason to revisit ever comes up.
 - Nothing is awaiting an owner response. The remaining items below are deferred or ready for a new, explicitly selected task.
 
 ## Next ready work
@@ -51,12 +52,6 @@ For the reasoning, exact code locations, and prior hot-path findings, see [HISTO
 ### Immediate
 
 No immediate items open.
-
-### MFF hygiene and technical debt
-
-- [ ] Delete README_CN.md and changes_cn.txt if desired. Do **not** delete MyFbFramework.wiki/: the IDE reads it for component help. Check usage before removing examples/ or help/.
-- [ ] Consider the standalone-Canvas device-ownership issue only with a dedicated test harness; it is not exercised by the IDE.
-- [ ] MFF control-library path consolidation.
 
 ### Deferred enhancements
 

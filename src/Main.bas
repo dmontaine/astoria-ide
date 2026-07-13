@@ -239,7 +239,6 @@ LoadSettings
 #include once "frmProjectProperties.bi"
 #include once "frmSave.bi"
 #include once "frmTipOfDay.frm"
-#include once "frmComponents.frm"
 #include once "Debug.bi"
 
 pComps = @Comps
@@ -1073,7 +1072,7 @@ Function AddProject(ByRef FileName As WString, pFilesList As WStringList Ptr, tn
 								bChanged = True
 							End If
 						Else
-							Dim LibKey As String = GetLibKey
+							Dim LibKey As String = "Lib64"
 							Dim As IniFile ini
 							ini.Load LibraryFolder & WindowsSlash & "Settings.ini"
 							Var CtlLibrary = _New(Library)
@@ -3376,28 +3375,6 @@ Sub InitToolBoxTree()
 	tnToolDialogs->Expand()
 End Sub
 
-Sub RemoveToolBoxLibraryNodes(CtlLibrary As Library Ptr)
-	Dim As TreeNode Ptr categories(0 To 3)
-	Dim bRemovedSelected As Boolean
-	categories(0) = tnToolControls
-	categories(1) = tnToolContainers
-	categories(2) = tnToolComponents
-	categories(3) = tnToolDialogs
-	For i As Integer = 0 To 3
-		If categories(i) = 0 Then Continue For
-		For j As Integer = categories(i)->Nodes.Count - 1 To 0 Step -1
-			Dim As TreeNode Ptr node = categories(i)->Nodes.Item(j)
-			If node->ImageKey = "Cursor" Then Continue For
-			Dim te As TypeElement Ptr = Cast(TypeElement Ptr, node->Tag)
-			If te <> 0 AndAlso te->Tag = CtlLibrary Then
-				If node = SelectedToolNode Then bRemovedSelected = True
-				categories(i)->Nodes.Remove j
-			End If
-		Next
-	Next
-	If bRemovedSelected Then ToolGroupsToCursor()
-End Sub
-
 Sub tvToolBox_NodeActivate(ByRef Designer As My.Sys.Object, ByRef Sender As TreeView, ByRef Item As TreeNode)
 	If Item.ParentNode = 0 AndAlso Item.Nodes.Count > 0 Then
 		If Item.IsExpanded Then Item.Collapse Else Item.Expand
@@ -5330,85 +5307,53 @@ Sub LoadToolBox(ForLibrary As Library Ptr = 0)
 	Dim As Integer i, j
 	Dim As My.Sys.Drawing.Cursor cur
 	Dim As String IncludePath
-	Dim As UString MFF, Temp
+	Dim As UString Temp
 	Dim As UInteger Attr
-			MFF = IIf(i = 0, "astoria.dll", "")
 	If ForLibrary = 0 AndAlso ControlLibraries.Count = 0 Then
 		IncludeMFFPath = iniSettings.ReadBool("Options", "IncludeMFFPath", True)
 		WLet(MFFPath, SanitizeIniCriticalPath(iniSettings.ReadString("Options", "MFFPath", "./Controls/MyFbFramework"), "./Controls/MyFbFramework"))
-		If iniSettings.KeyExists("ControlLibraries", "Path_0") = -1 Then
-			Dim LibKey As String = GetLibKey
-			Dim DirName As WString * 1024
-			DirName = Dir(ExePath & WindowsSlash & "Controls" & WindowsSlash & "*", fbReadOnly Or fbHidden Or fbSystem Or fbDirectory Or fbArchive, Attr)
-			While DirName <> ""
-				If (Attr And fbDirectory) <> 0 Then
-					If DirName <> "." AndAlso DirName <> ".." Then
-						Dim As IniFile ini
-						ini.Load ExePath & WindowsSlash & "Controls" & WindowsSlash & DirName & WindowsSlash & "Settings.ini"
-						Dim FileName As UString = ini.ReadString("Setup", LibKey)
-						If FileName <> "" Then
-							Temp = "Controls" & WindowsSlash & DirName & WindowsSlash & FileName
-							Var CtlLibrary = _New(Library)
-							CtlLibrary->Name = ini.ReadString("Setup", "Name")
-							CtlLibrary->Tips = ini.ReadString("Setup", "Tips")
-							CtlLibrary->Path = GetFullPath(Temp)
-							CtlLibrary->HeadersFolder = ini.ReadString("Setup", "HeadersFolder")
-							CtlLibrary->SourcesFolder = ini.ReadString("Setup", "SourcesFolder")
-							CtlLibrary->IncludeFolder = GetFullPath(GetFullPath(ini.ReadString("Setup", "IncludeFolder"), Temp))
-							CtlLibrary->Lib32Folder = GetFullPath(GetFullPath(ini.ReadString("Setup", "Lib32Folder"), Temp))
-							CtlLibrary->Lib64Folder = GetFullPath(GetFullPath(ini.ReadString("Setup", "Lib64Folder"), Temp))
-							CtlLibrary->Lib64ArmFolder = GetFullPath(GetFullPath(ini.ReadString("Setup", "Lib64ArmFolder"), Temp))
-							CtlLibrary->LibX32Folder = GetFullPath(GetFullPath(ini.ReadString("Setup", "LibX32Folder"), Temp))
-							CtlLibrary->LibX64Folder = GetFullPath(GetFullPath(ini.ReadString("Setup", "LibX64Folder"), Temp))
-							CtlLibrary->Enabled = ini.ReadBool("Setup", "Enabled", False)
-							If LCase(DirName) = "myfbframework" Then
-								If CtlLibrary->HeadersFolder = "" Then CtlLibrary->HeadersFolder = "mff"
-								If CtlLibrary->SourcesFolder = "" Then CtlLibrary->SourcesFolder = "mff"
-								MFFCtlLibrary = CtlLibrary
-								ControlLibraries.Insert(0, CtlLibrary)
-							Else
-								ControlLibraries.Add CtlLibrary
-							End If
+		'' Every folder under Controls\ with a valid Settings.ini/Lib64 entry is always
+		'' loaded into the toolbox -- no per-library enable/disable UI (owner decision,
+		'' 2026-07-13; formerly the Add Components dialog, now removed). Re-scanned fresh
+		'' every IDE session rather than cached in Settings/astoria.ini, so a newly added
+		'' library folder shows up immediately with no extra step.
+		Dim LibKey As String = "Lib64"
+		Dim DirName As WString * 1024
+		DirName = Dir(ExePath & WindowsSlash & "Controls" & WindowsSlash & "*", fbReadOnly Or fbHidden Or fbSystem Or fbDirectory Or fbArchive, Attr)
+		While DirName <> ""
+			If (Attr And fbDirectory) <> 0 Then
+				If DirName <> "." AndAlso DirName <> ".." Then
+					Dim As IniFile ini
+					ini.Load ExePath & WindowsSlash & "Controls" & WindowsSlash & DirName & WindowsSlash & "Settings.ini"
+					Dim FileName As UString = ini.ReadString("Setup", LibKey)
+					If FileName <> "" Then
+						Temp = "Controls" & WindowsSlash & DirName & WindowsSlash & FileName
+						Var CtlLibrary = _New(Library)
+						CtlLibrary->Name = ini.ReadString("Setup", "Name")
+						CtlLibrary->Tips = ini.ReadString("Setup", "Tips")
+						CtlLibrary->Path = GetFullPath(Temp)
+						CtlLibrary->HeadersFolder = ini.ReadString("Setup", "HeadersFolder")
+						CtlLibrary->SourcesFolder = ini.ReadString("Setup", "SourcesFolder")
+						CtlLibrary->IncludeFolder = GetFullPath(GetFullPath(ini.ReadString("Setup", "IncludeFolder"), Temp))
+						CtlLibrary->Lib32Folder = GetFullPath(GetFullPath(ini.ReadString("Setup", "Lib32Folder"), Temp))
+						CtlLibrary->Lib64Folder = GetFullPath(GetFullPath(ini.ReadString("Setup", "Lib64Folder"), Temp))
+						CtlLibrary->Lib64ArmFolder = GetFullPath(GetFullPath(ini.ReadString("Setup", "Lib64ArmFolder"), Temp))
+						CtlLibrary->LibX32Folder = GetFullPath(GetFullPath(ini.ReadString("Setup", "LibX32Folder"), Temp))
+						CtlLibrary->LibX64Folder = GetFullPath(GetFullPath(ini.ReadString("Setup", "LibX64Folder"), Temp))
+						CtlLibrary->Enabled = True
+						If LCase(DirName) = "myfbframework" Then
+							If CtlLibrary->HeadersFolder = "" Then CtlLibrary->HeadersFolder = "mff"
+							If CtlLibrary->SourcesFolder = "" Then CtlLibrary->SourcesFolder = "mff"
+							MFFCtlLibrary = CtlLibrary
+							ControlLibraries.Insert(0, CtlLibrary)
+						Else
+							ControlLibraries.Add CtlLibrary
 						End If
 					End If
 				End If
-				DirName = Dir(Attr)
-			Wend
-		Else
-			Do Until iniSettings.KeyExists("ControlLibraries", "Path_" & WStr(i)) = -1
-				Dim As IniFile ini
-				Dim As UString rawPath = iniSettings.ReadString("ControlLibraries", "Path_" & WStr(i), MFF)
-				Temp = SanitizeIniOptionalPath(rawPath)
-				If Temp = "" AndAlso Trim(rawPath) <> "" Then
-					i += 1
-					Continue Do
-				End If
-				If Temp = "" Then Temp = SanitizeIniPath(MFF)
-				ini.Load GetFolderName(GetRelativePath(Temp)) & "Settings.ini"
-				Var CtlLibrary = _New(Library)
-				CtlLibrary->Name = ini.ReadString("Setup", "Name")
-				CtlLibrary->Tips = ini.ReadString("Setup", "Tips")
-				CtlLibrary->Path = GetFullPath(Temp)
-				CtlLibrary->HeadersFolder = ini.ReadString("Setup", "HeadersFolder")
-				CtlLibrary->SourcesFolder = ini.ReadString("Setup", "SourcesFolder")
-				CtlLibrary->IncludeFolder = GetFullPath(GetFullPath(ini.ReadString("Setup", "IncludeFolder"), Temp))
-				CtlLibrary->Lib32Folder = GetFullPath(GetFullPath(ini.ReadString("Setup", "Lib32Folder"), Temp))
-				CtlLibrary->Lib64Folder = GetFullPath(GetFullPath(ini.ReadString("Setup", "Lib64Folder"), Temp))
-				CtlLibrary->Lib64ArmFolder = GetFullPath(GetFullPath(ini.ReadString("Setup", "Lib64ArmFolder"), Temp))
-				CtlLibrary->LibX32Folder = GetFullPath(GetFullPath(ini.ReadString("Setup", "LibX32Folder"), Temp))
-				CtlLibrary->LibX64Folder = GetFullPath(GetFullPath(ini.ReadString("Setup", "LibX64Folder"), Temp))
-				CtlLibrary->Enabled = iniSettings.ReadBool("ControlLibraries", "Enabled_" & WStr(i), ini.ReadBool("Setup", "Enabled", False))
-				If LCase(GetFolderName(GetFolderName(Temp), False)) = "myfbframework" OrElse IsMyFbFrameworkLibrary(Temp) Then
-					If CtlLibrary->HeadersFolder = "" Then CtlLibrary->HeadersFolder = "mff"
-					If CtlLibrary->SourcesFolder = "" Then CtlLibrary->SourcesFolder = "mff"
-					MFFCtlLibrary = CtlLibrary
-					ControlLibraries.Insert(0, CtlLibrary)
-				Else
-					ControlLibraries.Add CtlLibrary
-				End If
-				i += 1
-			Loop
-		End If
+			End If
+			DirName = Dir(Attr)
+		Wend
 	End If
 	Dim As Library Ptr CtlLibrary
 	' MyFbFramework must load before other FB control DLLs in Controls\ (shared fbrt runtime).
@@ -6713,10 +6658,6 @@ tbSearch->Expand = True
 tbExplorer.Buttons.Add tbsSeparator
 
 Sub tbFormClick(ByRef Designer As My.Sys.Object, ByRef Sender As My.Sys.Object)
-	Select Case Sender.ToString
-	Case "Components"
-		frmComponents.Show frmMain
-	End Select
 End Sub
 
 tbForm.ImagesList = @imgList
@@ -6727,8 +6668,6 @@ tbForm.Flat = True
 tbForm.ExtraMargins.Left = 2
 tbForm.ExtraMargins.Right = tbLeft.Width
 tbForm.Buttons.Add tbsCheck, "Label", , @tbFormClick, "Text", "", ("Text"), True, Cast(ToolButtonState, tstChecked Or tstEnabled)
-tbForm.Buttons.Add tbsSeparator
-tbForm.Buttons.Add , "Component", , @tbFormClick, "Components", "", ("Add Components"), True
 tbForm.Buttons.Add tbsSeparator
 Var FormSearch = tbForm.Buttons.Add(tbsCustom)
 txtForm.Width = 2

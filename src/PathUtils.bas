@@ -28,12 +28,41 @@ Function GetFullPathInSystem(ByRef Path As WString) As UString
 	End If
 End Function
 
+'' Collapses ".." segments anywhere in an already-drive-letter/absolute path (e.g.
+'' "C:\A\B\..\..\C" -> "C:\A\C"). GetFullPath's drive-letter branch previously only handled
+'' a *trailing* "\..": a Settings.ini value with an embedded ".." (e.g. Lib64=../../astoria.dll,
+'' joined onto an already-ExePath-prefixed path by a caller like frmComponents.frm) passed
+'' through uncollapsed, breaking string-equality comparisons against the same file resolved via
+'' GetFullPath's other, SearchPath-based branch (which Windows normalizes for free). Found via
+'' the cJSON toolbox investigation, 2026-07-13.
+Function CollapseDotDotSegments(ByRef path As UString) As UString
+	Dim As UString s = Replace(path, UnixSlash, WindowsSlash)
+	Dim segs() As UString
+	If Split(s, WindowsSlash, segs()) <= 0 Then Return path
+	Dim result(UBound(segs)) As UString
+	Dim As Long rCount = 0
+	For i As Long = 0 To UBound(segs)
+		If segs(i) = ".." Then
+			If rCount > 0 Then rCount -= 1
+		ElseIf segs(i) <> "." AndAlso segs(i) <> "" Then
+			result(rCount) = segs(i)
+			rCount += 1
+		End If
+	Next
+	Dim As UString joined = ""
+	For i As Long = 0 To rCount - 1
+		If i > 0 Then joined &= WindowsSlash
+		joined &= result(i)
+	Next
+	Return joined
+End Function
+
 Function GetFullPath(ByRef Path As WString, ByRef FromFile As WString) As UString
 	If CInt(InStr(Path, ":") > 0) OrElse CInt(StartsWith(Path, "/")) OrElse CInt(StartsWith(Path, "\")) Then
 		If EndsWith(Path, "\..") OrElse EndsWith(Path, "/..") Then
 			Return WinOsPath(GetFolderName(GetFolderName(Path)))
 		Else
-			Return WinOsPath(Path)
+			Return CollapseDotDotSegments(WinOsPath(Path))
 		End If
 	ElseIf StartsWith(Path, "./") OrElse StartsWith(Path, ".\") Then
 		If FromFile = "" Then

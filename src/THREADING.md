@@ -2,26 +2,29 @@
 
 This document describes how background work and UI updates are coordinated in the IDE.
 
-## ThreadsEnter / ThreadsLeave
+## ThreadsEnter / ThreadsLeave — no-ops; they guarantee NOTHING
 
-Defined in `Controls/MyFbFramework/mff/Component.bas` and declared in `Component.bi`.
+Defined in `Controls/MyFbFramework/mff/Component.bas` (see the block comment there) and declared in `Component.bi`.
 
 | Platform | `ThreadsEnter` | `ThreadsLeave` |
 |----------|--------------|----------------|
-| WinAPI (Windows 64-bit IDE) | (no-op) | (no-op) |
+| WinAPI (Windows 64-bit IDE) | **empty no-op** | **empty no-op** |
 
-**Purpose:** Worker threads that update controls or call `ShowMessages` wrap those calls in `ThreadsEnter()` / `ThreadsLeave()` for API consistency with the framework.
+**Contract (resolved 2026-07-12, T-OPUS-1): a `ThreadsEnter … ThreadsLeave` block provides NO synchronization and NO safety. It is a cross-target marker only.** They are a GTK-ism (`gdk_threads_enter/leave`, GTK's global UI lock); Win32 has no equivalent, so on this build they are empty. **They will not be given a real implementation** — a lock here would be *wrong*, not a fix: Win32 controls have thread affinity (a worker touching a control is undefined regardless of any lock), and a process-wide lock held by a worker that then repaints/`SendMessage`s the UI thread deadlocks — this is precisely the DR-3 hang. There are ~69 legacy `ThreadsEnter` blocks in `src/` (worker subs in `BuildService.bas`, `Debug.bas`, `AstoriaIDE.bas`, …); each is a latent unsynchronized race, and MFF itself contains zero uses.
 
-**Usage pattern** (throughout `Main.bas`, `VisualFBEditor.bas`, `TabWindow.bas`):
+**The rule for any cross-thread UI update: marshal to the UI thread.** Do NOT touch controls (`.Nodes.Add/.Clear`, paint, `.Text=`, `.Enabled=`, `ShowMessages`) directly from a worker. Stage the data on the worker; apply it on the UI thread from a timer/message callback. This is the pattern the debugger converged on across DR-2D / DR-7 / DR-16:
 
 ```freebasic
-ThreadsEnter()
-ShowMessages(...)
-lvProblems.ListItems.Add ...
-ThreadsLeave()
+' worker thread — stage only, no control access
+gRawLocals = readpipe(...)        ' Debug.bas RefreshDebugPanelsAfterStop
+bPanelFillPending = True
+
+' UI thread — apply (TimerProcGDB tick)
+FillDebugPanelsOnUI()             ' parses gRaw* into lvLocals/lvGlobals/...
+FlushDebugOutputOnUI()            ' Output text / watch edits / panel clears
 ```
 
-On pure WinAPI builds these calls are effectively no-ops, but the pattern is kept for a single code path across targets.
+The legacy `ThreadsEnter`-wrapped worker→UI sites are migrated to this marshal pattern opportunistically as bugs surface (the debugger paths are done; compile/find/etc. are not yet — treat any new hang or corruption there as this class).
 
 ## Worker thread spawning
 

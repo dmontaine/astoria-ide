@@ -254,6 +254,26 @@ Function ThreadCreate_(ByVal ProcPtr_ As Sub ( ByVal userdata As Any Ptr ), ByVa
 		Return ThreadCreate(ProcPtr_, param, stack_size)
 End Function
 
+'' ==========================================================================================
+'' ThreadsEnter / ThreadsLeave — INTENTIONAL NO-OPS on the WinAPI build. DO NOT "fix" by adding
+'' a lock. (Resolved: AstoriaIDE T-OPUS-1, 2026-07-12. Root cause of the IDE's DR-3/DR-7 hangs.)
+''
+'' These are a GTK-ism: on the old GTK build they mapped to gdk_threads_enter/leave (GTK's global
+'' UI lock). Win32 has NO equivalent — a window/control has THREAD AFFINITY and may only be
+'' touched from its owning (UI) thread. So there is no correct Win32 implementation of this
+'' Enter/Leave contract, and a process-wide critical section here would be actively wrong:
+''   1. It would NOT make a worker's cross-thread control access (Nodes.Add/Clear, paint, .Text=)
+''      correct — that is undefined on Win32 regardless of any lock (thread affinity).
+''   2. It would ADD deadlock risk — a worker holding the lock that then triggers a SendMessage /
+''      repaint to the UI thread (which is waiting on the same lock) deadlocks. That is exactly
+''      the GDI+/message-pump interaction behind the DR-3 hang.
+''
+'' THE CONTRACT (what a `ThreadsEnter … ThreadsLeave` block actually guarantees): NOTHING. It is
+'' a cross-target marker only. All cross-thread UI work MUST marshal to the UI thread — stage the
+'' data on the worker, apply it on the UI thread (timer/message). See the IDE's proven pattern:
+'' Debug.bas RefreshDebugPanelsAfterStop (worker stages) -> TimerProcGDB -> FillDebugPanelsOnUI /
+'' FlushDebugOutputOnUI (UI thread applies). See src/THREADING.md for the full rule.
+'' ==========================================================================================
 Private Sub ThreadsEnter
 End Sub
 

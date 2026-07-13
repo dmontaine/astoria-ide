@@ -1,6 +1,6 @@
 # Astoria-IDE — Project Status & Handoff
 
-**Last updated:** 2026-07-13 10:11:56 -07:00 (last push)
+**Last updated:** 2026-07-13 10:48:26 -07:00 (last push)
 **Repository:** [github.com/dmontaine/astoria-ide](https://github.com/dmontaine/astoria-ide)
 **Local path:** C:\Users\don\Astoria-IDE
 
@@ -27,6 +27,11 @@ All DR-1 through DR-16 defects are fixed and owner-verified. This retained ancho
   - Split Horizontally/Vertically (they split the code editor) are now greyed in Form-only view, where the code editor isn't visible.
   - Fold is now greyed in Form-only view for the same reason.
   - Debug Windows submenu is now greyed whenever Run → Use Debugger is unchecked (wired into `ChangeUseDebugger`, the single function all debugger-toggle paths funnel through).
+- **Four deferred owner decisions resolved:**
+  - **Change Log location:** each project's `<ProjectName>_Change.log` now lives in that project's own folder (`GetChangeLogPath`) instead of at `ExePath`, and is shown as a node under the project tree's **Others** folder (or the project root in flat/no-folders mode) via `EnsureChangeLogTreeNode` — added on project load (`AddProject`) and on folder-display-mode toggle (`ChangeFolderType`); double-clicking it jumps to the Change Log tab; renaming it is blocked (it's a synthesized node, not a real project file). Skipped for "show as folder" projects — the log is a real file in that folder already, so the filesystem-backed view shows it with no extra code.
+  - **New-project subfolder layout:** owner decided each new project should get its own subfolder inside the configured Projects directory — already matched: `frmNewProject.frm` already creates each new project in its own `<ProjectsPath>\<ProjectName>\` subfolder (not flat), and `frmOpenProject.frm`'s project scan already expects that layout. No code change needed; decision recorded as confirming existing behavior.
+  - **Default Projects Path:** owner decided the default must stay `./Projects` (relative to `ExePath`), never Documents, unless the user explicitly points it elsewhere via Tools ▸ Options ▸ General ▸ Projects Path — already matched: `SettingsService.bas` reads `iniSettings.ReadString("Options", "ProjectsPath", "./Projects")`. No code change needed.
+  - **Theme storage:** already matched the decision — default and user themes both live in `Settings/Themes/` with no split location today. No code change needed; decision recorded as confirming existing behavior (in-place edits to a shipped theme's `.ini` remain expected behavior, not a bug, per this decision).
 - Nothing is awaiting an owner response. The remaining items below are deferred or ready for a new, explicitly selected task.
 
 ## Next ready work
@@ -42,12 +47,6 @@ For the reasoning, exact code locations, and prior hot-path findings, see [HISTO
 - [ ] Consolidate the Run menu so related commands are not split between the top level and **More Build Options**.
 - [ ] Audit toolbar buttons and add missing tooltips.
 - [ ] Add a missing-executable check and user-visible message to the non-debug RunProgram/RunPr path.
-
-### Deferred owner decisions
-
-- [ ] Decide whether per-project <Project>_Change.log files should live in the project folder instead of the IDE root.
-- [ ] Decide whether new projects should default to Documents\Astoria-IDE Projects instead of the application folder.
-- [ ] Decide whether user theme-color edits should be stored separately from shipped theme files.
 
 ### MFF hygiene and technical debt
 

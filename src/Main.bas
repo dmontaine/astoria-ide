@@ -484,6 +484,34 @@ Function GetTreeNodeChild(tn As TreeNode Ptr, ByRef FileName As WString) As Tree
 	End If
 End Function
 
+' Owner decision: the per-project Change Log lives beside the project (not at ExePath).
+' tn is a project-root TreeNode (ImageKey "Project"/"MainProject"/"Opened"); falls back to
+' the old ExePath location if tn's Tag isn't a real ProjectElement (shouldn't happen at the
+' call sites, but avoids a null-deref).
+Function GetChangeLogPath(tn As TreeNode Ptr) As UString
+	If tn = 0 Then Return ExePath & WindowsSlash & "_Change.log"
+	Dim As ExplorerElement Ptr ee = tn->Tag
+	If ee <> 0 AndAlso *ee Is ProjectElement AndAlso ee->FileName <> 0 Then
+		Return GetFolderName(*ee->FileName) & StringExtract(tn->Text, ".") & "_Change.log"
+	End If
+	Return ExePath & WindowsSlash & StringExtract(tn->Text, ".") & "_Change.log"
+End Function
+
+' Owner decision: the Change Log should be discoverable in the project tree (under
+' "Others" when folders are shown, or directly under the project root in flat mode -- same
+' routing GetTreeNodeChild already uses for any other uncategorized file). Skipped for
+' ShowAsFolder projects: there the log is a real file inside the project folder once
+' written, and the filesystem-backed folder view already shows it with no extra node.
+Sub EnsureChangeLogTreeNode(tn As TreeNode Ptr)
+	If tn = 0 OrElse tn->Tag = 0 Then Exit Sub
+	Dim As ProjectElement Ptr ppe = Cast(ProjectElement Ptr, tn->Tag)
+	If ppe->ProjectFolderType = ProjectFolderTypes.ShowAsFolder Then Exit Sub
+	Dim As WString * 32 Sentinel = "_Change.log"
+	Dim As TreeNode Ptr tnParent = GetTreeNodeChild(tn, Sentinel)
+	If tnParent = 0 Then Exit Sub
+	tnParent->Nodes.Add(StringExtract(tn->Text, ".") & "_Change.log", "ProjectChangeLog", , "File", "File")
+End Sub
+
 Sub ClearTreeNode(ByRef tn As TreeNode Ptr)
 	If tn = 0 Then Exit Sub
     Dim As TabWindow Ptr tb
@@ -1090,6 +1118,7 @@ Function AddProject(ByRef FileName As WString, pFilesList As WStringList Ptr, tn
 	If Not inFolder Then
 		tn->Expand
 	End If
+	EnsureChangeLogTreeNode(tn)
 	'pfProjectProperties->RefreshProperties
 	tn->SelectItem
 	Return tn
@@ -3151,7 +3180,8 @@ Sub ChangeFolderType(Value As ProjectFolderTypes)
 	If tn->ImageKey <> "Project" Then Exit Sub
 	Dim As ProjectElement Ptr ppe = Cast(ProjectElement Ptr, tn->Tag)
 	Dim As ExplorerElement Ptr ee
-	If ppe->ProjectFolderType <> Value Then
+	Dim As Boolean bFolderTypeChanged = (ppe->ProjectFolderType <> Value)
+	If bFolderTypeChanged Then
 		If ppe->ProjectFolderType = ProjectFolderTypes.ShowAsFolder Then
 			bNotExpand = True
 			ClearTreeNode tn
@@ -3252,6 +3282,7 @@ Sub ChangeFolderType(Value As ProjectFolderTypes)
 		End If
 	End If
 	ppe->ProjectFolderType = Value
+	If bFolderTypeChanged Then EnsureChangeLogTreeNode(tn)
 End Sub
 
 Sub CompileProgram(Param As Any Ptr)
@@ -6993,6 +7024,7 @@ Sub tvExplorer_NodeActivate(ByRef Designer As My.Sys.Object, ByRef Sender As Con
 	RestoreStatusText
 	If Item.ImageKey = "Opened" Then Exit Sub
 	If Item.ImageKey = "Project" AndAlso Item.ParentNode = 0 Then Exit Sub
+	If Item.Name = "ProjectChangeLog" Then tpChangeLog->SelectTab : Exit Sub
 	Dim As ExplorerElement Ptr ee = Item.Tag
 	If ee <> 0 AndAlso ee->PendingDelete Then Exit Sub '' B1: about to be deleted on save, don't reopen
 	If ee <> 0 Then
@@ -7185,7 +7217,7 @@ Sub tvExplorer_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As TreeVi
 						txtChangeLog.SaveToFile(mChangelogName)  ' David Change
 						mChangeLogEdited = False
 					End If
-					mChangelogName = ExePath & WindowsSlash & StringExtract(ptn->Text, ".") & "_Change.log"
+					mChangelogName = GetChangeLogPath(ptn)
 					txtChangeLog.Text = "Waiting...... "
 					If Dir(mChangelogName)<>"" AndAlso mChangelogName<> "" Then
 						txtChangeLog.LoadFromFile(mChangelogName) ' David Change
@@ -7259,6 +7291,8 @@ Sub tvExplorer_BeforeLabelEdit(ByRef Designer As My.Sys.Object, ByRef Sender As 
 	If Item.IsEmpty Then Exit Sub
 	If Item.ImageKey = "Opened" Then
 		Cancel = True
+	ElseIf Item.Name = "ProjectChangeLog" Then
+		Cancel = True '' synthesized node, not a real project file -- see EnsureChangeLogTreeNode
 	End If
 End Sub
 
@@ -8766,7 +8800,7 @@ Sub tabBottom_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As Control
 				txtChangeLog.SaveToFile(mChangelogName)  ' David Change
 				mChangeLogEdited = False
 			End If
-			mChangelogName = ExePath & WindowsSlash & StringExtract(MainNode->Text, ".") & "_Change.log"
+			mChangelogName = GetChangeLogPath(MainNode)
 			txtChangeLog.Text = "Waiting...... "
 			If Dir(mChangelogName)<>"" AndAlso mChangelogName<> "" Then
 				txtChangeLog.LoadFromFile(mChangelogName) ' David Change
@@ -9636,7 +9670,7 @@ Sub frmMain_Close(ByRef Designer As My.Sys.Object, ByRef Sender As Form, ByRef A
 	iniSettings.WriteString("MainWindow", "RecentFile", MakePathPortable(*RecentFile))
 	iniSettings.WriteString("MainWindow", "RecentProject", MakePathPortable(*RecentProject))
 	iniSettings.WriteString("MainWindow", "RecentFolder", MakePathPortable(*RecentFolder))
-	If mChangeLogEdited Then txtChangeLog.SaveToFile(ExePath & WindowsSlash & StringExtract(MainNode->Text, ".") & "_Change.log") '
+	If mChangeLogEdited Then txtChangeLog.SaveToFile(GetChangeLogPath(MainNode)) '
 	UnLoadAddins
 	Exit Sub
 	ErrorHandler:

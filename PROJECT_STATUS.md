@@ -1,6 +1,6 @@
 # Astoria-IDE — Project Status & Handoff
 
-**Last updated:** 2026-07-13 01:53:43 -07:00 (last push)
+**Last updated:** 2026-07-13 02:05:39 -07:00 (last push)
 **Repository:** [github.com/dmontaine/astoria-ide](https://github.com/dmontaine/astoria-ide)
 **Local path:** C:\Users\don\Astoria-IDE
 
@@ -19,12 +19,12 @@ All DR-1 through DR-16 defects are fixed and owner-verified. This retained ancho
 - **Debugger Reliability (DR-1 through DR-16) is closed:** all known defects were fixed and owner-verified.
 - **MyFbFramework review is closed:** the six applicable tasks are complete; the remaining three became moot when HTTPServer was removed.
 - **H-1 is complete:** `Canvas.Cls` no longer creates a GDI brush on its Direct2D clear path and closes a Direct2D drawing session before returning. `mff64.dll` and `astoria.exe` rebuilt successfully; owner smoke test passed. Direct2D remains force-disabled in the IDE, so no live Direct2D-path test was available.
+- **H-4 is complete:** removed the duplicate GDI `FillRect` in `Canvas.Cls`. `mff64.dll` and `astoria.exe` rebuilt successfully; owner smoke test passed.
 - Nothing is awaiting an owner response. The remaining items below are deferred or ready for a new, explicitly selected task.
 
 ## Next ready work
 
-1. **H-4 — remove the redundant GDI FillRect in Canvas.Cls.**
-   Also requires an MFF rebuild and committing the rebuilt DLL.
+No task is currently selected. Choose from the open items below when ready.
 
 For the reasoning, exact code locations, and prior hot-path findings, see [HISTORY.md](HISTORY.md).
 
@@ -44,7 +44,6 @@ For the reasoning, exact code locations, and prior hot-path findings, see [HISTO
 
 ### MFF hygiene and technical debt
 
-- [ ] H-4 above.
 - [ ] Delete README_CN.md and changes_cn.txt if desired. Do **not** delete MyFbFramework.wiki/: the IDE reads it for component help. Check usage before removing examples/ or help/.
 - [ ] Consider the standalone-Canvas device-ownership issue only with a dedicated test harness; it is not exercised by the IDE.
 - [ ] MFF control-library path consolidation.

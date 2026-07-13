@@ -301,10 +301,6 @@ Namespace My.Sys.Drawing
 						.FillRect Handle, Cast(..Rect Ptr, @R), B
 					End If
 			End If
-				If FUseDirect2D AndAlso pRenderTarget <> 0 Then
-				Else
-					.FillRect Handle, Cast(..Rect Ptr, @R), B
-				End If
 				DeleteObject B
 		End If
 		If Not HandleSetted Then ReleaseDevice Handle_

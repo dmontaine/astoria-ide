@@ -895,15 +895,24 @@ Namespace My.Sys.Forms
 						End If
 					End If
 					If OnPaint Then
+						'' NOTE (2026-07-12): WM_PAINT is intentionally serviced with GetDC, NOT
+						'' BeginPaint, and this case deliberately does NOT set Message.Handled -- it
+						'' falls through to DefWindowProc, whose own BeginPaint/EndPaint is what
+						'' actually validates the update region. Two invariants depend on this:
+						''   1. Do NOT set Message.Handled/Result here. Without the DefWindowProc
+						''      fall-through nothing validates the region, so Windows re-posts WM_PAINT
+						''      forever -> CPU-pegging repaint loop.
+						''   2. The BeginPaint/EndPaint form (the "textbook" fix -- would clip the DC to
+						''      the invalid region, so partial repaints wouldn't redraw the whole client)
+						''      was tried UPSTREAM and reverted; the reason is not recorded in this fork's
+						''      history. If you ever retry it, it must both clip-to-invalid-region AND
+						''      validate, mark the message handled, and be live-verified across every
+						''      OnPaint surface (code tab strip, options color panel, search-box icons,
+						''      menu editor) for flicker/clip regressions before it's trusted.
 						Dim As HDC DC = GetDC(FHandle)
-						'Dim ps As PAINTSTRUCT
-						'Dim DC As HDC = BeginPaint(FHandle, @ps)
 						Canvas.SetHandle DC
 						OnPaint(*Designer, This, Canvas)
 						Canvas.UnSetHandle
-						'EndPaint(FHandle, @ps)
-						'Message.Result = 0
-						'Message.Handled = True
 						ReleaseDC FHandle, DC
 					End If
 				Case WM_SETCURSOR

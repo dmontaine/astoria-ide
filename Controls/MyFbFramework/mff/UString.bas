@@ -18,6 +18,7 @@ End Constructor
 Private Constructor UString(ByRef Value As WString)
 	m_Length = Len(Value)
 	m_BytesCount = (m_Length + 1) * SizeOf(WString) * GrowLength
+	m_BufferLen = m_Length * 2   '' T-OPUS-2: was omitted here (set by the String/ZString ctors) -> stale 0
 	m_Data = _Allocate(m_BytesCount)
 	m_Capacity = 0
 	If m_Data <> 0 Then
@@ -358,21 +359,37 @@ Private Sub UString.Resize(NewLength As Integer)
 	m_Length = NewLength
 End Sub
 
+'' AstoriaIDE T-OPUS-2 (2026-07-12): rewritten. The original mixed char-count and byte-count units
+'' and was memory-unsafe for any non-empty append:
+''   - m_Data is a WString Ptr (2-byte elements) but m_BufferLen is a BYTE count (= m_Length*2), so
+''     `memcpy(m_Data + m_BufferLen, ...)` wrote at BYTE offset m_BufferLen*2 (= m_Length*4) -- double
+''     the correct append offset (m_Length*2) -- leaving a gap and risking OOB in the no-resize branch.
+''   - `newLen = m_Length + NumBytes` and `(*m_Data)[newLen] = 0` mixed chars + bytes for the length
+''     and null-terminator position; This.Resize() also DESTROYS existing content (dealloc+calloc),
+''     so growing mid-append would lose the string.
+'' Audit result: this function is UNREACHABLE (Private; zero callers in the IDE or MFF), so the bugs
+'' were inert -- but it is shipped framework code, so fixed rather than left broken. m_Capacity is a
+'' write-only field everywhere else, used only by the removed broken bookkeeping. Appends NumBytes
+'' raw bytes at the byte-accurate end of the buffer, preserving existing content.
 Private Function UString.AppendBuffer(ByVal addrMemory As Any Ptr, ByVal NumBytes As ULong) As Boolean
-	If m_Data = 0 OrElse NumBytes < 1 Then Return False
-	Dim As Integer newLen = m_Length + NumBytes
-	If NumBytes > m_Capacity Then
-		Dim As Integer newCapacity = newLen * 2
-		If newCapacity < 16 Then newCapacity = 16
-		If m_Capacity < 1 Then newCapacity = newLen + 1 ' Exact-capacity mode fallback
-		m_Capacity = newCapacity - newLen  'Minimal-allocation mode; Capacity is remaining space!
-		This.Resize(newCapacity)
-	Else
-		m_Capacity -= NumBytes
-	End If
-		memcpy(m_Data + m_BufferLen, addrMemory, NumBytes)
-	(*m_Data)[newLen] = 0
-	m_BufferLen += NumBytes
+	If addrMemory = 0 OrElse NumBytes < 1 Then Return False
+	'' Use m_Length (which every constructor sets) as the authoritative current length -- NOT
+	'' m_BufferLen, which the UString(WString) constructor historically left uninitialized (0).
+	Dim As Integer oldByteLen = m_Length * SizeOf(WString)          ' bytes already in use
+	Dim As Integer newByteLen = oldByteLen + NumBytes                ' bytes after the append
+	Dim As Integer newCharLen = newByteLen \ SizeOf(WString)         ' whole wchars (floor)
+	Dim As Integer newBytesCount = (newCharLen + 1) * SizeOf(WString) * GrowLength
+	Dim As WString Ptr newData = _CAllocate(newBytesCount)           ' fresh, zero-filled (room for null)
+	If newData = 0 Then Return False
+	If m_Data <> 0 AndAlso oldByteLen > 0 Then memcpy(newData, m_Data, oldByteLen)   ' keep old content
+	memcpy(Cast(UByte Ptr, newData) + oldByteLen, addrMemory, NumBytes)             ' append at byte end
+	If m_Data <> 0 Then _Deallocate(m_Data)
+	m_Data = newData
+	m_BufferLen = newByteLen
+	m_Length = newCharLen
+	m_BytesCount = newBytesCount
+	m_Capacity = 0
+	(*m_Data)[m_Length] = 0                                          ' wchar null at char index m_Length
 	Return True
 End Function
 

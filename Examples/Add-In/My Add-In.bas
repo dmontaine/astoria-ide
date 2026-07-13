@@ -105,7 +105,7 @@ Sub OnConnection Alias "OnConnection"(VisualFBEditorApp As Any Ptr, ByRef AppPat
 			VFBEditorLib = DyLibLoad(GetFolderPath(AppPath) & "/astoria.dll")
 		#endif
 	#else
-		VFBEditorLib = DyLibLoad(GetFolderPath(AppPath) & "/Controls/MyFbFramework/libmff" & Right(AppPath, 7) & ".so")
+		VFBEditorLib = DyLibLoad(GetFolderPath(AppPath) & "/Controls/Framework/libmff" & Right(AppPath, 7) & ".so")
 	#endif
 	If s <> 0 Then Deallocate s
 	

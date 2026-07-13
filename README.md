@@ -33,10 +33,10 @@ None — this fork bundles the FreeBASIC compiler (`Compiler\fbc64.exe`, FBC 1.1
 
 #### Windows 64-bit (manual):
 ```shell
-  cd Path_to_AstoriaIDE/Controls/MyFbFramework/mff
+  cd Path_to_AstoriaIDE/Controls/Framework/mff
   fbc64 -b "mff.bi" "mff.rc" -dll -x "../../../astoria.dll"
   cd Path_to_AstoriaIDE/src
-  fbc64 "AstoriaIDE.bas" -s gui -x "../astoria.exe" "AstoriaIDE.rc" -i "Path_to_AstoriaIDE/Controls/MyFbFramework"
+  fbc64 "AstoriaIDE.bas" -s gui -x "../astoria.exe" "AstoriaIDE.rc" -i "Path_to_AstoriaIDE/Controls/Framework"
 ```
 
 See also `src/BUILD.md` for the full build pipeline.

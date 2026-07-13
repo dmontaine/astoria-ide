@@ -8,7 +8,7 @@ call "%~dp0BuildCommon.bat"
 
 echo [%time%] Building astoria.exe only ^(debug^)...
 cd /d "%SRC_DIR%"
-"%FBC64%" "AstoriaIDE.bas" -s gui -gen gcc -mt -g -exx -x "../astoria.exe" "AstoriaIDE.rc" -i "..\Controls\MyFbFramework" %FBC_VERBOSE%
+"%FBC64%" "AstoriaIDE.bas" -s gui -gen gcc -mt -g -exx -x "../astoria.exe" "AstoriaIDE.rc" -i "..\Controls\Framework" %FBC_VERBOSE%
 if errorlevel 1 exit /b 1
 
 echo [%time%] IDE-only debug build complete.

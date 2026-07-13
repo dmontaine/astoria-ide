@@ -5259,8 +5259,8 @@ Function GetTypeLink(ByRef TypeName As String, ByVal bMarkDown As Boolean = Fals
 End Function
 
 Function IsMyFbFrameworkLibrary(ByRef Path As UString) As Boolean
-	'' astoria.dll (built from Controls/MyFbFramework/mff) now lives at ExePath, next to
-	'' astoria.exe, not inside a "myfbframework"-named folder -- match by filename alone.
+	'' astoria.dll (built from Controls/Framework/mff) now lives at ExePath, next to
+	'' astoria.exe, not inside a "framework"-named folder -- match by filename alone.
 	Dim As String pathText = LCase(Path)
 	Return Right(pathText, 11) = "astoria.dll"
 End Function
@@ -5311,7 +5311,7 @@ Sub LoadToolBox(ForLibrary As Library Ptr = 0)
 	Dim As UInteger Attr
 	If ForLibrary = 0 AndAlso ControlLibraries.Count = 0 Then
 		IncludeMFFPath = iniSettings.ReadBool("Options", "IncludeMFFPath", True)
-		WLet(MFFPath, SanitizeIniCriticalPath(iniSettings.ReadString("Options", "MFFPath", "./Controls/MyFbFramework"), "./Controls/MyFbFramework"))
+		WLet(MFFPath, SanitizeIniCriticalPath(iniSettings.ReadString("Options", "MFFPath", "./Controls/Framework"), "./Controls/Framework"))
 		'' Every folder under Controls\ with a valid Settings.ini/Lib64 entry is always
 		'' loaded into the toolbox -- no per-library enable/disable UI (owner decision,
 		'' 2026-07-13; formerly the Add Components dialog, now removed). Re-scanned fresh
@@ -5341,7 +5341,7 @@ Sub LoadToolBox(ForLibrary As Library Ptr = 0)
 						CtlLibrary->LibX32Folder = GetFullPath(GetFullPath(ini.ReadString("Setup", "LibX32Folder"), Temp))
 						CtlLibrary->LibX64Folder = GetFullPath(GetFullPath(ini.ReadString("Setup", "LibX64Folder"), Temp))
 						CtlLibrary->Enabled = True
-						If LCase(DirName) = "myfbframework" Then
+						If LCase(DirName) = "framework" Then
 							If CtlLibrary->HeadersFolder = "" Then CtlLibrary->HeadersFolder = "mff"
 							If CtlLibrary->SourcesFolder = "" Then CtlLibrary->SourcesFolder = "mff"
 							MFFCtlLibrary = CtlLibrary
@@ -5396,7 +5396,7 @@ Sub LoadToolBox(ForLibrary As Library Ptr = 0)
 	If ForLibrary = 0 Then InitToolBoxTree()
 	Var iOld = -1, iNew = 0
 	Dim As String it = "Cursor"
-	Dim As String wikiFolder = ExePath & "/Controls/MyFbFramework/MyFbFramework.wiki/"
+	Dim As String wikiFolder = ExePath & "/Controls/Framework/Framework.wiki/"
 	Dim As String wikiTitle
 	Dim As List ECLines, teList
 	Dim As TypeElement Ptr tbi, tbi1, te, te1
@@ -5450,7 +5450,7 @@ Sub LoadToolBox(ForLibrary As Library Ptr = 0)
 		Dim As WString Ptr FileContentPtr, FileContentPtr1, FileContentEmpty
 		Dim As FileEncodings FileEncoding = FileEncodings.Utf8
 		Dim As NewLineTypes NewLineType, NewLineType1
-		Dim As UString controlParentFile = GetFullPath(ExePath & "/Controls/MyFbFramework/ControlParent.csv")
+		Dim As UString controlParentFile = GetFullPath(ExePath & "/Controls/Framework/ControlParent.csv")
 		If FileExists(controlParentFile) Then
 			Dim As Integer cpFn = FreeFile_
 			If Open(controlParentFile For Input As #cpFn) = 0 Then
@@ -8537,7 +8537,7 @@ txtImmediate.OnKeyDown = @txtImmediate_KeyDown
 '
 'txtImmediate.BackColor = NormalText.Background
 'txtImmediate.Font.Color = NormalText.Foreground
-txtImmediate.Text = "import #Include Once " + Chr(34) + ".." + WindowsSlash + "Controls" + WindowsSlash + "MyFbFramework"+ WindowsSlash + "mff" + WindowsSlash + "SysUtils.bas" + Chr(34) & Chr(13,10) & Chr(13,10)
+txtImmediate.Text = "import #Include Once " + Chr(34) + ".." + WindowsSlash + "Controls" + WindowsSlash + "Framework"+ WindowsSlash + "mff" + WindowsSlash + "SysUtils.bas" + Chr(34) & Chr(13,10) & Chr(13,10)
 txtImmediate.SetSel txtImmediate.GetTextLength, txtImmediate.GetTextLength
 
 Sub txtChangeLog_KeyDown(ByRef Designer As My.Sys.Object, ByRef Sender As Control, Key As Integer, Shift As Integer)

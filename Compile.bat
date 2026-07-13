@@ -1,5 +1,5 @@
 @echo off
-REM Release build: MyFbFramework (astoria.dll) then astoria.exe.
+REM Release build: Framework (astoria.dll) then astoria.exe.
 REM Flags: -gen gcc -mt -Wc -O2. Skips mff when sources are older than astoria.dll.
 REM Env: VERBOSE=1 (fbc -v), FORCE_MFF=1, SKIP_MFF=1, NOPAUSE=1. Close running IDE before linking.
 
@@ -16,7 +16,7 @@ if "%BUILD_MFF%"=="1" (
 
 echo [%time%] Building astoria.exe...
 cd /d "%SRC_DIR%"
-"%FBC64%" "AstoriaIDE.bas" -s gui -gen gcc -mt -Wc -O2 -x "../astoria.exe" "AstoriaIDE.rc" -i "..\Controls\MyFbFramework" %FBC_VERBOSE%
+"%FBC64%" "AstoriaIDE.bas" -s gui -gen gcc -mt -Wc -O2 -x "../astoria.exe" "AstoriaIDE.rc" -i "..\Controls\Framework" %FBC_VERBOSE%
 if errorlevel 1 exit /b 1
 
 echo [%time%] Release build complete.

@@ -4,7 +4,7 @@ This document describes how background work and UI updates are coordinated in th
 
 ## ThreadsEnter / ThreadsLeave — no-ops; they guarantee NOTHING
 
-Defined in `Controls/MyFbFramework/mff/Component.bas` (see the block comment there) and declared in `Component.bi`.
+Defined in `Controls/Framework/mff/Component.bas` (see the block comment there) and declared in `Component.bi`.
 
 | Platform | `ThreadsEnter` | `ThreadsLeave` |
 |----------|--------------|----------------|

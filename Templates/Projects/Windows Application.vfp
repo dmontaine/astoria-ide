@@ -30,4 +30,4 @@ OptimizationSmallCode=false
 CompilationArguments64Windows=""
 CommandLineArguments=""
 CreateDebugInfo=false
-ControlLibrary="Controls/MyFbFramework"
+ControlLibrary="Controls/Framework"

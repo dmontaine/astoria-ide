@@ -16,7 +16,7 @@ if "%BUILD_MFF%"=="1" (
 
 echo [%time%] Building astoria.exe ^(debug^)...
 cd /d "%SRC_DIR%"
-"%FBC64%" "AstoriaIDE.bas" -s gui -gen gcc -mt -g -exx -x "../astoria.exe" "AstoriaIDE.rc" -i "..\Controls\MyFbFramework" %FBC_VERBOSE%
+"%FBC64%" "AstoriaIDE.bas" -s gui -gen gcc -mt -g -exx -x "../astoria.exe" "AstoriaIDE.rc" -i "..\Controls\Framework" %FBC_VERBOSE%
 if errorlevel 1 exit /b 1
 
 echo [%time%] Debug build complete.

@@ -551,7 +551,7 @@ Function AddTab(ByRef FileName As WString, bNew As Boolean, TreeN As TreeNode Pt
 			End If
 			pstBar->Panels[1]->Caption = pstBar->Panels[1]->Caption & " / " & Format((Timer - timeElapse), "0.000s")
 			If CBool(FileName <> "") AndAlso CBool(tb->Project <> 0) AndAlso (EndsWith(FileName, "Form.frm") OrElse EndsWith(FileName, "UserControl.bas")) Then
-				If Not tb->Project->Components.Contains("Controls/MyFbFramework") Then tb->Project->Components.Add "Controls/MyFbFramework"
+				If Not tb->Project->Components.Contains("Controls/Framework") Then tb->Project->Components.Add "Controls/Framework"
 			End If
 			pApp->MainForm = @frmMain
 			If FileName <> "" Then

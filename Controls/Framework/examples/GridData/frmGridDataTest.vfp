@@ -39,4 +39,4 @@ CreateDebugInfo=false
 AndroidSDKLocation=""
 AndroidNDKLocation=""
 JDKLocation=""
-ControlLibrary="Controls/MyFbFramework"
+ControlLibrary="Controls/Framework"

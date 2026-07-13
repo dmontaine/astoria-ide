@@ -278,7 +278,7 @@ Function FileExistsU(path As UString) As Boolean
 End Function
 
 ' A folder browse dialog always returns an absolute OS path. When that path sits inside the
-' app's own install folder (e.g. picking the bundled Projects or MyFbFramework folder), storing
+' app's own install folder (e.g. picking the bundled Projects or Framework folder), storing
 ' it verbatim hard-codes the current install location into Settings and breaks the moment the
 ' app folder is moved or renamed. Return a ".\"-relative form in that case; paths genuinely
 ' outside ExePath (a Projects folder deliberately kept on another drive, say) are left absolute.

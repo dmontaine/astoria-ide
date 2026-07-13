@@ -6,8 +6,8 @@ How the IDE compiles user projects and how the IDE itself is built.
 
 Root `Compile.bat` is a **two-step** Win64-only build using the bundled compiler at `Compiler\fbc64.exe`:
 
-1. **MyFbFramework** — `cd Controls\MyFbFramework\mff`, build `astoria.dll` (output to repo root) with `fbc64`.
-2. **Visual FB Editor** — `cd src`, build `VisualFBEditor64.exe` with `fbc64`, linking `VisualFBEditor.rc` and `-i ..\Controls\MyFbFramework`.
+1. **Framework** — `cd Controls\Framework\mff`, build `astoria.dll` (output to repo root) with `fbc64`.
+2. **Visual FB Editor** — `cd src`, build `VisualFBEditor64.exe` with `fbc64`, linking `VisualFBEditor.rc` and `-i ..\Controls\Framework`.
 
 Linux, GTK, and 32-bit IDE builds are not supported in this fork.
 
@@ -39,7 +39,7 @@ MyFbFramework (`mff.bi`) also defaults `MEMCHECK` to `0` when undefined; the IDE
 Manual equivalent from `src/`:
 
 ```bat
-fbc64 VisualFBEditor.bas -s gui -gen gcc -Wc -O2 -x ../VisualFBEditor64.exe VisualFBEditor.rc -i "..\Controls\MyFbFramework" -v
+fbc64 VisualFBEditor.bas -s gui -gen gcc -Wc -O2 -x ../VisualFBEditor64.exe VisualFBEditor.rc -i "..\Controls\Framework" -v
 ```
 
 ## Bundled compiler

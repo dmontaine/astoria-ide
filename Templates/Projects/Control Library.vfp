@@ -26,4 +26,4 @@ CompilationArguments64Windows=""
 CompilationArguments64Linux=""
 CommandLineArguments=""
 CreateDebugInfo=false
-ControlLibrary="Controls/MyFbFramework"
+ControlLibrary="Controls/Framework"

@@ -337,6 +337,25 @@ Namespace My.Sys.Drawing
 	End Property
 	
 	Private Function Canvas.GetDevice As Any Ptr
+		'' KNOWN ISSUE (2026-07-12, documented + deferred — MFF hot-path review H-2):
+		'' HandleSetted conflates two meanings that collide:
+		''   (1) "a DC was set EXTERNALLY by the caller (a control owns it) -> never release it"
+		''       -- how the IDE uses Canvas (EditControl/Designer set HandleSetted True/False
+		''       around their own bufDC); and
+		''   (2) "we currently hold a DC we acquired OURSELVES via GetDevice."
+		'' GetDevice sets HandleSetted = True (meaning 2) at the end, but ReleaseDevice tests
+		'' HandleSetted to honor meaning (1) and bails (`If HandleSetted Then Exit Sub`). Net: a
+		'' Canvas used STANDALONE (no external SetHandle; HandleSetted starts False) acquires a DC
+		'' here on first draw, latches HandleSetted True, and never releases it -- not per-call
+		'' (subsequent draws reuse the held Handle) and not even in the destructor (same guard).
+		'' One leaked DC per standalone-drawing Canvas lifetime.
+		'' NOT FIXED, deliberately: the IDE never hits this path (its controls always set
+		'' HandleSetted externally + own the DC), so a fix has ZERO IDE benefit while risking the
+		'' 83 HandleSetted checks the working control-owned paint path depends on -- and the only
+		'' affected pattern (standalone Canvas) isn't exercised anywhere in the IDE/examples, so a
+		'' fix can't be live-verified here. A correct fix needs a SECOND flag (e.g. FOwnsDevice,
+		'' set only when GetDevice acquires) so ReleaseDevice/the destructor release only what
+		'' Canvas itself owns -- do that with a standalone-Canvas test harness, not blind.
 		Dim As Any Ptr Handle_
 		If Not HandleSetted Then
 			If ParentControl Then
@@ -377,6 +396,8 @@ Namespace My.Sys.Drawing
 	End Function
 	
 	Private Sub Canvas.ReleaseDevice(Handle As Any Ptr = 0)
+		'' The `If HandleSetted Then Exit Sub` below is the honor-meaning-(1) guard that also
+		'' wrongly suppresses release of a self-acquired DC -- see the H-2 note in GetDevice.
 		Dim As Any Ptr Handle_ = Handle
 		If Handle_ = 0 Then Handle_ = This.Handle
 			If HandleSetted Then Exit Sub

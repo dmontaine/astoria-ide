@@ -7,7 +7,6 @@
 
 #include once "EditControl.bi"
 	#include once "win/mmsystem.bi"
-	#include once "mff/D2D1/D2D1.bi"
 	#include once "crt/limits.bi"
 
 Dim Shared As WStringList KeywordLists 'keywords0, keywords1, keywords2, keywords3
@@ -2807,12 +2806,6 @@ Namespace My.Sys.Forms
 			OrElse (ActiveCodePane = 0 AndAlso ((bDividedX AndAlso (HCaretPos > iDividedX - dwCharX)) OrElse (bDividedY AndAlso (VCaretPos > iDividedY - dwCharY)))) Then
 			HCaretPos = -1
 		End If
-			If pRenderTarget <> 0 Then
-				If Scroll Then
-					CaretOn = True
-					PaintControl
-				End If
-			End If
 			'			If OldCaretVisible <> CaretVisible Then
 			'				If CaretVisible Then
 			'					ShowCaret FHandle
@@ -3111,18 +3104,7 @@ Namespace My.Sys.Forms
 	End Sub
 	
 	Function EditControl.TextWidth(ByRef sText As WString) As Integer
-			If pRenderTarget <> 0 Then
-				Dim pLayout As IDWriteTextLayout Ptr = 0
-				Dim Metrics As DWRITE_TEXT_METRICS
-				CreateTextLayout(pDWriteFactory, @sText, Len(sText), pFormat, FLT_MAX, FLT_MAX, @pLayout)
-				If pLayout <> 0 Then
-					pLayout->lpVtbl->GetMetrics(pLayout, @Metrics)
-					pLayout->lpVtbl->Release(pLayout): pLayout = 0
-					Return UnScaleX(Metrics.widthIncludingTrailingWhitespace)
-				End If
-			Else
-				Return Canvas.TextWidth(sText)
-			End If
+		Return Canvas.TextWidth(sText)
 	End Function
 	
 	Sub GetColor(iColor As Long, ByRef iRED As Double, ByRef iGREEN As Double, ByRef iBLUE As Double)
@@ -3170,163 +3152,42 @@ Namespace My.Sys.Forms
 					SetBkColor(bufDC, Colors.Background)
 				End If
 			End If
-			If pRenderTarget <> 0 Then
-				pRenderTarget->lpVtbl->CreateSolidColorBrush(pRenderTarget, @Type<D2D1_COLOR_F>(Colors.ForegroundRed, Colors.ForegroundGreen, Colors.ForegroundBlue, 1.0), 0, @pBrushForeground)
-				CreateTextLayout(pDWriteFactory, FLineLeft, Len(*FLineLeft), pFormat, FLT_MAX, FLT_MAX, @pLayout)
-				If pLayout <> 0 Then
-					pLayout->lpVtbl->GetMetrics(pLayout, @Metrics)
-					sz.cx = Metrics.widthIncludingTrailingWhitespace
-					sz.cy = Metrics.height
-					pLayout->lpVtbl->Release(pLayout): pLayout = 0
-				End If
-				Var x = ScaleX(LeftMargin - IIf(bDividedX AndAlso CodePane = 0, HScrollPosLeft, HScrollPosRight) * dwCharX + IIf(bDividedX AndAlso CodePane = 1, iDividedX + 7, 0)) + IIf(iStart = 0, 0, sz.cx)
-				Var y = ScaleY((iLine - IIf(CodePane = 0, VScrollPosTop, VScrollPosBottom)) * dwCharY + IIf(bDividedY AndAlso CodePane = 1, iDividedY + 7, 0)) + 1
-				SetRect(@rc, IIf(bDividedX And CodePane = 1, ScaleX(iDividedX + 7), 0), y, _
-				ScaleX(IIf(bDividedX AndAlso CodePane = 0, iDividedX, dwClientX)), y + ScaleY(dwCharY))
-				CreateTextLayout(pDWriteFactory, FLineRight, Len(*FLineRight), pFormat, FLT_MAX, FLT_MAX, @pLayout)
-				If pLayout <> 0 Then
-					pRenderTarget->lpVtbl->PushAxisAlignedClip(pRenderTarget, @Type<D2D1_RECT_F>(rc.Left, rc.Top, rc.Right, rc.Bottom), D2D1_ANTIALIAS_MODE_PER_PRIMITIVE)
-					pLayout->lpVtbl->GetMetrics(pLayout, @Metrics)
-					sz.cx = Metrics.widthIncludingTrailingWhitespace
-					sz.cy = Metrics.height + 1
-					If HighlightCurrentWord AndAlso @Colors <> @Selection AndAlso CurWord = Trim(*FLineRight) AndAlso CurWord <> "" Then
-						pRenderTarget->lpVtbl->CreateSolidColorBrush(pRenderTarget, @Type<D2D1_COLOR_F>(CurrentWord.BackgroundRed, CurrentWord.BackgroundGreen, CurrentWord.BackgroundBlue, 1.0), 0, @pBrushBackground)
-						pRenderTarget->lpVtbl->FillRectangle(pRenderTarget, @Type<D2D1_RECT_F>(x - 1, y - 1, x + sz.cx + 1, y + sz.cy - 1 - (sz.cy - ScaleY(dwCharY))), pBrushBackground)
-					ElseIf Colors.Background <> -1 AndAlso Colors.Background <> NormalText.Background Then
-						pRenderTarget->lpVtbl->CreateSolidColorBrush(pRenderTarget, @Type<D2D1_COLOR_F>(Colors.BackgroundRed, Colors.BackgroundGreen, Colors.BackgroundBlue, 1.0), 0, @pBrushBackground)
-						pRenderTarget->lpVtbl->FillRectangle(pRenderTarget, @Type<D2D1_RECT_F>(x - 1, y - 1, x + sz.cx + 1, y + sz.cy - 1 - (sz.cy - ScaleY(dwCharY))), pBrushBackground)
-					End If
-					pRenderTarget->lpVtbl->DrawTextLayout(pRenderTarget, Type<D2D1_POINT_2F>(x, y - (sz.cy - ScaleY(dwCharY))), pLayout, Cast(ID2D1Brush Ptr, pBrushForeground), D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT)
-					pRenderTarget->lpVtbl->PopAxisAlignedClip(pRenderTarget)
-					pLayout->lpVtbl->Release(pLayout): pLayout = 0
-					CameOut = x + sz.cx + 1 > ScaleX(dwClientX)
-				End If
-				If pBrushForeground Then pBrushForeground->lpVtbl->Release(pBrushForeground): pBrushForeground = 0
-				If pBrushBackground Then pBrushBackground->lpVtbl->Release(pBrushBackground): pBrushBackground = 0
-			Else
-				GetTextExtentPoint32(Canvas.Handle, FLineLeft, Len(*FLineLeft), @sz)
-				Var x = ScaleX(LeftMargin - IIf(bDividedX AndAlso CodePane = 0, HScrollPosLeft, HScrollPosRight) * dwCharX + IIf(bDividedX AndAlso CodePane = 1, iDividedX + 7, 0)) + IIf(iStart = 0, 0, sz.cx)
-				Var y = ScaleY((iLine - IIf(CodePane = 0, VScrollPosTop, VScrollPosBottom)) * dwCharY + IIf(bDividedY AndAlso CodePane = 1, iDividedY + 7, 0))
-				SetRect(@rc, IIf(bDividedX And CodePane = 1, ScaleX(iDividedX + 7), 0), y, _
-				ScaleX(IIf(bDividedX AndAlso CodePane = 0, iDividedX, dwClientX)), y + ScaleY(dwCharY))
-				GetTextExtentPoint32(bufDC, FLineRight, Len(*FLineRight), @sz)
-				SetTextColor(bufDC, Colors.Foreground)
-				If Bold Or Italic Or Underline Then
-					Canvas.Font.Bold = Bold
-					Canvas.Font.Italic = Italic
-					Canvas.Font.Underline = Underline
-					SelectObject(bufDC, This.Canvas.Font.Handle)
-				End If
-				'TextOut(bufDC, ScaleX(LeftMargin - IIf(bDividedX AndAlso CodePane = 0, HScrollPosLeft, HScrollPosRight) * dwCharX + IIf(bDividedX AndAlso CodePane = 1, iDividedX + 7, 0)) + IIf(iStart = 0, 0, Sz.cx), ScaleY((iLine - IIf(CodePane = 0, VScrollPosTop, VScrollPosBottom)) * dwCharY + IIf(bDividedY AndAlso CodePane = 1, iDividedY + 7, 0)), FLineRight, Len(*FLineRight))
-				'Dim As POLYTEXT ppt
-				'ppt.lpstr = FLineRight
-				'ppt.n = Len(*FLineRight)
-				'ppt.uiFlags = ETO_CLIPPED Or ETO_OPAQUE
-				'DrawText(bufDC, FLineRight, Len(*FLineRight), @rc, DT_SINGLELINE Or DT_NOPREFIX)
-				ExtTextOut bufDC, x, y, ETO_CLIPPED, @rc, FLineRight, Len(*FLineRight), 0
-				'PolyTextOut bufDC, @ppt, 1
-				If Colors.Background = -1 OrElse Colors.Background = NormalText.Background Then SetBkMode(bufDC, OPAQUE)
-				If Bold Or Italic Or Underline Then
-					Canvas.Font.Bold = False
-					Canvas.Font.Italic = False
-					Canvas.Font.Underline = False
-					SelectObject(bufDC, This.Canvas.Font.Handle)
-				End If
-				CameOut = x + sz.cx + 1 > ScaleX(dwClientX)
+			GetTextExtentPoint32(Canvas.Handle, FLineLeft, Len(*FLineLeft), @sz)
+			Var x = ScaleX(LeftMargin - IIf(bDividedX AndAlso CodePane = 0, HScrollPosLeft, HScrollPosRight) * dwCharX + IIf(bDividedX AndAlso CodePane = 1, iDividedX + 7, 0)) + IIf(iStart = 0, 0, sz.cx)
+			Var y = ScaleY((iLine - IIf(CodePane = 0, VScrollPosTop, VScrollPosBottom)) * dwCharY + IIf(bDividedY AndAlso CodePane = 1, iDividedY + 7, 0))
+			SetRect(@rc, IIf(bDividedX And CodePane = 1, ScaleX(iDividedX + 7), 0), y, _
+			ScaleX(IIf(bDividedX AndAlso CodePane = 0, iDividedX, dwClientX)), y + ScaleY(dwCharY))
+			GetTextExtentPoint32(bufDC, FLineRight, Len(*FLineRight), @sz)
+			SetTextColor(bufDC, Colors.Foreground)
+			If Bold Or Italic Or Underline Then
+				Canvas.Font.Bold = Bold
+				Canvas.Font.Italic = Italic
+				Canvas.Font.Underline = Underline
+				SelectObject(bufDC, This.Canvas.Font.Handle)
 			End If
+			'TextOut(bufDC, ScaleX(LeftMargin - IIf(bDividedX AndAlso CodePane = 0, HScrollPosLeft, HScrollPosRight) * dwCharX + IIf(bDividedX AndAlso CodePane = 1, iDividedX + 7, 0)) + IIf(iStart = 0, 0, Sz.cx), ScaleY((iLine - IIf(CodePane = 0, VScrollPosTop, VScrollPosBottom)) * dwCharY + IIf(bDividedY AndAlso CodePane = 1, iDividedY + 7, 0)), FLineRight, Len(*FLineRight))
+			'Dim As POLYTEXT ppt
+			'ppt.lpstr = FLineRight
+			'ppt.n = Len(*FLineRight)
+			'ppt.uiFlags = ETO_CLIPPED Or ETO_OPAQUE
+			'DrawText(bufDC, FLineRight, Len(*FLineRight), @rc, DT_SINGLELINE Or DT_NOPREFIX)
+			ExtTextOut bufDC, x, y, ETO_CLIPPED, @rc, FLineRight, Len(*FLineRight), 0
+			'PolyTextOut bufDC, @ppt, 1
+			If Colors.Background = -1 OrElse Colors.Background = NormalText.Background Then SetBkMode(bufDC, OPAQUE)
+			If Bold Or Italic Or Underline Then
+				Canvas.Font.Bold = False
+				Canvas.Font.Italic = False
+				Canvas.Font.Underline = False
+				SelectObject(bufDC, This.Canvas.Font.Handle)
+			End If
+			CameOut = x + sz.cx + 1 > ScaleX(dwClientX)
 		If CBool(CurExecutedLine <> iLine) AndAlso CBool(OldExecutedLine <> iLine) AndAlso CBool(Not FECLine->EndsCompleted) Then
 			FECLine->Ends.Add iEnd, @Colors
 		End If
 		'WDeallocate s
 	End Sub
-	
-		Private Sub EditControl.ReleaseDirect2D
-			If pRenderTarget <> 0 Then
-				pRenderTarget->lpVtbl->SetTarget(pRenderTarget, 0)
-			End If
-			If pTargetBitmap Then pTargetBitmap->lpVtbl->Release(pTargetBitmap): pTargetBitmap = 0
-			If pFormat Then pFormat->lpVtbl->Release(pFormat): pFormat = 0
-			If pSurface Then pSurface->lpVtbl->Release(pSurface): pSurface = 0
-			If pRenderTarget <> 0 Then
-				pRenderTarget->lpVtbl->Release(pRenderTarget): pRenderTarget = 0
-			End If
-			If pD3D11DeviceContext Then
-				pD3D11DeviceContext->lpVtbl->ClearState(pD3D11DeviceContext)
-				pD3D11DeviceContext->lpVtbl->Flush(pD3D11DeviceContext)
-			End If
-			If pSwapChain Then
-				pSwapChain->lpVtbl->SetFullscreenState(pSwapChain, False, NULL)
-				pSwapChain->lpVtbl->Release(pSwapChain): pSwapChain = 0
-			End If
-			If pTexture Then pTexture->lpVtbl->Release(pTexture): pTexture = 0
-		End Sub
-		
+
 		Sub EditControl.SetClientSize()
-			If g_Direct2DEnabled AndAlso UseDirect2D Then
-				ReleaseDirect2D
-				If FHandle <> 0 Then
-					Var hr = pD2D1Device->lpVtbl->CreateDeviceContext(pD2D1Device, D2D1_DEVICE_CONTEXT_OPTIONS_NONE, @pRenderTarget)
-					If hr = 0 Then
-						pRenderTarget->lpVtbl->SetUnitMode(pRenderTarget, D2D1_UNIT_MODE_PIXELS)
-						
-						Dim As DXGI_SWAP_CHAIN_DESC1 swapChainDesc
-						swapChainDesc.Width = 0
-						swapChainDesc.Height = 0
-						swapChainDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM
-						swapChainDesc.Stereo = False
-						swapChainDesc.SampleDesc.Count = 1
-						swapChainDesc.SampleDesc.Quality = 0
-						swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT
-						swapChainDesc.BufferCount = 2
-						swapChainDesc.Scaling = DXGI_SCALING_NONE
-						swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL
-						swapChainDesc.Flags = 0
-						
-						pD3D11DeviceContext->lpVtbl->ClearState(pD3D11DeviceContext)
-						pD3D11DeviceContext->lpVtbl->Flush(pD3D11DeviceContext)
-						
-						hr = pDXGIFactory2->lpVtbl->CreateSwapChainForHwnd(pDXGIFactory2, Cast(IUnknown Ptr, pD3D11Device), FHandle, @swapChainDesc, 0, 0, @pSwapChain)
-						If hr = 0 Then
-							hr = pSwapChain->lpVtbl->GetBuffer(pSwapChain, 0, @IID_ID3D11Texture2D, @pTexture)
-							If hr = 0 Then hr = pSwapChain->lpVtbl->GetBuffer(pSwapChain, 0, @IID_IDXGISurface, @pSurface)
-						End If
-						
-						If hr = 0 AndAlso pSurface <> 0 Then
-							Dim bmpProps As D2D1_BITMAP_PROPERTIES1
-							With bmpProps
-								.bitmapOptions = D2D1_BITMAP_OPTIONS_TARGET Or D2D1_BITMAP_OPTIONS_CANNOT_DRAW
-								.pixelFormat.format = DXGI_FORMAT_B8G8R8A8_UNORM
-								.pixelFormat.alphaMode = D2D1_ALPHA_MODE_IGNORE
-								.dpiX = 96
-								.dpiY = 96
-								.colorContext = 0
-							End With
-							
-							hr = pRenderTarget->lpVtbl->CreateBitmapFromDxgiSurface(pRenderTarget, pSurface, @bmpProps, @pTargetBitmap)
-							If hr = 0 Then
-								pRenderTarget->lpVtbl->SetTarget(pRenderTarget, pTargetBitmap)
-							End If
-						End If
-						
-						If hr = 0 AndAlso pTargetBitmap <> 0 Then
-							pRenderTarget->lpVtbl->SetAntialiasMode(pRenderTarget, D2D1_ANTIALIAS_MODE_ALIASED)
-							If pFormat Then pFormat->lpVtbl->Release(pFormat): pFormat = 0
-							Dim fontSize As Single = Max(1, EditorFontSize) * ydpi / 72.0
-							If CurrentFontName = 0 OrElse *CurrentFontName = "" Then
-								If EditorFontName <> 0 Then
-									WLet(CurrentFontName, *EditorFontName)
-								Else
-									WLet(CurrentFontName, "Courier New")
-								End If
-							End If
-							hr = CreateTextFormat(pDWriteFactory, CurrentFontName, 0, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fontSize, Cast(Const WString Ptr, @"en-us"), @pFormat)
-							If hr <> 0 OrElse pFormat = 0 Then ReleaseDirect2D
-						Else
-							ReleaseDirect2D
-						End If
-					End If
-				End If
-			End If
 		End Sub
 	
 	Sub EditControl.FontSettings()
@@ -4002,46 +3863,8 @@ Namespace My.Sys.Forms
 		Args.Sorted = True
 	End Constructor
 	
-		Sub FillPolygon(points() As D2D1_POINT_2F, ByVal pRT As ID2D1DeviceContext Ptr, ByVal brush As ID2D1Brush Ptr)
-			Dim pGeometry As ID2D1PathGeometry Ptr
-			If pD2D1Factory1->lpVtbl->CreatePathGeometry1(pD2D1Factory1, @pGeometry) = S_OK Then
-				Dim pSink As ID2D1GeometrySink Ptr
-				If pGeometry->lpVtbl->Open(pGeometry, @pSink) = S_OK Then
-					Dim pD2DPoints As D2D1_POINT_2F Ptr
-					Dim BeginD2DPoint As D2D1_POINT_2F
-					BeginD2DPoint.x = points(0).x
-					BeginD2DPoint.y = points(0).y
-					pD2DPoints = _CAllocate((UBound(points) + 1) * SizeOf(D2D1_POINT_2F))
-					For i As Integer = 0 To UBound(points)
-						pD2DPoints[i].x = points(i).x
-						pD2DPoints[i].y = points(i).y
-					Next
-					pSink->lpVtbl->BeginFigure(pSink, BeginD2DPoint, D2D1_FIGURE_BEGIN_FILLED)
-					If UBound(points) >= 1 Then
-						pSink->lpVtbl->AddLines(pSink, pD2DPoints, UBound(points) + 1)
-					End If
-					pSink->lpVtbl->EndFigure(pSink, D2D1_FIGURE_END_CLOSED)
-					pSink->lpVtbl->Close(pSink)
-					pSink->lpVtbl->Release(pSink)
-					_Deallocate((pD2DPoints))
-				End If
-				pRT->lpVtbl->FillGeometry(pRT, pGeometry, brush, NULL)
-				pGeometry->lpVtbl->Release(pGeometry)
-			End If
-		End Sub
-	
 	Sub EditControl.PaintControlPriv(Full As Boolean = False, OnlyCursor As Boolean = False)
 		'	On Error Goto ErrHandler
-			If OnlyCursor AndAlso pRenderTarget <> 0 Then
-				pRenderTarget->lpVtbl->BeginDraw(pRenderTarget)
-				pRenderTarget->lpVtbl->EndDraw(pRenderTarget, 0, 0)
-				pp.DirtyRectsCount = 0
-				pp.pDirtyRects = 0
-				pp.pScrollRect = 0
-				pp.pScrollOffset = 0
-				pSwapChain->lpVtbl->Present1(pSwapChain, 1, 0, @pp)
-				Exit Sub
-			End If
 		Dim As Boolean bFull = Full
 		If ShowHolidayFrame AndAlso WithFrame Then bFull = True
 		bFull = True
@@ -4053,63 +3876,27 @@ Namespace My.Sys.Forms
 				FontSettings
 				bFull = True
 			End If
-			If pRenderTarget <> 0 AndAlso pFormat = 0 Then
-				ReleaseDirect2D
-			End If
-			If pRenderTarget <> 0 AndAlso Not UseDirect2D Then
-				ReleaseDirect2D
-				KillTimer FHandle, 2
-				Var b = Focused
-				DestroyWindow(sbScrollBarvTop)
-				DestroyWindow(sbScrollBarvBottom)
-				DestroyWindow(sbScrollBarhLeft)
-				DestroyWindow(sbScrollBarhRight)
-				hwndTT = 0
-				hwndTTDropDown = 0
-				hwndTTMouseHover = 0
-				Var pmnuCode = ContextMenu
-				ContextMenu = 0
-				RecreateWnd
-				ContextMenu = pmnuCode
-				Width = Width - 1
-				Width = Width + 1
-				SetScrollsInfo True
-			ElseIf CBool(pRenderTarget = 0) AndAlso g_Direct2DEnabled AndAlso UseDirect2D AndAlso bPainted Then
-				SetClientSize
-				If Focused Then
-					KillTimer FHandle, 2
-					SetTimer FHandle, 2, BlinkTime, @EC_TimerProcBlink
-				End If
-			End If
-			If pRenderTarget = 0 Then
-				hd = GetDC(FHandle)
-				If bufDC = 0 Then
-					bufDC = CreateCompatibleDC(hd)
-					bufBMP = CreateCompatibleBitmap(hd, ScaleX(dwClientX), ScaleY(dwClientY))
-					This.Canvas.Handle = bufDC
-					This.Canvas.HandleSetted = True
-					SelectObject(bufDC, This.Font.Handle)
-					SelectObject(bufDC, bufBMP)
-				ElseIf OlddwClientX <> dwClientX OrElse OlddwClientY <> dwClientY Then
-					DeleteDC bufDC
-					DeleteObject bufBMP
-					bufDC = CreateCompatibleDC(hd)
-					bufBMP = CreateCompatibleBitmap(hd, ScaleX(dwClientX), ScaleY(dwClientY))
-					This.Canvas.Handle = bufDC
-					This.Canvas.HandleSetted = True
-					SelectObject(bufDC, This.Font.Handle)
-					SelectObject(bufDC, bufBMP)
-				End If
+			hd = GetDC(FHandle)
+			If bufDC = 0 Then
+				bufDC = CreateCompatibleDC(hd)
+				bufBMP = CreateCompatibleBitmap(hd, ScaleX(dwClientX), ScaleY(dwClientY))
 				This.Canvas.Handle = bufDC
 				This.Canvas.HandleSetted = True
-			Else
-				SelectObject(Canvas.Handle, This.Font.Handle)
+				SelectObject(bufDC, This.Font.Handle)
+				SelectObject(bufDC, bufBMP)
+			ElseIf OlddwClientX <> dwClientX OrElse OlddwClientY <> dwClientY Then
+				DeleteDC bufDC
+				DeleteObject bufBMP
+				bufDC = CreateCompatibleDC(hd)
+				bufBMP = CreateCompatibleBitmap(hd, ScaleX(dwClientX), ScaleY(dwClientY))
+				This.Canvas.Handle = bufDC
+				This.Canvas.HandleSetted = True
+				SelectObject(bufDC, This.Font.Handle)
+				SelectObject(bufDC, bufBMP)
 			End If
+			This.Canvas.Handle = bufDC
+			This.Canvas.HandleSetted = True
 			HideCaret(FHandle)
-			If pRenderTarget <> 0 Then
-				pRenderTarget->lpVtbl->BeginDraw(pRenderTarget)
-				pRenderTarget->lpVtbl->Clear(pRenderTarget, @Type<D2D1_COLOR_F>(NormalText.BackgroundRed, NormalText.BackgroundGreen, NormalText.BackgroundBlue, 1.0))
-			End If
 		'iMin = Min(FSelEnd, FSelStart)
 		'iMax = Max(FSelEnd, FSelStart)
 		'iLineIndex = LineFromCharIndex(iMax)
@@ -4213,13 +4000,8 @@ Namespace My.Sys.Forms
 			Matn = ""
 				'			This.Canvas.Font.Name = *EditorFontName
 				'			This.Canvas.Font.Size = EditorFontSize
-				If pRenderTarget = 0 Then
-					This.Canvas.Brush.Color = NormalText.Background
-					This.Canvas.Pen.Color = FoldLines.Foreground
-				Else
-					pRenderTarget->lpVtbl->CreateSolidColorBrush(pRenderTarget, @Type<D2D1_COLOR_F>(NormalText.BackgroundRed, NormalText.BackgroundGreen, NormalText.BackgroundBlue, 1.0), 0, @pBrushBackground)
-					pRenderTarget->lpVtbl->CreateSolidColorBrush(pRenderTarget, @Type<D2D1_COLOR_F>(FoldLines.ForegroundRed, FoldLines.ForegroundGreen, FoldLines.ForegroundBlue, 1.0), 0, @pBrushForeground)
-				End If
+				This.Canvas.Brush.Color = NormalText.Background
+				This.Canvas.Pen.Color = FoldLines.Foreground
 				If bDividedY Then
 					If zz = 0 Then
 						SetRect(@rc, ScaleX(LeftMargin), 0, ScaleX(dwClientX), ScaleY(iDividedY))
@@ -4240,13 +4022,7 @@ Namespace My.Sys.Forms
 				'			SelectObject(bufDC, This.Canvas.Pen.Handle)
 				'			SetROP2 bufDC, This.Canvas.Pen.Mode
 				If bFull OrElse OlddwClientX <> dwClientX OrElse OlddwClientY <> dwClientY OrElse OldPaintedVScrollPos(zz) <> VScrollPos OrElse OldPaintedHScrollPos(zz) <> HScrollPos OrElse iOldDivideY <> iDivideY OrElse iOldDividedY <> iDividedY OrElse iOldDivideX <> iDivideX OrElse iOldDividedX <> iDividedX OrElse CInt(bOldDividedX <> bDividedX) OrElse CInt(bOldDividedY <> bDividedY) Then
-					If pRenderTarget = 0 Then
-						FillRect bufDC, @rc, This.Canvas.Brush.Handle
-					Else
-						pRenderTarget->lpVtbl->FillRectangle(pRenderTarget, @Type<D2D1_RECT_F>(rc.Left, rc.Top, rc.Right, rc.Bottom), pBrushBackground)
-						If pBrushForeground Then pBrushForeground->lpVtbl->Release(pBrushForeground): pBrushForeground = 0
-						If pBrushBackground Then pBrushBackground->lpVtbl->Release(pBrushBackground): pBrushBackground = 0
-					End If
+					FillRect bufDC, @rc, This.Canvas.Brush.Handle
 				End If
 			i = -1
 			Var OldI = i
@@ -4256,25 +4032,7 @@ Namespace My.Sys.Forms
 			'ChangeCase = False
 			OldMatnLCase = ""
 			If ShowHolidayFrame AndAlso WithFrame Then
-					If pRenderTarget <> 0 Then
-						Dim bmp As ID2D1Bitmap Ptr
-						If Canvas.CreateD2DBitmapFromHBITMAP(pRenderTarget, EditControlFrame.Handle, bmp) = 0 Then
-							Dim As BITMAP Bitmap01
-							GetObject(EditControlFrame.Handle, SizeOf(Bitmap01), @Bitmap01)
-							
-							Dim destRect As D2D1_RECT_F
-							destRect.left   = ScaleX(dwClientX - 10) - EditControlFrame.Width
-							destRect.top    = 0
-							destRect.right  = ScaleX(dwClientX - 10)
-							destRect.bottom = EditControlFrame.Height
-							
-							pRenderTarget->lpVtbl->DrawBitmap(pRenderTarget, bmp, @destRect, 1, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, 0)
-							
-							bmp->lpVtbl->Release(bmp)
-						End If
-					Else
-						Canvas.DrawAlpha ScaleX(dwClientX - 10) - EditControlFrame.Width, 0, EditControlFrame.Width, EditControlFrame.Height, EditControlFrame
-					End If
+					Canvas.DrawAlpha ScaleX(dwClientX - 10) - EditControlFrame.Width, 0, EditControlFrame.Width, EditControlFrame.Height, EditControlFrame
 			End If
 			For z As Integer = 0 To Content.Lines.Count - 1
 				FECLine = Content.Lines.Items[z]
@@ -4314,17 +4072,9 @@ Namespace My.Sys.Forms
 							End If
 						End If
 						rc = Type(ScaleX(Max(-1, LeftMargin + -HScrollPos * dwCharX) + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + CodePaneY), ScaleX(IIf(bDividedX AndAlso zz = 0, iDividedX, This.Width)), ScaleY((i - VScrollPos) * dwCharY + dwCharY + 1 + CodePaneY))
-						If pRenderTarget = 0 Then
-							This.Canvas.Brush.Color = NormalText.Background
-							This.Canvas.Pen.Color = FoldLines.Foreground
-							FillRect bufDC, @rc, This.Canvas.Brush.Handle
-						Else
-							pRenderTarget->lpVtbl->CreateSolidColorBrush(pRenderTarget, @Type<D2D1_COLOR_F>(NormalText.BackgroundRed, NormalText.BackgroundGreen, NormalText.BackgroundBlue, 1.0), 0, @pBrushBackground)
-							pRenderTarget->lpVtbl->CreateSolidColorBrush(pRenderTarget, @Type<D2D1_COLOR_F>(FoldLines.ForegroundRed, FoldLines.ForegroundGreen, FoldLines.ForegroundBlue, 1.0), 0, @pBrushForeground)
-							pRenderTarget->lpVtbl->FillRectangle(pRenderTarget, @Type<D2D1_RECT_F>(rc.Left, rc.Top, rc.Right, rc.Bottom), pBrushBackground)
-							If pBrushForeground Then pBrushForeground->lpVtbl->Release(pBrushForeground): pBrushForeground = 0
-							If pBrushBackground Then pBrushBackground->lpVtbl->Release(pBrushBackground): pBrushBackground = 0
-						End If
+						This.Canvas.Brush.Color = NormalText.Background
+						This.Canvas.Pen.Color = FoldLines.Foreground
+						FillRect bufDC, @rc, This.Canvas.Brush.Handle
 					End If
 				If z > 0 Then iC = Cast(EditControlLine Ptr, Content.Lines.Items[z - 1])->CommentIndex
 				'If FECLine->Visible = False Then Continue For
@@ -5044,26 +4794,14 @@ Namespace My.Sys.Forms
 						Dim As ..Rect rec
 						If z = FSelEndLine + 1 Then
 							rec = Type(ScaleX(Max(-1, LeftMargin + -HScrollPos * dwCharX) + CodePaneX), ScaleY((i - VScrollPos - 1) * dwCharY + dwCharY + 1 + CodePaneY), ScaleX(IIf(bDividedX AndAlso zz = 0, iDividedX, This.Width)), ScaleY((i - VScrollPos - 1) * dwCharY + dwCharY + 1 + CodePaneY))
-								If pRenderTarget = 0 Then
-									This.Canvas.Pen.Color = CurrentLine.Frame
-									'SelectObject bufDC, This.Canvas.Pen.Handle
-									MoveToEx bufDC, rec.Left, rec.Top - 1, 0
-									LineTo bufDC, rec.Right, rec.Top - 1
-								Else
-									pRenderTarget->lpVtbl->CreateSolidColorBrush(pRenderTarget, @Type<D2D1_COLOR_F>(CurrentLine.FrameRed, CurrentLine.FrameGreen, CurrentLine.FrameBlue, 1.0), 0, @pBrushForeground)
-									pRenderTarget->lpVtbl->DrawLine(pRenderTarget, Type<D2D1_POINT_2F>(rec.Left + 1, rec.Top), Type<D2D1_POINT_2F>(rec.Right, rec.Top), pBrushForeground, 1)
-									If pBrushForeground Then pBrushForeground->lpVtbl->Release(pBrushForeground): pBrushForeground = 0
-								End If
+								This.Canvas.Pen.Color = CurrentLine.Frame
+								'SelectObject bufDC, This.Canvas.Pen.Handle
+								MoveToEx bufDC, rec.Left, rec.Top - 1, 0
+								LineTo bufDC, rec.Right, rec.Top - 1
 						Else
 							rec = Type(ScaleX(Max(-1, LeftMargin + -HScrollPos * dwCharX) + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + CodePaneY), ScaleX(IIf(bDividedX AndAlso zz = 0, iDividedX, This.Width)), ScaleY((i - VScrollPos) * dwCharY + dwCharY + 1 + CodePaneY))
-								If pRenderTarget = 0 Then
-									This.Canvas.Brush.Color = CurrentLine.Frame
-									FrameRect bufDC, @rec, This.Canvas.Brush.Handle
-								Else
-									pRenderTarget->lpVtbl->CreateSolidColorBrush(pRenderTarget, @Type<D2D1_COLOR_F>(CurrentLine.FrameRed, CurrentLine.FrameGreen, CurrentLine.FrameBlue, 1.0), 0, @pBrushForeground)
-									pRenderTarget->lpVtbl->DrawRectangle(pRenderTarget, @Type<D2D1_RECT_F>(rec.Left + 1, rec.Top + 1, rec.Right, rec.Bottom), pBrushForeground, 1)
-									If pBrushForeground Then pBrushForeground->lpVtbl->Release(pBrushForeground): pBrushForeground = 0
-								End If
+								This.Canvas.Brush.Color = CurrentLine.Frame
+								FrameRect bufDC, @rec, This.Canvas.Brush.Handle
 						End If
 					End If
 					If zz = ActiveCodePane AndAlso (FSelStartLine <> FSelEndLine Or FSelStartChar <> FSelEndChar) Then
@@ -5093,48 +4831,26 @@ Namespace My.Sys.Forms
 									Var x = ScaleX(LeftMargin - IIf(bDividedX AndAlso zz = 0, HScrollPosLeft, HScrollPosRight) * dwCharX + IIf(bDividedX AndAlso zz = 1, iDividedX + 7, 0)) + IIf(iStart = 0, 0, sz.cx)
 									Var y = ScaleY((i - IIf(zz = 0, VScrollPosTop, VScrollPosBottom)) * dwCharY + IIf(bDividedY AndAlso zz = 1, iDividedY + 7, 0))
 									Dim As ..Rect rec = Type(x, y, x + dwCharX * Len(*FLineRight), y + dwCharY)
-									If pRenderTarget = 0 Then
-										This.Canvas.Brush.Color = FoldLines.Foreground
-										FrameRect bufDC, @rec, This.Canvas.Brush.Handle
-									Else
-										pRenderTarget->lpVtbl->CreateSolidColorBrush(pRenderTarget, @Type<D2D1_COLOR_F>(FoldLines.ForegroundRed, FoldLines.ForegroundGreen, FoldLines.ForegroundBlue, 1.0), 0, @pBrushForeground)
-										pRenderTarget->lpVtbl->DrawRectangle(pRenderTarget, @Type<D2D1_RECT_F>(rec.Left + 1, rec.Top + 1, rec.Right, rec.Bottom), pBrushForeground, 1)
-										If pBrushForeground Then pBrushForeground->lpVtbl->Release(pBrushForeground): pBrushForeground = 0
-									End If
+									This.Canvas.Brush.Color = FoldLines.Foreground
+									FrameRect bufDC, @rec, This.Canvas.Brush.Handle
 							End If
 						Next
 					End If
 					If HighlightBrackets Then
 						If z = BracketsStartLine AndAlso BracketsStart > -1 Then
 							Dim As ..Rect rec = Type(ScaleX(LeftMargin + -HScrollPos * dwCharX + TextWidth(GetTabbedText(..Left(*s, BracketsStart))) + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + 1 + CodePaneY), ScaleX(LeftMargin + -HScrollPos * dwCharX + TextWidth(GetTabbedText(..Left(*s, BracketsStart))) + dwCharX + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + dwCharY + CodePaneY))
-								If pRenderTarget = 0 Then
-									This.Canvas.Brush.Color = CurrentBrackets.Frame
-									FrameRect bufDC, @rec, This.Canvas.Brush.Handle
-								Else
-									pRenderTarget->lpVtbl->CreateSolidColorBrush(pRenderTarget, @Type<D2D1_COLOR_F>(CurrentBrackets.FrameRed, CurrentBrackets.FrameGreen, CurrentBrackets.FrameBlue, 1.0), 0, @pBrushForeground)
-									pRenderTarget->lpVtbl->DrawRectangle(pRenderTarget, @Type<D2D1_RECT_F>(rec.Left + 1, rec.Top + 1, rec.Right, rec.Bottom), pBrushForeground, 1)
-									If pBrushForeground Then pBrushForeground->lpVtbl->Release(pBrushForeground): pBrushForeground = 0
-								End If
+								This.Canvas.Brush.Color = CurrentBrackets.Frame
+								FrameRect bufDC, @rec, This.Canvas.Brush.Handle
 						End If
 						If z = BracketsEndLine AndAlso BracketsEnd > -1 Then
 							Dim As ..Rect rec = Type(ScaleX(LeftMargin + -HScrollPos * dwCharX + TextWidth(GetTabbedText(..Left(*s, BracketsEnd))) + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + 1 + CodePaneY), ScaleX(LeftMargin + -HScrollPos * dwCharX + TextWidth(GetTabbedText(..Left(*s, BracketsEnd))) + dwCharX + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + dwCharY + CodePaneY))
-								If pRenderTarget = 0 Then
-									This.Canvas.Brush.Color = CurrentBrackets.Frame
-									FrameRect bufDC, @rec, This.Canvas.Brush.Handle
-								Else
-									pRenderTarget->lpVtbl->CreateSolidColorBrush(pRenderTarget, @Type<D2D1_COLOR_F>(CurrentBrackets.FrameRed, CurrentBrackets.FrameGreen, CurrentBrackets.FrameBlue, 1.0), 0, @pBrushForeground)
-									pRenderTarget->lpVtbl->DrawRectangle(pRenderTarget, @Type<D2D1_RECT_F>(rec.Left + 1, rec.Top + 1, rec.Right, rec.Bottom), pBrushForeground, 1)
-									If pBrushForeground Then pBrushForeground->lpVtbl->Release(pBrushForeground): pBrushForeground = 0
-								End If
+								This.Canvas.Brush.Color = CurrentBrackets.Frame
+								FrameRect bufDC, @rec, This.Canvas.Brush.Handle
 						End If
 					End If
 					If ShowSpaces Then
-							If pRenderTarget = 0 Then
-								This.Canvas.Pen.Color = SpaceIdentifiers.Foreground 'rgb(100, 100, 100) 'clLtGray
-								'SelectObject(bufDC, This.Canvas.Pen.Handle)
-							Else
-								pRenderTarget->lpVtbl->CreateSolidColorBrush(pRenderTarget, @Type<D2D1_COLOR_F>(SpaceIdentifiers.ForegroundRed, SpaceIdentifiers.ForegroundGreen, SpaceIdentifiers.ForegroundBlue, 1.0), 0, @pBrushForeground)
-							End If
+							This.Canvas.Pen.Color = SpaceIdentifiers.Foreground 'rgb(100, 100, 100) 'clLtGray
+							'SelectObject(bufDC, This.Canvas.Pen.Handle)
 						'WLet FLineLeft, GetTabbedText(*s, 0)
 						jj = 1
 						jPos = 0
@@ -5145,31 +4861,18 @@ Namespace My.Sys.Forms
 								jPos += 1
 								If LeftMargin + -HScrollPos * dwCharX + (jPos - 1) * (dwCharX) + dwCharX / 2 > 0 Then
 									'WLet FLineLeft, GetTabbedText(Left(*s, jj - 1))
-										If pRenderTarget = 0 Then
-											'GetTextExtentPoint32(bufDC, @Wstr(Left(*FLineLeft, jj - 1)), jj - 1, @Sz) 'Len(*FLineLeft)
-											'SetPixel bufDC, LeftMargin + -HScrollPos * dwCharX + IIF(jPos = 0, 0, Sz.cx) + dwCharX / 2, (i - VScrollPos) * dwCharY + dwCharY / 2, clBtnShadow
-											SetPixel bufDC, ScaleX(LeftMargin + -HScrollPos * dwCharX + (jPos - 1) * (dwCharX) + dwCharX / 2 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + Int(dwCharY / 2) + CodePaneY), SpaceIdentifiers.Foreground
-										Else
-											pRenderTarget->lpVtbl->DrawRectangle(pRenderTarget, @Type<D2D1_RECT_F>(ScaleX(LeftMargin + -HScrollPos * dwCharX + (jPos - 1) * (dwCharX) + dwCharX / 2 + CodePaneX) + 1, ScaleY((i - VScrollPos) * dwCharY + Int(dwCharY / 2) + CodePaneY) + 1, ScaleX(LeftMargin + -HScrollPos * dwCharX + (jPos - 1) * (dwCharX) + dwCharX / 2 + CodePaneX) + 1, ScaleY((i - VScrollPos) * dwCharY + Int(dwCharY / 2) + CodePaneY) + 1), pBrushForeground, 1)
-										End If
+										SetPixel bufDC, ScaleX(LeftMargin + -HScrollPos * dwCharX + (jPos - 1) * (dwCharX) + dwCharX / 2 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + Int(dwCharY / 2) + CodePaneY), SpaceIdentifiers.Foreground
 								End If
 							ElseIf sChar = !"\t" Then
 								jPP = TabWidth - (jPos + TabWidth) Mod TabWidth
 								If LeftMargin + -HScrollPos * dwCharX + jPos * (dwCharX) + jPP * dwCharX > 0 Then
 									'WLet FLineLeft, GetTabbedText(Left(*s, jj - 1))
-										If pRenderTarget = 0 Then
-											'GetTextExtentPoint32(bufDC, FLineLeft, Len(*FLineLeft), @Sz)
-											MoveToEx bufDC,   ScaleX(LeftMargin + -HScrollPos * dwCharX + jPos * (dwCharX) + 2 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + Int(dwCharY / 2) + CodePaneY), 0
-											LineTo bufDC,     ScaleX(LeftMargin + -HScrollPos * dwCharX + jPos * (dwCharX) + jPP * dwCharX - 3 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + Int(dwCharY / 2) + CodePaneY)
-											MoveToEx bufDC,   ScaleX(LeftMargin + -HScrollPos * dwCharX + jPos * (dwCharX) + jPP * dwCharX - 7 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + Int(dwCharY / 2) - 3 + CodePaneY), 0
-											LineTo bufDC,     ScaleX(LeftMargin + -HScrollPos * dwCharX + jPos * (dwCharX) + jPP * dwCharX - 4 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + Int(dwCharY / 2) + CodePaneY)
-											MoveToEx bufDC,   ScaleX(LeftMargin + -HScrollPos * dwCharX + jPos * (dwCharX) + jPP * dwCharX - 7 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + Int(dwCharY / 2) + 3 + CodePaneY), 0
-											LineTo bufDC,     ScaleX(LeftMargin + -HScrollPos * dwCharX + jPos * (dwCharX) + jPP * dwCharX - 4 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + Int(dwCharY / 2) + CodePaneY)
-										Else
-											pRenderTarget->lpVtbl->DrawLine(pRenderTarget, Type<D2D1_POINT_2F>(ScaleX(LeftMargin + -HScrollPos * dwCharX + jPos * (dwCharX) + 2 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + Int(dwCharY / 2) + CodePaneY) + 1), Type<D2D1_POINT_2F>(ScaleX(LeftMargin + -HScrollPos * dwCharX + jPos * (dwCharX) + jPP * dwCharX - 3 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + Int(dwCharY / 2) + CodePaneY) + 1), pBrushForeground, 1)
-											pRenderTarget->lpVtbl->DrawLine(pRenderTarget, Type<D2D1_POINT_2F>(ScaleX(LeftMargin + -HScrollPos * dwCharX + jPos * (dwCharX) + jPP * dwCharX - 7 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + Int(dwCharY / 2) - 3 + CodePaneY)), Type<D2D1_POINT_2F>(ScaleX(LeftMargin + -HScrollPos * dwCharX + jPos * (dwCharX) + jPP * dwCharX - 4 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + Int(dwCharY / 2) + CodePaneY)), pBrushForeground, 1)
-											pRenderTarget->lpVtbl->DrawLine(pRenderTarget, Type<D2D1_POINT_2F>(ScaleX(LeftMargin + -HScrollPos * dwCharX + jPos * (dwCharX) + jPP * dwCharX - 7 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + Int(dwCharY / 2) + 3 + CodePaneY) + 1), Type<D2D1_POINT_2F>(ScaleX(LeftMargin + -HScrollPos * dwCharX + jPos * (dwCharX) + jPP * dwCharX - 4 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + Int(dwCharY / 2) + CodePaneY) + 1), pBrushForeground, 1)
-										End If
+										MoveToEx bufDC,   ScaleX(LeftMargin + -HScrollPos * dwCharX + jPos * (dwCharX) + 2 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + Int(dwCharY / 2) + CodePaneY), 0
+										LineTo bufDC,     ScaleX(LeftMargin + -HScrollPos * dwCharX + jPos * (dwCharX) + jPP * dwCharX - 3 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + Int(dwCharY / 2) + CodePaneY)
+										MoveToEx bufDC,   ScaleX(LeftMargin + -HScrollPos * dwCharX + jPos * (dwCharX) + jPP * dwCharX - 7 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + Int(dwCharY / 2) - 3 + CodePaneY), 0
+										LineTo bufDC,     ScaleX(LeftMargin + -HScrollPos * dwCharX + jPos * (dwCharX) + jPP * dwCharX - 4 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + Int(dwCharY / 2) + CodePaneY)
+										MoveToEx bufDC,   ScaleX(LeftMargin + -HScrollPos * dwCharX + jPos * (dwCharX) + jPP * dwCharX - 7 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + Int(dwCharY / 2) + 3 + CodePaneY), 0
+										LineTo bufDC,     ScaleX(LeftMargin + -HScrollPos * dwCharX + jPos * (dwCharX) + jPP * dwCharX - 4 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + Int(dwCharY / 2) + CodePaneY)
 								End If
 								jPos += jPP
 							Else
@@ -5177,9 +4880,6 @@ Namespace My.Sys.Forms
 							End If
 							jj += 1
 						Loop
-							If pRenderTarget <> 0 Then
-								If pBrushForeground Then pBrushForeground->lpVtbl->Release(pBrushForeground): pBrushForeground = 0
-							End If
 					End If
 				End If
 				'If c >= vlc Then Exit Do
@@ -5187,135 +4887,70 @@ Namespace My.Sys.Forms
 				'Loop While Pos1 > 0
 				'Canvas.Font.Bold = False
 					WLet(FLineLeft, WStr(z + 1))
-					If pRenderTarget = 0 Then
-						GetTextExtentPoint32(bufDC, FLineLeft, Len(*FLineLeft), @sz)
-						SetRect(@rc, ScaleX(CodePaneX), ScaleY((i - VScrollPos) * dwCharY + CodePaneY), ScaleX(LeftMargin - 25 + CodePaneX), ScaleY((i - VScrollPos + 1) * dwCharY + CodePaneY))
-						'SelectObject(bufDC, This.Canvas.Font.Handle)
-						This.Canvas.Brush.Color = LineNumbers.Background
-						'SelectObject(bufDC, This.Canvas.Brush.Handle)
-						FillRect bufDC, @rc, This.Canvas.Brush.Handle
-						SetBkMode(bufDC, TRANSPARENT)
-						SetTextColor(bufDC, LineNumbers.Foreground)
-						TextOut(bufDC, ScaleX(LeftMargin - 25 + CodePaneX) - sz.cx, ScaleY((i - VScrollPos) * dwCharY + CodePaneY), FLineLeft, Len(*FLineLeft))
-						SetBkMode(bufDC, OPAQUE)
-					Else
-						pRenderTarget->lpVtbl->CreateSolidColorBrush(pRenderTarget, @Type<D2D1_COLOR_F>(LineNumbers.BackgroundRed, LineNumbers.BackgroundGreen, LineNumbers.BackgroundBlue, 1.0), 0, @pBrushBackground)
-						pRenderTarget->lpVtbl->CreateSolidColorBrush(pRenderTarget, @Type<D2D1_COLOR_F>(LineNumbers.ForegroundRed, LineNumbers.ForegroundGreen, LineNumbers.ForegroundBlue, 1.0), 0, @pBrushForeground)
-						CreateTextLayout(pDWriteFactory, FLineLeft, Len(*FLineLeft), pFormat, sz.cx + 100, sz.cy + 100, @pLayout)
-						If pLayout <> 0 Then
-							pLayout->lpVtbl->GetMetrics(pLayout, @Metrics)
-							sz.cx = Metrics.widthIncludingTrailingWhitespace
-							sz.cy = Metrics.height + 1
-							SetRect(@rc, ScaleX(CodePaneX), ScaleY((i - VScrollPos) * dwCharY + CodePaneY), ScaleX(LeftMargin - 25 + CodePaneX), ScaleY((i - VScrollPos + 1) * dwCharY + CodePaneY))
-							pRenderTarget->lpVtbl->FillRectangle(pRenderTarget, @Type<D2D1_RECT_F>(rc.Left, rc.Top, rc.Right, rc.Bottom), pBrushBackground)
-							pRenderTarget->lpVtbl->DrawTextLayout(pRenderTarget, Type<D2D1_POINT_2F>(ScaleX(LeftMargin - 25 + CodePaneX) - sz.cx, ScaleY((i - VScrollPos) * dwCharY + CodePaneY) + 1), pLayout, Cast(ID2D1Brush Ptr, pBrushForeground), D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT)
-							pLayout->lpVtbl->Release(pLayout): pLayout = 0
-						End If
-						If pBrushForeground Then pBrushForeground->lpVtbl->Release(pBrushForeground): pBrushForeground = 0
-						If pBrushBackground Then pBrushBackground->lpVtbl->Release(pBrushBackground): pBrushBackground = 0
-					End If
+					GetTextExtentPoint32(bufDC, FLineLeft, Len(*FLineLeft), @sz)
+					SetRect(@rc, ScaleX(CodePaneX), ScaleY((i - VScrollPos) * dwCharY + CodePaneY), ScaleX(LeftMargin - 25 + CodePaneX), ScaleY((i - VScrollPos + 1) * dwCharY + CodePaneY))
+					'SelectObject(bufDC, This.Canvas.Font.Handle)
+					This.Canvas.Brush.Color = LineNumbers.Background
+					'SelectObject(bufDC, This.Canvas.Brush.Handle)
+					FillRect bufDC, @rc, This.Canvas.Brush.Handle
+					SetBkMode(bufDC, TRANSPARENT)
+					SetTextColor(bufDC, LineNumbers.Foreground)
+					TextOut(bufDC, ScaleX(LeftMargin - 25 + CodePaneX) - sz.cx, ScaleY((i - VScrollPos) * dwCharY + CodePaneY), FLineLeft, Len(*FLineLeft))
+					SetBkMode(bufDC, OPAQUE)
 					SetRect(@rc, ScaleX(LeftMargin - 25 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + CodePaneY), ScaleX(LeftMargin + CodePaneX), ScaleY(Min(IIf(bDividedY AndAlso zz = 0, iDividedY, (i - VScrollPos + 1) * dwCharY), (i - VScrollPos + 1) * dwCharY) + CodePaneY))
-					If pRenderTarget = 0 Then
-						This.Canvas.Brush.Color = NormalText.Background
-						FillRect bufDC, @rc, This.Canvas.Brush.Handle
-					Else
-						pRenderTarget->lpVtbl->CreateSolidColorBrush(pRenderTarget, @Type<D2D1_COLOR_F>(NormalText.BackgroundRed, NormalText.BackgroundGreen, NormalText.BackgroundBlue, 1.0), 0, @pBrushBackground)
-						pRenderTarget->lpVtbl->FillRectangle(pRenderTarget, @Type<D2D1_RECT_F>(rc.Left, rc.Top, rc.Right, rc.Bottom), pBrushBackground)
-						If pBrushBackground Then pBrushBackground->lpVtbl->Release(pBrushBackground): pBrushBackground = 0
-					End If
+					This.Canvas.Brush.Color = NormalText.Background
+					FillRect bufDC, @rc, This.Canvas.Brush.Handle
 				If FECLine->Breakpoint Then
-						If pRenderTarget = 0 Then
-							This.Canvas.Pen.Color = IndicatorLines.Foreground
-							This.Canvas.Brush.Color = Breakpoints.Indicator
-							SelectObject(bufDC, This.Canvas.Brush.Handle)
-							SelectObject(bufDC, This.Canvas.Pen.Handle)
-							Ellipse bufDC, ScaleX(2 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + 2 + CodePaneY), ScaleX(dwCharY - 2 + CodePaneX), ScaleY((i - VScrollPos + 1) * dwCharY - 2 + CodePaneY)
-						Else
-							pRenderTarget->lpVtbl->CreateSolidColorBrush(pRenderTarget, @Type<D2D1_COLOR_F>(Breakpoints.IndicatorRed, Breakpoints.IndicatorGreen, Breakpoints.IndicatorBlue, 1.0), 0, @pBrushBackground)
-							pRenderTarget->lpVtbl->CreateSolidColorBrush(pRenderTarget, @Type<D2D1_COLOR_F>(IndicatorLines.ForegroundRed, IndicatorLines.ForegroundGreen, IndicatorLines.ForegroundBlue, 1.0), 0, @pBrushForeground)
-							pRenderTarget->lpVtbl->FillEllipse(pRenderTarget, Type<D2D1_ELLIPSE>(Type<D2D1_POINT_2F>(ScaleX(2 + CodePaneX + (dwCharY - 4) / 2), ScaleY((i - VScrollPos) * dwCharY + 2 + CodePaneY + (dwCharY - 4) / 2)), ScaleX((dwCharY - 4) / 2), ScaleY((dwCharY - 4) / 2)), pBrushBackground)
-							pRenderTarget->lpVtbl->DrawEllipse(pRenderTarget, Type<D2D1_ELLIPSE>(Type<D2D1_POINT_2F>(ScaleX(2 + CodePaneX + (dwCharY - 4) / 2), ScaleY((i - VScrollPos) * dwCharY + 2 + CodePaneY + (dwCharY - 4) / 2)), ScaleX((dwCharY - 4) / 2), ScaleY((dwCharY - 4) / 2)), pBrushForeground, 1, NULL)
-							If pBrushForeground Then pBrushForeground->lpVtbl->Release(pBrushForeground): pBrushForeground = 0
-							If pBrushBackground Then pBrushBackground->lpVtbl->Release(pBrushBackground): pBrushBackground = 0
-						End If
+						This.Canvas.Pen.Color = IndicatorLines.Foreground
+						This.Canvas.Brush.Color = Breakpoints.Indicator
+						SelectObject(bufDC, This.Canvas.Brush.Handle)
+						SelectObject(bufDC, This.Canvas.Pen.Handle)
+						Ellipse bufDC, ScaleX(2 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + 2 + CodePaneY), ScaleX(dwCharY - 2 + CodePaneX), ScaleY((i - VScrollPos + 1) * dwCharY - 2 + CodePaneY)
 				End If
 				If FECLine->Bookmark Then
-						If pRenderTarget = 0 Then
-							This.Canvas.Pen.Color = IndicatorLines.Foreground
-							This.Canvas.Brush.Color = Bookmarks.Indicator
-							'					SelectObject(bufDC, This.Canvas.Brush.Handle)
-							'					SelectObject(bufDC, This.Canvas.Pen.Handle)
-							RoundRect bufDC, ScaleX(2 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + 4 + CodePaneY), ScaleX(dwCharY - 2 + CodePaneX), ScaleY((i - VScrollPos + 1) * dwCharY - 4 + CodePaneY), ScaleX(5), ScaleY(5)
-						Else
-							pRenderTarget->lpVtbl->CreateSolidColorBrush(pRenderTarget, @Type<D2D1_COLOR_F>(Bookmarks.IndicatorRed, Bookmarks.IndicatorGreen, Bookmarks.IndicatorBlue, 1.0), 0, @pBrushBackground)
-							pRenderTarget->lpVtbl->CreateSolidColorBrush(pRenderTarget, @Type<D2D1_COLOR_F>(IndicatorLines.ForegroundRed, IndicatorLines.ForegroundGreen, IndicatorLines.ForegroundBlue, 1.0), 0, @pBrushForeground)
-							pRenderTarget->lpVtbl->FillRoundedRectangle(pRenderTarget, @Type<D2D1_ROUNDED_RECT>(Type<D2D1_RECT_F>(ScaleX(2 + CodePaneX) + 1, ScaleY((i - VScrollPos) * dwCharY + 4 + CodePaneY) + 1, ScaleX(dwCharY - 2 + CodePaneX) - 1, ScaleY((i - VScrollPos + 1) * dwCharY - 4 + CodePaneY) - 1), ScaleX(2.5), ScaleY(2.5)), pBrushBackground)
-							'pRenderTarget->lpVtbl->DrawRoundedRectangle(pRenderTarget, @Type<D2D1_ROUNDED_RECT>(Type<D2D1_RECT_F>(ScaleX(2 + CodePaneX) + 1, ScaleY((i - VScrollPos) * dwCharY + 4 + CodePaneY) + 1, ScaleX(dwCharY - 2 + CodePaneX) - 1, ScaleY((i - VScrollPos + 1) * dwCharY - 4 + CodePaneY) - 1), ScaleX(1), ScaleY(1)), pBrushForeground, 1)
-							If pBrushForeground Then pBrushForeground->lpVtbl->Release(pBrushForeground): pBrushForeground = 0
-							If pBrushBackground Then pBrushBackground->lpVtbl->Release(pBrushBackground): pBrushBackground = 0
-						End If
+						This.Canvas.Pen.Color = IndicatorLines.Foreground
+						This.Canvas.Brush.Color = Bookmarks.Indicator
+						'					SelectObject(bufDC, This.Canvas.Brush.Handle)
+						'					SelectObject(bufDC, This.Canvas.Pen.Handle)
+						RoundRect bufDC, ScaleX(2 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + 4 + CodePaneY), ScaleX(dwCharY - 2 + CodePaneX), ScaleY((i - VScrollPos + 1) * dwCharY - 4 + CodePaneY), ScaleX(5), ScaleY(5)
 				End If
 				If SyntaxEdit AndAlso Not Content.CStyle Then
-						If pRenderTarget <> 0 Then
-							pRenderTarget->lpVtbl->CreateSolidColorBrush(pRenderTarget, @Type<D2D1_COLOR_F>(FoldLines.ForegroundRed, FoldLines.ForegroundGreen, FoldLines.ForegroundBlue, 1.0), 0, @pBrushForeground)
-						End If
 					If ShowHorizontalSeparatorLines AndAlso CBool(FECLineNext <> 0) AndAlso FECLineNext->Visible Then
 						For ii As Integer = 0 To FECLineNext->Statements.Count - 1
 							FECStatement = FECLineNext->Statements.Items[ii]
 							If (FECStatement->ConstructionIndex >= C_P_Region) AndAlso (FECStatement->ConstructionPart = 0) Then
-									If pRenderTarget = 0 Then
-										This.Canvas.Pen.Color = FoldLines.Foreground
-										MoveToEx bufDC, ScaleX(LeftMargin + CodePaneX), ScaleY((i + 1 - VScrollPos) * dwCharY + CodePaneY), 0
-										LineTo bufDC, ScaleX(IIf(bDividedX AndAlso zz = 0, iDividedX, dwClientX)), ScaleY((i + 1 - VScrollPos) * dwCharY + CodePaneY)
-									Else
-										pRenderTarget->lpVtbl->DrawLine(pRenderTarget, Type<D2D1_POINT_2F>(ScaleX(LeftMargin + CodePaneX), ScaleY((i + 1 - VScrollPos) * dwCharY + CodePaneY) + 1), Type<D2D1_POINT_2F>(ScaleX(IIf(bDividedX AndAlso zz = 0, iDividedX, dwClientX)), ScaleY((i + 1 - VScrollPos) * dwCharY + CodePaneY) + 1), pBrushForeground, 1)
-									End If
+									This.Canvas.Pen.Color = FoldLines.Foreground
+									MoveToEx bufDC, ScaleX(LeftMargin + CodePaneX), ScaleY((i + 1 - VScrollPos) * dwCharY + CodePaneY), 0
+									LineTo bufDC, ScaleX(IIf(bDividedX AndAlso zz = 0, iDividedX, dwClientX)), ScaleY((i + 1 - VScrollPos) * dwCharY + CodePaneY)
 								Exit For
 							End If
 						Next ii
 					End If
 					If FECLine->Collapsible Then
-							If pRenderTarget = 0 Then
-								This.Canvas.Pen.Color = FoldLines.Foreground
-								This.Canvas.Brush.Color = NormalText.Background
-								'						SelectObject(bufDC, This.Canvas.Brush.Handle)
-								'						SelectObject(bufDC, This.Canvas.Pen.Handle)
-								Rectangle bufDC, ScaleX(LeftMargin - 15 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + 3 + CodePaneY), ScaleX(LeftMargin - 6 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + 12 + CodePaneY)
-								MoveToEx bufDC, ScaleX(LeftMargin - 13 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + 7 + CodePaneY), 0
-								LineTo bufDC, ScaleX(LeftMargin - 8 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + 7 + CodePaneY)
-							Else
-								pRenderTarget->lpVtbl->DrawRectangle(pRenderTarget, @Type<D2D1_RECT_F>(CInt(ScaleX(LeftMargin - 15 + CodePaneX)) + 1, CInt(ScaleY((i - VScrollPos) * dwCharY + 3 + CodePaneY)) + 1, CInt(ScaleX(LeftMargin - 6 + CodePaneX)), CInt(ScaleY((i - VScrollPos) * dwCharY + 12 + CodePaneY))), pBrushForeground, 1)
-								pRenderTarget->lpVtbl->DrawLine(pRenderTarget, Type<D2D1_POINT_2F>(CInt(ScaleX(LeftMargin - 13 + CodePaneX)), CInt(ScaleY((i - VScrollPos) * dwCharY + 7 + CodePaneY)) + 1), Type<D2D1_POINT_2F>(CInt(ScaleX(LeftMargin - 8 + CodePaneX)), CInt(ScaleY((i - VScrollPos) * dwCharY + 7 + CodePaneY)) + 1), pBrushForeground, 1)
-							End If
+							This.Canvas.Pen.Color = FoldLines.Foreground
+							This.Canvas.Brush.Color = NormalText.Background
+							'						SelectObject(bufDC, This.Canvas.Brush.Handle)
+							'						SelectObject(bufDC, This.Canvas.Pen.Handle)
+							Rectangle bufDC, ScaleX(LeftMargin - 15 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + 3 + CodePaneY), ScaleX(LeftMargin - 6 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + 12 + CodePaneY)
+							MoveToEx bufDC, ScaleX(LeftMargin - 13 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + 7 + CodePaneY), 0
+							LineTo bufDC, ScaleX(LeftMargin - 8 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + 7 + CodePaneY)
 							If ShowHorizontalSeparatorLines Then
 								For ii As Integer = 0 To FECLine->Statements.Count - 1
 									FECStatement = FECLine->Statements.Items[ii]
 									If (FECStatement->ConstructionIndex >= C_P_Region) AndAlso (FECStatement->ConstructionPart = 0) Then
-										If pRenderTarget = 0 Then
-											MoveToEx bufDC, ScaleX(LeftMargin + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + CodePaneY), 0
-											LineTo bufDC, ScaleX(IIf(bDividedX AndAlso zz = 0, iDividedX, dwClientX)), ScaleY((i - VScrollPos) * dwCharY + CodePaneY)
-										Else
-											pRenderTarget->lpVtbl->DrawLine(pRenderTarget, Type<D2D1_POINT_2F>(CInt(ScaleX(LeftMargin + CodePaneX)), CInt(ScaleY((i - VScrollPos) * dwCharY + CodePaneY)) + 1), Type<D2D1_POINT_2F>(CInt(ScaleX(IIf(bDividedX AndAlso zz = 0, iDividedX, dwClientX))), CInt(ScaleY((i - VScrollPos) * dwCharY + CodePaneY)) + 1), pBrushForeground, 1)
-										End If
+										MoveToEx bufDC, ScaleX(LeftMargin + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + CodePaneY), 0
+										LineTo bufDC, ScaleX(IIf(bDividedX AndAlso zz = 0, iDividedX, dwClientX)), ScaleY((i - VScrollPos) * dwCharY + CodePaneY)
 										Exit For
 									End If
 								Next ii
 							End If
 						If OldCollapseIndex > 0 Then
-								If pRenderTarget = 0 Then
-									MoveToEx bufDC, ScaleX(LeftMargin - 11 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + 0 + CodePaneY), 0
-									LineTo bufDC, ScaleX(LeftMargin - 11 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + 3 + CodePaneY)
-								Else
-									pRenderTarget->lpVtbl->DrawLine(pRenderTarget, Type<D2D1_POINT_2F>(ScaleX(LeftMargin - 11 + CodePaneX) + 1, ScaleY((i - VScrollPos) * dwCharY + 0 + CodePaneY)), Type<D2D1_POINT_2F>(ScaleX(LeftMargin - 11 + CodePaneX) + 1, ScaleY((i - VScrollPos) * dwCharY + 3 + CodePaneY) + 1), pBrushForeground, 1)
-								End If
+								MoveToEx bufDC, ScaleX(LeftMargin - 11 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + 0 + CodePaneY), 0
+								LineTo bufDC, ScaleX(LeftMargin - 11 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + 3 + CodePaneY)
 						End If
 						If FECLine->Collapsed Then
-								If pRenderTarget = 0 Then
-									MoveToEx bufDC, ScaleX(LeftMargin - 11 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + 5 + CodePaneY), 0
-									LineTo bufDC, ScaleX(LeftMargin - 11 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + 10 + CodePaneY)
-								Else
-									pRenderTarget->lpVtbl->DrawLine(pRenderTarget, Type<D2D1_POINT_2F>(ScaleX(LeftMargin - 11 + CodePaneX) + 1, ScaleY((i - VScrollPos) * dwCharY + 5 + CodePaneY)), Type<D2D1_POINT_2F>(ScaleX(LeftMargin - 11 + CodePaneX) + 1, ScaleY((i - VScrollPos) * dwCharY + 10 + CodePaneY)), pBrushForeground, 1)
-								End If
+								MoveToEx bufDC, ScaleX(LeftMargin - 11 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + 5 + CodePaneY), 0
+								LineTo bufDC, ScaleX(LeftMargin - 11 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + 10 + CodePaneY)
 						End If
 						For ii As Integer = 0 To FECLine->Statements.IndexOf(FECLine->MainStatement) - 1
 							FECStatement = FECLine->Statements.Items[ii]
@@ -5330,251 +4965,115 @@ Namespace My.Sys.Forms
 							End If
 						Next ii
 						If ((Not FECLine->Collapsed) AndAlso CBool(CollapseIndex > 0)) OrElse (FECLine->Collapsed AndAlso (CBool(OldCollapseIndex > 0) OrElse Not FECLine->CollapsedFully)) Then 'CBool(OldCollapseIndex = 0) AndAlso
-								If pRenderTarget = 0 Then
-									MoveToEx bufDC, ScaleX(LeftMargin - 11 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + 12 + CodePaneY), 0
-									LineTo bufDC, ScaleX(LeftMargin - 11 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + dwCharY + CodePaneY)
-								Else
-									pRenderTarget->lpVtbl->DrawLine(pRenderTarget, Type<D2D1_POINT_2F>(ScaleX(LeftMargin - 11 + CodePaneX) + 1, ScaleY((i - VScrollPos) * dwCharY + 12 + CodePaneY)), Type<D2D1_POINT_2F>(ScaleX(LeftMargin - 11 + CodePaneX) + 1, ScaleY((i - VScrollPos) * dwCharY + dwCharY + CodePaneY) + 1), pBrushForeground, 1)
-								End If
+								MoveToEx bufDC, ScaleX(LeftMargin - 11 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + 12 + CodePaneY), 0
+								LineTo bufDC, ScaleX(LeftMargin - 11 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + dwCharY + CodePaneY)
 						End If
 					ElseIf OldCollapseIndex > 0 Then
-							If pRenderTarget = 0 Then
-								This.Canvas.Pen.Color = FoldLines.Foreground
-								This.Canvas.Brush.Color = NormalText.Background
-								'						SelectObject(bufDC, This.Canvas.Brush.Handle)
-								'						SelectObject(bufDC, This.Canvas.Pen.Handle)
-								MoveToEx bufDC, ScaleX(LeftMargin - 11 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + 0 + CodePaneY), 0
-							End If
+							This.Canvas.Pen.Color = FoldLines.Foreground
+							This.Canvas.Brush.Color = NormalText.Background
+							'						SelectObject(bufDC, This.Canvas.Brush.Handle)
+							'						SelectObject(bufDC, This.Canvas.Pen.Handle)
+							MoveToEx bufDC, ScaleX(LeftMargin - 11 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + 0 + CodePaneY), 0
 						If CollapseIndex = 0 Then
-								If pRenderTarget = 0 Then
-									LineTo bufDC, ScaleX(LeftMargin - 11 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + dwCharY / 2 + CodePaneY)
-								Else
-									pRenderTarget->lpVtbl->DrawLine(pRenderTarget, Type<D2D1_POINT_2F>(ScaleX(LeftMargin - 11 + CodePaneX) + 1, ScaleY((i - VScrollPos) * dwCharY + 0 + CodePaneY)), Type<D2D1_POINT_2F>(ScaleX(LeftMargin - 11 + CodePaneX) + 1, ScaleY((i - VScrollPos) * dwCharY + dwCharY / 2 + CodePaneY) + 1), pBrushForeground, 1)
-								End If
+								LineTo bufDC, ScaleX(LeftMargin - 11 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + dwCharY / 2 + CodePaneY)
 						Else
-								If pRenderTarget = 0 Then
-									LineTo bufDC, ScaleX(LeftMargin - 11 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + dwCharY + CodePaneY)
-								Else
-									pRenderTarget->lpVtbl->DrawLine(pRenderTarget, Type<D2D1_POINT_2F>(ScaleX(LeftMargin - 11 + CodePaneX) + 1, ScaleY((i - VScrollPos) * dwCharY + 0 + CodePaneY)), Type<D2D1_POINT_2F>(ScaleX(LeftMargin - 11 + CodePaneX) + 1, ScaleY((i - VScrollPos) * dwCharY + dwCharY + CodePaneY) + 1), pBrushForeground, 1)
-								End If
+								LineTo bufDC, ScaleX(LeftMargin - 11 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + dwCharY + CodePaneY)
 						End If
 						If FECLine->ConstructionIndex >= 0 AndAlso CInt(Constructions(FECLine->ConstructionIndex).Collapsible) And CInt(FECLine->ConstructionPart = 2) Then
-								If pRenderTarget = 0 Then
-									MoveToEx bufDC, ScaleX(LeftMargin - 11 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + dwCharY / 2 + CodePaneY), 0
-									LineTo bufDC, ScaleX(LeftMargin - 6 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + dwCharY / 2 + CodePaneY)
-								Else
-									pRenderTarget->lpVtbl->DrawLine(pRenderTarget, Type<D2D1_POINT_2F>(ScaleX(LeftMargin - 11 + CodePaneX) + 1, ScaleY((i - VScrollPos) * dwCharY + dwCharY / 2 + CodePaneY) + 1), Type<D2D1_POINT_2F>(ScaleX(LeftMargin - 6 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + dwCharY / 2 + CodePaneY) + 1), pBrushForeground, 1)
-								End If
+								MoveToEx bufDC, ScaleX(LeftMargin - 11 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + dwCharY / 2 + CodePaneY), 0
+								LineTo bufDC, ScaleX(LeftMargin - 6 + CodePaneX), ScaleY((i - VScrollPos) * dwCharY + dwCharY / 2 + CodePaneY)
 						End If
 					End If
-						If pRenderTarget <> 0 Then
-							If pBrushForeground Then pBrushForeground->lpVtbl->Release(pBrushForeground): pBrushForeground = 0
-						End If
 				End If
 				'If i - VScrollPos > vlc1 Then Exit For 'AndAlso Not ChangeCase
 				OldCollapseIndex = CollapseIndex
 			Next z
 				SetRect(@rc, ScaleX(CodePaneX), ScaleY(Min(IIf(bDividedY AndAlso zz = 0, iDividedY, dwClientY), (Max(0, OldI - VScrollPos + 1)) * dwCharY + CodePaneY)), ScaleX(LeftMargin - 25 + CodePaneX), ScaleY(IIf(bDividedY AndAlso zz = 0, iDividedY, dwClientY)))
-				If pRenderTarget = 0 Then
-					This.Canvas.Brush.Color = LineNumbers.Background
-					FillRect bufDC, @rc, This.Canvas.Brush.Handle
-				Else
-					pRenderTarget->lpVtbl->CreateSolidColorBrush(pRenderTarget, @Type<D2D1_COLOR_F>(LineNumbers.BackgroundRed, LineNumbers.BackgroundGreen, LineNumbers.BackgroundBlue, 1.0), 0, @pBrushBackground)
-					pRenderTarget->lpVtbl->FillRectangle(pRenderTarget, @Type<D2D1_RECT_F>(rc.Left, rc.Top, rc.Right, rc.Bottom), pBrushBackground)
-					If pBrushBackground Then pBrushBackground->lpVtbl->Release(pBrushBackground): pBrushBackground = 0
-				End If
+				This.Canvas.Brush.Color = LineNumbers.Background
+				FillRect bufDC, @rc, This.Canvas.Brush.Handle
 				SetRect(@rc, ScaleX(LeftMargin - 25 + CodePaneX), ScaleY(Min(IIf(bDividedY AndAlso zz = 0, iDividedY, dwClientY), (Max(0, OldI - VScrollPos + 1)) * dwCharY + CodePaneY)), ScaleX(LeftMargin + CodePaneX), ScaleY(IIf(bDividedY AndAlso zz = 0, iDividedY, dwClientY)))
-				If pRenderTarget = 0 Then
-					This.Canvas.Brush.Color = NormalText.Background
-					FillRect bufDC, @rc, This.Canvas.Brush.Handle
-				Else
-					pRenderTarget->lpVtbl->CreateSolidColorBrush(pRenderTarget, @Type<D2D1_COLOR_F>(NormalText.BackgroundRed, NormalText.BackgroundGreen, NormalText.BackgroundBlue, 1.0), 0, @pBrushBackground)
-					pRenderTarget->lpVtbl->CreateSolidColorBrush(pRenderTarget, @Type<D2D1_COLOR_F>(NormalText.ForegroundRed, NormalText.ForegroundGreen, NormalText.ForegroundBlue, 1.0), 0, @pBrushForeground)
-					pRenderTarget->lpVtbl->FillRectangle(pRenderTarget, @Type<D2D1_RECT_F>(rc.Left, rc.Top, rc.Right, rc.Bottom), pBrushBackground)
-					If CaretOn Then
-						pRenderTarget->lpVtbl->DrawRectangle(pRenderTarget, @Type<D2D1_RECT_F>(ScaleX(HCaretPos) + 1, ScaleY(VCaretPos) + 1, ScaleX(HCaretPos) + 1, ScaleY(VCaretPos + dwCharY)), pBrushForeground)
-					End If
-					If pBrushBackground Then pBrushBackground->lpVtbl->Release(pBrushBackground): pBrushBackground = 0
-					If pBrushForeground Then pBrushForeground->lpVtbl->Release(pBrushForeground): pBrushForeground = 0
-				End If
+				This.Canvas.Brush.Color = NormalText.Background
+				FillRect bufDC, @rc, This.Canvas.Brush.Handle
 			OldPaintedVScrollPos(zz) = VScrollPos
 			OldPaintedHScrollPos(zz) = HScrollPos
 		Next zz
-			If pRenderTarget <> 0 Then
-				Dim As Double scrollFgR, scrollFgG, scrollFgB, scrollBkR, scrollBkG, scrollBkB
-				If g_darkModeEnabled Then
-					scrollFgR = 23 / 255.0: scrollFgG = 23 / 255.0: scrollFgB = 23 / 255.0
-					GetColor darkBkColor, scrollBkR, scrollBkG, scrollBkB
-				Else
-					scrollFgR = 217 / 255.0: scrollFgG = 217 / 255.0: scrollFgB = 217 / 255.0
-					GetColor clBtnFace, scrollBkR, scrollBkG, scrollBkB
-				End If
-				pRenderTarget->lpVtbl->CreateSolidColorBrush(pRenderTarget, @Type<D2D1_COLOR_F>(scrollFgR, scrollFgG, scrollFgB, 1.0), 0, @pBrushForeground)
-				pRenderTarget->lpVtbl->CreateSolidColorBrush(pRenderTarget, @Type<D2D1_COLOR_F>(scrollBkR, scrollBkG, scrollBkB, 1.0), 0, @pBrushBackground)
-			End If
 		If Not bDividedX Then
 				SetRect(@rc, 0, ScaleY(dwClientY - 17), ScaleX(7), ScaleY(dwClientY))
-				If pRenderTarget = 0 Then
-					If g_darkModeEnabled Then
-						This.Canvas.Pen.Color = BGR(23, 23, 23)
-						This.Canvas.Brush.Color = darkBkColor
-					Else
-						This.Canvas.Pen.Color = BGR(217, 217, 217)
-						This.Canvas.Brush.Color = clBtnFace
-					End If
-					Rectangle bufDC, rc.Left, rc.Top, rc.Right, rc.Bottom
+				If g_darkModeEnabled Then
+					This.Canvas.Pen.Color = BGR(23, 23, 23)
+					This.Canvas.Brush.Color = darkBkColor
 				Else
-					pRenderTarget->lpVtbl->FillRectangle(pRenderTarget, @Type<D2D1_RECT_F>(rc.Left, rc.Top, rc.Right, rc.Bottom), pBrushBackground)
-					pRenderTarget->lpVtbl->DrawRectangle(pRenderTarget, @Type<D2D1_RECT_F>(rc.Left, rc.Top, rc.Right, rc.Bottom), pBrushForeground, 1)
+					This.Canvas.Pen.Color = BGR(217, 217, 217)
+					This.Canvas.Brush.Color = clBtnFace
 				End If
+				Rectangle bufDC, rc.Left, rc.Top, rc.Right, rc.Bottom
 		End If
 		If Not bDividedY Then
 				SetRect(@rc, ScaleX(dwClientX - 17), 0, ScaleX(dwClientX), ScaleY(7))
-				If pRenderTarget = 0 Then
-					If g_darkModeEnabled Then
-						This.Canvas.Pen.Color = BGR(23, 23, 23)
-						This.Canvas.Brush.Color = darkBkColor
-					Else
-						This.Canvas.Pen.Color = BGR(217, 217, 217)
-						This.Canvas.Brush.Color = clBtnFace
-					End If
-					Rectangle bufDC, rc.Left, rc.Top, rc.Right, rc.Bottom
+				If g_darkModeEnabled Then
+					This.Canvas.Pen.Color = BGR(23, 23, 23)
+					This.Canvas.Brush.Color = darkBkColor
 				Else
-					pRenderTarget->lpVtbl->FillRectangle(pRenderTarget, @Type<D2D1_RECT_F>(rc.Left, rc.Top, rc.Right, rc.Bottom), pBrushBackground)
-					pRenderTarget->lpVtbl->DrawRectangle(pRenderTarget, @Type<D2D1_RECT_F>(rc.Left, rc.Top, rc.Right, rc.Bottom), pBrushForeground, 1)
+					This.Canvas.Pen.Color = BGR(217, 217, 217)
+					This.Canvas.Brush.Color = clBtnFace
 				End If
+				Rectangle bufDC, rc.Left, rc.Top, rc.Right, rc.Bottom
 		End If
 			'FillRect bufDC, @rc, This.Canvas.Brush.Handle
 			SetRect(@rc, ScaleX(dwClientX - 17), ScaleY(dwClientY - 17), ScaleX(dwClientX), ScaleY(dwClientY))
-			If pRenderTarget = 0 Then
-				FillRect bufDC, @rc, This.Canvas.Brush.Handle
-			Else
-				pRenderTarget->lpVtbl->FillRectangle(pRenderTarget, @Type<D2D1_RECT_F>(rc.Left, rc.Top, rc.Right, rc.Bottom), pBrushBackground)
-			End If
+			FillRect bufDC, @rc, This.Canvas.Brush.Handle
 		If bDividedX Then
 				SetRect(@rc, ScaleX(iDividedX - 17), ScaleY(dwClientY - 17), ScaleX(iDividedX), ScaleY(dwClientY))
-				If pRenderTarget = 0 Then
-					FillRect bufDC, @rc, This.Canvas.Brush.Handle
-				Else
-					pRenderTarget->lpVtbl->FillRectangle(pRenderTarget, @Type<D2D1_RECT_F>(rc.Left, rc.Top, rc.Right, rc.Bottom), pBrushBackground)
-				End If
+				FillRect bufDC, @rc, This.Canvas.Brush.Handle
 		End If
 		If bDividedX Then
 				SetRect(@rc, ScaleX(iDividedX), -1, ScaleX(iDividedX + 7), ScaleY(dwClientY) + 1)
-				If pRenderTarget = 0 Then
-					If g_darkModeEnabled Then
-						This.Canvas.Pen.Color = BGR(130, 135, 144)
-						This.Canvas.Brush.Color = darkBkColor
-					Else
-						This.Canvas.Pen.Color = BGR(217, 217, 217)
-						This.Canvas.Brush.Color = clBtnFace
-					End If
-					Rectangle bufDC, rc.Left, rc.Top, rc.Right, rc.Bottom
+				If g_darkModeEnabled Then
+					This.Canvas.Pen.Color = BGR(130, 135, 144)
+					This.Canvas.Brush.Color = darkBkColor
 				Else
-					pRenderTarget->lpVtbl->FillRectangle(pRenderTarget, @Type<D2D1_RECT_F>(rc.Left, rc.Top, rc.Right, rc.Bottom), pBrushBackground)
-					pRenderTarget->lpVtbl->DrawRectangle(pRenderTarget, @Type<D2D1_RECT_F>(rc.Left, rc.Top, rc.Right, rc.Bottom), pBrushForeground, 1)
+					This.Canvas.Pen.Color = BGR(217, 217, 217)
+					This.Canvas.Brush.Color = clBtnFace
 				End If
+				Rectangle bufDC, rc.Left, rc.Top, rc.Right, rc.Bottom
 		ElseIf bDividedY Then
 				SetRect(@rc, -1, ScaleY(iDividedY), ScaleX(dwClientX) + 1, ScaleY(iDividedY + 7))
-				If pRenderTarget = 0 Then
-					If g_darkModeEnabled Then
-						This.Canvas.Pen.Color = BGR(130, 135, 144)
-						This.Canvas.Brush.Color = darkBkColor
-					Else
-						This.Canvas.Pen.Color = BGR(217, 217, 217)
-						This.Canvas.Brush.Color = clBtnFace
-					End If
-					Rectangle bufDC, rc.Left, rc.Top, rc.Right, rc.Bottom
+				If g_darkModeEnabled Then
+					This.Canvas.Pen.Color = BGR(130, 135, 144)
+					This.Canvas.Brush.Color = darkBkColor
 				Else
-					pRenderTarget->lpVtbl->FillRectangle(pRenderTarget, @Type<D2D1_RECT_F>(rc.Left, rc.Top, rc.Right, rc.Bottom), pBrushBackground)
-					pRenderTarget->lpVtbl->DrawRectangle(pRenderTarget, @Type<D2D1_RECT_F>(rc.Left, rc.Top, rc.Right, rc.Bottom), pBrushForeground, 1)
+					This.Canvas.Pen.Color = BGR(217, 217, 217)
+					This.Canvas.Brush.Color = clBtnFace
 				End If
+				Rectangle bufDC, rc.Left, rc.Top, rc.Right, rc.Bottom
 		End If
-			If pRenderTarget <> 0 Then
-				If pBrushForeground Then pBrushForeground->lpVtbl->Release(pBrushForeground): pBrushForeground = 0
-				If pBrushBackground Then pBrushBackground->lpVtbl->Release(pBrushBackground): pBrushBackground = 0
-			End If
 		If bInDivideX Then
 				SetRect(@rc, ScaleX(iDivideX), 0, ScaleX(iDivideX + 5), ScaleY(dwClientY))
-				If pRenderTarget = 0 Then
-					InvertRect bufDC, @rc
-				Else
-					pRenderTarget->lpVtbl->CreateSolidColorBrush(pRenderTarget, @Type<D2D1_COLOR_F>(0.0, 0.0, 0.0, 1.0), 0, @pBrushBackground)
-					pRenderTarget->lpVtbl->FillRectangle(pRenderTarget, @Type<D2D1_RECT_F>(rc.Left, rc.Top, rc.Right, rc.Bottom), pBrushBackground)
-					If pBrushBackground Then pBrushBackground->lpVtbl->Release(pBrushBackground): pBrushBackground = 0
-				End If
+				InvertRect bufDC, @rc
 		ElseIf bInDivideY Then
 				SetRect(@rc, 0, ScaleY(iDivideY), ScaleX(dwClientX), ScaleY(iDivideY + 5))
-				If pRenderTarget = 0 Then
-					InvertRect bufDC, @rc
-				Else
-					pRenderTarget->lpVtbl->CreateSolidColorBrush(pRenderTarget, @Type<D2D1_COLOR_F>(0.0, 0.0, 0.0, 1.0), 0, @pBrushBackground)
-					pRenderTarget->lpVtbl->FillRectangle(pRenderTarget, @Type<D2D1_RECT_F>(rc.Left, rc.Top, rc.Right, rc.Bottom), pBrushBackground)
-					If pBrushBackground Then pBrushBackground->lpVtbl->Release(pBrushBackground): pBrushBackground = 0
-				End If
+				InvertRect bufDC, @rc
 		End If
 			If bInMiddleScroll Then
-					If pRenderTarget = 0 Then
-						This.Canvas.Pen.Color = SpaceIdentifiers.Foreground
-						This.Canvas.Brush.Color = SpaceIdentifiers.Foreground
-						'					SelectObject(bufDC, This.Canvas.Pen.Handle)
-						'					SelectObject(bufDC, This.Canvas.Brush.Handle)
-						Ellipse bufDC, ScaleX(MButtonX + 10), ScaleY(MButtonY + 10), ScaleX(MButtonX + 14), ScaleY(MButtonY + 14)
-						Dim pPoint1(3) As ..Point = {(ScaleX(MButtonX + 11), ScaleY(MButtonY + 1)), (ScaleX(MButtonX + 7), ScaleY(MButtonY + 5)), (ScaleX(MButtonX + 16), ScaleY(MButtonY + 5)), (ScaleX(MButtonX + 12), ScaleY(MButtonY + 1))}
-						Polygon(bufDC, @pPoint1(0), 4)
-						Dim pPoint2(3) As ..Point = {(ScaleX(MButtonX + 11), ScaleY(MButtonY + 22)), (ScaleX(MButtonX + 7), ScaleY(MButtonY + 18)), (ScaleX(MButtonX + 16), ScaleY(MButtonY + 18)), (ScaleX(MButtonX + 12), ScaleY(MButtonY + 22))}
-						Polygon(bufDC, @pPoint2(0), 4)
-						Dim pPoint3(3) As ..Point = {(ScaleX(MButtonX + 1), ScaleY(MButtonY + 11)), (ScaleX(MButtonX + 5), ScaleY(MButtonY + 7)), (ScaleX(MButtonX + 5), ScaleY(MButtonY + 16)), (ScaleX(MButtonX + 1), ScaleY(MButtonY + 12))}
-						Polygon(bufDC, @pPoint3(0), 4)
-						Dim pPoint4(3) As ..Point = {(ScaleX(MButtonX + 22), ScaleY(MButtonY + 11)), (ScaleX(MButtonX + 18), ScaleY(MButtonY + 7)), (ScaleX(MButtonX + 18), ScaleY(MButtonY + 16)), (ScaleX(MButtonX + 22), ScaleY(MButtonY + 12))}
-						Polygon(bufDC, @pPoint4(0), 4)
-					Else
-						pRenderTarget->lpVtbl->CreateSolidColorBrush(pRenderTarget, @Type<D2D1_COLOR_F>(SpaceIdentifiers.ForegroundRed, SpaceIdentifiers.ForegroundGreen, SpaceIdentifiers.ForegroundBlue, 1.0), 0, @pBrushForeground)
-						pRenderTarget->lpVtbl->FillEllipse(pRenderTarget, Type<D2D1_ELLIPSE>(Type<D2D1_POINT_2F>(ScaleX(MButtonX + 10 + 2), ScaleY(MButtonY + 10 + 2)), ScaleX(2), ScaleY(2)), pBrushForeground)
-						Dim pPoint1(3) As D2D1_POINT_2F = { _
-						(ScaleX(MButtonX + 11), ScaleY(MButtonY + 1)), _
-						(ScaleX(MButtonX + 7),  ScaleY(MButtonY + 5)), _
-						(ScaleX(MButtonX + 16), ScaleY(MButtonY + 5)), _
-						(ScaleX(MButtonX + 11), ScaleY(MButtonY + 1)) }
-						
-						Dim pPoint2(3) As D2D1_POINT_2F = { _
-						(ScaleX(MButtonX + 11), ScaleY(MButtonY + 22)), _
-						(ScaleX(MButtonX + 7),  ScaleY(MButtonY + 18)), _
-						(ScaleX(MButtonX + 16), ScaleY(MButtonY + 18)), _
-						(ScaleX(MButtonX + 11), ScaleY(MButtonY + 22)) }
-						
-						Dim pPoint3(3) As D2D1_POINT_2F = { _
-						(ScaleX(MButtonX + 1),  ScaleY(MButtonY + 11)), _
-						(ScaleX(MButtonX + 5),  ScaleY(MButtonY + 7)), _
-						(ScaleX(MButtonX + 5),  ScaleY(MButtonY + 16)), _
-						(ScaleX(MButtonX + 1),  ScaleY(MButtonY + 11)) }
-						
-						Dim pPoint4(3) As D2D1_POINT_2F = { _
-						(ScaleX(MButtonX + 22), ScaleY(MButtonY + 11)), _
-						(ScaleX(MButtonX + 18), ScaleY(MButtonY + 7)), _
-						(ScaleX(MButtonX + 18), ScaleY(MButtonY + 16)), _
-						(ScaleX(MButtonX + 22), ScaleY(MButtonY + 11)) }
-						FillPolygon(pPoint1(), pRenderTarget, pBrushForeground)
-						FillPolygon(pPoint2(), pRenderTarget, pBrushForeground)
-						FillPolygon(pPoint3(), pRenderTarget, pBrushForeground)
-						FillPolygon(pPoint4(), pRenderTarget, pBrushForeground)
-						If pBrushForeground Then pBrushForeground->lpVtbl->Release(pBrushForeground): pBrushForeground = 0
-					End If
+					This.Canvas.Pen.Color = SpaceIdentifiers.Foreground
+					This.Canvas.Brush.Color = SpaceIdentifiers.Foreground
+					'					SelectObject(bufDC, This.Canvas.Pen.Handle)
+					'					SelectObject(bufDC, This.Canvas.Brush.Handle)
+					Ellipse bufDC, ScaleX(MButtonX + 10), ScaleY(MButtonY + 10), ScaleX(MButtonX + 14), ScaleY(MButtonY + 14)
+					Dim pPoint1(3) As ..Point = {(ScaleX(MButtonX + 11), ScaleY(MButtonY + 1)), (ScaleX(MButtonX + 7), ScaleY(MButtonY + 5)), (ScaleX(MButtonX + 16), ScaleY(MButtonY + 5)), (ScaleX(MButtonX + 12), ScaleY(MButtonY + 1))}
+					Polygon(bufDC, @pPoint1(0), 4)
+					Dim pPoint2(3) As ..Point = {(ScaleX(MButtonX + 11), ScaleY(MButtonY + 22)), (ScaleX(MButtonX + 7), ScaleY(MButtonY + 18)), (ScaleX(MButtonX + 16), ScaleY(MButtonY + 18)), (ScaleX(MButtonX + 12), ScaleY(MButtonY + 22))}
+					Polygon(bufDC, @pPoint2(0), 4)
+					Dim pPoint3(3) As ..Point = {(ScaleX(MButtonX + 1), ScaleY(MButtonY + 11)), (ScaleX(MButtonX + 5), ScaleY(MButtonY + 7)), (ScaleX(MButtonX + 5), ScaleY(MButtonY + 16)), (ScaleX(MButtonX + 1), ScaleY(MButtonY + 12))}
+					Polygon(bufDC, @pPoint3(0), 4)
+					Dim pPoint4(3) As ..Point = {(ScaleX(MButtonX + 22), ScaleY(MButtonY + 11)), (ScaleX(MButtonX + 18), ScaleY(MButtonY + 7)), (ScaleX(MButtonX + 18), ScaleY(MButtonY + 16)), (ScaleX(MButtonX + 22), ScaleY(MButtonY + 12))}
+					Polygon(bufDC, @pPoint4(0), 4)
 			End If
-			If pRenderTarget <> 0 Then
-				pRenderTarget->lpVtbl->EndDraw(pRenderTarget, 0, 0)
-				pp.DirtyRectsCount = 0
-				pp.pDirtyRects = 0
-				pp.pScrollRect = 0
-				pp.pScrollOffset = 0
-				pSwapChain->lpVtbl->Present1(pSwapChain, 1, 0, @pp)
-			Else
 				BitBlt(hd, 0, 0, ScaleX(dwClientX), ScaleY(dwClientY), bufDC, 0, 0, SRCCOPY)
 				'DeleteDC bufDC
 				'DeleteObject bufBMP
 				ReleaseDC FHandle, hd
 				ShowCaret(FHandle)
-			End If
 		This.Canvas.HandleSetted = False
 		OlddwClientX = dwClientX
 		OlddwClientY = dwClientY
@@ -6368,9 +5867,6 @@ Namespace My.Sys.Forms
 				'ScrollToCaret
 				ShowCaret(FHandle)
 				FocusEC = @This
-				If pRenderTarget <> 0 Then
-					SetTimer FHandle, 2, BlinkTime, @EC_TimerProcBlink
-				End If
 			Case WM_KILLFOCUS
 				HideCaret(FHandle)
 				DestroyCaret()
@@ -6381,9 +5877,6 @@ Namespace My.Sys.Forms
 				End If
 				KillTimer FHandle, 2
 				CaretOn = False
-				If pRenderTarget <> 0 Then
-					PaintControl
-				End If
 			Case WM_UNDO
 				Undo
 				'Case WM_REDO
@@ -7113,8 +6606,6 @@ Namespace My.Sys.Forms
 						'						AllowDarkModeForWindow(.FHandle, g_darkModeEnabled)
 						'						UpdateWindow(.FHandle)
 					End If
-					If g_Direct2DEnabled Then
-					End If
 				'Var s1Pos = 100, s1Min = 1, s1Max = 100
 				'SetScrollRange(.FHandle, SB_CTL, s1Min, s1Max, TRUE)
 				'SetScrollPos(.FHandle, SB_CTL, s1Pos, TRUE)
@@ -7194,7 +6685,6 @@ Namespace My.Sys.Forms
 			cboIntellisense.Items.Clear
 			If bufDC Then DeleteDC bufDC
 			If bufBMP Then DeleteObject bufBMP
-			ReleaseDirect2D
 		WDeAllocate(FLine)
 		WDeAllocate(FLineLeft)
 		WDeAllocate(FLineRight)

@@ -19,7 +19,6 @@ File=mff/Component.bi
 File=mff/ContainerControl.bi
 File=mff/Control.bi
 File=mff/Cursor.bi
-File=mff/D2D1/D2D1.bi
 File=mff/DarkMode/DarkMode.bi
 File=mff/DateTimePicker.bi
 File=mff/Dialogs.bi

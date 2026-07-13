@@ -11,7 +11,6 @@
 
 #include once "Graphics.bi"
 #include once "Component.bi"
-	#include once "D2D1/D2D1.bi"
 	#include once "crt/limits.bi"
 
 Namespace My.Sys.Drawing
@@ -103,26 +102,15 @@ Namespace My.Sys.Drawing
 		imgOffsetY      As Double
 		FMoveToX        As Double
 		FMoveToY        As Double
-		FUseDirect2D    As Boolean
 	Protected:
 				Dim FGdipStartupInput As GdiplusStartupInput  'GDI+ startup info
 			Dim PrevWidth As Integer = 0
 			Dim PrevHeight As Integer = 0
-			Dim pRenderTarget As ID2D1DeviceContext Ptr = 0
-			Dim pTargetBitmap As ID2D1Bitmap1 Ptr = 0
-			Dim pSwapChain As IDXGISwapChain1 Ptr = 0
-			Dim pSurface As IDXGISurface Ptr = 0
-			Dim pTexture As ID3D11Texture2D Ptr = 0
-			Dim pFormat As IDWriteTextFormat Ptr = 0
-			Dim pForegroundBrush As ID2D1Brush Ptr = 0
-			Dim pBackgroundBrush As ID2D1Brush Ptr = 0
-			Declare Sub ReleaseDirect2D
 	Public:
 		HandleSetted As Boolean
 		FillGradient As Boolean
 		FillOpacity As Long
 		BackColorOpacity As Long
-			Declare Function CreateD2DBitmapFromHBITMAP(ByVal pRT As ID2D1DeviceContext Ptr, ByVal hBmp As HBITMAP, ByRef pOut As ID2D1Bitmap Ptr) As HRESULT
 			Handle  As HDC
 			GdipToken As ULONG_PTR
 			GdipGraphics As GpGraphics Ptr
@@ -166,8 +154,6 @@ Namespace My.Sys.Drawing
 		Declare Property HatchStyle(Value As HatchStyles)
 		Declare Property FillStyles As BrushStyles
 		Declare Property FillStyles(Value As BrushStyles)
-		Declare Property UseDirect2D As Boolean
-		Declare Property UseDirect2D(Value As Boolean)
 		Declare Sub Cls(x As Double = 0, y As Double = 0, x1 As Double = 0, y1 As Double = 0)
 		Declare Sub MoveTo(x As Double,y As Double)
 		Declare Sub LineTo(x As Double,y As Double)

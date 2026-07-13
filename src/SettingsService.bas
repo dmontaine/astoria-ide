@@ -171,12 +171,6 @@ Sub LoadSettings
 	GlobalSettings.ShowClassesExplorerOnOpenWindow = iniSettings.ReadBool("Options", "ShowClassesExplorerOnOpenWindow", True)
 	ShowHorizontalSeparatorLines = iniSettings.ReadBool("Options", "ShowHorizontalSeparatorLines", True)
 	ShowHolidayFrame = iniSettings.ReadBool("Options", "ShowHolidayFrame", True)
-	UseDirect2D = iniSettings.ReadBool("Options", "UseDirect2D", False)
-		' Prefer reliable GDI rendering until D2D path is explicitly re-enabled.
-		If UseDirect2D Then
-			UseDirect2D = False
-			iniSettings.WriteBool("Options", "UseDirect2D", False)
-		End If
 	HighlightBrackets = iniSettings.ReadBool("Options", "HighlightBrackets", True)
 	HighlightCurrentLine = iniSettings.ReadBool("Options", "HighlightCurrentLine", True)
 	HighlightCurrentWord = iniSettings.ReadBool("Options", "HighlightCurrentWord", True)
@@ -229,7 +223,6 @@ Sub LoadSettings
 	pfSplash->lblProcess.Text = ("Load On Startup") & ": " & ("KeyWords")
 	LoadKeyWords
 	LoadTheme
-		LoadD2D1
 	EditControlFrame.LoadFromFile(ExePath & "/Resources/Frame.png")
 End Sub
 

@@ -590,7 +590,6 @@ Namespace My
 			DeleteObject g_brItemBackground
 			DeleteObject g_brItemBackgroundHot
 			DeleteObject g_brItemBackgroundSelected
-			UnloadD2D1
 			OleUninitialize()
 	End Destructor
 End Namespace

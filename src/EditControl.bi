@@ -13,7 +13,6 @@
 #include once "mff/Application.bi"
 #include once "mff/ListView.bi"
 #include once "mff/ToolTips.bi"
-	#include once "mff/D2D1/D2D1.bi"
 '#include once "Main.bi"
 
 '' 2C (DR-1/DR-10): EditControl.Breakpoint arms/clears a live GDB breakpoint via arm_breakpoint,
@@ -56,7 +55,6 @@ Common Shared As Boolean ChangeKeyWordsCase
 Common Shared As Boolean ChangeEndingType
 Common Shared As Boolean AddSpacesToOperators
 Common Shared As Boolean WithFrame
-Common Shared As Boolean UseDirect2D
 Common Shared As WStringOrStringList Ptr pkeywordsAsm, pkeywords0, pkeywords1, pkeywords2 ', pkeywords3
 
 Type ECColorScheme
@@ -396,18 +394,6 @@ Namespace My.Sys.Forms
 		Dim jPos As Integer
 		Dim jPP As Integer = 0
 		Dim iPPos As Integer
-			'Dim pRenderTarget As ID2D1RenderTarget Ptr = 0
-			Dim pRenderTarget As ID2D1DeviceContext Ptr = 0
-			Dim pTargetBitmap As ID2D1Bitmap1 Ptr = 0
-			Dim pSwapChain As IDXGISwapChain1 Ptr = 0
-			Dim pSurface As IDXGISurface Ptr = 0
-			Dim pTexture As ID3D11Texture2D Ptr = 0
-			Dim pFormat As IDWriteTextFormat Ptr = 0
-			Dim pp As DXGI_PRESENT_PARAMETERS
-			Dim pBrushForeground As ID2D1Brush Ptr = 0
-			Dim pBrushBackground As ID2D1Brush Ptr = 0
-			Dim pLayout As IDWriteTextLayout Ptr = 0
-			Dim Metrics As DWRITE_TEXT_METRICS
 		Dim As Integer PosiBD, tIndex, Pos1
 		Dim As Boolean bKeyWord, bWithoutWith, TwoDots, OneDot
 		Dim As WString * 255 OriginalCaseWord, OldTypeName, TypeName
@@ -536,7 +522,6 @@ Namespace My.Sys.Forms
 			Declare Static Sub EC_TimerProc(HWND As HWND, uMsg As UINT, idEvent As UINT_PTR, dwTime As DWORD)
 			Declare Static Sub EC_TimerProcBlink(HWND As HWND, uMsg As UINT, idEvent As UINT_PTR, dwTime As DWORD)
 			Declare Sub SetDark(Value As Boolean)
-			Declare Sub ReleaseDirect2D
 			Declare Sub SetClientSize()
 		Declare Function deltaToScrollAmount(lDelta As Integer) As Integer
 		Declare Sub MiddleScroll

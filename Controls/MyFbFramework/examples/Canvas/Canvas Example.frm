@@ -63,7 +63,6 @@
 		Declare Sub RadioGDI_Click(ByRef Sender As CheckBox)
 		Declare Sub PictureBK_Click(ByRef Sender As Control)
 		Declare Sub RadioGDIPlus_Click(ByRef Sender As RadioButton)
-		Declare Sub RadioD2D1_Click(ByRef Sender As RadioButton)
 		Declare Constructor
 		
 		Dim As CommandButton cmdDrawButterfly, cmdGDIDraw, cmdGDICls
@@ -74,7 +73,7 @@
 		Dim As Panel  Panel1_Picture(2), Panel1_Form(1)
 		Dim As RichTextBox txtControlName
 		Dim As CheckBox chkTransparent, chkCenterImage, chkbackground, chkDoubleBuffered
-		Dim As RadioButton RadioGDIPlus, RadioD2D1, RadioGDI
+		Dim As RadioButton RadioGDIPlus, RadioGDI
 	End Type
 	
 	Constructor Form1Type
@@ -126,7 +125,6 @@
 			.Graphic.CenterImage= True
 			.Graphic.StretchImage= StretchMode.smStretchProportional
 			' .Graphic.ScaleFactor = 2
-			.Canvas.UseDirect2D = True
 			' .fill
 			.Font.Size= 14
 			' .Canvas.Pen.Color = clRed
@@ -499,19 +497,6 @@
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As RadioButton), @RadioGDIPlus_Click)
 			.Parent = @This
 		End With
-		' RadioD2D1
-		With RadioD2D1
-			.Name = "RadioD2D1"
-			.Text = "Direct2D "
-			.TabIndex = 39
-			.ControlIndex = 24
-			.Anchor.Left = AnchorStyle.asAnchor
-			.Anchor.Bottom = AnchorStyle.asAnchor
-			.SetBounds 500, 370, 90, 20
-			.Designer = @This
-			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As RadioButton), @RadioD2D1_Click)
-			.Parent = @This
-		End With
 	End Constructor
 	
 	Dim Shared Form1 As Form1Type
@@ -538,7 +523,6 @@ Private Sub Form1Type.cmdDrawButterfly_Click(ByRef Sender As Control)
 	' Picture2_Picture(1).Visible= False
 	' Panel1_Picture(1).Visible= False
 	With PictureBK.Canvas
-		.UseDirect2D = RadioGDI.Checked
 		.Scale(-10, -10, 10, 10)
 		.BackColor = PictureBK.BackColor
 		.DrawColor = clRed ' Will lost the background if not set the value first
@@ -597,7 +581,6 @@ Private Sub Form1Type.PictureBK_Paint(ByRef Sender As Control, ByRef Canvas As M
 	PictureBK.Graphic.CenterImage = chkCenterImage.Checked
 	PictureBK.Transparent = chkTransparent.Checked
 	PictureBK.DoubleBuffered = chkDoubleBuffered.Checked
-	Canvas.UseDirect2D = RadioD2D1.Checked
 	Canvas.UsingGdip = RadioGDIPlus.Checked
 	Canvas.FillColor = 16744448
 	With Canvas
@@ -715,17 +698,8 @@ Private Sub Form1Type.PictureBK_Paint(ByRef Sender As Control, ByRef Canvas As M
 		' TextOut(20, 220, TEXT("GDI"), 11);
 		' .TransferDoubleBuffer
 	End With
-	
-	' > BeginFigure(startPoint, D2D1_FIGURE_BEGIN_FILLED)
-	'
-	' Dim lines(1) As D2D1_POINT_2F lines(0).x = 100 : lines(0).y = 100(1).x = 200 : lines(1).y = 100 > AddLines(@lines(0), 2)
-	'
-	' Dim arc As D2D1_ARC_SEGMENT.point.x = 200 : arc.point.Y = 200.size.Width = 50 : arc.size.Height = 50.rotationAngle = 0.sweepDirection = D2D1_SWEEP_DIRECTION_CLOCKWISE.arcSize = D2D1_ARC_SIZE_SMALL>AddArc(@arc)
-	'
-	' Dim bezier As D2D1_BEZIER_SEGMENT.point1.x = 200 : bezier.point1.y = 250.point2.x = 150 : bezier.point2.y = 300.point3.x = 100 : bezier.point3.y = 250>AddBeziers(@bezier, 1)
-	' >EndFigure(D2D1_FIGURE_END_CLOSED)>Close()
-	
-	
+
+
 	
 	If cmdSelection = 1 Then cmdGDIDraw_Click(Sender) Else cmdDrawButterfly_Click(Sender)
 	Me.Caption = "Drawing With GdipToken="  & PictureBK.Canvas.GdipToken & "  Elapsed Time: " & Format(Timer - T, "0.0000") & "s"
@@ -838,7 +812,6 @@ Private Sub Form1Type.Form_Show(ByRef Sender As Form)
 	With PictureBK.Canvas
 		' '.FillColor = 16744448
 		' .UsingGdip = RadioGDI.Checked
-		.UseDirect2D = RadioGDI.Checked
 	End With
 End Sub
 
@@ -906,11 +879,6 @@ Private Sub Form1Type.cmdGDIDraw_Click(ByRef Sender As Control)
 End Sub
 
 Private Sub Form1Type.RadioGDIPlus_Click(ByRef Sender As RadioButton)
-	PictureBK.Canvas.Cls ' if switch must be use cls for init
-	PictureBK.Invalidate
-End Sub
-
-Private Sub Form1Type.RadioD2D1_Click(ByRef Sender As RadioButton)
 	PictureBK.Canvas.Cls ' if switch must be use cls for init
 	PictureBK.Invalidate
 End Sub

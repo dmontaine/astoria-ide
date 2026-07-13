@@ -1,6 +1,6 @@
 # Astoria-IDE — Project Status & Handoff
 
-**Last updated:** 2026-07-13 11:05:46 -07:00 (last push)
+**Last updated:** 2026-07-13 12:51:22 -07:00 (last push)
 **Repository:** [github.com/dmontaine/astoria-ide](https://github.com/dmontaine/astoria-ide)
 **Local path:** C:\Users\don\Astoria-IDE
 
@@ -18,7 +18,7 @@ All DR-1 through DR-16 defects are fixed and owner-verified. This retained ancho
 - The project title is **Astoria-IDE**. The GitHub repository name remains astoria-ide.
 - **Debugger Reliability (DR-1 through DR-16) is closed:** all known defects were fixed and owner-verified.
 - **MyFbFramework review is closed:** the six applicable tasks are complete; the remaining three became moot when HTTPServer was removed.
-- **H-1 is complete:** `Canvas.Cls` no longer creates a GDI brush on its Direct2D clear path and closes a Direct2D drawing session before returning. `mff64.dll` and `astoria.exe` rebuilt successfully; owner smoke test passed. Direct2D remains force-disabled in the IDE, so no live Direct2D-path test was available.
+- **H-1 is complete:** `Canvas.Cls` no longer creates a GDI brush on its Direct2D clear path and closes a Direct2D drawing session before returning. `mff64.dll` and `astoria.exe` rebuilt successfully; owner smoke test passed. (Direct2D itself was fully removed the same day — see below — so this fix is now only preserved in git history, recoverable per [DIRECT2D_REMOVAL.md](DIRECT2D_REMOVAL.md).)
 - **H-4 is complete:** removed the duplicate GDI `FillRect` in `Canvas.Cls`. `mff64.dll` and `astoria.exe` rebuilt successfully; owner smoke test passed.
 - **View menu owner review is complete:** owner walkthrough surfaced six real bugs, all fixed and rebuilt clean:
   - Code/Form/Code and Form were enabled for any `.bas` file, not just form-capable ones (`.frm`, or a file whose design already found a class/controls); fixed across all four sync points (`tabCode_SelChange`, `ApplyFormTabView`, `ApplyView`, `ChangeMenuItemsEnabled`).
@@ -33,6 +33,8 @@ All DR-1 through DR-16 defects are fixed and owner-verified. This retained ancho
   - **Default Projects Path:** owner decided the default must stay `./Projects` (relative to `ExePath`), never Documents, unless the user explicitly points it elsewhere via Tools ▸ Options ▸ General ▸ Projects Path — already matched: `SettingsService.bas` reads `iniSettings.ReadString("Options", "ProjectsPath", "./Projects")`. No code change needed.
   - **Theme storage:** already matched the decision — default and user themes both live in `Settings/Themes/` with no split location today. No code change needed; decision recorded as confirming existing behavior (in-place edits to a shipped theme's `.ini` remain expected behavior, not a bug, per this decision).
 - **Run menu fully consolidated:** removed both the "More Build Options" and "More Debug Options" submenus; all their items (Rebuild All, Clean, Syntax Check, Make, Parameters, Run Without Building, Run To Cursor, Continue, Break, Clear All Breakpoints, Add Watch, Set/Show Next Statement, Use Profiler, GDB Command) now sit directly in the top-level Run menu, per owner's chosen "flatten into top level" approach. No commands remain split off into a buried submenu. Rebuilt clean.
+- **Toolbar tooltip audit complete:** 13 buttons across the main toolbars (Pin ×3 on the left/right/bottom panels, Text/Component in the Form toolbox, Categorized/Properties in the Properties and Events panels, Clear Output/Erase Immediate Window/Add Watch/Remove Watch/Update in the bottom panel) had hint text already written but `ShowHint` left `False`, so the tooltip silently never displayed — fixed by setting `ShowHint = True`. `frmImageManager.frm`'s toolbar (Add/Add From.../Change/Remove/Up/Down/Sort) had no hint text at all — added. Deliberately left out of scope: the toolbar buttons that host an embedded child control (build-configuration combo, project/toolbox/properties/events search boxes, code-editor class/function dropdowns) — a tooltip there needs to go on the child control, not the `ToolButton` wrapper, which is a different mechanism than the fix applied here. Rebuilt clean.
+- **Direct2D fully removed:** owner decision — GDI/GDI+ is now the sole rendering path everywhere (both the IDE's own code editor and the MFF `Canvas` control end-user programs use), replacing the "Use Direct2D" toggle discussion. Direct2D had been force-disabled its entire life (never live-tested) and already had one real bug found in it (H-1); rather than keep a second, unproven rendering path around, it was stripped entirely: `src/EditControl.bas`/`.bi`, `Controls/MyFbFramework/mff/Canvas.bas`/`.bi`, the `D2D1.bi` API binding module (deleted outright, ~2760 lines), the toolbar button/Options checkbox/INI setting, and the Canvas example project's Direct2D radio option. GDI/GDI+ behavior is untouched. Full rationale, scope, and git-based recovery instructions in [DIRECT2D_REMOVAL.md](DIRECT2D_REMOVAL.md) — owner's stated plan is to reconsider Direct2D only once proven stable, and to make it the *sole* default then, not a re-added option. Rebuilt clean (0 errors, 0 warnings) and owner-verified live in the running IDE — toolbar, Run menu, Options dialog, and the six View-menu fixes all re-exercised interactively with no regressions found.
 - Nothing is awaiting an owner response. The remaining items below are deferred or ready for a new, explicitly selected task.
 
 ## Next ready work
@@ -45,7 +47,6 @@ For the reasoning, exact code locations, and prior hot-path findings, see [HISTO
 
 ### Immediate
 
-- [ ] Audit toolbar buttons and add missing tooltips.
 - [ ] Add a missing-executable check and user-visible message to the non-debug RunProgram/RunPr path.
 
 ### MFF hygiene and technical debt
@@ -64,6 +65,7 @@ For the reasoning, exact code locations, and prior hot-path findings, see [HISTO
 - [ ] Design-workspace status bar.
 - [ ] Establish an explicit upstream-sync strategy.
 - [ ] Fork-specific wiki/documentation.
+- [ ] Add tooltips to the embedded-child-control toolbar buttons (build-configuration combo, the four search boxes, code-editor class/function dropdowns) — needs a hint on the child control itself, not the `ToolButton` wrapper. Out of scope for the 2026-07-13 toolbar tooltip audit.
 
 ## Essential gotchas
 
@@ -106,5 +108,6 @@ For the reasoning, exact code locations, and prior hot-path findings, see [HISTO
 - [HISTORY.md](HISTORY.md) — detailed investigations, completed sub-projects, dated session notes, and rationale.
 - [CHANGELOG.md](CHANGELOG.md) — shipped work and commit history.
 - [ROADMAP.md](ROADMAP.md) — full enhancement specifications.
+- [DIRECT2D_REMOVAL.md](DIRECT2D_REMOVAL.md) — why Direct2D was removed (2026-07-13), full scope, and git-based instructions to bring it back.
 
 *End of status document.*

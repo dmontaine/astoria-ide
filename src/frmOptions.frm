@@ -733,19 +733,6 @@ pfOptions = @fOptions
 		.Designer = @This
 		.Parent = @grbDisplay
 	End With
-		' chkUseDirect2D
-	With chkUseDirect2D
-		.Name = "chkUseDirect2D"
-		.Text = ("Smoother text rendering (Direct2D)")
-		.TabIndex = 278
-		.Align = DockStyle.alTop
-		.AutoSize = True
-		.ControlIndex = 10
-		.Constraints.Height = 21
-		.SetBounds 0, 212, 117, 21
-		.Designer = @This
-		.Parent = @grbDisplay
-	End With
 		' chkHighlightCurrentWord
 	With chkHighlightCurrentWord
 		.Name = "chkHighlightCurrentWord"
@@ -2604,7 +2591,6 @@ Sub frmOptions.LoadSettings()
 		.chkShowClassesExplorerOnOpenWindow.Checked = GlobalSettings.ShowClassesExplorerOnOpenWindow
 		.chkShowHorizontalSeparatorLines.Checked = ShowHorizontalSeparatorLines
 		.chkShowHolidayFrame.Checked = ShowHolidayFrame
-		.chkUseDirect2D.Checked = UseDirect2D
 		.chkHighlightBrackets.Checked = HighlightBrackets
 		.chkHighlightCurrentLine.Checked = HighlightCurrentLine
 		.chkHighlightCurrentWord.Checked = HighlightCurrentWord
@@ -3082,7 +3068,6 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		GlobalSettings.ShowClassesExplorerOnOpenWindow = .chkShowClassesExplorerOnOpenWindow.Checked
 		ShowHorizontalSeparatorLines = .chkShowHorizontalSeparatorLines.Checked
 		ShowHolidayFrame = .chkShowHolidayFrame.Checked
-		UseDirect2D = .chkUseDirect2D.Checked
 		HighlightBrackets = .chkHighlightBrackets.Checked
 		HighlightCurrentLine = .chkHighlightCurrentLine.Checked
 		HighlightCurrentWord = .chkHighlightCurrentWord.Checked
@@ -3333,9 +3318,6 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		End If
 		If IniValueChangedBool(piniSettings, "Options", "ShowHolidayFrame", ShowHolidayFrame) Then
 			piniSettings->WriteBool "Options", "ShowHolidayFrame", ShowHolidayFrame
-		End If
-		If IniValueChangedBool(piniSettings, "Options", "UseDirect2D", UseDirect2D) Then
-			piniSettings->WriteBool "Options", "UseDirect2D", UseDirect2D
 		End If
 		If IniValueChangedBool(piniSettings, "Options", "HighlightBrackets", HighlightBrackets) Then
 			piniSettings->WriteBool "Options", "HighlightBrackets", HighlightBrackets

@@ -124,7 +124,7 @@ Dim Shared As MenuItem Ptr miAlignLefts, miAlignCenters, miAlignRights, miAlignT
 Dim Shared As MenuItem Ptr miFormFormat ' D1 (2026-07-07): top-level Designer menu; disabled when no form with controls is active
 Dim Shared As MenuItem Ptr miShowWithFolders, miShowWithoutFolders, miShowAsFolder
 Dim Shared As ToolButton Ptr tbtAlignLefts, tbtAlignCenters, tbtAlignRights, tbtAlignTops, tbtAlignMiddles, tbtAlignBottoms, tbtAlignToGrid, tbtMakeSameSizeWidth, tbtMakeSameSizeHeight, tbtMakeSameSizeBoth, tbtSizeToGrid, tbtHorizontalSpacingMakeEqual, tbtHorizontalSpacingIncrease, tbtHorizontalSpacingDecrease, tbtHorizontalSpacingRemove, tbtVerticalSpacingMakeEqual, tbtVerticalSpacingIncrease, tbtVerticalSpacingDecrease, tbtVerticalSpacingRemove, tbtCenterInParentHorizontally, tbtCenterInParentVertically, tbtOrderBringToFront, tbtOrderSendToBack, tbtLockControls
-Dim Shared As ToolButton Ptr tbtSave, tbtSaveAll, tbtSyntaxCheck, tbtSuggestions, tbtCompile, tbtUndo, tbtRedo, tbtCut, tbtCopy, tbtPaste, tbtSingleComment, tbtFormat, tbtUnformat, tbtCompleteWord, tbtParameterInfo, tbtFind, tbtUseDirect2D, tbtRemoveFileFromProject, tbtStartWithCompile, tbtStart, tbtBreak, tbtEnd, tbtUseDebugger, tbtNotSetted, tbtConsole, tbtGUI, tbtStepInto, tbtStepOver, tbtStepOut, tbtRunToCursor, tbtToggleBreakpoint, tbtSetNextStatement, tbtShowNextStatement
+Dim Shared As ToolButton Ptr tbtSave, tbtSaveAll, tbtSyntaxCheck, tbtSuggestions, tbtCompile, tbtUndo, tbtRedo, tbtCut, tbtCopy, tbtPaste, tbtSingleComment, tbtFormat, tbtUnformat, tbtCompleteWord, tbtParameterInfo, tbtFind, tbtRemoveFileFromProject, tbtStartWithCompile, tbtStart, tbtBreak, tbtEnd, tbtUseDebugger, tbtNotSetted, tbtConsole, tbtGUI, tbtStepInto, tbtStepOver, tbtStepOut, tbtRunToCursor, tbtToggleBreakpoint, tbtSetNextStatement, tbtShowNextStatement
 Dim Shared As SaveFileDialog SaveD
 Dim Shared As ReBar MainReBar, rbLeft, rbRight, rbBottom
 	Dim Shared As PageSetupDialog PageSetupD
@@ -6090,7 +6090,6 @@ Sub CreateMenusAndToolBars
 	imgList.Add "Translate", "Translate"
 	imgList.Add "TranslateE", "TranslateE"
 	imgList.Add "WebBrowserItem", "WebBrowserItem"
-	imgList.Add "UseDirect2D", "UseDirect2D"
 	imgList.Add "AlignLefts", "AlignLefts"
 	imgList.Add "AlignCenters", "AlignCenters"
 	imgList.Add "AlignRights", "AlignRights"
@@ -6567,10 +6566,6 @@ Sub CreateMenusAndToolBars
 	tbtPaste = tbStandard.Buttons.Add(, "Paste", , @mClick, "Paste", , ("Paste") & HK("Paste", "Ctrl+V", True), True, ToolButtonState.tstNone)
 	tbStandard.Buttons.Add tbsSeparator
 	tbtFind = tbStandard.Buttons.Add(, "Find", , @mClick, "Find", , ("Find") & HK("Find", "Ctrl+F", True), True, ToolButtonState.tstNone)
-	tbtUseDirect2D = tbStandard.Buttons.Add(tbsCheck, "UseDirect2D", , @mClick, "UseDirect2D", , ("Use Direct2D (For Windows)") & HK("UseDirect2D"), True)
-	Var b = UseDirect2D
-	tbtUseDirect2D->Checked = UseDirect2D
-	UseDirect2D = b
 	'tbStandard.Buttons.Add tbsSeparator
 	tbEdit.Name = "Edit"
 	tbEdit.ImagesList = @imgList
@@ -6687,7 +6682,7 @@ Sub tbLeft_OnResize(ByRef Designer As My.Sys.Object, ByRef Sender As Control, Ne
 End Sub
 
 tbLeft.ImagesList = @imgList
-tbLeft.Buttons.Add tbsCheck, "Pinned", , @mClick, "PinLeft", "", ("Pin"), , Cast(ToolButtonState, tstEnabled Or tstChecked)
+tbLeft.Buttons.Add tbsCheck, "Pinned", , @mClick, "PinLeft", "", ("Pin"), True, Cast(ToolButtonState, tstEnabled Or tstChecked)
 tbLeft.Flat = True
 tbLeft.Width = 23
 tbLeft.Parent = @pnlLeftPin
@@ -6729,9 +6724,9 @@ tbForm.Align = DockStyle.alTop
 tbForm.Flat = True
 tbForm.ExtraMargins.Left = 2
 tbForm.ExtraMargins.Right = tbLeft.Width
-tbForm.Buttons.Add tbsCheck, "Label", , @tbFormClick, "Text", "", ("Text"), , Cast(ToolButtonState, tstChecked Or tstEnabled)
+tbForm.Buttons.Add tbsCheck, "Label", , @tbFormClick, "Text", "", ("Text"), True, Cast(ToolButtonState, tstChecked Or tstEnabled)
 tbForm.Buttons.Add tbsSeparator
-tbForm.Buttons.Add , "Component", , @tbFormClick, "Components", "", ("Add Components")
+tbForm.Buttons.Add , "Component", , @tbFormClick, "Components", "", ("Add Components"), True
 tbForm.Buttons.Add tbsSeparator
 Var FormSearch = tbForm.Buttons.Add(tbsCustom)
 txtForm.Width = 2
@@ -7518,7 +7513,7 @@ Sub tbProperties_ButtonClick(ByRef Designer As My.Sys.Object, ByRef Sender As My
 End Sub
 
 tbRight.ImagesList = @imgList
-tbRight.Buttons.Add tbsCheck, "Pinned", , @mClick, "PinRight", "", ("Pin"), , Cast(ToolButtonState, tstEnabled Or tstChecked)
+tbRight.Buttons.Add tbsCheck, "Pinned", , @mClick, "PinRight", "", ("Pin"), True, Cast(ToolButtonState, tstEnabled Or tstChecked)
 tbRight.Flat = True
 tbRight.Width = 23
 tbRight.Parent = @pnlRightPin
@@ -7527,9 +7522,9 @@ tbProperties.ImagesList = @imgList
 tbProperties.Align = DockStyle.alTop
 tbProperties.List = True
 tbProperties.ExtraMargins.Right = tbRight.Width
-tbProperties.Buttons.Add Cast(ToolButtonStyle, tbsCheck Or tbsAutosize), "Categorized", , @tbProperties_ButtonClick, "PropertyCategory", "", ("Categorized"), , Cast(ToolButtonState, tstEnabled Or tstChecked)
+tbProperties.Buttons.Add Cast(ToolButtonStyle, tbsCheck Or tbsAutosize), "Categorized", , @tbProperties_ButtonClick, "PropertyCategory", "", ("Categorized"), True, Cast(ToolButtonState, tstEnabled Or tstChecked)
 tbProperties.Buttons.Add tbsSeparator
-tbProperties.Buttons.Add tbsAutosize, "Property", , @tbProperties_ButtonClick, "Properties", "", ("Properties"), , tstEnabled
+tbProperties.Buttons.Add tbsAutosize, "Property", , @tbProperties_ButtonClick, "Properties", "", ("Properties"), True, tstEnabled
 tbProperties.Buttons.Add tbsShowText, "", , , "SelControlName", "", "", , ToolButtonState.tstNone
 tbProperties.Buttons.Add tbsSeparator
 Var PropertiesSearch = tbProperties.Buttons.Add(tbsCustom)
@@ -7543,7 +7538,7 @@ tbEvents.ImagesList = @imgList
 tbEvents.Align = DockStyle.alTop
 tbEvents.List = True
 tbEvents.ExtraMargins.Right = tbRight.Width
-tbEvents.Buttons.Add Cast(ToolButtonStyle, tbsAutosize Or tbsCheck), "Categorized", , @tbProperties_ButtonClick, "EventCategory", "", ("Categorized"), , tstEnabled
+tbEvents.Buttons.Add Cast(ToolButtonStyle, tbsAutosize Or tbsCheck), "Categorized", , @tbProperties_ButtonClick, "EventCategory", "", ("Categorized"), True, tstEnabled
 tbEvents.Buttons.Add tbsSeparator
 tbEvents.Buttons.Add tbsShowText, "", , , "SelControlName", "", "", , ToolButtonState.tstNone
 tbEvents.Buttons.Add tbsSeparator
@@ -8857,13 +8852,13 @@ pnlBottom.Height = tabBottomHeight
 pnlBottom.OnResize = @pnlBottom_Resize
 
 tbBottom.ImagesList = @imgList
-tbBottom.Buttons.Add tbsCheck, "Pinned", , @mClick, "PinBottom", "", ("Pin"), , Cast(ToolButtonState, tstEnabled Or tstChecked)
+tbBottom.Buttons.Add tbsCheck, "Pinned", , @mClick, "PinBottom", "", ("Pin"), True, Cast(ToolButtonState, tstEnabled Or tstChecked)
 tbBottom.Buttons.Add tbsSeparator
-tbBottom.Buttons.Add , "Eraser", , @mClick, "EraseOutputWindow", "", ("Clear Output"), , tstEnabled
-tbBottom.Buttons.Add , "Eraser", , @mClick, "EraseImmediateWindow", "", ("Erase immediate window"), , tstEnabled
-tbBottom.Buttons.Add , "Add", , @mClick, "AddWatch", "", ("Add Watch"), , Cast(ToolButtonState, tstEnabled Or tstWrap)
-tbBottom.Buttons.Add , "Remove", , @mClick, "RemoveWatch", "", ("Remove Watch"), , tstEnabled
-tbBottom.Buttons.Add tbsCheck, "Update", , @mClick, "Update", "", ("Update"), , tstEnabled
+tbBottom.Buttons.Add , "Eraser", , @mClick, "EraseOutputWindow", "", ("Clear Output"), True, tstEnabled
+tbBottom.Buttons.Add , "Eraser", , @mClick, "EraseImmediateWindow", "", ("Erase immediate window"), True, tstEnabled
+tbBottom.Buttons.Add , "Add", , @mClick, "AddWatch", "", ("Add Watch"), True, Cast(ToolButtonState, tstEnabled Or tstWrap)
+tbBottom.Buttons.Add , "Remove", , @mClick, "RemoveWatch", "", ("Remove Watch"), True, tstEnabled
+tbBottom.Buttons.Add tbsCheck, "Update", , @mClick, "Update", "", ("Update"), True, tstEnabled
 tbBottom.Buttons.Item("EraseImmediateWindow")->Visible = False
 tbBottom.Buttons.Item("AddWatch")->Visible = False
 tbBottom.Buttons.Item("RemoveWatch")->Visible = False
@@ -9814,7 +9809,6 @@ Sub OnProgramQuit() Destructor
 	MutexDestroy tlockSave
 	MutexDestroy tlockGDB
 	MutexDestroy tlockSuggestions
-		UnloadD2D1
 	Dim As UserToolType Ptr tt
 	For i As Integer = 0 To Tools.Count - 1
 		_Delete(Cast(UserToolType Ptr, Tools.Item(i)))

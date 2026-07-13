@@ -4,6 +4,41 @@
 
 ---
 
+## Direct2D removed entirely (2026-07-13)
+
+Prompted by a question about the "Use Direct2D" toolbar button: is it useful, don't we always use Direct2D on Windows? Investigation found the opposite — `SettingsService.bas` force-resets `UseDirect2D` to `False` on every startup (overwriting even a saved `True`), with the comment *"Prefer reliable GDI rendering until D2D path is explicitly re-enabled."* GDI has always been the real default; Direct2D had never been exercised by a real user, and one real bug had already been found in it the same day (H-1: `Canvas.Cls`'s duplicate GDI brush + unclosed Direct2D drawing session).
+
+Given this project's consistent bias toward narrow, opinionated scope (the alternate debugger backend removed, dark-mode options collapsed, an explicit "no unnecessary options" principle already on record), asked the owner: is a GDI/Direct2D toggle even appropriate here? Recommended GDI-only over Direct2D-only, since GDI has years of real use and Direct2D has none. Owner agreed, then asked whether to include the MFF `Canvas` control's own Direct2D drawing feature (used by end-user GUI programs built with this IDE, not just the IDE's own editor) — flagged as a separate, bigger-blast-radius system before touching it. Owner's answer: strip everything, keep the codebase small, reconsider Direct2D later (and make it the *sole* default then, not a second option) once it's proven stable.
+
+**Scope:** two independent Direct2D implementations, both removed in full:
+
+1. **IDE code editor rendering** (`src/EditControl.bas`/`.bi`) — 181 references initially, all `If UseDirect2D Then <D2D> Else <GDI>` branches throughout the ~4000-line paint routine (`PaintControlPriv`), plus the `UseDirect2D` shared boolean, `ReleaseDirect2D` sub, and the D2D-specific member fields (`pRenderTarget`, `pTargetBitmap`, `pSwapChain`, `pSurface`, `pTexture`, `pFormat`, `pBrushForeground`, `pBrushBackground`). For each branch, kept only the GDI content and flattened it — GDI/GDI+ behavior is byte-for-byte unchanged.
+2. **UI/settings** — the `tbtUseDirect2D` toolbar button and its imgList icon (`Main.bas`), the `Case "UseDirect2D"` dispatch (`AstoriaIDE.bas`), the "Smoother text rendering (Direct2D)" checkbox (`frmOptions.frm`/`.bi`), and the INI load/force-disable block + `LoadD2D1`/`UnloadD2D1` calls (`SettingsService.bas`, `Main.bas`).
+3. **MFF `Canvas` control** (`Controls/MyFbFramework/mff/Canvas.bas`/`.bi`) — 145+ references across every drawing method (`Cls`, `MoveTo`, `LineTo`, `Rectangle`, `Ellipse`, `Circle`, `RoundRect`, `Polygon`, `Polyline`, `PolylineTo`, `PolyBeizer`, `PolyBeizerTo`, `SetPixel`, `TextOut`, `DrawAlpha`, `Draw`, `FillRect`, `GetDevice`, `ReleaseDevice`, `SetHandle`, `UnSetHandle`, `Font_Create`, `Pen_Create`, `Brush_Create`), the public `UseDirect2D` property (get/set), and the now-orphaned `CreateD2DBitmapFromHBITMAP`/`GuidFrom` helpers (deleted, no longer called by anything). This is a capability the framework exposes to *end-user programs* built with the IDE, not just the IDE's own UI — flagged and confirmed with the owner separately before touching it.
+4. **`D2D1.bi`** (`Controls/MyFbFramework/mff/D2D1/D2D1.bi`, ~2760 lines of raw D2D1/DirectWrite/Direct3D11/DXGI COM interface bindings) — deleted outright via `git rm` once nothing included it anymore. Removed its `File=` entry from `Controls/MyFbFramework/MyFbFramework.vfp`.
+5. **Canvas example project** (`Controls/MyFbFramework/examples/Canvas/Canvas Example.frm`) — had a GDI/GDI+/Direct2D three-way radio-button demo; removed the `RadioD2D1` control, its declaration, its click handler, and the `UseDirect2D` assignments, leaving the GDI/GDI+ choice intact.
+
+**Verification:** compile-clean, 0 errors, 0 warnings (`Compile.bat` with `NOPAUSE=1`, `FORCE_MFF=1` to force the MFF rebuild). One real mismatched `If`/`End If` surfaced during the first build attempt (a leftover `End If` in `EditControl.bas`'s paint routine after an earlier edit removed its matching `If` but not the closing token) — fixed, second build clean. Owner-verified live in the running IDE: launched the rebuilt `astoria.exe` and drove it interactively (screenshot-and-click automation, since no browser/Electron tooling applies to this native Win64 app) through the toolbar (confirmed the "Use Direct2D" button and its icon are gone, no gap left behind), the flattened Run menu, the Options dialog (confirmed the Direct2D checkbox is gone), and all six of the same day's View-menu fixes re-exercised incidentally — no crash, no visual regression, no missing menu/toolbar state found.
+
+**Recovery:** full rationale, exact scope, and git-based restore instructions in [DIRECT2D_REMOVAL.md](DIRECT2D_REMOVAL.md) at the repo root — last commit before removal was `faaf0860ecfaa69752e1533969a9b499c155441e`.
+
+---
+
+## Toolbar tooltip audit (2026-07-13)
+
+Open item: "Audit toolbar buttons and add missing tooltips." Enumerated every `.Buttons.Add` call across the codebase (121 lines in `Main.bas`, 3 in `TabWindow.bas`, 7 in `frmImageManager.frm`) to find gaps.
+
+`ToolButtons.Add`'s signature (`ToolBar.bas:563`/`601`) is `Add(FStyle, ImageKey, Index, FClick, FKey, FCaption, FHint, FShowHint, FState)` — the 7th positional arg is the hint text, the 8th is a boolean that must be `True` for the hint to actually render as a tooltip. Found two distinct gap patterns:
+
+1. **Hint text present, `FShowHint` left at its `False` default** (13 buttons in `Main.bas`): the button's author clearly wrote a hint string, but omitted the following boolean, so the tooltip silently never displays — a systematic, easy-to-miss mistake, not 13 independent oversights. Fixed by setting that argument to `True`: the three panel "Pin" buttons (`PinLeft`/`PinRight`/`PinBottom`), the Form toolbox's "Text" and "Add Components" buttons, the Properties and Events panels' "Categorized"/"Properties" buttons, and the bottom panel's Clear Output, Erase Immediate Window, Add Watch, Remove Watch, and Update buttons.
+2. **No hint text at all** (`frmImageManager.frm`'s toolbar, 7 buttons): Add, the Add-dropdown (Add From Resource/Add From File), Change (labeled "Project" but dispatches to the image-change case), Remove, Up, Down, Sort. None had any `FHint`/`FShowHint` arguments passed. Added concise hint text matching each button's actual behavior (read from `tbToolbar_ButtonClick`'s `Case` dispatch to confirm what each one does, since several `Key` values don't match their visible `ImageKey`/label) plus `ShowHint = True`.
+
+**Deliberately left out of scope:** toolbar buttons built with `tbsCustom` that host an embedded child control instead of an icon+click action — the build-configuration combo (`cboBuildConfiguration`, `Main.bas`), four search boxes (project explorer, form toolbox, properties panel, events panel), and the code editor's class/function dropdowns (`TabWindow.bas`). A tooltip on these needs to go on the child control itself (the thing the mouse actually hovers/focuses), not the `ToolButton` wrapper — a different mechanism than the `FHint`/`FShowHint` fix applied here, and speculative UX text (e.g. placeholder strings) rather than a clear "hint was written but not shown" bug. Recorded as a new, separate open item rather than guessing at it in this pass.
+
+Compile-clean, 0 warnings, rebuilt via `Compile.bat` with `NOPAUSE=1`. Owner-verified live in the running IDE alongside the Direct2D removal test pass.
+
+---
+
 ## Run menu consolidated (2026-07-13)
 
 Open item: "Consolidate the Run menu so related commands are not split between the top level and More Build Options." Before: the Run menu had Run/Build/Stop/Restart/Step/Toggle Breakpoint/Use Debugger at the top level, plus a "More Build Options" submenu (`Main.bas` ~6386) burying Rebuild All, Clean, Syntax Check, Make, Parameters, and Run Without Building — six build-related commands a user wouldn't necessarily think to look for behind an extra submenu click.

@@ -7,6 +7,8 @@ Namespace My.Sys.Forms
 			Case "host": Return Cast(Any Ptr, StrPtr(This.Host))
 			Case "port": Return Cast(Any Ptr, @This.Port)
 			Case "timeout" : Return Cast(Any Ptr, @This.Timeout)
+			Case "useragent": Return Cast(Any Ptr, StrPtr(This.UserAgent))
+			Case "maxresponsesize": Return Cast(Any Ptr, @This.MaxResponseSize)
 			Case "abort" : Return @FAbort
 			Case Else: Return Base.ReadProperty(PropertyName)
 			End Select
@@ -18,6 +20,8 @@ Namespace My.Sys.Forms
 			Case "host": This.Host = *Cast(ZString Ptr, Value)
 			Case "port": This.Port = QInteger(Value)
 			Case "timeout" : This.Timeout = QInteger(Value)
+			Case "useragent": This.UserAgent = *Cast(ZString Ptr, Value)
+			Case "maxresponsesize": This.MaxResponseSize = QInteger(Value)
 			Case "abort" : This.Abort = QBoolean(Value)
 			Case Else: Return Base.WriteProperty(PropertyName, Value)
 			End Select
@@ -37,7 +41,7 @@ Namespace My.Sys.Forms
 			Dim As Boolean hSendRequest
 			Dim As String result
 			
-			hSession = InternetOpen("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36", INTERNET_OPEN_TYPE_DIRECT, "", "", 0)
+			hSession = InternetOpen(This.UserAgent, INTERNET_OPEN_TYPE_DIRECT, "", "", 0)
 			If hSession = 0 Then
 				Responce.StatusCode= 405
 				Responce.Body = "{""Error"":{""Message"":""FAILED To Open Internet session"",""code"":405}}"
@@ -75,6 +79,11 @@ Namespace My.Sys.Forms
 			End If
 			
 			' Send request with retry logic
+			'' AstoriaIDE T-SON-2 (F-N7): this Sleep(1000) x up to 3 runs on the CALLING thread --
+			'' CallMethod blocks for up to 3 seconds on a failing send. If called from the UI thread
+			'' that freezes the UI for up to 3s; ThreadsEnter/ThreadsLeave provide no protection
+			'' either way (they're no-ops -- see T-OPUS-1 / Component.bas). Callers that can't
+			'' tolerate a multi-second block should invoke CallMethod from a worker thread.
 			Dim retryCount As Integer = 0
 			Do While retryCount < 3
 				hSendRequest = HttpSendRequest(hRequest, Request.Headers, Len(Request.Headers), Cast(LPVOID, StrPtr(Request.Body)), Len(Request.Body))
@@ -123,8 +132,18 @@ Namespace My.Sys.Forms
 					FAbort = True
 					szBuffer = ""
 				End If
-				Responce.Body &= szBuffer '*BufferPtr
-				If OnReceive Then OnReceive(*Designer, This, Request, szBuffer)
+				'' AstoriaIDE T-SON-2 (F-N7): optional response-size cap. MaxResponseSize = 0 (the
+				'' default) preserves the prior unbounded behavior exactly. When set, checked before
+				'' appending so Body never exceeds the cap -- an unbounded hostile/huge endpoint can
+				'' otherwise exhaust the host app's memory (the chunk that would overflow it is
+				'' dropped, not truncated mid-chunk, and the read stops there).
+				If MaxResponseSize > 0 AndAlso Len(Responce.Body) + Len(szBuffer) > MaxResponseSize Then
+					Responce.Reason = "Response truncated at MaxResponseSize (" & MaxResponseSize & " bytes)"
+					FAbort = True
+				Else
+					Responce.Body &= szBuffer '*BufferPtr
+					If OnReceive Then OnReceive(*Designer, This, Request, szBuffer)
+				End If
 			Loop While FAbort = False
 			_Deallocate(BufferPtr)
 			If OnComplete Then OnComplete(*Designer, This, Request, Responce)

@@ -31,6 +31,14 @@ Namespace My.Sys.Forms
 		As String Host = "127.0.0.1"
 		As Integer Port = 80
 		As Integer Timeout = 3000
+			'' AstoriaIDE T-SON-2 (F-N7): was a hardcoded fake "Chrome/115" string with no way for
+			'' the host app to change it -- now a configurable property with a neutral, honest
+			'' default (identifies the library, doesn't impersonate a browser).
+			As String UserAgent = "MyFbFramework-HTTPConnection"
+			'' T-SON-2 (F-N7): Responce.Body accumulated with no cap -- a hostile or huge endpoint
+			'' could exhaust the host app's memory. 0 = unlimited (unchanged default behavior);
+			'' set to a positive byte count to stop reading once Body reaches that size.
+			As Integer MaxResponseSize = 0
 		'Get response content and HTTP status code.
 		Declare Sub CallMethod(HTTPMethod As String, ByRef Request As HTTPRequest, ByRef Responce As HTTPResponce)
 		Declare Constructor

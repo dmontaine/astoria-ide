@@ -103,6 +103,7 @@ End Enum
 Declare Function kill_process(text As String) As Integer
 Declare Sub RunWithDebug(Debugger As String = "", ByRef ProjectFileName As WString, ByRef ProjectCommandLineArguments As WString, ByRef MainFile As WString, ByRef CompileLine As WString, ByRef FirstLine As WString)
 Declare Sub RunProgramWithDebug(Param As Any Ptr)
+Declare Function PrepareDebugSession() As Boolean  ' DR-16(a): UI thread, call before ThreadCreate_(@StartDebugging)
 
 	#include once "Debug.bas"
 

@@ -1329,28 +1329,21 @@ End Sub
 	
 	Function load_file(ByRef sCurentFileExe As WString, ByRef sPathGDB As WString) As Long
 		
-			If FileExists(sPathGDB) = 0 Then
-			
-			ThreadsEnter
-			
-			MsgBox(("The debugger could not be found. Try reinstalling the IDE."), "Astoria IDE", mtError)
-			
-			ThreadsLeave
-			
+			'' DR-16(a) (2026-07-12): these two checks are now also run pre-flight on the UI thread by
+		'' PrepareDebugSession (AstoriaIDE.bas gates every ThreadCreate_(@StartDebugging) on it), so
+		'' in the normal flow this is unreachable. Kept as a defensive fallback in case load_file is
+		'' ever reached another way; downgraded from a blocking worker-thread MsgBox (the original
+		'' hazard) to the same safe non-blocking QueueShowMessages path DR-7 established -- a modal
+		'' dialog from a background thread with no message pump is wrong regardless of how rare the
+		'' path is.
+		If FileExists(sPathGDB) = 0 Then
+			QueueShowMessages(("The debugger could not be found. Try reinstalling the IDE."))
 			Return -1
-			
 		End If
-		
+
 		If FileExists(sCurentFileExe) = 0 Then
-			
-			ThreadsEnter
-			
-			MsgBox(("The program to debug could not be found. Build the project first."), "Astoria IDE", mtError)
-			
-			ThreadsLeave
-			
+			QueueShowMessages(("The program to debug could not be found. Build the project first."))
 			Return -1
-			
 		End If
 		
 		'' DR-7 (2026-07-12): was a direct worker-thread ShowMessages + lvLocals/lvGlobals.Nodes.Clear
@@ -2330,15 +2323,57 @@ Sub RunWithDebug(Debugger As String, ByRef ProjectFileName As WString, ByRef Pro
 	ThreadsLeave()
 End Sub
 
-Sub RunProgramWithDebug(Param As Any Ptr)
-	Dim As ProjectElement Ptr Project
+'' DR-16(a) (2026-07-12): widened scope from the original DR-16(a) finding (load_file's two
+'' blocking MsgBox calls on the worker thread). Tracing what a UI-thread pre-check would need
+'' turned up a second, previously-unflagged instance of the same hazard: GetMainFile() -- needed
+'' to compute the exe path -- has its own side effect (a conditional scratch-save of an unsaved
+'' modified tab) AND its own embedded MsgBox ("Project Main File don't set"), and was being
+'' called from RunProgramWithDebug on the worker thread. Owner decision: fix both properly.
+'' GetMainFile/GetFirstCompileLine/GetExeFileName/GetFolderName were audited -- only GetMainFile
+'' has a side effect, so it must be called exactly ONCE; everything else is a pure/read-only
+'' string function and safe to (re)compute on either thread. Scope: covers the direct "Start
+'' Debugging" entry points (5x ThreadCreate_(@StartDebugging) in AstoriaIDE.bas) where the exe is
+'' expected to already exist. Deliberately NOT covering StartDebuggingWithCompile -- that path
+'' compiles first (the exe doesn't exist yet at call time, so an exe-exists pre-check doesn't
+'' apply the same way) and still has the old worker-thread-MsgBox behavior; flagged, not fixed.
+Dim Shared As UString gPreparedMainFile, gPreparedCompileLine, gPreparedFirstLine
+Dim Shared As ProjectElement Ptr gPreparedProject
+
+'' UI thread only. Call before ThreadCreate_(@StartDebugging). Runs GetMainFile (the one
+'' side-effecting call) and both existence checks that load_file used to run on the worker.
+'' Returns False (and shows the same MsgBox load_file used to show, now safely on the UI
+'' thread) if debugging can't start; the caller must not spawn the worker thread in that case.
+Function PrepareDebugSession() As Boolean
 	Dim As TreeNode Ptr ProjectNode
-	Dim As UString CompileLine, MainFile = GetMainFile(, Project, ProjectNode)
-	Dim As UString FirstLine = GetFirstCompileLine(MainFile, Project, CompileLine)
-	If Project <> 0 Then
-		RunWithDebug , *Project->FileName, *Project->CommandLineArguments, MainFile, CompileLine, FirstLine
+	gPreparedProject = 0
+	gPreparedMainFile = GetMainFile(, gPreparedProject, ProjectNode)
+	gPreparedCompileLine = ""
+	gPreparedFirstLine = GetFirstCompileLine(gPreparedMainFile, gPreparedProject, gPreparedCompileLine)
+
+	Dim As UString sPathGDB = GetFullPath(ExePath & "\" & BUNDLED_GDB_PATH)
+	If FileExists(sPathGDB) = 0 Then
+		MsgBox(("The debugger could not be found. Try reinstalling the IDE."), "Astoria IDE", mtError)
+		Return False
+	End If
+
+	Dim As UString sExeName = GetExeFileName(gPreparedMainFile, gPreparedCompileLine & " " & gPreparedFirstLine)
+	sExeName = Replace(sExeName, UnixSlash, WindowsSlash)
+	If FileExists(sExeName) = 0 Then
+		MsgBox(("The program to debug could not be found. Build the project first."), "Astoria IDE", mtError)
+		Return False
+	End If
+
+	Return True
+End Function
+
+Sub RunProgramWithDebug(Param As Any Ptr)
+	'' DR-16(a): MainFile/CompileLine/FirstLine/Project were already computed by
+	'' PrepareDebugSession() on the UI thread before this worker thread was spawned -- read the
+	'' staged values instead of calling GetMainFile a second time (it has a side effect).
+	If gPreparedProject <> 0 Then
+		RunWithDebug , *gPreparedProject->FileName, *gPreparedProject->CommandLineArguments, gPreparedMainFile, gPreparedCompileLine, gPreparedFirstLine
 	Else
-		RunWithDebug , "", "", MainFile, CompileLine, FirstLine
+		RunWithDebug , "", "", gPreparedMainFile, gPreparedCompileLine, gPreparedFirstLine
 	End If
 End Sub
 

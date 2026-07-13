@@ -295,9 +295,14 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 		ClearThreadsWindow
 		If iFlagStartDebug = 0 Then
 			If UseDebugger Then
-				runtype= RTFRUN
-				CurrentTimer = SetTimer(0, 0, 1, Cast(Any Ptr, @TimerProcGDB))
-				ThreadCounter(ThreadCreate_(@StartDebugging))
+				'' DR-16(a): pre-flight on the UI thread (GDB/exe existence, MainFile resolution)
+				'' before spawning the worker -- see PrepareDebugSession (Debug.bas). Shows its own
+				'' MsgBox and returns False if debugging can't start; don't arm the timer or thread.
+				If PrepareDebugSession() Then
+					runtype= RTFRUN
+					CurrentTimer = SetTimer(0, 0, 1, Cast(Any Ptr, @TimerProcGDB))
+					ThreadCounter(ThreadCreate_(@StartDebugging))
+				End If
 			Else
 				ThreadCounter(ThreadCreate_(@RunProgram))
 			End If
@@ -327,17 +332,23 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 	Case "StepInto":
 		ClearThreadsWindow
 		If iFlagStartDebug = 0 Then
-			runtype = RTSTEP
-			CurrentTimer = SetTimer(0, 0, 1, Cast(Any Ptr, @TimerProcGDB))
-			ThreadCounter(ThreadCreate_(@StartDebugging))
+			'' DR-16(a): see the "Start"/"Continue" case above for the pre-flight rationale.
+			If PrepareDebugSession() Then
+				runtype = RTSTEP
+				CurrentTimer = SetTimer(0, 0, 1, Cast(Any Ptr, @TimerProcGDB))
+				ThreadCounter(ThreadCreate_(@StartDebugging))
+			End If
 		Else
 			step_debug("s")
 		End If
 	Case "StepOver":
 		ClearThreadsWindow
 		If iFlagStartDebug = 0 Then
-			CurrentTimer = SetTimer(0, 0, 1, Cast(Any Ptr, @TimerProcGDB))
-			ThreadCounter(ThreadCreate_(@StartDebugging))
+			'' DR-16(a): see the "Start"/"Continue" case above for the pre-flight rationale.
+			If PrepareDebugSession() Then
+				CurrentTimer = SetTimer(0, 0, 1, Cast(Any Ptr, @TimerProcGDB))
+				ThreadCounter(ThreadCreate_(@StartDebugging))
+			End If
 		Else
 			step_debug("n")
 		End If
@@ -418,7 +429,10 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 		Case "StepOut":
 			ClearThreadsWindow
 			If iFlagStartDebug = 0 Then
-				ThreadCounter(ThreadCreate_(@StartDebugging))
+				'' DR-16(a): see the "Start"/"Continue" case above for the pre-flight rationale.
+				If PrepareDebugSession() Then
+					ThreadCounter(ThreadCreate_(@StartDebugging))
+				End If
 			Else
 				step_debug("finish")
 			End If
@@ -431,9 +445,12 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 				arm_breakpoint True, True
 				continue_debug
 			Else
-				RunningToCursor = True
-				CurrentTimer = SetTimer(0, 0, 1, Cast(Any Ptr, @TimerProcGDB))
-				ThreadCounter(ThreadCreate_(@StartDebugging))
+				'' DR-16(a): see the "Start"/"Continue" case above for the pre-flight rationale.
+				If PrepareDebugSession() Then
+					RunningToCursor = True
+					CurrentTimer = SetTimer(0, 0, 1, Cast(Any Ptr, @TimerProcGDB))
+					ThreadCounter(ThreadCreate_(@StartDebugging))
+				End If
 			End If
 		Case "AddWatch":
 			If tb->txtCode.SelText <> "" Then lvWatches.Nodes.Add(tb->txtCode.SelText)

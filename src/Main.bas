@@ -119,7 +119,7 @@ Dim Shared As MenuItem Ptr mnuStartWithCompile, mnuStart, mnuContinue, mnuBreak,
 Dim Shared As MenuItem Ptr miSaveProject, miSaveProjectAs, miCloseProject, miDeleteProject, miNewFile, miOpenFile, miCloseFile, miDeleteFile, miSaveFile, miSaveFileAs, miPrint, miPrintPreview, miPageSetup, miOpenProjectFolder, miProjectProperties, miExplorerOpenProjectFolder, miExplorerRename, miExplorerProjectProperties, miExplorerCloseProject, miRename, miRemoveFileFromProject
 Dim Shared As MenuItem Ptr miUndo, miRedo, miCutCurrentLine, miCut, miCopy, miPaste, miSingleComment, miDuplicate, miSelectAll, miIndent, miOutdent, miFormat, miUnformat, miFormatProject, miUnformatProject, miAddSpaces, miDeleteBlankLines, miParameterInfo, miStepInto, miStepOver, miStepOut, miRunToCursor, miGDBCommand, miAddWatch, miToggleBreakpoint, miClearAllBreakpoints, miSetNextStatement, miShowNextStatement
 Dim Shared As MenuItem Ptr dmiMake, dmiMakeClean
-Dim Shared As MenuItem Ptr miCode, miForm, miCodeAndForm, miGotoCodeForm, miCollapseCurrent, miCollapseAllProcedures, miCollapseAll, miUnCollapseCurrent, miUnCollapseAllProcedures, miUnCollapseAll, miImageManager, miAddProcedure, miAddType, miFind, miReplace, miFindNext, miFindPrevious, miGoto, miDefine, miToggleBookmark, miNextBookmark, miPreviousBookmark, miClearAllBookmarks, miSyntaxCheck, miCompile, miCompileAll, miMake, miMakeClean
+Dim Shared As MenuItem Ptr miCode, miForm, miCodeAndForm, miGotoCodeForm, miFold, miDebugWindows, miCollapseCurrent, miCollapseAllProcedures, miCollapseAll, miUnCollapseCurrent, miUnCollapseAllProcedures, miUnCollapseAll, miImageManager, miAddProcedure, miAddType, miFind, miReplace, miFindNext, miFindPrevious, miGoto, miDefine, miToggleBookmark, miNextBookmark, miPreviousBookmark, miClearAllBookmarks, miSyntaxCheck, miCompile, miCompileAll, miMake, miMakeClean
 Dim Shared As MenuItem Ptr miAlignLefts, miAlignCenters, miAlignRights, miAlignTops, miAlignMiddles, miAlignBottoms, miAlignToGrid, miMakeSameSizeWidth, miMakeSameSizeHeight, miMakeSameSizeBoth, miSizeToGrid, miHorizontalSpacingMakeEqual, miHorizontalSpacingIncrease, miHorizontalSpacingDecrease, miHorizontalSpacingRemove, miVerticalSpacingMakeEqual, miVerticalSpacingIncrease, miVerticalSpacingDecrease, miVerticalSpacingRemove, miCenterInParentHorizontally, miCenterInParentVertically, miOrderBringToFront, miOrderSendToBack, miLockControls
 Dim Shared As MenuItem Ptr miFormFormat ' D1 (2026-07-07): top-level Designer menu; disabled when no form with controls is active
 Dim Shared As MenuItem Ptr miShowWithFolders, miShowWithoutFolders, miShowAsFolder
@@ -2974,6 +2974,7 @@ Sub ChangeUseDebugger(bUseDebugger As Boolean, ChangeObject As Integer = -1)
 	SetDebugTabsVisible bUseDebugger
 	If Not bUseDebugger Then ChangeUseProfiler False
 	If mnuUseProfiler <> 0 Then mnuUseProfiler->Enabled = bUseDebugger
+	If miDebugWindows <> 0 Then miDebugWindows->Enabled = bUseDebugger
 	If iFlagStartDebug = 0 Then ChangeEnabledDebug True, False, False
 End Sub
 
@@ -6231,12 +6232,12 @@ Sub CreateMenusAndToolBars
 	miForm = miView->Add(("Form") & HK("Form", "Shift+F7"), "Form", "Form", @mClick, , , False)
 	miCodeAndForm = miView->Add(("Code And Form") & HK("CodeAndForm", "Ctrl+Shift+F7"), "CodeAndForm", "CodeAndForm", @mClick, , , False)
 	miView->Add("-")
-	miGotoCodeForm = miView->Add(("Goto Code/Form") & HK("GotoCodeForm", "F7"), "GotoCodeForm", "GotoCodeForm", @mClick, , , False)
+	miGotoCodeForm = miView->Add(("Switch Form/Code") & HK("GotoCodeForm", "F7"), "GotoCodeForm", "GotoCodeForm", @mClick, , , False)
 	miView->Add("-")
 	mnuSplitHorizontally = miView->Add(("Split &Horizontally") & HK("SplitHorizontally"), "", "SplitHorizontally", @mClick, True, , False)
 	mnuSplitVertically = miView->Add(("Split &Vertically") & HK("SplitVertically"), "", "SplitVertically", @mClick, True, , False)
 	miView->Add("-")
-	Var miFold = miView->Add(("Fold"), "", "Fold")
+	miFold = miView->Add(("Fold"), "", "Fold")
 	miCollapseAll = miFold->Add(("Collapse All") & HK("CollapseAll"), "", "CollapseAll", @mClick, , , False)
 	miUnCollapseAll = miFold->Add(("Expand All") & HK("UnCollapseAll"), "", "UnCollapseAll", @mClick, , , False)
 	miFold->Add("-")
@@ -6258,7 +6259,7 @@ Sub CreateMenusAndToolBars
 	miOtherWindows->Add(("ToDo Window") & HK("ToDoWindow"), "", "ToDoWindow", @mClick)
 	miOtherWindows->Add(("Change Log Window") & HK("ChangeLogWindow"), "", "ChangeLogWindow", @mClick)
 	miOtherWindows->Add(("Immediate Window") & HK("ImmediateWindow"), "", "ImmediateWindow", @mClick)
-	Var miDebugWindows = miView->Add(("Debug Windows"))
+	miDebugWindows = miView->Add(("Debug Windows"))
 	miDebugWindows->Add(("Locals Window") & HK("LocalsWindow"), "", "LocalsWindow", @mClick)
 	miDebugWindows->Add(("Globals Window") & HK("GlobalsWindow"), "", "GlobalsWindow", @mClick)
 	'miDebugWindows->Add(ML("Procedures Window") & HK("ProceduresWindow"), "", "ProceduresWindow", @mclick)
@@ -8396,18 +8397,33 @@ Sub tabCode_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As TabContro
 	If tb->cboClass.Items.Count > 1 Then
 		tb->FillAllProperties
 		'tpProperties->SelectTab
+		miCode->Enabled = True
 		miForm->Enabled = True
 		miCodeAndForm->Enabled = True
-		miGotoCodeForm->Enabled = True
+		' Switch Form/Code has nothing to do once both panels are already visible side by side.
+		miGotoCodeForm->Enabled = tb->CurrentView() <> "CodeAndForm"
+		' Split Horizontally/Vertically split the code editor, which isn't visible in Form-only view.
+		mnuSplitHorizontally->Enabled = tb->CurrentView() <> "Form"
+		mnuSplitVertically->Enabled = tb->CurrentView() <> "Form"
+		miFold->Enabled = tb->CurrentView() <> "Form"
 		miFormFormat->Enabled = True ' D1: form with controls is active
 		tb->SetFormViewsEnabled(True)
 	Else
 		lvProperties.Nodes.Clear
 		lvEvents.Nodes.Clear
-		Dim As Boolean bFormFile = EndsWith(LCase(tb->FileName), ".frm") OrElse EndsWith(LCase(tb->FileName), ".bas")
+		' A plain .bas module (no discovered class/controls) is not form-capable; only
+		' .frm files are. (UserControl.bas files get here only before their form design
+		' runs, at which point cboClass.Items.Count > 1 takes the branch above.)
+		Dim As Boolean bFormFile = EndsWith(LCase(tb->FileName), ".frm")
+		miCode->Enabled = bFormFile
 		miForm->Enabled = bFormFile
 		miCodeAndForm->Enabled = bFormFile
-		miGotoCodeForm->Enabled = bFormFile
+		' Switch Form/Code has nothing to do once both panels are already visible side by side.
+		miGotoCodeForm->Enabled = bFormFile AndAlso tb->CurrentView() <> "CodeAndForm"
+		' Split Horizontally/Vertically split the code editor, which isn't visible in Form-only view.
+		mnuSplitHorizontally->Enabled = tb->CurrentView() <> "Form"
+		mnuSplitVertically->Enabled = tb->CurrentView() <> "Form"
+		miFold->Enabled = tb->CurrentView() <> "Form"
 		miFormFormat->Enabled = False ' D1: no controls to design (Designer ops need existing controls)
 		tb->SetFormViewsEnabled(bFormFile)
 		If mApplyingDeferredFormDesign = False AndAlso mApplyingFormTabView = False Then

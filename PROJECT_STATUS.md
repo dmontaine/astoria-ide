@@ -1,6 +1,6 @@
 # Astoria-IDE — Project Status & Handoff
 
-**Last updated:** 2026-07-13 02:05:39 -07:00 (last push)
+**Last updated:** 2026-07-13 10:11:56 -07:00 (last push)
 **Repository:** [github.com/dmontaine/astoria-ide](https://github.com/dmontaine/astoria-ide)
 **Local path:** C:\Users\don\Astoria-IDE
 
@@ -20,6 +20,13 @@ All DR-1 through DR-16 defects are fixed and owner-verified. This retained ancho
 - **MyFbFramework review is closed:** the six applicable tasks are complete; the remaining three became moot when HTTPServer was removed.
 - **H-1 is complete:** `Canvas.Cls` no longer creates a GDI brush on its Direct2D clear path and closes a Direct2D drawing session before returning. `mff64.dll` and `astoria.exe` rebuilt successfully; owner smoke test passed. Direct2D remains force-disabled in the IDE, so no live Direct2D-path test was available.
 - **H-4 is complete:** removed the duplicate GDI `FillRect` in `Canvas.Cls`. `mff64.dll` and `astoria.exe` rebuilt successfully; owner smoke test passed.
+- **View menu owner review is complete:** owner walkthrough surfaced six real bugs, all fixed and rebuilt clean:
+  - Code/Form/Code and Form were enabled for any `.bas` file, not just form-capable ones (`.frm`, or a file whose design already found a class/controls); fixed across all four sync points (`tabCode_SelChange`, `ApplyFormTabView`, `ApplyView`, `ChangeMenuItemsEnabled`).
+  - "Goto Code/Form" renamed to **Switch Form/Code**.
+  - Switch Form/Code is a no-op in Code+Form split view (both panels already visible) — now greyed there.
+  - Split Horizontally/Vertically (they split the code editor) are now greyed in Form-only view, where the code editor isn't visible.
+  - Fold is now greyed in Form-only view for the same reason.
+  - Debug Windows submenu is now greyed whenever Run → Use Debugger is unchecked (wired into `ChangeUseDebugger`, the single function all debugger-toggle paths funnel through).
 - Nothing is awaiting an owner response. The remaining items below are deferred or ready for a new, explicitly selected task.
 
 ## Next ready work
@@ -50,7 +57,6 @@ For the reasoning, exact code locations, and prior hot-path findings, see [HISTO
 
 ### Deferred enhancements
 
-- [ ] Complete the owner walkthrough/sign-off for the View menu.
 - [ ] Standard Windows installer (per-user install model is approved).
 - [ ] Full Examples review and expansion.
 - [ ] Split oversized source files and standardize indentation.

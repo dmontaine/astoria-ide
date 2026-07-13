@@ -4,6 +4,21 @@
 
 ---
 
+## View menu owner walkthrough — 6 bugs found and fixed (2026-07-13)
+
+Owner did a hands-on click-through of the View menu (the deferred sign-off item from §13.3). Six real bugs surfaced, each fixed and rebuilt clean in the same session:
+
+1. **Code / Form / Code and Form did nothing for the wrong file.** The enablement check treated *any* `.bas` file as form-capable (`EndsWith(...,".frm") OrElse EndsWith(...,".bas")`), so the three view-selector items stayed enabled — and appeared to do nothing — on a plain code module with no form/controls. Root-caused to `tabCode_SelChange` (`Main.bas`) and `ApplyFormTabView` (`TabWindow.bas`), which both independently compute this; fixed by dropping the `.bas` clause so only `.frm` files (or any file whose form design already discovered a class/controls, `cboClass.Items.Count > 1`) count as form-capable. `miCode`'s enabled state, previously untied to form-capability at all, was brought under the same rule.
+2. **`ChangeMenuItemsEnabled` didn't recompute the same three items.** This function (which runs on tab close and tree-selection change, not just tab-select) only ever touched `miFormFormat`, so opening a project with no tab yet active could leave `Code` enabled from a stale prior state while `Form`/`Code and Form` sat correctly disabled. Fixed by adding the same form-capability check there via a `bActiveFormFile` local.
+3. **"Goto Code/Form" renamed to Switch Form/Code** — clearer name for the F7 jump-and-focus-toggle command (distinct from the three view-mode selectors above).
+4. **Switch Form/Code was a no-op in Code+Form split view.** Both panels are already visible side by side, so there's nothing to jump to; now greyed whenever the active view is `"CodeAndForm"`.
+5. **Split Horizontally/Vertically and Fold stayed enabled in Form-only view.** Both operate on the code editor (`txtCode`), which isn't visible in Form-only view. `miFold` was promoted from a local `Var` to a shared `MenuItem Ptr` (`Main.bas`) so it could be gated the same way. All four sync points (`ApplyView`'s choke point, `ChangeMenuItemsEnabled`, `tabCode_SelChange`, `ApplyFormTabView`) now grey both items and Fold whenever `CurrentView() = "Form"`.
+6. **Debug Windows submenu was always enabled, even with the debugger off.** Wired `miDebugWindows->Enabled = bUseDebugger` into `ChangeUseDebugger` (`Main.bas`) — the single function every debugger-toggle path (Run menu, toolbar button, startup INI restore) already funnels through for `mnuUseProfiler`'s identical enable/disable pattern.
+
+Verification: compile-clean (0 warnings) after each fix, rebuilt via `Compile.bat` with `NOPAUSE=1`. Owner live-tested each bug in the running IDE as it was found and fixed (that's how bugs 2–6 surfaced — each fix's owner re-test turned up the next one).
+
+---
+
 ## Codeberg retired, GitHub is now the sole remote (2026-07-09)
 
 `origin` switched from `git@codeberg.org:bigriverguy/VFBEWin64.git` to `https://github.com/dmontaine/Astoria-IDE`. The Codeberg repo (`bigriverguy/VFBEWin64`) received a final push replacing its README with a retirement notice pointing to the GitHub repo, and was left in that state — actually toggling Codeberg's "archived" flag requires the owner via the Codeberg web UI (Settings → Archive Repository), since no Codeberg API token was available to do this headlessly. All future sessions push to GitHub `origin main`.

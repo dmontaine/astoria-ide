@@ -249,6 +249,16 @@ Sub ChangeMenuItemsEnabled
 	Dim As TreeNode Ptr ptn = GetParentNode(tvExplorer.SelectedNode)
 	Dim bEnabled As Boolean = tvExplorer.Nodes.Count > 0
 	Dim bEnabledTab As Boolean = miWindow->Count > 1 '' Window menu now holds only the separator (index 0) as a static item; Split H/V moved to View (13.3.A)
+	' D1: Code/Form/CodeAndForm only apply to form-capable files (.frm, or any file whose
+	' form design already found a class/controls). Computed here too so it also greys on
+	' tab/form CLOSE -- CloseTab calls ChangeMenuItemsEnabled, whereas tabCode_SelChange's
+	' "If tb = tbOld Then Exit Sub" early-exits can skip the per-select update.
+	Dim As TabWindow Ptr tbActiveView = Cast(TabWindow Ptr, ptabCode->SelectedTab)
+	Dim As Boolean bActiveFormFile = tbActiveView <> 0 AndAlso (tbActiveView->cboClass.Items.Count > 1 OrElse EndsWith(LCase(tbActiveView->FileName), ".frm"))
+	Dim As Boolean bActiveSplitView = tbActiveView <> 0 AndAlso tbActiveView->CurrentView() = "CodeAndForm"
+	' Split Horizontally/Vertically split the code editor itself, which isn't visible in
+	' Form-only view.
+	Dim As Boolean bActiveFormView = tbActiveView <> 0 AndAlso tbActiveView->CurrentView() = "Form"
 	Dim bHasProject As Boolean = GetOpenProjectNode() <> 0
 	Dim bHasProjectFile As Boolean = bHasProject AndAlso bEnabledTab
 	Dim bEnabledProject As Boolean = ptn AndAlso (ptn->ImageKey = "Project" OrElse ptn->ImageKey = "MainProject")
@@ -266,13 +276,18 @@ Sub ChangeMenuItemsEnabled
 	miProjectProperties->Enabled = bEnabledProjectAndFolder
 	miExplorerProjectProperties->Enabled = bEnabledProjectAndFolder
 	mnuWindowSeparator->Visible = bEnabledTab
-	miCode->Enabled = bEnabledTab
+	miCode->Enabled = bEnabledTab AndAlso bActiveFormFile
+	miForm->Enabled = bEnabledTab AndAlso bActiveFormFile
+	miCodeAndForm->Enabled = bEnabledTab AndAlso bActiveFormFile
+	' Switch Form/Code has nothing to do once both panels are already visible side by side.
+	miGotoCodeForm->Enabled = bEnabledTab AndAlso bActiveFormFile AndAlso (Not bActiveSplitView)
 	miGoto->Enabled = bEnabledTab
 	miDefine->Enabled = bEnabledTab
 	miAddProcedure->Enabled = bEnabledTab
 	miAddType->Enabled = bEnabledTab
-	mnuSplitHorizontally->Enabled = bEnabledTab
-	mnuSplitVertically->Enabled = bEnabledTab
+	mnuSplitHorizontally->Enabled = bEnabledTab AndAlso (Not bActiveFormView)
+	mnuSplitVertically->Enabled = bEnabledTab AndAlso (Not bActiveFormView)
+	miFold->Enabled = bEnabledTab AndAlso (Not bActiveFormView)
 	miNewFile->Enabled = bHasProject
 	miOpenFile->Enabled = bHasProject
 	miSaveFile->Enabled = bHasProjectFile
@@ -316,8 +331,7 @@ Sub ChangeMenuItemsEnabled
 	' controls. Computed here (not only in tabCode_SelChange/ApplyFormTabView) so it also greys
 	' on tab/form CLOSE -- CloseTab calls ChangeMenuItemsEnabled, whereas tabCode_SelChange's
 	' "If tb = tbOld Then Exit Sub" early-exits can skip the per-select update.
-	Dim As TabWindow Ptr tbActiveDesigner = Cast(TabWindow Ptr, ptabCode->SelectedTab)
-	miFormFormat->Enabled = (tbActiveDesigner <> 0 AndAlso tbActiveDesigner->cboClass.Items.Count > 1)
+	miFormFormat->Enabled = (tbActiveView <> 0 AndAlso tbActiveView->cboClass.Items.Count > 1)
 	ChangeEnabledDebug bEnabled, False, False
 End Sub
 
@@ -341,19 +355,34 @@ End Sub
 
 Sub ApplyFormTabView(tb As TabWindow Ptr)
 	If tb = 0 Then Return
-	Dim As Boolean bFormFile = EndsWith(LCase(tb->FileName), ".frm") OrElse EndsWith(LCase(tb->FileName), ".bas")
+	' A plain .bas module (no discovered class/controls) is not form-capable; only .frm
+	' files are. (UserControl.bas files get here only before their form design runs, at
+	' which point cboClass.Items.Count >= 2 takes the Else branch below.)
+	Dim As Boolean bFormFile = EndsWith(LCase(tb->FileName), ".frm")
 	mApplyingFormTabView = True
 	If tb->cboClass.Items.Count < 2 Then
+		miCode->Enabled = bFormFile
 		miForm->Enabled = bFormFile
 		miCodeAndForm->Enabled = bFormFile
 		miGotoCodeForm->Enabled = bFormFile
+		' Split Horizontally/Vertically split the code editor; ShowView below always lands on
+		' "Code" here, so the code editor is visible.
+		mnuSplitHorizontally->Enabled = True
+		mnuSplitVertically->Enabled = True
+		miFold->Enabled = True
 		miFormFormat->Enabled = False ' D1: no controls to design
 		tb->SetFormViewsEnabled(bFormFile)
 		tb->ShowView("Code")
 	Else
+		miCode->Enabled = True
 		miForm->Enabled = True
 		miCodeAndForm->Enabled = True
-		miGotoCodeForm->Enabled = True
+		' Switch Form/Code has nothing to do once both panels are already visible side by side
+		' (ShowView below applies "CodeAndForm" and re-asserts this via ApplyView).
+		miGotoCodeForm->Enabled = False
+		mnuSplitHorizontally->Enabled = True
+		mnuSplitVertically->Enabled = True
+		miFold->Enabled = True
 		miFormFormat->Enabled = True ' D1: form with controls is active
 		tb->SetFormViewsEnabled(True)
 		tb->ShowView("CodeAndForm")
@@ -10145,6 +10174,17 @@ Sub TabWindow.ApplyView(ByRef ViewName As String)
 		Exit Sub
 	End Select
 	mViewName = ViewName
+	If Cast(TabWindow Ptr, ptabCode->SelectedTab) = @This Then
+		' Switch Form/Code (F7) has nothing to switch to once both panels are already visible
+		' side by side; grey it out for the split view instead of leaving a no-op click.
+		miGotoCodeForm->Enabled = mFormViewsEnabled AndAlso ViewName <> "CodeAndForm"
+		' Split Horizontally/Vertically split the code editor itself, which isn't visible
+		' in Form-only view.
+		mnuSplitHorizontally->Enabled = ViewName <> "Form"
+		mnuSplitVertically->Enabled = ViewName <> "Form"
+		' Fold operates on the code editor, which isn't visible in Form-only view.
+		miFold->Enabled = ViewName <> "Form"
+	End If
 	RequestAlign
 End Sub
 

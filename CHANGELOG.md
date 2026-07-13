@@ -64,6 +64,7 @@ This file archives completed work and the full commit history. For current statu
 - [x] **Development/Final compile-mode toggle finalized** — both `-gen gcc`, Development = `-O0 -g`, Final = `-O2`
 - [x] **General options page checkbox overlap** — fixed via explicit ControlIndex values + `RequestAlign` on page switch
 - [x] **Code/Designer view tabs** (Lazarus-style) — replaced the per-tab Code/Form/Code+Form toolbar toggle buttons with a top tab strip (`tcView`), order **Code And Form** (default) / **Code** / **Form**. Switching logic centralized into `TabWindow` methods (`ShowView`/`ApplyView`/`SyncViewTab`/`CurrentView`/`SetFormViewsEnabled`); the ~20 former `tbrTop.Buttons.Item(...)->Checked` call sites across `Main.bas`/`TabWindow.bas`/`VisualFBEditor.bas` now use those. Header-only strip (panels not reparented), so the designer-creation path is unchanged; non-form files bounce form views back to Code.
+- [x] **View menu owner walkthrough** — six bugs found and fixed: Code/Form/Code and Form were enabled for any `.bas` file instead of only form-capable files; "Goto Code/Form" renamed to **Switch Form/Code** and greyed in Code+Form split view (no-op there); Split Horizontally/Vertically and Fold greyed in Form-only view (they operate on the code editor, not visible in that view); Debug Windows submenu greyed whenever Use Debugger is unchecked.
 
 ---
 

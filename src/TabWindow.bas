@@ -11909,6 +11909,12 @@ Sub RunPr(Debugger As String, ByRef ProjectFileName As WString, ByRef ProjectCom
 			If EndsWith(*ExeFileName, ".html") Then
 				WLet(CmdL, "explorer http://localhost:8000/" & GetFileName(*ExeFileName))
 			Else
+				If FileExists(*ExeFileName) = 0 Then
+					ShowMessages(Time & ": " & ("Application do not run. The executable was not found") & ": " & *ExeFileName)
+					ChangeEnabledDebug True, False, False
+					If ExeFileName Then _Deallocate(ExeFileName)
+					Exit Sub
+				End If
 				WLet(CmdL, """" & *ExeFileName & """ " & *RunArguments)
 				If ProjectCommandLineArguments <> "" Then WAdd(CmdL, " " & ProjectCommandLineArguments)
 				Var Pos1 = InStrRev(*ExeFileName, WindowsSlash)

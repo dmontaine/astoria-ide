@@ -1,6 +1,6 @@
 # Astoria-IDE — Project Status & Handoff
 
-**Last updated:** 2026-07-13 12:51:22 -07:00 (last push)
+**Last updated:** 2026-07-13 14:33:08 -07:00 (last push)
 **Repository:** [github.com/dmontaine/astoria-ide](https://github.com/dmontaine/astoria-ide)
 **Local path:** C:\Users\don\Astoria-IDE
 
@@ -35,6 +35,9 @@ All DR-1 through DR-16 defects are fixed and owner-verified. This retained ancho
 - **Run menu fully consolidated:** removed both the "More Build Options" and "More Debug Options" submenus; all their items (Rebuild All, Clean, Syntax Check, Make, Parameters, Run Without Building, Run To Cursor, Continue, Break, Clear All Breakpoints, Add Watch, Set/Show Next Statement, Use Profiler, GDB Command) now sit directly in the top-level Run menu, per owner's chosen "flatten into top level" approach. No commands remain split off into a buried submenu. Rebuilt clean.
 - **Toolbar tooltip audit complete:** 13 buttons across the main toolbars (Pin ×3 on the left/right/bottom panels, Text/Component in the Form toolbox, Categorized/Properties in the Properties and Events panels, Clear Output/Erase Immediate Window/Add Watch/Remove Watch/Update in the bottom panel) had hint text already written but `ShowHint` left `False`, so the tooltip silently never displayed — fixed by setting `ShowHint = True`. `frmImageManager.frm`'s toolbar (Add/Add From.../Change/Remove/Up/Down/Sort) had no hint text at all — added. Deliberately left out of scope: the toolbar buttons that host an embedded child control (build-configuration combo, project/toolbox/properties/events search boxes, code-editor class/function dropdowns) — a tooltip there needs to go on the child control, not the `ToolButton` wrapper, which is a different mechanism than the fix applied here. Rebuilt clean.
 - **Direct2D fully removed:** owner decision — GDI/GDI+ is now the sole rendering path everywhere (both the IDE's own code editor and the MFF `Canvas` control end-user programs use), replacing the "Use Direct2D" toggle discussion. Direct2D had been force-disabled its entire life (never live-tested) and already had one real bug found in it (H-1); rather than keep a second, unproven rendering path around, it was stripped entirely: `src/EditControl.bas`/`.bi`, `Controls/MyFbFramework/mff/Canvas.bas`/`.bi`, the `D2D1.bi` API binding module (deleted outright, ~2760 lines), the toolbar button/Options checkbox/INI setting, and the Canvas example project's Direct2D radio option. GDI/GDI+ behavior is untouched. Full rationale, scope, and git-based recovery instructions in [DIRECT2D_REMOVAL.md](DIRECT2D_REMOVAL.md) — owner's stated plan is to reconsider Direct2D only once proven stable, and to make it the *sole* default then, not a re-added option. Rebuilt clean (0 errors, 0 warnings) and owner-verified live in the running IDE — toolbar, Run menu, Options dialog, and the six View-menu fixes all re-exercised interactively with no regressions found.
+- **Missing-executable check added to Run:** the non-debug `RunProgram`/`RunPr` path (`TabWindow.bas`) now checks the target `.exe` exists before launching, matching the pre-flight check the debug path already had via `PrepareDebugSession()`. Rebuilt clean.
+- **Debug-mode "Returned code" fixed:** `RunWithDebug` always displayed "Returned code: 0 - No error" regardless of the real outcome (its `Result` was never assigned). Now parses GDB's own completion text into the real exit code (decoding GDB's octal `"exited with code NN"` format), and correctly stays silent — rather than showing a fabricated code — when Stop-while-running force-kills the debuggee. Live-verified both the normal-completion and Stop-while-running cases; see [HISTORY.md](HISTORY.md) for the two follow-up bugs caught along the way (an `SCODE` naming collision, and the Stop-kill-vs-real-exit distinction).
+- Also investigated, not fixed: a one-off where a freshly-compiled test program's worker threads exited with `STATUS_CONTROL_C_EXIT` seconds after Start. Antivirus and a "second `run` sent while the first was still live" theory were both checked and ruled out; did not reproduce on a second isolated attempt. No code changed — see [HISTORY.md](HISTORY.md) for what was checked; revisit only if it recurs, capturing `Settings/debug_trace.log` immediately after.
 - Nothing is awaiting an owner response. The remaining items below are deferred or ready for a new, explicitly selected task.
 
 ## Next ready work
@@ -47,7 +50,7 @@ For the reasoning, exact code locations, and prior hot-path findings, see [HISTO
 
 ### Immediate
 
-- [ ] Add a missing-executable check and user-visible message to the non-debug RunProgram/RunPr path.
+No immediate items open.
 
 ### MFF hygiene and technical debt
 

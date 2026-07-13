@@ -4,6 +4,26 @@
 
 ---
 
+## Missing-exe check on Run; debug "Returned code" made real (2026-07-13)
+
+Two independent fixes from the same session, on opposite sides of the Run/Debug split.
+
+**Missing-executable check (`RunProgram`/`RunPr`, `TabWindow.bas`).** The non-debug Run path (`Case "Start", "Continue"` with `UseDebugger` off, `AstoriaIDE.bas` ~306) resolved the target `.exe` path and went straight to `CreateProcessW` with no existence check — the debug path already had this via `PrepareDebugSession()` (DR-16(a)), this one didn't. Added a `FileExists` check right after `GetExeFileName` resolves, skipped for the `.html` case (that path launches a browser URL, not a local file). On a miss: `ShowMessages` a clear message, run `ChangeEnabledDebug True, False, False` and deallocate, then `Exit Sub` — mirroring the existing `CreatePipe`/`CreateProcess` failure branches a few lines down in the same function.
+
+**Debug "Returned code" always showed 0.** While live-verifying the above, the owner reported a program that "ran fine" turned out — per a fresh `debug_trace.log` capture — to be indistinguishable from a case that crashed: `RunWithDebug`'s completion message (`"Application finished. Returned code: " & Result & ...`) used a local `Result As Integer` that is declared but never assigned anywhere in the sub, so it always printed `0 - No error` regardless of what the debuggee actually did. Root cause confirmed by code read, not guesswork.
+
+Fix: added `ParseGdbExitCode()` (`Debug.bas`), which reads GDB's own completion text — `"exited normally"` → 0, `"exited with code NN"` → decoded via `Val("&o" & ...)` since **GDB reports this in octal**, anything else (killed by signal, still running) → `-1`/unknown. A new `Dim Shared As Integer gLastExitCode` is set at the two existing "the inferior is gone" exit points inside `run_debug()`'s loop (the DR-14 dead-inferior branch and the `"[Inferior "`/`"Program exited"` text-match branch) as a pure side-effect — no existing control flow, locking, or command timing touched, in line with the standing rule against changing the GDB worker loop without direct evidence. Reset to `-1` at the top of every fresh `run_debug(1)` call so a stale value can never leak into the next run's message. `RunWithDebug` now uses `gLastExitCode` and stays silent (no message at all) when it's `-1`, rather than showing a fabricated `0`.
+
+First rebuild caught a real bug of its own: the parser's local variable was named `sCode`, which collides case-insensitively with the Windows API `SCODE` type alias pulled in by this codebase's WinAPI headers — `Len(sCode)` silently resolved as ambiguous (compiler warning 37(2)), risking the wrong `Len` overload. Renamed to `sDigits`; warning gone.
+
+Second live-test round surfaced a follow-up: `kill_inferior_process()` (used by Stop-while-running and by closing the IDE mid-debug) always calls `TerminateProcess(h, 1)` — a hardcoded sentinel, not a real program exit code. Without a guard, the new parser would faithfully report every Stop click as `Returned code: 1 - Illegal function call`, which is accurate to what GDB says but misleading about what actually happened. Added `gKilledByStop`, a shared flag set inside `kill_inferior_process()` right before the `TerminateProcess` call and reset alongside `gLastExitCode` at the top of each run; both exit-detection sites now force `gLastExitCode = -1` when it's set, so a Stop click suppresses the message entirely instead of showing a fake crash reason.
+
+Verified live, both fixes, this session: normal completion shows the correct code (`0 - No error` on a clean exit, `1 - Illegal function call` for a real FB runtime error 1); Stop-while-running now shows no "Returned code" line at all. Rebuilt clean each iteration (0 errors, 0 warnings) via `Compile.bat` / `NOPAUSE=1`.
+
+Also investigated, ruled out, not fixed: an earlier one-off where a freshly-compiled console test program's worker threads all exited with `STATUS_CONTROL_C_EXIT` seconds after Start (looked like a crash). Checked and ruled out: antivirus interference (Windows Security Protection History had no entry for the binary), and a "second `run` sent while the first inferior was still live, silently auto-killed by `set confirm off`" theory (a fresh, isolated `debug_trace.log` capture of both the failing pattern's setup and a clean rerun showed exactly one `r\n` sent in each case). Did not reproduce on a second isolated attempt. No code changed for this one — flagged as a possible transient/environmental event, not a demonstrated Astoria/GDB defect; revisit only if it recurs, with `Settings/debug_trace.log` captured immediately after (before any other run overwrites it).
+
+---
+
 ## Direct2D removed entirely (2026-07-13)
 
 Prompted by a question about the "Use Direct2D" toolbar button: is it useful, don't we always use Direct2D on Windows? Investigation found the opposite — `SettingsService.bas` force-resets `UseDirect2D` to `False` on every startup (overwriting even a saved `True`), with the comment *"Prefer reliable GDI rendering until D2D path is explicitly re-enabled."* GDI has always been the real default; Direct2D had never been exercised by a real user, and one real bug had already been found in it the same day (H-1: `Canvas.Cls`'s duplicate GDI brush + unclosed Direct2D drawing session).

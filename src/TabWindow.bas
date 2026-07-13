@@ -3681,7 +3681,7 @@ Sub DesignerDblClickControl(ByRef Sender As Designer, Ctrl As Any Ptr)
 			Select Case tClassName
 			Case "TimerComponent"
 				If iItem <> 0 Then FindEvent tb, iItem->Object, "OnTimer"
-			Case "HTTPServer", "HTTPConnection"
+			Case "HTTPConnection"
 				If iItem <> 0 Then FindEvent tb, iItem->Object, "OnReceive"
 			Case "PrintDocument"
 				If iItem <> 0 Then FindEvent tb, iItem->Object, "OnPrintPage"

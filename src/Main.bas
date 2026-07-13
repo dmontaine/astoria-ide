@@ -3416,7 +3416,7 @@ End Sub
 
 Function IsExcludedToolBoxControl(ControlName As String) As Boolean
 	Select Case LCase(ControlName)
-	Case "animate", "webbrowser", "listviewex", "searchbar"
+	Case "webbrowser", "listviewex", "searchbar"
 		Return True
 	Case Else
 		Return False

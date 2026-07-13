@@ -14,7 +14,6 @@
 #define MEMCHECK 0
 
 #include once "Form.bi"
-#include once "Animate.bi"
 #include once "Application.bi"
 #include once "Bitmap.bi"
 #include once "Brush.bi"
@@ -44,7 +43,6 @@
 #include once "HorizontalBox.bi"
 #include once "HotKey.bi"
 #include once "HTTP.bi"
-#include once "HTTPServer.bi"
 #include once "Icon.bi"
 #include once "ImageBox.bi"
 #include once "ImageList.bi"
@@ -116,7 +114,6 @@ Using My.Sys.Forms
 	Function CreateControl Alias "CreateControl" (ByRef ClassName As String, ByRef sName As WString, ByRef Text As WString, lLeft As Integer, lTop As Integer, lWidth As Integer, lHeight As Integer, Parent As Control Ptr) As Control Ptr Export
 		Ctrl = 0
 		Select Case LCase(ClassName)
-		Case "animate": Ctrl = _New( Animate)
 		Case "chart": Ctrl = _New( Chart)
 		Case "checkbox": Ctrl = _New( CheckBox)
 		Case "checkedlistbox": Ctrl = _New( CheckedListBox)
@@ -183,7 +180,6 @@ Using My.Sys.Forms
 		Cpnt = 0
 		Select Case LCase(ClassName)
 		Case "httpconnection": Cpnt = _New(HTTPConnection)
-		Case "httpserver": Cpnt = _New(HTTPServer)
 		Case "imagelist": Cpnt = _New( ImageList)
 		Case "timercomponent": Cpnt = _New( TimerComponent)
 		Case "tooltips": Cpnt = _New( ToolTips)
@@ -232,7 +228,6 @@ Using My.Sys.Forms
 	Function DeleteComponent Alias "DeleteComponent"(Ctrl As Any Ptr) As Boolean Export
 		If Ctrl = 0 Then Return False
 		Select Case LCase(Cast(Component Ptr, Ctrl)->ClassName)
-		Case "animate": _Delete( Cast(Animate Ptr, Ctrl))
 		Case "chart": _Delete( Cast(Chart Ptr, Ctrl))
 		Case "checkbox" :_Delete( Cast(CheckBox Ptr, Ctrl))
 		Case "checkedlistbox": _Delete( Cast(CheckedListBox Ptr, Ctrl))
@@ -248,7 +243,6 @@ Using My.Sys.Forms
 		Case "hotkey": _Delete( Cast(HotKey Ptr, Ctrl))
 		Case "horizontalbox": _Delete(Cast(HorizontalBox Ptr, Ctrl))
 		Case "httpconnection": _Delete(Cast(HTTPConnection Ptr, Ctrl))
-		Case "httpserver": _Delete(Cast(HTTPServer Ptr, Ctrl))
 		Case "ipaddress": _Delete( Cast(IPAddress Ptr, Ctrl))
 		Case "imagebox": _Delete( Cast(ImageBox Ptr, Ctrl))
 		Case "label": _Delete( Cast(Label Ptr, Ctrl))

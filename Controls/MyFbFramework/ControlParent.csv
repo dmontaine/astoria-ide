@@ -18,8 +18,6 @@ GridRows	GridData
 HeaderSection	Header
 HTTPRequest	HTTPConnection
 HTTPResponce	HTTPConnection
-HTTPServerRequest	HTTPServer
-HTTPServerResponce	HTTPServer
 List	LinkLabel
 ListItems	ListControl
 ListViewColumn	ListView

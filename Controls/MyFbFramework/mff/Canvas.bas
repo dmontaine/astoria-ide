@@ -252,15 +252,19 @@ Namespace My.Sys.Drawing
 	
 	Private Sub Canvas.Cls(x As Double = 0, y As Double = 0, x1 As Double = 0, y1 As Double = 0)
 		Dim As Any Ptr Handle_
-		If Not HandleSetted Then Handle_ = GetDevice
+		Dim As Boolean AcquiredDevice = Not HandleSetted
+		If AcquiredDevice Then Handle_ = GetDevice
 		If ParentControl > 0 Then
-				Dim As HBRUSH B = CreateSolidBrush(FBackColor)
 				If FUseDirect2D AndAlso pRenderTarget <> 0 Then
 					Dim As D2D1_COLOR_F Color1
 					Color1.r = GetRed(FBackColor)
 					Color1.g = GetGreen(FBackColor)
 					Color1.b = GetBlue(FBackColor)
 					pRenderTarget->lpVtbl->Clear(pRenderTarget, @Color1) ' White background
+					If AcquiredDevice Then
+						HandleSetted = False
+						ReleaseDevice Handle_
+					End If
 					Return
 				ElseIf Not UsingGdip Then
 					
@@ -268,6 +272,7 @@ Namespace My.Sys.Drawing
 					GdipGraphicsClear(GdipGraphics, &h00000000)
 					'Return
 				End If
+				Dim As HBRUSH B = CreateSolidBrush(FBackColor)
 			Dim As Rect R
 			If x = x1 AndAlso y = y1 AndAlso x = y Then
 				R.Left = 0
@@ -401,7 +406,7 @@ Namespace My.Sys.Drawing
 		Dim As Any Ptr Handle_ = Handle
 		If Handle_ = 0 Then Handle_ = This.Handle
 			If HandleSetted Then Exit Sub
-			If ParentControl AndAlso Handle_ Then
+			If ParentControl Then
 				'If ParentControl->DoubleBuffered Then
 				'	BitBlt(Handle_, 0, 0, R.Right - R.left, R.Bottom - R.top, memDC, 0, 0, SRCCOPY)
 				'	DeleteObject(CompatibleBmp)
@@ -415,9 +420,9 @@ Namespace My.Sys.Drawing
 					pp.pScrollRect = 0
 					pp.pScrollOffset = 0
 					pSwapChain->lpVtbl->Present1(pSwapChain, 1, 0, @pp)
-				Else
-					ReleaseDC ParentControl->Handle, Handle_
-				End If
+			ElseIf Handle_ Then
+				ReleaseDC ParentControl->Handle, Handle_
+			End If
 			End If
 	End Sub
 	

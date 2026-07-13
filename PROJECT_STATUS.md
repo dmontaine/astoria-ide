@@ -1,6 +1,6 @@
-# AstoriaIDE — Project Status & Handoff
+# Astoria-IDE — Project Status & Handoff
 
-**Last updated:** 2026-07-12
+**Last updated:** 2026-07-13 01:53:43 -07:00 (last push)
 **Repository:** [github.com/dmontaine/astoria-ide](https://github.com/dmontaine/astoria-ide)
 **Local path:** C:\Users\don\Astoria-IDE
 
@@ -12,19 +12,18 @@ This is the concise, authoritative handoff for the next work session. Completed-
 
 All DR-1 through DR-16 defects are fixed and owner-verified. This retained anchor keeps links from older historical records valid.
 
-## Current State (2026-07-12)
+## Current State (2026-07-13)
 
 - The IDE is Win64-only, builds cleanly with the bundled FBC 1.10.1 toolchain, and produces astoria.exe.
-- The project was renamed to **AstoriaIDE**. The GitHub repository name remains astoria-ide.
+- The project title is **Astoria-IDE**. The GitHub repository name remains astoria-ide.
 - **Debugger Reliability (DR-1 through DR-16) is closed:** all known defects were fixed and owner-verified.
 - **MyFbFramework review is closed:** the six applicable tasks are complete; the remaining three became moot when HTTPServer was removed.
+- **H-1 is complete:** `Canvas.Cls` no longer creates a GDI brush on its Direct2D clear path and closes a Direct2D drawing session before returning. `mff64.dll` and `astoria.exe` rebuilt successfully; owner smoke test passed. Direct2D remains force-disabled in the IDE, so no live Direct2D-path test was available.
 - Nothing is awaiting an owner response. The remaining items below are deferred or ready for a new, explicitly selected task.
 
 ## Next ready work
 
-1. **H-1 — fix the Direct2D early-return leak in Canvas.Cls.**
-   Move creation of the GDI brush into the non-D2D branch and release an acquired device before the D2D return. This requires FORCE_MFF=1 through Compile.bat, committing the rebuilt mff64.dll with the source. The IDE force-disables the D2D path, so compile-clean is the available verification; state that limitation in the commit.
-2. **H-4 — remove the redundant GDI FillRect in Canvas.Cls.**
+1. **H-4 — remove the redundant GDI FillRect in Canvas.Cls.**
    Also requires an MFF rebuild and committing the rebuilt DLL.
 
 For the reasoning, exact code locations, and prior hot-path findings, see [HISTORY.md](HISTORY.md).
@@ -40,12 +39,12 @@ For the reasoning, exact code locations, and prior hot-path findings, see [HISTO
 ### Deferred owner decisions
 
 - [ ] Decide whether per-project <Project>_Change.log files should live in the project folder instead of the IDE root.
-- [ ] Decide whether new projects should default to Documents\AstoriaIDE Projects instead of the application folder.
+- [ ] Decide whether new projects should default to Documents\Astoria-IDE Projects instead of the application folder.
 - [ ] Decide whether user theme-color edits should be stored separately from shipped theme files.
 
 ### MFF hygiene and technical debt
 
-- [ ] H-1 and H-4 above.
+- [ ] H-4 above.
 - [ ] Delete README_CN.md and changes_cn.txt if desired. Do **not** delete MyFbFramework.wiki/: the IDE reads it for component help. Check usage before removing examples/ or help/.
 - [ ] Consider the standalone-Canvas device-ownership issue only with a dedicated test harness; it is not exercised by the IDE.
 - [ ] MFF control-library path consolidation.

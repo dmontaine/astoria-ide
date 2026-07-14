@@ -23,34 +23,31 @@ Current: GCC 9.3.0 (MinGW-W64, posix-sjlj), Binutils 2.34. No actual problem exi
 #### Phase 1 — Safe mechanical cleanup (low risk, scriptable)
 
 - **2.1.1 Standardize indentation (whitespace only):** convert mixed tabs/spaces to one consistent scheme across all `.bas`/`.bi`/`.frm`. Scriptable in bulk, zero logic changes. Gate: `CompileDebug.bat` clean.
-- **2.1.2 Remove dead/comment-cruft and empty handlers:** sweep for commented-out code blocks, dead `Declare` forwards with no implementation, empty no-op event handlers. Clean `src/Temp.bas` (238 KB of designer-generated scratch). Gate: compile clean + grep for removed identifiers.
-- **2.1.3 Audit and fix magic numbers:** hunt for unnamed numeric literals standing in for counts/sizes/flags. Known example: `SettingsService.bas` `NoMoreIndexedSettingsKeys` `Return keySum = -9` (already fixed, but the pattern repeats). Gate: compile clean + spot-check constant values.
+- **2.1.2 Remove dead/comment-cruft and empty handlers — DONE:** swept commented-out code blocks, dead `Declare` forwards with no implementation, empty no-op event handlers, and designer-generated scratch code.
+- **2.1.3 Audit and fix magic numbers — DONE:** audited unnamed numeric literals used for counts, sizes, and flags and replaced applicable cases with named constants.
 
 #### Phase 2 — Codebase readability (moderate risk, file-by-file)
 
 - **2.2.1 Standardize variable naming conventions:** pick one convention and apply uniformly. Rename file-by-file (not cross-file), avoids breaking `Alias`/`Export`/`Declare` bindings. Gate: `CompileDebug.bat` after each file.
-- **2.2.2 DRY pass — extract repeated code within files:** identify duplicated logic patterns within single files and extract into `Private Function`/`Sub`. Gate: compile after each extraction.
-- **2.2.3 Split oversized files by logical domain:** `TabWindow.bas` (Editor/Designer/Debug/Project/Build), `Main.bas` (panels/settings/toolbars/project tree), `EditControl.bas` (highlighting/folding/intellisense). Gate: compile after each split, verify `Export`/`Alias` bindings.
+- **2.2.2 DRY pass — extract repeated code within files — DONE:** extracted applicable duplicated logic into shared private functions and procedures.
+- **2.2.3 Split oversized files by logical domain — CLOSED:** declined because the cross-file binding and regression risk outweighed the expected maintainability benefit.
 
 #### Phase 3 — Architecture improvements (high value, high risk)
 
-- **2.3.1 Development/Final compile-mode toggle:** replace 6 Project Properties controls with one "Development"/"Final" radio pair. Both use `-gen gcc`. Gate: compile clean + compile a test project in both modes.
-- **2.3.2 UI/settings sweep — remove orphaned controls:** audit `frmOptions.frm`, `frmProjectProperties.frm` for GTK/Linux controls, alt-compiler radios, alt-debugger references, orphaned theme pickers whose underlying code was deleted in Tier 2.75.3. Gate: compile clean + visual verification.
-- **2.3.3 Extract shared framework utilities:** move common patterns into shared modules. Candidates: INI key migration, GDB command construction, panel-size clamping, DPI scaling helpers. Gate: compile after each extraction.
+- **2.3.1 Development/Final compile-mode toggle — DONE:** replaced the former Project Properties controls with the simplified Development/Final compile-mode choice.
+- **2.3.2 UI/settings sweep — remove orphaned controls — DONE:** audited and removed obsolete platform, compiler, debugger, and settings controls.
 
 #### Phase 4 — Legacy tech debt (lowest priority)
 
-- **2.4.1 Final audit for remaining GTK/Linux/32-bit artifacts:** verify nothing new was introduced since Tier 2.75.3. Gate: `grep -rn "GTK\|__USE_GTK__\|__FB_LINUX__\|32bit\|i686" src/ mff/` returns zero (except intentional `CheckCondition()` in `TabWindow.bas`).
-- **2.4.2 Clean `src/makefile` and `src/THREADING.md`:** remove GTK references. Gate: docs-only, compile not affected.
+- **2.4.1 Final audit for remaining GTK/Linux/32-bit artifacts — DONE:** verified that no unintended platform artifacts remain after the Win64-only cleanup.
+- **2.4.2 Clean `src/makefile` and `src/THREADING.md` — DONE:** removed obsolete GTK references from build documentation.
 
 #### Recommended execution order
 
 ```
-2.1.1 → 2.1.3 → 2.1.2   (mechanical, safe, quick wins)
-2.2.1 → 2.3.2            (variable naming + UI sweep — user-facing)
-2.3.1                     (compile toggle — immediate user value)
-2.2.2 → 2.2.3            (DRY + file splits — the real structural work, highest risk)
-2.3.3 → 2.4.1 → 2.4.2   (final cleanup)
+2.1.1                     (remaining mechanical cleanup; 2.1.2 and 2.1.3 complete)
+2.2.1                     (variable naming; 2.3.1 and 2.3.2 complete)
+(2.2.2 complete; 2.2.3 closed as too risky; 2.3.3 removed)
 
 ### 13.3 UI evaluation and modernization
 
@@ -189,9 +186,9 @@ Distinct audience from the current git-clone-and-compile workflow: an end-user d
 - Needs a decision on installer scope before starting: does this ship the bundled compiler (making it a fully standalone IDE+compiler), or does it assume the end user already has FreeBASIC installed? Given this fork bundles its own `Compiler/` tree already (§3a), standalone is the more consistent choice.
 - Depends on Tier 3 (compiler swap) being done first, so the installer ships the final intended compiler version rather than needing a re-package immediately after.
 
-### 13.6 Full review and expansion of Examples/ (added 2026-07-03)
+### 13.6 Full review and expansion of Examples/ — **DONE**
 
-**Sequencing:** owner-specified — do this in a **testing/fine-tuning or documentation phase**, after the core work (Tier 3 compiler swap, §13.2 structural pass) is done, not now. Noted here so it isn't forgotten, not to be picked up immediately.
+**Status:** completed. The Examples tree was flattened to one project per folder, every project was compile-tested, failures were removed, and the retained set was documented.
 
 **Why this is on the list:** the 2026-07-03 GTK/Linux/Win32-only audit (§3b) went through all 33 `Examples/` folders and found the premise (remove GTK/Linux/Win32-only examples) didn't hold, but surfaced real gaps along the way: several examples had no `.vfp` project file at all, two had genuine API-drift bugs from being written against an older `mff` version (one fixed — `Graphics/CanvasDraw.bas`, §3b — one still open — `WellCOM Example/WellCOM.bas`'s `DllMain` conflict), and this was only found because someone happened to try compiling them. That's a sign `Examples/` hasn't had a systematic pass in a while.
 
@@ -228,9 +225,9 @@ There's no native "embed a control inside a status bar panel" API in `mff/Status
 
 For the live-update wiring: every property-grid commit (including "Name") funnels through `Sub PropertyChanged` (`TabWindow.bas` ~2555-2667), which already special-cases `PropertyName = "Name"` (~2588-2596) to call `TabWindow.ChangeName` — that's the one choke point to hook for keeping cells 1/2 in sync, regardless of whether the edit came from the property grid's cell editor, its textbox, or its combo.
 
-### 13.9 Blank Designer page on cold-open until a control is selected (deferred 2026-07-04 — "nice to have, not critical")
+### 13.9 Blank Designer page on cold-open until a control is selected — **DONE**
 
-See §8's panel/layer navigation write-up for full context. A `PagePanel` page (e.g. `frmOptions.frm`'s "General" page) shows blank the moment the file is opened, even though `SelectedPanelIndex`/`Visible` are (as of this session's fixes) correctly set — it only renders once a control inside that page is actually selected. Added `Controls[i]->RequestAlign` to `PagePanel.SelectedPanelIndex`'s real setter (the architecturally-obvious fix — force a layout pass the moment a page becomes visible) but confirmed via testing this wasn't sufficient; the real trigger that makes it render (selecting a control *inside* the page) does something beyond what `RequestAlign` alone captures. Owner explicitly deprioritized further chasing this — all of the actual navigation (tree, right-click menu, Ctrl+PageUp/PageDown) works correctly the moment any selection has happened, so this is purely a cold-open-frame cosmetic issue, not a functional blocker. Next session starting here should re-open with fresh eyes on what specifically differs between "becoming visible via `SelectedPanelIndex`'s setter" and "becoming visible via selecting a control inside it" (`Designer.MoveDots`/`DesignerChangeSelection` are the obvious next things to diff against `RequestAlign`).
+Owner testing confirmed that the suspected cold-open blank-page problem does not reproduce and the Designer renders correctly. No further work is required.
 
 ### 13.10 Dark mode: owner-drawn popup menus + input-field polish (deferred 2026-07-04)
 

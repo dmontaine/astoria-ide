@@ -71,13 +71,27 @@ No immediate items open.
 
 ### Deferred enhancements
 
-- [ ] Standard Windows installer (per-user install model is approved).
-- [ ] Full Examples review and expansion.
-- [ ] Split oversized source files and standardize indentation.
-- [ ] Dark-mode popup menus, dialog backgrounds, and live re-theming on Options Apply.
-- [ ] Design-workspace status bar.
-- [ ] Fork-specific wiki/documentation.
-- [ ] Add tooltips to the embedded-child-control toolbar buttons (build-configuration combo, the four search boxes, code-editor class/function dropdowns) — needs a hint on the child control itself, not the `ToolButton` wrapper. Out of scope for the 2026-07-13 toolbar tooltip audit.
+- [ ] **T01 — Standardize indentation.**
+- [ ] **T02 — Standardize variable naming.**
+- [x] **T03 — Extract repeated logic within files.**
+- [x] **T05 — Simplify the Development/Final compile-mode controls.**
+- [x] **T06 — Audit UI/settings for orphaned controls.**
+- [ ] **T08 — Build a standard Windows installer.** The per-user installation model is approved.
+- [x] **T09 — Expand and further document the retained Examples.**
+- [ ] **T10 — Implement dark-mode popup menus.**
+- [ ] **T11 — Implement dark-mode dialog/modal backgrounds.**
+- [ ] **T12 — Complete live dark-mode re-theming after Options Apply.**
+- [ ] **T13 — Add the design-workspace status bar.**
+- [x] **T14 — Fix the cold-open blank Designer page.**
+- [x] **T15 — Create fork-specific wiki/documentation.**
+- [ ] **T16 — Add tooltips to embedded toolbar controls.** This covers the build-configuration combo, four search boxes, and code-editor class/function dropdowns.
+
+### Recently completed cleanup
+
+- [x] **T17 — Remove dead/commented code and empty handlers.**
+- [x] **T18 — Audit and replace applicable magic numbers.**
+- [x] **T19 — Audit remaining GTK/Linux/32-bit artifacts.**
+- [x] **T20 — Clean obsolete platform references from build documentation.**
 
 ## Essential gotchas
 

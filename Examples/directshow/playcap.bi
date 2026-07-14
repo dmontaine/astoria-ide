@@ -1,5 +1,5 @@
 ﻿#pragma once
-'playcap摄像设备预览和截图
+'playcap Camera Device Preview and Screenshot
 ' Copyright (c) 2025 CM.Wang
 ' Freeware. Use at your own risk.
 

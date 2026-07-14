@@ -1,25 +1,25 @@
-﻿'五子棋的人工智能试验小程序
-'https://zhuanlan.zhihu.com/p/551562016  五子棋必胜26阵法图解
-' vbnet实现五子棋的人工智能  http://www.west999.com/www/info/24067-1.htm
-' 实现五子棋的人工智能五子棋的AI构想 https://blog.csdn.net/elizabethxxy/article/details/103150370?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_title~default-8.pc_relevant_default&spm=1001.2101.3001.4242.5&utm_relevant_index=11
-' 由阿凡达翻译到freeBasic. 本程序需要MyFbFramework框架支持，并由VisualFBEditor进行可视化窗体设计
-' 你可以拷贝，分发，修改，本程序中的任意代码, 期待你加入局域网对战功能
+﻿'A small AI experiment for the game of Gomoku (Five in a Row)
+'https://zhuanlan.zhihu.com/p/551562016  Illustrated guide to 26 winning Gomoku formations
+' Implementing Gomoku AI in VB.NET  http://www.west999.com/www/info/24067-1.htm
+' Implementing Gomoku AI - design ideas for a Gomoku AI https://blog.csdn.net/elizabethxxy/article/details/103150370?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_title~default-8.pc_relevant_default&spm=1001.2101.3001.4242.5&utm_relevant_index=11
+' Translated to FreeBASIC by Avata. This program requires the MyFbFramework framework, with the visual form designed using VisualFBEditor
+' You may copy, distribute, and modify any code in this program; contributions adding LAN multiplayer support are welcome
 '
-'修改历史：
-'2022年4月12日 阿凡达增加棋盘大小可以动态修改，修复棋盘从10X0放大到19X19后算法不准，电脑乱走。
-'2022年4月13日 阿凡达增加可换棋盘颜色, 调整搜索范围，改变游戏难易程度
-'五子棋的玩法和规则
-'1/黑棋禁手判负,所谓黑方形成禁手,是指黑方一子落下同时形成两个或两个以上的活三/冲四及长连禁手.此时,白方应立即向黑方指出禁手,自然而胜
+'Change history:
+'April 12, 2022 - Avata added dynamic resizing of the board, and fixed an issue where the algorithm became inaccurate and the computer played erratically after enlarging the board from 10x10 to 19x19.
+'April 13, 2022 - Avata added the ability to change the board color, and adjusted the search range to change the game's difficulty
+'Gomoku rules and gameplay
+'1/ Black loses on a forbidden move: a forbidden move is when Black's stone simultaneously creates two or more open threes, a double four, or an overline. When this happens White should immediately point out the forbidden move and wins automatically
 '
-'2/白棋无禁手.黑棋禁手包括"三、三"(Double Three)(包括"四、三、三")/"四、四"(Double Four)(包括"四、四、三")/"长连"(Overline).黑棋只能以"四、三"取胜.
+'2/ White has no forbidden moves. Black's forbidden moves include "double three" (Double Three, including "four-three-three"), "double four" (Double Four, including "four-four-three"), and "overline" (Overline). Black can only win with a "four-three".
 '
-'3/最先在棋盘横向/竖向/斜向形成连续的相同色五个棋子的一方为胜.
+'3/ Whoever is first to form five consecutive stones of the same color horizontally, vertically, or diagonally on the board wins.
 '
-'4/黑方走出长连禁手则不同,只要是在终局前,无论白方何时发现此长连禁手点,指出此点而宣布胜利,判白方胜.
+'4/ It's different when Black plays an overline (a forbidden move): as long as it's before the game ends, whenever White notices this overline forbidden-move point and points it out to declare victory, White is ruled the winner.
 '
-'5/五黑方在落下关键的第五子即形成五连的同时,又形成禁手.此时因黑方已成连五,故禁手失效,黑方胜.
+'5/ If Black's fifth stone both completes a five-in-a-row and forms a forbidden move at the same time, the forbidden move is voided because the five-in-a-row already exists, and Black wins.
 '
-'6/黑方禁手形成时,白方应立即指出,黑方即负.若白方未发现或发现后未指明而继续应子,则不能判黑方负.
+'6/ When Black forms a forbidden move, White should point it out immediately, and Black loses at once. If White doesn't notice, or notices but doesn't point it out and keeps responding with moves, Black cannot be ruled as having lost.
 
 '#Region "Form"
 	#if defined(__FB_MAIN__) AndAlso Not defined(__MAIN_FILE__)
@@ -48,22 +48,22 @@
 	#include once "mff/NumericUpDown.bi"
 	Using My.Sys.Forms
 	
-	Dim Shared As Integer mSteps, ChessR = 30, ChessSize, WinStepSum '棋子大小，棋盘大小 WinStepSum, 19->354, 10-> 192
-	'　　定义虚拟桌面：
-	Dim Shared As Integer Table(Any, Any) ' =0, 无子， 1 黑子， 2 白子
-	'　  定义当前玩家桌面空格的分数：
+	Dim Shared As Integer mSteps, ChessR = 30, ChessSize, WinStepSum 'Stone size, board size WinStepSum, 19->354, 10-> 192
+	'Defines the virtual board:
+	Dim Shared As Integer Table(Any, Any) ' =0, empty, 1 black stone, 2 white stone
+	'Defines the score of each empty cell for the current player:
 	Dim Shared pScore(Any, Any) As Integer
-	'　　定义当前电脑桌面空格的分数：
+	'Defines the score of each empty cell for the current computer:
 	Dim Shared cScore(Any, Any) As Integer
-	'　　定义玩家的获胜组合：
+	'Defines the player's winning combinations:
 	Dim Shared  PersonWin(Any, Any, Any) As Boolean
-	'　　定义电脑的获胜组合：
+	'Defines the computer's winning combinations:
 	Dim Shared  ComputerWin(Any, Any, Any) As Boolean
-	'　　定义玩家的获胜组合标志：
+	'Defines the player's winning-combination flags:
 	Dim Shared  PersonFlag(Any) As Boolean
-	'　　定义电脑的获胜组合标志：
+	'Defines the computer's winning-combination flags:
 	Dim Shared ComputerFlag(Any) As Boolean
-	'　 定义游戏有效标志
+	'Defines the game-active flag
 	Dim Shared PlayingFlag As Boolean
 	Dim Shared As Integer zhX, zhY, zhXOld, zhYOld
 	Dim Shared As Integer colorPerson, ColorComputer, ColorLastStep, ColorChessBK, ColorChessGrid
@@ -108,7 +108,7 @@
 		' frmWuziqi
 		With This
 			.Name = "frmWuziqi"
-			.Text = ML("Wuziqi")  '"五子棋"
+			.Text = ML("Wuziqi")  '"Gomoku"
 			.Designer = @This
 			.BorderStyle = FormBorderStyle.FixedDialog
 			.MaximizeBox = False
@@ -139,7 +139,7 @@
 		' GroupBox1
 		With GroupBox1
 			.Name = "GroupBox1"
-			.Text = ML("Setting") '"设置"
+			.Text = ML("Setting") '"Settings"
 			.TabIndex = 3
 			.SetBounds 638, 13, 159, 242
 			.Designer = @This
@@ -148,7 +148,7 @@
 		' cmdStart
 		With cmdStart
 			.Name = "cmdStart"
-			.Text = ML("Restart")  '"重新开始"
+			.Text = ML("Restart")  '"Restart"
 			.TabIndex = 5
 			.SetBounds 13, 198, 135, 35
 			.Designer = @This
@@ -187,7 +187,7 @@
 		' Label2
 		With Label2
 			.Name = "Label2"
-			.Text = ML("Chess Board Size") '"棋盘大小:"
+			.Text = ML("Chess Board Size") '"Board size:"
 			.TabIndex = 8
 			.SetBounds 9, 97, 97, 16
 			.Designer = @This
@@ -207,7 +207,7 @@
 		' chkComputerFirst
 		With chkComputerFirst
 			.Name = "chkComputerFirst"
-			.Text = ML("Computer first") '"电脑先下"
+			.Text = ML("Computer first") '"Computer moves first"
 			.TabIndex = 9
 			.Checked = True
 			.SetBounds 18, 74, 117, 16
@@ -326,25 +326,25 @@ Private Sub frmWuziqiType.InitPlayEnvironment()
 		numChessSize.Text = Str(ChessSize)
 		
 		WinStepSum = Max(WinStepsTotal(Val(numChessSize.Text)), 192)
-		ReDim As Integer Table(ChessSize+ 1, ChessSize+ 1) ' =0, 无子， 1 黑子， 2 白子
-		'　　定义虚拟桌面：
+		ReDim As Integer Table(ChessSize+ 1, ChessSize+ 1) ' =0, empty, 1 black stone, 2 white stone
+		'Defines the virtual board:
 		ReDim Table(ChessSize, ChessSize) As Integer
-		'　  定义当前玩家桌面空格的分数：
+		'Defines the score of each empty cell for the current player:
 		ReDim pScore(ChessSize, ChessSize) As Integer
-		'　　定义当前电脑桌面空格的分数：
+		'Defines the score of each empty cell for the current computer:
 		ReDim cScore(ChessSize, ChessSize) As Integer
-		'　　定义玩家的获胜组合：
+		'Defines the player's winning combinations:
 		ReDim  PersonWin(ChessSize, ChessSize, WinStepSum) As Boolean
-		'　　定义电脑的获胜组合：
+		'Defines the computer's winning combinations:
 		ReDim  ComputerWin(ChessSize, ChessSize, WinStepSum) As Boolean
-		'　　定义玩家的获胜组合标志：
+		'Defines the player's winning-combination flags:
 		ReDim  PersonFlag(WinStepSum) As Boolean
-		'　　定义电脑的获胜组合标志：
+		'Defines the computer's winning-combination flags:
 		ReDim ComputerFlag(WinStepSum) As Boolean
 	End If
 	With Picture1.Canvas
 		.Cls
-		For i As Integer = 1 To ChessSize     ''''''画游戏棋盘ChessSize 19*19
+		For i As Integer = 1 To ChessSize     ''''''draws the game board ChessSize 19*19
 			.Line i * ChessR + ChessR / 2, ChessR + ChessR / 2, i * ChessR + ChessR / 2, ChessSize * ChessR + ChessR / 2, ColorChessGrid
 			.TextOut i * ChessR + ChessR / 3, ChessR / 3, Str(i), clBlack
 			.Line ChessR + ChessR / 2 , ChessR *i + ChessR / 2, ChessSize * ChessR + ChessR / 2, ChessR *i + ChessR / 2, ColorChessGrid
@@ -352,26 +352,26 @@ Private Sub frmWuziqiType.InitPlayEnvironment()
 		Next
 	End With
 	
-	PlayingFlag = True           '游戏有效
-	lblInfomation.Visible = True       '游戏状态标签显示
+	PlayingFlag = True           'Game active
+	lblInfomation.Visible = True       'Show the game status label
 	lblInfomation.BackColor = frmWuziqi.BackColor
-	lblInfomation.Text = ML("Player Turn......" )  '"等待玩家落子......"
+	lblInfomation.Text = ML("Player Turn......" )  '"Waiting for player to move......"
 	Dim  As Integer i, j, m, n
-	
-	'桌面初始化
+
+	'Initialize the board
 	For i = 0 To ChessSize - 1
 		For j = 0 To ChessSize - 1
 			Table(i, j) = 0
 		Next
 	Next
-	
-	'获胜标志初始化
+
+	'Initialize the winning-combination flags
 	For i = 0 To WinStepSum
 		PersonFlag(i) = True
 		ComputerFlag(i) = True
 	Next
-	
-	'******** 初始化获胜组合 ********
+
+	'******** Initialize winning combinations ********
 	n = 0
 	For i = 0 To ChessSize - 1
 		For j = 0 To ChessSize - 5
@@ -413,13 +413,13 @@ Private Sub frmWuziqiType.InitPlayEnvironment()
 		Next
 	Next
 	
-	''由于我们设定电脑先手，并下在了坐标ChessSize*ChessR / 2, 调用绘图函数绘制当前电脑先走的位置
+	''Since we set the computer to move first and it plays at coordinates ChessSize*ChessR / 2, call the drawing function to render the computer's first move
 	If chkComputerFirst.Checked = True Then
 		zhX = ChessSize / 2 : zhY = ChessSize/ 2
 		zhXOld = -2: zhYOld = -2
 		DrawCompter((zhX + 1)*ChessR + ChessR / 2 , (zhY + 1)*ChessR + ChessR / 2 )
-		Table(zhX , zhY) = 1              '由于我们设定电脑先手，并下了ChessSize / 2，ChessSize / 2位所以将其值设为1
-		'由于电脑已下了ChessSize/ 2，ChessSize/ 2位所以我们需要重新设定玩家的获胜标志
+		Table(zhX , zhY) = 1              'Since the computer moves first and played at ChessSize / 2, ChessSize / 2, set that cell's value to 1
+		'Since the computer has played at ChessSize/ 2, ChessSize/ 2 we need to re-evaluate the player's winning flags
 		For i = 0 To WinStepSum
 			If PersonWin(zhX,  zhY, i) = True Then
 				PersonFlag(i) = False
@@ -428,8 +428,8 @@ Private Sub frmWuziqiType.InitPlayEnvironment()
 	Else
 		zhXOld = -2: zhYOld = -2
 	End If
-	
-	'******** 初始化获胜组合结束 ********
+
+	'******** End of winning-combination initialization ********
 	
 End Sub
 
@@ -874,7 +874,7 @@ End Sub
 
 Private Sub frmWuziqiType.Picture1_Paint(ByRef Sender As Control, ByRef Canvas As My.Sys.Drawing.Canvas)
 	Canvas.Cls
-	For i As Integer = 1 To ChessSize     ''''''画游戏棋盘ChessSize 19*19
+	For i As Integer = 1 To ChessSize     ''''''draws the game board ChessSize 19*19
 		Canvas.Line i * ChessR + ChessR / 2, ChessR + ChessR / 2, i * ChessR + ChessR / 2, ChessSize * ChessR + ChessR / 2, ColorChessGrid
 		Canvas.TextOut i * ChessR + ChessR / 3, ChessR / 3, Str(i), clBlack
 		Canvas.Line ChessR + ChessR / 2 , ChessR *i + ChessR / 2, ChessSize * ChessR + ChessR / 2, ChessR *i + ChessR / 2, ColorChessGrid

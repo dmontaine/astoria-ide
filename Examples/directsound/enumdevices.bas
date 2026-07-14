@@ -1,4 +1,4 @@
-' enumdevices设备枚举
+' enumdevices device enumeration
 ' Copyright (c) 2024 CM.Wang
 ' Freeware. Use at your own risk.
 

@@ -1,5 +1,5 @@
 ﻿#pragma once
-'wavegenerator波形发生器
+'wavegenerator waveform generator
 ' Copyright (c) 2024 CM.Wang
 ' Freeware. Use at your own risk.
 
@@ -41,7 +41,7 @@ Private Function WaveStart(pGUID As LPGUID, my_HWND As HWND, ByVal WaveType As I
 	
 	Select Case WaveType
 	Case 0
-		'sin wave正玄波
+		'sin wave
 		gsx = 4 * Atn(1) * 2 / mBufferLength
 		For i = 0 To mBufferLength
 			n = i * gsx
@@ -49,32 +49,32 @@ Private Function WaveStart(pGUID As LPGUID, my_HWND As HWND, ByVal WaveType As I
 			mByteBuffer(i) = Osc2Samp + 128
 		Next
 	Case 1
-		'square wave方波
-		gsx = mBufferLength / 2 ' 计算周期长度
+		'square wave
+		gsx = mBufferLength / 2 ' calculate period length
 		For i = 0 To mBufferLength
 			If i < gsx Then
-				Osc2Samp = 0    '低电平
+				Osc2Samp = 0    'low level
 			Else
-				Osc2Samp = 255 '高电平
+				Osc2Samp = 255 'high level
 			End If
 			mByteBuffer(i) = Osc2Samp
 		Next
 	Case 2
-		'sawtooth wave锯齿波
+		'sawtooth wave
 		gsx = 255
-		gsx = gsx / mBufferLength ' 计算增量
+		gsx = gsx / mBufferLength ' calculate increment
 		For i = 0 To mBufferLength
-			Osc2Samp = i * gsx ' 递增序列
+			Osc2Samp = i * gsx ' increasing sequence
 			mByteBuffer(i) = Osc2Samp
 		Next
 	Case 3
-		'triangular wave三角波
-		gsx = 510 / mBufferLength ' 计算增量
+		'triangular wave
+		gsx = 510 / mBufferLength ' calculate increment
 		For i = 0 To mBufferLength
 			If i < mBufferLength / 2 Then
-				Osc2Samp = i * gsx ' 正半周期递增
+				Osc2Samp = i * gsx ' rising during positive half-cycle
 			Else
-				Osc2Samp = 510 - (i * gsx) ' 负半周期递减，总幅度为510
+				Osc2Samp = 510 - (i * gsx) ' falling during negative half-cycle, total amplitude 510
 			End If
 			mByteBuffer(i) = Osc2Samp
 		Next

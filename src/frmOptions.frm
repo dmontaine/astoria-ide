@@ -3030,7 +3030,7 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		IncludeMFFPath = .chkIncludeMFFPath.Checked
 		WLet(MFFPath, .txtMFFpath.Text)
 		WLet(ProjectsPath, .txtProjectsPath.Text)
-			WLet(MFFDll, *MFFPath & "/mff64.dll")
+			WLet(MFFDll, *MFFPath & "/framework.dll")
 		TabWidth = Val(.txtTabSize.Text)
 		HistoryLimit = Val(.txtHistoryLimit.Text)
 		IntellisenseLimit = Val(.txtIntellisenseLimit.Text)

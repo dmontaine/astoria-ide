@@ -1,4 +1,4 @@
-﻿' FileAct 文件处理
+﻿' FileAct - file handling
 ' Copyright (c) 2024 CM.Wang
 ' Freeware. Use at your own risk.
 

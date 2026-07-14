@@ -31,17 +31,17 @@
 #include once "wlanapi.bi"
 
 '' ----------------------------------------------------------
-'' 辅助函数
+'' Helper functions
 '' ----------------------------------------------------------
 
-' 转换GUID为WString
+' Convert GUID to WString
 Function GUID2WStr(ByRef g As GUID) ByRef As WString
 	Static As WString * 64 guidStr
 	StringFromGUID2(@g, @guidStr, 64)
 	Function = guidStr
 End Function
 
-' 转换SSID(utf8)为WString
+' Convert SSID (utf8) to WString
 Function SSID2WStr(ByRef ssid As DOT11_SSID) ByRef As WString
 	Dim wideCharCount As Long
 	Dim result As Long
@@ -54,7 +54,7 @@ Function SSID2WStr(ByRef ssid As DOT11_SSID) ByRef As WString
 			Dim wstrBuffer As WString * 129
 			result = MultiByteToWideChar(CP_UTF8, 0, @ssid.ucSSID, CInt(ssid.uSSIDLength), wstrBuffer, wideCharCount)
 			If result > 0 Then
-				' --- 成功转换 ---
+				' --- Conversion succeeded ---
 				finalWString = Left(wstrBuffer, result)
 				Return finalWString
 			End If ' If result > 0
@@ -63,7 +63,7 @@ Function SSID2WStr(ByRef ssid As DOT11_SSID) ByRef As WString
 	Return finalWString
 End Function
 
-' 获取认证算法描述
+' Get authentication algorithm description
 Function GetAuthAlgorithmString(algo As DOT11_AUTH_ALGORITHM) As String
 	Select Case algo
 	Case DOT11_AUTH_ALGO_80211_OPEN: Return "Open"
@@ -82,7 +82,7 @@ Function GetAuthAlgorithmString(algo As DOT11_AUTH_ALGORITHM) As String
 	End Select
 End Function
 
-' 获取加密算法描述
+' Get cipher algorithm description
 Function GetCipherAlgorithmString(algo As DOT11_CIPHER_ALGORITHM) As String
 	Select Case algo
 	Case DOT11_CIPHER_ALGO_NONE: Return "None"
@@ -102,21 +102,21 @@ Function GetCipherAlgorithmString(algo As DOT11_CIPHER_ALGORITHM) As String
 	End Select
 End Function
 
-' PHY 类型描述
+' PHY type description
 Function phy_type_to_string(t As DOT11_PHY_TYPE) As String
 	Select Case t
-	Case dot11_phy_type_any         : Return "Any" '未初始化"
-	Case dot11_phy_type_fhss        : Return "FHSS" '指定频率跳跃分布光谱"
-	Case dot11_phy_type_dsss        : Return "DSSS" '指定直接序列分布范围 "
-	Case dot11_phy_type_irbaseband  : Return "IR" '指定红外（IR）基带"
-	Case dot11_phy_type_ofdm        : Return "802.11a OFDM" '指定正交频率除法"
-	Case dot11_phy_type_hrdsss      : Return "802.11b HRDSSS" '指定高速率"
-	Case dot11_phy_type_erp         : Return "802.11g ERP" '指定扩展速率"
-	Case dot11_phy_type_ht          : Return "802.11n (HT)" '指定高吞吐量"
-	Case dot11_phy_type_vht         : Return "802.11ac (VHT)" '非常高的吞吐量 PHY 类型"
-	Case dot11_phy_type_dmg         : Return "802.11ad (DMG)" '指定方向多千兆位"
-	Case dot11_phy_type_he          : Return "802.11ax (Wi-Fi 6)" '非常高的吞吐量 PHY 类型"
-	Case dot11_phy_type_eht         : Return "802.11be (Wi-Fi 7)" '指定非常高的吞吐量 PHY 类型"
+	Case dot11_phy_type_any         : Return "Any" 'Not initialized"
+	Case dot11_phy_type_fhss        : Return "FHSS" 'Frequency-hopping spread spectrum"
+	Case dot11_phy_type_dsss        : Return "DSSS" 'Direct-sequence spread spectrum "
+	Case dot11_phy_type_irbaseband  : Return "IR" 'Infrared (IR) baseband"
+	Case dot11_phy_type_ofdm        : Return "802.11a OFDM" 'Orthogonal frequency-division (multiplexing)"
+	Case dot11_phy_type_hrdsss      : Return "802.11b HRDSSS" 'High rate"
+	Case dot11_phy_type_erp         : Return "802.11g ERP" 'Extended rate"
+	Case dot11_phy_type_ht          : Return "802.11n (HT)" 'High throughput"
+	Case dot11_phy_type_vht         : Return "802.11ac (VHT)" 'Very high throughput PHY type"
+	Case dot11_phy_type_dmg         : Return "802.11ad (DMG)" 'Directional multi-gigabit"
+	Case dot11_phy_type_he          : Return "802.11ax (Wi-Fi 6)" 'Very high throughput PHY type"
+	Case dot11_phy_type_eht         : Return "802.11be (Wi-Fi 7)" 'Extremely high throughput PHY type"
 	Case dot11_phy_type_IHV_start   : Return "IHV_start"
 	Case dot11_phy_type_IHV_end     : Return "IHV_end"
 	Case Else : Return "Unknown"

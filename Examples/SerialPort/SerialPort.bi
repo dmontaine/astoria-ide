@@ -1,4 +1,4 @@
-﻿' SerialPort 串口
+﻿' SerialPort
 ' Copyright (c) 2022 CM.Wang
 ' Freeware. Use at your own risk.
 
@@ -35,7 +35,7 @@ Public:
 	Declare Function Open(ByVal Index As Integer, ByVal Owner As Any Ptr) As HANDLE
 	Declare Function Close() As Boolean
 	
-	OndDtaArrive As Sub(Owner As Any Ptr, ArriveData As ZString Ptr, DataLength As Integer) '接收串口数据
+	OndDtaArrive As Sub(Owner As Any Ptr, ArriveData As ZString Ptr, DataLength As Integer) 'Receives serial port data
 End Type
 
 #ifndef __USE_MAKE__

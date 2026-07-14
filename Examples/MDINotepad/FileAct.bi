@@ -1,5 +1,5 @@
 ﻿#pragma once
-' FileAct 文件处理
+' FileAct - file handling
 ' Copyright (c) 2024 CM.Wang
 ' Freeware. Use at your own risk.
 
@@ -22,7 +22,7 @@
 ' SHA256 = "d7a8fbb307d7809469ca9abcb0082e4f8d5651e46d3cdb762d02d0bf37c9e592"
 ' SHA512 = "07e547d9586f6a73f73fbac0435ed76951218fb7d0c8d788a309d785436bbb642e93a252a954f23912547d1e8a3b5ed6e1bfd7097821233fa0538f3db854fee6"
 
-'Hash算法
+'Hash algorithms
 Enum HashAlgorithms
 	MD2 = 0
 	MD4

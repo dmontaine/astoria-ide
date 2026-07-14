@@ -8,7 +8,7 @@
 Dim Shared g_scanEvent As HANDLE
 
 ' ------------------------------------------------------------
-' WLAN 通知回调
+' WLAN notification callback
 ' ------------------------------------------------------------
 Sub WlanNotificationCallback(pData As L2_NOTIFICATION_DATA Ptr, pContext As Any Ptr)
 	If pData = 0 Then Exit Sub
@@ -18,7 +18,7 @@ Sub WlanNotificationCallback(pData As L2_NOTIFICATION_DATA Ptr, pContext As Any 
 		Select Case pData->NotificationCode
 		Case wlan_notification_acm_scan_complete
 			?"[+] Scan complete notification"
-			'设置事件为有信号状态
+			'Set the event to signaled state
 			SetEvent(g_scanEvent)
 		Case wlan_notification_acm_scan_fail
 			?"[!] Scan failed"
@@ -32,7 +32,7 @@ Sub WlanNotificationCallback(pData As L2_NOTIFICATION_DATA Ptr, pContext As Any 
 End Sub
 
 '' ----------------------------------------------------------
-'' 主程序
+'' Main program
 '' ----------------------------------------------------------
 Dim As HANDLE hClient = 0
 Dim As ULong ver = 0
@@ -54,7 +54,7 @@ If g_scanEvent = NULL Then
 End If
 ?"CreateEvent "; g_scanEvent
 
-' 注册通知
+' Register notification
 ret = WlanRegisterNotification(hClient, WLAN_NOTIFICATION_SOURCE_ACM, True, @WlanNotificationCallback, NULL, NULL, NULL)
 ?"WlanRegisterNotification "; ret
 If ret <> ERROR_SUCCESS Then
@@ -86,7 +86,7 @@ End If
 ?"Interfaces found: "; pIfList->dwNumberOfItems
 Print
 
-' 检查是否有可用接口
+' Check if any interfaces are available
 If pIfList->dwNumberOfItems = 0 Then
     ?"No WiFi interfaces found"
     WlanFreeMemory(pIfList)
@@ -106,19 +106,19 @@ For i As Integer = 0 To pIfList->dwNumberOfItems - 1
 		?"GUID: "; GUID2WStr(.InterfaceGuid)
 		?"Requesting scan..."
 		
-		' 重置事件状态
+		' Reset event state
 		ResetEvent(g_scanEvent)
-		
-		'' 启动扫描
+
+		'' Start scan
 		ret = WlanScan(hClient, .InterfaceGuid, NULL, NULL, NULL)
 		If ret <> ERROR_SUCCESS Then
 			?"WlanScan failed = "; ret
 			Continue For
 		End If
 		
-		' 等待扫描完成（设置超时时间，避免无限等待）
+		' Wait for scan to complete (set a timeout to avoid waiting indefinitely)
 		?"(0) Waiting for scan completion..."
-		Dim As ULong waitResult = WaitForSingleObject(g_scanEvent, 10000) ' 10秒超时
+		Dim As ULong waitResult = WaitForSingleObject(g_scanEvent, 10000) ' 10-second timeout
 		Select Case waitResult
 		Case WAIT_OBJECT_0
 			?"(1) Scan completed successfully"
@@ -133,8 +133,8 @@ For i As Integer = 0 To pIfList->dwNumberOfItems - 1
 			Continue For
 		End Select
 		
-		'' 获取可用网络列表
-		' 参数3对应WLAN_AVAILABLE_NETWORK_INCLUDE_ALL_ADHOC_PROFILES
+		'' Get list of available networks
+		' Parameter 3 corresponds to WLAN_AVAILABLE_NETWORK_INCLUDE_ALL_ADHOC_PROFILES
 		ret = WlanGetAvailableNetworkList(hClient, .InterfaceGuid, 3, NULL, @pList)
 	End With
 	
@@ -156,7 +156,7 @@ For i As Integer = 0 To pIfList->dwNumberOfItems - 1
 			?"    Cipher: "; GetCipherAlgorithmString(.dot11DefaultCipherAlgorithm), .dot11DefaultCipherAlgorithm
 			?"    Security: "; IIf(.bSecurityEnabled, "YES", "NO")
 			
-			' 显示PHY类型
+			' Display PHY types
 			Dim hasPhyType As Boolean = False
 			For k As Integer = 0 To WLAN_MAX_PHY_TYPE_NUMBER - 1
 				If .dot11PhyTypes(k) <> dot11_phy_type_unknown Then
@@ -173,7 +173,7 @@ For i As Integer = 0 To pIfList->dwNumberOfItems - 1
 			
 			?"    BSS Type: "; .dot11BssType
 			
-			' -------- 调用 BSS 列表 --------
+			' -------- Query BSS list --------
 			Dim pBssList As PWLAN_BSS_LIST
 			
 			ret = WlanGetNetworkBssList(hClient, pIfList->InterfaceInfo(i).InterfaceGuid, @.dot11Ssid, .dot11BssType, False, NULL, @pBssList)
@@ -189,7 +189,7 @@ For i As Integer = 0 To pIfList->dwNumberOfItems - 1
 				With pBssList->wlanBssEntries(k)
 					?"      -- BSS["; k + 1; "]"
 					
-					' MAC地址
+					' MAC address
 					Dim As String macAddr = _
 					LCase(Hex(.dot11Bssid.ucDot11MacAddress(0), 2)) & ":" & _
 					LCase(Hex(.dot11Bssid.ucDot11MacAddress(1), 2)) & ":" & _
@@ -200,7 +200,7 @@ For i As Integer = 0 To pIfList->dwNumberOfItems - 1
 					
 					?"         BSSID: "; macAddr
 					
-					' 信道和频率
+					' Channel and frequency
 					Dim As ULong freq = .ulChCenterFrequency
 					Dim As Integer channel = 0
 					If freq >= 2412000 AndAlso freq <= 2484000 Then
@@ -217,7 +217,7 @@ For i As Integer = 0 To pIfList->dwNumberOfItems - 1
 				End With
 			Next
 			
-			' 释放BSS列表内存
+			' Free BSS list memory
 			If pBssList <> NULL Then 
 			    WlanFreeMemory(pBssList)
 			    pBssList = NULL
@@ -226,12 +226,12 @@ For i As Integer = 0 To pIfList->dwNumberOfItems - 1
 		End With
 	Next
 	
-	' 释放网络列表内存
+	' Free network list memory
 	WlanFreeMemory(pList)
 	pList = NULL
 Next
 
-' 清理资源
+' Clean up resources
 CloseHandle(g_scanEvent)
 WlanFreeMemory(pIfList)
 WlanCloseHandle(hClient, NULL)

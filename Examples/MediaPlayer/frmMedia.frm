@@ -1,4 +1,4 @@
-' MediaPlayer 媒体播放器
+﻿' MediaPlayer - media player
 ' Copyright (c) 2024 CM.Wang
 ' Freeware. Use at your own risk.
 
@@ -912,10 +912,10 @@ Function CaptureBmp(filename As ZString Ptr, pMC As IMediaControl Ptr, pBV2 As I
 	
 	Dim As HRESULT hr
 	
-	'1, 检查pBV2是否存在
+	'1, Check whether pBV2 exists
 	If pBV2 = NULL Then Return True
-	
-	'2, 检查视频是否在暂停状态
+
+	'2, Check whether the video is paused
 	'Retrieves the state of the filter graph—paused, running, or stopped.
 	
 	Dim As FILTER_STATE pfs

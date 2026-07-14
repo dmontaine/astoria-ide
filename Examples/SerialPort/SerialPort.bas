@@ -1,4 +1,4 @@
-﻿' SerialPort 串口
+﻿' SerialPort
 ' Copyright (c) 2022 CM.Wang
 ' Freeware. Use at your own risk.
 
@@ -93,7 +93,7 @@ Private Function SerialPort.ThreadProcedure(ByVal pParam As LPVOID) As DWORD
 End Function
 
 Private Function SerialPort.Write(ByVal WriteData As ZString Ptr, ByVal DataLength As Integer) As Integer
-	Dim NumberWritten As DWORD   '用来记录写入的字节长度
+	Dim NumberWritten As DWORD   'Used to record the number of bytes written
 	
 	If WriteFile(mHandle, WriteData, DataLength, @NumberWritten, @mOverlapped) Then
 		FlushFileBuffers(mHandle)

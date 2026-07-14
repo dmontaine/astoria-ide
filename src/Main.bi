@@ -303,7 +303,6 @@ Common Shared As Boolean mApplyingDeferredFormDesign
 Common Shared As Boolean mApplyingFormTabView
 Common Shared As Boolean mAddingTab
 Common Shared As Library Ptr MFFCtlLibrary
-Declare Sub RemoveToolBoxLibraryNodes(CtlLibrary As Library Ptr)
 Declare Sub InitToolBoxTree()
 Declare Sub CloseAllTabs(WithoutCurrent As Boolean = False)
 Declare Sub UpdateAllTabWindows

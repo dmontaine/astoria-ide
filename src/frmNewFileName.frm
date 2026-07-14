@@ -10,7 +10,7 @@ Constructor frmNewFileName
 		.MaximizeBox = False
 		.MinimizeBox = False
 		.OnCreate = @Form_Create_
-		.SetBounds 0, 0, 657, 120
+		.SetBounds 0, 0, 328, 120
 		.StartPosition = FormStartPosition.CenterParent
 	End With
 	' pnlBottom -- footer (file name row + OK/Cancel), same layout as New File / New Project

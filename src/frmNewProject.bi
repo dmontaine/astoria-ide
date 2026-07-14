@@ -22,13 +22,14 @@
 		Declare Static Sub Form_Create_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Sub Form_Create(ByRef Sender As Control)
 		Declare Sub AddProjectTemplateItem(ByRef TemplateName As String)
+		Declare Function GetTemplateMainFile(ByRef TemplateName As String) As UString
 		Declare Constructor
-		
+
 		Dim As ListView lvTemplates
 		Dim As CommandButton cmdOK, cmdCancel, cmdOpenExisting
-		Dim As Label lblProjectTemplates, lblProjectName
-		Dim As TextBox txtProjectName
-		Dim As Panel pnlProjectName, pnlBottom
+		Dim As Label lblProjectTemplates, lblProjectName, lblFormName, lblModuleName
+		Dim As TextBox txtProjectName, txtFormName, txtModuleName
+		Dim As Panel pnlBottom, pnlProjectName, pnlFormName, pnlModuleName
 		Dim As WStringList TemplateNames
 		Dim As UString SelectedTemplate, SelectedFolder, SelectedProjectFile
 		Dim As Boolean OpenExistingRequested

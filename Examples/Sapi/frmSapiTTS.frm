@@ -394,7 +394,7 @@ Private Sub frmSapiTTSType.CommandButton_Click(ByRef Sender As Control)
 		
 		App.DoEvents()
 		
-		'创建音频输出文件流设备
+		'Create audio output file stream device
 		Dim classID As IID, riid As IID
 		CLSIDFromString(CLSID_SpFileStream, @classID)
 		IIDFromString(IID_ISpeechFileStream, @riid)
@@ -403,7 +403,7 @@ Private Sub frmSapiTTSType.CommandButton_Click(ByRef Sender As Control)
 		
 		Dim pSpAudioFormat As ISpeechAudioFormat Ptr
 		
-		'设置音频格式
+		'Set audio format
 		If ComboBoxEdit3.ItemIndex >-1 Then
 			Dim aft As SpeechAudioFormatType
 			pSpFileStream->get_Format(@pSpAudioFormat)
@@ -413,22 +413,22 @@ Private Sub frmSapiTTSType.CommandButton_Click(ByRef Sender As Control)
 			pSpFileStream->putref_Format(pSpAudioFormat)
 		End If
 		
-		'打开文件流
+		'Open file stream
 		pSpFileStream->Open(@TextBox2.Text, SSFMCreateForWrite, False)
 		
-		'语音指向文件流设备
+		'Point voice output to the file stream device
 		pSpVoice->SetOutput(pSpFileStream, True)
 		
-		'文字转语音
+		'Text to speech
 		pSpVoice->Speak(@TextBox1.Text , SVSFNLPSpeakPunc, NULL)
 		
-		'关闭音频流
+		'Close audio stream
 		pSpFileStream->Close()
 		
-		'恢复音频输出装置
+		'Restore audio output device
 		pSpVoice->SetOutput(ComboBoxEdit2.ItemData(ComboBoxEdit2.ItemIndex), True)
 		
-		'释放资源
+		'Release resources
 		pSpAudioFormat->Release()
 		pSpFileStream->Release()
 		
@@ -448,7 +448,7 @@ Private Sub frmSapiTTSType.Form_Message(ByRef Sender As Control, ByRef MSG As Me
 		Do
 			If pSpVoice->GetEvents(1, @eventItem, NULL) <> S_OK Then Exit Do
 			If eventItem.eEventId = SPEI_WORD_BOUNDARY Then
-				'显示播报进度
+				'Show speech progress
 				pSpVoice->GetStatus(@eventStatus, NULL)
 				TextBox1.SelStart = eventStatus.ulInputWordPos
 				TextBox1.SelLength = eventStatus.ulInputWordLen
@@ -458,7 +458,7 @@ Private Sub frmSapiTTSType.Form_Message(ByRef Sender As Control, ByRef MSG As Me
 End Sub
 
 Private Sub frmSapiTTSType.Form_Destroy(ByRef Sender As Control)
-	'释放资源
+	'Release resources
 	pSpVoice->Release()
 	CoUninitialize()
 End Sub

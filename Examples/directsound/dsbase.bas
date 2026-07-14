@@ -1,4 +1,4 @@
-'dsbase ds基础库
+'dsbase DirectSound base library
 ' Copyright (c) 2024 CM.Wang
 ' Freeware. Use at your own risk.
 

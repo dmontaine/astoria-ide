@@ -171,7 +171,7 @@ Private Sub frmPlayerGrabType.Form_Create(ByRef Sender As Control)
 	hr = CoInitialize(NULL)
 	If FAILED(hr) Then
 		? "COM 初始化失败, hr = "; Hex(hr)
-		' COM 初始化失败，退出
+		' COM initialization failed, exit
 		' COM initialization failed, exit
 		End -1
 	End If

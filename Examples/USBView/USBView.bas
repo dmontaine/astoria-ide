@@ -560,13 +560,13 @@ Private Function usbPortEnum(hHub As HANDLE, PortCount As UCHAR, tv As TreeView 
 		Else
 			usbNoteConnInfoDisp(@ConnectionInformation)
 			If ConnectionInformation.ConnectionStatus = NoDeviceConnected Then
-				'没有连接设备
+				'No device connected
 				usbTextPrint("No connected device  " & vbTab & PortIndex)
 				If pStatus Then portStr += "*" & *pDrvDesc
 				subtn = usbTVNodeAdd(tv, tn, portStr, 19, True, True)
 			Else
-				'连接了设备
-				
+				'Device connected
+
 				usbDeviceDesc(hHub, PortIndex)
 				Dim temp As String = usbDeviceInfo(hHub, PortIndex, @ConnectionInformation.DeviceDescriptor)
 				If temp = "" Then
@@ -577,9 +577,9 @@ Private Function usbPortEnum(hHub As HANDLE, PortCount As UCHAR, tv As TreeView 
 				subtn = usbTVNodeAdd(tv, tn, portStr, 19, True, False)
 
 				If ConnectionInformation.DeviceIsHub = 0 Then
-					'连接了设备
+					'Device connected
 				Else
-					'连接了HUB
+					'Hub connected
 					memset(@NodeConnection, 0, SizeOf(USB_NODE_CONNECTION_NAME))
 					NodeConnection.ConnectionIndex = PortIndex
 					usbTextPrint("[IOCTL_USB_GET_NODE_CONNECTION_NAME]检索连接到 USB 集线器特定端口的设备的符号链接名称")
@@ -667,7 +667,7 @@ End Function
 Private Sub usbHostControllerEnum(tv As TreeView Ptr, tx As TextBox Ptr)
 	usbTextPrint(!"\r\n[usbHostControllerEnum] start" & vbTab & tx)
 	
-	'我的电脑
+	'My Computer
 	tv->Nodes.Clear
 	Dim tn As PTreeNode
 	'tn = usbTVNodeAdd(tv, tv->Nodes, "My Computer", 12, True, True)

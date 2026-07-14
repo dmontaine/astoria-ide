@@ -1,11 +1,11 @@
-﻿' FileAct 文件处理
+﻿' FileAct - file handling
 ' Copyright (c) 2024 CM.Wang
 ' Freeware. Use at your own risk.
 
 #pragma once
 #include once "FileAct.bi"
 
-'根据哈希算法代码Algorithm返回哈希算法名字符串
+'Return the hash algorithm name string for algorithm code Algorithm
 Private Function AlgorithmWStr(ByVal Algorithm As HashAlgorithms = MD5) ByRef As WString
 	Select Case Algorithm
 	Case MD2
@@ -23,7 +23,7 @@ Private Function AlgorithmWStr(ByVal Algorithm As HashAlgorithms = MD5) ByRef As
 	End Select
 End Function
 
-'用指定大小nSize的数据nData和哈希算法代码Algorithm返回哈希值
+'Return the hash value of data nData (size nSize) using hash algorithm code Algorithm
 Private Function GetHash(nData As Any Ptr, nSize As Integer, ByVal Algorithm As HashAlgorithms = MD5, ByVal nLCase As Boolean = False) As String
 	Dim As Byte Ptr phalg, phhash
 	Dim As ULong lhashlength, LRESULT, nlength
@@ -48,7 +48,7 @@ Private Function GetHash(nData As Any Ptr, nSize As Integer, ByVal Algorithm As 
 	End If
 End Function
 
-'获取文件FileName数据rtnData, 返回文件大小
+'Get the data of file FileName into rtnData; returns the file size
 Private Function FileDataGet Overload (ByRef FileName As Const WString, ByRef rtnData As Any Ptr) As UInteger
 	Dim h As Integer = FreeFile
 	Dim fsize As UInteger = 0
@@ -68,7 +68,7 @@ Private Function FileDataGet Overload (ByRef FileName As Const WString, ByRef rt
 	Return fsize
 End Function
 
-'秒数Sec按指定的时格式hfmt,分格式mfmt,秒格式sfmt, 返回转换为时间字符串
+'Convert seconds Sec to a time string using the specified hour format hfmt, minute format mfmt, second format sfmt
 Private Function Sec2Time(Sec As Single, hfmt As String = "#,#0", mfmt As String = "#00", sfmt As String = "#00") ByRef As String
 	Dim h As Long
 	Dim m As Long
@@ -81,7 +81,7 @@ Private Function Sec2Time(Sec As Single, hfmt As String = "#,#0", mfmt As String
 	Return r
 End Function
 
-'字节数Bytes按指定的整数格式iFmt,小数格式sFmt, 返回带单位的字符串
+'Convert byte count Bytes to a string with a unit, using the specified integer format iFmt and decimal format sFmt
 Private Function Bytes2Str(Bytes As Double, iFmt As String = "#,#0", sFmt As String = "#0.0") ByRef As String
 	Dim dbb As Double
 	Dim dba As Double
@@ -118,12 +118,12 @@ Private Function Bytes2Str(Bytes As Double, iFmt As String = "#,#0", sFmt As Str
 	Return r
 End Function
 
-'返回WFD的字节数
+'Return the byte count from the WFD
 Private Function WFD2Bytes(wfd As WIN32_FIND_DATA Ptr) As ULongInt
 	Return (Cast(ULONGLONG, wfd->nFileSizeHigh) Shl 32) Or wfd->nFileSizeLow
 End Function
 
-'返回FILETIME时间ft的时间
+'Return the date/time value of FILETIME ft
 Private Function WFD2TimeSerial(ft As FILETIME Ptr) As Double
 	Dim lft As FILETIME
 	FileTimeToLocalFileTime(ft, @lft)
@@ -132,7 +132,7 @@ Private Function WFD2TimeSerial(ft As FILETIME Ptr) As Double
 	Return DateSerial(st.wYear, st.wMonth, st.wDay) + TimeSerial(st.wHour, st.wMinute, st.wSecond)
 End Function
 
-'用FILETIME的时间ft按格式tf返回时间字符串
+'Return a time string for FILETIME ft using format tf
 Private Function WFD2TimeStr(ft As FILETIME Ptr, tf As WString = "yyyy/mm/dd hh:mm:ss") As String
 	Dim lft As FILETIME
 	FileTimeToLocalFileTime(ft, @lft)
@@ -142,7 +142,7 @@ Private Function WFD2TimeStr(ft As FILETIME Ptr, tf As WString = "yyyy/mm/dd hh:
 	Return Format(dt, tf)
 End Function
 
-'WFD比较,成功返回true
+'Compare two WFDs; returns true on success
 Private Function WFDCompare(ByVal sWFD As WIN32_FIND_DATA Ptr, ByVal tWFD As WIN32_FIND_DATA Ptr, ByVal chkData As Long = 0, ByVal chkMode As Long = 0) As Long
 	Dim st As FILETIME Ptr
 	Dim tt As FILETIME Ptr
@@ -223,7 +223,7 @@ Private Function WFDCompare(ByVal sWFD As WIN32_FIND_DATA Ptr, ByVal tWFD As WIN
 	Return True
 End Function
 
-'获取文件FileName的WIN32_FIND_DATA结构wfd,成功返回true
+'Get the WIN32_FIND_DATA structure wfd for file FileName; returns true on success
 Private Function WFDGet(FileName As Const WString, ByRef wfd As WIN32_FIND_DATA Ptr) As Integer
 	Dim hFind As HANDLE = FindFirstFile(FileName, wfd)
 	If hFind = INVALID_HANDLE_VALUE Then

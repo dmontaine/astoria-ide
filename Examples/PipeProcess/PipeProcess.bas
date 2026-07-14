@@ -1,5 +1,5 @@
 ﻿#pragma once
-' PipeProcess 管道处理
+' PipeProcess - pipe handling
 ' Copyright (c) 2023 CM.Wang
 ' Freeware. Use at your own risk.
 
@@ -13,7 +13,7 @@ Destructor PipeProcess
 End Destructor
 
 Function PipeProcess.ThreadPipeRead(ByVal pParam As LPVOID) As DWORD
-	Dim cPp As PipeProcess Ptr = Cast(PipeProcess Ptr ,pParam) '将空指针转换成类指针
+	Dim cPp As PipeProcess Ptr = Cast(PipeProcess Ptr ,pParam) 'Cast the void pointer to the class pointer
 	cPp->mThreadAlive = True
 	cPp->PipeRead
 	cPp->mThreadAlive = False
@@ -63,7 +63,7 @@ Function PipeProcess.PipeCreate(Owner As Any Ptr, cmdStr As WString, rtnmsg As W
 	End If
 	
 	'https://docs.microsoft.com/en-us/windows/win32/api/namedpipeapi/nf-namedpipeapi-setnamedpipehandlestate
-	dwMode = PIPE_NOWAIT '启用非阻塞模式
+	dwMode = PIPE_NOWAIT 'Enable non-blocking mode
 	rtn	 = SetNamedPipeHandleState(hPipeOutRead ,@dwMode ,ByVal 0& ,ByVal 0& )
 	If rtn Then
 	Else

@@ -131,6 +131,32 @@ Function DbgTraceEsc(ByRef s As String, ByVal iMax As Integer = 200) As String
 	Return r
 End Function
 
+'' The real inferior exit code, parsed from GDB's own completion text. GDB reports a
+'' nonzero code in OCTAL ("exited with code 02" == decimal 2). Set at the two "the
+'' inferior is gone" exit points in run_debug(); consumed by RunWithDebug's "Application
+'' finished" message. -1 means unknown (e.g. killed by a signal, or still running).
+Dim Shared As Integer gLastExitCode = -1
+
+'' True once kill_inferior_process() has forcibly terminated the debuggee this run
+'' (Stop-while-running, or a close-while-debugging). That path hardcodes exit code 1
+'' via TerminateProcess -- GDB then legitimately reports "exited with code 01", but
+'' it is not a real program exit code, so it must not be shown as one.
+Dim Shared As Boolean gKilledByStop = False
+
+'' Returns -1 if sText names no exit code (killed by signal, "not being run", etc).
+Function ParseGdbExitCode(ByRef sText As String) As Integer
+	If InStr(sText, "exited normally") > 0 Then Return 0
+	Dim As Long iPos = InStr(sText, "exited with code ")
+	If iPos = 0 Then Return -1
+	Dim As String sDigits = Mid(sText, iPos + Len("exited with code "))
+	Dim As Long i = 1
+	While i <= Len(sDigits) AndAlso Mid(sDigits, i, 1) >= "0" AndAlso Mid(sDigits, i, 1) <= "7"
+		i += 1
+	Wend
+	If i = 1 Then Return -1
+	Return CInt(Val("&o" & Left(sDigits, i - 1)))
+End Function
+
 Sub DbgTrace(ByRef tag As String, ByRef info As String = "")
 	If Not bDbgTrace Then Exit Sub
 	If tlockDbgTrace = 0 Then Exit Sub
@@ -1740,7 +1766,9 @@ End Sub
 		If iFlag Then
 
 			iGlPid = 0
-			
+			gLastExitCode = -1
+			gKilledByStop = False
+
 			'killtimer(0, TimerID)
 			
 			'If runtype = RTSTEP Then
@@ -1907,6 +1935,7 @@ End Sub
 							'' DR-14: program already gone at the first stop -- shut the session down cleanly
 							'' on the worker (single pipe owner) instead of 'c'/refresh against a dead inferior.
 							DbgTrace("LOOP.inferiorGone", "info inferiors: no live process")
+							If gKilledByStop Then gLastExitCode = -1 Else gLastExitCode = ParseGdbExitCode(Result)
 							QueueShowMessages(Result)
 							deinit
 							bGDBLocked = False   '' deinit released tlockGDB
@@ -1935,6 +1964,7 @@ End Sub
 						'' Shut the session down cleanly right here on the worker thread (which owns the
 						'' pipe): deinit closes the handles + quits GDB, then leave the loop.
 						DbgTrace("LOOP.inferiorGone", DbgTraceEsc(Left(Result, 80)))
+						If gKilledByStop Then gLastExitCode = -1 Else gLastExitCode = ParseGdbExitCode(Result)
 						QueueShowMessages(Result)
 						deinit
 						bGDBLocked = False   '' deinit released tlockGDB
@@ -2001,7 +2031,7 @@ End Sub
 	Sub kill_inferior_process()
 		If iGlPid Then
 			Var h = OpenProcess(PROCESS_ALL_ACCESS , 0 , iGlPid)
-			If h Then TerminateProcess(h , 1) : CloseHandle(h)
+			If h Then gKilledByStop = True : TerminateProcess(h , 1) : CloseHandle(h)
 		End If
 	End Sub
 	
@@ -2240,7 +2270,10 @@ Sub RunWithDebug(Debugger As String, ByRef ProjectFileName As WString, ByRef Pro
 		tpLocals->SelectTab
 		iFlagStartDebug = 1
 		run_debug(1)
-		ShowMessages(Time & ": " & ("Application finished. Returned code") & ": " & Result & " - " & Err2Description(Result))
+		If gLastExitCode >= 0 Then
+			Result = gLastExitCode
+			ShowMessages(Time & ": " & ("Application finished. Returned code") & ": " & Result & " - " & Err2Description(Result))
+		End If
 		CheckProfiler GetFolderName(exename), exename
 		ChangeEnabledDebug True, False, False
 	If Workdir <> 0 Then _Deallocate( Workdir)

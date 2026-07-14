@@ -1,11 +1,11 @@
 ﻿#pragma once
-' FileAct 文件处理
+' FileAct - file handling
 ' Copyright (c) 2024 CM.Wang
 ' Freeware. Use at your own risk.
 
 #include once "FileAct.bi"
 
-'文件夹和文件执行枚举
+'Folder and file action enumeration
 Enum PathFileActEnum
 	Act_FileCopy = 1
 	Act_FileOverwrite
@@ -16,7 +16,7 @@ Enum PathFileActEnum
 	Act_PathRemoveBNotInA
 End Enum
 
-'计数枚举
+'Count enumeration
 Enum PathFileCountEnum
 	Count_FileCopy = 1
 	Count_FileOverwrite
@@ -31,7 +31,7 @@ Enum PathFileCountEnum
 	Count_Error
 End Enum
 
-'FilesSync文件操作枚举
+'FilesSync file-operation enumeration
 Enum FilesSyncMode
 	FSM_PathSync = 1
 	FSM_PathRemove
@@ -40,32 +40,32 @@ End Enum
 
 Type FilesSync
 Private:
-	'私有变量
-	
-	Const mFileInc As Integer = &hfffff '文件增量
-	
+	'Private variables
+
+	Const mFileInc As Integer = &hfffff 'File increment
+
 	mOwner As Any Ptr = 0
-	
+
 	mPathA As WString Ptr = NULL
 	mPathB As WString Ptr = NULL
-	
-	mDone As Long                       '主线程完成
-	mCancel As Long                     '主线程取消
-	
-	mThreadMode As FilesSyncMode        '主模式: 同步，建立，移除
-	
-	mPercentThread As Any Ptr = NULL    '提供计算进度百分比的线程ID
-	
-	mTiMr As TimeMeter '计时器
-	mSyncTarget As WString Ptr = NULL   '同步目标
-	mSyncSource As WString Ptr = NULL   '同步源
+
+	mDone As Long                       'Main thread completed
+	mCancel As Long                     'Main thread cancelled
+
+	mThreadMode As FilesSyncMode        'Main mode: sync, create, remove
+
+	mPercentThread As Any Ptr = NULL    'Thread ID for computing the progress percentage
+
+	mTiMr As TimeMeter 'Timer
+	mSyncTarget As WString Ptr = NULL   'Sync target
+	mSyncSource As WString Ptr = NULL   'Sync source
 	
 	mListFile(Any) As WString Ptr
 	mListFileCount As LongInt
 	mListPath(Any) As WString Ptr
 	mListPathCount As LongInt
 
-	'记录
+	'Records
 	mErrorMessage(Any) As WString Ptr
 	mErrorMessageCount As LongInt
 	mFileCopy(Any) As WString Ptr
@@ -90,15 +90,15 @@ Private:
 	mPathRemoveBNotInACount As LongInt
 	mPathRemoveCount As LongInt
 	
-	'完成进度
-	mPercentReady As Long               '准备好
-	mPercentCount As LongInt            '完成全部数
-	mPercentStep As LongInt             '已完成数
-	mPercentPath As WString Ptr = NULL  '进度目录
-	
-	'完成步骤
-	mStepDoing As Long                  '进行中步骤
-	mStepCount As Long = -1             '总步骤
+	'Completion progress
+	mPercentReady As Long               'Ready
+	mPercentCount As LongInt            'Total count to complete
+	mPercentStep As LongInt             'Count completed so far
+	mPercentPath As WString Ptr = NULL  'Progress directory
+
+	'Completion steps
+	mStepDoing As Long                  'Step in progress
+	mStepCount As Long = -1             'Total steps
 	mStepMessage(Any) As WString Ptr
 	mStepTimeAdd As Double = -1
 	mStepTime(Any) As Double
@@ -109,21 +109,21 @@ Private:
 	mDeleteTime As Double
 	
 Public:
-	mSyncThread As Any Ptr = NULL       '主线程ID
-	
-	'设置
-	mCompareData As Long                '重复文件是否复制比较数据
-	mCompareMode As Long                '重复文件是否复制比较模式
-	mCopyEmptyPath As Long              '复制空白目录
-	mDuplicat As Long                   '删除不存在A中的B文件
-	mLogFile As WString Ptr             '记录文件名
-	mLogFileNum As Long                 '记录文件号
-	mLogMode As Long                    '记录模式：0不记录、1内存、2文件
-	mSyncMode As Long                   '目录模式：False单向复制、True双向同步
-	
+	mSyncThread As Any Ptr = NULL       'Main thread ID
+
+	'Settings
+	mCompareData As Long                'Comparison data used to decide whether a duplicate file is overwritten
+	mCompareMode As Long                'Comparison mode used to decide whether a duplicate file is overwritten
+	mCopyEmptyPath As Long              'Copy empty directories
+	mDuplicat As Long                   'Delete B files that don't exist in A
+	mLogFile As WString Ptr             'Log file name
+	mLogFileNum As Long                 'Log file number
+	mLogMode As Long                    'Log mode: 0 = none, 1 = memory, 2 = file
+	mSyncMode As Long                   'Directory mode: False = one-way copy, True = two-way sync
+
 Private:
-	
-	'私有函数
+
+	'Private functions
 	Declare Function ActPath(aType As PathFileActEnum, SourceStr As WString Ptr) As Long
 	Declare Function LogStr(Index As Long) ByRef As WString
 	Declare Static Function PercentThread(ByVal pParam As Any Ptr) As Any Ptr
@@ -151,20 +151,20 @@ Private:
 	Declare Sub SyncInit()
 	
 Public:
-	'构造与析构函数
+	'Constructor and destructor
 	Declare Constructor
 	Declare Destructor
-	
-	'共有函数，类的事件
-	OnDone As Sub(Owner As Any Ptr) '枚举完成事件
 
-	'共有函数，类的方法
+	'Public functions - class events
+	OnDone As Sub(Owner As Any Ptr) 'Enumeration-completed event
+
+	'Public functions - class methods
 	Declare Function Create(Owner As Any Ptr, PathStr As WString) As Integer
 	Declare Function Remove(Owner As Any Ptr, PathStr As WString) As Integer
 	Declare Function ReportData(x As Long, y As Long) ByRef As WString
 	Declare Function Sync(Owner As Any Ptr, SourceStr As WString, TargetStr As WString) As Integer
-	
-	'共有函数，类的属性
+
+	'Public functions - class properties
 	Declare Property Cancel() As Integer
 	Declare Property Cancel(ByVal nVal As Integer)
 	Declare Property DetialInfo() ByRef As WString

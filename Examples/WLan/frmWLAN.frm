@@ -240,7 +240,7 @@ Private Sub frmWLANType.ComboBoxEx1_Selected(ByRef Sender As ComboBoxEdit, ItemI
 		Logmsg("GUID: " & GUID2WStr(.InterfaceGuid))
 		Logmsg("Requesting scan...")
 		
-		'' 启动扫描
+		'' Start scan
 		ret = WlanScan(hClient, .InterfaceGuid, NULL, NULL, NULL)
 		If ret <> ERROR_SUCCESS Then
 			Logmsg("WlanScan failed = " & ret)
@@ -248,7 +248,7 @@ Private Sub frmWLANType.ComboBoxEx1_Selected(ByRef Sender As ComboBoxEdit, ItemI
 	End With
 End Sub
 
-' 获取可用网络列表
+' Get list of available networks
 Sub frmWLANType.GetNetwork()
 	If pIfList = NULL Then Exit Sub
 	Dim As Integer i, j
@@ -307,7 +307,7 @@ Private Sub frmWLANType.Form_Create(ByRef Sender As Control)
 	If ret <> 0 Then
 		Logmsg("WlanOpenHandle failed, error code: " & ret)
 	Else
-		' 重置事件状态
+		' Reset event state
 		Logmsg("ResetEvent " & ResetEvent(pScanEvent)) 
 		
 		Logmsg("WLAN API opened (ver " & ver & ")")
@@ -315,7 +315,7 @@ Private Sub frmWLANType.Form_Create(ByRef Sender As Control)
 		pScanEvent = CreateEvent(NULL, False, False, NULL)
 		Logmsg("CreateEvent " & pScanEvent)
 		
-		' 注册通知
+		' Register notification
 		ret = WlanRegisterNotification(hClient, WLAN_NOTIFICATION_SOURCE_ACM, True, @WlanNotificationCallback, @This, NULL, NULL)
 		If ret <> ERROR_SUCCESS Then
 			Select Case ret
@@ -374,7 +374,7 @@ Private Sub frmWLANType.ListView1_ItemClick(ByRef Sender As ListView, ByVal Item
 			End If
 		Next
 		
-		' -------- 调用 BSS 列表 --------
+		' -------- Query BSS list --------
 		Dim pBssList As PWLAN_BSS_LIST
 		
 		ret = WlanGetNetworkBssList(hClient, pIfList->InterfaceInfo(i).InterfaceGuid, @.dot11Ssid, .dot11BssType, False, NULL, @pBssList)
@@ -399,7 +399,7 @@ Private Sub frmWLANType.ListView1_ItemClick(ByRef Sender As ListView, ByVal Item
 				Hex(.dot11Bssid.ucDot11MacAddress(4), 2) & ":" & _
 				Hex(.dot11Bssid.ucDot11MacAddress(5), 2))
 				
-				' 信道
+				' Channel
 				Dim freq As ULong = .ulChCenterFrequency
 				Dim channel As Integer = 0
 				If freq >= 2412000 AndAlso freq <= 2484000 Then

@@ -1,4 +1,4 @@
-' Radar 窗口探测
+﻿' Radar window inspector
 ' Copyright (c) 2023 CM.Wang
 ' Freeware. Use at your own risk.
 
@@ -20,8 +20,8 @@
 	Using My.Sys.Forms
 	
 	Type frmRadarType Extends Form
-		mhWnd As HWND = 0 '当前控件句柄
-		phWnd As HWND = 0 '前一控件句柄
+		mhWnd As HWND = 0 'current control handle
+		phWnd As HWND = 0 'previous control handle
 		
 		Declare Sub HighlighthWnd(hWnd As HWND)
 		
@@ -140,14 +140,14 @@
 	#endif
 '#End Region
 
-'获取控件位置大小
+'Get control position and size
 Private Function ObjectRect2Str(hWnd As HWND) As String
 	Dim lRT As Rect
 	GetWindowRect(hWnd, @lRT)
 	Return lRT.Left & ", " & lRT.Right & ", " & lRT.Top & ", " & lRT.Bottom
 End Function
 
-'控件截图
+'Control screenshot
 Private Sub ObjectScreenShot(hWndObj As HWND, hWndImg As HWND)
 	Dim hDC As HDC
 	hDC = GetWindowDC(hWndImg)
@@ -155,45 +155,45 @@ Private Sub ObjectScreenShot(hWndObj As HWND, hWndImg As HWND)
 	ReleaseDC(hWndImg, hDC)
 End Sub
 
-'控件高亮
+'Control highlight
 Private Sub ObjectHighlight(hWnd As HWND, mColor As Long)
 	Dim lhDC As HDC
 	Dim lPen As HPEN
 	Dim lRT As Rect
-	
-	'获取控件矩形
+
+	'Get control rectangle
 	GetWindowRect(hWnd, @lRT)
-	'获取控件DC
+	'Get control DC
 	lhDC = GetWindowDC(hWnd)
-	
-	SetROP2 lhDC, R2_NOT                             '设置DC的颜色，备以后移去时使用
-	
-	'建立画笔
+
+	SetROP2 lhDC, R2_NOT                             'Set DC color, for use when removing later
+
+	'Create pen
 	lPen = CreatePen(0, 5 * GetSystemMetrics(SM_CXBORDER), &Hff000000 + mColor)
-	
-	'增亮控件边框
-	SaveDC(lhDC)                                     '保存画笔和刷子
-	SelectObject(lhDC, lPen)                         '设置新笔
-	SelectObject(lhDC, GetStockObject(NULL_BRUSH))   '设备空刷子，背景不能修改
-	
-	'画控件边框
+
+	'Highlight control border
+	SaveDC(lhDC)                                     'Save pen and brush
+	SelectObject(lhDC, lPen)                         'Set new pen
+	SelectObject(lhDC, GetStockObject(NULL_BRUSH))   'Set null brush, background unchanged
+
+	'Draw control border
 	Rectangle lhDC, 0, 0, lRT.Right - lRT.Left, lRT.Bottom - lRT.Top
-	
-	'恢复DC
-	RestoreDC(lhDC, -1)                              '-1时恢复以前的内容
-	
-	'释放
+
+	'Restore DC
+	RestoreDC(lhDC, -1)                              '-1 restores previous content
+
+	'Release
 	ReleaseDC hWnd, lhDC
 	DeleteObject lPen
 End Sub
 
 Private Sub frmRadarType.HighlighthWnd(hWnd As HWND)
 	If phWnd <> 0 Then
-		'恢复上一个控件
+		'Restore previous control
 		ObjectHighlight(phWnd, RGB(&h80, &h80, &h80))
 	End If
 	If hWnd <> 0 Then
-		'高亮当前控件
+		'Highlight current control
 		ObjectHighlight(hWnd, RGB(&h80, &h80, &h80))
 	End If
 	
@@ -213,37 +213,37 @@ Private Sub frmRadarType.ImageBox1_MouseMove(ByRef Sender As Control, MouseButto
 	Dim s As WString Ptr
 	Dim l As Long = 255
 	
-	'取得鼠标坐标
+	'Get mouse coordinates
 	GetCursorPos(@p)
 	TextBox2.Text = p.x & ", " & p.y
-	
-	'取得坐标控件句柄
+
+	'Get control handle at coordinates
 	hWnd = WindowFromPoint(p)
-	
-	'如果控件未变退出处理
+
+	'Exit if the control hasn't changed
 	If hWnd = mhWnd Or hWnd = 0 Then Exit Sub
-	
-	'高亮显示控件
+
+	'Highlight the control
 	HighlighthWnd(hWnd)
-	
-	'显示控件句柄
+
+	'Display control handle
 	TextBox1.Text = hWnd & " (&H" &  Hex(hWnd) & ")"
-	'显示控件位置大小
+	'Display control position and size
 	TextBox3.Text = ObjectRect2Str(hWnd)
-	
-	'显示控件类型
+
+	'Display control class name
 	s = CAllocate(l * 2 + 2)
 	GetClassName(hWnd, s, l)
 	TextBox4.Text = *s
-	
-	'显示控件文字
+
+	'Display control text
 	l = GetWindowTextLength(hWnd) + 1
 	s = Reallocate(s, l * 2 + 2)
 	GetWindowText(hWnd, s, l)
 	TextBox5.Text = *s
 	Deallocate(s)
-	
-	'显示控件截图
+
+	'Display control screenshot
 	ObjectScreenShot(hWnd, ImageBox2.Handle)
 	
 	mhWnd = hWnd

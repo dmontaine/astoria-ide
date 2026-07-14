@@ -1,4 +1,4 @@
-﻿'sysenum枚举系统设备
+﻿'sysenum Enumerate System Devices
 ' Copyright (c) 2025 CM.Wang
 ' Freeware. Use at your own risk.
 

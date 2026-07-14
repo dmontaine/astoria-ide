@@ -8,8 +8,8 @@
 'A FreeBasic module that generates including files (not dependent on libraries) on the fly can be used to write  the code normally according to the COM and VBA syntax. Before compiling the code
 'Click On COMWrapperBuilder in the Menu "Settings" To automatically generate a reference header FILE that calls Com. Add "#include once 'Com_xxx.bi" in the code including area.
 
-'一个即时翻译生成头文件（不依赖于库）的 FreeBasic 调用Com的模块，你可以先按照COM和VBA语法正常必须代码，在编译代码前
-'点击菜单”设置”里的COMWrapperBuilder,将自动生成调用com的引用头文件。在代码引用区加入”#include once "Com_xxx.bi"即可
+'A FreeBasic module that generates an including file on the fly (not dependent on libraries), for calling COM; you can write the code normally according to COM and VBA syntax. Before compiling the code,
+'click COMWrapperBuilder in the "Settings" menu to automatically generate a reference header file that calls COM. Add "#include once "Com_xxx.bi"" in the code-including area.
 
 '#Region "Form"
 	#if defined(__FB_MAIN__) AndAlso Not defined(__MAIN_FILE__)
@@ -152,7 +152,7 @@ Private Sub Form2Type.cmdJson2_Click(ByRef Sender As Control)
 	Dim As Object_Msxml2 oHttp = CreateObject("Msxml2.XMLHTTP")
 	oHttp.Open "GET", "https://www.msn.com", False
     oHttp.send
-    Dim As String strHtml = oHttp.responseText ' 得到数据
+    Dim As String strHtml = oHttp.responseText ' get the data
     TextBox1.Text = strHtml
 End Sub
 

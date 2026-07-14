@@ -389,7 +389,7 @@
 Private Sub frmHashType.Form_Create(ByRef Sender As Control)
 	lvFiles.ListItems.Clear
 	
-	'加载文件图标到imagelist1
+	'Load file icons into imagelist1
 	Dim FileInfo As SHFILEINFO
 	ImageList1.Handle = Cast(Any Ptr, SHGetFileInfo("", 0, @FileInfo, SizeOf(FileInfo), SHGFI_SYSICONINDEX Or SHGFI_ICON Or SHGFI_SMALLICON Or SHGFI_LARGEICON Or SHGFI_PIDL Or SHGFI_DISPLAYNAME Or SHGFI_TYPENAME Or SHGFI_ATTRIBUTES))
 	SendMessage lvFiles.Handle, LVM_SETIMAGELIST, LVSIL_SMALL, Cast(LPARAM, ImageList1.Handle)

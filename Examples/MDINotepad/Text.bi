@@ -1,5 +1,5 @@
 ﻿#pragma once
-' Text 文本处理
+' Text - text processing
 ' Copyright (c) 2024 CM.Wang
 ' Freeware. Use at your own risk.
 
@@ -25,7 +25,7 @@
 #endif
 #endif
 
-' 定义排序类型：升序或降序
+' Define sort order: ascending or descending
 Enum SortOrders
 Descending
 Ascending

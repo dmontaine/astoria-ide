@@ -174,7 +174,7 @@ Private Function EnumDev(ComBox As ComboBoxEdit Ptr, ByVal IidDev As Const IID C
 End Function
 
 Private Sub Form1Type.Form_Create(ByRef Sender As Control)
-	' 初始化 COM
+	' Initialize COM
 	Dim hr As HRESULT = CoInitialize(NULL)
 	If FAILED(hr) Then
 		MessageBox(NULL, "CoInitialize failed!", "Error", MB_ICONERROR)

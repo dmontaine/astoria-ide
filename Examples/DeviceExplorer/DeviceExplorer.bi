@@ -1,11 +1,11 @@
 ﻿'DeviceExplorer.bi
 ' Copyright (c) 2024 CM.Wang
 ' Freeware. Use at your own risk.
-' 通过windows api实现如device manager一样的update driver, uninstall device, eject device的功能
-' 翻译了cfgmgr32, devguid, devpkey, devpropdef, newdev等相关头文件
+' Implements Device Manager-like update driver, uninstall device, and eject device functionality via the Windows API
+' Translated (ported) related headers: cfgmgr32, devguid, devpkey, devpropdef, newdev, etc.
 ' https://learn.microsoft.com/en-us/windows/win32/devinst/setupapi-h
 
-' 参考了TwinBasic的样例
+' Based on the TwinBasic sample
 ' https://github.com/fafalone/DeviceExplorer
 
 #include once "mff/Form.bi"

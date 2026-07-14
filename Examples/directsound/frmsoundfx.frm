@@ -1,4 +1,4 @@
-﻿'soundfx声音效果器
+﻿'soundfx sound effects
 ' Copyright (c) 2024 CM.Wang
 ' Freeware. Use at your own risk.
 

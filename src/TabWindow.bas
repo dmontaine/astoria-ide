@@ -10583,10 +10583,12 @@ Constructor TabWindow(ByRef wFileName As WString, bNewForm As Boolean, TreeN As 
 	cboClass.OnSelected = @cboClass_Change
 	cboClass.ImagesList = pimgListTools
 	cboClass.Tag = @This
-	
+	cboClass.Hint = ("Select Class/Object")
+
 	cboFunction.ImagesList = pimgList
 	cboFunction.Tag = @This
 	cboFunction.OnSelected = @cboFunction_Change
+	cboFunction.Hint = ("Select Function/Procedure")
 	'cboFunction.Width = cboClass.Width
 	'cboFunction.Sort = True
 	cboFunction.Items.Add WStr("(") & ("Declarations") & ")" & WChr(0), , "Sub", "Sub"

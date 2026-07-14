@@ -6351,9 +6351,8 @@ Sub CreateMenusAndToolBars
 	miXizmat = mnuMain.Add(("&Tools"), "", "Service")
 	miXizmat->Add(("&Command Prompt") & HK("CommandPrompt", "Alt+C"), "Console", "CommandPrompt", @mClick)
 	miXizmat->Add("-")
-	Var miToolsAdvanced = miXizmat->Add(("Advanced"), "", "ToolsAdvanced")
-	miToolsAdvanced->Add(("&Add-Ins") & "..." & HK("AddIns"), "", "AddIns", @mClick)
-	miToolsAdvanced->Add(("&External Tools") & "..." & HK("Tools"), "", "Tools", @mClick)
+	miXizmat->Add(("&Add-Ins") & "..." & HK("AddIns"), "", "AddIns", @mClick)
+	miXizmat->Add(("&External Tools") & "..." & HK("Tools"), "", "Tools", @mClick)
 	miXizmat->Add("-")
 	Dim As My.Sys.Drawing.BitmapType Bitm
 	Dim As WString * 1024 Buff
@@ -6581,6 +6580,7 @@ Sub CreateMenusAndToolBars
 	Var tbButton = tbProject.Buttons.Add(tbsCustom)
 	tbButton->Width = 170
 	tbButton->Child = @cboBuildConfiguration
+	cboBuildConfiguration.Hint = ("Build Configuration: extra compiler switches to apply when building")
 	tbFormat.Name = "Format"
 	tbFormat.ImagesList = @imgList
 	tbFormat.HotImagesList = @imgList
@@ -6653,6 +6653,7 @@ miShowAsFolder = tbFolder->DropDownMenu.Add(("Show As Folder"), "", "ShowAsFolde
 tbExplorer.Buttons.Add tbsSeparator
 Var tbSearch = tbExplorer.Buttons.Add(tbsCustom)
 txtExplorer.Width = 2
+txtExplorer.Hint = ("Search Explorer")
 tbSearch->Child = @txtExplorer
 tbSearch->Expand = True
 tbExplorer.Buttons.Add tbsSeparator
@@ -6671,6 +6672,7 @@ tbForm.Buttons.Add tbsCheck, "Label", , @tbFormClick, "Text", "", ("Text"), True
 tbForm.Buttons.Add tbsSeparator
 Var FormSearch = tbForm.Buttons.Add(tbsCustom)
 txtForm.Width = 2
+txtForm.Hint = ("Search Toolbox")
 FormSearch->Child = @txtForm
 FormSearch->Expand = True
 tbForm.Buttons.Add tbsSeparator
@@ -7470,6 +7472,7 @@ tbProperties.Buttons.Add tbsShowText, "", , , "SelControlName", "", "", , ToolBu
 tbProperties.Buttons.Add tbsSeparator
 Var PropertiesSearch = tbProperties.Buttons.Add(tbsCustom)
 txtProperties.Width = 2
+txtProperties.Hint = ("Search Properties")
 PropertiesSearch->Child = @txtProperties
 PropertiesSearch->Expand = True
 tbProperties.Buttons.Add tbsSeparator
@@ -7485,6 +7488,7 @@ tbEvents.Buttons.Add tbsShowText, "", , , "SelControlName", "", "", , ToolButton
 tbEvents.Buttons.Add tbsSeparator
 Var EventsSearch = tbEvents.Buttons.Add(tbsCustom)
 txtEvents.Width = 2
+txtEvents.Hint = ("Search Events")
 EventsSearch->Child = @txtEvents
 EventsSearch->Expand = True
 tbEvents.Buttons.Add tbsSeparator

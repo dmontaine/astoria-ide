@@ -63,7 +63,7 @@ All DR-1 through DR-16 defects are fixed and owner-verified. This retained ancho
 ## Session handoff (2026-07-13)
 
 - Flattened `Examples` to one `.vfp` project per immediate child folder, compiled all 51 projects in owner-approved batches, retained 30 passing projects, removed 21 failures, and documented the audit in `EXAMPLES_BUILD_AUDIT.md` (`6afd4da`).
-- Reconciled the numbered backlog with owner decisions: the authoritative remaining tasks are the unchecked `T01`, `T02`, `T08`, `T10`, `T11`, `T12`, `T13`, and `T16` entries below (`489a3ed`).
+- Reconciled the numbered backlog with owner decisions: the authoritative remaining tasks are the unchecked `T01`, `T08`, `T10`, `T11`, `T12`, and `T16` entries below (`489a3ed`). `T02` (standardize variable naming) and `T13` (design-workspace status bar) were later dropped by owner decision.
 - Removed tracked scratch files and the obsolete DeviceExplorer project file, cleared repository-root `Temp/`, and synchronized the tracked `Settings/astoria.ini` (`e9bc31d`).
 - Documented the standing rule that `Settings/astoria.ini` must be committed and pushed whenever changed so both development computers remain synchronized (`e3f5817`).
 - `main` is synchronized with `origin/main`. No tracked changes remain at handoff.
@@ -83,8 +83,7 @@ No immediate items open.
 
 ### Deferred enhancements
 
-- [ ] **T01 — Standardize indentation.**
-- [ ] **T02 — Standardize variable naming.**
+- [ ] **T01 — Standardize indentation.** Done for `src/` (`2f445e4`): tabs enforced, CRLF normalized via scoped `.gitattributes` rules. Still needed for `Controls/` and `Examples/`.
 - [x] **T03 — Extract repeated logic within files.**
 - [x] **T05 — Simplify the Development/Final compile-mode controls.**
 - [x] **T06 — Audit UI/settings for orphaned controls.**
@@ -93,10 +92,9 @@ No immediate items open.
 - [ ] **T10 — Implement dark-mode popup menus.**
 - [ ] **T11 — Implement dark-mode dialog/modal backgrounds.**
 - [ ] **T12 — Complete live dark-mode re-theming after Options Apply.**
-- [ ] **T13 — Add the design-workspace status bar.**
 - [x] **T14 — Fix the cold-open blank Designer page.**
 - [x] **T15 — Create fork-specific wiki/documentation.**
-- [ ] **T16 — Add tooltips to embedded toolbar controls.** This covers the build-configuration combo, four search boxes, and code-editor class/function dropdowns.
+- [x] **T16 — Add tooltips to embedded toolbar controls.** Covered the build-configuration combo, four search boxes (Explorer/Toolbox/Properties/Events), and code-editor class/function dropdowns.
 
 ### Recently completed cleanup
 

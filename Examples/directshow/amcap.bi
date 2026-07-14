@@ -8,7 +8,6 @@
 #include once "crt/fcntl.bi"
 #include once "win/dbt.bi"
 #include once "win/msacm.bi"
-#include once "win/mmsystem.bi"
 #include once "win/d3d9types.bi"
 #include once "win/dsound.bi"
 #include once "win/dshow.bi"
@@ -59,8 +58,6 @@ Dim Shared As IConfigAviMux Ptr pConfigAviMux = NULL
 Dim Shared As IAMStreamConfig Ptr pASC = NULL 'For audio cap
 Dim Shared As IAMStreamConfig Ptr pVSC = NULL 'For video cap
 Dim Shared As IAMVfwCaptureDialogs Ptr pDlg = NULL
-Dim Shared As IMoniker Ptr pMVideo = NULL
-Dim Shared As IMoniker Ptr pMAudio = NULL
 Dim Shared As IBasicVideo2 Ptr pBV2 = NULL
 Dim Shared As IAMDroppedFrames Ptr pDF = NULL
 Dim Shared As ISpecifyPropertyPages Ptr pSpec

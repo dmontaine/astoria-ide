@@ -91,14 +91,6 @@ Private Function OutPutWStr(tpy As DISPLAYCONFIG_VIDEO_OUTPUT_TECHNOLOGY) ByRef 
 		Return "UDI_EMBEDDED"
 	Case DISPLAYCONFIG_OUTPUT_TECHNOLOGY_SDTVDONGLE
 		Return "SDTVDONGLE"
-		'Case DISPLAYCONFIG_OUTPUT_TECHNOLOGY_MIRACAST
-		'	Return "MIRACAST"
-		'Case DISPLAYCONFIG_OUTPUT_TECHNOLOGY_INDIRECT_WIRED
-		'	Return "INDIRECT_WIRED"
-		'Case DISPLAYCONFIG_OUTPUT_TECHNOLOGY_INDIRECT_VIRTUAL
-		'	Return "INDIRECT_VIRTUAL"
-		'Case DISPLAYCONFIG_OUTPUT_TECHNOLOGY_DISPLAYPORT_USB_TUNNEL
-		'	Return "DISPLAYPORT_USB_TUNNEL"
 	Case DISPLAYCONFIG_OUTPUT_TECHNOLOGY_INTERNAL
 		Return "INTERNAL"
 	Case DISPLAYCONFIG_OUTPUT_TECHNOLOGY_FORCE_UINT32
@@ -287,7 +279,6 @@ Private Sub Monitor.EnumDisplayDevice(dwFlags As DWORD, cob As ComboBoxEdit Ptr,
 	Dim iDevNum As DWORD = 0
 	Dim ddDisplay As DISPLAY_DEVICE
 	Dim dmDevMode As DEVMODE
-	'Dim dwFlags As DWORD = EDSEdwFlags(ComboBoxEdit4.ItemIndex)
 	txt->Clear
 	Do
 		memset (@ddDisplay, 0, SizeOf(ddDisplay))
@@ -411,9 +402,7 @@ Private Sub Monitor.EnumDisplayMode(DiviceName As LPCWSTR, dwFlags As DWORD, lst
 	Dim i As Long
 	Dim tmpi As String
 	Dim tmpc As String
-	
-	'Dim dwFlags As DWORD = EDSEdwFlags(FlagIndex)
-	
+
 	memset (@dmDevModeCur, 0, SizeOf(DEVMODE))
 	dmDevModeCur.dmSize = SizeOf(DEVMODE)
 	EnumDisplaySettingsEx(DiviceName, ENUM_CURRENT_SETTINGS, @dmDevModeCur, dwFlags)
@@ -448,14 +437,10 @@ End Sub
 Private Sub Monitor.GetDisplayMode(DiviceName As LPCWSTR, ByVal FlagIndex As Integer, ByVal Index As Integer, lst As ListControl Ptr, txt As TextBox Ptr)
 	If DiviceName = NULL Or FlagIndex < 0 Then Exit Sub
 	
-	Dim dmDevMode() As DEVMODE
 	Dim dmDevModeCur As DEVMODE
-	Dim iModeCur As Integer = -1
-	Dim iModeNum As Integer = -1
-	Dim i As Long
 	Dim tmpi As WString Ptr
 	Dim tmpc As WString Ptr
-	
+
 	Dim dwFlags As DWORD = EDSEdwFlags(FlagIndex)
 	
 	memset (@dmDevModeCur, 0, SizeOf(DEVMODE))

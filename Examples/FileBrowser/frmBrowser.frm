@@ -33,15 +33,10 @@
 		Declare Function RootInit() As PTreeNode
 		Declare Sub FileList(ByRef Item As TreeNode, ByVal LV As Boolean = True)
 		Declare Sub RootList()
-		
+
 		Declare Sub Form_Create(ByRef Sender As Control)
 		Declare Sub Form_Show(ByRef Sender As Form)
-		Declare Sub TreeView1_NodeClick(ByRef Sender As TreeView, ByRef Item As TreeNode)
-		Declare Sub TreeView1_Click(ByRef Sender As Control)
-		Declare Sub TreeView1_NodeDblClick(ByRef Sender As TreeView, ByRef Item As TreeNode)
-		Declare Sub TreeView1_NodeActivate(ByRef Sender As TreeView, ByRef Item As TreeNode)
 		Declare Sub TreeView1_SelChanged(ByRef Sender As TreeView, ByRef Item As TreeNode)
-		Declare Sub TreeView1_SelChanging(ByRef Sender As TreeView, ByRef Item As TreeNode, ByRef Cancel As Boolean)
 		Declare Sub MenuView_Click(ByRef Sender As MenuItem)
 		Declare Sub Form_Resize(ByRef Sender As Control, NewWidth As Integer, NewHeight As Integer)
 		Declare Sub ListView1_Resize(ByRef Sender As Control, NewWidth As Integer, NewHeight As Integer)
@@ -144,12 +139,7 @@
 			.ContextMenu = @PopupMenu1
 			.SetBounds 5, 35, 200, 599
 			.Designer = @This
-			'.OnNodeClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As TreeView, ByRef Item As TreeNode), @TreeView1_NodeClick)
-			'.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @TreeView1_Click)
-			'.OnNodeDblClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As TreeView, ByRef Item As TreeNode), @TreeView1_NodeDblClick)
-			'.OnNodeActivate = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As TreeView, ByRef Item As TreeNode), @TreeView1_NodeActivate)
 			.OnSelChanged = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As TreeView, ByRef Item As TreeNode), @TreeView1_SelChanged)
-			'.OnSelChanging = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As TreeView, ByRef Item As TreeNode, ByRef Cancel As Boolean), @TreeView1_SelChanging)
 			.Parent = @This
 		End With
 		' Splitter1
@@ -333,43 +323,18 @@
 '#End Region
 
 Private Sub frmBrowserType.Form_Show(ByRef Sender As Form)
-	'Debug.Print "Form_Show"
-End Sub
-
-Private Sub frmBrowserType.TreeView1_NodeDblClick(ByRef Sender As TreeView, ByRef Item As TreeNode)
-	'Debug.Print "TreeView1_NodeDblClick"
-End Sub
-
-Private Sub frmBrowserType.TreeView1_Click(ByRef Sender As Control)
-	'Debug.Print "TreeView1_Click"
-End Sub
-
-Private Sub frmBrowserType.TreeView1_NodeClick(ByRef Sender As TreeView, ByRef Item As TreeNode)
-	'Debug.Print "TreeView1_NodeClick"
-End Sub
-
-Private Sub frmBrowserType.TreeView1_NodeActivate(ByRef Sender As TreeView, ByRef Item As TreeNode)
-	'Debug.Print "TreeView1_NodeActivate"
-End Sub
-
-Private Sub frmBrowserType.TreeView1_SelChanging(ByRef Sender As TreeView, ByRef Item As TreeNode, ByRef Cancel As Boolean)
-	'Debug.Print "TreeView1_SelChanging"
 End Sub
 
 Private Sub frmBrowserType.ListView1_Resize(ByRef Sender As Control, NewWidth As Integer, NewHeight As Integer)
-	'Debug.Print "ListView1_Resize"
 End Sub
 
 Private Sub frmBrowserType.ListView1_Click(ByRef Sender As Control)
-	'Debug.Print "ListView1_Click"
 End Sub
 
 Private Sub frmBrowserType.ListView1_SelectedItemChanged(ByRef Sender As ListView, ByVal ItemIndex As Integer)
-	'Debug.Print "ListView1_SelectedItemChanged" & ItemIndex
 End Sub
 
 Private Sub frmBrowserType.Form_Resize(ByRef Sender As Control, NewWidth As Integer, NewHeight As Integer)
-	'Debug.Print "Form_Resize"
 	With ListView1
 		.Columns.Column(0)->Width = .Width - 20 - .Columns.Column(1)->Width - .Columns.Column(2)->Width - .Columns.Column(3)->Width - .Columns.Column(4)->Width
 	End With
@@ -377,8 +342,6 @@ Private Sub frmBrowserType.Form_Resize(ByRef Sender As Control, NewWidth As Inte
 End Sub
 
 Private Sub frmBrowserType.Form_Create(ByRef Sender As Control)
-	'Debug.Print "Form_Create"
-	
 	'init imagelist
 	Dim pFileInfo As SHFILEINFO
 	ImageList1.Handle = Cast(Any Ptr, SHGetFileInfo("", 0, @pFileInfo, SizeOf(pFileInfo), SHGFI_SYSICONINDEX Or SHGFI_ICON Or SHGFI_SMALLICON Or SHGFI_LARGEICON Or SHGFI_PIDL Or SHGFI_DISPLAYNAME Or SHGFI_TYPENAME Or SHGFI_ATTRIBUTES))
@@ -404,7 +367,6 @@ Private Sub frmBrowserType.Form_Create(ByRef Sender As Control)
 End Sub
 
 Private Function frmBrowserType.Path2ComboEx(ByRef Sender As ComboBoxEx, Path As Const WString) As Integer
-	'If Path = "" Then Return -1
 	Dim i As Integer = Sender.IndexOf("" + Path)
 	If i < 0 Then
 		Dim FileInfo As SHFILEINFO
@@ -416,7 +378,6 @@ Private Function frmBrowserType.Path2ComboEx(ByRef Sender As ComboBoxEx, Path As
 End Function
 
 Private Sub frmBrowserType.TreeView1_SelChanged(ByRef Sender As TreeView, ByRef Item As TreeNode)
-	'Debug.Print "TreeView1_SelChanged"
 	If mClosing Then Exit Sub
 	If mListing Then Exit Sub
 	
@@ -439,11 +400,9 @@ Private Sub frmBrowserType.TreeView1_SelChanged(ByRef Sender As TreeView, ByRef 
 		Item.Expand()
 	End If
 	mListing = False
-	'TreeView1.Enabled = True
 End Sub
 
 Private Function frmBrowserType.RootInit() As PTreeNode
-	'Debug.Print "RootInit"
 	'my computer
 	Dim pIIDL As ITEMIDLIST Ptr
 	Dim pFileInfo As SHFILEINFO
@@ -456,7 +415,6 @@ Private Function frmBrowserType.RootInit() As PTreeNode
 End Function
 
 Private Sub frmBrowserType.RootList()
-	'Debug.Print "RootList"
 	'desktop,documents,pictures,videos,music
 	Dim pFileInfo As SHFILEINFO
 	Dim pIIDL As ITEMIDLIST Ptr
@@ -511,18 +469,13 @@ Private Function frmBrowserType.FindNode(Path As WString) As TreeNode Ptr
 		d = False
 		l = n->Count - 1
 		WLet(sPath, IIf(sPath = NULL, "", *sPath & "\") & *pSP(i))
-		'Debug.Print "i - " & i & " - " & *sPath
-		'Debug.Print "l - " & l
-		'Debug.Print String(10, Asc("="))
 		For k = 0 To l
-			'Debug.Print "k - " & k & " - " & n->Item(k)->Name
 			If n->Item(k)->Name = *sPath Then
 				If i = j Then
 					TreeView1.SelectedNode = n->Item(k)
 				Else
 					FileList(*n->Item(k), False)
 				End If
-				'n->Item(k)->Expand
 				n = @n->Item(k)->Nodes
 				d = True
 				Exit For
@@ -532,10 +485,7 @@ Private Function frmBrowserType.FindNode(Path As WString) As TreeNode Ptr
 	Next
 	If sPath Then Deallocate(sPath)
 	ArrayDeallocate(pSP())
-	'Debug.Print i & "," & k & "," & d
 	If d Then
-		'TreeView1.SelectedNode = n->Item(k)
-		'Debug.Print "FindNode: " & n->Item(k)->Name
 		Return n->Item(k)
 	Else
 		Return NULL
@@ -543,7 +493,6 @@ Private Function frmBrowserType.FindNode(Path As WString) As TreeNode Ptr
 End Function
 
 Private Sub frmBrowserType.FileList(ByRef Item As TreeNode, ByVal LV As Boolean = True)
-	'Debug.Print "FileList: " & Item.Name
 	Dim pFileInfo As SHFILEINFO
 	Dim pPath As WString * MAX_PATH
 	Dim pFullName As WString * MAX_PATH
@@ -599,7 +548,6 @@ Private Sub frmBrowserType.FileList(ByRef Item As TreeNode, ByVal LV As Boolean 
 End Sub
 
 Private Sub frmBrowserType.MenuFile_Click(ByRef Sender As MenuItem)
-	'Debug.Print "MenuFile_Click"
 	Dim pTxt As String
 	Dim pFile As String
 	Dim i As Integer
@@ -639,7 +587,6 @@ Private Sub frmBrowserType.MenuFile_Click(ByRef Sender As MenuItem)
 End Sub
 
 Private Sub frmBrowserType.MenuView_Click(ByRef Sender As MenuItem)
-	'Debug.Print "MenuView_Click"
 	Select Case Sender.Name
 	Case "MenuItem8"
 		Sender.Checked = Not Sender.Checked
@@ -659,7 +606,6 @@ Private Sub frmBrowserType.MenuView_Click(ByRef Sender As MenuItem)
 End Sub
 
 Private Sub frmBrowserType.Form_Close(ByRef Sender As Form, ByRef Action As Integer)
-	'Debug.Print "Form_Close"
 	mClosing = True
 	App.DoEvents()
 	If mSelectPath Then Deallocate(mSelectPath)
@@ -668,7 +614,6 @@ Private Sub frmBrowserType.Form_Close(ByRef Sender As Form, ByRef Action As Inte
 End Sub
 
 Private Sub frmBrowserType.ListView1_ItemClick(ByRef Sender As ListView, ByVal ItemIndex As Integer)
-	'Debug.Print "ListView1_ItemClick" & ItemIndex
 	Dim i As Integer
 	Dim c As Integer
 	Dim j As Integer = ListView1.ListItems.Count - 1
@@ -686,23 +631,19 @@ Private Sub frmBrowserType.ListView1_ItemClick(ByRef Sender As ListView, ByVal I
 End Sub
 
 Private Sub frmBrowserType.ListView1_ItemDblClick(ByRef Sender As ListView, ByVal ItemIndex As Integer)
-	'Debug.Print "ListView1_ItemDblClick" & ItemIndex
 	MenuFile_Click(MenuOpen)
 End Sub
 
 Private Sub frmBrowserType.ComboBoxEx1_KeyPress(ByRef Sender As ComboBoxEdit, Key As Integer, Shift As Integer)
-	'Debug.Print "ComboBoxEx1_KeyPress: " & Key & ComboBoxEx1.Text
 	If Key <> 13 Then Exit Sub
 	FindNode(ComboBoxEx1.Text)
 End Sub
 
 Private Sub frmBrowserType.ComboBoxEx1_Selected(ByRef Sender As ComboBoxEdit, ItemIndex As Integer)
-	'Debug.Print "ComboBoxEx1_Selected: " & ComboBoxEx1.Item(ItemIndex)
 	FindNode(ComboBoxEx1.Item(ItemIndex))
 End Sub
 
 Private Sub frmBrowserType.CommandButton1_Click(ByRef Sender As Control)
-	'Debug.Print "CommandButton1_Click: " & TreeView1.SelectedNode->ParentNode
 	If TreeView1.SelectedNode->ParentNode = NULL Then Exit Sub
 	TreeView1.SelectedNode = TreeView1.SelectedNode->ParentNode
 End Sub

@@ -12,10 +12,7 @@
 	#endif
 	#include once "mff/Form.bi"
 	#include once "mff/ListControl.bi"
-	#include once "mff/Panel.bi"
-	#include once "mff/CommandButton.bi"
-	#include once "mff/Label.bi"
-	
+
 	Using My.Sys.Forms
 	
 	Type MDIListType Extends Form

@@ -104,8 +104,7 @@ Type TCamGrab
 	Declare Sub DisconnectFilters(ByVal pGraph As IGraphBuilder Ptr)
 	Declare Function SaveRGB24AsBMP(ByVal filename As String, ByVal pBits As UByte Ptr, ByVal sWidth As Long, ByVal sHeight As Long) As Long
 	Declare Sub DrawOverlayInfo(ByVal x As Long, ByVal y As Long)
-	'Declare Sub SafeRelease(ByRef ppUnk As Any Ptr)
-	
+
 Public:
 	' ===============================================================
 	' Constructor and Destructor

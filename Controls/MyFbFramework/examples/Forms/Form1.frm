@@ -39,7 +39,6 @@
 			.Designer = @This
 			.Menu = @MainMenu1
 			.FormStyle = FormStyles.fsNormal
-			' .WindowState = WindowStates.wsMaximized
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @Form_Click)
 			.SetBounds 0, 0, 350, 319
 		End With

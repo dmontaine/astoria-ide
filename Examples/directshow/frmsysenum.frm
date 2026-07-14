@@ -190,7 +190,6 @@ Private Sub frmSysEnumType.AddFilter(szFilterName As TCHAR Ptr, pCatGuid As GUID
 	*pclsid = *pCatGuid
 	
 	'Add the category Name And a Pointer To its CLSID To the list box
-	'Dim As Integer nSuccess  = m_FilterList.AddString(szFilterName)
 	Dim As Integer nIndexNew = ListControl2.ItemCount
 	ListControl2.AddItem *Cast(WString Ptr, szFilterName)
 	ListControl2.ItemData(nIndexNew) = pclsid

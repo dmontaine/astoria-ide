@@ -11,7 +11,6 @@ Static Shared LockCount As DWORD
 ' Where I store a pointer to my type library's TYPEINFO
 Static Shared As ITypeInfo Ptr MyTypeInfo
 
-Dim Shared CLSID_TypeLib As GUID = Type(&h26a8002a, &h83d7, &h45eb, { &h98, &he1, &h9, &hcf, &h47, &ha4, &he, &he3})
 Dim Shared CLSID_MyObject As GUID = Type(&hf2e0ac34, &h64ba, &h4871, { &hbb, &hfc, &hb9, &hde, &h5b, &hd9, &hc8, &hb})
 Dim Shared IID_MyObject As GUID = Type(&h2a2af189, &hc5a1, &h4a4e, { &h92, &h77, &hb4, &hfd, &h87, &h1a, &h51, &h19})
 
@@ -22,47 +21,7 @@ Const IIDS_MyObject   = "{2A2AF189-C5A1-4a4e-9277-B4FD871A5119}"
 '==========================================================
 'Registry
 '==========================================================
-Dim Shared DllName As ZString * 128 => "WellCOM.dll"
-Dim Shared ObjDescription As ZString * 128 => "Intermediary between DLL host and COM client"
-Dim Shared FileDlgTitle As ZString * 128 => "Locate WellCOM.dll to register it"
-Dim Shared FileDlgExt As ZString * 128 => "DLL files\000*.dll\000\000"
-Dim Shared CLSID_Str As ZString * 128 => "CLSID"
-Dim Shared ClassKeyName As ZString * 128 => "Software\\Classes"
-Dim Shared InprocServer32Name As ZString * 128 => "InprocServer32"
-Dim Shared ThreadingModel As ZString * 128 => "ThreadingModel"
-Dim Shared BothStr As ZString * 128 => "both"
 Dim Shared ProgID As ZString * 128 => "WellCOM.Object"
-Dim Shared TypeLibName As WString * 128 => "WellCOM.dll"
-
-Dim Shared Result As Long, ghDLLInst As HMODULE
-Dim Shared FileName As ZString*MAX_PATH
-Dim Shared RootKey As HKEY
-Dim Shared hKey1 As HKEY
-Dim Shared hKey2 As HKEY
-Dim Shared hKExtra As HKEY
-Dim Shared GUIDtxt As ZString * 39
-Dim Shared Disposition As DWORD
-Dim Shared sa As SECURITY_ATTRIBUTES
-
-Declare Function SetKeyAndValue(ByRef szKey As String, ByRef szSubKey As String, ByRef szValue As String) As Long
-
-#define W2Ansi(A, W)  WideCharToMultiByte(CP_ACP, 0, W, -1, A, 2047, 0, 0)
-#define A2Wide(A, W, L)  MultiByteToWideChar(CP_ACP, 0, A, -1, W, L)
-
-Function UnicodeToAnsi(ByVal szW As OLECHAR Ptr) As String
-	Static szA As ZString * 256
-	If szW = NULL Then Return ""
-	WideCharToMultiByte(CP_ACP, 0, szW, -1, szA, 256, NULL, NULL)
-	Return szA
-End Function
-
-Function AnsiToUnicode(A As String) As OLECHAR Ptr
-	Dim W As OLECHAR Ptr
-	Dim Length As Integer
-	Length = (2 * Len(A)) + 1
-	A2Wide(StrPtr(A), W, Length)
-	Return W
-End Function
 
 'Convert String to BSTR
 'Please follow with SysFreeString(BSTR) after use to avoid memory leak
@@ -73,18 +32,6 @@ Function StringToBSTR(cnv_string As String) As BSTR
 	sb = SysAllocStringLen(sb, n)
 	MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, StrPtr(cnv_string), -1, sb, n)
 	Return sb
-End Function
-
-Function s2guid(txt As String) As GUID
-	Static oGuid As GUID
-	IIDFromString(WStr(txt), @oGuid)
-	Return oGuid
-End Function
-
-Function guid2s(iguid As GUID) As String
-	Dim oGuids As WString Ptr
-	StringFromIID(@iguid, Cast(LPOLESTR Ptr, @oGuids))
-	Return *oGuids
 End Function
 
 Function RegString (hKey As HKEY , RegPath As ZString Ptr, SubKey As ZString Ptr) As String
@@ -201,8 +148,7 @@ Function LoadMyTypeInfo() As HRESULT
 	TypeLibraryFullFilePath = RegString(HKEY_CLASSES_ROOT, "CLSID\" & CLSIDS_MyObject & "\InprocServer32", NULL)
 	
 	hr = LoadTypeLib(@TypeLibraryFullFilePath, @pTypeLib)
-	'hr = LoadRegTypeLib(@CLSID_TypeLib, 1, 0, 409, @pTypeLib)
-	
+
 	If  hr = 0 Then
 		
 		' Get Microsoft's generic ITypeInfo, giving it our loaded type library. We only
@@ -268,9 +214,7 @@ End Function
 Function IObject_GetIDsOfNames(ByVal pthis As IObject Ptr, riid As REFIID, rgszNames As LPOLESTR Ptr, cNames As UINT, lcid As LCID, rgdispid As DISPID Ptr) As HRESULT
 	
 	If (0 = MyTypeInfo) Then
-		Dim As HRESULT   hr
 		LoadMyTypeInfo()
-		'If ((hr = loadMyTypeInfo())) Then Return(hr)
 	End If
 	
 	' Let OLE32.DLL's DispGetIDsOfNames() do all the real work of using our type
@@ -296,15 +240,6 @@ Function IObject_Invoke(ByVal pthis As IObject Ptr, dispid As DISPID, riid As RE
 	Dim As HRESULT hr = S_OK
 	hr = (DispInvoke(pthis, MyTypeInfo, dispid, wFlags, params, result, pexcepinfo, puArgErr))
 	Return hr
-	'	Dim As IDispatch Ptr pDisp = NULL
-	'    Dim As HRESULT    hr = S_OK
-	'    hr = m_pOuterUnknown->QueryInterface( IID_IDispatch, (void * * ) @pDisp )
-	'    If ( SUCCEEDED(hr) ) Then
-	'        hr = pDisp->Invoke( dispidMember, riid, lcid, wFlags, pdispparams, pvarResult, pexcepinfo, puArgErr)
-	'        pDisp->Release()
-	'    End If
-	'
-	'    Return hr
 End Function
 
 
@@ -315,7 +250,6 @@ Function IObject_SetString(ByVal pthis As IObject Ptr, ByVal lpstr As BSTR) As H
 End Function
 
 Function IObject_GetString(ByVal pthis As IObject Ptr, ByVal buffer As BSTR Ptr) As HRESULT
-	'If buffer=0 Then Return E_POINTER
 	*buffer = SysAllocString(Cast(LPOBJECT, pthis)->tex)
 	If *buffer = 0 Then Return E_OUTOFMEMORY Else Return NOERROR
 End Function
@@ -350,26 +284,19 @@ Function ClassQueryInterface (pcF As IClassFactory Ptr, riid As REFIID, ByVal pp
 	End If
 	*ppv = 0
 	Return  E_NOINTERFACE
-	
-	'Cast(LPUNKNOWN,*ppv)->lpvtbl->AddRef(Cast(LPUNKNOWN,*ppv))
-	'Return NOERROR
 End Function
 
 Function ClassRelease(pcF As IClassFactory Ptr) As ULong
 	Dim pthis As OBJECT_ClassFactory Ptr = Cast(OBJECT_ClassFactory Ptr, pcF)
-	Dim pcc As CLASS_OBJECT Ptr
 	pthis->cRef -= 1
 	If pthis->cRef = 0 Then
 		free(pthis)
 		Return 0
 	End If
 	Return pthis->cRef
-	'Return  InterlockedDecRement(@OutstandingObjects)
 End Function
 
 Function ClassCreateInstance(pcF As IClassFactory Ptr, punkOuter As LPUNKNOWN, ByVal vTableGuid As REFIID, ByVal objHandle As PVOID Ptr) As HRESULT
-	Dim hr As HRESULT
-	Dim pthis As OBJECT_ClassFactory Ptr = Cast(OBJECT_ClassFactory Ptr, pcF)
 	Dim thisobj As CLASS_OBJECT Ptr
 	*objHandle = 0
 	If punkOuter Then
@@ -389,7 +316,6 @@ Function ClassCreateInstance(pcF As IClassFactory Ptr, punkOuter As LPUNKNOWN, B
 			End If
 			thisobj->Ib.lpVTbl->Release(@(thisobj->Ib))
 			OutstandingObjects += 1
-			'If hr = 0 Then InterlockedIncRement(@OutstandingObjects)
 		End If
 	End If
 	Return S_OK
@@ -398,10 +324,8 @@ End Function
 Function ClassLockServer(pcF As IClassFactory Ptr, flock As BOOL) As HRESULT
 	If flock Then
 		OutstandingObjects += 1
-		'InterlockedIncRement(@LockCount)
 	Else
 		OutstandingObjects -= 1
-		'InterlockedDecRement(@LockCount)
 	End If
 	Return  NOERROR
 End Function
@@ -411,7 +335,6 @@ Static Shared  As IClassFactoryVtbl MyClassFactoryVTbl = (@ClassQueryInterface, 
 '============================================
 'dll function
 '============================================
-'Dim shared MyTypeInfo As ITypeInfo PTR
 
 Extern "windows-ms"
 	

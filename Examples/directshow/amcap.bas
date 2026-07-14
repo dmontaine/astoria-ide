@@ -19,66 +19,6 @@ Private Function PreviewResize() As HRESULT
 	Return hr
 End Function
 
-Private Function EnumDev1(ByVal IidDev As Const IID Const Ptr, ByVal Idx As Integer = 0, Dev As IBaseFilter Ptr Ptr) As Integer
-	Dim hr As HRESULT
-	Dim pCreateDevEnum As ICreateDevEnum Ptr
-	hr = CoCreateInstance(@CLSID_SystemDeviceEnum, NULL, CLSCTX_INPROC_SERVER, @IID_ICreateDevEnum, @pCreateDevEnum)
-	If hr <> NOERROR Then Return -1
-	
-	Dim pEnumMoniker As IEnumMoniker Ptr
-	Dim pMoniker As IMoniker Ptr
-	
-	hr = pCreateDevEnum->lpVtbl->CreateClassEnumerator(pCreateDevEnum, IidDev, @pEnumMoniker, 0)
-	If hr <> S_OK Then Return -2
-	
-	Dim pBaseFilter As IBaseFilter Ptr
-	Dim pPropertyBag As IPropertyBag Ptr
-	Dim cFetched As ULong
-	Dim pFName As VARIANT
-	Dim pClsidStr As VARIANT
-	
-	Dim i As Integer = 0
-	
-	Do
-		hr = pEnumMoniker->lpVtbl->Next(pEnumMoniker, 1, @pMoniker, @cFetched)
-		If hr <> S_OK Then Exit Do
-		If i = Idx Then
-			hr = pMoniker->lpVtbl->BindToObject(pMoniker, 0, 0, @IID_IBaseFilter, @pBaseFilter)
-			If hr <> S_OK Then Exit Do
-			Dim dpname As WString Ptr
-			pMoniker->lpVtbl->GetDisplayName(pMoniker, 0, 0, @dpname)
-			If hr <> S_OK Then Exit Do
-			hr = pMoniker->lpVtbl->BindToStorage(pMoniker, 0, 0, @IID_IPropertyBag, @pPropertyBag)
-			If hr <> S_OK Then Exit Do
-			hr = pPropertyBag->lpVtbl->Read(pPropertyBag, "FriendlyName", @pFName, 0)
-			If hr <> S_OK Then Exit Do
-			hr = pPropertyBag->lpVtbl->Read(pPropertyBag, "CLSID", @pClsidStr, 0)
-			If hr <> S_OK Then Exit Do
-			Dim pClsid As CLSID Ptr = New CLSID
-			hr = CLSIDFromString(pClsidStr.bstrVal, pClsid)
-			If hr <> S_OK Then Exit Do
-			
-			'Print "GetDisplayName: " & *dpname
-			'Print "pMoniker      : " & pMoniker
-			'Print "pBaseFilter   : " & pBaseFilter
-			'Print "FriendlyName  : " & *Cast(WString Ptr, pFName.bstrVal)
-			'Print "CLSID         : " & *Cast(WString Ptr, pClsidStr.bstrVal)
-			'Print "Selected      : " & Idx
-			
-			*Dev = pBaseFilter
-			SysFreeString(pFName.bstrVal)
-			SysFreeString(pClsidStr.bstrVal)
-			CoTaskMemFree(dpname)
-			SAFE_RELEASE(pPropertyBag)
-		End If
-		'SAFE_RELEASE(pMoniker)
-		i += 1
-	Loop
-	SAFE_RELEASE(pEnumMoniker)
-	SAFE_RELEASE(pCreateDevEnum)
-	Return i
-End Function
-
 Private Function CaptureBmp(filename As ZString Ptr) As HRESULT
 	'IBasicVideo::GetCurrentImage
 	'Retrieves the current image waiting at the renderer.
@@ -177,7 +117,6 @@ Private Function CaptureBmp(filename As ZString Ptr) As HRESULT
 	
 	'10, 写入文件
 	fileHandle = fopen(filename, @Str("wb"))
-	'Print "fopen(filename, @Str(wb)): " & fileHandle
 	If fileHandle Then
 		Dim As DWORD bytesWritten = fwrite(@mbitmapFileHeader, 1, SizeOf(BITMAPFILEHEADER), fileHandle)
 		bytesWritten = fwrite(@mbitmapInfoHeader, 1, SizeOf(BITMAPINFOHEADER), fileHandle)
@@ -187,8 +126,7 @@ Private Function CaptureBmp(filename As ZString Ptr) As HRESULT
 	
 	'11, 释放缓存
 	CoTaskMemFree(pDIBImage)
-	'Deallocate(pDIBImage)
-	
+
 	pMC->lpVtbl->Run(pMC)
 	
 	?"CaptureBmp Success"
@@ -545,25 +483,6 @@ Private Sub AVStop()
 	Dim hr As HRESULT
 	hr = pMC->lpVtbl->Stop(pMC)
 End Sub
-
-Private Function GetSize(tach As LPCTSTR) As DWORDLONG
-	Dim As HANDLE HFILE = CreateFile(tach, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0)
-	
-	If (HFILE = INVALID_HANDLE_VALUE) Then
-		Return 0
-	End If
-	
-	Dim As DWORD dwSizeHigh
-	Dim As DWORD dwSizeLow = GetFileSize(HFILE, @dwSizeHigh)
-	
-	Dim As DWORDLONG dwlSize = dwSizeLow + Cast(DWORDLONG, dwSizeHigh) Shl 32
-	
-	If Not(CloseHandle(HFILE)) Then
-		dwlSize = 0
-	End If
-	
-	Return dwlSize
-End Function
 
 Private Function AVStatus() As String
 	Dim As Long lDropped, lNot, lAvgFrameSize

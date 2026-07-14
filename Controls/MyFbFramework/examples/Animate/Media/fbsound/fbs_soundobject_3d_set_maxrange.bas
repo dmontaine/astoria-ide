@@ -42,7 +42,6 @@ fbs_Load_WAVFile   (data_path & "pcar.wav",@hWave)
 fbs_Create_Sound   (hWave,@hSound)
 fbs_Set_SoundVolume(hSound,OldVolume)
 fbs_Set_SoundPan   (hSound,OldPan)
-' fbs_Set_SoundSpeed (hSound,0.3)
 fbs_Play_Sound     (hSound,1000)
 
 fbs_Set_MaxRange(listner,220)

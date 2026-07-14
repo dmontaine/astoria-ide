@@ -1,6 +1,4 @@
 ﻿#include "mff/NoInterface.bi"
-' SetConsoleOutputCP(65001)
-' SetConsoleOutputCP(936)
 Dim ArrUString() As UString
 Dim ArrString() As String
 Dim ArrWStringPtr() As WString Ptr

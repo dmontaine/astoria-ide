@@ -1,12 +1,5 @@
 
 #include once "inc/mongoose.bi"
-#include once "crt/stdlib.bi"
-
-' #ifndef __FB_64BIT__
-' #libpath "../../win32"
-' #else
-' #libpath "../../win64"
-' #endif
 
 dim shared s_listen_on as const zstring ptr = @"mqtt://0.0.0.0:1883"
 
@@ -18,11 +11,7 @@ type sub_
 end type
 
 dim shared s_subs as sub_ ptr = NULL
-' dim shared s_signo as long
 
-' private sub signal_handler(byval signo as long)
-' s_signo = signo
-' end sub
 Function CtrlHandler(dwCtrlType As ulong) As long
    If dwCtrlType = 0 Then  
       function= 1
@@ -85,8 +74,7 @@ Select Case mm->cmd
             sub_ptr->qos = qos
             LIST_ADD_HEAD(sub_, @s_subs, sub_ptr)
             MG_INFO("SUB %p [%.*s]", c->fd, clng(sub_ptr->topic.len_), sub_ptr->topic.buf)
-            ' MG_INFO("SUB " & c->fd & " [" & Left(sub_ptr->topic.buf, sub_ptr->topic.len_) & "]")
-           
+
             For i As Integer = 0 To sub_ptr->topic.len_ - 1
                 If sub_ptr->topic.buf[i] = Asc("+") Then
                     sub_ptr->topic.buf[i] = Asc("*")

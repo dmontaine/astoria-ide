@@ -6,7 +6,6 @@
 Dim As Integer screen_width = 1920
 Dim As Integer screen_height = 1080
 SetConfigFlags(FLAG_WINDOW_RESIZABLE Or FLAG_WINDOW_HIGHDPI )
-' SetConfigFlags(IFLAG_WINDOW_UNDECORATED)
 InitWindow(screen_width, screen_height, "raylib [models] example - heightmap loading and drawing")
 
 Dim As Camera cam
@@ -26,8 +25,6 @@ For i As Integer = 0 To MAX_COLUMNS
 	col(i) = ColorRL(GetRandomValue(20, 255), GetRandomValue(10, 55), 30, 255)
 Next i
 
-' SetCameraMode(cam, CAMERA_FIRST_PERSON)
-' SetCameraMode(cam, 1)
 SetTargetFPS(60)
 
 While Not WindowShouldClose()
@@ -49,7 +46,6 @@ While Not WindowShouldClose()
 		DrawCube(positions(j), 2.0, heights(j), 2.0, col(j))
 		DrawCubeWires(positions(j), 2.0, heights(j), 2.0, MAROON)
 	Next j
-	' DrawGrid(20, 1.0f)
 	EndMode3D()
 	
 	DrawRectangle( 10, 10, 220, 70, Fade(SKYBLUE, 0.5))

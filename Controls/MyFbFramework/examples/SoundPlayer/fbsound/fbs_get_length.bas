@@ -21,7 +21,6 @@ const data_path = TESTS_DATA_PATH
 ' only if not same as exe path
 ' FBS_Set_PlugPath( FBSOUND_DLL_PATH )
 
-const last_number = 9
 dim as integer hWave,hSound,SoundLength,WaveLength
 
 fbs_Init()

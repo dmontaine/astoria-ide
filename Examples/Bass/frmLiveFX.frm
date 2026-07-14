@@ -53,7 +53,6 @@
 		
 		Declare Static Function StreamCallback(ByVal handle As HSTREAM, ByVal buffer As Any Ptr, ByVal length As DWORD, ByVal user As Any Ptr) As DWORD
 		Declare Function StreamProc(ByVal handle As HSTREAM, ByVal buffer As Any Ptr, ByVal length As DWORD, ByVal user As Any Ptr) As DWORD
-'		Declare Sub UpdateInfo()
 		Declare Sub ShowError(es As String)
 		Declare Function InitDevice(RecDevice As Integer, OutDevice As Integer) As Boolean
 		
@@ -323,28 +322,19 @@ Private Function frmLiveFXType.StreamProc(ByVal handle As HSTREAM, ByVal buffer 
 	EndIf
 	Dim As DWORD r = rate
 	If (buftarget) Then
-		#if 1 ' target buffer amount = minimum
-			If (got < buftarget) Then ' buffer level Is low
-				r = initrate * 0.999 ' slow down slightly
-				ratedelay = 10 + (buftarget - got) / 16 ' prevent speeding-up again too soon
-			ElseIf (ratedelay = 0) Then
-				If (buflevel >= buftarget * 1.1) Then ' buffer level Is high
-					r = initrate * 1.001 ' speed up slightly
-				Else ' buffer level Is in range
-					r = initrate ' normal speed
-				End If
-			Else
-				ratedelay -= 1
-			End If
-		#else ' target buffer amount = average
-			If (buflevel < buftarget) Then ' buffer level Is low
-				r = initrate * 0.999 ' slow down slightly
-			ElseIf (buflevel >= buftarget * 1.1) Then ' buffer level Is high
+		' target buffer amount = minimum
+		If (got < buftarget) Then ' buffer level Is low
+			r = initrate * 0.999 ' slow down slightly
+			ratedelay = 10 + (buftarget - got) / 16 ' prevent speeding-up again too soon
+		ElseIf (ratedelay = 0) Then
+			If (buflevel >= buftarget * 1.1) Then ' buffer level Is high
 				r = initrate * 1.001 ' speed up slightly
 			Else ' buffer level Is in range
 				r = initrate ' normal speed
 			End If
-		#endif
+		Else
+			ratedelay -= 1
+		End If
 	Else
 		r = initrate
 	End If
@@ -482,7 +472,6 @@ Private Sub frmLiveFXType.CheckBox1_Click(ByRef Sender As CheckBox)
 	Else
 		buftarget = 0
 	End If
-'	TimerComponent1.Enabled = CheckBox1.Checked
 End Sub
 
 Private Sub frmLiveFXType.CheckBox2_Click(ByRef Sender As CheckBox)

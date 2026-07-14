@@ -111,7 +111,7 @@ end sub
 '
 ' main
 '
-dim as integer hWave,hSound,KeyCode,index,nFrames
+dim as integer KeyCode
 dim as boolean ok,Callback
 screenres 512,128
 windowtitle "[c]=callback [d]=dealay"

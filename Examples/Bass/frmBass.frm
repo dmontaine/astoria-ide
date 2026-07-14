@@ -101,11 +101,7 @@
 		fxEQHdl(9) As HFX
 		
 		Declare Function FxIndex(fxName As WString) As Integer
-		Declare Sub FxReset(ch As HSTREAM)
-		Declare Sub FxRemove(ch As HSTREAM)
-		Declare Sub FxParafrmCtl(fxIdx As Integer)
 		Declare Sub FxPara2Ctl(fxIdx As Integer)
-		Declare Sub FxParaShow(fxIdx As Integer, paIdx As Integer)
 		Declare Sub FxParaSet(fxIdx As Integer, paIdx As Integer, Position As Integer)
 		Declare Sub FxEnabled(fxName As WString, st As Boolean, ch As HSTREAM)
 		Declare Sub EqEnabled(st As Boolean, ch As HSTREAM)
@@ -159,7 +155,6 @@
 		With This
 			.Name = "frmBass"
 			.Text = ML("Bass Audio")
-			'.Caption = "Bass Audio"
 			.StartPosition = FormStartPosition.CenterScreen
 			.Designer = @This
 			.OnCreate = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @Form_Create)
@@ -173,7 +168,6 @@
 			.Name = "GroupBox1"
 			.Text = ML("Playback")
 			.TabIndex = 0
-			'.Caption = "Playback"
 			.SetBounds 10, 190, 410, 130
 			.Parent = @This
 		End With
@@ -182,7 +176,6 @@
 			.Name = "GroupBox2"
 			.Text = ML("Record")
 			.TabIndex = 1
-			'.Caption = "Record"
 			.Enabled = True
 			.SetBounds 10, 330, 410, 130
 			.Parent = @This
@@ -192,7 +185,6 @@
 			.Name = "GroupBox3"
 			.Text = ML("Ex")
 			.TabIndex = 2
-			'.Caption = "Ex"
 			.SetBounds 440, 230, 410, 290
 			.Parent = @This
 		End With
@@ -201,7 +193,6 @@
 			.Name = "GroupBox4"
 			.Text = ""
 			.TabIndex = 3
-			'.Caption = ""
 			.Hint = ""
 			.SetBounds 440, 60, 410, 160
 			.Parent = @This
@@ -211,7 +202,6 @@
 			.Name = "GroupBox5"
 			.Text = ML("Stream")
 			.TabIndex = 4
-			'.Caption = "Stream"
 			.SetBounds 440, 10, 410, 40
 			.Parent = @This
 		End With
@@ -220,7 +210,6 @@
 			.Name = "GroupBox6"
 			.Text = ML("Device")
 			.TabIndex = 5
-			'.Caption = "Device"
 			.SetBounds 10, 10, 410, 170
 			.Parent = @This
 		End With
@@ -229,7 +218,6 @@
 			.Name = "GroupBox7"
 			.Text = ML("Raido")
 			.TabIndex = 6
-			'.Caption = "Raido"
 			.SetBounds 10, 470, 410, 200
 			.Parent = @This
 		End With
@@ -238,7 +226,6 @@
 			.Name = "GroupBox8"
 			.Text = ""
 			.TabIndex = 7
-			'.Caption = ""
 			.Enabled = False
 			.SetBounds 440, 530, 410, 140
 			.Parent = @This
@@ -248,7 +235,6 @@
 			.Name = "cnbDevOutput"
 			.Text = ML("Output")
 			.TabIndex = 8
-			'.Caption = "Output"
 			.Hint = ""
 			.SetBounds 10, 20, 60, 20
 			.Designer = @This
@@ -270,7 +256,6 @@
 			.Name = "lblOutVolume"
 			.Text = ML("Volume")
 			.TabIndex = 10
-			'.Caption = "Volume"
 			.Alignment = AlignmentConstants.taRight
 			.SetBounds 10, 50, 60, 16
 			.Parent = @GroupBox6
@@ -297,7 +282,6 @@
 			.Name = "cnbDevInput"
 			.Text = ML("Input")
 			.TabIndex = 12
-			'.Caption = "Input"
 			.SetBounds 10, 80, 60, 20
 			.Designer = @This
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @cnbDevice_Click)
@@ -328,7 +312,6 @@
 			.Name = "lblInpPin"
 			.Text = ML("Microphone")
 			.TabIndex = 15
-			'.Caption = "Microphone"
 			.SetBounds 250, 113, 150, 16
 			.Parent = @GroupBox6
 		End With
@@ -338,7 +321,6 @@
 			.Text = ML("Volume")
 			.TabIndex = 16
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "Volume"
 			.SetBounds 10, 140, 60, 16
 			.Parent = @GroupBox6
 		End With
@@ -372,7 +354,6 @@
 			.Name = "cnbPlySelect"
 			.Text = ML("Select")
 			.TabIndex = 19
-			'.Caption = "Select"
 			.SetBounds 10, 50, 60, 20
 			.Designer = @This
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @cnbPlayback_Click)
@@ -383,7 +364,6 @@
 			.Name = "cnbPlyOpen"
 			.Text = ML("Open")
 			.TabIndex = 20
-			'.Caption = "Open"
 			.SetBounds 70, 50, 60, 20
 			.Designer = @This
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @cnbPlayback_Click)
@@ -394,7 +374,6 @@
 			.Name = "cnbPlyPause"
 			.Text = ML("Pause")
 			.TabIndex = 21
-			'.Caption = "Pause"
 			.Enabled = False
 			.SetBounds 130, 50, 60, 20
 			.Designer = @This
@@ -406,7 +385,6 @@
 			.Name = "cnbPlyStop"
 			.Text = ML("Stop")
 			.TabIndex = 22
-			'.Caption = "Stop"
 			.Enabled = False
 			.SetBounds 190, 50, 60, 20
 			.Designer = @This
@@ -418,7 +396,6 @@
 			.Name = "chkPlayRecord"
 			.Text = ML("Record")
 			.TabIndex = 23
-			'.Caption = "Record"
 			.Enabled = False
 			.SetBounds 280, 50, 60, 20
 			.Designer = @This
@@ -430,7 +407,6 @@
 			.Name = "chkPlayLoop"
 			.Text = ML("Loop")
 			.TabIndex = 24
-			'.Caption = "Loop"
 			.Checked = True
 			.SetBounds 340, 50, 60, 20
 			.Designer = @This
@@ -457,7 +433,6 @@
 			.Name = "lblPlay"
 			.Text = ML("Position")
 			.TabIndex = 26
-			'.Caption = "Position"
 			.Alignment = AlignmentConstants.taCenter
 			.SetBounds 10, 100, 390, 16
 			.Parent = @GroupBox1
@@ -468,7 +443,6 @@
 			.Name = "cnbRecMonitor"
 			.Text = ML("Monitor")
 			.TabIndex = 27
-			'.Caption = "Monitor"
 			.Enabled = True
 			.SetBounds 10, 20, 60, 20
 			.Designer = @This
@@ -489,7 +463,6 @@
 			.Name = "cnbRecSelect"
 			.Text = ML("Select")
 			.TabIndex = 29
-			'.Caption = "Select"
 			.SetBounds 10, 50, 60, 20
 			.Designer = @This
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @cnbRecord_Click)
@@ -500,7 +473,6 @@
 			.Name = "cnbRecRecord"
 			.Text = ML("Record")
 			.TabIndex = 30
-			'.Caption = "Record"
 			.Enabled = True
 			.SetBounds 70, 50, 60, 20
 			.Designer = @This
@@ -512,7 +484,6 @@
 			.Name = "cnbRecPause"
 			.Text = ML("Pause")
 			.TabIndex = 31
-			'.Caption = "Pause"
 			.Enabled = False
 			.SetBounds 130, 50, 60, 20
 			.Designer = @This
@@ -524,7 +495,6 @@
 			.Name = "cnbRecSave"
 			.Text = ML("Save")
 			.TabIndex = 32
-			'.Caption = "Save"
 			.Enabled = False
 			.SetBounds 190, 50, 60, 20
 			.Designer = @This
@@ -546,7 +516,6 @@
 			.Name = "lblRecord"
 			.Text = ML("Bytes record")
 			.TabIndex = 34
-			'.Caption = "Bytes record"
 			.Alignment = AlignmentConstants.taCenter
 			.SetBounds 10, 110, 390, 16
 			.Parent = @GroupBox2
@@ -566,7 +535,6 @@
 			.Name = "cnbRdoOpen"
 			.Text = ML("Open")
 			.TabIndex = 36
-			'.Caption = "Open"
 			.SetBounds 280, 20, 60, 20
 			.Designer = @This
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @cnbRaido_Click)
@@ -577,7 +545,6 @@
 			.Name = "cnbRdoClose"
 			.Text = ML("Close")
 			.TabIndex = 37
-			'.Caption = "Close"
 			.SetBounds 340, 20, 60, 20
 			.Designer = @This
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @cnbRaido_Click)
@@ -589,7 +556,6 @@
 			.Text = ML("stop")
 			.TabIndex = 38
 			.Alignment = AlignmentConstants.taCenter
-			'.Caption = "stop"
 			.SetBounds 10, 50, 390, 16
 			.Parent = @GroupBox7
 		End With
@@ -599,7 +565,6 @@
 			.Text = ML("stop")
 			.TabIndex = 39
 			.Alignment = AlignmentConstants.taCenter
-			'.Caption = "stop"
 			.SetBounds 10, 70, 390, 16
 			.Parent = @GroupBox7
 		End With
@@ -618,7 +583,6 @@
 			.Name = "chkConnection"
 			.Text = ML("Direct connection")
 			.TabIndex = 41
-			'.Caption = "Direct connection"
 			.Checked = True
 			.SetBounds 10, 170, 110, 20
 			.Designer = @This
@@ -641,7 +605,6 @@
 			.Text = ML("Playback")
 			.TabIndex = 43
 			.Checked = True
-			'.Caption = "Playback"
 			.SetBounds 10, 14, 60, 20
 			.Designer = @This
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @RadioButton_Click)
@@ -653,7 +616,6 @@
 			.Text = ML("Record")
 			.TabIndex = 44
 			.Checked = False
-			'.Caption = "Record"
 			.SetBounds 90, 14, 60, 20
 			.Designer = @This
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @RadioButton_Click)
@@ -664,7 +626,6 @@
 			.Name = "RadioButton3"
 			.Text = ML("Raido")
 			.TabIndex = 45
-			'.Caption = "Raido"
 			.SetBounds 160, 14, 60, 20
 			.Designer = @This
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @RadioButton_Click)
@@ -707,7 +668,6 @@
 			.Text = ML("Show Waveform")
 			.TabIndex = 48
 			.Checked = true
-			'.Caption = "Start"
 			.Hint = ML("Show Waveform")
 			.Alignment = CheckAlignmentConstants.chLeft
 			.SetBounds 180, 10, 110, 20
@@ -743,7 +703,6 @@
 			.Name = "chkExChorus"
 			.Text = ML("Chorus")
 			.TabIndex = 51
-			'.Caption = "Chorus"
 			.SetBounds 10, 20, 90, 20
 			.Designer = @This
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @CheckBox_Click)
@@ -754,7 +713,6 @@
 			.Name = "chkExCompression"
 			.Text = ML("Compression")
 			.TabIndex = 52
-			'.Caption = "Compression"
 			.SetBounds 10, 40, 90, 20
 			.Designer = @This
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @CheckBox_Click)
@@ -765,7 +723,6 @@
 			.Name = "chkExDistortion"
 			.Text = ML("Distortion")
 			.TabIndex = 53
-			'.Caption = "Distortion"
 			.SetBounds 10, 60, 90, 20
 			.Designer = @This
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @CheckBox_Click)
@@ -776,7 +733,6 @@
 			.Name = "chkExEcho"
 			.Text = ML("Echo")
 			.TabIndex = 54
-			'.Caption = "Echo"
 			.SetBounds 10, 80, 90, 20
 			.Designer = @This
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @CheckBox_Click)
@@ -787,7 +743,6 @@
 			.Name = "chkExFlanger"
 			.Text = ML("Flanger")
 			.TabIndex = 55
-			'.Caption = "Flanger"
 			.SetBounds 10, 100, 90, 20
 			.Designer = @This
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @CheckBox_Click)
@@ -798,7 +753,6 @@
 			.Name = "chkExGargle"
 			.Text = ML("Gargle")
 			.TabIndex = 56
-			'.Caption = "Gargle"
 			.SetBounds 10, 120, 90, 20
 			.Designer = @This
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @CheckBox_Click)
@@ -809,7 +763,6 @@
 			.Name = "chkEx3D"
 			.Text = "3D"
 			.TabIndex = 57
-			'.Caption = "3D"
 			.SetBounds 10, 140, 90, 20
 			.Designer = @This
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @CheckBox_Click)
@@ -820,7 +773,6 @@
 			.Name = "chkExEqualizer"
 			.Text = ML("Equalizer")
 			.TabIndex = 58
-			'.Caption = "Equalizer"
 			.SetBounds 10, 160, 90, 20
 			.Designer = @This
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @CheckBox_Click)
@@ -831,7 +783,6 @@
 			.Name = "chkExReverb"
 			.Text = ML("Reverb")
 			.TabIndex = 59
-			'.Caption = "Reverb"
 			.SetBounds 10, 180, 90, 20
 			.Designer = @This
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @CheckBox_Click)
@@ -842,7 +793,6 @@
 			.Name = "chkExVolume"
 			.Text = ML("Volume")
 			.TabIndex = 60
-			'.Caption = "Volume"
 			.SetBounds 10, 200, 90, 20
 			.Designer = @This
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @CheckBox_Click)
@@ -853,7 +803,6 @@
 			.Name = "chkDarkMode"
 			.Text = ML("Dark Mode")
 			.TabIndex = 61
-			'.Caption = "Dark Mode"
 			.Checked = True
 			.SetBounds 10, 260, 80, 20
 			.Designer = @This
@@ -875,7 +824,6 @@
 			.Name = "TabPage1"
 			.Text = ML("Chorus")
 			.TabIndex = 63
-			'.Caption = "Chorus"
 			.SetBounds 0, 0, 674, 165
 			.Parent = @TabControl1
 		End With
@@ -884,7 +832,6 @@
 			.Name = "TabPage2"
 			.Text = ML("Compression")
 			.TabIndex = 64
-			'.Caption = "Compression"
 			.SetBounds -48, 22, 484, 185
 			.Parent = @TabControl1
 		End With
@@ -893,7 +840,6 @@
 			.Name = "TabPage3"
 			.Text = ML("Distortion")
 			.TabIndex = 65
-			'.Caption = "Distortion"
 			.SetBounds 0, 0, 674, 165
 			.Parent = @TabControl1
 		End With
@@ -902,7 +848,6 @@
 			.Name = "TabPage4"
 			.Text = ML("Echo")
 			.TabIndex = 66
-			'.Caption = "Echo"
 			.SetBounds 0, 0, 674, 165
 			.Parent = @TabControl1
 		End With
@@ -911,7 +856,6 @@
 			.Name = "TabPage5"
 			.Text = ML("Flanger")
 			.TabIndex = 67
-			'.Caption = "Flanger"
 			.SetBounds 0, 0, 674, 165
 			.Parent = @TabControl1
 		End With
@@ -920,7 +864,6 @@
 			.Name = "TabPage6"
 			.Text = ML("Gargle")
 			.TabIndex = 68
-			'.Caption = "Gargle"
 			.SetBounds 0, 0, 674, 165
 			.Parent = @TabControl1
 		End With
@@ -929,7 +872,6 @@
 			.Name = "TabPage7"
 			.Text = "3D"
 			.TabIndex = 69
-			'.Caption = "3D"
 			.SetBounds 2, 22, 294, 245
 			.Parent = @TabControl1
 		End With
@@ -938,7 +880,6 @@
 			.Name = "TabPage8"
 			.Text = ML("Equalizer")
 			.TabIndex = 70
-			'.Caption = "Equalizer"
 			.SetBounds 0, 0, 674, 165
 			.Parent = @TabControl1
 		End With
@@ -947,7 +888,6 @@
 			.Name = "TabPage9"
 			.Text = ML("Reverb")
 			.TabIndex = 71
-			'.Caption = "Reverb"
 			.SetBounds 0, 0, 674, 165
 			.Parent = @TabControl1
 		End With
@@ -956,7 +896,6 @@
 			.Name = "TabPage10"
 			.Text = ML("Volume")
 			.TabIndex = 72
-			'.Caption = "Volume"
 			.SetBounds 2, 22, 704, 185
 			.Parent = @TabControl1
 		End With
@@ -966,7 +905,6 @@
 			.Name = "lblFXMSG0900"
 			.Text = ML("In Gain")
 			.TabIndex = 73
-			'.Caption = "fInGain"
 			.Alignment = AlignmentConstants.taRight
 			.SetBounds 8, 8, 110, 16
 			.Parent = @TabPage9
@@ -976,7 +914,6 @@
 			.Name = "lblFXMSG0901"
 			.Text = ML("Reverb Mix")
 			.TabIndex = 74
-			'.Caption = "fReverbMix"
 			.Alignment = AlignmentConstants.taRight
 			.SetBounds 8, 28, 110, 16
 			.Parent = @TabPage9
@@ -986,7 +923,6 @@
 			.Name = "lblFXMSG0902"
 			.Text = ML("Reverb Time")
 			.TabIndex = 75
-			'.Caption = "fReverbTime"
 			.Alignment = AlignmentConstants.taRight
 			.SetBounds 8, 48, 110, 16
 			.Parent = @TabPage9
@@ -996,7 +932,6 @@
 			.Name = "lblFXMSG0903"
 			.Text = ML("High Freq RTRatio")
 			.TabIndex = 76
-			'.Caption = "fHighFreqRTRatio"
 			.Alignment = AlignmentConstants.taRight
 			.SetBounds 8, 68, 110, 16
 			.Parent = @TabPage9
@@ -1067,7 +1002,6 @@
 			.Name = "lblFXShw0900"
 			.Text = "0.000"
 			.TabIndex = 81
-			'.Caption = "0.000"
 			.Alignment = AlignmentConstants.taRight
 			.SetBounds 218, 8, 70, 16
 			.Parent = @TabPage9
@@ -1077,7 +1011,6 @@
 			.Name = "lblFXShw0901"
 			.Text = "0.000"
 			.TabIndex = 82
-			'.Caption = "0.000"
 			.Alignment = AlignmentConstants.taRight
 			.SetBounds 218, 28, 70, 16
 			.Parent = @TabPage9
@@ -1087,7 +1020,6 @@
 			.Name = "lblFXShw0902"
 			.Text = "1000.000"
 			.TabIndex = 83
-			'.Caption = "1000.000"
 			.Alignment = AlignmentConstants.taRight
 			.SetBounds 218, 48, 70, 16
 			.Parent = @TabPage9
@@ -1097,7 +1029,6 @@
 			.Name = "lblFXShw0903"
 			.Text = "0.001"
 			.TabIndex = 84
-			'.Caption = "0.001"
 			.Alignment = AlignmentConstants.taRight
 			.SetBounds 218, 68, 70, 16
 			.Parent = @TabPage9
@@ -1839,7 +1770,6 @@
 			.Text = ML("Wet Dry Mix")
 			.TabIndex = 136
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "fWetDryMix"
 			.SetBounds 8, 8, 100, 20
 			.Parent = @TabPage1
 		End With
@@ -1849,7 +1779,6 @@
 			.Text = ML("Depth")
 			.TabIndex = 137
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "fDepth"
 			.SetBounds 8, 28, 100, 20
 			.Parent = @TabPage1
 		End With
@@ -1859,7 +1788,6 @@
 			.Text = ML("Feedback")
 			.TabIndex = 138
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "fFeedback"
 			.SetBounds 8, 48, 100, 20
 			.Parent = @TabPage1
 		End With
@@ -1869,7 +1797,6 @@
 			.Text = ML("Frequency")
 			.TabIndex = 139
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "Frequency"
 			.SetBounds 8, 68, 100, 20
 			.Parent = @TabPage1
 		End With
@@ -1879,7 +1806,6 @@
 			.Text = ML("Waveform")
 			.TabIndex = 140
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "lWaveform"
 			.SetBounds 8, 88, 100, 20
 			.Parent = @TabPage1
 		End With
@@ -1889,7 +1815,6 @@
 			.Text = ML("Delay")
 			.TabIndex = 141
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "fDelay"
 			.SetBounds 8, 108, 100, 20
 			.Parent = @TabPage1
 		End With
@@ -1899,7 +1824,6 @@
 			.Text = ML("Gain")
 			.TabIndex = 142
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "fGain"
 			.SetBounds 8, 8, 100, 20
 			.Parent = @TabPage2
 		End With
@@ -1909,7 +1833,6 @@
 			.Text = ML("Attack")
 			.TabIndex = 143
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "fAttack"
 			.SetBounds 8, 28, 100, 20
 			.Parent = @TabPage2
 		End With
@@ -1919,7 +1842,6 @@
 			.Text = ML("Release")
 			.TabIndex = 144
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "Release"
 			.SetBounds 8, 48, 100, 20
 			.Parent = @TabPage2
 		End With
@@ -1929,7 +1851,6 @@
 			.Text = ML("Threshold")
 			.TabIndex = 145
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "fThreshold"
 			.SetBounds 8, 68, 100, 20
 			.Parent = @TabPage2
 		End With
@@ -1939,7 +1860,6 @@
 			.Text = ML("Ratio")
 			.TabIndex = 146
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "fRatio"
 			.SetBounds 8, 88, 100, 20
 			.Parent = @TabPage2
 		End With
@@ -1949,7 +1869,6 @@
 			.Text = ML("Predelay")
 			.TabIndex = 147
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "fPredelay"
 			.SetBounds 8, 108, 100, 20
 			.Parent = @TabPage2
 		End With
@@ -1958,7 +1877,6 @@
 			.Name = "lblFXMSG0300"
 			.Text = ML("Gain")
 			.TabIndex = 148
-			'.Caption = "fGain"
 			.Alignment = AlignmentConstants.taRight
 			.SetBounds 8, 8, 100, 20
 			.Parent = @TabPage3
@@ -1968,7 +1886,6 @@
 			.Name = "lblFXMSG0301"
 			.Text = ML("Edge")
 			.TabIndex = 149
-			'.Caption = "fEdge"
 			.Alignment = AlignmentConstants.taRight
 			.SetBounds 8, 28, 100, 20
 			.Parent = @TabPage3
@@ -1978,7 +1895,6 @@
 			.Name = "lblFXMSG0302"
 			.Text = ML("Post EQ Center Frequency")
 			.TabIndex = 150
-			'.Caption = "fPostEQCenterFrequency"
 			.Alignment = AlignmentConstants.taRight
 			.SetBounds 8, 48, 100, 20
 			.Parent = @TabPage3
@@ -1988,7 +1904,6 @@
 			.Name = "lblFXMSG0303"
 			.Text = ML("Post EQ Bandwidth")
 			.TabIndex = 151
-			'.Caption = "fPostEQBandwidth"
 			.Alignment = AlignmentConstants.taRight
 			.SetBounds 8, 68, 100, 20
 			.Parent = @TabPage3
@@ -1998,7 +1913,6 @@
 			.Name = "lblFXMSG0304"
 			.Text = ML("Pre Lowpass Cutoff")
 			.TabIndex = 152
-			'.Caption = "fPreLowpassCutoff"
 			.Alignment = AlignmentConstants.taRight
 			.SetBounds 8, 88, 100, 20
 			.Parent = @TabPage3
@@ -2008,7 +1922,6 @@
 			.Name = "lblFXMSG0400"
 			.Text = ML("Wet Dry Mix")
 			.TabIndex = 153
-			'.Caption = "fWetDryMix"
 			.Alignment = AlignmentConstants.taRight
 			.SetBounds 8, 8, 100, 20
 			.Parent = @TabPage4
@@ -2019,7 +1932,6 @@
 			.Text = ML("Feedback")
 			.TabIndex = 154
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "fFeedback"
 			.SetBounds 8, 28, 100, 20
 			.Parent = @TabPage4
 		End With
@@ -2029,7 +1941,6 @@
 			.Text = ML("Left Delay")
 			.TabIndex = 155
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "fLeftDelay"
 			.SetBounds 8, 48, 100, 20
 			.Parent = @TabPage4
 		End With
@@ -2039,7 +1950,6 @@
 			.Text = ML("Right Delay")
 			.TabIndex = 156
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "fRightDelay"
 			.SetBounds 8, 68, 100, 20
 			.Parent = @TabPage4
 		End With
@@ -2048,7 +1958,6 @@
 			.Name = "lblFXMSG0404"
 			.Text = ML("Pan Delay")
 			.TabIndex = 157
-			'.Caption = "lPanDelay"
 			.Alignment = AlignmentConstants.taRight
 			.SetBounds 8, 88, 100, 20
 			.Parent = @TabPage4
@@ -2059,7 +1968,6 @@
 			.Text = ML("Wet Dry Mix")
 			.TabIndex = 158
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "fWetDryMix"
 			.SetBounds 8, 8, 100, 20
 			.Parent = @TabPage5
 		End With
@@ -2069,7 +1977,6 @@
 			.Text = ML("Depth")
 			.TabIndex = 159
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "fDepth"
 			.SetBounds 8, 28, 100, 20
 			.Parent = @TabPage5
 		End With
@@ -2079,7 +1986,6 @@
 			.Text = ML("Feedback")
 			.TabIndex = 160
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "fFeedback"
 			.SetBounds 8, 48, 100, 20
 			.Parent = @TabPage5
 		End With
@@ -2089,7 +1995,6 @@
 			.Text = ML("Frequency")
 			.TabIndex = 161
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "fFrequency"
 			.SetBounds 8, 68, 100, 20
 			.Parent = @TabPage5
 		End With
@@ -2099,7 +2004,6 @@
 			.Text = ML("Waveform")
 			.TabIndex = 162
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "lWaveform"
 			.SetBounds 8, 88, 100, 20
 			.Parent = @TabPage5
 		End With
@@ -2109,7 +2013,6 @@
 			.Text = ML("Delay")
 			.TabIndex = 163
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "fDelay"
 			.SetBounds 8, 108, 100, 20
 			.Parent = @TabPage5
 		End With
@@ -2119,7 +2022,6 @@
 			.Text = ML("Phase")
 			.TabIndex = 164
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "lPhase"
 			.SetBounds 8, 128, 100, 20
 			.Parent = @TabPage5
 		End With
@@ -2129,7 +2031,6 @@
 			.Text = ML("dw Rate Hz")
 			.TabIndex = 165
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "dwRateHz"
 			.SetBounds 8, 8, 100, 20
 			.Parent = @TabPage6
 		End With
@@ -2139,7 +2040,6 @@
 			.Text = ML("dw Wave Shape")
 			.TabIndex = 166
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "dwWaveShape"
 			.SetBounds 8, 28, 100, 20
 			.Parent = @TabPage6
 		End With
@@ -2149,7 +2049,6 @@
 			.Text = ML("Room")
 			.TabIndex = 167
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "lRoom"
 			.SetBounds 8, 8, 100, 20
 			.Parent = @TabPage7
 		End With
@@ -2159,7 +2058,6 @@
 			.Text = ML("Room HF")
 			.TabIndex = 168
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "lRoomHF"
 			.SetBounds 8, 28, 100, 20
 			.Parent = @TabPage7
 		End With
@@ -2169,7 +2067,6 @@
 			.Text = ML("Room Rolloff Factor")
 			.TabIndex = 169
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "flRoomRolloffFactor"
 			.SetBounds 8, 48, 100, 20
 			.Parent = @TabPage7
 		End With
@@ -2179,7 +2076,6 @@
 			.Text = ML("Decay Time")
 			.TabIndex = 170
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "flDecayTime"
 			.SetBounds 8, 68, 100, 20
 			.Parent = @TabPage7
 		End With
@@ -2189,7 +2085,6 @@
 			.Text = ML("Decay HF Ratio")
 			.TabIndex = 171
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "flDecayHFRatio"
 			.SetBounds 8, 88, 100, 20
 			.Parent = @TabPage7
 		End With
@@ -2199,7 +2094,6 @@
 			.Text = ML("Reflections")
 			.TabIndex = 172
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "lReflections"
 			.SetBounds 8, 108, 100, 20
 			.Parent = @TabPage7
 		End With
@@ -2209,7 +2103,6 @@
 			.Text = ML("Reflections Delay")
 			.TabIndex = 173
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "flReflectionsDelay"
 			.SetBounds 8, 128, 100, 20
 			.Parent = @TabPage7
 		End With
@@ -2219,7 +2112,6 @@
 			.Text = ML("Reverb")
 			.TabIndex = 174
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "lReverb"
 			.SetBounds 8, 148, 100, 20
 			.Parent = @TabPage7
 		End With
@@ -2229,7 +2121,6 @@
 			.Text = ML("Reverb Delay")
 			.TabIndex = 175
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "ReverbDelay"
 			.SetBounds 8, 168, 100, 20
 			.Parent = @TabPage7
 		End With
@@ -2239,7 +2130,6 @@
 			.Text = ML("Diffusion")
 			.TabIndex = 176
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "Diffusion"
 			.SetBounds 8, 188, 100, 20
 			.Parent = @TabPage7
 		End With
@@ -2249,7 +2139,6 @@
 			.Text = ML("Density")
 			.TabIndex = 177
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "Density"
 			.SetBounds 8, 208, 100, 20
 			.Parent = @TabPage7
 		End With
@@ -2259,7 +2148,6 @@
 			.Text = ML("HF Reference")
 			.TabIndex = 178
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "flHFReference"
 			.SetBounds 8, 228, 100, 20
 			.Parent = @TabPage7
 		End With
@@ -2269,7 +2157,6 @@
 			.Text = ML("Center")
 			.TabIndex = 179
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "fCenter"
 			.SetBounds 8, 8, 100, 20
 			.Parent = @TabPage8
 		End With
@@ -2279,7 +2166,6 @@
 			.Text = ML("Band width")
 			.TabIndex = 180
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "fBandwidth"
 			.SetBounds 8, 28, 100, 20
 			.Parent = @TabPage8
 		End With
@@ -2289,7 +2175,6 @@
 			.Text = ML("Gain")
 			.TabIndex = 181
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "fGain"
 			.SetBounds 8, 48, 100, 20
 			.Parent = @TabPage8
 		End With
@@ -2299,7 +2184,6 @@
 			.Text = ML("Target")
 			.TabIndex = 182
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "fTarget"
 			.SetBounds 8, 8, 100, 20
 			.Parent = @TabPage10
 		End With
@@ -2309,7 +2193,6 @@
 			.Text = ML("Current")
 			.TabIndex = 183
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "fCurrent"
 			.SetBounds 8, 28, 100, 20
 			.Parent = @TabPage10
 		End With
@@ -2319,7 +2202,6 @@
 			.Text = ML("Time")
 			.TabIndex = 184
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "fTime"
 			.SetBounds 8, 48, 100, 20
 			.Parent = @TabPage10
 		End With
@@ -2329,7 +2211,6 @@
 			.Text = ML("Curve")
 			.TabIndex = 185
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "lCurve"
 			.SetBounds 8, 68, 100, 20
 			.Parent = @TabPage10
 		End With
@@ -2339,7 +2220,6 @@
 			.Text = "50.000"
 			.TabIndex = 186
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "50.000"
 			.SetBounds 218, 8, 70, 20
 			.Parent = @TabPage1
 		End With
@@ -2349,7 +2229,6 @@
 			.Text = "10.000"
 			.TabIndex = 187
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "10.000"
 			.SetBounds 218, 28, 70, 20
 			.Parent = @TabPage1
 		End With
@@ -2359,7 +2238,6 @@
 			.Text = "25.000"
 			.TabIndex = 188
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "25.000"
 			.SetBounds 218, 48, 70, 20
 			.Parent = @TabPage1
 		End With
@@ -2369,7 +2247,6 @@
 			.Text = "1.100"
 			.TabIndex = 189
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "1.100"
 			.SetBounds 218, 68, 70, 20
 			.Parent = @TabPage1
 		End With
@@ -2379,7 +2256,6 @@
 			.Text = "1.000"
 			.TabIndex = 190
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "1.000"
 			.SetBounds 218, 88, 70, 20
 			.Parent = @TabPage1
 		End With
@@ -2389,7 +2265,6 @@
 			.Text = "16.000"
 			.TabIndex = 191
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "16.000"
 			.SetBounds 218, 108, 70, 20
 			.Parent = @TabPage1
 		End With
@@ -2398,7 +2273,6 @@
 			.Name = "lblFXShw0200"
 			.Text = "0.000"
 			.TabIndex = 192
-			'.Caption = "0.000"
 			.Alignment = AlignmentConstants.taRight
 			.SetBounds 218, 8, 70, 20
 			.Parent = @TabPage2
@@ -2408,7 +2282,6 @@
 			.Name = "lblFXShw0201"
 			.Text = "10.000"
 			.TabIndex = 193
-			'.Caption = "10.000"
 			.Alignment = AlignmentConstants.taRight
 			.SetBounds 218, 28, 70, 20
 			.Parent = @TabPage2
@@ -2418,7 +2291,6 @@
 			.Name = "lblFXShw0202"
 			.Text = "200.000"
 			.TabIndex = 194
-			'.Caption = "200.000"
 			.Alignment = AlignmentConstants.taRight
 			.SetBounds 218, 48, 70, 20
 			.Parent = @TabPage2
@@ -2428,7 +2300,6 @@
 			.Name = "lblFXShw0203"
 			.Text = "-20.000"
 			.TabIndex = 195
-			'.Caption = "-20.000"
 			.Alignment = AlignmentConstants.taRight
 			.SetBounds 218, 68, 70, 20
 			.Parent = @TabPage2
@@ -2438,7 +2309,6 @@
 			.Name = "lblFXShw0204"
 			.Text = "3.000"
 			.TabIndex = 196
-			'.Caption = "3.000"
 			.Alignment = AlignmentConstants.taRight
 			.SetBounds 218, 88, 70, 20
 			.Parent = @TabPage2
@@ -2448,7 +2318,6 @@
 			.Name = "lblFXShw0205"
 			.Text = "4.000"
 			.TabIndex = 197
-			'.Caption = "4.000"
 			.Alignment = AlignmentConstants.taRight
 			.SetBounds 218, 108, 70, 20
 			.Parent = @TabPage2
@@ -2458,7 +2327,6 @@
 			.Name = "lblFXShw0300"
 			.Text = "-18.000"
 			.TabIndex = 198
-			'.Caption = "-18.000"
 			.Alignment = AlignmentConstants.taRight
 			.SetBounds 218, 8, 70, 20
 			.Parent = @TabPage3
@@ -2468,7 +2336,6 @@
 			.Name = "lblFXShw0301"
 			.Text = "15.000"
 			.TabIndex = 199
-			'.Caption = "15.000"
 			.Alignment = AlignmentConstants.taRight
 			.SetBounds 218, 28, 70, 20
 			.Parent = @TabPage3
@@ -2478,7 +2345,6 @@
 			.Name = "lblFXShw0302"
 			.Text = "2400.000"
 			.TabIndex = 200
-			'.Caption = "2400.000"
 			.Alignment = AlignmentConstants.taRight
 			.SetBounds 218, 48, 70, 20
 			.Parent = @TabPage3
@@ -2488,7 +2354,6 @@
 			.Name = "lblFXShw0303"
 			.Text = "2400.000"
 			.TabIndex = 201
-			'.Caption = "2400.000"
 			.Alignment = AlignmentConstants.taRight
 			.SetBounds 218, 68, 70, 20
 			.Parent = @TabPage3
@@ -2498,7 +2363,6 @@
 			.Name = "lblFXShw0304"
 			.Text = "8000.000"
 			.TabIndex = 202
-			'.Caption = "8000.000"
 			.Alignment = AlignmentConstants.taRight
 			.SetBounds 218, 88, 70, 20
 			.Parent = @TabPage3
@@ -2509,7 +2373,6 @@
 			.Text = "50.000"
 			.TabIndex = 203
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "50.000"
 			.SetBounds 218, 8, 70, 20
 			.Parent = @TabPage4
 		End With
@@ -2519,7 +2382,6 @@
 			.Text = "50.000"
 			.TabIndex = 204
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "50.000"
 			.SetBounds 218, 28, 70, 20
 			.Parent = @TabPage4
 		End With
@@ -2529,7 +2391,6 @@
 			.Text = "500.000"
 			.TabIndex = 205
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "500.000"
 			.SetBounds 218, 48, 70, 20
 			.Parent = @TabPage4
 		End With
@@ -2538,7 +2399,6 @@
 			.Name = "lblFXShw0403"
 			.Text = "500.000"
 			.TabIndex = 206
-			'.Caption = "500.000"
 			.Alignment = AlignmentConstants.taRight
 			.SetBounds 218, 68, 70, 20
 			.Parent = @TabPage4
@@ -2548,7 +2408,6 @@
 			.Name = "lblFXShw0404"
 			.Text = "0.000"
 			.TabIndex = 207
-			'.Caption = "0.000"
 			.Alignment = AlignmentConstants.taRight
 			.SetBounds 218, 88, 70, 20
 			.Parent = @TabPage4
@@ -2559,7 +2418,6 @@
 			.Text = "50.000"
 			.TabIndex = 208
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "50.000"
 			.SetBounds 218, 8, 70, 20
 			.Parent = @TabPage5
 		End With
@@ -2569,7 +2427,6 @@
 			.Text = "100.000"
 			.TabIndex = 209
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "100.000"
 			.SetBounds 218, 28, 70, 20
 			.Parent = @TabPage5
 		End With
@@ -2579,7 +2436,6 @@
 			.Text = "-50.000"
 			.TabIndex = 210
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "-50.000"
 			.SetBounds 218, 48, 70, 20
 			.Parent = @TabPage5
 		End With
@@ -2589,7 +2445,6 @@
 			.Text = "0.250"
 			.TabIndex = 211
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "0.250"
 			.SetBounds 218, 68, 70, 20
 			.Parent = @TabPage5
 		End With
@@ -2599,7 +2454,6 @@
 			.Text = "1.000"
 			.TabIndex = 212
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "1.000"
 			.SetBounds 218, 88, 70, 20
 			.Parent = @TabPage5
 		End With
@@ -2609,7 +2463,6 @@
 			.Text = "2.000"
 			.TabIndex = 213
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "2.000"
 			.SetBounds 218, 108, 70, 20
 			.Parent = @TabPage5
 		End With
@@ -2619,7 +2472,6 @@
 			.Text = "2.000"
 			.TabIndex = 214
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "2.000"
 			.SetBounds 218, 128, 70, 20
 			.Parent = @TabPage5
 		End With
@@ -2629,7 +2481,6 @@
 			.Text = "20.000"
 			.TabIndex = 215
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "20.000"
 			.SetBounds 218, 8, 70, 20
 			.Parent = @TabPage6
 		End With
@@ -2639,7 +2490,6 @@
 			.Text = "0.000"
 			.TabIndex = 216
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "0.000"
 			.SetBounds 218, 28, 70, 20
 			.Parent = @TabPage6
 		End With
@@ -2649,7 +2499,6 @@
 			.Text = "-1000.000"
 			.TabIndex = 217
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "-1000.000"
 			.SetBounds 218, 8, 70, 20
 			.Parent = @TabPage7
 		End With
@@ -2659,7 +2508,6 @@
 			.Text = "-100.000"
 			.TabIndex = 218
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "-100.000"
 			.SetBounds 218, 28, 70, 20
 			.Parent = @TabPage7
 		End With
@@ -2669,7 +2517,6 @@
 			.Text = "0.000"
 			.TabIndex = 219
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "0.000"
 			.SetBounds 218, 48, 70, 20
 			.Parent = @TabPage7
 		End With
@@ -2679,7 +2526,6 @@
 			.Text = "1.490"
 			.TabIndex = 220
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "1.490"
 			.SetBounds 218, 68, 70, 20
 			.Parent = @TabPage7
 		End With
@@ -2689,7 +2535,6 @@
 			.Text = "0.830"
 			.TabIndex = 221
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "0.830"
 			.SetBounds 218, 88, 70, 20
 			.Parent = @TabPage7
 		End With
@@ -2699,7 +2544,6 @@
 			.Text = "-2602.000"
 			.TabIndex = 222
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "-2602.000"
 			.SetBounds 218, 108, 70, 20
 			.Parent = @TabPage7
 		End With
@@ -2709,7 +2553,6 @@
 			.Text = "0.007"
 			.TabIndex = 223
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "0.007"
 			.SetBounds 218, 128, 70, 20
 			.Parent = @TabPage7
 		End With
@@ -2719,7 +2562,6 @@
 			.Text = "200.000"
 			.TabIndex = 224
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "200.000"
 			.SetBounds 218, 148, 70, 20
 			.Parent = @TabPage7
 		End With
@@ -2729,7 +2571,6 @@
 			.Text = "0.011"
 			.TabIndex = 225
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "0.011"
 			.SetBounds 218, 168, 70, 20
 			.Parent = @TabPage7
 		End With
@@ -2739,7 +2580,6 @@
 			.Text = "100.000"
 			.TabIndex = 226
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "100.000"
 			.SetBounds 218, 188, 70, 20
 			.Parent = @TabPage7
 		End With
@@ -2749,7 +2589,6 @@
 			.Text = "100.000"
 			.TabIndex = 227
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "100.000"
 			.SetBounds 218, 208, 70, 20
 			.Parent = @TabPage7
 		End With
@@ -2759,7 +2598,6 @@
 			.Text = "5000.000"
 			.TabIndex = 228
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "5000.000"
 			.SetBounds 218, 228, 70, 20
 			.Parent = @TabPage7
 		End With
@@ -2769,7 +2607,6 @@
 			.Text = "8000.000"
 			.TabIndex = 229
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "8000.000"
 			.SetBounds 218, 8, 70, 20
 			.Parent = @TabPage8
 		End With
@@ -2779,7 +2616,6 @@
 			.Text = "12.000"
 			.TabIndex = 230
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "12.000"
 			.SetBounds 218, 28, 70, 20
 			.Parent = @TabPage8
 		End With
@@ -2789,7 +2625,6 @@
 			.Text = "0.000"
 			.TabIndex = 231
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "0.000"
 			.SetBounds 218, 48, 70, 20
 			.Parent = @TabPage8
 		End With
@@ -2799,7 +2634,6 @@
 			.Text = "1.000"
 			.TabIndex = 232
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "1.000"
 			.SetBounds 218, 8, 70, 20
 			.Parent = @TabPage10
 		End With
@@ -2809,7 +2643,6 @@
 			.Text = "1.000"
 			.TabIndex = 233
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "1.000"
 			.SetBounds 218, 28, 70, 20
 			.Parent = @TabPage10
 		End With
@@ -2819,7 +2652,6 @@
 			.Text = "0.000"
 			.TabIndex = 234
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "0.000"
 			.SetBounds 218, 48, 70, 20
 			.Parent = @TabPage10
 		End With
@@ -2829,7 +2661,6 @@
 			.Text = "0.000"
 			.TabIndex = 235
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "0.000"
 			.SetBounds 218, 68, 70, 20
 			.Parent = @TabPage10
 		End With
@@ -2838,7 +2669,6 @@
 			.Name = "lblFXMSG0106"
 			.Text = ML("Phase")
 			.TabIndex = 236
-			'.Caption = "lPhase"
 			.Alignment = AlignmentConstants.taRight
 			.SetBounds 8, 128, 100, 20
 			.Parent = @TabPage1
@@ -2849,7 +2679,6 @@
 			.Text = "3.000"
 			.TabIndex = 237
 			.Alignment = AlignmentConstants.taRight
-			'.Caption = "3.000"
 			.SetBounds 218, 128, 70, 20
 			.Parent = @TabPage1
 		End With
@@ -2871,7 +2700,6 @@
 			.Text = "0"
 			.TabIndex = 239
 			.Alignment = AlignmentConstants.taCenter
-			'.Caption = "0"
 			.SetBounds 15, 120, 20, 16
 			.Parent = @GroupBox8
 		End With
@@ -2962,7 +2790,6 @@
 			.Text = "60"
 			.TabIndex = 249
 			.Alignment = AlignmentConstants.taCenter
-			'.Caption = "60"
 			.SetBounds 15, 30, 20, 16
 			.Parent = @GroupBox8
 		End With
@@ -2972,7 +2799,6 @@
 			.Text = "170"
 			.TabIndex = 250
 			.Alignment = AlignmentConstants.taCenter
-			'.Caption = "170"
 			.SetBounds 55, 30, 20, 16
 			.Parent = @GroupBox8
 		End With
@@ -2982,7 +2808,6 @@
 			.Text = "310"
 			.TabIndex = 251
 			.Alignment = AlignmentConstants.taCenter
-			'.Caption = "310"
 			.SetBounds 95, 30, 20, 16
 			.Parent = @GroupBox8
 		End With
@@ -2992,7 +2817,6 @@
 			.Text = "600"
 			.TabIndex = 252
 			.Alignment = AlignmentConstants.taCenter
-			'.Caption = "600"
 			.SetBounds 145, 30, 20, 16
 			.Parent = @GroupBox8
 		End With
@@ -3002,7 +2826,6 @@
 			.Text = "1K"
 			.TabIndex = 253
 			.Alignment = AlignmentConstants.taCenter
-			'.Caption = "1K"
 			.SetBounds 175, 30, 20, 16
 			.Parent = @GroupBox8
 		End With
@@ -3011,7 +2834,6 @@
 			.Name = "lblEQB05"
 			.Text = "3K"
 			.TabIndex = 254
-			'.Caption = "3K"
 			.Alignment = AlignmentConstants.taCenter
 			.SetBounds 215, 30, 20, 16
 			.Parent = @GroupBox8
@@ -3021,7 +2843,6 @@
 			.Name = "lblEQB06"
 			.Text = "6K"
 			.TabIndex = 255
-			'.Caption = "6K"
 			.Alignment = AlignmentConstants.taCenter
 			.SetBounds 255, 30, 20, 16
 			.Parent = @GroupBox8
@@ -3031,7 +2852,6 @@
 			.Name = "lblEQB07"
 			.Text = "12K"
 			.TabIndex = 256
-			'.Caption = "12K"
 			.Alignment = AlignmentConstants.taCenter
 			.SetBounds 295, 30, 20, 16
 			.Parent = @GroupBox8
@@ -3041,7 +2861,6 @@
 			.Name = "lblEQB08"
 			.Text = "14K"
 			.TabIndex = 257
-			'.Caption = "14K"
 			.Alignment = AlignmentConstants.taCenter
 			.SetBounds 335, 30, 20, 16
 			.Parent = @GroupBox8
@@ -3051,7 +2870,6 @@
 			.Name = "lblEQB09"
 			.Text = "16K"
 			.TabIndex = 258
-			'.Caption = "16K"
 			.Alignment = AlignmentConstants.taCenter
 			.SetBounds 375, 30, 20, 16
 			.Parent = @GroupBox8
@@ -3768,11 +3586,7 @@ Private Sub frmBassType.Form_Create(ByRef Sender As Control)
 	End If
 	' enable playlist processing
 	BASS_SetConfig(BASS_CONFIG_NET_PLAYLIST, 1)
-	
-	'	BASS_PluginLoad("bass_aac.dll", 0) ' load BASS_AAC (If present) For AAC support On older Windows
-	'	BASS_PluginLoad("bassflac.dll", 0) ' load BASSFLAC (If present) For FLAC support
-	'	BASS_PluginLoad("basshls.dll", 0) ' load BASSHLS (If present) For HLS support
-	
+
 	cobRecFormat.ItemIndex = 3
 	cobRaidoUrl.ItemIndex = cobRaidoUrl.ItemCount - 4
 	
@@ -4005,15 +3819,11 @@ Private Sub frmBassType.tbPlayPosition_Change(ByRef Sender As TrackBar, Position
 End Sub
 
 Private Sub frmBassType.tbPlayPosition_MouseDown(ByRef Sender As Control, MouseButton As Integer, x As Integer, y As Integer, Shift As Integer)
-	'	If MouseButton = 0 Then
 	tmrPlayBack.Enabled = False
-	'	End If
 End Sub
 
 Private Sub frmBassType.tbPlayPosition_MouseUp(ByRef Sender As Control, MouseButton As Integer, x As Integer, y As Integer, Shift As Integer)
-	'	If MouseButton = 0 Then
 	tmrPlayBack.Enabled = True
-	'	End If
 End Sub
 
 Private Sub frmBassType.CheckBox_Click(ByRef Sender As CheckBox)
@@ -4311,157 +4121,6 @@ Private Sub frmBassType.FxParaSet(fxIdx As Integer, paIdx As Integer, Position A
 	fxCtlShow(fxIdx, paIdx)->Text = Format(s, "0.000")
 End Sub
 
-'从控件里获取参数
-Private Sub frmBassType.FxParafrmCtl(fxIdx As Integer)
-	Dim As Single s
-	Dim As Integer i
-	For i = 0 To fxParaC(fxIdx)
-		Select Case fxIdx
-		Case 1
-			Select Case i
-			Case 0
-				bfdCHO.fWetDryMix=s
-			Case 1
-				bfdCHO.fDepth=s
-			Case 2
-				bfdCHO.fFeedback=s
-			Case 3
-				bfdCHO.fFrequency=s
-			Case 4
-				bfdCHO.lWaveform=s
-			Case 5
-				bfdCHO.fDelay=s
-			Case 6
-				bfdCHO.lPhase=s
-			End Select
-		Case 2
-			Select Case i
-			Case 0
-				bfdCOM.fGain =s
-			Case 1
-				bfdCOM.fAttack =s
-			Case 2
-				bfdCOM.fRelease =s
-			Case 3
-				bfdCOM.fThreshold =s
-			Case 4
-				bfdCOM.fRatio =s
-			Case 5
-				bfdCOM.fPredelay =s
-			End Select
-		Case 3
-			Select Case i
-			Case 0
-				bfdDIS.fGain=s
-			Case 1
-				bfdDIS.fEdge=s
-			Case 2
-				bfdDIS.fPostEQCenterFrequency=s
-			Case 3
-				bfdDIS.fPostEQBandwidth=s
-			Case 4
-				bfdDIS.fPreLowpassCutoff = s
-			End Select
-		Case 4
-			Select Case i
-			Case 0
-				bfdECH.fWetDryMix=s
-			Case 1
-				bfdECH.fFeedback=s
-			Case 2
-				bfdECH.fLeftDelay=s
-			Case 3
-				bfdECH.fRightDelay=s
-			Case 4
-				bfdECH.lPanDelay=s
-			End Select
-		Case 5
-			Select Case i
-			Case 0
-				bfdFLA.fWetDryMix=s
-			Case 1
-				bfdFLA.fDepth=s
-			Case 2
-				bfdFLA.fFeedback=s
-			Case 3
-				bfdFLA.fFrequency=s
-			Case 4
-				bfdFLA.lWaveform=s
-			Case 5
-				bfdFLA.fDelay=s
-			Case 6
-				bfdFLA.lPhase=s
-			End Select
-		Case 6
-			Select Case i
-			Case 0
-				bfdGAR.dwRateHz=s
-			Case 1
-				bfdGAR.dwWaveShape=s
-			End Select
-		Case 7
-			Select Case i
-			Case 0
-				bfdI3D.lRoom=s
-			Case 1
-				bfdI3D.lRoomHF=s
-			Case 2
-				bfdI3D.flRoomRolloffFactor=s
-			Case 3
-				bfdI3D.flDecayTime=s
-			Case 4
-				bfdI3D.flDecayHFRatio=s
-			Case 5
-				bfdI3D.lReflections=s
-			Case 6
-				bfdI3D.flReflectionsDelay=s
-			Case 7
-				bfdI3D.lReverb=s
-			Case 8
-				bfdI3D.flReverbDelay=s
-			Case 9
-				bfdI3D.flDiffusion=s
-			Case 10
-				bfdI3D.flDensity=s
-			Case 11
-				bfdI3D.flHFReference=s
-			End Select
-		Case 8
-			Select Case i
-			Case 0
-				bfdPAR.fCenter=s
-			Case 1
-				bfdPAR.fBandwidth=s
-			Case 2
-				bfdPAR.fGain=s
-			End Select
-		Case 10
-			Select Case i
-			Case 0
-				bfVOL.fTarget=s
-			Case 1
-				bfVOL.fCurrent=s
-			Case 2
-				bfVOL.fTime=s
-			Case 3
-				bfVOL.lCurve=s
-			End Select
-		Case 9
-			s = fxCtlTrack(fxIdx, i)->Position / CInt(fxCtlTrack(fxIdx, i)->Text)
-			Select Case i
-			Case 0
-				bfdREV.fInGain = s
-			Case 1
-				bfdREV.fReverbMix = s
-			Case 2
-				bfdREV.fReverbTime= s
-			Case 3
-				bfdREV.fHighFreqRTRatio = s
-			End Select
-		End Select
-	Next
-End Sub
-
 '将参数设置在TrackBar控件上
 Private Sub frmBassType.FxPara2Ctl(fxIdx As Integer)
 	Dim As Single s
@@ -4613,158 +4272,6 @@ Private Sub frmBassType.FxPara2Ctl(fxIdx As Integer)
 	Next
 End Sub
 
-'将参数显示在Label控件上
-Private Sub frmBassType.FxParaShow(fxIdx As Integer, paIdx As Integer)
-	'fxCtlMsg(10, 10) As Label Ptr '信息显示指针
-	'fxCtlShow(10, 10) As Label Ptr '参数显示指针
-	'fxCtlTrack(10, 10) As TrackBar Ptr '参数调节控件指针
-	
-	Dim s As Single
-	Select Case fxIdx
-	Case 1
-		Select Case paIdx
-		Case 0
-			s = bfdCHO.fWetDryMix
-		Case 1
-			s = bfdCHO.fDepth
-		Case 2
-			s = bfdCHO.fFeedback
-		Case 3
-			s = bfdCHO.fFrequency
-		Case 4
-			s = bfdCHO.lWaveform
-		Case 5
-			s = bfdCHO.fDelay
-		Case 6
-			s = bfdCHO.lPhase
-		End Select
-	Case 2
-		Select Case paIdx
-		Case 0
-			s = bfdCOM.fGain
-		Case 1
-			s = bfdCOM.fAttack
-		Case 2
-			s = bfdCOM.fRelease
-		Case 3
-			s = bfdCOM.fThreshold
-		Case 4
-			s = bfdCOM.fRatio
-		Case 5
-			s = bfdCOM.fPredelay
-		End Select
-	Case 3
-		Select Case paIdx
-		Case 0
-			s = bfdDIS.fGain
-		Case 1
-			s = bfdDIS.fEdge
-		Case 2
-			s = bfdDIS.fPostEQCenterFrequency
-		Case 3
-			s = bfdDIS.fPostEQBandwidth
-		Case 4
-			s = bfdDIS.fPreLowpassCutoff
-		End Select
-	Case 4
-		Select Case paIdx
-		Case 0
-			s = bfdECH.fWetDryMix
-		Case 1
-			s = bfdECH.fFeedback
-		Case 2
-			s = bfdECH.fLeftDelay
-		Case 3
-			s = bfdECH.fRightDelay
-		Case 4
-			s = bfdECH.lPanDelay
-		End Select
-	Case 5
-		Select Case paIdx
-		Case 0
-			s = bfdFLA.fWetDryMix
-		Case 1
-			s = bfdFLA.fDepth
-		Case 2
-			s = bfdFLA.fFeedback
-		Case 3
-			s = bfdFLA.fFrequency
-		Case 4
-			s = bfdFLA.lWaveform
-		Case 5
-			s = bfdFLA.fDelay
-		Case 6
-			s = bfdFLA.lPhase
-		End Select
-	Case 6
-		Select Case paIdx
-		Case 0
-			s = bfdGAR.dwRateHz
-		Case 1
-			s = bfdGAR.dwWaveShape
-		End Select
-	Case 7
-		Select Case paIdx
-		Case 0
-			s = bfdI3D.lRoom
-		Case 1
-			s = bfdI3D.lRoomHF
-		Case 2
-			s = bfdI3D.flRoomRolloffFactor
-		Case 3
-			s = bfdI3D.flDecayTime
-		Case 4
-			s = bfdI3D.flDecayHFRatio
-		Case 5
-			s = bfdI3D.lReflections
-		Case 6
-			s = bfdI3D.flReflectionsDelay
-		Case 7
-			s = bfdI3D.lReverb
-		Case 8
-			s = bfdI3D.flReverbDelay
-		Case 9
-			s = bfdI3D.flDiffusion
-		Case 10
-			s = bfdI3D.flDensity
-		Case 11
-			s = bfdI3D.flHFReference
-		End Select
-	Case 8
-		Select Case paIdx
-		Case 0
-			s = bfdPAR.fCenter
-		Case 1
-			s = bfdPAR.fBandwidth
-		Case 2
-			s = bfdPAR.fGain
-		End Select
-	Case 10
-		Select Case paIdx
-		Case 0
-			s = bfVOL.fTarget
-		Case 1
-			s = bfVOL.fCurrent
-		Case 2
-			s = bfVOL.fTime
-		Case 3
-			s = bfVOL.lCurve
-		End Select
-	Case 9
-		Select Case paIdx
-		Case 0
-			s = bfdREV.fInGain
-		Case 1
-			s = bfdREV.fReverbMix
-		Case 2
-			s = bfdREV.fReverbTime
-		Case 3
-			s = bfdREV.fHighFreqRTRatio
-		End Select
-	End Select
-	fxCtlShow(fxIdx, paIdx)->Text = Format(s, "0.000")
-End Sub
-
 Private Function frmBassType.FxIndex(fxName As WString) As Integer
 	Select Case fxName
 	Case chkExChorus.Name
@@ -4789,24 +4296,6 @@ Private Function frmBassType.FxIndex(fxName As WString) As Integer
 		Return 10
 	End Select
 End Function
-
-Private Sub frmBassType.FxReset(ch As HSTREAM)
-	Dim i As Long
-	For i = 1 To 10
-		If fxHdl(i) Then
-			fxHdl(i) = BASS_ChannelSetFX(ch, fxTyp(i), i)
-		End If
-	Next
-End Sub
-
-Private Sub frmBassType.FxRemove(ch As HSTREAM)
-	Dim i As Long
-	For i = 1 To 10
-		If fxHdl(i) Then
-			BASS_ChannelRemoveFX(ch, fxHdl(i))
-		End If
-	Next
-End Sub
 
 Private Sub frmBassType.FxEnabled(fxName As WString, st As Boolean, ch As HSTREAM)
 	Dim fxIdx As Integer = FxIndex(fxName)

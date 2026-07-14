@@ -216,7 +216,6 @@ File=mff/Web/mff.js
 File=mff/Android/mffActivity.java
 File=mff/Android/mffEditText.java
 File=README.md
-File=README_CN.md
 File=mff/DarkMode/Themes.txt
 ProjectType=1
 Subsystem=0

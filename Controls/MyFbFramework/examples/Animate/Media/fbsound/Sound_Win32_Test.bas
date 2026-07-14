@@ -7,168 +7,6 @@ Const MAXPNAMELEN = 32
 Const MIXER_LONG_NAME_CHARS = 64
 Const MIXER_SHORT_NAME_CHARS = 16
 Const MIXER_GETLINEINFOF_LINEID = &H2
-' Const MIXER_GETLINEINFOF_COMPONENTTYPE = &H3&
-' Const MIXER_GETCONTROLDETAILSF_VALUE = &H0&
-' Const MIXER_GETCONTROLDETAILSF_LISTTEXT = &H1&
-' Const MIXER_GETLINECONTROLSF_ONEBYID = &H1
-' Const MIXER_GETLINECONTROLSF_ONEBYTYPE = &H2&
-' Const MIXER_OBJECTF_WAVEOUT = &H10000000
-' Const MIXER_SETCONTROLDETAILSF_VALUE = &H0&
-'
-' Const MIXERCONTROL_CT_CLASS_FADER = &H50000000
-' Const MIXERCONTROL_CT_CLASS_SWITCH = &H20000000
-' Const MIXERCONTROL_CT_UNITS_BOOLEAN = &H10000
-' Const MIXERCONTROL_CT_UNITS_UNSIGNED = &H30000
-' Const MIXERCONTROL_CONTROLTYPE_FADER = (MIXERCONTROL_CT_CLASS_FADER Or MIXERCONTROL_CT_UNITS_UNSIGNED)
-' Const MIXERCONTROL_CONTROLTYPE_VOLUME = (MIXERCONTROL_CONTROLTYPE_FADER + 1)
-' Const MIXERCONTROL_CONTROLTYPE_BASS = (MIXERCONTROL_CONTROLTYPE_FADER + 2)
-' Const MIXERCONTROL_CONTROLTYPE_TREBLE = (MIXERCONTROL_CONTROLTYPE_FADER + 3)
-' Const MIXERCONTROL_CONTROLTYPE_EQUALIZER = (MIXERCONTROL_CONTROLTYPE_FADER + 4)
-' Const MIXERCONTROL_CONTROLTYPE_BOOLEAN = (MIXERCONTROL_CT_CLASS_SWITCH Or MIXERCONTROL_CT_UNITS_BOOLEAN)
-' Const MIXERCONTROL_CONTROLTYPE_MUTE = (MIXERCONTROL_CONTROLTYPE_BOOLEAN + 2)
-' Const MIXERLINE_COMPONENTTYPE_SRC_FIRST = &H1000&
-' Const MIXERLINE_COMPONENTTYPE_SRC_UNDEFINED = (MIXERLINE_COMPONENTTYPE_SRC_FIRST + 0)
-' Const MIXERLINE_COMPONENTTYPE_SRC_DIGITAL = (MIXERLINE_COMPONENTTYPE_SRC_FIRST + 1)
-' Const MIXERLINE_COMPONENTTYPE_SRC_LINE = (MIXERLINE_COMPONENTTYPE_SRC_FIRST + 2)
-' Const MIXERLINE_COMPONENTTYPE_SRC_MICROPHONE = (MIXERLINE_COMPONENTTYPE_SRC_FIRST + 3)
-' Const MIXERLINE_COMPONENTTYPE_SRC_SYNTHESIZER = (MIXERLINE_COMPONENTTYPE_SRC_FIRST + 4)
-' Const MIXERLINE_COMPONENTTYPE_SRC_COMPACTDISC = (MIXERLINE_COMPONENTTYPE_SRC_FIRST + 5)
-' Const MIXERLINE_COMPONENTTYPE_SRC_TELEPHONE = (MIXERLINE_COMPONENTTYPE_SRC_FIRST + 6)
-' Const MIXERLINE_COMPONENTTYPE_SRC_PCSPEAKER = (MIXERLINE_COMPONENTTYPE_SRC_FIRST + 7)
-' Const MIXERLINE_COMPONENTTYPE_SRC_WAVEOUT = (MIXERLINE_COMPONENTTYPE_SRC_FIRST + 8)
-' Const MIXERLINE_COMPONENTTYPE_SRC_AUXILIARY = (MIXERLINE_COMPONENTTYPE_SRC_FIRST + 9)
-' Const MIXERLINE_COMPONENTTYPE_SRC_ANALOG = (MIXERLINE_COMPONENTTYPE_SRC_FIRST + 10)
-' Const MIXERLINE_COMPONENTTYPE_SRC_LAST = (MIXERLINE_COMPONENTTYPE_SRC_FIRST + 10)
-' Const MIXERLINE_COMPONENTTYPE_DST_FIRST = &H0&
-' Const MIXERLINE_COMPONENTTYPE_DST_UNDEFINED = (MIXERLINE_COMPONENTTYPE_DST_FIRST + 0)
-' Const MIXERLINE_COMPONENTTYPE_DST_DIGITAL = (MIXERLINE_COMPONENTTYPE_DST_FIRST + 1)
-' Const MIXERLINE_COMPONENTTYPE_DST_LINE = (MIXERLINE_COMPONENTTYPE_DST_FIRST + 2)
-' Const MIXERLINE_COMPONENTTYPE_DST_MONITOR = (MIXERLINE_COMPONENTTYPE_DST_FIRST + 3)
-' Const MIXERLINE_COMPONENTTYPE_DST_SPEAKERS = (MIXERLINE_COMPONENTTYPE_DST_FIRST + 4)
-' Const MIXERLINE_COMPONENTTYPE_DST_HEADPHONES = (MIXERLINE_COMPONENTTYPE_DST_FIRST + 5)
-' Const MIXERLINE_COMPONENTTYPE_DST_TELEPHONE = (MIXERLINE_COMPONENTTYPE_DST_FIRST + 6)
-' Const MIXERLINE_COMPONENTTYPE_DST_WAVEIN = (MIXERLINE_COMPONENTTYPE_DST_FIRST + 7)
-' Const MIXERLINE_COMPONENTTYPE_DST_VOICEIN = (MIXERLINE_COMPONENTTYPE_DST_FIRST + 8)
-' Const MIXERLINE_COMPONENTTYPE_DST_LAST = (MIXERLINE_COMPONENTTYPE_DST_FIRST + 8)
-'
-' Type MIXERCAPS Field=1
-' wMid As Short
-' wPid As Short
-' vDriverVersion As Integer
-' szPname As ZString * MAXPNAMELEN
-' fdwSupport As Integer
-' cDestinations As Integer
-' End Type
-'
-' Type MIXERCONTROL Field=1
-' cbStruct As Integer
-' dwControlID As Integer
-' dwControlType As Integer
-' fdwControl As Integer
-' cMultipleItems As Integer
-' szShortName As ZString * MIXER_SHORT_NAME_CHARS
-' szName As ZString * MIXER_LONG_NAME_CHARS
-' Union
-' Type
-' lMinimum As Integer
-' lMaximum As Integer
-' End Type
-' Type
-' dwMinimum As UInteger
-' dwMaximum As UInteger
-' End Type
-' dwReserved1(6-1) As Integer
-' End Union
-' Union
-' cSteps As Integer
-' cbCustomData As Integer
-' dwReserved2(6-1) As Integer
-' End Union
-' End Type
-'
-' Type MIXERCONTROLDETAILS
-' cbStruct As Integer
-' dwControlID As Integer
-' cChannels As Integer
-' item As Integer
-' cbDetails As Integer
-' paDetails As Any Ptr
-' End Type
-'
-' Type MIXERCONTROLDETAILS_UNSIGNED
-' dwValue As Integer
-' End Type
-'
-' Type MIXERLINE Field=1
-' cbStruct As Integer
-' dwDestination As Integer
-' dwSource As Integer
-' dwLineID As Integer
-' fdwLine As Integer
-' dwUser As Integer
-' dwComponentType As Integer
-' cChannels As Integer
-' cConnections As Integer
-' cControls As Integer
-' szShortName As ZString * MIXER_SHORT_NAME_CHARS
-' szName As ZString * MIXER_LONG_NAME_CHARS
-' dwType As Integer
-' dwDeviceID As Integer
-' wMid As Short
-' wPid As Short
-' vDriverVersion As Integer
-' szPname As ZString * MAXPNAMELEN
-' End Type
-'
-' Type MIXERLINECONTROLS
-' cbStruct As Integer
-' dwLineID As Integer
-' dwControl As Integer
-' cControls As Integer
-' cbmxctrl As Integer
-' pamxctrl As MIXERCONTROL Ptr
-' End Type
-'
-' Extern "windows"
-' Declare Function mixerClose Lib "winmm.dll" (ByVal hmx As Integer) As Integer
-' Declare Function mixerGetControlDetails Lib "winmm.dll" Alias "mixerGetControlDetailsA" ( _
-' ByVal hmxobj As Integer, _
-' ByRef pmxcd As MIXERCONTROLDETAILS, _
-' ByVal fdwDetails As Integer) As Integer
-' Declare Function mixerGetDevCaps Lib "winmm.dll" Alias "mixerGetDevCapsA" ( _
-' ByVal uMxId As Integer, _
-' ByVal pmxcaps As MIXERCAPS Ptr, _
-' ByVal cbmxcaps As Integer) As Integer
-' Declare Function mixerGetID Lib "winmm.dll" ( _
-' ByVal hmxobj As Integer, _
-' ByVal pumxID As Integer Ptr,_
-' ByVal fdwId As Integer) As Integer
-' Declare Function mixerGetLineControls Lib "winmm.dll" Alias "mixerGetLineControlsA" ( _
-' ByVal hmxobj As Integer, _
-' ByVal pmxlc As MIXERLINECONTROLS Ptr, _
-' ByVal fdwControls As Integer) As Integer
-' Declare Function mixerGetLineInfo Lib "winmm.dll" Alias "mixerGetLineInfoA" ( _
-' ByVal hmxobj As Integer, _
-' ByVal pmxl As MIXERLINE Ptr,_
-' ByVal fdwInfo As Integer) As Integer
-' Declare Function mixerGetNumDevs Lib "winmm.dll" () As Integer
-' Declare Function mixerMessage Lib "winmm.dll" ( _
-' ByVal hmx As Integer, _
-' ByVal uMsg As Integer, _
-' ByVal dwParam1 As Integer, _
-' ByVal dwParam2 As Integer) As Integer
-' Declare Function mixerOpen Lib "winmm.dll" ( _
-' ByVal phmx As Integer Ptr, _
-' ByVal uMxId As Integer, _
-' ByVal dwCallback As Any Ptr, _
-' ByVal dwInstance As Integer, _
-' ByVal fdwOpen As Integer) As Integer
-' Declare Function mixerSetControlDetails Lib "winmm.dll" ( _
-' ByVal hmxobj As Integer, _
-' ByRef pmxcd As MIXERCONTROLDETAILS, _
-' ByVal fdwDetails As Integer) As Integer
-
-' End Extern
 
 Type MIXER_CLASS
   Declare Constructor
@@ -213,7 +51,6 @@ Type MIXER_CLASS
   Private:
   Declare Function IsCtrl(ByVal Index As Integer) As Integer
   Declare Function IsMute(ByVal Index As Integer) As Integer
-  Declare Sub Prepare_mxcd
   Declare Function GetMixerControl(ByVal hMixer As Integer, _
                                    ByVal componentType As Integer, _
                                    ByRef mxc   As MIXERCONTROL, _
@@ -434,8 +271,6 @@ Constructor MIXER_CLASS
   If bOK Then
     CtrlState = CtrlState Or 1
     With volCtrl
-      ' MinVolVol = .lMinimum
-      ' MaxVolVol = .lMaximum
     End With
     bOK = GetMixerControl(hMixer, MIXERLINE_COMPONENTTYPE_DST_SPEAKERS, volMute, 2)
     If bOK Then MuteState = MuteState Or 1
@@ -445,8 +280,6 @@ Constructor MIXER_CLASS
   If bOK Then
     CtrlState = CtrlState Or 2
     With micCtrl
-      ' MinMicVol = .lMinimum
-      ' MaxMicVol = .lMaximum
     End With
 
     If bOK Then MuteState = MuteState Or 2
@@ -456,8 +289,6 @@ Constructor MIXER_CLASS
   If bOK Then
     CtrlState = CtrlState Or 4
     With wavCtrl
-      ' MinWavVol = .lMinimum
-      ' MaxWavVol = .lMaximum
     End With
     bOK = GetMixerControl(hMixer, MIXERLINE_COMPONENTTYPE_SRC_WAVEOUT, wavMute, 2)
     If bOK Then MuteState = MuteState Or 4
@@ -467,8 +298,6 @@ Constructor MIXER_CLASS
   If bOK Then
     CtrlState = CtrlState Or 8
     With linCtrl
-      ' MinLinVol = .lMinimum
-      ' MaxLinVol = .lMaximum
     End With
 
     bOK = GetMixerControl(hMixer, MIXERLINE_COMPONENTTYPE_SRC_LINE, linMute, 2)
@@ -478,8 +307,6 @@ Constructor MIXER_CLASS
     If bOK Then
       CtrlState = CtrlState Or 8
       With linCtrl
-        ' MinLinVol = .lMinimum
-        ' MaxLinVol = .lMaximum
       End With
       
       bOK = GetMixerControl(hMixer, MIXERLINE_COMPONENTTYPE_SRC_AUXILIARY, linMute, 2)
@@ -491,8 +318,6 @@ Constructor MIXER_CLASS
   If bOK Then
     CtrlState = CtrlState Or 16
     With cd_Ctrl
-      ' MinCD_Vol = .lMinimum
-      ' MaxCD_Vol = .lMaximum
     End With
     bOK = GetMixerControl(hMixer, MIXERLINE_COMPONENTTYPE_SRC_COMPACTDISC, cdrMute, 2)
     If bOK Then MuteState = MuteState Or 16
@@ -502,8 +327,6 @@ Constructor MIXER_CLASS
   If bOK Then
     CtrlState = CtrlState Or 32
     With midCtrl
-      ' MinMidVol = .lMinimum
-      ' MaxMidVol = .lMaximum
     End With
     bOK = GetMixerControl(hMixer, MIXERLINE_COMPONENTTYPE_SRC_SYNTHESIZER, midMute, 2)
     If bOK Then MuteState = MuteState Or 32

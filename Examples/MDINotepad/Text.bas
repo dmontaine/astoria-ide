@@ -114,48 +114,6 @@ End If
 Return rtn
 End Function
 
-'反向查找文字fFind在字符串fSource中的位置, 未找到返回0
-Private Function InWStrRev(ByRef fSource As Const WString, ByRef fFind As Const WString, ByVal fStartPos As Integer = -1, ByVal MatchCase As Boolean = False) As Integer
-Dim lenSource As Integer = Len(fSource)
-If lenSource = 0 Then Return 0
-Dim lenFind As Integer = Len(fFind)
-If lenFind = 0 Then Return 0
-If fStartPos = -1 Then fStartPos = lenSource
-If fStartPos < lenFind Then Return 0
-If fStartPos > lenSource Then Return 0
-
-Dim i As Integer
-Dim j As Integer = lenFind - 1
-Dim rtn As Integer = 0
-
-Dim pSource As WString Ptr
-Dim pFind As WString Ptr
-If MatchCase Then
-pSource = StrPtr(fSource)
-pFind = StrPtr(fFind)
-Else
-TextConvert(fSource, pSource, LCMAP_LOWERCASE)
-TextConvert(fFind, pFind, LCMAP_LOWERCASE)
-End If
-For i = fStartPos - 1 To 0 Step -1
-If (*pSource)[i] = (*pFind)[j] Then
-j -= 1
-If j < 0 Then
-rtn = i + 1
-End If
-Else
-j = lenFind - 1
-End If
-If rtn Then Exit For
-Next
-
-If MatchCase = False Then
-If pSource Then Deallocate(pSource)
-If pFind Then Deallocate(pFind)
-End If
-Return rtn
-End Function
-
 '寻找文字Finding在字符串Expression中的数量和位置FoundPositions,返回数量(从1开始)0表示没有找到
 Private Function FindCountWStr(ByRef Expression As WString, Finding As Const WString, ByRef FoundPositions As Integer Ptr, ByVal MatchCase As Boolean = False) As Integer
 Dim lenExpression As Integer = Len(Expression)
@@ -513,16 +471,6 @@ Dim nLength As LongInt = WideCharToMultiByte(CodePage, 0, StrPtr(pText), -1, NUL
 If pToAnsi Then Deallocate(pToAnsi)
 pToAnsi = CAllocate(nLength * 2 + 2)
 Return WideCharToMultiByte(CodePage, 0, StrPtr(pText), nLength, pToAnsi, nLength, NULL, NULL)
-End Function
-
-'文本pUtf8从Utf8转换为文本pToText
-Private Function TextFromUtf8(ByRef pUtf8 As Const ZString, ByRef pToText As WString Ptr) As Integer
-Return TextFromAnsi(pUtf8, pToText, CodePage_UTF8)
-End Function
-
-'文本pText转换为Utf8编码pToUtf8
-Private Function TextToUtf8(ByRef pText As Const WString, ByRef pToUtf8 As ZString Ptr) As Integer
-Return TextToAnsi(pText, pToUtf8, CodePage_UTF8)
 End Function
 
 '文本pSource指定转换码CnvCode转换为pConverted

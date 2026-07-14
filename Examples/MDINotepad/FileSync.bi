@@ -64,8 +64,7 @@ Private:
 	mListFileCount As LongInt
 	mListPath(Any) As WString Ptr
 	mListPathCount As LongInt
-	'mListWFD(Any) As WIN32_FIND_DATA
-	
+
 	'记录
 	mErrorMessage(Any) As WString Ptr
 	mErrorMessageCount As LongInt

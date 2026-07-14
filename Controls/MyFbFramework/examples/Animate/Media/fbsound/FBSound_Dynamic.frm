@@ -33,7 +33,6 @@
 	Dim Shared As Boolean Playing
 	Type Form1Type Extends Form
 		Declare Sub cmdPlay_Click(ByRef Sender As Control)
-		Declare Sub cmdVolChange_Click(ByRef Sender As Control)
 		Declare Sub cmdChannels_Click(ByRef Sender As Control)
 		Declare Sub cmdVolumeChanged_Click(ByRef Sender As Control)
 		Declare Sub cmdExplore_Click(ByRef Sender As Control)
@@ -269,7 +268,6 @@ Private Sub Form1Type.cmdExplore_Click(ByRef Sender As Control)
 		cboFileName.Text = OpenFileDialog1.FileName
 		If cboFileName.Contains(OpenFileDialog1.FileName) = False Then
 			cboFileName.AddItem OpenFileDialog1.FileName
-			' cboFileName.SaveToFile(ExePath & "\PlayList.txt")
 		End If
 		cmdPlay.SetFocus
 	End If

@@ -29,9 +29,7 @@
 	
 	Type frmSapiTTSType Extends Form
 		pSpVoice As ISpVoice Ptr
-		'pSpAudio As ISpAudio Ptr
-		'pSpeechVoice As ISpeechVoice Ptr
-		
+
 		Declare Sub Form_Create(ByRef Sender As Control)
 		Declare Sub CommandButton_Click(ByRef Sender As Control)
 		Declare Sub Form_Message(ByRef Sender As Control, ByRef MSG As Message)
@@ -300,8 +298,7 @@ Private Sub frmSapiTTSType.Form_Create(ByRef Sender As Control)
 		pSpVoice->SetInterest(SPFEI(SPEI_WORD_BOUNDARY), SPFEI(SPEI_WORD_BOUNDARY))
 		' Set the handle of the window that will receive the MSG_SAPI_EVENT message
 		pSpVoice->SetNotifyWindowMessage(Handle, MSG_SAPI_EVENT, 0, 0)
-		Dim pToken As ISpObjectToken Ptr
-		
+
 		' Voice list
 		TokenCategory2Cob(SPCAT_VOICES, ComboBoxEdit1)
 		

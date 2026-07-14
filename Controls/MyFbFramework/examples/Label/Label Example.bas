@@ -17,7 +17,6 @@
 	Using My.Sys.Forms
 
 	Type Form1Type Extends Form
-		Declare Sub CommandButton1_Click(ByRef Sender As Control)
 		Declare Sub Label1_Click(ByRef Sender As Label)
 		Declare Constructor
 	
@@ -44,7 +43,6 @@
 			.Alignment = AlignmentConstants.taLeft
 			.Font.Size = 14
 			.Font.Name = "Tahoma"
-			' .Font.Orientation = 90
 			.ForeColor = 255
 			.BackColor = 32768 'clBlue
 			.Border = LabelBorder.sbNone
@@ -63,7 +61,6 @@
 			.DoubleBuffered = True 
 			.BackColor = 32768
 			.ForeColor = 255
-			' .ShowText = True
 			.Font.Size = 14
 			.Font.Name = "Tahoma"
 			.Font.Orientation = 0 
@@ -73,8 +70,7 @@
 			.Alignment = AlignmentConstants.taLeft
 			.Anchor.Top = AnchorStyle.asAnchor
 			.Anchor.Right = AnchorStyle.asAnchor
-			.Anchor.Left = AnchorStyle.asAnchor 
-			' .Caption = "Hello World "
+			.Anchor.Left = AnchorStyle.asAnchor
 			.WordWraps = False
 			.AutoSize = True
 			.Designer = @This
@@ -126,7 +122,6 @@
 	Dim Shared Form1 As Form1Type
 	
 	#if _MAIN_FILE_ = __FILE__
-		' App.DarkMode = True
 		Form1.MainForm = True
 		Form1.Show
 		App.Run

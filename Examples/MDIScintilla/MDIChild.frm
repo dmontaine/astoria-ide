@@ -26,8 +26,7 @@
 		mFile As WString Ptr = NULL
 		mTitle As WString Ptr = NULL
 		mTitleTmp As WString Ptr = NULL
-		
-		'NewLine As NewLineTypes = NewLineTypes.WindowsCRLF
+
 		Declare Property NewLine As NewLineTypes
 		Declare Property NewLine(val As NewLineTypes)
 		
@@ -191,17 +190,10 @@ Private Sub MDIChildType.Form_Message(ByRef Sender As Control, ByRef MSG As Mess
 			'Any commented with TODO have not been implimented yet.
 			Select Case scMsg.hdr.code
 			Case SCN_MODIFIED
-				'Debug.Print "SCN_MODIFIED"
-				'Debug.Print "modificationType=" & scMsg.modificationType
 				Changed = True
 			Case SCN_HOTSPOTCLICK
-				'Debug.Print "SCN_HOTSPOTCLICK"
 			Case SCN_DOUBLECLICK
-				'Debug.Print "SCN_DOUBLECLICK"
-				'MDIMain.MDIChildDoubleClick(@This)
 			Case SCN_UPDATEUI
-				'Debug.Print "SCN_UPDATEUI"
-				'Debug.Print  "updated=" & scMsg.updated
 				Select Case scMsg.updated
 				Case SC_UPDATE_NONE
 				Case SC_UPDATE_CONTENT
@@ -217,11 +209,8 @@ Private Sub MDIChildType.Form_Message(ByRef Sender As Control, ByRef MSG As Mess
 				Case SC_UPDATE_H_SCROLL
 				End Select
 			Case SCN_AUTOCSELECTIONCHANGE
-				'Debug.Print "SCN_AUTOCSELECTIONCHANGE"
 			Case SCN_KEY
-				'Debug.Print "SCN_KEY"
 			Case SCN_PAINTED
-				'Debug.Print "SCN_PAINTED"
 			End Select
 		End If
 	End Select

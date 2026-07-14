@@ -60,7 +60,6 @@ Type Maze
 	Declare Sub Init(ByVal mSize As Integer, ByVal wSize As Integer)
 	Declare Sub Generate(ByVal x As Integer, y As Integer, ByVal style As Integer)
 	Declare Function Choose(ByVal possibilities As Integer, ByVal style As Integer) As Integer
-	Declare Sub Show(ByVal WSize As Integer)
 End Type
 
 Sub Maze.Init(ByVal mSize As Integer, ByVal wSize As Integer)
@@ -102,45 +101,12 @@ Sub Maze.Init(ByVal mSize As Integer, ByVal wSize As Integer)
 	Generate(0,0,0)
 End Sub
 
-Sub Maze.Show(ByVal WSize As Integer)
-	'Dim As Integer x, y, xx, yy, ws
-	'WallSize= IIf(WSize < 10 OrElse WSize< 10, 10, WSize)
-	'ws = WallSize / 2
-	'Canvas.Scale(0, 0, (MazeSize+ 1) * WallSize / 2, (MazeSize+ 1) * WallSize/ 2)
-	'Canvas.Cls
-	'For x = 0 To MazeSize -1
-	'	For y = 0 To MazeSize -1
-	'		xx = x*WallSize + WallSize
-	'		yy = y*WallSize + WallSize
-	'		If rooms(x, y).getStatus() And (Gen Or Visited) Then
-	'			'Canvas.Line(xx - ws, yy - ws, xx + ws, yy + ws, RGB(0, 32, 0), "bf")
-	'			If rooms(x, y).getStatus() And Gen Then Canvas.Circle(xx, yy, ws / 2, RGB(255, 128, 0))
-	'			If rooms(x, y).isWall(North) And WALL Then Canvas.Line (xx - ws, yy - ws, xx + ws, yy - ws, RGB(0, 255, 0))
-	'			If rooms(x, y).isWall(West)  And WALL Then Canvas.Line (xx - ws, yy - ws, xx - ws, yy + ws, RGB(0, 255, 0))
-	'			If rooms(x, y).isWall(South) And WALL Then Canvas.Line (xx - ws, yy + ws, xx + ws, yy + ws, RGB(0, 255, 0))
-	'			If rooms(x, y).isWall(East)  And WALL Then Canvas.Line (xx + ws, yy - ws, xx + ws, yy + ws, RGB(0, 255, 0))
-	'		End If
-	'	Next
-	'Next
-	'For x = 0 To MazeSize -1
-	'	For y = 0 To MazeSize -1
-	'		xx = x * WallSize + WallSize
-	'		yy = y * WallSize + WallSize
-	'		If rooms(x,y).getStatus() And (Gen Or Visited) Then
-	'		Else
-	'			Canvas.Line(xx - ws, yy - ws, xx + ws, yy + ws, RGB(0, 64, 0), "bf")
-	'		End If
-	'	Next
-	'Next
-End Sub
-
 Sub Maze.Generate(ByVal x As Integer, y As Integer,ByVal style As Integer)
 	' "Open" walls only on non already visited room
 	If rooms(x,y).getStatus() And Normal  = 0 Then Return
 	Dim As Integer i, possibilities, choosen
 	Do ' enumerate posibilities and choose one to drill (recursive)
 		rooms(x,y).setStatus(Gen)
-		'Show(8)
 		possibilities = 0
 		For i = FIRSTDIR To LASTDIR
 			If (rooms(x,y).RoomStatus(i) And Normal)<>0 And (rooms(x,y).isWall(i) And WALL)<>0 Then

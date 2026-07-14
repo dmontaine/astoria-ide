@@ -19,8 +19,7 @@
 	#include once "mff/StatusBar.bi"
 	#include once "mff/CheckBox.bi"
 	#include once "mff/ImageList.bi"
-	
-	#include once "../MDINotepad/Text.bi"
+
 	#include once "USBView.bi"
 	
 	Using My.Sys.Forms
@@ -166,7 +165,6 @@
 			.Name = "cmdRemoved"
 			.Text = ML("Removed")
 			.TabIndex = 7
-			'.Caption = "Removed"
 			.Visible = False
 			.SetBounds 240, 9, 70, 20
 			.Designer = @This
@@ -178,7 +176,6 @@
 			.Name = "cmdEject"
 			.Text = ML("Eject")
 			.TabIndex = 8
-			'.Caption = "Eject"
 			.Visible = False
 			.SetBounds 320, 9, 70, 20
 			.Designer = @This
@@ -225,7 +222,6 @@
 			.Name = "CheckBox3"
 			.Text = ML("Dark mode")
 			.TabIndex = 11
-			'.Caption = "Dark mode"
 			.Checked = True
 			.SetBounds 80, 11, 70, 20
 			.Designer = @This

@@ -25,7 +25,6 @@
 	#include once "crt/fcntl.bi"
 	#include once "win/dbt.bi"
 	#include once "win/msacm.bi"
-	#include once "win/mmsystem.bi"
 	#include once "win/d3d9types.bi"
 	#include once "win/dsound.bi"
 	#include once "win/dshow.bi"

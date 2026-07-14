@@ -12,7 +12,6 @@ Private Function InitDirectSound(hDlg As HWND, cbInput As GUID Ptr, cbOutput As 
 	Dim As HRESULT hr
 	Dim As DSBUFFERDESC dsbdesc
 	
-	'ZeroMemory(@g_aPosNotify, SizeOf(DSBPOSITIONNOTIFY) * NUM_PLAY_NOTIFICATIONS)
 	g_dwOutputBufferSize  = 0
 	g_dwCaptureBufferSize = 0
 	g_dwNotifySize        = 0
@@ -27,7 +26,6 @@ Private Function InitDirectSound(hDlg As HWND, cbInput As GUID Ptr, cbOutput As 
 	DXTRACE_MSG("InitDirectSound()g_pDS->lpVtbl->SetCooperativeLevel(g_pDS, hDlg, DSSCL_PRIORITY)", hr)
 	
 	'Obtain primary buffer
-	'ZeroMemory(@dsbdesc, SizeOf(DSBUFFERDESC))
 	With dsbdesc
 		.dwSize  = SizeOf(DSBUFFERDESC)
 		.dwFlags = DSBCAPS_PRIMARYBUFFER Or DSBCAPS_CTRLVOLUME
@@ -80,9 +78,7 @@ Private Function SetBufferFormats(pwfxInput As WAVEFORMATEX Ptr, pwfxOutput As W
 	g_dwCaptureBufferSize = g_dwNotifySize * NUM_PLAY_NOTIFICATIONS
 	
 	'Create the capture buffer
-	'SAFE_RELEASE(g_pDSBCapture)
 	Dim As DSCBUFFERDESC dscbd
-	'ZeroMemory(@dscbd, SizeOf(dscbd))
 	dscbd.dwSize        = SizeOf(dscbd)
 	dscbd.dwBufferBytes = g_dwCaptureBufferSize
 	dscbd.lpwfxFormat   = pwfxInput 'Set the format during creatation
@@ -119,13 +115,11 @@ Private Function CreateOutputBuffer() As HRESULT
 	'WinMain() waits for the associated event to be signaled, and
 	'when it is, it calls HandleNotifications() which copy the
 	'data from the capture buffer into the output buffer
-	'ZeroMemory(@wfxInput, SizeOf(wfxInput))
 	hr = g_pDSBCapture->lpVtbl->GetFormat(g_pDSBCapture, @wfxInput, SizeOf(wfxInput), NULL)
 	DXTRACE_MSG("CreateOutputBuffer()g_pDSBCapture->lpVtbl->GetFormat(g_pDSBCapture, @wfxInput, SizeOf(wfxInput), NULL)", hr)
 	'Create the direct sound buffer using the same format as the
 	'capture buffer.
 	Dim As DSBUFFERDESC dsbd
-	'ZeroMemory(@dsbd, SizeOf(DSBUFFERDESC))
 	dsbd.dwSize          = SizeOf(DSBUFFERDESC)
 	dsbd.dwFlags         = DSBCAPS_GLOBALFOCUS Or DSBCAPS_CTRLVOLUME
 	dsbd.dwBufferBytes   = g_dwOutputBufferSize
@@ -183,12 +177,10 @@ Private Function StartBuffers() As HRESULT
 	DXTRACE_MSG("StartBuffers()g_pDSBOutput->lpVtbl->SetCurrentPosition", hr)
 	
 	'Save the format of the capture buffer in g_pCaptureWaveFormat
-	'ZeroMemory(@g_WaveFormatCapture, SizeOf(WAVEFORMATEX))
 	hr = g_pDSBCapture->lpVtbl->GetFormat(g_pDSBCapture, @g_WaveFormatCapture, SizeOf(WAVEFORMATEX), NULL)
 	DXTRACE_MSG("StartBuffers()g_pDSBCapture->lpVtbl->GetFormat", hr)
-	
+
 	'Get the format of the output buffer
-	'ZeroMemory(@wfxOutput, SizeOf(wfxOutput))
 	hr = g_pDSBOutput->lpVtbl->GetFormat(g_pDSBOutput, @wfxOutput, SizeOf(wfxOutput), NULL)
 	DXTRACE_MSG("StartBuffers()g_pDSBOutput->lpVtbl->GetFormat", hr)
 	
@@ -208,39 +200,6 @@ Private Function StartBuffers() As HRESULT
 	
 	Return hr
 End Function
-
-'-----------------------------------------------------------------------------
-'Name: RestoreBuffer()
-'Desc: Restores a lost buffer. *pbWasRestored returns TRUE if the buffer was
-'      restored.  It can also NULL if the information is not needed.
-'-----------------------------------------------------------------------------
-'Private Function RestoreBuffer(pDSBuffer As LPDIRECTSOUNDBUFFER, pbRestored As BOOL Ptr) As HRESULT
-'	Dim As HRESULT hr
-'	If (pbRestored <> NULL) Then *pbRestored = False
-'	If (NULL = pDSBuffer) Then Return S_FALSE
-'	
-'	Dim As DWORD dwStatus
-'	hr = pDSBuffer->lpVtbl->GetStatus(pDSBuffer, @dwStatus)
-'	DXTRACE_MSG("RestoreBuffer", hr)
-'	
-'	If (dwStatus And DSBSTATUS_BUFFERLOST) Then
-'		'Since the app could have just been activated, then
-'		'DirectSound may not be giving us control yet, so
-'		'the restoring the buffer may fail.
-'		'If it does, sleep until DirectSound gives us control.
-'		Do
-'			hr = pDSBuffer->lpVtbl->Restore(pDSBuffer)
-'			If (hr = DSERR_BUFFERLOST) Then Sleep(10)
-'			hr = pDSBuffer->lpVtbl->Restore(pDSBuffer)
-'		Loop While(hr)
-'		
-'		If (pbRestored <> NULL) Then *pbRestored = True
-'		Return S_OK
-'	Else
-'		Return S_FALSE
-'	End If
-'End Function
-
 
 '-----------------------------------------------------------------------------
 'Name: HandleNotification()

@@ -63,21 +63,6 @@ Function SSID2WStr(ByRef ssid As DOT11_SSID) ByRef As WString
 	Return finalWString
 End Function
 
-' 获取接口状态描述
-Function GetInterfaceStateString(state As WLAN_INTERFACE_STATE) As String
-	Select Case state
-	Case wlan_interface_state_not_ready: Return "Not ready"
-	Case wlan_interface_state_connected: Return "Connected"
-	Case wlan_interface_state_ad_hoc_network_formed: Return "Ad hoc formed"
-	Case wlan_interface_state_disconnecting: Return "Disconnecting"
-	Case wlan_interface_state_disconnected: Return "Disconnected"
-	Case wlan_interface_state_associating: Return "Associating"
-	Case wlan_interface_state_discovering: Return "Discovering"
-	Case wlan_interface_state_authenticating: Return "Authenticating"
-	Case Else: Return "Unknown"
-	End Select
-End Function
-
 ' 获取认证算法描述
 Function GetAuthAlgorithmString(algo As DOT11_AUTH_ALGORITHM) As String
 	Select Case algo

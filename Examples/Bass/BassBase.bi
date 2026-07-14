@@ -5,7 +5,6 @@
 #pragma once
 
 #include once "vbcompat.bi"
-#include once "string.bi"
 #include once "bass.bi"
 
 #define BASS_SYNC_HLS_SEGMENT   &H10300

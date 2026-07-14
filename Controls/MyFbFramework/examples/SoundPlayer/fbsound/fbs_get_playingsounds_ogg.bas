@@ -26,13 +26,12 @@ const scr_width  as integer = 640 '320 640 800 ...
 const scr_height as integer = 480 '200 480 600 ...
 
 dim as integer  anim,cfade,frames,fake,hWave
-dim as double   r,rstep,i,istep,ioffset,roffset
+dim as double   rstep,istep,ioffset,roffset
 dim as double   stime,etime,fps
-dim as double   r_max,r_min,i_max,i_min,rdiff,idiff,zoom
+dim as double   r_min,i_min,rdiff,idiff,zoom
 dim as double   roffsetsoll,ioffsetsoll,zoomsoll
 dim as double   roffsetdiff,ioffsetdiff,zoomdiff
-dim as double   roffsetstep,ioffsetstep,zoomstep
-dim as integer  x2y2,col1,col2,flag
+dim as integer  x2y2,col2,flag
 dim as integer  l,a ' xm,ym,l a
 dim as byte ptr video_mem
 dim as string   k

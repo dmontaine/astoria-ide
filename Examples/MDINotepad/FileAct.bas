@@ -68,15 +68,6 @@ Private Function FileDataGet Overload (ByRef FileName As Const WString, ByRef rt
 	Return fsize
 End Function
 
-'向文件FileName存放指定大小setSize的数据setData,成功返回true
-Private Function FileDataSet(ByRef FileName As Const WString, ByRef setData As Any Ptr, setSize As Integer) As Integer
-	Dim h As Integer = FreeFile
-	If Open(FileName For Binary Access Write As #h) <> 0 Then Return False
-	If Put(#h, , *Cast(UByte Ptr, setData), setSize) Then Return False
-	Close #h
-	Return True
-End Function
-
 '秒数Sec按指定的时格式hfmt,分格式mfmt,秒格式sfmt, 返回转换为时间字符串
 Private Function Sec2Time(Sec As Single, hfmt As String = "#,#0", mfmt As String = "#00", sfmt As String = "#00") ByRef As String
 	Dim h As Long
@@ -130,7 +121,6 @@ End Function
 '返回WFD的字节数
 Private Function WFD2Bytes(wfd As WIN32_FIND_DATA Ptr) As ULongInt
 	Return (Cast(ULONGLONG, wfd->nFileSizeHigh) Shl 32) Or wfd->nFileSizeLow
-	'Return wfd->nFileSizeHigh * (MAXDWORD + 1) + wfd->nFileSizeLow
 End Function
 
 '返回FILETIME时间ft的时间
@@ -150,17 +140,6 @@ Private Function WFD2TimeStr(ft As FILETIME Ptr, tf As WString = "yyyy/mm/dd hh:
 	FileTimeToSystemTime(@lft, @st)
 	Dim dt As Double = DateSerial(st.wYear, st.wMonth, st.wDay) + TimeSerial(st.wHour, st.wMinute, st.wSecond)
 	Return Format(dt, tf)
-End Function
-
-'用FILETIME的时间ft按格式tf返回时间字符串RtnPtr, 返回字符串长度
-Private Function WFD2TimeWStr(ft As FILETIME Ptr, ByRef tf As Const WString, ByRef RtnPtr As WString Ptr) As Integer
-	Dim lft As FILETIME
-	FileTimeToLocalFileTime(ft, @lft)
-	Dim st As SYSTEMTIME
-	FileTimeToSystemTime(@lft, @st)
-	Dim dt As Double = DateSerial(st.wYear, st.wMonth, st.wDay) + TimeSerial(st.wHour, st.wMinute, st.wSecond)
-	WLet(RtnPtr, Format(dt, tf))
-	Return Len(*RtnPtr)
 End Function
 
 'WFD比较,成功返回true
@@ -217,28 +196,24 @@ Private Function WFDCompare(ByVal sWFD As WIN32_FIND_DATA Ptr, ByVal tWFD As WIN
 		Select Case chkMode
 		Case 0 '>
 			If memcmp(st, tt, SizeOf(FILETIME)) > 0 Then
-			'If CompareFileTime(st, tt) > 0 Then
 				Return True
 			Else
 				Return False
 			End If
 		Case 1 '<
 			If memcmp(st, tt, SizeOf(FILETIME)) < 0 Then
-			'If CompareFileTime(st, tt) < 0 Then
 				Return True
 			Else
 				Return False
 			End If
 		Case 2 '<>
 			If memcmp(st, tt, SizeOf(FILETIME)) <> 0 Then
-			'If CompareFileTime(st, tt) <> 0 Then
 				Return True
 			Else
 				Return False
 			End If
 		Case 3 '=
 			If memcmp(st, tt, SizeOf(FILETIME)) = 0 Then
-			'If CompareFileTime(st, tt) = 0 Then
 				Return True
 			Else
 				Return False

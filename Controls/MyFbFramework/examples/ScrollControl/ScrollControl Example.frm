@@ -22,7 +22,6 @@
 	#include once "mff/TrackBar.bi"
 	#include once "mff/TimerComponent.bi"
 	#include once "mff/NumericUpDown.bi"
-	#include once "mff/UpDown.bi"
 	#include once "maze.bi"
 	Using My.Sys.Forms
 
@@ -53,7 +52,7 @@
 		
 		Dim As Picture PanelRender
 		Dim As ScrollControl ScrollMaze
-		Dim As Label lblFPS, lblLanguage, lblMazeSize, lblWallSize ', lblPosition
+		Dim As Label lblFPS, lblLanguage, lblMazeSize, lblWallSize
 		Dim As CommandButton cmdRefresh, cmdPlay
 		Dim As TrackBar TrackBarFPS
 		Dim As TimerComponent TimerFPS
@@ -89,10 +88,6 @@
 			.TabIndex = 2
 			.BackColor = 8421376
 			.DoubleBuffered = True
-			' .Anchor.Top = AnchorStyle.asAnchor
-			' .Anchor.Right = AnchorStyle.asAnchor
-			' .Anchor.Left = AnchorStyle.asAnchor
-			' .Anchor.Bottom = AnchorStyle.asAnchor
 			.SetBounds 0, 10, 310, 240
 			.Designer = @This
 			.OnResize = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control, NewWidth As Integer, NewHeight As Integer), @PanelRender_Resize)
@@ -226,16 +221,6 @@
 			.OnScroll = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As ScrollControl), @ScrollMaze_Scroll)
 			.Parent = @This
 		End With
-	'
-	' ' lblPosition
-	' With lblPosition
-	' .Name = "lblPosition"
-	' .Text = "VisualFBEditor"
-	' .TabIndex = 13
-	' .SetBounds 360, 380, 260, 120
-	' .Designer = @This
-	' .Parent = @ScrollMaze
-	' End With
 	End Constructor
 	
 	Dim Shared Form1 As Form1Type
@@ -287,18 +272,11 @@ Private Sub Form1Type.cmdPlay_Click(ByRef Sender As Control)
 	cmdRefresh.Enabled = Playing
 	If Playing Then RenderProj(0)
 	TimerFPS.Enabled = Playing
-	' aMaze.Show(Val(NumUpDnWallSize.Text))
-	
 End Sub
 
 Private Sub Form1Type.cmdRefresh_Click(ByRef Sender As Control)
-	' Playing = False
-	' cmdPlay.Enabled = Not Playing
-	' cmdRefresh.Enabled = Playing
-	' If Playing Then RenderProj(0)
 	cmdRefresh.Enabled = False
 	PanelRender.Width = (Val(NumUpDnMazeSize.Text) + 1) * Val(NumUpDnWallSize.Text): PanelRender.Height = PanelRender.Width
-	' lblPosition.Left = PanelRender.Width + 20 : lblPosition.Top = PanelRender.Height + 20
 	TimerFPS.Enabled = Playing
 	MazeX = 0 : MazeY = 0
 	aMaze.Init(Val(NumUpDnMazeSize.Text), Val(NumUpDnWallSize.Text))
@@ -322,14 +300,12 @@ Private Sub Form1Type.PanelRender_Paint(ByRef Sender As Control, ByRef Canvas As
 	ws = aMaze.WallSize / 2
 	Debug.Print "aMaze.WallSize=" & aMaze.WallSize
 	Debug.Print "aMaze.MazeSize=" & aMaze.MazeSize
-	' Canvas.Scale(0, 0, (aMaze.MazeSize+ 1) * aMaze.WallSize / 2, (aMaze.MazeSize+ 1) * aMaze.WallSize/ 2)
 	Canvas.Cls
 	For x = 0 To aMaze.MazeSize -1
 		For y = 0 To aMaze.MazeSize -1
 			xx = x*aMaze.WallSize + aMaze.WallSize
 			yy = y*aMaze.WallSize + aMaze.WallSize
 			If aMaze.rooms(x, y).getStatus() And (Gen Or Visited) Then
-				' Canvas.Line(xx - ws, yy - ws, xx + ws, yy + ws, RGB(0, 32, 0), "bf")
 				If aMaze.rooms(x, y).getStatus() And Gen Then Canvas.Circle(xx, yy, ws / 2, RGB(255, 128, 0))
 				If aMaze.rooms(x, y).isWall(North) And WALL Then Canvas.Line (xx - ws, yy - ws, xx + ws, yy - ws, RGB(0, 255, 0))
 				If aMaze.rooms(x, y).isWall(West)  And WALL Then Canvas.Line (xx - ws, yy - ws, xx - ws, yy + ws, RGB(0, 255, 0))
@@ -342,7 +318,6 @@ Private Sub Form1Type.PanelRender_Paint(ByRef Sender As Control, ByRef Canvas As
 	x = 0: y = 0
     xx = x*aMaze.WallSize + aMaze.WallSize
 	yy = y*aMaze.WallSize + aMaze.WallSize
-	' Canvas.Line(xx - ws * 1.1, yy - ws * 0.7, xx - ws *.9, yy + ws *.8, PanelRender.BackColor) ', "bf")
 	Canvas.Line (xx - ws, yy - ws, xx - ws, yy + ws, PanelRender.BackColor)
 	Canvas.TextOut(xx - ws *.8, yy - ws *.8, "->")
 	
@@ -350,31 +325,15 @@ Private Sub Form1Type.PanelRender_Paint(ByRef Sender As Control, ByRef Canvas As
 	x = aMaze.MazeSize -1: y = aMaze.MazeSize -1
     xx = x*aMaze.WallSize + aMaze.WallSize
 	yy = y*aMaze.WallSize + aMaze.WallSize
-	' Canvas.Line(xx + ws *.9, yy - ws * 0.7, xx + ws * 1.1, yy + ws *.8, PanelRender.BackColor) ', "bf")
 	Canvas.Line (xx + ws, yy - ws, xx + ws, yy + ws, PanelRender.BackColor)
 	Canvas.TextOut(xx - ws * 0.2, yy - ws *.8, "->")
-	'
-	' Exit Sub
-	' For x = 0 To aMaze.MazeSize -1
-	' For y = 0 To aMaze.MazeSize -1
-	' xx = x * aMaze.WallSize + aMaze.WallSize
-	' yy = y * aMaze.WallSize + aMaze.WallSize
-	' If aMaze.rooms(x,y).getStatus() And (Gen Or Visited) Then
-	' Else
-	' Canvas.Line(xx - ws, yy - ws, xx + ws, yy + ws, RGB(0, 64, 0), "bf")
-	' End If
-	' Next
-	' Next
 End Sub
 
 Private Sub Form1Type.TimerFPS_Timer(ByRef Sender As TimerComponent)
-	
-	' App.DoEvents
 	If MazeY > aMaze.MazeSize- 1 Then
 		MazeX += 1
 		MazeY = 0
 	End If
-	' PanelRender.Repaint
 	MazeY += 1
 	Sleep regulate(speed, fps), 1
 	

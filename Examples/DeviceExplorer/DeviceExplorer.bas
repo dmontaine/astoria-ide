@@ -272,13 +272,6 @@ Private Function pvEnumClasses(hwndParent As HWND, tv As TreeView Ptr, ShowCateg
 				If nProbCode<> 0 Then bProblem = True
 				If dwStatus And DN_HAS_PROBLEM Then
 					bProblem = True
-					
-					'Dim p As WString Ptr
-					'Dim s As DWORD = 0
-					's = DeviceProblemText(0, categoriesDevInfo(i).DevInst, nProbCode, NULL, NULL)
-					'p = CAllocate(s * 4, SizeOf(Byte))
-					'DeviceProblemText(0, categoriesDevInfo(i).DevInst, nProbCode, p, @s)
-					'If p Then Deallocate(p)
 				End If
 				devicesProblem(j) = nProbCode
 				devicesStatus(j) = dwStatus
@@ -360,7 +353,6 @@ Private Function pvEnableDevice(hwndParent As HWND, idx As Integer, fEnable As B
 		tParams.ClassInstallHeader.InstallFunction = DIF_PROPERTYCHANGE
 		tParams.StateChange = IIf(fEnable, DICS_ENABLE, DICS_DISABLE)
 		tParams.Scope = DICS_FLAG_GLOBAL 'DICS_FLAG_CONFIGSPECIFIC
-		'tParams.Scope = DICS_FLAG_GLOBAL
 		
 		ret = SetupDiSetClassInstallParams(hSet, @cDevInfo, @tParams.ClassInstallHeader, SizeOf(SP_PROPCHANGE_PARAMS))
 		If ret Then

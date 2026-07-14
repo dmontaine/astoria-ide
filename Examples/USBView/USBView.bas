@@ -365,7 +365,6 @@ Private Function usbDeviceDesc(hHub As HANDLE, PortIndex As ULong) As Long
 	Dim pHidDeviceDescriptor As HID_DESCRIPTOR Ptr
 	Dim pUsbHeaderDescriptor As USB_COMMON_DESCRIPTOR Ptr
 	Dim Request As USB_DESCRIPTOR_REQUEST
-	'Dim sBuffer As String
 	Dim BytesReturned As ULong
 	Dim Success As Long
 	Dim TmpByte As UCHAR
@@ -560,14 +559,11 @@ Private Function usbPortEnum(hHub As HANDLE, PortCount As UCHAR, tv As TreeView 
 			usbTextPrint("Error F, node connection information not returned.")
 		Else
 			usbNoteConnInfoDisp(@ConnectionInformation)
-			'If ConnectionInformation.ConnectionStatus <> DeviceConnected Then
 			If ConnectionInformation.ConnectionStatus = NoDeviceConnected Then
 				'没有连接设备
 				usbTextPrint("No connected device  " & vbTab & PortIndex)
 				If pStatus Then portStr += "*" & *pDrvDesc
 				subtn = usbTVNodeAdd(tv, tn, portStr, 19, True, True)
-				'subtn = tn->Nodes.Add(portStr, portStr, portStr, 19, 19)
-				'TreeView_SetItemState(tv->Handle, subtn->Handle, TVIS_CUT, TVIS_CUT)
 			Else
 				'连接了设备
 				
@@ -579,8 +575,7 @@ Private Function usbPortEnum(hHub As HANDLE, PortCount As UCHAR, tv As TreeView 
 					portStr += temp
 				End If
 				subtn = usbTVNodeAdd(tv, tn, portStr, 19, True, False)
-				'subtn = tn ->Nodes.Add(portStr, portStr, portStr, 19, 19)
-				
+
 				If ConnectionInformation.DeviceIsHub = 0 Then
 					'连接了设备
 				Else
@@ -628,7 +623,6 @@ Private Function usbHostControllerInfo(hHostController As HANDLE, tv As TreeView
 	Dim RootHubName As WString * MAXIMUM_USB_STRING_LENGTH  'RootHubName must start with "\\.\"
 	
 	Dim hRootHub As HANDLE
-	'Dim dwRegType As ULong
 	Dim BytesReturned As ULong
 	Dim Success As BOOL
 	

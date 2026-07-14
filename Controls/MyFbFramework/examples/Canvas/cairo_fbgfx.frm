@@ -29,13 +29,7 @@
 	' ' include fbgfx.bi for some useful definitions
 	#include once "fbgfx.bi"
 	#include once "cairo/cairo.bi"
-	
-	' if drawing with RayLib
-	' #include once "inc/raymath.bi"
-	' #include once "inc/raylib.bi"
-	' Using RayLib
-	'
-	
+
 	Dim Shared As cairo_surface_t Ptr cairoSurface
 	Dim Shared As cairo_t Ptr cairoCreate
 	Dim Shared As Any Ptr image
@@ -172,7 +166,6 @@
 		Form1.MainForm = True
 		Form1.Show
 		' Put the Render code here
-		' ThreadcairoCreateeate_(@RenderProj, 0)
 		RenderProj(0)
 		App.Run
 	#endif
@@ -241,8 +234,6 @@ Sub RenderProj(Param As Any Ptr)
 			ScreenLock()
 			Put (0, 0), image, PSet
 			ScreenUnlock()
-			' speed = Form1.TrackBarFPS.Position
-			' Playing = Form1.cmdPlay.Enabled
 			Form1.lblFPS.Text = "FPS:" & speed
 			App.DoEvents
 			Ending = Len(Inkey) > 0

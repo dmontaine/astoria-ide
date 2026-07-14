@@ -20,18 +20,11 @@
 	' The "RenderProj" sub is the main rendering code subroutine.
 	' 。“RenderProj”。
 	Declare Sub RenderProj(Param As Any Ptr)
-	
-	' ' include fbgfx.bi for some useful definitions
-	' #include once "fbgfx.bi"
-	' Using FB
-	
+
 	' if drawing with RayLib
 	#include once "inc/raymath.bi"
 	#include once "inc/raylib.bi"
 	Using RayLib
-	'
-	'
-	' Dim Shared As RayLib.Camera3D Camera
 	Dim Shared As Single rotation
 	Dim Shared As Integer IMAGE_W, IMAGE_H
 	#ifdef __USE_WINAPI__
@@ -89,7 +82,6 @@
 		Form1.MainForm = True
 		Form1.Show
 		' Put the Render code here
-		' ThreadCreate_(@RenderProj, 0)
 		RenderProj(0)
 		App.Run
 	#endif
@@ -132,8 +124,7 @@ Sub RenderProj(Param As Any Ptr)
 			' ' Polygon shapes and lines
 			RayLib.DrawPoly(Type<Vector2>(IMAGE_W / 4.0 * 3, 330), 6, 80, rotation, BROWN)
 			RayLib.DrawPolyLines(Type<Vector2>(IMAGE_W / 4.0 * 3, 330 ), 6, 90, rotation, BROWN)
-			' DrawPolyLinesEx(Type<Vector2>(IMAGE_W / 4.0 * 3, 330), 6, 85, rotation, 6, BEIGE)
-			
+
 			' ' Polygon shapes and lines (Alternative :)
 			RayLib.DrawPoly(Type<Vector2>(IMAGE_W / 4.0 * 3, 320), 6, 80, rotation, BROWN)
 			RayLib.DrawPolyLines(Type<Vector2>(IMAGE_W / 4.0 * 3, 330 ), 6, 90, rotation, BROWN)
@@ -143,9 +134,6 @@ Sub RenderProj(Param As Any Ptr)
 			' ' this way, all LINES are rendered in a single draw pass
 			RayLib.DrawLine(18, 42, IMAGE_W - 18, 42, BLACK)
 			RayLib.EndDrawing()
-			' ThreadsEnter
-			
-			' ThreadsLeave
 		Wend
 	#endif
 End Sub
@@ -196,11 +184,7 @@ Private Sub Form1Type.Form_Resize(ByRef Sender As Control, NewWidth As Integer, 
 End Sub
 
 Private Sub Form1Type.Form_Close(ByRef Sender As Form, ByRef Action As Integer)
-	' Ending = True
 	#ifdef __fbgfx_bi__
-		' cairo_destroy(cairoCreate)
-		' cairo_surface_destroy(cairoSurface)
-		' ImageDestroy image
 	#elseif defined(RAYLIB_H)
 		RayLib.CloseWindow
 	#endif

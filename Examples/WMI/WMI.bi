@@ -1,4 +1,4 @@
-﻿'WMI
+'WMI
 ' Copyright (c) 2025 CM.Wang
 ' Freeware. Use at your own risk.
 
@@ -45,7 +45,6 @@ Private Function VARIANT2Str(vResult As VARIANT, pType As CIMTYPE, pFlag As Long
 				SafeArrayGetElement(pSafeArray, @i, @longvalue)
 				WLet(wstrrtn(i), Hex(longvalue, 2))
 			Next
-			'Case VT_BOOL
 		Case Else
 			Print "CIM_FLAG_ARRAY-" & Hex(vResult.vt)
 		End Select
@@ -218,8 +217,6 @@ Private Function EnumPropreties(wminame As WString, classname As WString, rtnwst
 	SafeArrayGetUBound(pNames, 1, @lUBound)
 	Dim As Long i
 	Dim As WString Ptr bstrName
-	Dim As Long pFlag
-	Dim As CIMTYPE pType
 	
 	ReDim rtnwstra(lLBound To lUBound)
 	For i = lLBound To lUBound
@@ -277,7 +274,7 @@ Private Function EnumPropretiesValues(wminame As WString, classname As WString, 
 				If hr <> 0 Then Exit For
 				hr = pItem->lpVtbl->Get(pItem, bstrName, WBEM_FLAG_ALWAYS, @vResult, @pType, @pFlag)
 				If hr = 0 Then
-					WStrArrayAdd(txts(), !"\t" & i + 1 & !".\t" & *bstrName & " = " & VARIANT2Str(vResult, pType, pFlag)) '& " (0x" & Hex(pType) & ", " & pType & ", 0x" & Hex(vResult.vt) & ")")
+					WStrArrayAdd(txts(), !"\t" & i + 1 & !".\t" & *bstrName & " = " & VARIANT2Str(vResult, pType, pFlag))
 				Else
 					WStrArrayAdd(txts(), !"\t" & i + 1 & !".\t" & *bstrName & " = Invalid")
 				End If

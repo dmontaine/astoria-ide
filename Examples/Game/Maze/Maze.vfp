@@ -2,7 +2,6 @@
 File=Maze.bi
 File=Form1.rc
 File=Manifest.xml
-File=Chinese (Simplified).lng
 ProjectType=0
 Subsystem=2
 ProjectName="Maze"

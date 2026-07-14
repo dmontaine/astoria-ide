@@ -38,7 +38,7 @@ ScreenSet 1,0
 FBS_Init()
 
 
-Dim As Integer hWave,hSound,nChannels,nFrames
+Dim As Integer hWave,hSound,nChannels
 
 FBS_Set_LoadCallback(@MP3LoadCB)
 FBS_Enable_LoadCallback()

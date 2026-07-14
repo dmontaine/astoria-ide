@@ -48,7 +48,6 @@
 	#include once "mff/NumericUpDown.bi"
 	Using My.Sys.Forms
 	
-	Dim Shared As Single MouseX, MouseY
 	Dim Shared As Integer mSteps, ChessR = 30, ChessSize, WinStepSum '棋子大小，棋盘大小 WinStepSum, 19->354, 10-> 192
 	'　　定义虚拟桌面：
 	Dim Shared As Integer Table(Any, Any) ' =0, 无子， 1 黑子， 2 白子
@@ -78,8 +77,7 @@
 		Declare Sub ComputerAI
 		Declare Function WinStepsTotal(ByVal n As Long) As Long
 		Declare Sub DrawCompter(ByVal x As Integer, ByVal y As Integer)
-		
-		Declare Function WhoWin() As Integer
+
 		Declare Sub Form_Show(ByRef Sender As Form)
 		
 		Declare Sub Picture1_MouseDown(ByRef Sender As Control, MouseButton As Integer, x As Integer, y As Integer, Shift As Integer)
@@ -96,7 +94,6 @@
 		Dim As NumericUpDown numChessSize
 		Dim As CheckBox chkComputerFirst
 		Dim As LinkLabel LinkLblAbout
-		'Dim As TextBox LinkLblAbout
 		Dim As ColorDialog ColorDialog1
 		
 	End Type
@@ -117,7 +114,6 @@
 			.MaximizeBox = False
 			.MinimizeBox = False
 			.StartPosition = FormStartPosition.CenterScreen
-			'.Cursor = crWait
 			.OnShow = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @Form_Show)
 			.Graphic.Icon.LoadFromResourceID(1, , 48, 48)
 			.BorderStyle = FormBorderStyle.FixedSingle
@@ -232,8 +228,6 @@
 			        "VisualFBEditor: <a href=""https://gitee.com/avata/VisualFBEditor""> https://gitee.com/avata/VisualFBEditor</a>"
 		
 			.TabIndex = 10
-			'.Multiline = True
-			'.WordWraps = True
 			.SetBounds 639, 264, 159, 367
 			.Designer = @This
 			.Parent = @This
@@ -327,8 +321,6 @@ Private Sub frmWuziqiType.cmdStart_Click(ByRef Sender As Control)
 End Sub
 
 Private Sub frmWuziqiType.InitPlayEnvironment()
-	'player.filename = ".\music\zhyu01.mid"
-	'player.play()
 	If ChessSize<> Val(numChessSize.Text) Then
 		ChessSize= Max(10, Min(19, Val(numChessSize.Text)))
 		numChessSize.Text = Str(ChessSize)
@@ -350,7 +342,6 @@ Private Sub frmWuziqiType.InitPlayEnvironment()
 		'　　定义电脑的获胜组合标志：
 		ReDim ComputerFlag(WinStepSum) As Boolean
 	End If
-	'Picture1.ForeColor = ColorChessBK
 	With Picture1.Canvas
 		.Cls
 		For i As Integer = 1 To ChessSize     ''''''画游戏棋盘ChessSize 19*19
@@ -443,7 +434,6 @@ Private Sub frmWuziqiType.InitPlayEnvironment()
 End Sub
 
 Private Sub frmWuziqiType.Form_Show(ByRef Sender As Form)
-	'Picture1.Style = 16
 	colorPerson = clWhite: ColorComputer = clBlack: ColorLastStep = clPurple: ColorChessBK = 8421376: ColorChessGrid = &HF00f0000
 	lblColorBK(0).BackColor = ColorChessBK
 	lblColorBK(1).BackColor = ColorChessGrid
@@ -602,12 +592,8 @@ Sub frmWuziqiType.ComputerAI()
 	
 	'调整搜索范围，改变游戏难易程度
 	Dim As Integer Xmin, XMax, YMin, YMax
-	'Xmin = Max(0, zhX - 8): XMax = Min(ChessSize-1, zhX + 8)
-	'YMin = Max(0, zhY - 8): YMax = Min(ChessSize-1, zhY + 8)
-	
 	Xmin = 0: XMax = ChessSize-1
 	YMin = 0: YMax = ChessSize-1
-	'Print Xmin, XMax, Ymin, YMax
 	Picture1.Cursor = crWait
 	'初始化赋值数组
 	'* * * * * * * * 电脑加强算法 * * * * * * * *
@@ -835,9 +821,7 @@ Public Function frmWuziqiType.WinStepsTotal(ByVal tChessSize As Long) As Long
 	'反对角线方向 6+(5+4+3+2+1)*2=36
 	' 总的获胜组合数为60 + 60 + 36 +36= 192
 	Dim As Long i, j, m, n
-	'For i = n - 5 To 1 Step -1: n += i: Next
-	'Return 2 * (2 * t + n - 4) + 2 * n * (n - 4)
-	
+
 	'******** 初始化获胜组合 ********
 	n = 0
 	n = 0
@@ -870,7 +854,6 @@ End Function
 
 Private Sub frmWuziqiType.Picture1_MouseMove(ByRef Sender As Control, MouseButton As Integer,x As Integer,y As Integer, Shift As Integer)
 	If x > ChessR And y > ChessR And x < ChessR * ChessSize And y < ChessR * ChessSize Then
-		'frmWuziqi.Cursor = crWait
 	Else
 		frmWuziqi.Cursor = crHand
 	End If

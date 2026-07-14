@@ -24,8 +24,7 @@
 	Type MDIMainType Extends Form
 		Dim lstMdiChild As List
 		Dim actMdiChild As Any Ptr
-		' Dim actMidChildIdx As Integer
-		
+
 		Dim mnuWindowCount As Integer = -1
 		Dim mnuWindows(Any) As MenuItem Ptr
 		
@@ -45,7 +44,7 @@
 		Dim As MainMenu MainMenu1
 		Dim As MenuItem mnuFile, mnuFileNew, mnuFileOpen, mnuFileSave, mnuFileSaveAs, mnuFileBar1, mnuFileBar2, mnuFileSaveAll, mnuFileBar3, mnuFileProperties, mnuFilePrintSetup, mnuFilePrintPreview, mnuFilePrint, mnuFileBar4, mnuFileExit
 		Dim As MenuItem mnuEdit, mnuEditUndo, mnuRedo, mnuEditCopy, mnuEditCut, mnuEditPaste, mnuEditBar1, mnuEditDelete, mnuEditBar2, mnuEditSelectAll
-		Dim As MenuItem mnuView, mnuViewToolbar, mnuViewStatusBar, mnuViewBar1, mnuViewRefresh
+		Dim As MenuItem mnuView, mnuViewToolbar, mnuViewStatusBar, mnuViewBar1
 		Dim As MenuItem mnuHelp, mnuHelpAbout
 		Dim As MenuItem mnuWindow, mnuWindowCascade, mnuWindowTileHorizontal, mnuWindowTileVertical, mnuWindowArrangeIcons, mnuWindowClose, mnuWindowCloseAll, MenuItem3, mnuViewDarkMode
 		Dim As ImageList ImageList1
@@ -67,7 +66,6 @@
 			#else
 				This.Icon.LoadFromResourceID(1)
 			#endif
-			' .WindowState = WindowStates.wsMaximized
 			.Caption = "MDIMain"
 			.StartPosition = FormStartPosition.CenterScreen
 			.SetBounds 0, 0, 350, 319

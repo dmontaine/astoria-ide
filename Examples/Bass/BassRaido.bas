@@ -25,7 +25,6 @@ Private Sub BassRaido.DoMeta()
 	End If
 	If (meta) Then
 		If OnMeta Then OnMeta(mOwner, meta)
-'		If InStr(TextBox5.Text, *meta) = 0 Then TextBox5.Text = *meta
 	End If
 End Sub
 
@@ -50,7 +49,6 @@ Private Sub BassRaido.StatusProc(ByVal buffer As Const Any Ptr, ByVal length As 
 			Dim As ZString Ptr proc = Cast(ZString Ptr, buffer)
 			(*Cast(BassRaido Ptr, user)).OnStatus((*Cast(BassRaido Ptr, user)).mOwner, proc)
 		End If
-'		If InStr(*Cast(frmBassType Ptr, user).Label6.Text, *proc) = 0 Then *Cast(frmBassType Ptr, user).Label6.Text = *proc '  display status
 	End If
 End Sub
 

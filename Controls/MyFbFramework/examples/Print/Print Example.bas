@@ -350,13 +350,10 @@ End Sub
 
 Private Sub Form1Type.cboOrientation_Selected(ByRef Sender As ComboBoxEdit, ItemIndex As Integer)
 	If ItemIndex = 0 Then
-	' If FPageHeight < FPageWidth Then Swap FPageWidth, FPageHeight
 		PrintPreviewControl1.Orientation = PrinterOrientation.poPortait
 	ElseIf ItemIndex = 1 Then
-	' If FPageWidth < FPageHeight Then Swap FPageWidth, FPageHeight
 		PrintPreviewControl1.Orientation = PrinterOrientation.poLandscape
 	End If
-	' PrintPreviewControl1.Repaint
 	ChangePagesCount
 End Sub
 

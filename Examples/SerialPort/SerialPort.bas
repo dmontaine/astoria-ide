@@ -70,8 +70,6 @@ Private Function SerialPort.ThreadProcedure(ByVal pParam As LPVOID) As DWORD
 	Dim recdata As ZString Ptr
 	Dim recComState As COMSTAT
 	Dim ErrorFlag As DWORD
-	Dim lResult As Integer
-	Dim lngSize As Integer
 	Dim NumToRead As Integer
 	Dim NumhaveRead As DWORD
 	

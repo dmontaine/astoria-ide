@@ -3,7 +3,6 @@
 ' Freeware. Use at your own risk.
 
 #pragma once
-#include once "crt\stdio.bi"
 #include once "win\mmsystem.bi"
 
 #define BUFSTEP 1000000 ' memory allocation unit

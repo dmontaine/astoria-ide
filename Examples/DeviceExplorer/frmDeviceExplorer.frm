@@ -289,7 +289,6 @@ Private Sub frmDeviceExplorerType.TreeView1_SelChanged(ByRef Sender As TreeView,
 	devicesSelected = j
 	
 	TextBox1.AddLine ML("Categories") + ": " & i
-'	TextBox1.AddLine "HDEVINFO) + ": " & categoriesHSet(i)
 	TextBox1.AddLine ML("Categories Description") + ": " & *categoriesDescription(i)
 	TextBox1.AddLine ML("Categories Name") + ": " & *categoriesName(i)
 	StringFromCLSID(@categoriesGuid(i), @wtmp)
@@ -319,7 +318,6 @@ Private Sub frmDeviceExplorerType.TreeView1_SelChanged(ByRef Sender As TreeView,
 		TextBox1.AddLine *wtmp2
 	End If
 	CommandButton_Enabled(IIf(j < 0, False, True))
-	'If wtmp Then Deallocate(wtmp)
 	If wtmp2 Then Deallocate(wtmp2)
 End Sub
 

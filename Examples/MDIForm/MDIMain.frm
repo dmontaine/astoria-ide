@@ -52,7 +52,7 @@
 		
 		Dim As MenuItem mnuFile, mnuFileNew, mnuFileOpen, mnuFileBar1, mnuFileSave, mnuFileSaveAs, mnuFileSaveAll, mnuFileBar2, mnuFileRecent, mnuRecentEdit, mnuFileBar3, mnuFileProperties, mnuFileBar4, mnuFilePrintSetup, mnuFilePrintPreview, mnuFilePrint, mnuFileBar5, mnuFileExit
 		Dim As MenuItem mnuEdit, mnuEditUndo, mnuRedo, mnuEditCopy, mnuEditCut, mnuEditPaste, mnuEditBar1, mnuEditDelete, mnuEditBar2, mnuEditSelectAll
-		Dim As MenuItem mnuView, mnuViewToolbar, mnuViewStatusBar, mnuViewBar1, mnuViewRefresh
+		Dim As MenuItem mnuView, mnuViewToolbar, mnuViewStatusBar, mnuViewBar1
 		Dim As MenuItem mnuWindow, mnuWindowCascade, mnuWindowTileHorizontal, mnuWindowTileVertical, mnuWindowArrangeIcons, mnuWindowClose, mnuWindowCloseAll, mnuWindowBar1, mnuViewDarkMode
 		Dim As MenuItem mnuHelp, mnuHelpAbout, mnuPopRecent
 		Dim As ImageList ImageList1, ImageList2
@@ -768,7 +768,6 @@ End Sub
 
 Private Sub MDIMainType.Form_Close(ByRef Sender As Form, ByRef Action As Integer)
 	? "Form_Close"
-	mlKeys.SaveToFile(ExePath & "\" &  App.Language & ".lng")
 	mnuWindow_Click(mnuWindowCloseAll)
 End Sub
 
@@ -905,10 +904,7 @@ Private Sub MDIMainType.MDIChildDestroy(Child As Any Ptr)
 	
 	'The following type delete code can sometimes cause the application to crash
 	'Therefore, I used a timer to delete the type
-	
-	'lstMdiChild.Remove(lstMdiChild.IndexOf(Child))
-	'Delete Cast(MDIChildType Ptr, Child)
-	
+
 	TimerComponent1.Enabled = False
 	
 	'add to destroyed list

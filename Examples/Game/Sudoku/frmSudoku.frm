@@ -26,10 +26,9 @@
 	Dim Shared  As Integer SudoCellColorBK, SudoCellColorBKDefault, SudoCellColorBKSelect, SudoCellColorFore, SudoCellColorForeSelect, SudoCellColorHover
 	Dim Shared  As Integer SudoCellChildFontSize = 10, SudoCellChildSize = 20, SudoCellChildTop = 2, SudoCellChildLeft = 2
 	Dim Shared  As Integer SudoCellChildColorBK, SudoCellChildColorFore, SudoCellChildColorHover
-	Dim Shared  As Integer SudoCellCurr, SudoCellChildCurr, SudoCellLast, SudoCellChildLast, mTabIndex = 81
-	Dim Shared As Point MsCell, MsCellChild                  ' 记录鼠标按下时的坐标
+	Dim Shared  As Integer mTabIndex = 81
+	Dim Shared As Point MsCellChild                  ' 记录鼠标按下时的坐标
 	Dim Shared  As Boolean GameOver, bCustomize, bDrawing
-	Dim Shared As My.Sys.Drawing.BitmapType ScreenShotBitm
 	Dim Shared  As Integer SudoKu(0 To 9, 0 To 8, 0 To 8), SudoAns(0 To 9, 0 To 8, 0 To 8), SudoIn(0 To 8, 0 To 8)
 	
 	Type Form1Type Extends Form
@@ -59,7 +58,6 @@
 		Declare Sub UpdateShow(ByRef CurrentValue As String = "")
 		
 		Dim As Panel pnlSudoCell(80), pnlBack
-		'Dim As Picture pnlBack
 		' 9 * (i + j * 9) + 8
 		Dim As Label lblSudoCellChild(728)
 		Dim As LinkLabel lblInfo
@@ -101,22 +99,15 @@
 		' pnlSudoCell(0)
 		For j As Integer = 0 To 8
 			mTabIndex += 9
-			'Debug.Print ""
 			For i As Integer = 0 To 8
 				With pnlSudoCell(i + j * 9)
 					.Name = "pnlSudoCell(" & (i + j * 9) & ")"
 					.BevelOuter = bvRaised
 					.BevelInner = bvRaised
 					.Canvas.Font.Size= SudoCellFontSize
-					'.ForeColor = clWhite
-					'.BackColor = -1
-					'.BorderWidth = 1
 					.BevelWidth = 1
 					.DoubleBuffered = True
 					.TabIndex = mTabIndex
-					'.ShowCaption = IIf(SudoIn(i, j) > 0, True, False)
-					'Debug.Print SudoIn(i, j),
-					'.SetBounds SudoCellGapsX + SudoCellSize *i + i, SudoCellGapsY + SudoCellSize * j + j, SudoCellSize, SudoCellSize
 					.OnMouseLeave = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @pnlSudoCell_MouseLeave)
 					.OnMouseHover = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control, MouseButton As Integer, x As Integer, y As Integer, Shift As Integer), @pnlSudoCell_MouseHover)
 					.OnMouseDown = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control, MouseButton As Integer, x As Integer, y As Integer, Shift As Integer), @pnlSudoCell_MouseDown)
@@ -127,7 +118,6 @@
 				
 				For k As Integer = 0 To 8
 					' lblSudoCellChild(0)
-					'Debug.Print  "lblSudoCellChild=" & 9 * (i + j * 9) + k
 					With lblSudoCellChild(9 * (i + j * 9) + k)
 						.Name = "lblSudoCellChild(" & (9 * (i + j * 9) + k) & ")"
 						.Text = WStr(k + 1)
@@ -260,62 +250,39 @@ Private Sub Form1Type.Form_Show(ByRef Sender As Form)
 End Sub
 
 Private Sub Form1Type.cmdSolveSudo_Click(ByRef Sender As Control)
-	'Randomize ' 初始化随机数生成器
-	'Input "", SudoString
 	Dim SudoAns(0 To 9, 0 To 8, 0 To 8) As Integer
 	Dim SudoIn(0 To 8, 0 To 8) As Integer
 	For i As Integer = 0 To 80
-		SudoIn(i \ 9, i Mod 9) = SudoKu(0, i \ 9, i Mod 9) 'SudoString[i] - Asc("0")
+		SudoIn(i \ 9, i Mod 9) = SudoKu(0, i \ 9, i Mod 9)
 	Next i
 	SolveSudo(SudoAns(), SudoIn())
 	GameOver = True
-	'' 如果需要解对角线数独
-	'While (dialog_sudoku(sudoans[0])==0) {
-	'    solvesudo(sudoans, sudoin);
-	'    print_a_sudoku(sudoans);
-	'
 	For j As Integer = 0 To 8
 		For i As Integer = 0 To 8
 			With pnlSudoCell(i + j * 9)
-				'.Font.Size = SudoCellFontSize
 				.Text = WStr(SudoAns(0, i, j))
 				.ShowCaption = IIf(SudoAns(0, i, j) > 0, True, False)
 				.BackColor = IIf(SudoKu(0, i, j) > 0, SudoCellColorBK, SudoCellColorBKSelect)
-				'.ForeColor = SudoCellColorFore
-				'Debug.Print SudoIn(i, j)
 			End With
-			
+
 			For k As Integer = 0 To 8
 				' lblSudoCellChild(0)
-				
+
 				With lblSudoCellChild(9 * (i + j * 9) + k)
-					'.Text = pnlSudoCell(i + j * 9).Text
 					.ForeColor = SudoCellChildColorFore
 					.Visible= IIf(SudoAns(0, i, j) > 0, False, IIf(SudoAns(k + 1, i, j) > 0, True, False))
-					'.Parent = @pnlSudoCell(i + j * 9)
 				End With
 			Next
 		Next
 	Next
-	
-	'Dim As String LineStr
-	'For i As Integer = 0 To 8
-	'	LineStr = "| "
-	'	For j As Integer = 0 To 8
-	'		LineStr &= " " & SudoAns(0, i, j) & " "
-	'		If j Mod 3 = 2 Then LineStr &=  "| "
-	'	Next j
-	'	Debug.Print LineStr
-	'	If i Mod 3 = 2 Then Debug.Print "  -- -- --   -- -- --   -- -- --"
-	'Next i
-	'
+
 	'[X-wing] 7在行0,2列1,4交叉点两行或两列的7只在交叉点上存在,意味着4个交叉点上的7一定存在两个,那么可以删去不在交叉点上的7
-	
+
 End Sub
 
 Private Sub Form1Type.cmdFromClipBoard_Click(ByRef Sender As Control)
 	Dim As String SudoString = cboFromClipBoard.Text
-	Erase SudoKu  'Clear_Bits(SudoKu())
+	Erase SudoKu
 	Erase SudoAns
 	Erase SudoIn
 	GameOver = False
@@ -329,11 +296,6 @@ Private Sub Form1Type.cmdFromClipBoard_Click(ByRef Sender As Control)
 		Next
 	Next
 	cmdSolveSudo.Enabled = True
-	'For i As Integer = 0 To 80
-	'	SudoIn(i \ 9, i Mod 9) = SudoString[i] - Asc("0")
-	'Print SudoIn(i \ 9, i Mod 9);
-	'If i Mod 9 = 8 Then Print
-	'Next i
 	' pnlSudoCell(0)
 	UpdateShow("")
 End Sub
@@ -380,12 +342,10 @@ End Sub
 Private Sub Form1Type.pnlSudoCell_MouseDown(ByRef Sender As Control, MouseButton As Integer, x As Integer, y As Integer, Shift As Integer)
 	Dim As Integer Index = Val(Mid(Sender.Name, InStrRev(Sender.Name, "(") + 1))
 	If GameOver Then Exit Sub
-	'Debug.Print "MouseButton=" & MouseButton
 	If MouseButton = 1 AndAlso Sender.BackColor <> SudoCellColorBK AndAlso SudoKu(0, Index \ 9, Index Mod 9) = 0 Then
 		Sender.BackColor = SudoCellColorBKDefault
 		Sender.Text = "0"
 		Sender.ShowCaption = False
-		'Clear_Point(SudoKu(), tryNum, x, y)
 		For k As Integer = 0 To 8
 			With lblSudoCellChild(Index * 9 + k)
 				.Visible= IIf(SudoKu(k + 1, Index Mod 9, Index \ 9) = 1, True, False)
@@ -423,7 +383,6 @@ Private Sub Form1Type.lblSudoCellChild_MouseDown(ByRef Sender As Control, MouseB
 		pnlSudoCell(IndexCell).ShowCaption = True
 		If bCustomize Then
 			SudoKu(0, IndexCell Mod 9, IndexCell \ 9) = Val(Sender.Text)
-			'PreSolveSudo(SudoKu())
 			UpdateShow(Sender.Text)
 		Else
 			SudoKu(Val(Sender.Text), IndexCell Mod 9, IndexCell \ 9) = 1
@@ -489,7 +448,7 @@ Private Sub Form1Type.cmdCustomize_Click(ByRef Sender As Control)
 	cmdRandomized.Enabled = IIf(bCustomize, False, True)
 	If bCustomize Then
 		Dim As String SudoString = String(81, 48)
-		Erase SudoKu  'Clear_Bits(SudoKu())
+		Erase SudoKu
 		Erase SudoAns
 		Erase SudoIn
 		GameOver = False
@@ -526,7 +485,6 @@ Private Sub Form1Type.cmdRandomized_Click(ByRef Sender As Control)
 End Sub
 
 Private Sub Form1Type.Form_Paint(ByRef Sender As Control, ByRef Canvas As My.Sys.Drawing.Canvas)
-	'Canvas.(X1, y1, x2, y2)
 End Sub
 
 Private Sub Form1Type.pnlBack_Paint(ByRef Sender As Control, ByRef Canvas As My.Sys.Drawing.Canvas)
@@ -548,7 +506,7 @@ Private Sub Form1Type.cmdDrawing_Click(ByRef Sender As Control)
 		Dim As Rect ScreenshotRect
 		GetWindowRect(pnlBack.Handle, @ScreenshotRect)
 		'拷贝屏幕图像bi于背景，控件不能点选
-		pnlBack.Graphic.Bitmap.LoadFromScreen(ScreenshotRect.Left, ScreenshotRect.Top, ScreenshotRect.Right, ScreenshotRect.Bottom) 'LoadFromScreen(ScreenshotRect.Left, ScreenshotRect.Top, (ScreenshotRect.Right - ScreenshotRect.Left), (ScreenshotRect.Bottom - ScreenshotRect.Top))
+		pnlBack.Graphic.Bitmap.LoadFromScreen(ScreenshotRect.Left, ScreenshotRect.Top, ScreenshotRect.Right, ScreenshotRect.Bottom)
 		'隐藏控件
 		For j As Integer = 0 To 8
 			For i As Integer = 0 To 8
@@ -557,8 +515,6 @@ Private Sub Form1Type.cmdDrawing_Click(ByRef Sender As Control)
 				End With
 			Next
 		Next
-		'Canvas.DrawWidth = 2
-		'Canvas.DrawColor = clBlue
 	Else
 		pnlBack.Canvas.Cls
 		'显示控件

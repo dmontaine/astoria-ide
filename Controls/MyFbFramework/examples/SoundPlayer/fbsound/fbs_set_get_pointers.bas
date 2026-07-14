@@ -40,5 +40,4 @@ while fbs_Get_PlayingSounds()=0:sleep 10:wend
 while fbs_Get_PlayingSounds() and inkey()=""
   sleep 100
 wend
-' end
 

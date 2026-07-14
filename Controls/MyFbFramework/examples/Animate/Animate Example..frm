@@ -55,14 +55,11 @@
 		Declare Sub Form_Resize(ByRef Sender As Control, NewWidth As Integer, NewHeight As Integer)
 		Declare Sub tbAudio_Change(ByRef Sender As TrackBar, Position As Integer)
 		Declare Sub tbAudio_MouseUp(ByRef Sender As Control, MouseButton As Integer, x As Integer, y As Integer, Shift As Integer)
-		Declare Sub tbBalance_Change(ByRef Sender As TrackBar, Position As Integer)
-		Declare Sub tbBalance_MouseUp(ByRef Sender As Control, MouseButton As Integer, x As Integer, y As Integer, Shift As Integer)
 		Declare Sub TimerComponent1_Timer(ByRef Sender As TimerComponent)
 		Declare Sub tbPosition_Change(ByRef Sender As TrackBar, Position As Integer)
 		Declare Sub tbPosition_MouseDown(ByRef Sender As Control, MouseButton As Integer, x As Integer, y As Integer, Shift As Integer)
 		Declare Sub tbPosition_MouseUp(ByRef Sender As Control, MouseButton As Integer, x As Integer, y As Integer, Shift As Integer)
 		Declare Sub Animate1_Message(ByRef Sender As Control, ByRef MSG As Message)
-		Declare Sub cboChanel_Selected(ByRef Sender As ComboBoxEdit, ItemIndex As Integer)
 		Declare Sub cmdBrowse_Click(ByRef Sender As Control)
 		Declare Sub cmdFull_Click(ByRef Sender As Control)
 		Declare Sub chkLoop_Click(ByRef Sender As CheckBox)
@@ -114,8 +111,6 @@
 			.AutoSize = True
 			.Center = True
 			.Transparency = True
-			' .FILE = "D:\Faster (2010) 720p BluRay AC3 x264 - AdiT.mkv"
-			' .FILE = "ExePath & "/../Resources/horse.gif"
 			.BackColor = 16776960
 			.Anchor.Top = AnchorStyle.asAnchor
 			.Anchor.Right = AnchorStyle.asAnchor
@@ -489,7 +484,7 @@ Private Sub frmAnimateType.cmdBtn_Click(ByRef Sender As Control)
 	Case "cmdOpen"
 		Animate1.Close
 		If ..Left(Trim(cboFileName.Text), 9) = "OS System" Then
-			Animate1.CommonAvi = CommonAVIs.aviCopyFile 'Val(Trim(Mid(Trim(cboFileName.Text), 10))) 'CommonAVIs.aviCopyFile '
+			Animate1.CommonAvi = CommonAVIs.aviCopyFile
 			Animate1.OpenFile
 		Else
 			If Animate1.OpenFile(cboFileName.Text) = 0 Then
@@ -519,7 +514,6 @@ Private Sub frmAnimateType.cmdBtn_Click(ByRef Sender As Control)
 		tbBalance.Position = Animate1.Balance
 		lblBalance.Text = ML("Balance:") & tbBalance.Position
 		tbPosition.Position = 0
-		' Animate1.Play
 		cmdPlay.Text = ML("Pause")
 		b = True
 	Case "cmdPlay"
@@ -619,10 +613,6 @@ End Sub
 ' https://learn.microsoft.com/en-us/windows/win32/directshow/event-notification-codes.
 Private Sub frmAnimateType.Animate1_Message(ByRef Sender As Control, ByRef msg As Message)
 	
-End Sub
-
-Private Sub frmAnimateType.cboChanel_Selected(ByRef Sender As ComboBoxEdit, ItemIndex As Integer)
-	This.Caption = Mid(This.Caption, 1, Len(ML("VisualFBEditor Animate Player(X64)")) + 1)
 End Sub
 
 Private Sub frmAnimateType.cmdBrowse_Click(ByRef Sender As Control)

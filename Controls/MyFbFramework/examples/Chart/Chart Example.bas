@@ -138,8 +138,6 @@ Private Sub Form1.Chart1_Create_(ByRef Designer As My.Sys.Object, ByRef Sender A
 	(*Cast(Form1 Ptr, Sender.Designer)).Chart1_Create(Sender)
 End Sub
 Private Sub Form1.Chart1_Create(ByRef Sender As Control)
-	' Chart1.LabelsPosition = LabelsPositions.LP_Outside
-	
 	Dim StringValue As WStringList Ptr
 	Dim Value As DoubleList Ptr
 	

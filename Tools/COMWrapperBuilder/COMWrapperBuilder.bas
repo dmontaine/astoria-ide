@@ -218,7 +218,6 @@ Private Sub frmCOMWrapperBuilder.Form_Create(ByRef Sender As Control)
 				txtPathSource.Text = WithoutQuotes(Mid(Command, PosS + 3))
 			End If
 		End If
-		'cmdRun_Click(Sender)
 	End If
 End Sub
 
@@ -433,7 +432,6 @@ Private Sub frmCOMWrapperBuilder.cmdRun_Click(ByRef Sender As Control)
 					Lines.Add Buff
 				End If
 				bNext = EndsWith(Buff, " _")
-				'If StartsWith(LCase(Trim(Buff, Any !"\t ")), "#include ") AndAlso _
 				Pos2 = InStr(LCase(Buff), " createobject(")
 				If Pos2 > 0 Then
 					WLet fileName, Files.Item(i)
@@ -442,7 +440,6 @@ Private Sub frmCOMWrapperBuilder.cmdRun_Click(ByRef Sender As Control)
 					Pos1 = InStr(Pos2, Buff, ".")
 					If Pos1 < 1 Then Pos1 = InStr(Pos2, Buff, Chr(34))
 					If Pos1 < 1 Then Pos1 = Len(Buff)
-					'Debug.Print "Com Name=" & Trim(Mid(Buff, Pos2, Pos1 - Pos2))
 					TmpStr = Trim(Mid(Buff, Pos2, Pos1 - Pos2))
 					If TmpStr <> "" AndAlso Not ComList.Contains(TmpStr) Then ComList.Add TmpStr
 				End If
@@ -463,7 +460,6 @@ Private Sub frmCOMWrapperBuilder.cmdRun_Click(ByRef Sender As Control)
 		Next
 		For jj As Integer = 0 To ComList.Count - 1
 			comName = ComList.Item(jj)
-			'WLet(FoldName, GetFolderName(*fileName))
 			WLet(DeclaresText, ML("' Add Declares at")  + " " + Str(Time) + ", " + Str(Date))
 			WLet(FunctionsText, ML("' Add Functions at") + " " + Str(Time) + ", " + Str(Date))
 			TmpStr = "" : TmpStr1 = ""

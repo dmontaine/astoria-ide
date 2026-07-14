@@ -15,12 +15,10 @@
 	#include once "mff/Picture.bi"
 	#include once "mff/Textbox.bi"
 	#include once "mff/Pen.bi"
-	#include once "mff/ListControl.bi"
 	#include once "mff/Panel.bi"
 	#include once "mff/NumericUpDown.bi"
 	#include once "mff/RichTextBox.bi"
 	#include once "mff/CheckBox.bi"
-	#include once "string.bi"
 	#include once "mff/RadioButton.bi"
 	
 	Using My.Sys.Forms
@@ -36,8 +34,6 @@
 		Declare Sub Form_Resize(ByRef Sender As Control, NewWidth As Integer, NewHeight As Integer)
 		Declare Sub cmdGDIDraw_Click(ByRef Sender As Control)
 		Declare Sub cmdGDICls_Click(ByRef Sender As Control)
-		Declare Sub CommandButton2_Click(ByRef Sender As Control)
-		Declare Sub cmdGDIDraw1_Click(ByRef Sender As Control)
 		Declare Sub Form_Click(ByRef Sender As Control)
 		Declare Sub PictureBK_Resize(ByRef Sender As Control, NewWidth As Integer, NewHeight As Integer)
 		Declare Sub Panel1_Form_MouseDown(ByRef Sender As Control, MouseButton As Integer, x As Integer, y As Integer, Shift As Integer)
@@ -124,12 +120,7 @@
 			' jpg-0.webp
 			.Graphic.CenterImage= True
 			.Graphic.StretchImage= StretchMode.smStretchProportional
-			' .Graphic.ScaleFactor = 2
-			' .fill
 			.Font.Size= 14
-			' .Canvas.Pen.Color = clRed
-			' .Canvas.BackColor = clBlue
-			' .Canvas.Font.Size= 14
 			.Anchor.Top = AnchorStyle.asAnchor
 			.Anchor.Right = AnchorStyle.asAnchor
 			.Anchor.Left = AnchorStyle.asAnchor
@@ -516,28 +507,14 @@ Private Sub Form1Type.cmdDrawButterfly_Click(ByRef Sender As Control)
 	cmdSelection = 0
 	
 	' Coordination
-	cmdDrawButterfly.Caption = "Waiting......Drawing"  '"稍等，正在绘画"     '"Waiting......Drawing" '
-	' PictureBK.Style = PictureStyle.ssOwnerDraw
-	' Picture2_Picture(0).Visible= False
-	' Panel1_Picture(0).Visible= False
-	' Picture2_Picture(1).Visible= False
-	' Panel1_Picture(1).Visible= False
+	cmdDrawButterfly.Caption = "Waiting......Drawing"
 	With PictureBK.Canvas
 		.Scale(-10, -10, 10, 10)
 		.BackColor = PictureBK.BackColor
 		.DrawColor = clRed ' Will lost the background if not set the value first
-		' .Pen.Mode = PenMode.pmNotXor
-		' .Pen.Color = clRed
-		' .Font.Size= 14
 		.DrawWidth = 2
-		' .FillStyles = BrushStyles.bsSolid
 		.FillStyles = BrushStyles.bsClear ' Will lost the background if not set the value first
-		' .Pen.Mode = PenMode.pmMerge
 		' draw across
-		' .FillMode = BrushFillMode.bmOpaque
-		' .FillStyles = BrushStyles.bsSolid
-		' .Rectangle -10 , -10 , 10 , 10
-		' .Line -10 , -10 , 10 , 10, clblue, "BF"
 		.Line -10 , 0 , 10 , 00
 		.Line 0 , -10 , 0 , 10
 		.TextOut 10 , 0, "1", clGreen , -1
@@ -546,12 +523,6 @@ Private Sub Form1Type.cmdDrawButterfly_Click(ByRef Sender As Control)
 		.TextOut 20 - 3 , 1000, "4", clGreen , -1
 		.TextOut 1 , 1, "0", clGreen , -1
 		
-		' drawing arrow
-		' .Line 0 , 1000 , -125 , 950
-		' .Line 0 , 1000 , 125 , 950
-		' .Line 1000 , 0 , 950 , 125
-		' .Line 1000 , 0 , 950 , -125
-		'
 		A(0) = Val(Text1(0).Text): A(1) = Val(Text1(1).Text)
 		B(0) = Val(Text2(0).Text): B(1) = Val(Text2(1).Text)
 		C(0) = Val(Text3(0).Text): C(1) = Val(Text3(1).Text)
@@ -562,17 +533,15 @@ Private Sub Form1Type.cmdDrawButterfly_Click(ByRef Sender As Control)
 		If D(0) < 1 Then D(0) = 1: If D(1) < 1 Then D(1) = 1
 		If E(0) < 1 Then E(0) = 1: If E(1) < 1 Then E(1) = 1
 		
-		For i As Long = -72000 To 72000 'Step  0.1
+		For i As Long = -72000 To 72000
 			X = (Sin(i * A(0)) * (Exp(Cos(i)) - B(0) * Cos(C(0) * i) - Sin(i / D(0)) ^ E(0)))
 			Y = (Cos(i * A(1)) * (Exp(Cos(i)) - B(1) * Cos(C(1) * i) - Sin(i / D(1)) ^ E(1)))
 			.SetPixel X, Y, clRed
-			' .TextOut 20, 20, Str(i), clYellow, -1
 		Next
-		.TextOut - 9, -9, "  Elapsed Time: " & Format(Timer - T, "0.0000") & "s", clGreen , -1 '"用时 " & GetTickCount - t & "毫秒", clGreen , -1
-		
+		.TextOut - 9, -9, "  Elapsed Time: " & Format(Timer - T, "0.0000") & "s", clGreen , -1
+
 	End With
-	' bUpdatePaint = False
-	cmdDrawButterfly.Caption = "Start Draw" '"开始绘画"    '"Start Draw"
+	cmdDrawButterfly.Caption = "Start Draw"
 End Sub
 
 Private Sub Form1Type.PictureBK_Paint(ByRef Sender As Control, ByRef Canvas As My.Sys.Drawing.Canvas)
@@ -635,39 +604,30 @@ Private Sub Form1Type.PictureBK_Paint(ByRef Sender As Control, ByRef Canvas As M
 		.Line 140, 70, 80, 90, clBlue, "F"
 		
 		.DrawWidth = 2 ' Set pen width
-		' .DrawStyle = PenStyle.psSolid
-		' 、、
 		.Arc(30, 50, 70, 80, 70, 60, 30, 60)
 		.Chord(10, 60, 40, 80, 40, 60, 80, 70)
 		.Pie(0, 0, 40, 50, 60, 80, 40, 60)
 		.DrawAlpha(20, 30, 100, 100, BoardBitm)
 		Dim As My.Sys.Drawing.Point pt(4) = {(-60, + 20), (-60, 0), (-90, 0), (-90, + 20), (-60, + 20)}
-		' {{90, 130}, {60, 40}, {140, 150}, {160, 80}}
-		' //、
 		.Ellipse(pt(0).X, pt(0).Y, pt(1).X, pt(1).Y)
 		.Rectangle(pt(2).X, pt(2).Y, pt(3).X, pt(3).Y)
 		.RoundRect(30, 10, 60, 30, 25, 25)
-		'
 		.Circle(pt(0).X, pt(0).Y, 4)
 		.Circle(pt(1).X, pt(1).Y, 4)
 		.Circle(pt(2).X, pt(2).Y, 4)
 		.Circle(pt(3).X, pt(3).Y, 4)
-		
-		'
+
 		.DrawColor = clRed
 		.FillColor = clYellow
 		.DrawWidth = 2  'DrawWidth
 		.FillStyles = BrushStyles.bsHatch
 		.HatchStyle = HatchStyles.hsDiagonal
 		.DrawColor = clRed
-		' .Polyline(pt(), 5)
 		Dim As My.Sys.Drawing.Point ptPoly(4) = {(-40, 0), (-60, 10), (-70, 10), (-20, + 45), (-30, + 60)}
 		.Polygon(ptPoly(), 5)
-		
-		'
+
 		.Circle(50, 60, 20, clYellow)
-		
-		'
+
 		.DrawWidth = 1
 		.DrawColor = clGreen
 		.FillColor = clRed
@@ -688,15 +648,6 @@ Private Sub Form1Type.PictureBK_Paint(ByRef Sender As Control, ByRef Canvas As M
 		.FillColor = clGray
 		.Rectangle(20, -80, 60, -90) ' HS_VERTICAL, RGB(0, 0, 0))
 		.Rectangle(40, -80, 60, -90) ' HS_VERTICAL, RGB(0, 0, 0))
-		' Draw Image
-		' StretchDraw(10, 140, 180, 100, TEXT("chenggong.bmp"))
-		' Taijitu(110, 110, 45)
-		' Taijitu(500, 300, 138)
-		' .FillColor = 16744448
-		' .BackColor = 16744448
-		'
-		' TextOut(20, 220, TEXT("GDI"), 11);
-		' .TransferDoubleBuffer
 	End With
 
 
@@ -808,15 +759,9 @@ End Sub
 
 Private Sub Form1Type.Form_Show(ByRef Sender As Form)
 	BoardBitm.LoadFromFile(ExePath & "/../Resources/Wheel.png")
-	' RadioGDI.Checked = True
-	With PictureBK.Canvas
-		' '.FillColor = 16744448
-		' .UsingGdip = RadioGDI.Checked
-	End With
 End Sub
 
 Private Sub Form1Type.PictureBK_MouseMove(ByRef Sender As Control, MouseButton As Integer, x As Integer, y As Integer, Shift As Integer)
-	' If MouseButton = 0 Then Sender.Location = Type<My.Sys.Drawing.Point>(Sender.Left + x - Ms.X, Sender.Top + y - Ms.Y) : Sender.Repaint
 End Sub
 
 Private Sub Form1Type.PictureBK_MouseDown(ByRef Sender As Control, MouseButton As Integer, x As Integer, y As Integer, Shift As Integer)
@@ -843,14 +788,9 @@ Private Sub Form1Type.PictureBK_MouseUp(ByRef Sender As Control, MouseButton As 
 	TempRect.LeftMy = 100
 	TempRect.RightMy = 200
 	TempRect.TopMy = FillStyleMy.fsBorderMY
-	' Debug.Print 9999, TempRect.LeftMy, TempRect.RightMy, TempRect.TopMy
 End Sub
 
 Private Sub Form1Type.Form_Create(ByRef Sender As Control)
-	' Dim As Rect R
-	' GetClientRect GetDesktopWindow(), @R
-	' If R.Right < 10 Then R = Type<Rect>(0, 0, 1920, 1080)
-	' This.Graphic.Bitmap.LoadFromScreen(R.Left, R.Top, R.Right, R.Bottom)
 End Sub
 
 Private Sub Form1Type.RadioGDI_Click(ByRef Sender As CheckBox)
@@ -864,18 +804,6 @@ Private Sub Form1Type.PictureBK_Click(ByRef Sender As Control)
 End Sub
 
 Private Sub Form1Type.cmdGDIDraw_Click(ByRef Sender As Control)
-	' Dim As Integer x = -140
-	' Dim As Integer y = -40
-	' Dim As Integer r = 30
-	' With PictureBK.Canvas
-	' .Circle x, y, 2 * r
-	' .Line x, y - 2 * r, x, y + 2 * r, 7, "B"
-	' '.Paint x - r, y, 15, 7
-	' .Circle x, y - r / 2, r - 1, clWhite
-	' .Circle x, y + r / 2, r - 1, clBlack
-	' .Circle x, y - r / 2, r / 3, clBlack
-	' .Circle x, y + r / 2, r / 3, clWhite
-	' End With
 End Sub
 
 Private Sub Form1Type.RadioGDIPlus_Click(ByRef Sender As RadioButton)

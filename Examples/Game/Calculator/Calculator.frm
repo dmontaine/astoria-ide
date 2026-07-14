@@ -15,10 +15,8 @@
 	#include once "mff/Label.bi"
 	#include once "mff/CommandButton.bi"
 	#include once "mff/Textbox.bi"
-	#include once "string.bi"
 	#include once "mff/Panel.bi"
 	#include once "Com_MSScriptControl.bi"
-	#include once "Basic.bi"
 	
 	Using My.Sys.Forms
 	Using My.Sys.Drawing
@@ -323,7 +321,6 @@ Private Sub CalculatorType.cmdNum_Click(ByRef Sender As Control)
 	Dim As Integer Index = Val(Mid(Sender.Name, InStrRev(Sender.Name, "(") + 1))
 	Dim As String key, tmpStr 
     key = cmdNum(Index).Caption
-    'If Right(txtExpressions.Text, 1) = "=" Then txtExpressions.Text = "" : txtResult.Text = "" 
     If key = "=" Then
     	tmpStr = Trim(txtExpressions.Text, " ")
     	If Right(tmpStr, 1) = "="  Then tmpStr = Mid(tmpStr, 1, Len(tmpStr) - 1)

@@ -58,7 +58,5 @@ Type PDEVPROPKEY As _DEVPROPKEY Ptr
 Const DEVPROPID_FIRST_USABLE = 2
 
 #define DEFINE_DEVPROPKEY(n, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8, pid) Dim Shared n As DEVPROPKEY = (l, w1, w2, {b1, b2, b3, b4, b5, b6, b7, b8}, pid)
-'#define DEFINE_DEVPROPKEY(n, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8, pid) Extern n Alias #n As DEVPROPKEY: Dim n As DEVPROPKEY = (l, w1, w2, {b1, b2, b3, b4, b5, b6, b7, b8}, pid)
-'#define DEFINE_DEVPROPKEY(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8, pid) EXTERN_C Const DEVPROPKEY name
 #define IsEqualDevPropKey(a, b) (((a).pid = (b).pid) AndAlso IsEqualIID(@(a).fmtid, @(b).fmtid))
 

@@ -1,4 +1,4 @@
-﻿' Copyright (c) 2025 CM.Wang
+' Copyright (c) 2025 CM.Wang
 ' Freeware. Use at your own risk.
 
 '#Region "Form"
@@ -15,7 +15,6 @@
 	#include once "mff/TextBox.bi"
 	#include once "mff/ComboBoxEdit.bi"
 	
-	#include once "../MDINotepad/Text.bi"
 	#include once "WMI.bi"
 	
 	Using My.Sys.Forms

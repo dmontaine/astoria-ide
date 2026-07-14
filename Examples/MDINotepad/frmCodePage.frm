@@ -636,7 +636,6 @@ Private Sub frmCodePageType.chkPreview_Click(ByRef Sender As CheckBox)
 	If Splitter1.Visible <> chkPreview.Checked Then
 		txtPreviewSize.Enabled = chkPreview.Checked
 		txtPreview.Visible = chkPreview.Checked
-		'StatusBar1.Visible = chkPreview.Checked
 		Splitter1.Visible = chkPreview.Checked
 		If chkPreview.Checked = False Then
 			Form_Resize(This, 0, 0)

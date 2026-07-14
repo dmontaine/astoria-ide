@@ -31,7 +31,7 @@ Private Function FilesSync.Create(Owner As Any Ptr, PathStr As WString) As Integ
 	End If
 End Function
 
-Private Function FilesSync.Sync(Owner As Any Ptr, SourceStr As WString, TargetStr As WString) As Integer ', ByVal cData As Long = 0, ByVal cMode As Long = 0) As Integer
+Private Function FilesSync.Sync(Owner As Any Ptr, SourceStr As WString, TargetStr As WString) As Integer
 	mOwner = Owner
 	WLet(mPathA, SourceStr)
 	WLet(mPathB, TargetStr)
@@ -100,7 +100,6 @@ Private Destructor FilesSync
 	If mSyncTarget Then Deallocate(mSyncTarget)
 	If mPercentPath Then Deallocate(mPercentPath)
 	If mLogFile Then Deallocate(mLogFile)
-	'If WStrTmpPtr Then Deallocate(WStrTmpPtr)
 End Destructor
 
 Private Sub FilesSync.SyncInit()
@@ -505,13 +504,11 @@ Private Sub FilesSync.ListFile()
 	mListPathCount = -1
 	ArrayDeallocate(mListFile())
 	ArrayDeallocate(mListPath())
-	'Erase mListWFD
-	
+
 	ListFileSub("")
-	
+
 	If mListFileCount >-1 Then
 		ReDim Preserve mListFile(mListFileCount)
-		'ReDim Preserve mListWFD(mListFileCount)
 	End If
 	If mListPathCount >-1 Then ReDim Preserve mListPath(mListPathCount)
 End Sub
@@ -541,10 +538,8 @@ Private Sub FilesSync.ListFileSub(PathStr As WString)
 			tIndex = mListFileCount + 1
 			If ((tIndex Mod mFileInc) = 0) Or (tIndex = 0) Then
 				ReDim Preserve mListFile(mListFileCount + mFileInc)
-				'ReDim Preserve mListWFD(mListFileCount + mFileInc)
 			End If
 			WLet(mListFile(tIndex), PathStr + "\" + wfd.cFileName)
-			'memcpy(@mListWFD(tIndex), @wfd, SizeOf(wfd))
 			mListFileCount = tIndex
 		End If
 		If mCancel Then Exit Do

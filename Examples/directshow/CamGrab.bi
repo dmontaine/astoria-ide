@@ -69,7 +69,6 @@ Dim Shared g_pCallback As Any Ptr = 0
 ' --------------------------
 ' 辅助函数声明
 ' --------------------------
-Declare Function CreatePreviewWindow() As HWND
 Declare Function CreateSampleGrabberCB() As Any Ptr
 Declare Function FormatFPS(ByVal fps As Double) As String
 Declare Function GetCurrentTimestamp() As String
@@ -77,7 +76,6 @@ Declare Function GetFirstCaptureDevice(ByRef ppMoniker As IMoniker Ptr Ptr) As H
 Declare Function InitializeDirectShow(ByRef sMon As IMoniker Ptr = NULL) As HRESULT
 Declare Function OnPainting() As LRESULT
 Declare Function SaveRGB24AsBMP(ByVal filename As String, ByVal pBits As UByte Ptr, ByVal sWidth As Long, ByVal sHeight As Long) As Long
-Declare Function WindowProc(ByVal HWND As HWND, ByVal uMsg As UINT, ByVal WPARAM As WPARAM, ByVal LPARAM As LPARAM) As LRESULT
 Declare Sub CleanupDirectShow()
 Declare Sub DisconnectFilterPins(ByVal PFILTER As IBaseFilter Ptr)
 Declare Sub DisconnectFilters(ByVal pGraph As IGraphBuilder Ptr)
@@ -255,8 +253,6 @@ Function SGCB_BufferCB(ByVal pThis As Any Ptr, ByVal SampleTime As Double, ByVal
 				Dim filename As String = "capture_" + Format(g_captureCount) + "_" + _
 				Format(GetTickCount()) + ".bmp"
 				If SaveRGB24AsBMP(filename, @g_frameData(0), g_frameWidth, g_frameHeight) Then
-					'Dim newTitle As String = *APP_TITLE + " - Saved: " + filename + " - " + FormatFPS(g_currentFPS)
-					'SetWindowText(g_hwnd, StrPtr(newTitle))
 					g_captureCount += 1
 				End If
 			End If

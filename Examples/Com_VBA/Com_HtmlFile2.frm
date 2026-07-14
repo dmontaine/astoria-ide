@@ -153,10 +153,7 @@ Private Sub Form2Type.cmdJson2_Click(ByRef Sender As Control)
 	oHttp.Open "GET", "https://www.msn.com", False
     oHttp.send
     Dim As String strHtml = oHttp.responseText ' 得到数据
-    'oWindow.clipboardData.SetData "text", strHtml '写入剪贴板
-    'oWindow.execScript "var js= " & strHtml  ' 改写成对象创建语句
-    'Dim As vbVariant kuwo = oWindow.js ' 获取解析后的对象
-    TextBox1.Text = strHtml  'kuwo.view
+    TextBox1.Text = strHtml
 End Sub
 
 Private Sub Form2Type.cmdShowForm1_Click(ByRef Sender As Control)

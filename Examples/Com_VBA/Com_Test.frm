@@ -166,12 +166,7 @@ Private Sub Form1Type.cmdJson2_Click(ByRef Sender As Control)
 	oHttp.Open "GET", "https://www.marketscreener.com/COLUMBIA-SPORTSWEAR-COMPA-8859/company/", False
 	oHttp.send
 	Dim As String strHtml = oHttp.responseText ' 得到数据
-	'Window.clipboardData.SetData "text", strHtml '写入剪贴板
-	'Dim As Object_Msxml2 oName = oDom.getElementsByTagName("table")
-	'Print oName(0).innerHTML
-	'oWindow.execScript "var js= " & strHtml  ' 改写成对象创建语句
-	'Dim As vbVariant kuwo = oWindow.js ' 获取解析后的对象
-	TextBox1.Text = strHtml  'kuwo.view
+	TextBox1.Text = strHtml
 End Sub
 #include once "Com_HtmlFile2.frm"
 Private Sub Form1Type.cmdShow2_Click(ByRef Sender As Control)
@@ -190,7 +185,6 @@ Private Sub Form1Type.cmdExcel_Click(ByRef Sender As Control)
 	Dim As Object_Excel CellValue 
 	Dim As Object_Excel xlSheet = xlApp.Worksheets(2)
 	Dim As Object_Excel xlSheet1 = xlApp.Worksheets(1)
-	'Dim xlSheet As vbVariant = xlApp.ActiveSheet
 	xlSheet1.Range("A1").Value = "Sheet115.3434353535" 'A1格赋值
 	xlSheet1.Range("A2").Value = 8.676843553454353453453454 'A2格赋值
 	xlSheet1.Range("A3").Value = 16.3243243242344 'A3格赋值
@@ -204,7 +198,6 @@ Private Sub Form1Type.cmdExcel_Click(ByRef Sender As Control)
 	'大写转小写
 	With xlSheet.Range("A1") 'let's operate from the TopLeft-cell
 		Dim SArr(0 To 2) As String = {"Hello", "COM-calls", "from FB"}
-		'Dim SArr(1 To 2) As String = {{"11111", "22222", "33333"}, {"44444", "55555", "66666"}}
 		For iRow As Integer = 0 To UBound(SArr, iRow)
 			For iCol As Integer = 0 To UBound(SArr, iRow)
 				xlSheet.Range("A1").Offset(0, iCol).Value = SArr(iCol)
@@ -212,8 +205,6 @@ Private Sub Form1Type.cmdExcel_Click(ByRef Sender As Control)
 		Next
 		CellValue = xlApp.Range("B5").Value & Chr(13)  & Chr(10) & xlApp.Range("B6").Value '.Offset(6, 0).Value '<- should return "COM-calls"
 		Print CellValue
-		'CellValue = .Resize("3", "3").Value
-		'Print CellValue
 	End With '<- at this point, the above instantiated A1-Range-Object will be destroyed implicitly
 	MsgBox Str(CellValue) '... now show the CellValue we have retrieved (should contain "COM-calls") ...
 	xlApp.Save(ExePath & "\com_Excel_bak.xlsx")  '保存已经存在的EXCEL工件簿文件

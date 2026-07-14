@@ -1,4 +1,4 @@
-﻿' MediaPlayer 媒体播放器
+' MediaPlayer 媒体播放器
 ' Copyright (c) 2024 CM.Wang
 ' Freeware. Use at your own risk.
 
@@ -902,144 +902,6 @@
 	#endif
 '#End Region
 
-'https://learn.microsoft.com/en-us/windows/win32/directshow/event-notification-codes.
-Private Function MsgStr(MSG As Long) ByRef As String
-	Static r As String
-	
-	Select Case MSG
-	Case EC_SYSTEMBASE
-		r = "EC_SYSTEMBASE = " & EC_SYSTEMBASE
-	Case EC_USER
-		r = "EC_USER = " & EC_USER
-	Case EC_COMPLETE
-		r = "EC_COMPLETE = " & EC_COMPLETE
-	Case EC_USERABORT
-		r = "EC_USERABORT = " & EC_USERABORT
-	Case EC_ERRORABORT
-		r = "EC_ERRORABORT = " & EC_ERRORABORT
-	Case EC_TIME
-		r = "EC_TIME = " & EC_TIME
-	Case EC_REPAINT
-		r = "EC_REPAINT = " & EC_REPAINT
-	Case EC_STREAM_ERROR_STOPPED
-		r = "EC_STREAM_ERROR_STOPPED = " & EC_STREAM_ERROR_STOPPED
-	Case EC_STREAM_ERROR_STILLPLAYING
-		r = "EC_STREAM_ERROR_STILLPLAYING = " & EC_STREAM_ERROR_STILLPLAYING
-	Case EC_ERROR_STILLPLAYING
-		r = "EC_ERROR_STILLPLAYING = " & EC_ERROR_STILLPLAYING
-	Case EC_PALETTE_CHANGED
-		r = "EC_PALETTE_CHANGED = " & EC_PALETTE_CHANGED
-	Case EC_VIDEO_SIZE_CHANGED
-		r = "EC_VIDEO_SIZE_CHANGED = " & EC_VIDEO_SIZE_CHANGED
-	Case EC_QUALITY_CHANGE
-		r = "EC_QUALITY_CHANGE = " & EC_QUALITY_CHANGE
-	Case EC_SHUTTING_DOWN
-		r = "EC_SHUTTING_DOWN = " & EC_SHUTTING_DOWN
-	Case EC_CLOCK_CHANGED
-		r = "EC_CLOCK_CHANGED = " & EC_CLOCK_CHANGED
-	Case EC_PAUSED
-		r = "EC_PAUSED = " & EC_PAUSED
-	Case EC_OPENING_FILE
-		r = "EC_OPENING_FILE = " & EC_OPENING_FILE
-	Case EC_BUFFERING_DATA
-		r = "EC_BUFFERING_DATA = " & EC_BUFFERING_DATA
-	Case EC_FULLSCREEN_LOST
-		r = "EC_FULLSCREEN_LOST = " & EC_FULLSCREEN_LOST
-	Case EC_ACTIVATE
-		r = "EC_ACTIVATE = " & EC_ACTIVATE
-	Case EC_NEED_RESTART
-		r = "EC_NEED_RESTART = " & EC_NEED_RESTART
-	Case EC_WINDOW_DESTROYED
-		r = "EC_WINDOW_DESTROYED = " & EC_WINDOW_DESTROYED
-	Case EC_DISPLAY_CHANGED
-		r = "EC_DISPLAY_CHANGED = " & EC_DISPLAY_CHANGED
-	Case EC_STARVATION
-		r = "EC_STARVATION = " & EC_STARVATION
-	Case EC_OLE_EVENT
-		r = "EC_OLE_EVENT = " & EC_OLE_EVENT
-	Case EC_NOTIFY_WINDOW
-		r = "EC_NOTIFY_WINDOW = " & EC_NOTIFY_WINDOW
-	Case EC_STREAM_CONTROL_STOPPED
-		r = "EC_STREAM_CONTROL_STOPPED = " & EC_STREAM_CONTROL_STOPPED
-	Case EC_STREAM_CONTROL_STARTED
-		r = "EC_STREAM_CONTROL_STARTED = " & EC_STREAM_CONTROL_STARTED
-	Case EC_END_OF_SEGMENT
-		r = "EC_END_OF_SEGMENT = " & EC_END_OF_SEGMENT
-	Case EC_SEGMENT_STARTED
-		r = "EC_SEGMENT_STARTED = " & EC_SEGMENT_STARTED
-	Case EC_LENGTH_CHANGED
-		r = "EC_LENGTH_CHANGED = " & EC_LENGTH_CHANGED
-	Case EC_DEVICE_LOST
-		r = "EC_DEVICE_LOST = " & EC_DEVICE_LOST
-	Case EC_SAMPLE_NEEDED
-		r = "EC_SAMPLE_NEEDED = " & EC_SAMPLE_NEEDED
-	Case EC_PROCESSING_LATENCY
-		r = "EC_PROCESSING_LATENCY = " & EC_PROCESSING_LATENCY
-	Case EC_SAMPLE_LATENCY
-		r = "EC_SAMPLE_LATENCY = " & EC_SAMPLE_LATENCY
-	Case EC_SCRUB_TIME
-		r = "EC_SCRUB_TIME = " & EC_SCRUB_TIME
-	Case EC_STEP_COMPLETE
-		r = "EC_STEP_COMPLETE = " & EC_STEP_COMPLETE
-	Case EC_NEW_PIN
-		r = "EC_NEW_PIN = " & EC_NEW_PIN
-	Case EC_RENDER_FINISHED
-		r = "EC_RENDER_FINISHED = " & EC_RENDER_FINISHED
-	Case EC_TIMECODE_AVAILABLE
-		r = "EC_TIMECODE_AVAILABLE = " & EC_TIMECODE_AVAILABLE
-	Case EC_EXTDEVICE_MODE_CHANGE
-		r = "EC_EXTDEVICE_MODE_CHANGE = " & EC_EXTDEVICE_MODE_CHANGE
-	Case EC_STATE_CHANGE
-		r = "EC_STATE_CHANGE = " & EC_STATE_CHANGE
-	Case EC_PLEASE_REOPEN
-		r = "EC_PLEASE_REOPEN = " & EC_PLEASE_REOPEN
-	Case EC_STATUS
-		r = "EC_STATUS = " & EC_STATUS
-	Case EC_MARKER_HIT
-		r = "EC_MARKER_HIT = " & EC_MARKER_HIT
-	Case EC_LOADSTATUS
-		r = "EC_LOADSTATUS = " & EC_LOADSTATUS
-	Case EC_FILE_CLOSED
-		r = "EC_FILE_CLOSED = " & EC_FILE_CLOSED
-	Case EC_ERRORABORTEX
-		r = "EC_ERRORABORTEX = " & EC_ERRORABORTEX
-	Case EC_EOS_SOON
-		r = "EC_EOS_SOON = " & EC_EOS_SOON
-	Case EC_CONTENTPROPERTY_CHANGED
-		r = "EC_CONTENTPROPERTY_CHANGED = " & EC_CONTENTPROPERTY_CHANGED
-	Case EC_BANDWIDTHCHANGE
-		r = "EC_BANDWIDTHCHANGE = " & EC_BANDWIDTHCHANGE
-	Case EC_VIDEOFRAMEREADY
-		r = "EC_VIDEOFRAMEREADY = " & EC_VIDEOFRAMEREADY
-	Case EC_GRAPH_CHANGED
-		r = "EC_GRAPH_CHANGED = " & EC_GRAPH_CHANGED
-	Case EC_CLOCK_UNSET
-		r = "EC_CLOCK_UNSET = " & EC_CLOCK_UNSET
-	Case EC_VMR_RENDERDEVICE_SET
-		r = "EC_VMR_RENDERDEVICE_SET = " & EC_VMR_RENDERDEVICE_SET
-	Case EC_VMR_SURFACE_FLIPPED
-		r = "EC_VMR_SURFACE_FLIPPED = " & EC_VMR_SURFACE_FLIPPED
-	Case EC_VMR_RECONNECTION_FAILED
-		r = "EC_VMR_RECONNECTION_FAILED = " & EC_VMR_RECONNECTION_FAILED
-	Case EC_PREPROCESS_COMPLETE
-		r = "EC_PREPROCESS_COMPLETE = " & EC_PREPROCESS_COMPLETE
-	Case EC_CODECAPI_EVENT
-		r = "EC_CODECAPI_EVENT = " & EC_CODECAPI_EVENT
-	Case EC_BUILT
-		r = "EC_BUILT = " & EC_BUILT
-	Case EC_UNBUILT
-		r = "EC_UNBUILT = " & EC_UNBUILT
-	Case EC_WMT_EVENT_BASE
-		r = "EC_WMT_EVENT_BASE = " & EC_WMT_EVENT_BASE
-	Case EC_WMT_INDEX_EVENT
-		r = "EC_WMT_INDEX_EVENT = " & EC_WMT_INDEX_EVENT
-	Case EC_WMT_EVENT
-		r = "EC_WMT_EVENT = " & EC_WMT_EVENT
-	End Select
-	
-	Return r
-End Function
-
 Function CaptureBmp(filename As ZString Ptr, pMC As IMediaControl Ptr, pBV2 As IBasicVideo2 Ptr) As HRESULT
 	'IBasicVideo::GetCurrentImage
 	'Retrieves the current image waiting at the renderer.
@@ -1059,14 +921,10 @@ Function CaptureBmp(filename As ZString Ptr, pMC As IMediaControl Ptr, pBV2 As I
 	Dim As FILTER_STATE pfs
 	Do
 		hr = pMC->lpVtbl->GetState(pMC, NULL, @pfs)
-		'Print "FILTER_STATE=" & pfs & ", " &  hr
 		Select Case hr
 		Case VFW_S_STATE_INTERMEDIATE
-			'Print "VFW_S_STATE_INTERMEDIATE"
 		Case VFW_S_CANT_CUE
-			'Print "VFW_S_CANT_CUE"
 		Case E_FAIL
-			'Print "E_FAIL"
 			Return hr
 		Case Else
 		End Select
@@ -1100,7 +958,7 @@ Function CaptureBmp(filename As ZString Ptr, pMC As IMediaControl Ptr, pBV2 As I
 	mbitmapInfoHeader.biClrUsed = 0
 	mbitmapInfoHeader.biClrImportant = 0
 	
-	Dim pBufferSize As Long ' = SizeOf(BITMAPFILEHEADER) + lHeight * lWidth * (mbitmapInfoHeader.biBitCount / 8)
+	Dim pBufferSize As Long
 	Dim pDIBImage As Long Ptr = NULL
 	
 	'6, 获取缓存大小和申请缓存
@@ -1114,10 +972,8 @@ Function CaptureBmp(filename As ZString Ptr, pMC As IMediaControl Ptr, pBV2 As I
 	'8, Retrieves the current image waiting at the renderer.
 	hr = pBV2->lpVtbl->GetCurrentImage(pBV2, @pBufferSize, pDIBImage)
 	If hr = VFW_E_NOT_PAUSED Then
-		'Print "VFW_E_NOT_PAUSED"
 	End If
 	If hr = E_UNEXPECTED Then
-		'Print "E_UNEXPECTED"
 	End If
 	If hr Then Return hr
 	
@@ -1131,7 +987,6 @@ Function CaptureBmp(filename As ZString Ptr, pMC As IMediaControl Ptr, pBV2 As I
 	
 	'10, 写入文件
 	fileHandle = fopen(filename, @Str("wb"))
-	'Print "fopen(filename, @Str(wb)): " & fileHandle
 	If fileHandle Then
 		Dim As DWORD bytesWritten = fwrite(@mbitmapFileHeader, 1, SizeOf(BITMAPFILEHEADER), fileHandle)
 		bytesWritten = fwrite(@mbitmapInfoHeader, 1, SizeOf(BITMAPINFOHEADER), fileHandle)
@@ -1189,8 +1044,7 @@ Private Property frmMediaType.WithPosition(val As Double)
 		lblPosition.Text = "Position: NA"
 	End If
 	tbPosition.Position = 0
-	
-	'lblPosition.Enabled = mWithPosition
+
 	lblLength.Enabled = mWithPosition
 	tbPosition.Enabled = mWithPosition
 	mnuNormal.Enabled = mWithPosition
@@ -1487,13 +1341,11 @@ Private Sub frmMediaType.Form_Message(ByRef Sender As Control, ByRef Msg As Mess
 		Dim lParam2 As LONG_PTR
 		
 		If pIMediaEventEx Then
-			'Debug.Print "Enter event loop"
 			Do
 				Dim hr As HRESULT
 				hr = pIMediaEventEx->lpVtbl->GetEvent(pIMediaEventEx, @lEventCode, @lParam1, @lParam2, 0)
 				If hr <> S_OK Then Exit Do
 				pIMediaEventEx->lpVtbl->FreeEventParams(pIMediaEventEx, lEventCode, lParam1, lParam2)
-				'Debug.Print MsgStr(lEventCode)
 				If lEventCode = EC_COMPLETE Then
 					If mnuLoop.Checked Then
 						pIMediaPosition->lpVtbl->put_CurrentPosition(pIMediaPosition , 0)
@@ -1501,7 +1353,6 @@ Private Sub frmMediaType.Form_Message(ByRef Sender As Control, ByRef Msg As Mess
 					End If
 				End If
 			Loop
-			'Debug.Print "Exit event loop"
 		End If
 	End Select
 End Sub

@@ -135,7 +135,7 @@ end sub
 '
 ' main
 '
-dim as integer KeyCode,nFrames
+dim as integer KeyCode
 dim as boolean blnExit,blnFadeOut
 dim as single  StreamVolume
 

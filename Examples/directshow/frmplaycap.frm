@@ -69,7 +69,6 @@
 		frmplaycap.MainForm = True
 		frmplaycap.Show
 		App.Run
-		App.Run
 	#endif
 '#End Region
 

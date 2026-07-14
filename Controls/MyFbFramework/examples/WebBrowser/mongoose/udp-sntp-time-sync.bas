@@ -1,21 +1,8 @@
 
 #include once "inc/mongoose.bi"
-' #ifndef __FB_64BIT__
-' #libpath "win32"
-' #else
-' #libpath "win64"
-' #endif
 ' demo for udp(sntp-time-sync)
 Dim Shared s_boot_timestamp As time_t = 0
 Dim Shared s_sntp_conn As mg_connection Ptr = NULL
-
-' private function my_time(byval tp as time_t ptr) as time_t
-' dim as time_t t = s_boot_timestamp + mg_millis() / 1000
-' if tp <> NULL then
-' *tp = t
-' end if
-' return t
-' end function
 
 Private Sub sfn cdecl (ByVal c As mg_connection Ptr, ByVal ev As Long, ByVal ev_data As Any Ptr)
 	If ev = MG_EV_SNTP_TIME Then

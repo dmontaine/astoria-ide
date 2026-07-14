@@ -9,12 +9,10 @@
 #endif
 '#Region "Form"
 	#include once "mff/Form.bi"
-	#include once "mff/Label.bi"
 	#include once "mff/CommandButton.bi"
 	#include once "mff/Picture.bi"
 	#include once "mff/Textbox.bi"
 	#include once "mff/Pen.bi"
-	#include once "mff/ListControl.bi"
 	Using My.Sys.Forms
 	Using My.Sys.Drawing
 	
@@ -29,10 +27,6 @@
 		Declare Sub cmdGDIDraw_Click(ByRef Sender As Control)
 		Declare Static Sub _cmdGDICls_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Sub cmdGDICls_Click(ByRef Sender As Control)
-		Declare Static Sub _CommandButton2_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-		Declare Sub CommandButton2_Click(ByRef Sender As Control)
-		Declare Static Sub _cmdGDIDraw1_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-		Declare Sub cmdGDIDraw1_Click(ByRef Sender As Control)
 		Declare Static Sub _Form_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Sub Form_Click(ByRef Sender As Control)
 		Declare Constructor
@@ -196,10 +190,6 @@
 		(*Cast(Form1Type Ptr, Sender.Designer)).Form_Click(Sender)
 	End Sub
 	
-	Private Sub Form1Type._CommandButton2_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-		(*Cast(Form1Type Ptr, Sender.Designer)).CommandButton2_Click(Sender)
-	End Sub
-	
 	Private Sub Form1Type._cmdGDICls_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		(*Cast(Form1Type Ptr, Sender.Designer)).cmdGDICls_Click(Sender)
 	End Sub
@@ -230,20 +220,13 @@ Private Sub Form1Type.CommandButton1_Click(ByRef Sender As Control)
 	Dim As Double A(1), B(1), C(1), D(1), E(1), X, Y
 	Dim T As Double = Timer
 	' Coordination  坐标系统
-	CommandButton1.Caption = "Waiting......Drawing"  '"稍等，正在绘画"     '"Waiting......Drawing" '
-	'Picture1.Visible = False
+	CommandButton1.Caption = "Waiting......Drawing"
 	With Picture1.Canvas
-		'.Cls
 		.Scale(-10, -10, 10, 10)
 		.Pen.Color = clGreen
 		.Pen.Size = 2
 		.Pen.Style = PenStyle.psDashDot
-		'.Pen.Mode = PenMode.pmMerge
 		' draw across  画十字线条
-		'.FillMode = BrushFillMode.bmOpaque
-		'.Brush.Style = BrushStyles.bsSolid
-		'.Rectangle -10 , -10 , 10 , 10
-		'.Line -10 , -10 , 10 , 10, clblue, "BF"
 		.Line -10 , 0 , 10 , 00
 		.Line 0 , -10 , 0 , 10
 		.TextOut 10 , 0, "1", clGreen , -1
@@ -252,12 +235,6 @@ Private Sub Form1Type.CommandButton1_Click(ByRef Sender As Control)
 		.TextOut 20 - 3 , 1000, "4", clGreen , -1
 		.TextOut 1 , 1, "0", clGreen , -1
 		
-		' drawing arrow  化箭头
-		'    .Line 0 , 1000 , -125 , 950
-		'    .Line 0 , 1000 , 125 , 950
-		'    .Line 1000 , 0 , 950 , 125
-		'    .Line 1000 , 0 , 950 , -125
-		'
 		A(0) = Val(Text1(0).Text): A(1) = Val(Text1(1).Text)
 		B(0) = Val(Text2(0).Text): B(1) = Val(Text2(1).Text)
 		C(0) = Val(Text3(0).Text): C(1) = Val(Text3(1).Text)
@@ -268,49 +245,30 @@ Private Sub Form1Type.CommandButton1_Click(ByRef Sender As Control)
 		If D(0) < 1 Then D(0) = 1: If D(1) < 1 Then D(1) = 1
 		If E(0) < 1 Then E(0) = 1: If E(1) < 1 Then E(1) = 1
 		
-		For i As Long = -72000 To 72000 'Step  0.1
+		For i As Long = -72000 To 72000
 			X = (Sin(i * A(0)) * (Exp(Cos(i)) - B(0) * Cos(C(0) * i) - Sin(i / D(0)) ^ E(0)))
 			Y = (Cos(i * A(1)) * (Exp(Cos(i)) - B(1) * Cos(C(1) * i) - Sin(i / D(1)) ^ E(1)))
 			.SetPixel X, Y, clRed
-			'.TextOut 20, 20, Str(i), clYellow, -1
 		Next
-		.TextOut - 9, -9, "Elapsed Time: " & Timer - T & "ms", clGreen , -1 '"用时 " & GetTickCount - t & "毫秒", clGreen , -1
+		.TextOut - 9, -9, "Elapsed Time: " & Timer - T & "ms", clGreen , -1
 	End With
-	
-	CommandButton1.Caption = "Start Draw" '"开始绘画"    '"Start Draw"
-	'
+
+	CommandButton1.Caption = "Start Draw"
 End Sub
 
 Private Sub Form1Type.Picture1_Paint(ByRef Sender As Control, ByRef Canvas As My.Sys.Drawing.Canvas)
-	'cmdGDIDraw_Click(Sender)
 	CommandButton1_Click(Sender)
 End Sub
 
 Private Sub Form1Type.Form_Resize(ByRef Sender As Control, NewWidth As Integer, NewHeight As Integer)
-	'CommandButton1_Click(Sender)
-	'Debug.Print "NewWidth=" & NewWidth & " NewHeight=" & NewHeight
-End Sub
-
-Sub Taijitu(x As Integer, y As Integer, r As Integer)
-	'With Picture1.Canvas
-	'	.Circle x, y, 2 * r, 0, , , , F
-	'	.Line x, y - 2 * r, x, y + 2 * r, 7, B
-	'	.Paint x - r, y, 15, 7
-	'	.Circle x, y - r, r - 1, 15, , , , F
-	'	.Circle x, y + r, r - 1,  0, , , , F
-	'	.Circle x, y - r, r / 3,  0, , , , F
-	'	.Circle x, y + r, r / 3, 15, , , , F
-	'End With
 End Sub
 
 Private Sub Form1Type.cmdGDIDraw_Click(ByRef Sender As Control)
 	With Picture1.Canvas
-		'.Cls
 		.Scale(-100, 100, 100, -100)
 		.Pen.Color = clGreen
 		.Pen.Size = 1
 		.Pen.Style = PenStyle.psDashDot
-		'Print Picture1.BackColor
 		.FillMode = BrushFillMode.bmTransparent
 		.Line (-100, 0, 100, 0) '画X轴
 		.Line (0, 100, 0, -100) '画Y轴
@@ -353,7 +311,6 @@ Private Sub Form1Type.cmdGDIDraw_Click(ByRef Sender As Control)
 		.Pie(20, 70, 40, 50, 60, 80, 40, 60)
 		
 		Dim As My.Sys.Drawing.Point pt(4) = {(-60, + 20), (-90, + 110), (-10, 0), (-30, 70)}
-		'{{90, 130}, {60, 40}, {140, 150}, {160, 80}}
 		'//绘制椭圆、矩形
 		.Ellipse(pt(0).X, pt(0).Y, pt(1).X, pt(0).Y)
 		.Rectangle(pt(2).X, pt(2).Y, pt(3).X, pt(3).Y)
@@ -361,7 +318,6 @@ Private Sub Form1Type.cmdGDIDraw_Click(ByRef Sender As Control)
 		'绘制贝塞尔曲线
 		.Pen.Color = clRed
 		.DrawWidth = 2  'DrawWidth
-		'.PolyBeizer(pt(), 4)
 		'标出贝塞尔曲线的四个锚点
 		.Circle(pt(0).X, pt(0).Y, 4)
 		.Circle(pt(1).X, pt(1).Y, 4)
@@ -392,13 +348,6 @@ Private Sub Form1Type.cmdGDIDraw_Click(ByRef Sender As Control)
 		.FillColor = clGray
 		.Rectangle(20, -80, 60, -90) ' HS_VERTICAL, RGB(0, 0, 0))
 		
-		'Draw Image   绘制位图
-		'StretchDraw(10, 140, 180, 100, TEXT("chenggong.bmp"))
-		'Taijitu(110, 110, 45)
-		'Taijitu(500, 300, 138)
-		
-		'绘制文本
-		'TextOut(20, 220, TEXT("GDI画图输出测试程序"), 11);
 	End With
 End Sub
 

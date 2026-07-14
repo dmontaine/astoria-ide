@@ -11,7 +11,6 @@ Dim As ConsoleType Console
 Console.BackColor = clGreen
 Console.ForeColor = clRed
 Console.Title = "VisualFBEditor - Console Example"
-' MsgBox Console.Title
 
 ' Print Heart shape
 Dim As Single a, x, y
@@ -35,7 +34,6 @@ Console.FontSize(15, 20)
 Console.WriteLine " output CodePage = " & Str(outCodePage)
 Console.WriteLine " Input CodePage = " & Console.InputCodePage
 Debug.Print "Input CodePage = " & Console.InputCodePage, True
-' Console.OutputCodePage= 936
 Console.FillTextAttribute(1, 4, 20, clYellow, clGray, clDarkBlue)
 Console.WriteLine " view width=" &  Console.ViewWidth & "  view height=" &  Console.ViewHeight
 Console.WriteLine " view widthMax=" &  Console.ViewWidthMax & "  view heightMax=" &  Console.ViewHeightMax
@@ -50,12 +48,9 @@ Console.WriteLine " view widthMax=" &  Console.ViewWidthMax & "  view heightMax=
 
 
 Console.InputModeLine= True
-' Console.FillTextEx(10, 5, 212, 58, clYellow, clPink, clCyan)
-' Dim As String YourName = Console.ReadLine(": ")
 Dim As String YourName = Console.ReadLine("Please input your name: ")
 
 Console.WriteLine "Hello, " & YourName
-' Console.WriteLine ""
 Console.WriteLine "Press any key to continue..."
 
 Console.ReadKey

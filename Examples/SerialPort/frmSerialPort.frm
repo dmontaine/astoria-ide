@@ -730,21 +730,18 @@
 '#End Region
 
 Private Sub frmSerialPortType.ComboBoxEdit_Selected(ByRef Sender As ComboBoxEdit, ItemIndex As Integer)
-	'Debug.Print Sender.Name
 	If getStatus Then Exit Sub
 	tmrSetStatus.Enabled = False
 	tmrSetStatus.Enabled = True
 End Sub
 
 Private Sub frmSerialPortType.CheckBox_Click(ByRef Sender As CheckBox)
-	'Debug.Print Sender.Name
 	If getStatus Then Exit Sub
 	tmrSetStatus.Enabled = False
 	tmrSetStatus.Enabled = True
 End Sub
 
 Private Sub frmSerialPortType.TextBox_Change(ByRef Sender As TextBox)
-	'Debug.Print Sender.Name
 	If getStatus Then Exit Sub
 	tmrSetStatus.Enabled = False
 	tmrSetStatus.Enabled = True
@@ -970,7 +967,6 @@ Private Sub frmSerialPortType.PortOpen(e As Boolean)
 End Sub
 
 Private Sub frmSerialPortType.TimerComponent_Timer(ByRef Sender As TimerComponent)
-	'Debug.Print Sender.Name
 	Sender.Enabled = False
 	
 	Select Case Sender.Name

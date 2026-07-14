@@ -1,11 +1,6 @@
 
 #include once "inc/mongoose.bi"
 
-' #ifndef __FB_64BIT__
-' #libpath "win32"
-' #else
-' #libpath "win64"
-' #endif
 Dim Shared s_url As  ZString Ptr =@"ws://localhost:8000/websocket"
 
 Private Sub fn(ByVal c As mg_connection Ptr, ByVal ev As Long, ByVal ev_data As Any Ptr)

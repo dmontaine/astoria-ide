@@ -16,7 +16,6 @@
 	Using My.Sys.Forms
 	
 	Type MDIChildType Extends Form
-		'Editor As Scintilla
 		CodePage As Integer = GetACP()
 		Destroied As Boolean
 		Encode As FileEncodings = FileEncodings.Utf8BOM
@@ -28,7 +27,6 @@
 		mTitle As WString Ptr = NULL
 		mTitleTmp As WString Ptr = NULL
 		
-		'NewLine As NewLineTypes = NewLineTypes.WindowsCRLF
 		Declare Property NewLine As NewLineTypes
 		Declare Property NewLine(val As NewLineTypes)
 		
@@ -42,7 +40,6 @@
 		
 		Declare Sub Form_Activate(ByRef Sender As Form)
 		Declare Sub Form_Close(ByRef Sender As Form, ByRef Action As Integer)
-		'Declare Sub Form_Create(ByRef Sender As Control)
 		Declare Sub Form_Destroy(ByRef Sender As Control)
 		Declare Sub Form_DropFile(ByRef Sender As Control, ByRef Filename As WString)
 		Declare Sub Editor_DblClick(ByRef Sender As ScintillaControl)

@@ -190,18 +190,13 @@ Private Sub Scintilla.Create(ParentFHandle As Any Ptr)
 	Dim As Integer lExStyle = 0
 	Dim As Integer lStyle = WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or WS_BORDER
 	FHandle = CreateWindowEx(lExStyle, "Scintilla", 0, lStyle, 0, 0, rt.Right - rt.Left, rt.Bottom - rt.Top, ParentFHandle, NULL, 0, 0)
-	
-	'font quality (antialiasing method)
-	'SendMessage(FHandle, SCI_SETFONTQUALITY, SC_EFF_QUALITY_LCD_OPTIMIZED, 0)
-	
+
 	'set margin 0 as linenumber
 	SendMessage(FHandle, SCI_SETMARGINTYPEN, 0, SC_MARGIN_NUMBER)
-	'SendMessage(FHandle, SCI_SETMARGINMASKN, 0, STYLE_LINENUMBER)
 	MarginWidth(0) = 35
-	
+
 	'set margin 1 as fold
 	SendMessage(FHandle, SCI_SETMARGINTYPEN, 1, SC_MARGIN_SYMBOL)
-	'SendMessage(FHandle, SCI_SETMARGINMASKN, 1, SC_MASK_FOLDERS)
 	MarginWidth(1) = 0
 	
 	'set when text is pasted any line ends are converted to match the document's end of line mode
@@ -224,20 +219,13 @@ Private Sub Scintilla.Create(ParentFHandle As Any Ptr)
 	SendMessage(FHandle, SCI_SETELEMENTCOLOUR, SC_ELEMENT_SELECTION_BACK, RGBA(&hff, &h40, &h40, &hff))
 	SendMessage(FHandle, SCI_SETELEMENTCOLOUR, SC_ELEMENT_SELECTION_INACTIVE_TEXT, RGBA(&hff, &hff, &hff, &hff))
 	SendMessage(FHandle, SCI_SETELEMENTCOLOUR, SC_ELEMENT_SELECTION_INACTIVE_BACK, RGBA(&h40, &h40, &hff, &hff))
-	
-	'set white space
-	'SendMessage(FHandle, SCI_SETELEMENTCOLOUR, SC_ELEMENT_WHITE_SPACE, RGBA(&h80, &h80, &h80, &h80))
-	
+
 	'set caretline layer
 	SendMessage(FHandle, SCI_SETCARETLINELAYER, SC_LAYER_BASE, 0)
 	
 	'set an event mask that determines which document change events are notified to the container with SCN_MODIFIED and SCEN_CHANGE
 	SendMessage(FHandle, SCI_SETMODEVENTMASK, SC_MOD_INSERTTEXT Or SC_MOD_DELETETEXT, 0)
-	
-	'Disable scintilla vertical scroll bar (wParam = 1 to enable)
-	'SendMessage(FHandle, SCI_SETVSCROLLBAR, 0, 0)
-	'SendMessage(FHandle, SCI_SETHSCROLLBAR, 0, 0)
-	
+
 	DarkMode = False
 End Sub
 

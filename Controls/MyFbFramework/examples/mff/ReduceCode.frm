@@ -187,7 +187,6 @@
 	
 	#if _MAIN_FILE_ = __FILE__
 		ReduceCode.MainForm = True
-		' ReduceCode.darkmode= True
 		ReduceCode.Show
 		App.Run
 	#endif

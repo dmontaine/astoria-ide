@@ -1,11 +1,6 @@
 ﻿
 #include once "inc/mongoose.bi"
 #include once "crt/stdio.bi"
-' #ifndef __FB_64BIT__
-' #libpath "win32"
-' #else
-' #libpath "win64"
-' #endif
 
 Dim Shared s_listen_on  As ZString Ptr = @Str("ws://localhost:8000")
 Dim Shared s_web_root As Const ZString Ptr = @Str("web_root")

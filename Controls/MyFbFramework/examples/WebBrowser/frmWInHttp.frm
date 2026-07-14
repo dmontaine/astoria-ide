@@ -8,15 +8,11 @@
 	#define __MAIN_FILE__
 	#ifdef __FB_WIN32__
 		#cmdline "Form1.rc"
-		#ifdef __FB_64BIT__
-			' #cmdline "-gen gas64"
-		#endif
 	#endif
 	Const _MAIN_FILE_ = __FILE__
 #endif
 
 #ifndef __USE_GTK__
-	' #Compile -exx "frmWinsockType.rc"
 #else
 	#define __USE_GTK3__
 	#define _NOT_AUTORUN_FORMS_
@@ -26,12 +22,9 @@
 #include once "vbcompat.bi"
 #include once "mff/CommandButton.bi"
 #include once "mff/TextBox.bi"
-#include once "mff/CommandButton.bi"
 #include once "mff/ComboBoxEdit.bi"
-#include once "mff/Clipboard.bi"
 #include once "mff/TimerComponent.bi"
 #include once "mff/Dialogs.bi"
-#include once "mff/Label.bi"
 
 #ifdef __FB_WIN32__
 	#include once "win/wininet.bi"
@@ -243,7 +236,6 @@ Function Http_Get(ByVal URL As String, ByVal ref As String = "", ByVal user As S
 	user &= Chr(0)
 	pwd &= Chr(0)
 	
-	' DeleteUrlCacheEntry(StrPtr(URL))
 	Dim  hInet As HWND = InternetOpenA(@G_HTTP_Agent, INTERNET_OPEN_TYPE_DIRECT, NULL, NULL, 0)
 	If hInet Then
 		Dim hConn As HWND = InternetConnectA(hInet, StrPtr(host), Prot, StrPtr(user), StrPtr(pwd), INTERNET_SERVICE_HTTP, 0, 0)
@@ -298,7 +290,6 @@ Function StringExtractHTML(ByRef wszMainStr As WString, ByRef wszDelim1 As Const
 End Function
 
 Private Sub frmWinsockType.Form_Close(ByRef Sender As Form, ByRef Action As Integer)
-	' If mTmpString Then Deallocate mTmpString
 End Sub
 
 

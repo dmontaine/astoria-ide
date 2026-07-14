@@ -35,7 +35,7 @@ end sub
 dim as FBS_SOUNDOBJECT  listner
 dim as FBS_SOUNDOBJECT  source
 dim as single           volume,pan,oldVolume,oldPan,w
-dim as integer          hWave,hSound,i
+dim as integer          hWave,hSound
 screenres 640,480
 fbs_Init()
 fbs_Load_WAVFile   (data_path & "pcar.wav",@hWave)

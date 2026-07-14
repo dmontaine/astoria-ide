@@ -1,4 +1,4 @@
-﻿' Radar 窗口探测
+' Radar 窗口探测
 ' Copyright (c) 2023 CM.Wang
 ' Freeware. Use at your own risk.
 
@@ -197,11 +197,7 @@ Private Sub frmRadarType.HighlighthWnd(hWnd As HWND)
 		ObjectHighlight(hWnd, RGB(&h80, &h80, &h80))
 	End If
 	
-	'If phWnd = hWnd Then
-	'	phWnd = 0
-	'Else
-		phWnd = hWnd
-	'End If
+	phWnd = hWnd
 End Sub
 
 Private Sub frmRadarType.ImageBox1_MouseDown(ByRef Sender As Control, MouseButton As Integer, x As Integer, y As Integer, Shift As Integer)
@@ -258,5 +254,4 @@ Private Sub frmRadarType.ImageBox1_MouseUp(ByRef Sender As Control, MouseButton 
 	HighlighthWnd(0)
 	ImageBox1.BackColor = &h808080
 	ReleaseCapture()
-	'InvalidateRect(0, 0, True)
 End Sub

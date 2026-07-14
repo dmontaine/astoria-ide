@@ -74,9 +74,6 @@ Private Sub BassSpectrum.Init(w As Integer = 368 , h As Integer = 127) 'w As Lon
 		pal[128 + 96 + a].rgbBlue = 8 * a
 	Next
 ' create the bitmap
-' specbmp = CreateDIBSection(0, Cast(BITMAPINFO Ptr, bh), DIB_RGB_COLORS, @specbuf(0), NULL, 0)
-' specdc = CreateCompatibleDC(0)
-' SelectObject(specdc, specbmp)
 End Sub
 
 Private Sub BassSpectrum.Update(Chan As DWORD, hWnd As HANDLE)
@@ -115,13 +112,8 @@ Private Sub BassSpectrum.Update(Chan As DWORD, hWnd As HANDLE)
 
 		If specmode = 0 Then ' "normal" FFT Then
 			ReDim specbuf(SpecWidth * (SpecHeight + 1))
-			' memset(specbuf, 0, SpecWidth * SpecHeight)
 			For x = 0 To SpecWidth / 2 - 1
-#if 1
 				y = Sqrt(fft(x + 1)) * 3 * SpecHeight - 4 '  scale it (sqrt To make low values more visible)
-#else
-				y = fft(x + 1) * 10 * SpecHeight ' scale it (linearly)
-#endif
 				If y > SpecHeight Then y = SpecHeight '  cap it
 				If x Then ' interpolate from previous To make the display smoother Then
 					y1 = (y + y1) / 2
@@ -172,7 +164,6 @@ Private Sub BassSpectrum.Update(Chan As DWORD, hWnd As HANDLE)
 
 	' update the display
 	Dim As HDC dc = GetDC(hWnd)
-	' BitBlt(dc, 0, 0, SpecWidth, SpecHeight, specdc, 0, 0, SRCCOPY)
 	SetDIBitsToDevice(dc , 0 , 0 , SpecWidth , SpecHeight , 0 , 0 , 0 , SpecHeight , @specbuf(0) , bh , 0)
 	ReleaseDC(hWnd, dc)
 End Sub

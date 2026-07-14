@@ -12,12 +12,10 @@
 	#if defined(__FB_MAIN__) AndAlso Not defined(__MAIN_FILE__)
 		#define __MAIN_FILE__
 		#ifdef __FB_WIN32__
-			' #cmdline "-static"
 		#endif
 		Const _MAIN_FILE_ = __FILE__
 	#endif
 	#include once "mff/Form.bi"
-	#include once "mff/TextBox.bi"
 	#include once "mff/ComboBoxEdit.bi"
 	#include once "mff/CommandButton.bi"
 	#include once "mff/Label.bi"
@@ -206,8 +204,7 @@ Private Sub Form1Type.cmdRun_Click(ByRef Sender As Control)
 	If ( curl_global_init( CURL_GLOBAL_ALL ) <> 0 ) Then
 		RtfReceive.Text = RtfReceive.Text & Chr(13, 10) & "curl_global_init() failed"
 	End If
-	RtfReceive.Text = RtfReceive.Text & Chr(13, 10) & "Send_File " & __FILE__ 
-	' 'send_file( "test.txt" )
+	RtfReceive.Text = RtfReceive.Text & Chr(13, 10) & "Send_File " & __FILE__
 	Send_File( __FILE__ )
 	
 	curl_global_cleanup( )

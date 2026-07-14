@@ -7,15 +7,12 @@
 		Const _MAIN_FILE_ = __FILE__
 	#endif
 	#include once "mff/Form.bi"
-	#include once "mff/RichTextBox.bi"
 	#include once "mff/Splitter.bi"
 	#include once "mff/HTTP.bi"
 	#include once "mff/CommandButton.bi"
 	#include once "mff/Panel.bi"
-	#include once "mff/CheckBox.bi"
 	#include once "mff/ComboBoxEdit.bi"
 	#include once "mff/TextBox.bi"
-	#include once "mff/ListControl.bi"
 	#include once "mff/Menus.bi"
 	#include once "../MDINotepad/Text.bi"
 	
@@ -309,7 +306,7 @@ Private Sub frmAiAgentType.Form_Create(ByRef Sender As Control)
 	'load setting
 	Dim As WString Ptr f
 	Dim As WString Ptr t, tt()
-	Dim As Integer i, j
+	Dim As Integer j
 	Dim As Boolean def = True
 	WLet(f, ExePath & "\" & "AiAgent.ini")
 	If Len(Dir(*f)) Then
@@ -379,7 +376,6 @@ Private Sub frmAiAgentType.Form_Close(ByRef Sender As Form, ByRef Action As Inte
 	WLet(f, ExePath & "\" & "AiAgent.ini")
 	If Len(Dir(*f)) Then Kill(*f)
 	Dim As WString Ptr t, tt()
-	Dim As Integer i, j
 	ReDim tt(0)
 	WLet(tt(0), *Ai.ProfileName)
 	JoinWStr(tt(), vbCrLf, t)

@@ -21,9 +21,6 @@
 #define DEFINE_GUID(n, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) Dim Shared n As GUID = (l, w1, w2, {b1, b2, b3, b4, b5, b6, b7, b8})
 #define DEFINE_PROPERTYKEY(n, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8, pid) Dim Shared n As PROPERTYKEY = (l, w1, w2, {b1, b2, b3, b4, b5, b6, b7, b8}, pid)
 
-'#define DEFINE_GUID(n, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) Extern n Alias #n As GUID : Dim n As GUID = (l, w1, w2, {b1, b2, b3, b4, b5, b6, b7, b8})
-'#define DEFINE_PROPERTYKEY(n, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8, pid) Extern n Alias #n As PROPERTYKEY : Dim n As PROPERTYKEY = (l, w1, w2, {b1, b2, b3, b4, b5, b6, b7, b8}, pid)
-
 #include once "devpkey.bi"
 #include once "devguid.bi"
 

@@ -65,23 +65,18 @@
 		With Grid1
 			.Name = "Grid1"
 			.Text = ML("Grid1")
-			' .TabIndex = 0
 			.Hint = ML("Double Click or press space start edit, Enter Confirm input!")
-			' .BackColor = clBlue
-			' .ForeColor = clWhite
-			' .BackColor = IIf(g_darkModeEnabled, darkBkColor, GetSysColor(COLOR_WINDOW))
-			' .ForeColor = IIf(g_darkModeEnabled, darkTextColor, GetSysColor(COLOR_WINDOWTEXT))
 			.Anchor.Right = AnchorStyle.asAnchor
 			.Anchor.Left = AnchorStyle.asAnchor
 			.Anchor.Top = AnchorStyle.asAnchor
 			.Anchor.Bottom = AnchorStyle.asAnchor
 			.OwnerData = True
 			.SetBounds 10, 52, 610, 210
-			.Columns.Add "NO.", , 30 , cfRight ', , clPurple, clBlue
-			.Columns.Add ML("Column") & " 1", , 100, cfRight ', , clRed, clBlue
+			.Columns.Add "NO.", , 30 , cfRight
+			.Columns.Add ML("Column") & " 1", , 100, cfRight
 			.Columns.Add ML("Column") & " 2", , 100, cfRight, True, clYellow, clRed
-			.Columns.Add ML("Column") & " 3", , 100, cfRight ', , clBlue, clYellow
-			.Columns.Add ML("Column") & " 4", , 100, cfRight ', , clGreen, clBlue
+			.Columns.Add ML("Column") & " 3", , 100, cfRight
+			.Columns.Add ML("Column") & " 4", , 100, cfRight
 			.Columns.Add ML("Column") & " 5", , 100, cfRight,  True, clPurple, clGreen
 			.Columns[1].Tag = @"0"
 			
@@ -318,7 +313,6 @@ End Sub
 
 Private Sub Form1Type.cmdColDele_Click(ByRef Sender As Control)
 	Dim As Integer Curr = Grid1.SelectedColumnIndex
-	' Print "CurrCol=" & Curr
 	Grid1.Columns.Remove(Curr)
 End Sub
 
@@ -339,7 +333,6 @@ Private Sub Form1Type.cmdLargeData_Click(ByRef Sender As Control)
 	Dim As WString * 255 RowStr
     Dim As Integer  MAX_ROW = 20000
 	With Grid1
-		' chkOwnerData.Checked = Not chkDataArrayPtr.Checked
 		.Clear
 		.OwnerData = chkOwnerData.Checked
 		.FixCols = IIf(chkFixCols.Checked, 1, 0)
@@ -384,7 +377,7 @@ Private Sub Form1Type.cmdLargeData_Click(ByRef Sender As Control)
 				If iRow Mod 15 = 0 Then App.DoEvents  'if rows.count=666666  :254.144s   1 Million: 364.829s    5 Million:512.616s
 			Next
 		End If 
-		.SelectedRowIndex = 0 '.Rows.Count - 1
+		.SelectedRowIndex = 0
 		Debug.Print __FUNCTION__ & ": " & ML("Elasped time:") & Str(Int((Timer - StartShow) * 1000 + 0.5) / 1000) & ML("s. Total Rows/Cols:") & " " & (.Rows.Count - 1) & " / " & (.Columns.Count - 1)
 	End With
 End Sub
@@ -394,8 +387,6 @@ End Sub
 		' This sub send the data to control and overwrite the data in grid
 		Select Case iMask
 		Case LVIF_TEXT
-			' NewText = IIf(ColumnIndex = 0, WStr(RowIndex), "" + Str(RowIndex) + "" + Str(ColumnIndex))
-			' Print "NewText GetDispInfo " = NewText
 		Case LVIF_IMAGE
 			NewText = "1"
 		Case LVIF_INDENT
@@ -413,7 +404,6 @@ Private Sub Form1Type.Grid1_CacheHint(ByRef Sender As Grid, ByVal iFrom As Integ
 		If Not .OwnerData Then Return
 		.FixCols = IIf(chkFixCols.Checked, 1, 0)
 		For iRow As Integer = iFrom To iTo
-			' Debug.Print " iFrom=" & iFrom & " iTo=" & iTo & " State=" & .Rows.Item(iRow)->State
 			If .FixCols <> 0 Then .Rows[iRow][0].Text = Str(iRow + 1) Else .Rows[iRow][0].Text = ML("User") + ML("Row") + Str(iRow + 1) +  ML("Col")
 			If .Rows.Item(iRow)->State = 1 Then Continue For
 			For iCol As Integer = 1 To .Columns.Count - 1
@@ -425,7 +415,6 @@ Private Sub Form1Type.Grid1_CacheHint(ByRef Sender As Grid, ByVal iFrom As Integ
 End Sub
 
 Private Sub Form1Type.Grid1_CellEdited(ByRef Sender As Grid, ByVal RowIndex As Integer, ByVal ColumnIndex As Integer, ByRef NewText As WString)
-	' Debug.Print " RowIndex=" & RowIndex & " Col=" & ColumnIndex & " Text=" & NewText
 End Sub
 
 Private Sub Form1Type.cmdSaveToFile_Click(ByRef Sender As Control)

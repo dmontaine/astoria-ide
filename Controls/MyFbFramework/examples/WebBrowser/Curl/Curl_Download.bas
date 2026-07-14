@@ -26,7 +26,6 @@ Function download_curl(url As String, tout As Double = 10.0) As String
 	End If
  
 	' ' set url and callback
-	' curl_easy_setopt(curlinfo.curl, CURLOPT_SSL_VERIFYPEER, 1)
 	curl_easy_setopt(curlinfo.curl, CURLOPT_CAINFO, "curl-ca-bundle.crt")
 	curl_easy_setopt(curlinfo.curl, CURLOPT_URL, url)
 	curl_easy_setopt(curlinfo.curl, CURLOPT_WRITEDATA, @curlinfo)
@@ -36,7 +35,6 @@ Function download_curl(url As String, tout As Double = 10.0) As String
 	curl_easy_perform(curlinfo.curl) 'execute..
 	curl_easy_cleanup(curlinfo.curl) 'shutdown
 	
-	' Close curlinfo.ff
 	Print curlinfo.content
 	Return curlinfo.content
 End Function
@@ -76,8 +74,6 @@ End Function
 Dim As String content
 
 content = download_curl("https://promo.betfair.com/betfairsp/prices/dwbfpricesukwin13072020.csv")
-' content = download_curl("https://users.freebasic-portal.de/stw/builds/freebasic_manual.chm")
-' Print "done" & content
 Dim As Integer Fn = FreeFile
 Open "freebasic_manual.chm" For Output As #Fn
 Print #Fn, content;

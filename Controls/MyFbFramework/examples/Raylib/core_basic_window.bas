@@ -19,16 +19,13 @@ Dim As Long fileSize
 Dim As UByte Ptr fontFileData = LoadFileData("c:\windows\fonts\simhei.ttf", @fileSize)
 
 SetTargetFPS(60)
-' PlayMusicStream(fxMusic)
 While Not WindowShouldClose()
-	' Print IsKeyPressed(KEY_SPACE)
 	If IsKeyPressed(KEY_SPACE) Then PlaySound fxWav
 	If IsKeyDown(KEY_ENTER) Then PlaySound fxOgg
 	If IsKeyPressed(KEY_P) Then PlayMusicStream(fxMusic)
 	' Updates buffers for music streaming, this should be called on every frame
 	UpdateMusicStream(fxMusic)
-	' If GetMusicTimePlayed(fxMusic) > 0 Then Print "MusicTimePlayed"
-	
+
 	' Unicode,
 	Dim As Long codepointsCount
 	Dim As Long Ptr codepoints = LoadCodepoints(StrShow, @codepointsCount)

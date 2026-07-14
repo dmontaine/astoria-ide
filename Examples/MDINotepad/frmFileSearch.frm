@@ -469,8 +469,6 @@ n = Chr(i) & ":"
 GetVolumeInformation @n, @lpVolumeNameBuffer, MAX_PATH, @lpVolumeSerialNumber, 0, 0, @lpFileSystemNameBuffer, MAX_PATH
 SHGetFileInfo(Chr(i) + ":", FILE_ATTRIBUTE_NORMAL, @FileInfo, SizeOf(FileInfo), SHGFI_USEFILEATTRIBUTES Or SHGFI_SMALLICON Or SHGFI_SYSICONINDEX)
 zFile2ComboEx(cmbexPath, Chr(i) + ":")
-'ComboBoxEx9.Items.Add(Chr(i) + ":", , FileInfo.iIcon, FileInfo.iIcon, FileInfo.iIcon)
-'lpVolumeNameBuffer & "|"  & lpVolumeSerialNumber & "|"  & lpFileSystemNameBuffer
 End If
 Next
 
@@ -527,8 +525,6 @@ Case "Search"
 tmrSearch.Start
 it3.SetState(TBPF_INDETERMINATE)
 Dim a As WString Ptr
-'ReplaceWStr(cmbexExt.Text, a, ".", "*.")
-
 WLet(a, .Replace(cmbexExt.Text, ".", "*."))
 TimerComponent1.Enabled = True
 ffs.OnFindDone = Cast(Sub(Owner As Any Ptr), @zOnFindDone)

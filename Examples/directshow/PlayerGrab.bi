@@ -280,8 +280,7 @@ Sub MediaOpen(hwnd As HWND, filepath As WString Ptr)
 	
 	' 输入文件（请按需修改文件路径）
 	' Input file (modify path as needed)
-	'Dim As WString * 512 filePath = "F:\OfficePC_Update\!Media\632734Y0314.mp4"
-	
+
 	' 将源文件添加为 Source Filter
 	' Add source filter for the input file
 	hr = pGraph->lpVtbl->AddSourceFilter(pGraph, filepath, WStr("Source"), @pSrc)

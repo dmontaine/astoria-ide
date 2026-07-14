@@ -25,13 +25,12 @@ Const scr_width  As Integer = 640 '320 '320 640 800 ...
 Const scr_height As Integer = 480 '200 '240 480 600 ...
 
 Dim As Integer  anim,cfade,frames,fake
-Dim As Double   r,rstep,i,istep,ioffset,roffset
+Dim As Double   rstep,istep,ioffset,roffset
 Dim As Double   stime,etime,fps
-Dim As Double   r_max,r_min,i_max,i_min,rdiff,idiff,zoom
+Dim As Double   r_min,i_min,rdiff,idiff,zoom
 Dim As Double   roffsetsoll,ioffsetsoll,zoomsoll
 Dim As Double   roffsetdiff,ioffsetdiff,zoomdiff
-Dim As Double   roffsetstep,ioffsetstep,zoomstep
-Dim As Integer  x2y2,col1,col2,flag
+Dim As Integer  x2y2,col2,flag
 Dim As Integer  l,a ' xm,ym,l a
 Dim As Byte Ptr video_mem
 Dim As String   k

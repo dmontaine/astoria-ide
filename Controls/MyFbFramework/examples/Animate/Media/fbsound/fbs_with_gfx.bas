@@ -57,8 +57,6 @@ sub init() constructor
   for z=0 to mapsize\2
     for x=0 to mapsize\2
       y=Turbulence2D(x,z,128)*127
-      ' if y<0 then y=0
-      ' if y>127 then y=127
       highmap(            x,            z)=y
       highmap((mapsize-1)-x,            z)=y
       highmap(            x,(mapsize-1)-z)=y

@@ -86,5 +86,4 @@
 
 Private Sub frmGotoType.btnGoto_Click(ByRef Sender As Control)
 	MDIMain.GotoLineNo(CInt(txtLineNo.Text))
-	'CloseForm
 End Sub

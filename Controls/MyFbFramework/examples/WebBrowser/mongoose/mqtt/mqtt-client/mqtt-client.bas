@@ -1,25 +1,16 @@
 #include once "inc/mongoose.bi"
-' #ifndef __FB_64BIT__
-' #libpath "../../win32"
-' #else
-' #libpath "../../win64"
-' #endif
 dim shared s_url as  zstring ptr = @"mqtt://broker.hivemq.com:1883"
 dim shared s_sub_topic as  zstring ptr = @"mg/+/test"
 dim shared s_pub_topic as zstring ptr = @"mg/clnt/test"
 dim shared s_qos as long = 1
 dim shared s_conn as mg_connection ptr
-' dim shared s_signo as long
 Function CtrlHandler(dwCtrlType As ulong) As long
-   If dwCtrlType = 0 Then  
+   If dwCtrlType = 0 Then
       function= 1
        end
     End If
     Return 0
 End Function
-' private sub signal_handler(byval signo as long)
-' s_signo = signo
-' end sub
 
 private sub fn cdecl(byval c as mg_connection ptr, byval ev as long, byval ev_data as any ptr)
    if ev = MG_EV_OPEN then

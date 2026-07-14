@@ -83,7 +83,6 @@ Function PipeProcess.PipeCreate(Owner As Any Ptr, cmdStr As WString, rtnmsg As W
 	If rtn Then
 	Else
 		Return rtn
-		rtnMsg = "3.1 SetHandleInformation(hPipeOutRead, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT) FAILED!"
 	End If
 	
 	rtn	 = SetHandleInformation(hPipeErrRead ,HANDLE_FLAG_INHERIT ,HANDLE_FLAG_INHERIT)
@@ -122,7 +121,6 @@ End Function
 
 Function PipeProcess.PipeWrite(a As String) As Long
 	Dim nWritten As Long
-'	Dim a As String = aStr(cmd) '多字节Unicode字符串转换为单字节Ansi字符串
 	WriteFile(hPipeInWrite, StrPtr(a), Len(a), @nWritten, NULL)
 	Return nWritten
 End Function

@@ -160,8 +160,6 @@
 		Declare Sub Form_Resize(ByRef Sender As Control, NewWidth As Integer, NewHeight As Integer)
 		Declare Sub tbAudio_Change(ByRef Sender As TrackBar, Position As Integer)
 		Declare Sub tbAudio_MouseUp(ByRef Sender As Control, MouseButton As Integer, x As Integer, y As Integer, Shift As Integer)
-		Declare Sub tbBalance_Change(ByRef Sender As TrackBar, Position As Integer)
-		Declare Sub tbBalance_MouseUp(ByRef Sender As Control, MouseButton As Integer, x As Integer, y As Integer, Shift As Integer)
 		Declare Sub TimerComponent1_Timer(ByRef Sender As TimerComponent)
 		Declare Sub tbPosition_Change(ByRef Sender As TrackBar, Position As Integer)
 		Declare Sub tbPosition_MouseDown(ByRef Sender As Control, MouseButton As Integer, x As Integer, y As Integer, Shift As Integer)
@@ -213,8 +211,6 @@
 			.AutoSize = True
 			.Center = True
 			.Transparency = True
-			' .FILE = "D:\Faster (2010) 720p BluRay AC3 x264 - AdiT.mkv"
-			' .FILE = "ExePath & "/../Resources/horse.gif"
 			.BackColor = 16776960
 			.Anchor.Top = AnchorStyle.asAnchor
 			.Anchor.Right = AnchorStyle.asAnchor
@@ -621,7 +617,7 @@ Private Sub frmAnimateType.cmdBtn_Click(ByRef Sender As Control)
 	Case "cmdOpen"
 		Animate1.Close
 		If ..Left(Trim(cboFileName.Text), 9) = "OS System" Then
-			Animate1.CommonAvi = CommonAVIs.aviCopyFile 'Val(Trim(Mid(Trim(cboFileName.Text), 10))) 'CommonAVIs.aviCopyFile '
+			Animate1.CommonAvi = CommonAVIs.aviCopyFile
 			Animate1.OpenFile
 		Else
 			If Animate1.OpenFile(cboFileName.Text) = 0 Then
@@ -651,7 +647,6 @@ Private Sub frmAnimateType.cmdBtn_Click(ByRef Sender As Control)
 		tbBalance.Position = Animate1.Balance
 		lblBalance.Text = ML("Balance:") & tbBalance.Position
 		tbPosition.Position = 0
-		' Animate1.Play
 		cmdPlay.Text = ML("Pause")
 		b = True
 	Case "cmdPlay"
@@ -759,17 +754,6 @@ Private Sub frmAnimateType.Animate1_Message(ByRef Sender As Control, ByRef msg A
 		' designated application window. The message's lParam parameter is equal to the third
 		' parameter in SetNotifyWindow. This parameter enables you to send instance data with
 		' the message. The window message's wParam parameter is always zero.
-		
-		Dim lEventCode As Long
-		Dim lParam1 As LONG_PTR
-		Dim lParam2 As LONG_PTR
-		' Debug.Print " Message.lParamLo= " & msg.lParamLo & " Message.lParamHi= " & msg.lParamHi
-		If lEventCode = EC_COMPLETE Then
-			' If chkLoop.Checked Then
-			' pIMediaPosition->lpVtbl->put_CurrentPosition(pIMediaPosition , 0)
-			' pIMediaControl->lpVtbl->Run(pIMediaControl)
-			' End If
-		End If
 	End Select
 End Sub
 

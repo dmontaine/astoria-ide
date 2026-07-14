@@ -52,13 +52,6 @@ Function NTP_sec(NtpServ As ZString) As time_t
 	Dim Bcast As BOOL = True
 	Print setsockopt(sock, SOL_SOCKET, SO_BROADCAST, Cast(ZString Ptr, @Bcast), SizeOf(BOOL))
 	
-	'设置Client地址和端口
-	'Dim local_addr As SOCKADDR_IN
-	'local_addr.sin_family = AF_INET
-	'local_addr.sin_port = htons(NTP_PORT)
-	'local_addr.sin_addr.s_addr = INADDR_ANY
-	'Print bind(sock, Cast(PSOCKADDR, @local_addr), SizeOf(local_addr))
-	
 	'设置NTP服务器地址和端口
 	Dim ia As IN_ADDR
 	Dim hostentry As HOSTENT Ptr
@@ -98,7 +91,6 @@ Function NTP_sec(NtpServ As ZString) As time_t
 	ps_buff[0] = &h1B
 	
 	' 发送NTP数据包
-	'If (sendto(sock, ps_buff, NTP_PACKET_SIZE, 0, Cast(PSOCKADDR, @saddr), SizeOf(saddr)) <= 0) Then
 	If (send(sock, ps_buff, NTP_PACKET_SIZE, 0) <= 0) Then
 		Print "Failed to send NTP request"
 		Deallocate(ps_buff)
@@ -107,24 +99,11 @@ Function NTP_sec(NtpServ As ZString) As time_t
 		Return 0
 	End If
 	
-	' 10/27 接收NTP数据包(阻塞)
-	'Dim pr_buff As UByte Ptr = CAllocate(NTP_PACKET_SIZE, SizeOf(Byte))
-	''Dim rcv_bytes As Integer = recvfrom(sock, pr_buff, NTP_PACKET_SIZE, MSG_PEEK, Cast(PSOCKADDR, @saddr), SizeOf(saddr))
-	'Dim rcv_bytes As Integer = recv(sock, pr_buff, NTP_PACKET_SIZE, MSG_PEEK)
-	'If (rcv_bytes < NTP_PACKET_SIZE Or Cast(UByte, pr_buff[40]) < 127) Then
-	'	Print "Failed to receive NTP response"
-	'	Deallocate(pr_buff)
-	'	closesocket(sock)
-	'	WSACleanup()
-	'	Return 0
-	'End If
-	
 	' 10/27 接收NTP数据包（非阻塞）
 	Dim pr_buff As UByte Ptr = CAllocate(NTP_PACKET_SIZE, SizeOf(Byte))
 	Dim rcv_bytes As Integer
 	ntpCancel = False
 	Do
-		'rcv_bytes = recvfrom(sock, pr_buff, NTP_PACKET_SIZE, MSG_PEEK, Cast(PSOCKADDR, @saddr), SizeOf(saddr))
 		rcv_bytes = recv(sock, pr_buff, NTP_PACKET_SIZE, 0)
 		App.DoEvents
 		If ntpCancel Then Exit Do

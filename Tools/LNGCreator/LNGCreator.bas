@@ -469,7 +469,6 @@ End Sub
 Private Sub Form1.Form_Create(ByRef Sender As Control)
 	Debug.Print "Command args =" & Command
 	Debug.Print "App.Language =" & App.Language & " App.CurLanguage =" & App.CurLanguage
-	'Debug.Print "App.Language =" & My.Sys.Language
 	If Command <> "" Then
 		txtPathProj.Text = Command
 		txtPathLng.Text = GetFolderName(Command) & "english.lng"

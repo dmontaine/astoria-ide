@@ -48,7 +48,7 @@ sub MyCallback(byval pSamples as FBS_SAMPLE ptr, _
     windowtitle "note: " & note & " frq: " & frequence
   end if  
 
-  dim as integer n,index,x,max_x=511
+  dim as integer index,x,max_x=511
   nSamples-=1
   if nSamples<max_x then max_x=nSamples
 

@@ -1,11 +1,5 @@
-﻿#include once "sqlite3.bi" 
+﻿#include once "sqlite3.bi"
 
-' #IfDef __FB_64BIT__
-' #libpath "X:\FBОДјюїв\lib\64"
-' #Else
-' #libpath "X:\FBОДјюїв\lib\32"
-' #endif
-' #Include Once "sqlite3.bi"
 Sub SQLiteClose(ByVal hDB As  sqlite3 Ptr )
     sqlite3_close(hDB)
 End Sub
@@ -46,7 +40,6 @@ Function SQLiteOpen(ByRef DB As sqlite3 Ptr ,ByVal sFileSpec As String,ByVal Pas
 End Function
 
 Function SQLiteReKey(ByVal db As  sqlite3 Ptr ,ByVal newkey As String ) As Integer 'ЙиЦГГЬВлЈ¬Из№ыОЄїХЈ¬ИЎПыГЬВл
-   ' Dim aa as Integer
     RETURN sqlite3_rekey(DB,ByVal StrPtr(newkey),Len(newkey))
  
 End Function
@@ -67,7 +60,6 @@ Function SQLiteSelect(ByVal db As  SQLite3 Ptr ,ByVal sSql As String ,saRecSetZ(
 	    Dim nColumns   As Integer         ' ·µ»ШµДјЗВјјЇµДБРКэ
     #endif
     Dim lpErrorSz  As ZString Ptr         ' ґнОуРЕПў
-    Dim zField     As ZString Ptr   ' ·µ»Шёш¶Ё±нµДЧЦ¶ОЈЁФЪlpTableКэЧйФЄЛШЈ©
     Dim iFields    As Integer         ' ·µ»Ш±н·µ»ШµДЧЦ¶ОКэ
     Dim iRow       As Integer
     Dim iCol       As Integer
@@ -86,23 +78,20 @@ Function SQLiteSelect(ByVal db As  SQLite3 Ptr ,ByVal sSql As String ,saRecSetZ(
 ' µЪ5ёцІОКэКЗ¶аЙЩёцЧЦ¶ОЈЁ¶аЙЩБРЈ©ЎЈ
 ' µЪ6ёцІОКэКЗґнОуРЕПўЈ¬ёъЗ°ГжТ»СщЈ¬ХвАпІ»¶аЛµБЛЎЈ
     If sqlite3_get_table(DB, ByVal StrPtr(sSQL), @lpTable, @nRows, @nColumns, @lpErrorSz) = 0 Then 'іЙ№¦   
-        If nRows = 0 Then 
-           ' declare sub sqlite3_free_table(byval result as zstring ptr ptr)
+        If nRows = 0 Then
            sqlite3_free_table lpTable  'І»ВЫКэѕЭївІйСЇКЗ·сіЙ№¦Ј¬¶јКН·Е char** ІйСЇЅб№ы
            RETURN  -1
         end if
         iFields = ((nRows+1) * nColumns)-1
         ReDim saRecSetZ(nRows, nColumns-1)
         For i = 0 To iFields
-' zField = *lpTable[i]
             saRecSetZ(iRow, iCol) = *lpTable[i]
             iCol +=1 
             If iCol = nColumns Then iCol = 0
             If (i+1) Mod nColumns = 0 Then iRow +=1
         Next 
     Else
-        iResult = -1  
-' ErrStr = *sqlite3_errmsg(DB)
+        iResult = -1
          sqlite3_free_table lpTable  'І»ВЫКэѕЭївІйСЇКЗ·сіЙ№¦Ј¬¶јКН·Е char** ІйСЇЅб№ы
         RETURN  -1
     End If 

@@ -221,10 +221,6 @@ Private Sub CloseInterfaces()
 	' Stop previewing data
 	If (pMC) Then pMC->lpVtbl->StopWhenReady(pMC)
 	
-	' Stop receiving events
-	'If (pME) Then pME->lpVtbl->SetNotifyWindow(pME, NULL, WM_GRAPHNOTIFY, 0)
-	'SAFE_RELEASE(pME)
-	
 	' Relinquish ownership (IMPORTANT!) of the video window.
 	' Failing to call put_Owner can lead to assert failures within
 	' the video renderer, as it still assumes that it has a valid

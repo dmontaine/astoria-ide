@@ -27,7 +27,7 @@ sub MyCallback(byval lpSamples as FBS_SAMPLE ptr, _
                byval nChannels as integer, _
                byval nSamples  as integer)
   static as integer counter
-  dim as integer n,index,x,max_x=511
+  dim as integer index,x,max_x=511
   dim as FBS_SAMPLE l,r
 
   nSamples-=1

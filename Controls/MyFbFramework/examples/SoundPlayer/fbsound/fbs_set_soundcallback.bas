@@ -63,7 +63,7 @@ end sub
 '
 ' main
 '
-dim as integer hWave,hSound,key,index,nFrames
+dim as integer hWave,hSound,key
 dim as boolean ok,MonoFile
 screenres 512,512
 windowtitle "[esc]=quit [space]=togle PhaseShift on/off"

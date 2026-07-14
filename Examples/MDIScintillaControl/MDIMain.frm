@@ -159,7 +159,6 @@
 		Declare Sub mnuConvert_Click(ByRef Sender As MenuItem)
 		Declare Sub mnuEdit_Click(ByRef Sender As MenuItem)
 		Declare Sub mnuFormat_Click(ByRef Sender As MenuItem)
-		Declare Sub mnuEOLConvert_Click(ByRef Sender As MenuItem)
 		Declare Sub mnuFile_Click(ByRef Sender As MenuItem)
 		Declare Sub mnuHelp_Click(ByRef Sender As MenuItem)
 		Declare Sub mnuTools_Click(ByRef Sender As MenuItem)
@@ -2122,23 +2121,6 @@ Private Sub MDIMainType.mnuEdit_Click(ByRef Sender As MenuItem)
 	End Select
 End Sub
 
-Private Sub MDIMainType.mnuEOLConvert_Click(ByRef Sender As MenuItem)
-	Dim a As MDIChildType Ptr = ActMdiChild
-	Select Case Sender.Name
-	Case "mnuConvertCRLF"
-		a->Editor.EOLMode = SC_EOL_CRLF
-		MDIChildActivate(ActMdiChild)
-	Case "mnuConvertLF"
-		a->Editor.EOLMode = SC_EOL_LF
-		MDIChildActivate(ActMdiChild)
-	Case "mnuConvertCR"
-		a->Editor.EOLMode = SC_EOL_CR
-		MDIChildActivate(ActMdiChild)
-	Case Else
-		MsgBox Sender.Name & !"\r\nThis function is under construction", "Edit"
-	End Select
-End Sub
-
 Private Sub MDIMainType.mnuView_Click(ByRef Sender As MenuItem)
 	Dim a As MDIChildType Ptr = ActMdiChild
 	Dim i As Integer
@@ -2466,7 +2448,6 @@ Private Function MDIMainType.MDIChildNew(ByRef FileName As WString) As Any Ptr
 		spSpeed.Caption = "Load " & Format(timr.Passed, "#,#0.000") & " sec."
 	End If
 	a->Encode = Encode
-	'a->NewLine = NewLine
 	a->CodePage = CodePage
 	a->Changed = False
 	MDIChildMenuUpdate()
@@ -2601,7 +2582,6 @@ Private Sub MDIMainType.MDIChildClick()
 	
 	If s = e Then
 		spLocation.Caption = "Ln: " & Format(sy + 1, "#,#0") & "  Col: " & Format(sx + 1, "#,#0") & "  Pos: " & Format(s + 1, "#,#0")
-		'spSpeed.Caption = "Zoom " & a->Editor.Zoom
 	Else
 		ey = a->Editor.GetPosY(e)
 		ex = a->Editor.GetPosX(e)
@@ -2853,7 +2833,6 @@ Private Sub MDIMainType.Find(ByRef FindStr As Const WString, ByVal RegularExp As
 	SendMessage(a->Editor.Handle, SCI_GOTOPOS, a->Editor.FindPoses(a->Editor.FindIndex), 0)
 	a->Editor.SelStart = a->Editor.FindPoses(a->Editor.FindIndex)
 	a->Editor.SelLength = a->Editor.FindLength
-	'SendMessage(a->Editor.Handle, SCI_SCROLLCARET, 0, 0)
 	If t Then Deallocate(t)
 	spSpeed.Caption = "Find " & Format(timr.Passed, "#,#0.000") & " sec."
 End Sub

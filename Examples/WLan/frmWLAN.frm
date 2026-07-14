@@ -225,8 +225,8 @@ Private Sub frmWLANType.CommandButton1_Click(ByRef Sender As Control)
 End Sub
 
 Private Sub frmWLANType.ComboBoxEx1_Selected(ByRef Sender As ComboBoxEdit, ItemIndex As Integer)
-	Dim As Integer i, j
-	
+	Dim As Integer i
+
 	ListView1.ListItems.Clear
 	
 	i = Sender.ItemIndex
@@ -280,9 +280,6 @@ Sub frmWLANType.Logmsg(msg As WString)
 End Sub
 
 Private Sub frmWLANType.Form_Create(ByRef Sender As Control)
-	'Dim pFileInfo As SHFILEINFO
-	'ImageList1.Handle = Cast(Any Ptr, SHGetFileInfo("", 0, @pFileInfo, SizeOf(pFileInfo), SHGFI_SYSICONINDEX Or SHGFI_ICON Or SHGFI_SMALLICON Or SHGFI_LARGEICON Or SHGFI_PIDL Or SHGFI_DISPLAYNAME Or SHGFI_TYPENAME Or SHGFI_ATTRIBUTES))
-	
 	Dim i As Long
 	Dim j As Long
 	Dim Icon As HICON

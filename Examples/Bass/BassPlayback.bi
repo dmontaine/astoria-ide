@@ -28,7 +28,6 @@ Public : '共有过程和函数
 	
 	Declare Function OpenBuffer(Buffer As Any Ptr, Length As QWORD, bLoop As Boolean = True) As Boolean
 	Declare Function OpenFile(File As WString, bLoop As Boolean = True) As Boolean
-	Declare Function Restart() As Boolean
 	Declare Sub Play()
 	Declare Sub Stop()
 	Declare Sub Pause()

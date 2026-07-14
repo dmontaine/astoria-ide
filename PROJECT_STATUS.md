@@ -60,6 +60,15 @@ All DR-1 through DR-16 defects are fixed and owner-verified. This retained ancho
   - `Examples/IFileDialog/`: `IFileDialog.bi`'s test functions look unreachable under normal `__FB_MAIN__` semantics, but `frmIFileDialog.frm` is disabled in the `.vfp` project file while `IFileDialog.bi` is the active entry point — build-mode semantics weren't fully verified, so nothing was removed.
 - Nothing is awaiting an owner response. The remaining items below are deferred or ready for a new, explicitly selected task.
 
+## Session handoff (2026-07-13)
+
+- Flattened `Examples` to one `.vfp` project per immediate child folder, compiled all 51 projects in owner-approved batches, retained 30 passing projects, removed 21 failures, and documented the audit in `EXAMPLES_BUILD_AUDIT.md` (`6afd4da`).
+- Reconciled the numbered backlog with owner decisions: the authoritative remaining tasks are the unchecked `T01`, `T02`, `T08`, `T10`, `T11`, `T12`, `T13`, and `T16` entries below (`489a3ed`).
+- Removed tracked scratch files and the obsolete DeviceExplorer project file, cleared repository-root `Temp/`, and synchronized the tracked `Settings/astoria.ini` (`e9bc31d`).
+- Documented the standing rule that `Settings/astoria.ini` must be committed and pushed whenever changed so both development computers remain synchronized (`e3f5817`).
+- `main` is synchronized with `origin/main`. No tracked changes remain at handoff.
+- Intentionally untracked local artifacts remain: `.claude/`, `Projects/Project3/Module1.exe`, `Projects/Project3/Temp.bas`, and six `Settings/debug_trace.*.log` files. Review or remove them only if explicitly requested.
+
 ## Next ready work
 
 No task is currently selected. Choose from the open items below when ready.

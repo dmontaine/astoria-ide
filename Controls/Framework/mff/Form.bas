@@ -616,6 +616,36 @@ Namespace My.Sys.Forms
 					Dim FLY_pMinMaxInfo As MINMAXINFO Ptr = Cast(MINMAXINFO Ptr, msg.lParam)
 					msg.Result = 0
 				End If
+			Case WM_SETTINGCHANGE
+				' A live light/dark switch - the user toggling Options > Apply, or
+				' Windows itself changing its color scheme - arrives here as a
+				' desktop-wide WM_SETTINGCHANGE broadcast. The base handler only
+				' re-forwards WM_THEMECHANGED, which refreshes this window's own
+				' title bar and theme class but never invalidates the child tree,
+				' so panels, toolbars and list/tree views keep their old colors
+				' until a resize or restart (the "partial dark mode after Apply"
+				' bug). Re-run SetDark here instead: it swaps the background brush
+				' and, via its trailing Repaint (RDW_ALLCHILDREN), forces every
+				' descendant to repaint and self-flip through its own WM_PAINT
+				' handler - the same full cascade a fresh startup produces.
+				' g_darkModeEnabled is our own setting, not the OS preference, so
+				' an OS-driven broadcast simply re-asserts the current state.
+				' Safe against the known dark-mode recursion crash: SetDark emits
+				' WM_THEMECHANGED, never WM_SETTINGCHANGE, so this case cannot
+				' re-enter itself. Falls through to Base afterwards to preserve
+				' the existing default handling.
+				If g_darkModeSupported AndAlso CBool(IsColorSchemeChangeMessage(msg.lParam)) Then
+					SetDark(g_darkModeEnabled)
+					' SetDark repaints the child tree (RDW_ALLCHILDREN) so plain
+					' controls self-flip via WM_PAINT, but controls that theme
+					' sub-windows (list/tree/grid headers and backgrounds) only
+					' re-theme correctly from their WM_THEMECHANGED handler. That
+					' message never reaches nested windows on a live toggle, so
+					' push it down the tree explicitly - otherwise e.g. the
+					' Properties header/background, themed while dark, stays dark
+					' after reverting to light.
+					BroadcastThemeChangedToChildren(FHandle)
+				End If
 			Case WM_THEMECHANGED
 				If (g_darkModeSupported) Then
 					AllowDarkModeForWindow(msg.hWnd, g_darkModeEnabled)
@@ -947,7 +977,19 @@ Namespace My.Sys.Forms
 				IsMenuItem = True
 			Case WM_INITMENU
 			Case WM_INITMENUPOPUP
-				If g_darkModeSupported AndAlso g_darkModeEnabled Then
+				' Dark mode draws popup menu items owner-draw (the ODT_MENU
+				' WM_DRAWITEM handler paints them), and this is the only place
+				' items get flagged MFT_OWNERDRAW. The flag must be stripped again
+				' when reverting to light: that draw handler only paints while
+				' g_darkModeEnabled, so an item left owner-draw in light mode
+				' renders blank - white text on white background. That surfaced
+				' as the Tools menu (the popup expanded during a dark session)
+				' still being broken after switching back to light. Toggling the
+				' flag symmetrically here - set it in dark, clear it in light -
+				' keeps every popup correct across any number of live switches.
+				' For users who never enable dark mode no item is ever flagged,
+				' so the light branch finds nothing to change.
+				If g_darkModeSupported Then
 					Dim As Boolean isSystemMenu = ((msg.lParam Shr 16) And &HFFFF) <> 0
 					If Not isSystemMenu Then
 						Dim As HMENU hPopup = Cast(HMENU, msg.wParam)
@@ -958,9 +1000,16 @@ Namespace My.Sys.Forms
 							mii.fMask = MIIM_FTYPE
 							For i As Integer = 0 To nCount - 1
 								GetMenuItemInfo(hPopup, i, True, @mii)
-								If Not (mii.fType And MFT_OWNERDRAW) Then
-									mii.fType Or = MFT_OWNERDRAW
-									SetMenuItemInfo(hPopup, i, True, @mii)
+								If g_darkModeEnabled Then
+									If Not (mii.fType And MFT_OWNERDRAW) Then
+										mii.fType Or = MFT_OWNERDRAW
+										SetMenuItemInfo(hPopup, i, True, @mii)
+									End If
+								Else
+									If (mii.fType And MFT_OWNERDRAW) Then
+										mii.fType = mii.fType And (Not MFT_OWNERDRAW)
+										SetMenuItemInfo(hPopup, i, True, @mii)
+									End If
 								End If
 							Next i
 						End If

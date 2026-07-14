@@ -631,6 +631,20 @@ Namespace My.Sys.Forms
 						Return
 					End If
 				End If
+			Case WM_THEMECHANGED
+				' Follow live light/dark switches even on hidden tabs. RichTextBox
+				' only self-flips on WM_PAINT, which never fires while the control
+				' sits on an unselected tab page - so a description pane toggled
+				' while hidden kept its old colours (the Events pane staying white
+				' after switching to dark from the Properties tab).
+				' BroadcastThemeChangedToChildren delivers WM_THEMECHANGED to every
+				' window, visible or not; mirror the WM_PAINT self-flip here so
+				' SetDark re-colours background and text right away.
+				If g_darkModeSupported AndAlso g_darkModeEnabled Then
+					If Not FDarkMode Then SetDark True
+				Else
+					If FDarkMode Then SetDark False
+				End If
 			Case WM_PAINT
 				If g_darkModeSupported AndAlso g_darkModeEnabled Then
 					If Not FDarkMode Then
@@ -774,6 +788,24 @@ Namespace My.Sys.Forms
 				Perform(EM_GETZOOM, CInt(@FZoomWP), CInt(@FZoomLP))
 				Perform(EM_SETTEXTEX, Cast(WPARAM, @bb), Cast(LPARAM, StrPtr(Buffer)))
 				Perform(EM_SETZOOM, FZoomWP, FZoomLP)
+				' Replacing the text (EM_SETTEXTEX) can reset the RichEdit's
+				' background to the system default (white). That persists because
+				' the WM_PAINT self-flip only re-themes on an FDarkMode transition,
+				' so a pane cleared or refilled while already dark went white and
+				' never recovered. Re-assert the current colours, mirroring SetDark.
+				Dim As CHARFORMAT2 Cf
+				Cf.cbSize = SizeOf(Cf)
+				Cf.dwMask = CFM_COLOR Or CFM_BACKCOLOR
+				If g_darkModeSupported AndAlso FDarkMode Then
+					SendMessage(FHandle, EM_SETBKGNDCOLOR, 0, darkBkColor)
+					Cf.crTextColor = darkTextColor
+					Cf.crBackColor = darkBkColor
+				Else
+					SendMessage(FHandle, EM_SETBKGNDCOLOR, 0, FBackColor)
+					Cf.crTextColor = FForeColor
+					Cf.crBackColor = FBackColor
+				End If
+				SendMessage(FHandle, EM_SETCHARFORMAT, SCF_ALL, Cast(LPARAM, @Cf))
 			End If
 	End Property
 	

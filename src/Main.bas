@@ -8325,8 +8325,11 @@ Sub tabCode_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As TabContro
 		WLet(gSearchSave, "")
 	End If
 	If frmMain.ActiveControl <> tb And frmMain.ActiveControl <> @tb->txtCode Then tb->txtCode.SetFocus
-	txtLabelProperty.Text = ""
-	txtLabelEvent.Text = ""
+	' Clear via TextRTF (not Text) so the RichTextBox re-asserts its dark/light
+	' colours after the text replacement - a plain Text clear left the pane white
+	' in dark mode (the RichEdit background reset that WM_PAINT won't re-flip).
+	txtLabelProperty.TextRTF = ""
+	txtLabelEvent.TextRTF = ""
 	pnlPropertyValue.Visible = False
 	If tb->cboClass.Items.Count > 1 Then
 		tb->FillAllProperties

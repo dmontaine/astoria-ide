@@ -1215,8 +1215,19 @@ Namespace My.Sys.Forms
 					Dim As HWND hHeader = ListView_GetHeader(Message.hWnd)
 					
 					AllowDarkModeForWindow(Message.hWnd, g_darkModeEnabled)
-					AllowDarkModeForWindow(hHeader, g_darkModeEnabled)
-					
+					' Theme the column header exactly as SetDark does. Do NOT route
+					' this through AllowDarkModeForWindow: that applies
+					' "DarkMode_Explorer", which leaves the header background light
+					' - so switching to dark left the header white. SetDark uses
+					' "DarkMode_ItemsView" (the theme that actually darkens a
+					' header), and startup works because it goes through SetDark;
+					' this path must match it or the two disagree.
+					If g_darkModeEnabled Then
+						SetWindowTheme(hHeader, "DarkMode_ItemsView", nullptr)
+					Else
+						SetWindowTheme(hHeader, NULL, NULL)
+					End If
+
 					Dim As HTHEME hTheme '= OpenThemeData(nullptr, "ItemsView")
 					'If (hTheme) Then
 					'	Dim As COLORREF Color1

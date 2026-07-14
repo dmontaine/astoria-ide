@@ -47,6 +47,7 @@ Declare Function IsColorSchemeChangeMessage Overload(lParam As LPARAM) As BOOL
 Declare Function IsColorSchemeChangeMessage Overload(message As UINT, lParam As LPARAM) As BOOL
 Declare Sub AllowDarkModeForApp(allow As BOOL)
 Declare Sub EnableDarkScrollBarForWindowAndChildren(hwnd As HWND)
+Declare Sub BroadcastThemeChangedToChildren(hwnd As HWND)
 Declare Sub InitDarkMode()
 Declare Function IsWindows11() As BOOL
 Declare Sub SetDarkMode(useDarkMode As Boolean, fixDarkScrollbar As Boolean, DoBroadcast As Boolean = True)

@@ -183,6 +183,35 @@ Sub EnableDarkScrollBarForWindowAndChildren(hwnd As HWND)
 	Wend
 End Sub
 
+Sub BroadcastThemeChangedToChildren(hwnd As HWND)
+	' Propagate WM_THEMECHANGED down the whole window tree, the way Windows
+	' itself does on a real (OS-driven) theme change.
+	'
+	' A live light/dark switch from Options > Apply is delivered as a
+	' WM_SETTINGCHANGE broadcast, but HWND_BROADCAST only reaches top-level
+	' windows - nested controls never see it. Controls that theme sub-windows
+	' via SetWindowTheme (TreeListView/ListView/TreeView/Grid and their column
+	' headers) rely on their own WM_THEMECHANGED handler to re-theme in the new
+	' direction; without it, a header or list background themed while dark stays
+	' dark after reverting to light (the "Properties header/background stays
+	' dark" bug). The form's SetDark only invalidates children (RDW_ALLCHILDREN),
+	' which re-runs their WM_PAINT but not their WM_THEMECHANGED path. Walk the
+	' tree and send it explicitly.
+	'
+	' Recursion into each control's handler is bounded: the WM_THEMECHANGED
+	' handlers funnel their re-theming through AllowDarkModeForWindow, whose
+	' same-window re-entry guard cuts the SetWindowTheme -> WM_THEMECHANGED
+	' cycle. This is the exact propagation the framework was already built to
+	' absorb (see AllowDarkModeForWindow).
+	If hwnd = 0 Then Exit Sub
+	Dim As HWND hChild = GetWindow(hwnd, GW_CHILD)
+	While hChild <> 0
+		SendMessageW(hChild, WM_THEMECHANGED, 0, 0)
+		BroadcastThemeChangedToChildren(hChild)  ' recursive
+		hChild = GetWindow(hChild, GW_HWNDNEXT)
+	Wend
+End Sub
+
 Sub InitDarkMode()
 	' Detect the Windows version and determine if dark mode is supported.
 	' Called once at startup - after this, g_darkModeSupported indicates

@@ -84,14 +84,6 @@ pfOptions = @fOptions
 		pnlColorsAndFonts.SetBounds 10, 0, 417, 400
 		pnlColorsAndFonts.ControlIndex = 5
 		pnlColorsAndFonts.Parent = @pplGeneral
-		' pnlOtherEditors
-		pnlOtherEditors.Name = "pnlOtherEditors"
-		pnlOtherEditors.Text = ""
-		pnlOtherEditors.Align = DockStyle.alClient
-		pnlOtherEditors.TabIndex = 76
-		pnlOtherEditors.SetBounds 10, 0, 417, 400
-		pnlOtherEditors.ControlIndex = 6
-		pnlOtherEditors.Parent = @pplGeneral
 		' pnlCompiler
 		pnlCompiler.Name = "pnlCompiler"
 		pnlCompiler.Text = ""
@@ -156,9 +148,6 @@ pfOptions = @fOptions
 		pnlHelp.TabIndex = 75
 		pnlHelp.SetBounds 188, 4, 427, 400
 		pnlHelp.Parent = @pplGeneral
-		'pnlOtherEditors.ExtraMargins.Right = 10
-		'pnlOtherEditors.ExtraMargins.Bottom = 9
-		'pnlOtherEditors.ExtraMargins.Top = 4
 		'pnlIncludes.ExtraMargins.Bottom = 9
 		'pnlIncludes.ExtraMargins.Right = 10
 		'pnlIncludes.ExtraMargins.Top = 4
@@ -1597,96 +1586,6 @@ pfOptions = @fOptions
 			.OnClick = @chkCreateNonStaticEventHandlers_Click_
 			.Parent = @pnlDesigner
 		End With
-		' grbOtherEditors
-		With grbOtherEditors
-			.Name = "grbOtherEditors"
-			.Text = ("Other Editors")
-			.Align = DockStyle.alClient
-			.ExtraMargins.Top = 0
-			.ExtraMargins.Left = 0
-			.Margins.Top = 21
-			.Margins.Right = 15
-			.Margins.Left = 15
-			.Margins.Bottom = 15
-			.TabIndex = 166
-			.SetBounds 10, 0, 407, 400
-			.Parent = @pnlOtherEditors
-		End With
-		' lvOtherEditors
-		With lvOtherEditors
-			.Name = "lvOtherEditors"
-			.Text = "lvHelpPaths1"
-			.ExtraMargins.Top = 0
-			.ExtraMargins.Right = 0
-			.ExtraMargins.Left = 0
-			.Align = DockStyle.alClient
-			.ExtraMargins.Bottom = 15
-			.TabIndex = 167
-			.SetBounds 15, 21, 387, 325
-			.Designer = @This
-			.OnItemActivate = @lvOtherEditors_ItemActivate_
-			.Parent = @grbOtherEditors
-		End With
-		' cmdClearEditor
-		With cmdClearEditor
-			.Name = "cmdClearEditor"
-			.Text = ("&Clear")
-			.ExtraMargins.Bottom = 0
-			.ExtraMargins.Left = 0
-			.ExtraMargins.Right = 0
-			.Align = DockStyle.alRight
-			.TabIndex = 27
-			.SetBounds 290, 0, 97, 24
-			.Designer = @This
-			.OnClick = @cmdClearEditor_Click_
-			.Parent = @hbxEditors
-		End With
-		' cmdRemoveEditor
-		With cmdRemoveEditor
-			.Name = "cmdRemoveEditor"
-			.Text = ("&Remove")
-			.Align = DockStyle.alRight
-			.ExtraMargins.Bottom = 0
-			.ExtraMargins.Left = 0
-			.ExtraMargins.Right = 0
-			.TabIndex = 28
-			.SetBounds 193, 0, 97, 24
-			.Designer = @This
-			.OnClick = @cmdRemoveEditor_Click_
-			.Parent = @hbxEditors
-		End With
-		' cmdChangeEditor
-		With cmdChangeEditor
-			.Name = "cmdChangeEditor"
-			.Text = ("Chan&ge")
-			.Align = DockStyle.alRight
-			.ExtraMargins.Bottom = 0
-			.ExtraMargins.Left = 0
-			.ExtraMargins.Right = 0
-			.TabIndex = 29
-			.SetBounds 96, 0, 97, 24
-			.Designer = @This
-			.OnClick = @cmdChangeEditor_Click_
-			.Parent = @hbxEditors
-		End With
-		' cmdAddEditor
-		With cmdAddEditor
-			.Name = "cmdAddEditor"
-			.Text = ("&Add")
-			.Align = DockStyle.alRight
-			.ExtraMargins.Left = 0
-			.ExtraMargins.Bottom = 0
-			.ExtraMargins.Right = 0
-			.TabIndex = 30
-			.SetBounds -1, 0, 97, 24
-			'.Caption = "Add"
-			.Designer = @This
-			.OnClick = @cmdAddEditor_Click_
-			.Parent = @hbxEditors
-		End With
-			'.Caption = "Change"
-			'.Caption = "Remove"
-			'.Caption = "Clear"
 		' grbWhenCompiling
 		With grbWhenCompiling
 			.Name = "grbWhenCompiling"
@@ -2021,25 +1920,11 @@ pfOptions = @fOptions
 	End With
 		lvShortcuts.Columns.Add ("Action"), , 250
 		lvShortcuts.Columns.Add ("Shortcut"), , 100
-		lvOtherEditors.Columns.Add ("Version"), , 126
-		lvOtherEditors.Columns.Add ("Extensions"), , 126
-		lvOtherEditors.Columns.Add ("Path"), , 126
-		lvOtherEditors.Columns.Add ("Command line"), , 80
 		lvTerminalPaths.Columns.Add ("Version"), , 190
 		lvTerminalPaths.Columns.Add ("Path"), , 190
 		lvTerminalPaths.Columns.Add ("Command line"), , 80
 		lvHelpPaths.Columns.Add ("Version"), , 190
 		lvHelpPaths.Columns.Add ("Path"), , 190
-		' hbxEditors
-		With hbxEditors
-			.Name = "hbxEditors"
-			.Text = "HorizontalBox1"
-			.TabIndex = 209
-			.Align = DockStyle.alBottom
-			.SetBounds 15, 361, 387, 24
-			.Designer = @This
-			.Parent = @grbOtherEditors
-		End With
 		' hbxHelp
 		With hbxHelp
 			.Name = "hbxHelp"
@@ -2621,13 +2506,6 @@ Sub frmOptions.LoadSettings()
 			.cboTerminal.AddItem pTerminals->Item(i)->Key
 		Next
 		.cboTerminal.ItemIndex = Max(0, .cboTerminal.IndexOf(*DefaultTerminal))
-		.lvOtherEditors.ListItems.Clear
-		For i As Integer = 0 To pOtherEditors->Count - 1
-			.lvOtherEditors.ListItems.Add pOtherEditors->Item(i)->Key
-			.lvOtherEditors.ListItems.Item(i)->Text(1) = Cast(ToolType Ptr, pOtherEditors->Item(i)->Object)->Extensions
-			.lvOtherEditors.ListItems.Item(i)->Text(2) = pOtherEditors->Item(i)->Text
-			.lvOtherEditors.ListItems.Item(i)->Text(3) = Cast(ToolType Ptr, pOtherEditors->Item(i)->Object)->Parameters
-		Next
 		.cboHelp.Clear
 		.lvHelpPaths.ListItems.Clear
 		.cboHelp.AddItem ("(not selected)")
@@ -2814,7 +2692,6 @@ Private Sub frmOptions.Form_Create(ByRef Designer As My.Sys.Object, ByRef Sender
 		.tvOptions.Nodes.Add(("Designer"), "Designer")
 		tnGeneral->Nodes.Add(("Shortcuts"), "Shortcuts")
 		tnEditor->Nodes.Add(("Colors And Fonts"), "ColorsAndFonts")
-		tnEditor->Nodes.Add(("Other Editors"), "OtherEditors")
 		tnDebugger->Nodes.Add(("Terminal"), "Terminal")
 		Var tnHelp = .tvOptions.Nodes.Add(("Help"), "Help")
 		.tvOptions.ExpandAll
@@ -2997,19 +2874,6 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 			WLet(CurrentTerminal, *DefaultTerminal)
 		End If
 		WLet(TerminalPath, pTerminals->Get(*CurrentTerminal))
-		For i As Integer = 0 To pOtherEditors->Count - 1
-			_Delete(Cast(ToolType Ptr, pOtherEditors->Item(i)->Object))
-		Next
-		pOtherEditors->Clear
-		For i As Integer = 0 To .lvOtherEditors.ListItems.Count - 1
-			tempStr = .lvOtherEditors.ListItems.Item(i)->Text(0)
-			Tool = _New(ToolType)
-			Tool->Name = tempStr
-			Tool->Extensions = .lvOtherEditors.ListItems.Item(i)->Text(1)
-			Tool->Path = .lvOtherEditors.ListItems.Item(i)->Text(2)
-			Tool->Parameters = .lvOtherEditors.ListItems.Item(i)->Text(3)
-			pOtherEditors->Add tempStr, .lvOtherEditors.ListItems.Item(i)->Text(2), Tool
-		Next
 		pHelps->Clear
 		miHelps->Clear
 		For i As Integer = 0 To .lvHelpPaths.ListItems.Count - 1
@@ -3169,27 +3033,6 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 			piniSettings->KeyRemove "Terminals", "Version_" & WStr(i)
 			piniSettings->KeyRemove "Terminals", "Path_" & WStr(i)
 			piniSettings->KeyRemove "Terminals", "Command_" & WStr(i)
-			i += 1
-		Loop
-		For i As Integer = 0 To pOtherEditors->Count - 1
-			If IniValueChangedStr(piniSettings, "OtherEditors", "Version_" & WStr(i), pOtherEditors->Item(i)->Key) Then
-				piniSettings->WriteString "OtherEditors", "Version_" & WStr(i), pOtherEditors->Item(i)->Key
-			End If
-			If IniValueChangedStr(piniSettings, "OtherEditors", "Extensions_" & WStr(i), Cast(ToolType Ptr, pOtherEditors->Item(i)->Object)->Extensions) Then
-				piniSettings->WriteString "OtherEditors", "Extensions_" & WStr(i), Cast(ToolType Ptr, pOtherEditors->Item(i)->Object)->Extensions
-			End If
-			If IniValueChangedStr(piniSettings, "OtherEditors", "Path_" & WStr(i), pOtherEditors->Item(i)->Text) Then
-				piniSettings->WriteString "OtherEditors", "Path_" & WStr(i), pOtherEditors->Item(i)->Text
-			End If
-			If IniValueChangedStr(piniSettings, "OtherEditors", "Command_" & WStr(i), Cast(ToolType Ptr, pOtherEditors->Item(i)->Object)->Parameters) Then
-				piniSettings->WriteString "OtherEditors", "Command_" & WStr(i), Cast(ToolType Ptr, pOtherEditors->Item(i)->Object)->Parameters
-			End If
-		Next
-		Do Until piniSettings->KeyExists("OtherEditors", "Version_" & WStr(i)) = -1
-			piniSettings->KeyRemove "OtherEditors", "Version_" & WStr(i)
-			piniSettings->KeyRemove "OtherEditors", "Extensions_" & WStr(i)
-			piniSettings->KeyRemove "OtherEditors", "Path_" & WStr(i)
-			piniSettings->KeyRemove "OtherEditors", "Command_" & WStr(i)
 			i += 1
 		Loop
 		If IniValueChangedStr(piniSettings, "Helps", "DefaultHelp", *DefaultHelp) Then
@@ -4089,7 +3932,6 @@ Private Sub frmOptions.TreeView1_SelChange(ByRef Designer As My.Sys.Object, ByRe
 		.pnlCodeEditor.Visible = Key = "CodeEditor"
 		.pnlShortcuts.Visible = Key = "Shortcuts"
 		.pnlColorsAndFonts.Visible = Key = "ColorsAndFonts"
-		.pnlOtherEditors.Visible = Key = "OtherEditors"
 		.pnlCompiler.Visible = Key = "Compiler"
 		.pnlDebugger.Visible = Key = "Debugger"
 		.pnlTerminal.Visible = Key = "Terminal"
@@ -4553,74 +4395,6 @@ Private Sub frmOptions.cmdSetShortcut_Click(ByRef Designer As My.Sys.Object, ByR
 	End With
 End Sub
 
-Private Sub frmOptions.cmdAddEditor_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-	(*Cast(frmOptions Ptr, Sender.Designer)).cmdAddEditor_Click(Sender)
-End Sub
-Private Sub frmOptions.cmdAddEditor_Click(ByRef Sender As Control)
-	pfPath->txtVersion.Text = ""
-	pfPath->txtExtensions.Text = ""
-	pfPath->txtPath.Text = ""
-	pfPath->txtCommandLine.Text = ""
-	pfPath->WithExtensions = True
-	'' T16 smoke-test finding: read the snapshot fields (frmPath.bi) -- see frmTools.frm's
-	'' cmdAdd_Click for the full explanation.
-	If pfPath->ShowModal(*pfrmMain) = ModalResults.OK Then
-		With lvOtherEditors.ListItems
-			Var ItemsCount = .Count
-			If .IndexOf(pfPath->txtVersionText) = -1 Then
-				.Add pfPath->txtVersionText
-				.Item(ItemsCount)->Text(1) = pfPath->txtExtensionsText
-				.Item(ItemsCount)->Text(2) = pfPath->txtPathText
-				.Item(ItemsCount)->Text(3) = pfPath->txtCommandLineText
-			Else
-				MsgBox ("This version is exists!")
-			End If
-		End With
-	End If
-End Sub
-
-Private Sub frmOptions.cmdChangeEditor_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-	(*Cast(frmOptions Ptr, Sender.Designer)).cmdChangeEditor_Click(Sender)
-End Sub
-Private Sub frmOptions.cmdChangeEditor_Click(ByRef Sender As Control)
-	With lvOtherEditors
-		If .SelectedItem = 0 Then Exit Sub
-		pfPath->txtVersion.Text = .SelectedItem->Text(0)
-		pfPath->txtExtensions.Text = .SelectedItem->Text(1)
-		pfPath->txtPath.Text = .SelectedItem->Text(2)
-		pfPath->txtCommandLine.Text = .SelectedItem->Text(3)
-		pfPath->WithExtensions = True
-		If pfPath->ShowModal(*pfrmMain) = ModalResults.OK Then
-			If .SelectedItem->Text(0) = pfPath->txtVersionText OrElse .ListItems.IndexOf(pfPath->txtVersionText) = -1 Then
-				Var i = .ListItems.IndexOf(.SelectedItem->Text(0))
-				.SelectedItem->Text(0) = pfPath->txtVersionText
-				.SelectedItem->Text(1) = pfPath->txtExtensionsText
-				.SelectedItem->Text(2) = pfPath->txtPathText
-				.SelectedItem->Text(3) = pfPath->txtCommandLineText
-			Else
-				MsgBox ("This version is exists!")
-			End If
-		End If
-	End With
-End Sub
-
-Private Sub frmOptions.cmdRemoveEditor_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-	(*Cast(frmOptions Ptr, Sender.Designer)).cmdRemoveEditor_Click(Sender)
-End Sub
-Private Sub frmOptions.cmdRemoveEditor_Click(ByRef Sender As Control)
-	With lvOtherEditors
-		If .SelectedItem = 0 Then Exit Sub
-		.ListItems.Remove .SelectedItemIndex
-	End With
-End Sub
-
-Private Sub frmOptions.cmdClearEditor_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-	(*Cast(frmOptions Ptr, Sender.Designer)).cmdClearEditor_Click(Sender)
-End Sub
-Private Sub frmOptions.cmdClearEditor_Click(ByRef Sender As Control)
-	lvOtherEditors.ListItems.Clear
-End Sub
-
 Sub HistoryCodeClean(ByRef Path As WString)
 	Dim As WString * 1024 f, f1
 	Dim As Double d2
@@ -4639,13 +4413,6 @@ Sub HistoryCodeClean(ByRef Path As WString)
 		f = Dir()
 	Wend
 	HistoryCodeCleanDay = DateValue(Format(Now, "yyyy/mm/dd"))
-End Sub
-
-Private Sub frmOptions.lvOtherEditors_ItemActivate_(ByRef Designer As My.Sys.Object, ByRef Sender As ListView, ByVal ItemIndex As Integer)
-	(*Cast(frmOptions Ptr, Sender.Designer)).lvOtherEditors_ItemActivate(Sender, ItemIndex)
-End Sub
-Private Sub frmOptions.lvOtherEditors_ItemActivate(ByRef Sender As ListView, ByVal ItemIndex As Integer)
-	cmdChangeEditor_Click cmdChangeEditor
 End Sub
 
 Private Sub frmOptions.lvTerminalPaths_ItemActivate_(ByRef Designer As My.Sys.Object, ByRef Sender As ListView, ByVal ItemIndex As Integer)

@@ -136,7 +136,7 @@ Dim Shared As WStringOrStringList Comps, GlobalAsmFunctionsHelp, GlobalFunctions
 'Dim Shared As WStringOrStringList GlobalNamespaces, GlobalTypes, GlobalEnums, GlobalDefines, GlobalFunctions, GlobalTypeProcedures, GlobalArgs
 Dim Shared As WStringList AddIns, IncludeFiles, LoadPaths, IncludePaths, LibraryPaths, MRUFiles, MRUFolders, MRUProjects, ProfilingFunctions
 Dim Shared As WString Ptr RecentFiles, RecentFile, RecentProject, RecentFolder
-Dim Shared As Dictionary Helps, HotKeys, Compilers, MakeTools, Terminals, OtherEditors, BuildConfigurations
+Dim Shared As Dictionary Helps, HotKeys, Compilers, MakeTools, Terminals, BuildConfigurations
 Dim Shared As ListView lvProblems, lvSuggestions, lvSearch, lvToDo, lvMemory
 Dim Shared As ProgressBar prProgress
 Dim Shared As CommandButton btnPropertyValue
@@ -170,7 +170,6 @@ pControlLibraries = @ControlLibraries
 pCompilers = @Compilers
 pMakeTools = @MakeTools
 pTerminals = @Terminals
-pOtherEditors = @OtherEditors
 pHelps = @Helps
 plvSearch = @lvSearch
 plvToDo = @lvToDo '
@@ -1288,17 +1287,6 @@ Sub OpenUrl(ByRef url As WString)
 	'' PipeCmd's old blanket wrapper also piped output to the clipboard.
 	'' See PROJECT_STATUS Fable review remediation, T3 / finding F-S5.
 	ShellExecuteW(0, WStr("open"), url, 0, 0, SW_SHOWNORMAL)
-End Sub
-
-'' Worker-thread body for launching a registered "Other Editor" on a file --
-'' keeps PipeCmd's blocking wait off the UI thread. Param owns the WString
-'' Ptr allocated by the caller via WLet; freed here once the launch returns.
-Sub RunOtherEditorTool(Param As Any Ptr)
-	Dim As WString Ptr cmd = Param
-	If cmd <> 0 Then
-		PipeCmd *cmd, CommandTargetIsBatchFile(*cmd)
-		WDeAllocate(cmd)
-	End If
 End Sub
 
 Function GetOpenProjectNode() As TreeNode Ptr
@@ -6979,25 +6967,6 @@ Sub tvExplorer_NodeActivate(ByRef Designer As My.Sys.Object, ByRef Sender As Con
 			SelectControlTreeNode Cast(ControlTreeElement Ptr, ee)
 			Exit Sub
 		Else
-			Dim As Integer Pos1 = InStrRev(*ee->FileName, ".")
-			If Pos1 > 0 Then
-				Dim As UString Extension = Mid(*ee->FileName, Pos1)
-				For i As Integer = 0 To pOtherEditors->Count - 1
-					Dim As ToolType Ptr Tool = pOtherEditors->Item(i)->Object
-					If InStr(" " & LCase(Tool->Extensions) & ",", " " & LCase(Extension) & ",") > 0 Then
-						If Not FileExists(GetFullPath(Tool->Path)) Then Continue For
-						'Shell """" & Tool->GetCommand(*ee->FileName) & """"
-						'' Off the UI thread: this handler runs on a tree double-click,
-						'' and PipeCmd waits for the launched program to exit -- which
-						'' could be the whole rest of the user's session with an
-						'' external editor left open. See T3 / F-S1 (UI stall).
-						Dim As WString Ptr OtherEditorCmd
-						WLet(OtherEditorCmd, Tool->GetCommand(*ee->FileName))
-						ThreadCounter(ThreadCreate_(@RunOtherEditorTool, OtherEditorCmd))
-						Exit Sub
-					End If
-				Next
-			End If
 			Dim As String extStr = LCase(Right(*ee->FileName, 4))
 			If CBool(extStr = ".exe" OrElse extStr = ".dll"  OrElse extStr = ".png" OrElse extStr = ".jpg" OrElse extStr = ".bmp" OrElse extStr = ".ico" OrElse extStr = ".cur" OrElse extStr = ".gif" OrElse extStr = ".avi" OrElse _
 				extStr = ".chm" OrElse extStr = ".zip" OrElse extStr = ".rar") OrElse EndsWith(LCase(*ee->FileName), ".dll.a") OrElse EndsWith(LCase(*ee->FileName), ".so") OrElse EndsWith(LCase(*ee->FileName), ".7z") Then
@@ -7017,10 +6986,10 @@ End Sub
 
 ' Single-click ("select") equivalent of NodeActivate, used from tvExplorer_SelChange.
 ' Deliberately narrower: only opens files that land in our own text/form editor.
-' Anything NodeActivate would hand off externally (Shell-launch binaries/media,
-' other-editor tools) or that switches the active sub-project (.vfp) is skipped -
-' those still require an explicit double-click, so a stray single click can't
-' launch an external program or change projects.
+' Anything NodeActivate would hand off externally (Shell-launch binaries/media)
+' or that switches the active sub-project (.vfp) is skipped - those still
+' require an explicit double-click, so a stray single click can't launch an
+' external program or change projects.
 Sub OpenTreeNodeOnSingleClick(ByRef Item As TreeNode)
 	If Item.ImageKey = "Opened" Then Exit Sub
 	If Item.ImageKey = "Project" Then Exit Sub
@@ -7035,14 +7004,6 @@ Sub OpenTreeNodeOnSingleClick(ByRef Item As TreeNode)
 			tb->txtCode.SetSelection te->StartLine, te->StartLine, te->StartChar, te->StartChar
 		End If
 		Exit Sub
-	End If
-	Dim As Integer Pos1 = InStrRev(*ee->FileName, ".")
-	If Pos1 > 0 Then
-		Dim As UString Extension = Mid(*ee->FileName, Pos1)
-		For i As Integer = 0 To pOtherEditors->Count - 1
-			Dim As ToolType Ptr Tool = pOtherEditors->Item(i)->Object
-			If InStr(" " & LCase(Tool->Extensions) & ",", " " & LCase(Extension) & ",") > 0 Then Exit Sub
-		Next
 	End If
 	Dim As String extStr = LCase(Right(*ee->FileName, 4))
 	If CBool(extStr = ".exe" OrElse extStr = ".dll"  OrElse extStr = ".png" OrElse extStr = ".jpg" OrElse extStr = ".bmp" OrElse extStr = ".ico" OrElse extStr = ".cur" OrElse extStr = ".gif" OrElse extStr = ".avi" OrElse _
@@ -9769,10 +9730,6 @@ Sub OnProgramQuit() Destructor
 	Next i
 	For i As Integer = 0 To pTerminals->Count - 1
 		Tool = pTerminals->Item(i)->Object
-		_Delete(Tool)
-	Next i
-	For i As Integer = 0 To pOtherEditors->Count - 1
-		Tool = pOtherEditors->Item(i)->Object
 		_Delete(Tool)
 	Next i
 	Dim As WStringOrStringList Ptr keywordlist

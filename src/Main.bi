@@ -185,7 +185,7 @@ Common Shared As List Ptr pTools, pControlLibraries
 Common Shared As WStringOrStringList Ptr pComps, pGlobalNamespaces, pGlobalTypes, pGlobalEnums, pGlobalDefines, pGlobalFunctions, pGlobalTypeProcedures, pGlobalArgs
 Common Shared As WStringList Ptr pAddIns, pIncludeFiles, pLoadPaths, pIncludePaths, pLibraryPaths
 'Common Shared As WStringList Ptr pLocalTypes, pLocalEnums, pLocalProcedures, pLocalFunctions, pLocalFunctionsOthers, pLocalArgs,
-Common Shared As Dictionary Ptr pHelps, pCompilers, pMakeTools, pTerminals, pOtherEditors
+Common Shared As Dictionary Ptr pHelps, pCompilers, pMakeTools, pTerminals
 
 Enum LoadParam
 	OnlyFilePath
@@ -221,7 +221,6 @@ Declare Sub AddFromTemplates
 Declare Sub AddFilesToProject
 Declare Sub RestoreStatusText
 Declare Sub OpenUrl(ByRef url As WString)
-Declare Sub RunOtherEditorTool(Param As Any Ptr)
 Declare Function AddProject(ByRef FileName As WString = "", pFilesList As WStringList Ptr = 0, tn As TreeNode Ptr = 0, bNew As Boolean = False) As TreeNode Ptr
 Declare Function CreatePendingProjectFile(ByRef TemplatePath As WString, ByRef SuggestedBaseName As WString, tnParent As TreeNode Ptr, bOpenTab As Boolean = True) As TreeNode Ptr
 Declare Function SaveProject(ByRef tn As TreeNode Ptr, bWithQuestion As Boolean = False) As Boolean

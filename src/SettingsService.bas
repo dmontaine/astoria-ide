@@ -8,7 +8,7 @@
 #include once "SettingsService.bi"
 #include once "PathUtils.bi"
 
-Const INDEXED_SETTINGS_SECTION_COUNT As Integer = 7
+Const INDEXED_SETTINGS_SECTION_COUNT As Integer = 6
 
 Function GetBundledCompilerFolder() As UString
 	Return ExePath & "/" & BUNDLED_COMPILER_FOLDER
@@ -69,7 +69,6 @@ Private Function NoMoreIndexedSettingsKeys(i As Integer) As Boolean
 	keySum += iniSettings.KeyExists("Terminals", "Version_" & WStr(i))
 	keySum += iniSettings.KeyExists("BuildConfigurations", "Name_" & WStr(i))
 	keySum += iniSettings.KeyExists("Helps", "Version_" & WStr(i))
-	keySum += iniSettings.KeyExists("OtherEditors", "Version_" & WStr(i))
 	keySum += iniSettings.KeyExists("IncludePaths", "Path_" & WStr(i))
 	keySum += iniSettings.KeyExists("LibraryPaths", "Path_" & WStr(i))
 	Return keySum = -INDEXED_SETTINGS_SECTION_COUNT
@@ -98,16 +97,6 @@ Sub LoadSettings
 			Tool->Parameters = iniSettings.ReadString("Terminals", "Command_" & WStr(i), "")
 			Terminals.Add Temp, Tool->Path, Tool
 		End If
-		Temp = iniSettings.ReadString("OtherEditors", "Version_" & WStr(i), "")
-		If Temp <> "" Then
-			Tool = _New(ToolType)
-			Tool->Name = Temp
-			Tool->Path = SanitizeIniOptionalPath(iniSettings.ReadString("OtherEditors", "Path_" & WStr(i), ""))
-			Tool->Parameters = iniSettings.ReadString("OtherEditors", "Command_" & WStr(i), "")
-			Tool->Extensions = iniSettings.ReadString("OtherEditors", "Extensions_" & WStr(i), "")
-			OtherEditors.Add Temp, Tool->Path, Tool
-		End If
-		
 		Temp = iniSettings.ReadString("Helps", "Version_" & WStr(i), "")
 		If Temp <> "" Then Helps.Add Temp, SanitizeIniOptionalPath(iniSettings.ReadString("Helps", "Path_" & WStr(i), ""))
 		Temp = iniSettings.ReadString("BuildConfigurations", "Name_" & WStr(i), "")

@@ -649,6 +649,17 @@ Namespace My.Sys.Forms
 				If g_darkModeSupported AndAlso g_darkModeEnabled Then
 					If Not FDarkMode Then
 						SetDark True
+					Else
+						' EM_SETBKGNDCOLOR can get silently reset back to the system
+						' default by the RichEdit control itself (observed after
+						' switching dark -> light -> dark again), and the full SetDark
+						' call above only re-runs on the FDarkMode transition, so a
+						' reset that happens while already dark was never caught -
+						' the pane stayed white even though FDarkMode reported True.
+						' Re-assert just the background colour (cheap, no text
+						' reformatting) on every paint before the RichEdit's own
+						' WM_PAINT below runs, so it can never paint a stale colour.
+						SendMessage(FHandle, EM_SETBKGNDCOLOR, 0, darkBkColor)
 					End If
 				Else
 					If FDarkMode Then

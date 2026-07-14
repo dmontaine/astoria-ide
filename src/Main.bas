@@ -9668,6 +9668,24 @@ frmMain.Add @splBottom
 frmMain.Add ptabPanel
 frmMain.Show
 
+' Cold-start dark mode relies on each control's own first WM_PAINT to self-theme
+' (SettingsService's LoadSettings sets g_darkModeEnabled before any window exists,
+' deliberately with DoBroadcast=False - there's nothing to broadcast to yet). That
+' self-theming path turned out to be weaker than the live Options-Apply path: some
+' controls (e.g. the Properties/Events TreeListView column headers) only re-theme
+' correctly in response to an explicit WM_THEMECHANGED, which the live-toggle path
+' sends via BroadcastThemeChangedToChildren but a cold dark start never generates.
+' Now that the full window tree exists, run the exact same cascade a live toggle
+' uses so a dark cold start ends up in the identical state as toggling dark after
+' launch - closes the "headers/menus stay wrong until you touch Options" gap.
+If g_darkModeEnabled Then
+	' Form.SetDark is private, so re-enter through the same WM_SETTINGCHANGE
+	' path Options>Apply uses (Form.ProcessMessage's WM_SETTINGCHANGE case),
+	' rather than reaching into the class directly.
+	Dim As WString * 32 wsImmersiveColorSet = "ImmersiveColorSet"
+	SendMessageW(frmMain.Handle, WM_SETTINGCHANGE, 0, Cast(LPARAM, @wsImmersiveColorSet))
+End If
+
 Sub OnProgramStart() Constructor
 End Sub
 

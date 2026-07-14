@@ -995,10 +995,22 @@ Namespace My.Sys.Forms
 						Dim As HMENU hPopup = Cast(HMENU, msg.wParam)
 						Dim As Integer nCount = GetMenuItemCount(hPopup)
 						If nCount > 0 Then
+							' fMask covers MIIM_STRING/MIIM_BITMAP/MIIM_ID, not just MIIM_FTYPE,
+							' so the SetMenuItemInfo call below re-supplies the item's display
+							' string (and bitmap/ID) alongside the MFT_OWNERDRAW flip. A
+							' fType-only SetMenuItemInfo (the original approach here) let Windows
+							' silently drop the item's cached text once it became owner-draw, so
+							' reverting to classic (MFT_STRING) rendering left nothing to draw -
+							' invisible/"white on white" items. Confirmed via an instrumented
+							' build: the flag math itself was already correct in every case; only
+							' widening this fMask fixed the cold-dark-start-then-light repro.
 							Dim As MENUITEMINFO mii
 							mii.cbSize = SizeOf(mii)
-							mii.fMask = MIIM_FTYPE
+							mii.fMask = MIIM_FTYPE Or MIIM_BITMAP Or MIIM_STRING Or MIIM_ID
+							Dim As WString * 512 wszItemText
 							For i As Integer = 0 To nCount - 1
+								mii.dwTypeData = @wszItemText
+								mii.cch = 512
 								GetMenuItemInfo(hPopup, i, True, @mii)
 								If g_darkModeEnabled Then
 									If Not (mii.fType And MFT_OWNERDRAW) Then

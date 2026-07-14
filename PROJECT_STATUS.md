@@ -14,6 +14,9 @@ All DR-1 through DR-16 defects are fixed and owner-verified. This retained ancho
 
 ## Current State (2026-07-13)
 
+- `Settings/astoria.ini` is intentionally tracked and must be committed and pushed whenever it changes so the two development computers stay synchronized.
+- Tracked scratch files under the framework and DeviceExplorer were removed, the obsolete DeviceExplorer project file was deleted, and the repository-root `Temp/` folder was cleared.
+
 - The IDE is Win64-only, builds cleanly with the bundled FBC 1.10.1 toolchain, and produces astoria.exe.
 - The project title is **Astoria-IDE**. The GitHub repository name remains astoria-ide.
 - **Debugger Reliability (DR-1 through DR-16) is closed:** all known defects were fixed and owner-verified.

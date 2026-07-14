@@ -4,6 +4,22 @@
 
 ---
 
+## New Project dialog redesigned (2026-07-13)
+
+Owner's original request: the New Project flow used two separate dialogs (a template picker, then a generic "Name:" popup reused from the file-add flow) with a system-generated project name the user never typed. Wanted the name prompts to read "New Form Name"/"New Module Name" instead of "New Form1 name" style text, wanted an explicit project-name prompt plus a separate file-name prompt, and wanted the dialog 50% narrower.
+
+That request evolved through several rounds of live testing into a different, better shape than originally specified: instead of two sequential dialogs, the template picker (`frmNewProject`) now has three inline fields — Project Name, Primary Form Name, Primary Module Name — directly below the template icon list, so the whole thing is one dialog. `frmNewFileName` (the old generic popup) is no longer used by this flow at all, though it's kept for its other callers (adding a file to an already-open project) with its width still cut in half per the original ask.
+
+Iterations, in order: (1) two-dialog version scoped down to just the project-name half, owner asked to combine both into one dialog with the icons on top and fields below; (2) dialog and field sizing reduced further since only 5 templates need to be shown; (3) removed the auto-generated default project name entirely (field starts blank, is required) and made Form/Module names optional — leaving one blank just skips creating that file rather than being an error; (4) Primary Form Name was originally planned to be the only field gated on template choice (active only for Windows Application) but owner wanted both Form and Module active for Windows Application, so it can ship with a Form, a Module, or both; (5) Tab-key navigation between the new fields didn't work, root-caused (empirically, not fully explained by static reading of the framework's `SelectNextControl`/`ChangeTabIndex` machinery in `Controls/Framework/mff/Control.bas`) to the controls' `TabIndex` values being in a scattered, non-sequential order rather than a clean ascending sequence — renumbering fixed it.
+
+Since Windows Application's own template folder only ships a Form (no Module), its optional extra Module is copied from the generic `Templates\Files\Module.bas` used elsewhere in the codebase for the same purpose (owner's explicit choice over writing a dedicated Windows-Application-specific module template). `.vfp` project-file generation was extended to add whichever of Form/Module got created as `*File=`/`File=` lines, handling all four combinations (form only, module only, both, neither beyond the base template).
+
+One recurring FreeBASIC gotcha hit twice more in this pass: bare `Left(...)` calls inside `frmNewProject`'s methods resolve to the `Control.Left` X-coordinate property instead of the global string function due to case-insensitive name collision inside a Form-derived Type; fixed with the established `..Left(...)` double-dot prefix used elsewhere in the same file.
+
+All four scenarios (Console/Library templates create just a Module; Windows Application with Form only; with Module only; with both) verified working live by the owner after the TabIndex fix, along with Tab navigation itself.
+
+---
+
 ## astoria.dll renamed to framework.dll, moved back into Controls/Framework (2026-07-13)
 
 Immediate follow-up to the folder rename above: owner asked for the DLL to become `framework.dll` and move back inside `Controls/Framework/`, "for consistency" — reversing the earlier decision (same session, a few hours prior) to move it to the repo root as `astoria.dll`.

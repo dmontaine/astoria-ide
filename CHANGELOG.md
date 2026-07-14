@@ -8,6 +8,7 @@ This file archives completed work and the full commit history. For current statu
 
 ## Completed work
 
+- [x] **New Project dialog redesigned** — combined the old type-picker dialog and the separate popup name-prompt into one dialog with template icons plus inline Project Name (required)/Primary Form Name/Primary Module Name fields; fields start blank (no auto-generated name); Windows Application can get both a Form and an optional Module (sourced from `Templates\Files\Module.bas`), other templates get just a Module; fixed a scattered-`TabIndex` bug that broke Tab-key navigation between fields; shrank `frmNewFileName`'s width by half for its remaining uses.
 - [x] Project renamed VisualFBEditor → **AstoriaIDE** (§13.4): source/project/resource files (`AstoriaIDE.bas/.rc/.vfp`), build scripts, output binary (`astoria.exe`), settings file (`Settings/astoria.ini`), splash/title-bar/dialog-title strings, README, and ~44 source-file header comments. Internal code identifiers (`VisualFBEditorApp`, `Namespace VisualFBEditor`, `WhenVisualFBEditorStarts`) deliberately left as-is — pure implementation detail, not user-facing. `frmAbout` excluded per owner's in-progress edits.
 - [x] Win64-only fork scope documented (`README.md`, `BUILD.md`)
 - [x] `Compile.bat` / `CompileDebug.bat` two-step build (mff + IDE)

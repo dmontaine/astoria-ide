@@ -936,10 +936,10 @@ Private Sub MDIMainType.TimerComponent1_Timer(ByRef Sender As TimerComponent)
 		lstDestroied.Remove(0)
 	Wend
 	
-	'如果有MDIChildType窗口delete, 更新窗口菜单
+	'If any MDIChildType window was deleted, update window menu
 	If c Then
 		MDIChildMenuUpdate()
-		'更新窗口菜单上的激活窗口
+		'Update the active window on the window menu
 		If lstMdiChild.Count < 1 Then MDIChildActivate(NULL)
 	End If
 End Sub

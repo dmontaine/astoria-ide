@@ -1,4 +1,4 @@
-﻿' Analog Clock模拟时钟
+﻿' Analog Clock - Analog clock
 ' Copyright (c) 2024 CM.Wang
 ' Freeware. Use at your own risk.
 

@@ -10,7 +10,7 @@ Using Speech
 
 Private Sub CreateInstance(sCLSID As String, sIID As String, rtn As Any Ptr)
 	
-	'创建识别器实例
+	'Create recognizer instance
 	Dim classID As GUID, riid As GUID
 	CLSIDFromString(sCLSID, @classID)
 	IIDFromString(sIID, @riid)

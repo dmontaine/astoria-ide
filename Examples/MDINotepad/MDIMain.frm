@@ -35,39 +35,39 @@
 		timr As TimeMeter
 		
 		'MDI child
-		actMdiChild As Any Ptr                          '激活的子窗口Activated child-window
-		lstMdiChild As List                             '子窗口列表List of child-windows
-		CloseResult As ModalResults = ModalResults.Yes  '子窗关闭返回值Return value of child-window closure
-		mCaption As WString Ptr                         '主窗口标题Title of main window
-		
+		actMdiChild As Any Ptr                          'Activated child-window
+		lstMdiChild As List                             'List of child-windows
+		CloseResult As ModalResults = ModalResults.Yes  'Return value of child-window closure
+		mCaption As WString Ptr                         'Title of main window
+
 		'MDI Child menu
-		mnuWindowCount As Integer = -1                  '窗口菜单数Number of window menus
-		mnuWindows(Any) As MenuItem Ptr                 '窗口菜单指针数组Array of pointers to window menus
-		mnuWindowsAct As Integer = -1                   '激活窗口菜单索引Index of activated window menu
-		Declare Function MDIChildCloseConfirm(ByRef Child As Any Ptr) As MessageResult  '子窗口关闭确认Confirmation of child-window closure.
-		Declare Function MDIChildFind(ByRef FileName As WString) As Integer             '寻找文件是否存已在经打开的窗口中Check if the file is already open in an existing window.
-		Declare Function MDIChildNew(ByRef FileName As WString) As Any Ptr              '创建新子窗口Create a new child-window.
-		Declare Sub MDIChildActivate(ByRef Child As Any Ptr)                            '激活的子窗口指针Pointer of activated child-window.
-		Declare Sub MDIChildClick()                                                     '更新状态栏信息Update status bar information.
-		Declare Sub MDIChildDestroy(ByRef Child As Any Ptr)                             '子窗口销毁Destroy the child-window.
+		mnuWindowCount As Integer = -1                  'Number of window menus
+		mnuWindows(Any) As MenuItem Ptr                 'Array of pointers to window menus
+		mnuWindowsAct As Integer = -1                   'Index of activated window menu
+		Declare Function MDIChildCloseConfirm(ByRef Child As Any Ptr) As MessageResult  'Confirmation of child-window closure.
+		Declare Function MDIChildFind(ByRef FileName As WString) As Integer             'Check if the file is already open in an existing window.
+		Declare Function MDIChildNew(ByRef FileName As WString) As Any Ptr              'Create a new child-window.
+		Declare Sub MDIChildActivate(ByRef Child As Any Ptr)                            'Pointer of activated child-window.
+		Declare Sub MDIChildClick()                                                     'Update status bar information.
+		Declare Sub MDIChildDestroy(ByRef Child As Any Ptr)                             'Destroy the child-window.
 		'Declare Sub MDIChildDoubleClick(ByRef Child As Any Ptr)
-		Declare Sub MDIChildInsertText(ByRef Child As Any Ptr, ByRef Text As WString)   '在子窗口的光标处插入文字Insert text at the cursor position in the sub-window.
-		Declare Sub MDIChildMenuUpdate()                                                '更新窗口菜单Update window menus.
-		Declare Sub MenuEnabled(Enabled As Boolean)                                     '窗口菜单可用与否Availability of window menus.
-		
+		Declare Sub MDIChildInsertText(ByRef Child As Any Ptr, ByRef Text As WString)   'Insert text at the cursor position in the sub-window.
+		Declare Sub MDIChildMenuUpdate()                                                'Update window menus.
+		Declare Sub MenuEnabled(Enabled As Boolean)                                     'Availability of window menus.
+
 		'file
-		Declare Function FileSave(ByRef Child As Any Ptr) As MessageResult              '文件保存
-		Declare Function FileSaveAs(ByRef Child As Any Ptr) As MessageResult            '文件另存为
-		Declare Sub FileInsert(ByRef Child As Any Ptr, ByRef FileName As WString)       '文件插入
-		Declare Sub FileOpen(ByRef FileName As WString)                                 '文件打开
-		
+		Declare Function FileSave(ByRef Child As Any Ptr) As MessageResult              'Save file
+		Declare Function FileSaveAs(ByRef Child As Any Ptr) As MessageResult            'Save file as
+		Declare Sub FileInsert(ByRef Child As Any Ptr, ByRef FileName As WString)       'Insert file
+		Declare Sub FileOpen(ByRef FileName As WString)                                 'Open file
+
 		'edit
-		mFindBack As Boolean = False                                                    '往回寻找
-		mFinding As WString Ptr = NULL                                                  '寻找字符串
-		mFindLength As Integer = -1                                                     '寻找字符串长度
-		mFindIndex As Integer = -1                                                      '寻找索引
-		mFindCount As Integer = -1                                                      '寻找到总数
-		mFindPos As Integer Ptr                                                         '寻找到位置
+		mFindBack As Boolean = False                                                    'Search backward
+		mFinding As WString Ptr = NULL                                                  'Search string
+		mFindLength As Integer = -1                                                     'Search string length
+		mFindIndex As Integer = -1                                                      'Search index
+		mFindCount As Integer = -1                                                      'Total number of matches found
+		mFindPos As Integer Ptr                                                         'Position(s) found
 		
 		Declare Sub Find(ByRef FindStr As WString, ByVal MatchCase As Boolean = False, ByVal FindWarp As Boolean = True, ByVal FindBack As Boolean = False)
 		Declare Sub GotoLineNo(ByVal LineNumber As Integer)
@@ -1433,10 +1433,10 @@
 Private Sub MDIMainType.Form_Close(ByRef Sender As Form, ByRef Action As Integer)
 	mnuWindow_Click(mnuWindowCloseAll)
 	If CloseResult = ModalResults.Cancel Then
-		'子窗口关闭选择了Cancel
+		'Cancel was chosen at child-window close
 		Action = False
 	Else
-		'销毁内存
+		'Free memory
 		If mCaption Then Deallocate(mCaption)
 		If mFinding Then Deallocate(mFinding)
 		If mFindPos Then Deallocate(mFindPos)
@@ -1455,7 +1455,7 @@ Private Sub MDIMainType.Form_Create(ByRef Sender As Control)
 	
 	MenuEnabled(False)
 	
-	'Command line 命令行
+	'Command line
 	Dim As Integer i = 1
 	Do
 		If Len(Command(i)) = 0 Then Exit Do
@@ -1469,7 +1469,7 @@ Private Sub MDIMainType.Form_DropFile(ByRef Sender As Control, ByRef Filename As
 End Sub
 
 Private Sub MDIMainType.Form_Resize(ByRef Sender As Control, NewWidth As Integer, NewHeight As Integer)
-	'状态栏中文件名栏位宽度自动调整
+	'Auto-adjust the filename column width in the status bar
 	spFileName.Width = NewWidth - (spEOL.Width + spEncode.Width + spLocation.Width + spSpace.Width + spSpeed.Width)
 End Sub
 
@@ -1495,9 +1495,9 @@ Private Sub MDIMainType.TimerComponent1_Timer(ByRef Sender As TimerComponent)
 			b = True
 		End If
 	Next
-	'如果有窗口delete, 更新窗口菜单
+	'If any window was deleted, update window menu
 	If b Then MDIChildMenuUpdate()
-	'更新窗口菜单上的激活窗口
+	'Update the active window on the window menu
 	If lstMdiChild.Count > 0 Then
 		MDIChildActivate(actMdiChild)
 	Else
@@ -1987,7 +1987,7 @@ Private Sub MDIMainType.mnuHelp_Click(ByRef Sender As MenuItem)
 	End Select
 End Sub
 
-'子窗口关闭确认Confirmation of child-window closure.
+'Confirmation of child-window closure.
 Private Function MDIMainType.MDIChildCloseConfirm(ByRef Child As Any Ptr) As MessageResult
 	Dim As MDIChildType Ptr a = Child
 	Dim As MessageResult msr = mrYes
@@ -2005,7 +2005,7 @@ Private Function MDIMainType.MDIChildCloseConfirm(ByRef Child As Any Ptr) As Mes
 	Return msr
 End Function
 
-'寻找文件是否存已在经打开的窗口中Check if the file is already open in an existing window.
+'Check if the file is already open in an existing window.
 Private Function MDIMainType.MDIChildFind(ByRef FileName As WString) As Integer
 	Dim As Integer i
 	Dim As MDIChildType Ptr a
@@ -2018,7 +2018,7 @@ Private Function MDIMainType.MDIChildFind(ByRef FileName As WString) As Integer
 	Return -1
 End Function
 
-'创建新子窗口Create a new child-window.
+'Create a new child-window.
 Private Function MDIMainType.MDIChildNew(ByRef FileName As WString) As Any Ptr
 	'Debug.Print "MDIChildNew: " & FileName
 	Dim As FileEncodings Encode = -1
@@ -2067,7 +2067,7 @@ Private Function MDIMainType.MDIChildNew(ByRef FileName As WString) As Any Ptr
 	Return a
 End Function
 
-'激活的子窗口指针Pointer of activated child-window.
+'Pointer of activated child-window.
 Private Sub MDIMainType.MDIChildActivate(ByRef Child As Any Ptr)
 	'Debug.Print "MDIChildActivate: " & Child
 	actMdiChild = Child
@@ -2151,14 +2151,14 @@ Private Sub MDIMainType.MDIChildActivate(ByRef Child As Any Ptr)
 		End If
 	Next
 	
-	'重置查找
+	'Reset search
 	mFindLength = -1
 	If frmFindReplace.Handle Then
 		frmFindReplace.lblStatus.Caption = "Find..."
 	End If
 End Sub
 
-'更新状态栏信息Update status bar information.
+'Update status bar information.
 Private Sub MDIMainType.MDIChildClick()
 	'Debug.Print "MDIChildClick: " & actMdiChild
 	If actMdiChild = NULL Then Exit Sub
@@ -2181,28 +2181,28 @@ Private Sub MDIMainType.MDIChildClick()
 	End If
 	
 	If s = e Then
-		'没有选择文字
+		'No text selected
 		spLocation.Caption = "Ln: " & Format(sy + 1, "#,#0") & "  Col: " & Format(sx + 1, "#,#0") & "  Pos: " & Format(s + 1, "#,#0")
 		If frmFindReplace.Handle Then
-			'重置查找定位位置
+			'Reset search position
 			mFindIndex = -1
 			frmFindReplace.lblStatus.Caption = "..."
 		End If
 	Else
-		'选择了文字
+		'Text selected
 		spLocation.Caption = "Ln: " & Format(sy + 1, "#,#0") & "  Col: " & Format(sx + 1, "#,#0") & "  Sel: " & Format(e - s, "#,#0") & "|" & Format(ey - sy + 1, "#,#0")
 		If frmFindReplace.Handle Then
 			If frmFindReplace.txtFind.Text <> a->Editor.SelText Then
 				frmFindReplace.txtFind.Text = a->Editor.SelText
 				frmFindReplace.lblStatus.Caption = "..."
-				'重置查找
+				'Reset search
 				mFindLength = -1
 			End If
 		End If
 	End If
 End Sub
 
-'子窗口销毁Destroy the sub-window.
+'Destroy the sub-window.
 Private Sub MDIMainType.MDIChildDestroy(ByRef Child As Any Ptr)
 	'Debug.Print "MDIChildDestroy: " & Child
 	Cast(MDIChildType Ptr, Child)->Destroied = True
@@ -2210,7 +2210,7 @@ Private Sub MDIMainType.MDIChildDestroy(ByRef Child As Any Ptr)
 	TimerComponent1.Enabled = True
 End Sub
 
-'在子窗口的光标处插入文字Insert text at the cursor position in the sub-window.
+'Insert text at the cursor position in the sub-window.
 Private Sub MDIMainType.MDIChildInsertText(ByRef Child As Any Ptr, ByRef Text As WString)
 	Dim As MDIChildType Ptr a = Child
 	Dim As Integer i = a->Editor.SelStart
@@ -2219,7 +2219,7 @@ Private Sub MDIMainType.MDIChildInsertText(ByRef Child As Any Ptr, ByRef Text As
 	a->Editor.SelLength = Len(Text)
 End Sub
 
-'更新窗口菜单Update window menus.
+'Update window menus.
 Private Sub MDIMainType.MDIChildMenuUpdate()
 	'Debug.Print "MDIChildMenuUpdate"
 	
@@ -2284,7 +2284,7 @@ Private Sub MDIMainType.MDIChildMenuUpdate()
 	End If
 End Sub
 
-'窗口菜单可用与否Availability of window menus.
+'Availability of window menus.
 Private Sub MDIMainType.MenuEnabled(Enabled As Boolean)
 	'menu
 	mnuFileSave.Enabled = Enabled
@@ -2405,36 +2405,36 @@ Private Function MDIMainType.FileSaveAs(ByRef Child As Any Ptr) As MessageResult
 	Return msr
 End Function
 
-'新版本查找,可展示找查找总数和所在位置
+'New-version search, can show the total match count and current position
 Private Sub MDIMainType.Find(ByRef FindStr As WString, ByVal MatchCase As Boolean = False, ByVal FindWarp As Boolean = True, ByVal FindBack As Boolean = False)
 	If FindStr = "" Then Exit Sub
-	
+
 	timr.Start
 	Dim As MDIChildType Ptr a = actMdiChild
 	mFindBack = FindBack
-	
-	'判断是否要重新查找
+
+	'Determine whether a new search is needed
 	If *mFinding <> FindStr Or mFindLength < 1 Then
-		'执行查找
+		'Run the search
 		mFindCount = FindCountWStr(a->Editor.Text, FindStr, mFindPos, MatchCase)
 		WLet(mFinding, FindStr)
 		mFindLength = Len(FindStr)
 		mFindIndex = -1
 	End If
-	
+
 	If mFindCount < 1 Then
-		'没有否有找到
+		'Not found
 		If frmFindReplace.Handle Then
 			If mFindCount < 1 Then frmFindReplace.lblStatus.Caption = "Find not found."
 		End If
 		MsgBox("Find not found.")
 	Else
-		'找到
+		'Found
 		If mFindIndex = -1 Then
-			'需要定位
+			'Need to locate
 			mFindIndex = FindIndexByPos(mFindPos, mFindCount, a->Editor.SelStart, FindWarp, FindBack)
 		Else
-			'继续找
+			'Continue searching
 			If FindBack Then
 				If mFindIndex > 0 Then
 					mFindIndex -= 1
@@ -2468,7 +2468,7 @@ Private Sub MDIMainType.Find(ByRef FindStr As WString, ByVal MatchCase As Boolea
 			a->Editor.SelEnd = a->Editor.SelEnd + mFindLength
 			
 			If frmFindReplace.Handle Then
-				'展示找查找总数和所在位置
+				'Show the total match count and current position
 				frmFindReplace.lblStatus.Caption = "Find: " & Format(mFindIndex + 1, "#,#0") & " of " & Format(mFindCount, "#,#0")
 			End If
 		End If
@@ -2476,7 +2476,7 @@ Private Sub MDIMainType.Find(ByRef FindStr As WString, ByVal MatchCase As Boolea
 	spSpeed.Caption = "Find " & Format(timr.Passed, "#,#0.000") & " sec."
 End Sub
 
-'查找替换
+'Find and replace
 Private Sub MDIMainType.Replace(ByRef FindStr As WString, ByRef ReplaceStr As WString, ByVal MatchCase As Boolean = False, ByVal FindWarp As Boolean = True)
 	If FindStr = "" Then Exit Sub
 	Dim As TimeMeter t
@@ -2492,7 +2492,7 @@ Private Sub MDIMainType.Replace(ByRef FindStr As WString, ByRef ReplaceStr As WS
 	spSpeed.Caption = "Replace " & Format(t.Passed, "#,#0.000") & " sec."
 End Sub
 
-'查找替换全部
+'Find and replace all
 Private Sub MDIMainType.ReplaceAll(ByRef FindStr As WString, ByRef ReplaceStr As WString, ByVal MatchCase As Boolean = False)
 	If FindStr = "" Then Exit Sub
 	timr.Start
@@ -2509,7 +2509,7 @@ Private Sub MDIMainType.ReplaceAll(ByRef FindStr As WString, ByRef ReplaceStr As
 	spSpeed.Caption = "Replace All " & Format(timr.Passed, "#,#0.000") & " sec."
 End Sub
 
-'行排序
+'Sort lines
 Private Sub MDIMainType.SortLines(SortOrder As SortOrders)
 	timr.Start
 	Dim As MDIChildType Ptr a = actMdiChild
@@ -2542,7 +2542,7 @@ Private Sub MDIMainType.SortLines(SortOrder As SortOrders)
 	spSpeed.Caption = "Sort " & Format(timr.Passed, "#,#0.000") & " sec."
 End Sub
 
-'跳转到指定行
+'Go to the specified line
 Private Sub MDIMainType.GotoLineNo(ByVal LineNumber As Integer)
 	timr.Start
 	Dim As MDIChildType Ptr a = actMdiChild

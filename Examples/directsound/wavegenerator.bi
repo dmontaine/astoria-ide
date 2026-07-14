@@ -1,5 +1,5 @@
 ﻿#pragma once
-'wavegenerator波形发生器
+'wavegenerator waveform generator
 ' Copyright (c) 2024 CM.Wang
 ' Freeware. Use at your own risk.
 

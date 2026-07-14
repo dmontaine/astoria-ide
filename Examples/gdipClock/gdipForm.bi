@@ -1,10 +1,10 @@
-﻿' Trans Form 透明窗口
+﻿' Trans Form - Transparent window
 ' Copyright (c) 2024 CM.Wang
 ' Freeware. Use at your own risk.
 
 #include once "win\GdiPlus.bi"
 
-'建立gdip透明窗口
+'Build a GDI+ transparent window
 Type gdipForm
 	'UpdateLayeredWindow
 	hScrDC As HDC

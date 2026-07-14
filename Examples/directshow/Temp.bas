@@ -1,4 +1,4 @@
-﻿'AMCap摄像头捕捉
+﻿'AMCap Camera Capture
 ' Copyright (c) 2025 CM.Wang
 ' Freeware. Use at your own risk.
 
@@ -89,13 +89,13 @@ Private Function CaptureBmp(filename As ZString Ptr) As HRESULT
 	
 	Dim As HRESULT hr
 	
-	'1, 检查pBV2是否存在
+	'1, Check whether pBV2 exists
 	?"pBV2 = " & pBV2
 	If pBV2 = NULL Then Return True
 	
 	pMC->lpVtbl->Pause(pMC)
 	
-	'2, 检查视频是否在暂停状态
+	'2, Check whether video is in paused state
 	'Retrieves the state of the filter graph—paused, running, or stopped.
 	Dim As FILTER_STATE pfs
 	Do
@@ -115,27 +115,27 @@ Private Function CaptureBmp(filename As ZString Ptr) As HRESULT
 	
 	Sleep(150)
 	
-	'3, 获取视频宽高
+	'3, Get video width/height
 	Dim As Long lHeight
 	Dim As Long lWidth
 	hr = pBV2->lpVtbl->GetVideoSize(pBV2, @lWidth, @lHeight)
 	?"pBV2->lpVtbl->GetVideoSize = " & hr, lWidth, lHeight
 	If hr Then Return hr
 	
-	'4, 创建位图文件头
+	'4, Create bitmap file header
 	Dim As BITMAPFILEHEADER mbitmapFileHeader
 	mbitmapFileHeader.bfType = &h4D42
 	mbitmapFileHeader.bfReserved1 = 0
 	mbitmapFileHeader.bfReserved2 = 0
 	mbitmapFileHeader.bfOffBits = SizeOf(BITMAPFILEHEADER) + SizeOf(BITMAPINFOHEADER)
 	
-	'5, 创建位图信息头
+	'5, Create bitmap info header
 	Dim As BITMAPINFOHEADER mbitmapInfoHeader
 	mbitmapInfoHeader.biSize = SizeOf(BITMAPINFOHEADER)
-	mbitmapInfoHeader.biWidth = lWidth      ' 设置图像宽度
-	mbitmapInfoHeader.biHeight = lHeight    ' 设置图像高度（可根据摄像头支持的分辨率进行调整）
+	mbitmapInfoHeader.biWidth = lWidth      ' Set image width
+	mbitmapInfoHeader.biHeight = lHeight    ' Set image height (adjust based on camera's supported resolution)
 	mbitmapInfoHeader.biPlanes = 1
-	mbitmapInfoHeader.biBitCount = 32       ' 设置位图位数（24表示每个像素占用3字节,32表示每个像素占用4字节）
+	mbitmapInfoHeader.biBitCount = 32       ' Set bitmap bit depth (24 = 3 bytes/pixel, 32 = 4 bytes/pixel)
 	mbitmapInfoHeader.biCompression = BI_RGB
 	mbitmapInfoHeader.biSizeImage = 0
 	mbitmapInfoHeader.biXPelsPerMeter = 0
@@ -146,14 +146,14 @@ Private Function CaptureBmp(filename As ZString Ptr) As HRESULT
 	Dim pBufferSize As Long = SizeOf(BITMAPFILEHEADER) + lHeight * lWidth * (mbitmapInfoHeader.biBitCount / 8)
 	Dim pDIBImage As Long Ptr = NULL
 	
-	'6, 获取缓存大小和申请缓存
+	'6, Get buffer size and allocate buffer
 	'hr = pBV2->lpVtbl->GetCurrentImage(pBV2, @pBufferSize, NULL)
 	?"pBV2->lpVtbl->GetCurrentImage = " & hr, pBufferSize, SizeOf(BITMAPFILEHEADER) + lHeight * lWidth * (mbitmapInfoHeader.biBitCount / 8)
 	If hr Then Return hr
 	pDIBImage = CoTaskMemAlloc(pBufferSize)
 	'pDIBImage = Cast(Long Ptr, Allocate(pBufferSize))	
 	
-	'7, 更新位图文件头
+	'7, Update bitmap file header
 	mbitmapFileHeader.bfSize = pBufferSize + SizeOf(BITMAPFILEHEADER)
 	
 	'8, Retrieves the current image waiting at the renderer.
@@ -167,7 +167,7 @@ Private Function CaptureBmp(filename As ZString Ptr) As HRESULT
 	End If
 	If hr Then Return hr
 	
-	'9, 检查文件存在和删除
+	'9, Check whether file exists and delete it
 	Dim As FILE Ptr fileHandle
 	fileHandle = fopen(filename, @Str("rb"))
 	If fileHandle Then
@@ -175,7 +175,7 @@ Private Function CaptureBmp(filename As ZString Ptr) As HRESULT
 		remove(filename)
 	End If
 	
-	'10, 写入文件
+	'10, Write file
 	fileHandle = fopen(filename, @Str("wb"))
 	'Print "fopen(filename, @Str(wb)): " & fileHandle
 	If fileHandle Then
@@ -185,7 +185,7 @@ Private Function CaptureBmp(filename As ZString Ptr) As HRESULT
 		fclose(fileHandle)
 	End If
 	
-	'11, 释放缓存
+	'11, Free buffer
 	CoTaskMemFree(pDIBImage)
 	'Deallocate(pDIBImage)
 	

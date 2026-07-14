@@ -257,7 +257,7 @@ Function regulate(ByVal myfps As Long, ByRef fps As Long) As Long
 	Return sleeptime
 End Function
 
-'the main rendering code.  渲染代码主过程。
+'the main rendering code.  Main rendering procedure.
 Sub RenderProj(Param As Any Ptr)
 	
 End Sub

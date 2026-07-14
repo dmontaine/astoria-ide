@@ -1,4 +1,4 @@
-﻿'Monitor显示器
+﻿'Monitor - display monitor
 ' Copyright (c) 2024 CM.Wang
 ' Freeware. Use at your own risk.
 
@@ -23,7 +23,7 @@
 'GetMonitorInfo
 'https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getmonitorinfoa
 
-'C定义
+'C definition
 'typedef struct tagMONITORINFO {
 '  DWORD cbSize;
 '  Rect  rcMonitor;
@@ -35,7 +35,7 @@
 '  WCHAR szDevice[CCHDEVICENAME];
 '} MONITORINFOEXW,*LPMONITORINFOEXW;
 
-'转换成freebasic的定义
+'Converted to FreeBASIC definition
 'Type tagMONITORINFO
 '	cbSize As DWORD
 '	rcMonitor As Rect

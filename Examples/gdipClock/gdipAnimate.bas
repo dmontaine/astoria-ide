@@ -1,4 +1,4 @@
-﻿'gdipAnimate动画
+﻿'gdipAnimate - Animation
 ' Copyright (c) 2024 CM.Wang
 ' Freeware. Use at your own risk.
 
@@ -16,34 +16,34 @@ End Destructor
 Private Sub gdipAnimate.ImageFile(sFileName As WString, ByVal sFrameWidth As Integer = 0, ByVal sFrameHeight As Integer = 0, ByVal sFrameCount As Integer = -1)
 	mFileBitmap.DrawFromFile(sFileName)
 	
-	' 识别图像格式
+	' Identify the image format
 	Dim fguid As GUID
 	GdipGetImageRawFormat(mFileBitmap.Image, @fguid)
 	'Debug.Print "fguid.Data1: &H" & Hex(fguid.Data1)
 	Select Case fguid.Data1
 	Case &HB96B3CB0
-		' 获取帧数
+		' Get the frame count
 		'Todo: FrameDimensionTime freebasic not decdared at gdip Win32
 		'GdipImageGetFrameCount(mFileBitmap.Image, @FrameDimensionTime, @mFrameCount)
 		GdipImageGetFrameCount(mFileBitmap.Image, @GUID_FrameDimensionTime, @mFrameCount)
 		mFrameCount = mFrameCount - 1
 		
-		' 获取属性项大小
+		' Get the property item size
 		Dim propItemSize As UINT
 		GdipGetPropertyItemSize(mFileBitmap.Image, PropertyTagFrameDelay, @propItemSize)
-		' 申请内存存储属性项数据
+		' Allocate memory to store the property item data
 		Dim propItem As PropertyItem Ptr = Allocate(propItemSize)
-		' 获取属性项数据
+		' Get the property item data
 		GdipGetPropertyItem(mFileBitmap.Image, PropertyTagFrameDelay, propItemSize, propItem)
 		
-		' 解析属性项数据
+		' Parse the property item data
 		Dim i As Integer
 		ReDim mFrameDelays(mFrameCount)
-		' 获取每帧时延
+		' Get the delay for each frame
 		For i = 0 To mFrameCount
 			mFrameDelays(i) = *Cast(ULong Ptr, (propItem->value + i*SizeOf(ULong)))
 			
-			'换算成毫秒
+			'Convert to milliseconds
 			Select Case mFrameDelays(i)
 			Case Is > 6000
 				mFrameDelays(i) = 60000 ' Max.: 1 min.

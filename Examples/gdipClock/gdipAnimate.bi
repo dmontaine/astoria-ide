@@ -1,4 +1,4 @@
-﻿'gdipAnimate动画
+﻿'gdipAnimate - Animation
 ' Copyright (c) 2024 CM.Wang
 ' Freeware. Use at your own risk.
 

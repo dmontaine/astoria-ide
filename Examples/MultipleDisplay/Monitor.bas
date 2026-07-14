@@ -1,4 +1,4 @@
-﻿'Monitor显示器
+﻿'Monitor - display monitor
 ' Copyright (c) 2024 CM.Wang
 ' Freeware. Use at your own risk.
 

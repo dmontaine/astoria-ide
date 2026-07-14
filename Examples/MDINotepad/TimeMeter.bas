@@ -1,5 +1,5 @@
 ﻿#pragma once
-' TimeMeter 计时器
+' TimeMeter - timer
 ' Copyright (c) 2024 CM.Wang
 ' Freeware. Use at your own risk.
 

@@ -1,4 +1,4 @@
-﻿' DrawClockCalendar 绘制时钟日历
+﻿' DrawClockCalendar - draws the clock and calendar
 ' Copyright (c) 2024 CM.Wang
 ' Freeware. Use at your own risk.
 
@@ -14,8 +14,8 @@ Constructor DitalClock
 	mColon = ":"
 	FontNameE = "Arial"'"FX-LED"
 	FontNameC = "微软雅黑"
-	
-	'调颜色
+
+	'set colors
 	mClr(0) = vbRGB(mC(7), mC(6), mC(8)) 'backcolor_clock
 	mClr(1) = vbRGB(mC(0), mC(0), mC(0)) 'forecolor_hour
 	mClr(2) = vbRGB(mC(0), mC(0), mC(0)) 'forecolor_minute
@@ -55,31 +55,31 @@ End Function
 Private Sub DitalClock.CalculateSize(Canvas As My.Sys.Drawing.Canvas, ByVal byHeight As Boolean = True)
 	mDt = "00" & mColon & "00"
 	If byHeight Then
-		mFontSize = Canvas.Height / 1.38 '时分字体大小
+		mFontSize = Canvas.Height / 1.38 'hour/minute font size
 	Else
-		mFontSize = Canvas.Width / 4.3     '时分字体大小
+		mFontSize = Canvas.Width / 4.3     'hour/minute font size
 	End If
 	Canvas.Font.Size = mFontSize
 	Canvas.Font.Name = FontNameE
 	Canvas.Font.Bold = True
 	
-	mH(0) = Canvas.TextHeight(mDt)      '整体高度
-	mW(1) = Canvas.TextWidth(mDt)       '时分宽度
-	Canvas.Font.Size = mFontSize / 3    '秒字体大小
-	mW(2) = Canvas.TextWidth(" MW")     '秒宽度
+	mH(0) = Canvas.TextHeight(mDt)      'overall height
+	mW(1) = Canvas.TextWidth(mDt)       'hour/minute width
+	Canvas.Font.Size = mFontSize / 3    'seconds font size
+	mW(2) = Canvas.TextWidth(" MW")     'seconds width
 	If mShowSec Then
-		mW(0) = mW(1) + mW(2)           '整体宽度
+		mW(0) = mW(1) + mW(2)           'overall width
 	Else
-		mW(0) = mW(1)                   '整体宽度
+		mW(0) = mW(1)                   'overall width
 	End If
-	mOx = (Canvas.Width - mW(0)) / 2    'x偏移
-	mOy = (Canvas.Height - mH(0)) / 2   'y偏移
+	mOx = (Canvas.Width - mW(0)) / 2    'x offset
+	mOy = (Canvas.Height - mH(0)) / 2   'y offset
 End Sub
 
 Private Sub DitalClock.DrawClock(ByRef Canvas As My.Sys.Drawing.Canvas, DateTime As Double, ByVal byHeight As Boolean = True)
 	CalculateSize(Canvas, byHeight)
 	
-	'时钟区域
+	'clock area
 	Canvas.Pen.Color = mClr(0)
 	Canvas.Line 0, 0, Canvas.Width, Canvas.Height, mClr(0) , "F"
 	
@@ -87,25 +87,25 @@ Private Sub DitalClock.DrawClock(ByRef Canvas As My.Sys.Drawing.Canvas, DateTime
 	Canvas.Font.Bold = True
 	Canvas.Font.Size = mFontSize
 	
-	'时
+	'hour
 	'mDt = Format(Hour(DateTime), "00")
 	'Canvas.TextOut(mOx, mOy, mDt, mClr(1))
 	mDt = Format(Hour(DateTime), "0")
 	Canvas.TextOut(mOx + Canvas.TextWidth("00") - Canvas.TextWidth(mDt), mOy, mDt, mClr(1))
-	'分
+	'minute
 	mDt = Format(Minute(DateTime), "00")
 	Canvas.TextOut(mOx + mW(1) - Canvas.TextWidth(mDt), mOy, mDt, mClr(2))
-	
-	'Mark冒号(0不绘, 1绘制)
+
+	'Mark colon (0 = don't draw, 1 = draw)
 	If Mark Then Canvas.TextOut(mOx + (mW(1) - Canvas.TextWidth(mColon)) / 2, mOy, mColon, mClr(3))
-	
+
 	If mShowSec = False Then Exit Sub
-	
-	'上下午
+
+	'AM/PM
 	Canvas.Font.Size = mFontSize * 3 / 8
 	mDt = IIf(Hour(DateTime) < 12, "AM", "PM")
 	Canvas.TextOut(mOx + mW(1) + (mW(2) - Canvas.TextWidth(mDt)) / 2 , mOy + mH(0) / 2 - Canvas.TextHeight(mDt) , mDt, mClr(4))
-	'秒
+	'seconds
 	mDt = Format(Second(DateTime), "00")
 	Canvas.TextOut(mOx + mW(1) + (mW(2) - Canvas.TextWidth(mDt)) / 2 , mOy + mH(0) / 2, mDt, mClr(5))
 End Sub

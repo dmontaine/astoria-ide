@@ -1,11 +1,11 @@
 ﻿'DeviceExplorer.bas
 ' Copyright (c) 2024 CM.Wang
 ' Freeware. Use at your own risk.
-' 通过windows api实现如device manager一样的update driver, uninstall device, eject device的功能
-' 翻译了cfgmgr32, devguid, devpkey, devpropdef, newdev等相关头文件
+' Implements Device Manager-like update driver, uninstall device, and eject device functionality via the Windows API
+' Translated (ported) related headers: cfgmgr32, devguid, devpkey, devpropdef, newdev, etc.
 ' https://learn.microsoft.com/en-us/windows/win32/devinst/setupapi-h
 
-' 参考了TwinBasic的样例
+' Based on the TwinBasic sample
 ' https://github.com/fafalone/DeviceExplorer
 
 #include once "DeviceExplorer.bi"
@@ -55,9 +55,9 @@ Private Sub pvInit()
 End Sub
 
 Private Sub pvInitIcon(tv As TreeView Ptr)
-	'初始化ImageList, 并从setupapi.dll文件获得Overlay Icon
-	
-	'清空ImageList Icon
+	'Initialize the ImageList, and get the overlay icons from setupapi.dll
+
+	'Clear the ImageList icons
 	ImageList_Remove tv->Images->Handle, -1
 	
 	Dim hico As HANDLE
@@ -66,7 +66,7 @@ Private Sub pvInitIcon(tv As TreeView Ptr)
 	Dim k As Integer = ExtractIconEx(SystemPath & "\setupapi.dll", -1, 0, NULL, 0)
 	k -= 1
 	Dim o As Long
-	'最后3个图标是Overlay icon.
+	'The last 3 icons are overlay icons.
 	For i = k - 2 To k
 		ExtractIconEx(SystemPath & "\setupapi.dll", i, 0, @hico, 1)
 		o = ImageList_ReplaceIcon(tv->Images->Handle, -1, hico)
@@ -115,7 +115,7 @@ Private Function pvEnumClasses(hwndParent As HWND, tv As TreeView Ptr, ShowCateg
 	pvRelase()
 	
 	cbReq = 0
-	'SetupDiBuildClassInfoList返回本地计算机上安装的设备类别的 GUID 列表
+	'SetupDiBuildClassInfoList returns the list of GUIDs for the device classes installed on the local computer
 	ret = SetupDiBuildClassInfoList(NULL, NULL, 0, @cbReq)
 	categoriesCount = cbReq - 1
 	EnumCCount = 0
@@ -148,7 +148,7 @@ Private Function pvEnumClasses(hwndParent As HWND, tv As TreeView Ptr, ShowCateg
 		If categoriesHSet(i) = INVALID_HANDLE_VALUE Then Continue For
 		
 		cchReq = 0
-		'SetupDiClassNameFromGuid根据设备类别 GUID 获取设备类名称
+		'SetupDiClassNameFromGuid gets the device class name from the device class GUID
 		ret = SetupDiClassNameFromGuid(@categoriesGuid(i), NULL, NULL, @cchReq)
 		If cchReq Then
 			categoriesName(i) = CAllocate(cchReq * 2, SizeOf(Byte))
@@ -156,7 +156,7 @@ Private Function pvEnumClasses(hwndParent As HWND, tv As TreeView Ptr, ShowCateg
 		End If
 		
 		cchReq = 0
-		'SetupDiGetClassDescription获取设备类的描述
+		'SetupDiGetClassDescription gets the description of the device class
 		ret = SetupDiGetClassDescription(@categoriesGuid(i), NULL, NULL, @cchReq)
 		If cchReq Then
 			categoriesDescription(i) = CAllocate(cchReq * 2, SizeOf(Byte))
@@ -164,7 +164,7 @@ Private Function pvEnumClasses(hwndParent As HWND, tv As TreeView Ptr, ShowCateg
 		End If
 		
 		Dim pTNode As TreeNode Ptr = NULL
-		'显示所有设备类别
+		'Show all device categories
 		If ShowCategories Then
 			EnumCCount += 1
 			ret = SetupDiLoadClassIcon(@categoriesGuid(i), @hicn, NULL)
@@ -176,10 +176,10 @@ Private Function pvEnumClasses(hwndParent As HWND, tv As TreeView Ptr, ShowCateg
 		mIndex = 0
 		memset(@categoriesDevInfo(i), 0, SizeOf(categoriesDevInfo(i)))
 		categoriesDevInfo(i).cbSize = SizeOf(categoriesDevInfo(i))
-		'SetupDiEnumDeviceInfo枚举设备信息集中的设备信息元素
+		'SetupDiEnumDeviceInfo enumerates the device information elements in a device information set
 		Do While SetupDiEnumDeviceInfo(categoriesHSet(i), mIndex, @categoriesDevInfo(i))
 			
-			'只显示有设备的设备类别
+			'Only show device categories that have devices
 			If pTNode = NULL Then
 				EnumCCount += 1
 				ret = SetupDiLoadClassIcon(@categoriesGuid(i), @hicn, NULL)
@@ -204,7 +204,7 @@ Private Function pvEnumClasses(hwndParent As HWND, tv As TreeView Ptr, ShowCateg
 			
 			devicesIndexCategories(j) = i
 			
-			'SetupDiGetDeviceInstanceId获取设备实例 ID。这个 ID 是一个唯一的字符串，用于标识系统中的每个设备实例。
+			'SetupDiGetDeviceInstanceId gets the device instance ID. This ID is a unique string identifying each device instance in the system.
 			cchReq = 0
 			ret = SetupDiGetDeviceInstanceId(categoriesHSet(i), @categoriesDevInfo(i), NULL, 0, @cchReq)
 			If cchReq Then
@@ -212,7 +212,7 @@ Private Function pvEnumClasses(hwndParent As HWND, tv As TreeView Ptr, ShowCateg
 				ret = SetupDiGetDeviceInstanceId(categoriesHSet(i), @categoriesDevInfo(i), devicesInstanceId(j), cchReq, @cchReq)
 			End If
 			
-			'SetupDiGetDeviceRegistryProperty从设备的信息集中检索设备的注册表属性
+			'SetupDiGetDeviceRegistryProperty retrieves a device's registry property from the device information set
 			cchReq = 0
 			regType= 0
 			ret = SetupDiGetDeviceRegistryProperty(categoriesHSet(i), @categoriesDevInfo(i), SPDRP_CLASSGUID, @regType, NULL, 0, @cchReq)
@@ -314,7 +314,7 @@ Private Function pvEnumClasses(hwndParent As HWND, tv As TreeView Ptr, ShowCateg
 			End If
 			devicesPresent(j) = fPresent
 			
-			'显示设备
+			'Display the device
 			Dim sTNode As TreeNode Ptr
 			If *devicesFriendlyName(j) = "" Then
 				sTNode = pTNode->Nodes.Add(*devicesDescription(j), WStr(j), WStr("Devices"), ico, ico)

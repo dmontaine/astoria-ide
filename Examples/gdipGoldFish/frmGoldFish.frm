@@ -1,4 +1,4 @@
-﻿'frmAnimate金鱼
+﻿'frmAnimate - GoldFish
 ' Copyright (c) 2024 CM.Wang
 ' Freeware. Use at your own risk.
 

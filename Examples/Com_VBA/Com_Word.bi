@@ -67,7 +67,7 @@ Type Object_Word
 	#endif
 	Declare Function  vbV() As Object_Word
 
-' 添加声明在以下位置 09:11:08, 06-15-2024
+' Declarations added below at 09:11:08, 06-15-2024
 	Declare Property Visible As Object_Word
 	Declare Property Visible(ByRef Param1 As Object_Word)
 	Declare Function ADD As Object_Word
@@ -84,7 +84,7 @@ Type Object_Word
 	
 End Type
 
-' 在以下位置添加函数 09:11:08, 06-15-2024
+' Functions added below at 09:11:08, 06-15-2024
 Property Object_Word.Visible As Object_Word
 	Return This.Get("Visible")
 End Property

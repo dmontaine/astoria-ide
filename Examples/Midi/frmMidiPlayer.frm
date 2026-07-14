@@ -565,9 +565,9 @@ Private Sub frmMidiPlayerType.Form_Create(ByRef Sender As Control)
 	'add other midi devices
 	For i = 0 To midiOutGetNumDevs() - 1
 		If midiOutGetDevCaps(i, @midicaps, SizeOf(midicaps)) = 0 Then
-			cmbDevice.AddItem(midicaps.szPname)         '添加设备名称
+			cmbDevice.AddItem(midicaps.szPname)         'Add device name
 			j = cmbDevice.NewIndex
-			cmbDevice.ItemData(j) = Cast(Any Ptr, i)    '设备ID
+			cmbDevice.ItemData(j) = Cast(Any Ptr, i)    'device ID
 		End If
 	Next
 	cmbDevice.ItemIndex = 0

@@ -1,4 +1,4 @@
-﻿' Gregorian Calendar Lunar Calendar公历农历
+﻿' Gregorian Calendar Lunar Calendar
 ' Copyright (c) 2023 CM.Wang
 ' Freeware. Use at your own risk.
 
@@ -9,7 +9,7 @@ Destructor LunarCalendar
 End Destructor
 
 Constructor LunarCalendar
-	'位操作初使化模块函数 modBit4VB中定义
+	'initialize the bit-operation module function, defined in modBit4VB
 	Dim i As Integer
 	For i = 0 To 30
 		BitPower(i) = 2 ^ i
@@ -17,9 +17,9 @@ Constructor LunarCalendar
 	BitPower(31) = &H80000000
 End Constructor
 
-'位测试 ,测试位为1返回真
+'bit test; returns true if the tested bit is 1
 Private Function LunarCalendar.mvarBitTest32(Number As Long, bit As Long) As Boolean
-	If bit < 0 Or bit > 31 Then '不是整数位
+	If bit < 0 Or bit > 31 Then 'not a valid bit position
 		Return False
 	Else
 		If Number And BitPower(bit) Then
@@ -30,7 +30,7 @@ Private Function LunarCalendar.mvarBitTest32(Number As Long, bit As Long) As Boo
 	End If
 End Function
 
-'计算农历上的节气
+'compute the solar term on the lunar calendar
 Private Property LunarCalendar.lSolarTerm() As String
 	Dim baseDateAndTime As Double
 	Dim newdate As Double
@@ -45,7 +45,7 @@ Private Property LunarCalendar.lSolarTerm() As String
 	Dim i As Long
 	For i = 1 To 24
 		num = 525948.76 * (Y - 1900) + sTermInfo(i - 1)
-		newdate = DateAdd("n", num, baseDateAndTime)  '按分钟计算,之所以不按秒钟计算，是因为会溢出
+		newdate = DateAdd("n", num, baseDateAndTime)  'computed in minutes; not in seconds, because that would overflow
 		If Abs(DateDiff("d", newdate, mvarDate)) = 0 Then
 			TempStr = SolarTerm(i - 1)
 			Exit For
@@ -55,7 +55,7 @@ Private Property LunarCalendar.lSolarTerm() As String
 	lSolarTerm = TempStr
 End Property
 
-'计算按第几周星期几计算的节日
+'compute holidays defined as the Nth weekday of a month
 Private Property LunarCalendar.wHoliday() As String
 	Dim W As Long
 	Dim i As Long
@@ -65,10 +65,10 @@ Private Property LunarCalendar.wHoliday() As String
 	TempStr = ""
 	b = UBound(wHolidayInfo)
 	For i = 0 To b
-		If wHolidayInfo(i).Month = mvarsMonth Then  '当月份相当时
+		If wHolidayInfo(i).Month = mvarsMonth Then  'when the month matches
 			W = Weekday(mvarDate)
-			If wHolidayInfo(i).Recess = W Then  '仅当星期几也相等时
-				FirstDay = DateValue(mvarsMonth & "/" & 1 & "/" & mvarsYear) '取当月第一天
+			If wHolidayInfo(i).Recess = W Then  'only when the weekday also matches
+				FirstDay = DateValue(mvarsMonth & "/" & 1 & "/" & mvarsYear) 'get the first day of the month
 				If (DateDiff("ww", FirstDay, mvarDate) = wHolidayInfo(i).Day) Then
 					TempStr = *wHolidayInfo(i).HolidayName
 				End If
@@ -78,7 +78,7 @@ Private Property LunarCalendar.wHoliday() As String
 	wHoliday = TempStr
 End Property
 
-'求农历节日
+'find lunar-calendar holiday
 Private Property LunarCalendar.lHoliday() As String
 	Dim i As Long
 	Dim b As Long
@@ -89,13 +89,13 @@ Private Property LunarCalendar.lHoliday() As String
 	TempStr = ""
 	b = UBound(lHolidayInfo)
 	If mvarlMonth = 12 And (mvarlDay = 29 Or mvarlDay = 30) Then
-		oy = mvarlYear '保存农历年数
+		oy = mvarlYear 'save the lunar year number
 		odate = mvarDate
 		ndate = mvarDate + 1
-		sInitDate(Year(ndate), Month(ndate), Day(ndate)) '计算第二天的属性
-		If oy = mvarlYear - 1 Then '如果农历年数增加了1
+		sInitDate(Year(ndate), Month(ndate), Day(ndate)) 'compute the next day's attributes
+		If oy = mvarlYear - 1 Then 'if the lunar year number has advanced by 1
 			TempStr = "除夕"
-			sInitDate(Year(odate), Month(odate), Day(odate)) '恢复到今天原有数据
+			sInitDate(Year(odate), Month(odate), Day(odate)) 'restore today's original data
 			
 		End If
 	Else
@@ -110,7 +110,7 @@ Private Property LunarCalendar.lHoliday() As String
 	lHoliday = TempStr
 End Property
 
-'求公历节日
+'find Gregorian-calendar holiday
 Private Property LunarCalendar.sHoliday() As String
 	Dim i As Long
 	Dim b As Long
@@ -145,7 +145,7 @@ Private Property LunarCalendar.sHolidayRecess() As Boolean
 	sHolidayRecess = TempStr
 End Property
 
-'是否是农历的闰月
+'whether this is a leap month on the lunar calendar
 Private Property LunarCalendar.IsLeap() As Boolean
 	IsLeap = mvarIsLeap
 End Property
@@ -170,7 +170,7 @@ Private Property LunarCalendar.sWeekDay() As Long
 	sWeekDay = Weekday(mvarDate)
 End Property
 
-'计算星期几中文字串
+'compute the Chinese-language weekday string
 Private Property LunarCalendar.sWeekDayStr() As String
 	Select Case Weekday(mvarDate)
 	Case vbSunday
@@ -253,7 +253,7 @@ Private Function LunarCalendar.IsToday(Y As Long, m As Long, d As Long) As Boole
 	
 End Function
 
-'根据年份不同计算当年属于什么朝代
+'compute which dynasty/era the given year belongs to
 Private Function LunarCalendar.Era(Y As Long) As String
 	Dim TempStr As String
 	
@@ -303,24 +303,24 @@ Private Function LunarCalendar.Era(Y As Long) As String
 	Era = TempStr
 End Function
 
-' 传入 num 传回干支, 0=甲子
+' pass in num, return the GanZhi (heavenly stem/earthly branch), 0=jiazi
 Private Function LunarCalendar.GanZhi(num As Long) As String
 	Dim TempStr As String
 	Dim i As Long
-	i = (num - 1864) Mod 60 '计算干支
+	i = (num - 1864) Mod 60 'compute the GanZhi
 	TempStr = Gan(i Mod 10) & Zhi(i Mod 12)
 	GanZhi = TempStr
 End Function
 
-'计算年的属相字串
+'compute the zodiac-animal string for the year
 Private Function LunarCalendar.YearAttribute(Y As Long) As String
 	YearAttribute = Animals((Y - 1900) Mod 12)
 End Function
 
-'将数字汉化
+'convert a number to its Chinese numeral form
 Private Function LunarCalendar.UpNumber(Dxs As String) As String
-	
-	'检测为空时
+
+	'check for empty input
 	If Trim(Dxs) = "" Then
 		UpNumber = ""
 		Exit Function
@@ -436,7 +436,7 @@ Private Function LunarCalendar.Converts(NumStr As String) As String
 	End Select
 End Function
 
-'中文日期
+'Chinese-language date
 Private Function LunarCalendar.CDayStr(d As Long) As String
 	Dim s As String
 	Select Case d
@@ -449,13 +449,13 @@ Private Function LunarCalendar.CDayStr(d As Long) As String
 	Case 30
 		s = "三十"
 	Case Else
-		s = nStr2(d \ 10)  '整数除法
+		s = nStr2(d \ 10)  'integer division
 		s = s & nStr1(d Mod 10)
 	End Select
 	CDayStr = s
 End Function
 
-'计算星座归属
+'compute the zodiac sign
 Private Function LunarCalendar.Constellation(m As Long, d As Long) As String
 	Dim tempDate As Double
 	Dim ConstellName As String
@@ -495,14 +495,14 @@ Private Function LunarCalendar.Constellation(m As Long, d As Long) As String
 	Constellation = ConstellName
 End Function
 
-'以下为类内部使用的一些函数
+'the following are internal helper functions used within the class
 
-'传回农历 y年的总天数
+'return the total number of days in lunar year y
 Private Function LunarCalendar.lYearDays(ByVal Y As Long) As Long
-	lYearDays = LunarYearDays(Y - 1900)  '先计算出每年的天数,并形成数组,以减少以后的运算时间
+	lYearDays = LunarYearDays(Y - 1900)  'precompute each year's day count into an array, to reduce later computation time
 End Function
 
-'传回农历 y年m月的总天数
+'return the total number of days in lunar year y, month m
 Private Function LunarCalendar.lMonthDays(ByVal Y As Long, ByVal m As Long) As Long
 	'If (LunarInfo(y - 1900) And &H1000FFFF) And BitRight32(&H10000, m) Then
 	
@@ -513,7 +513,7 @@ Private Function LunarCalendar.lMonthDays(ByVal Y As Long, ByVal m As Long) As L
 	End If
 End Function
 
-'传回农历 y年闰月的天数
+'return the number of days in the leap month of lunar year y
 Private Function LunarCalendar.leapDays(Y As Long) As Long
 	If leapMonth(Y) Then
 		If LunarInfo(Y - 1900) And &H10000 Then
@@ -526,7 +526,7 @@ Private Function LunarCalendar.leapDays(Y As Long) As Long
 	End If
 End Function
 
-'传回农历 y年闰哪个月 1-12 , 没闰传回 0
+'return which month (1-12) is the leap month of lunar year y, 0 if none
 Private Function LunarCalendar.leapMonth(Y As Long) As Long
 	Dim i As Long
 	i = LunarInfo(Y - 1900) And &HF
@@ -536,11 +536,11 @@ Private Function LunarCalendar.leapMonth(Y As Long) As Long
 	leapMonth = i
 End Function
 
-'计算公历年月的天数
+'compute the number of days in a Gregorian year/month
 Private Function LunarCalendar.SolarDays(Y As Long, m As Long) As Long
 	Dim d As Long
-	
-	If (Y Mod 4) = 0 Then   '闰年
+
+	If (Y Mod 4) = 0 Then   'leap year
 		If m = 2 Then
 			d = 29
 		Else
@@ -557,7 +557,7 @@ Private Function LunarCalendar.SolarDays(Y As Long, m As Long) As Long
 	SolarDays = d
 End Function
 
-'主要的函数,用公历年月日对日期对象进行初使化,在此函数内部完成对私有对象属性的设置
+'main function; initializes the date object from a Gregorian y/m/d, setting the private object properties within
 Private Sub LunarCalendar.sInitDate(ByVal y As Long, ByVal m As Long, ByVal d As Long)
 	Dim i As Long
 	Dim leap As Long
@@ -569,14 +569,14 @@ Private Sub LunarCalendar.sInitDate(ByVal y As Long, ByVal m As Long, ByVal d As
 	mvarsMonth = m
 	mvarsDay = d
 	
-	'农历日期计算部分
+	'lunar date computation section
 	leap = 0
 	temp = 0
-	
-	offset = mvarDate - DateValue("1900/1/30")  '计算两天的基本差距
-	
+
+	offset = mvarDate - DateValue("1900/1/30")  'compute the basic day difference
+
 	For i = 1900 To 2049
-		temp = lYearDays(i)  '求当年农历年天数
+		temp = lYearDays(i)  'get that year's lunar day count
 		
 		offset = offset - temp
 		If offset < 1 Then Exit For
@@ -585,18 +585,18 @@ Private Sub LunarCalendar.sInitDate(ByVal y As Long, ByVal m As Long, ByVal d As
 	offset = offset + temp
 	mvarlYear = i
 	
-	leap = leapMonth(i) '闰哪个月
-	
+	leap = leapMonth(i) 'which month is the leap month
+
 	mvarIsLeap = False
 	For i = 1 To 12
-		'闰月
+		'leap month
 		If CBool(leap > 0) And CBool(i = (leap + 1)) And CBool(mvarIsLeap = False) Then
 			mvarIsLeap = True
 			i = i - 1
-			temp = leapDays(mvarlYear)   '计算闰月天数
+			temp = leapDays(mvarlYear)   'compute the leap-month day count
 		Else
 			mvarIsLeap = False
-			temp = lMonthDays(mvarlYear, i) '计算非闰月天数
+			temp = lMonthDays(mvarlYear, i) 'compute the non-leap-month day count
 		End If
 		
 		offset = offset - temp
@@ -609,7 +609,7 @@ Private Sub LunarCalendar.sInitDate(ByVal y As Long, ByVal m As Long, ByVal d As
 	
 End Sub
 
-'主要的函数,用农历年月日对日期对象进行初使化,在此函数内部完成对私有对象属性的设置
+'main function; initializes the date object from a lunar y/m/d, setting the private object properties within
 Private Sub LunarCalendar.lInitDate(ByVal y As Long, ByVal m As Long, ByVal d As Long, ByVal LeapFlag As Boolean = False)
 	Dim i As Long
 	Dim leap As Long
@@ -623,42 +623,42 @@ Private Sub LunarCalendar.lInitDate(ByVal y As Long, ByVal m As Long, ByVal d As
 	offset = 0
 	
 	For i = 1900 To y - 1
-		temp = LunarYearDays(i - 1900) '求当年农历年天数
+		temp = LunarYearDays(i - 1900) 'get that year's lunar day count
 		offset = offset + temp
 	Next
-	
-	leap = leapMonth(y) '闰哪个月
+
+	leap = leapMonth(y) 'which month is the leap month
 	If m <> leap Then
-		mvarIsLeap = False  '当前日期并非闰月
+		mvarIsLeap = False  'the current date is not in a leap month
 	Else
-		mvarIsLeap = LeapFlag  '使用用户输入的是否闰月月份
+		mvarIsLeap = LeapFlag  'use the caller-supplied leap-month flag
 	End If
-	
-	If (m < leap) Or (leap = 0) Then   '当闰月在当前日期后
+
+	If (m < leap) Or (leap = 0) Then   'when the leap month comes after the current date
 		For i = 1 To m - 1
-			temp = lMonthDays(y, i) '计算非闰月天数
+			temp = lMonthDays(y, i) 'compute the non-leap-month day count
 			offset = offset + temp
 		Next
-	Else   '在闰月后
-		If mvarIsLeap = False Then  '用户要计算非闰月的月份
+	Else   'after the leap month
+		If mvarIsLeap = False Then  'caller wants the non-leap-month count
 			For i = 1 To m - 1
-				temp = lMonthDays(y, i) '计算非闰月天数
+				temp = lMonthDays(y, i) 'compute the non-leap-month day count
 				offset = offset + temp
 			Next
 			If m > leap Then
-				temp = leapDays(y)   '计算闰月天数
+				temp = leapDays(y)   'compute the leap-month day count
 				offset = offset + temp
 			End If
-			
-		Else  '此时只有mvarisleap=ture,
+
+		Else  'at this point only mvarIsLeap=true applies,
 			For i = 1 To m
-				temp = lMonthDays(y, i) '计算非闰月天数
+				temp = lMonthDays(y, i) 'compute the non-leap-month day count
 				offset = offset + temp
 			Next
 		End If
 	End If
-	
-	offset = offset + d '加上当月的天数
+
+	offset = offset + d 'add the current month's days
 	mvarDate = DateAdd("d", offset, DateValue("1900/1/30"))
 	mvarsYear = Year(mvarDate)
 	mvarsMonth = Month(mvarDate)

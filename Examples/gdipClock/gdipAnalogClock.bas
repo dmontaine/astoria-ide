@@ -1,4 +1,4 @@
-﻿' Analog Clock模拟时钟
+﻿' Analog Clock - Analog clock
 ' Copyright (c) 2024 CM.Wang
 ' Freeware. Use at your own risk.
 
@@ -79,7 +79,7 @@ Private Function AnalogClock.DrawTray() As GpImage Ptr
 	fDeg = 180 / fPi
 	Dim As Single fShadowAngle
 	
-	'准备画布和位图
+	'Prepare the canvas and bitmap
 	sTmpBitmap.Initial(mWidth, mWidth)
 	
 	tPoint1.X = fBorderSize
@@ -97,19 +97,19 @@ Private Function AnalogClock.DrawTray() As GpImage Ptr
 	GdipMultiplyLineTransform(hBrushLB, hMatrix, 0)
 	GdipDeleteMatrix(hMatrix)
 	
-	'填充表盘底色
+	'Fill the dial base color
 	GdipFillEllipse(sTmpBitmap.Graphics, hBrushLB, fBorderSize, fBorderSize, fSize, fSize)
 	
-	'绘制表盘阴影
+	'Draw the dial shadow
 	fShadowAngle = Atn(fShadow_vy / fShadow_vx) * fDeg
 	If fShadow_vx < 0 And fShadow_vy >= 0 Then fShadowAngle += 180
 	If fShadow_vx < 0 And fShadow_vy < 0 Then fShadowAngle -= 180
 	GdipCreatePen1(mTrayShadowAlpha Shl 24 Or mTrayShadowColor, fBorderSize, UnitPixel, @hPen)
 	GdipDrawEllipse(sTmpBitmap.Graphics, hPen, fBorderSize + fShadow_vx, fBorderSize + fShadow_vy, fSize, fSize)
-	'阴影模糊处理
+	'Blur the shadow
 	FastBoxBlurHV(sTmpBitmap.Image, mWidth * 0.02)
 	
-	'绘制表盘边缘
+	'Draw the dial edge
 	tPoint1.X = 0
 	tPoint1.Y = 0
 	tPoint2.X = fSize
@@ -130,16 +130,16 @@ End Function
 
 Private Function AnalogClock.DrawScale() As GpImage Ptr
 	Dim As Single fRadius = mWidth / 2
-	'刻度距离边缘
+	'Distance of ticks from the edge
 	Dim As Single fDistance = mWidth / 11
-	'粗刻度
+	'Major ticks
 	Dim As Single iWidth1 = mWidth / 48, iHeight1 = mWidth / 15, iWidth12 = iWidth1 / 2
-	'细刻度
+	'Minor ticks
 	Dim As Single iWidth2 = mWidth / 100, iHeight2 = mWidth / 25, iWidth22 = iWidth2 / 2
-	'准备画布和位图
+	'Prepare the canvas and bitmap
 	Static sTmpBitmap As gdipBitmap
 	sTmpBitmap.Initial(mWidth, mWidth)
-	'绘制表盘刻度
+	'Draw the dial ticks
 	Dim As Any Ptr hBrush
 	GdipCreateSolidFill((mScaleAlpha Shl 24) Or mScaleColor, @hBrush)
 	
@@ -151,10 +151,10 @@ Private Function AnalogClock.DrawScale() As GpImage Ptr
 		GdipRotateWorldTransform(sTmpBitmap.Graphics, 6.0, MatrixOrderPrepend)
 		GdipTranslateWorldTransform(sTmpBitmap.Graphics, -fRadius, -fRadius, 0)
 		If (i Mod 5) = 0 Then
-			'绘制粗刻度
+			'Draw a major tick
 			GdipFillRectangle(sTmpBitmap.Graphics, hBrush, fRadius - iWidth12, fDistance, iWidth1, iHeight1)
 		Else
-			'绘制细刻度
+			'Draw a minor tick
 			GdipFillRectangle(sTmpBitmap.Graphics, hBrush, fRadius - iWidth22, fDistance, iWidth2, iHeight2)
 		End If
 	Next
@@ -168,37 +168,37 @@ Private Function AnalogClock.DrawHand() As GpImage Ptr
 	Static sTmpBitmap As gdipBitmap
 	Static SecBitmap As gdipBitmap
 	
-	'准备画布和位图
+	'Prepare the canvas and bitmap
 	sTmpBitmap.Initial(mWidth, mHeight)
 	SecBitmap.Initial(mWidth, mHeight)
 	
 	Dim sTime As Double= VBTimer()
 	Dim sHour As Double, sMinute As Double, sSecond As Double
 	
-	'时分秒
+	'Hour, minute, second
 	sHour = sTime / 3600
 	sMinute = sTime / 60 - Fix(sHour) * 60
 	sSecond = sTime - Fix(sHour) * 3600 + Fix(sMinute) * 60
 	
-	'时分秒换算成角度
+	'Convert hour/minute/second to angles
 	Dim sHourAngle As Double, sMinuteAngle As Double, sSecondAngle As Double
 	sHourAngle = mPi / 2 - sHour / 12 * 2 * mPi
 	sMinuteAngle = mPi / 2 - sMinute / 60 * 2 * mPi
 	sSecondAngle = mPi / 2 - sSecond / 60 * 2 * mPi
 	
 	If mHandHourEnabled Then
-		'时针
+		'Hour hand
 		GdipDrawLine(sTmpBitmap.Graphics, mPenHour, mCenterX - mCenterX * mHandHourTail * Cos(sHourAngle), mCenterY + mCenterY * mHandHourTail * Sin(sHourAngle), mCenterX + (mCenterX * mHandHourFront) * Cos(sHourAngle), mCenterY - (mCenterY * mHandHourFront) * Sin(sHourAngle))
 	End If
 	If mHandMinuteEnabled Then
-		'分针
+		'Minute hand
 		GdipDrawLine(sTmpBitmap.Graphics, mPenMinute, mCenterX - mCenterX * mHandMinuteTail * Cos(sMinuteAngle), mCenterY + mCenterY * mHandMinuteTail * Sin(sMinuteAngle), mCenterX + (mCenterX * mHandMinuteFront) * Cos(sMinuteAngle), mCenterY - (mCenterY * mHandMinuteFront) * Sin(sMinuteAngle))
 	End If
 	If mHandSecondEnabled Then
-		'秒针
+		'Second hand
 		GdipDrawLine(SecBitmap.Graphics, mPenSecond, mCenterX - mCenterX * mHandSecondTail * Cos(sSecondAngle), mCenterY + mCenterY * mHandSecondTail * Sin(sSecondAngle), mCenterX + (mCenterX * mHandSecondFront) * Cos(sSecondAngle), mCenterY - (mCenterY * mHandSecondFront) * Sin(sSecondAngle))
 		
-		'清除绘画
+		'Clear the drawing
 		Dim fPath As GpPath Ptr
 		GdipCreatePath(FillModeAlternate, @fPath)
 		GdipAddPathEllipse(fPath, mCenterX - mCenterX * mHandHourSize / 2, mCenterY - mCenterY * mHandHourSize / 2, mCenterX * mHandHourSize, mCenterY * mHandHourSize)
@@ -220,18 +220,18 @@ Private Sub AnalogClock.Background(ByVal pWidth As Single = 300, ByVal pHeight A
 	mHeight = pHeight
 	Dim sTmpBitmap As gdipBitmap
 	
-	'时钟中心
+	'Clock center
 	mCenterX = mWidth / 2 + mHandOffsetX
 	mCenterY = mHeight / 2 + mHandOffsetY
-	'时针大小
+	'Hand widths
 	mHandHourSize = 0.088 * mHandScale
 	mHandMinuteSize = 0.066 * mHandScale
 	mHandSecondSize = 0.033 * mHandScale
-	'时针后端偏移
+	'Hand tail offset
 	mHandHourTail = 0.16 * mHandScale
 	mHandMinuteTail = 0.16 * mHandScale
 	mHandSecondTail = 0.22 * mHandScale
-	'时针前端长度
+	'Hand front length
 	mHandHourFront = 0.62 * mHandScale
 	mHandMinuteFront = 0.68 * mHandScale
 	mHandSecondFront = 0.86 * mHandScale
@@ -240,7 +240,7 @@ Private Sub AnalogClock.Background(ByVal pWidth As Single = 300, ByVal pHeight A
 	mAMinuteColor = mHandAlpha Shl 24 Or mHandMinuteColor
 	mASecondColor = mHandAlpha Shl 24 Or mHandSecondColor
 	
-	'释放资源
+	'Free resources
 	If mPenHour Then GdipDeletePen(mPenHour)
 	If mPenMinute Then GdipDeletePen(mPenMinute)
 	If mPenSecond Then GdipDeletePen(mPenSecond)

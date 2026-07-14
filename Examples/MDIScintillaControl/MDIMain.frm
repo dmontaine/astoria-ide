@@ -45,22 +45,22 @@
 		mnuWindowCount As Integer = -1
 		mnuWindows(Any) As MenuItem Ptr
 		mnuWindowsAct As Integer = -1
-		Declare Function MDIChildCloseConfirm(ByRef Child As Any Ptr) As MessageResult  '子窗口关闭确认Confirmation of child-window closure.
-		Declare Function MDIChildFind(ByRef FileName As WString) As Integer             '寻找文件是否存已在经打开的窗口中Check if the file is already open in an existing window.
-		Declare Function MDIChildNew(ByRef FileName As WString) As Any Ptr              '创建新子窗口Create a new child-window.
-		Declare Sub MDIChildActivate(ByRef Child As Any Ptr)                            '激活的子窗口指针Pointer of activated child-window.
-		Declare Sub MDIChildClick()                                                     '更新状态栏信息Update status bar information.
-		Declare Sub MDIChildDestroy(ByRef Child As Any Ptr)                             '子窗口销毁Destroy the child-window.
+		Declare Function MDIChildCloseConfirm(ByRef Child As Any Ptr) As MessageResult  'Confirmation of child-window closure.
+		Declare Function MDIChildFind(ByRef FileName As WString) As Integer             'Check if the file is already open in an existing window.
+		Declare Function MDIChildNew(ByRef FileName As WString) As Any Ptr              'Create a new child-window.
+		Declare Sub MDIChildActivate(ByRef Child As Any Ptr)                            'Pointer of activated child-window.
+		Declare Sub MDIChildClick()                                                     'Update status bar information.
+		Declare Sub MDIChildDestroy(ByRef Child As Any Ptr)                             'Destroy the child-window.
 		Declare Sub MDIChildDoubleClick(ByRef Child As Any Ptr)
-		Declare Sub MDIChildInsertText(ByRef Child As Any Ptr, ByRef Text As WString)   '在子窗口的光标处插入文字Insert text at the cursor position in the sub-window.
-		Declare Sub MDIChildMenuUpdate()                                                '更新窗口菜单Update window menus.
-		Declare Sub MenuEnabled(Enabled As Boolean)                                     '窗口菜单可用与否Availability of window menus.
-		
+		Declare Sub MDIChildInsertText(ByRef Child As Any Ptr, ByRef Text As WString)   'Insert text at the cursor position in the sub-window.
+		Declare Sub MDIChildMenuUpdate()                                                'Update window menus.
+		Declare Sub MenuEnabled(Enabled As Boolean)                                     'Availability of window menus.
+
 		'file
-		Declare Function FileSave(ByRef Child As Any Ptr) As MessageResult              '文件保存
-		Declare Function FileSaveAs(ByRef Child As Any Ptr) As MessageResult            '文件另存为
-		Declare Sub FileInsert(ByRef Child As Any Ptr, ByRef FileName As WString)       '文件插入
-		Declare Sub FileOpen(ByRef FileName As WString)                                 '文件打开
+		Declare Function FileSave(ByRef Child As Any Ptr) As MessageResult              'Save file
+		Declare Function FileSaveAs(ByRef Child As Any Ptr) As MessageResult            'Save file as
+		Declare Sub FileInsert(ByRef Child As Any Ptr, ByRef FileName As WString)       'Insert file
+		Declare Sub FileOpen(ByRef FileName As WString)                                 'Open file
 		
 		fFindBack As Boolean = False
 		fMatchCase As Boolean = False
@@ -1882,7 +1882,7 @@ Private Sub MDIMainType.Form_Create(ByRef Sender As Control)
 	
 	MenuEnabled(False)
 	
-	'Command line 命令行
+	'Command line
 	Dim As Integer i = 1
 	Do
 		If Len(Command(i)) = 0 Then Exit Do
@@ -1912,9 +1912,9 @@ Private Sub MDIMainType.TimerComponent1_Timer(ByRef Sender As TimerComponent)
 			b = True
 		End If
 	Next
-	'如果有窗口delete, 更新窗口菜单
+	'If any window was deleted, update window menu
 	If b Then MDIChildMenuUpdate()
-	'更新窗口菜单上的激活窗口
+	'Update the active window on the window menu
 	If lstMdiChild.Count > 0 Then
 		MDIChildActivate(ActMdiChild)
 	Else
@@ -2891,7 +2891,7 @@ Private Function MDIMainType.ReplaceAll(ByRef FindStr As Const WString, ByRef Re
 	Return i
 End Function
 
-'行排序
+'Sort lines
 Private Sub MDIMainType.SortLines(SortOrder As SortOrders)
 	timr.Start
 	Dim As MDIChildType Ptr a = ActMdiChild

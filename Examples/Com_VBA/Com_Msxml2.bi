@@ -67,7 +67,7 @@ Type Object_Msxml2
 	#endif
 	Declare Function  vbV() As Object_Msxml2
 
-' 添加声明在以下位置 09:11:08, 06-15-2024
+' Declarations added below at 09:11:08, 06-15-2024
 	Declare Function Open(ByRef Param1 As Object_Msxml2, ByRef Param2 As Object_Msxml2, ByRef Param3 As Object_Msxml2) As Object_Msxml2
 	Declare Function send As Object_Msxml2
 	Declare Function responseText As Object_Msxml2
@@ -77,7 +77,7 @@ Type Object_Msxml2
 	
 End Type
 
-' 在以下位置添加函数 09:11:08, 06-15-2024
+' Functions added below at 09:11:08, 06-15-2024
 Function Object_Msxml2.Open(ByRef Param1 As Object_Msxml2, ByRef Param2 As Object_Msxml2, ByRef Param3 As Object_Msxml2) As Object_Msxml2
 	Return This.Get("Open", "vvv", @Param1, @Param2, @Param3)
 End Function

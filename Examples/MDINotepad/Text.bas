@@ -1,11 +1,11 @@
 ﻿#pragma once
-' Text 文本处理
+' Text - text processing
 ' Copyright (c) 2025 CM.Wang
 ' Freeware. Use at your own risk.
 
 #include once "Text.bi"
 
-'释放指针数组Subject
+'Free the pointer array Subject
 Private Sub ArrayDeallocate(Subject(Any) As Any Ptr)
 Dim Ub As Integer = UBound(Subject)
 Dim Lb As Integer = LBound(Subject)
@@ -18,7 +18,7 @@ End If
 Erase Subject
 End Sub
 
-'用指定的字符iChr生成指定长度iCount的字符Result,左lw中mw右rw的文字可指定
+'Generate a string Result of length iCount using character iChr; left (LW), middle (MW), right (RW) text may be specified
 Private Sub TitleWStr(ByRef Result As WString Ptr, ByVal iCount As Integer = 80, ByRef iChr As Const WString = " ", ByRef LW As Const WString = "", ByRef MW As Const WString = "" , ByRef RW As Const WString = "")
 Dim sTL As Integer = iCount
 Dim sLL As Integer = Len(LW)
@@ -34,7 +34,7 @@ If sML Then Mid(*Result, sTL / 2, sML) = MW
 If sRL Then Mid(*Result, sTL - sRL + 1, sRL) = RW
 End Sub
 
-'查找文字fFind在字符串fSource中的位置(指定开始位置fStartPos), 未找到返回0
+'Find the position of fFind within fSource (starting at fStartPos); returns 0 if not found
 Private Function InWStr Overload (ByVal fStartPos As Integer, ByRef fSource As Const WString, ByRef fFind As Const WString, ByVal MatchCase As Boolean = False) As Integer
 If fStartPos < 1 Then Return 0
 Dim lenSource As Integer = Len(fSource)
@@ -74,7 +74,7 @@ End If
 Return rtn
 End Function
 
-'查找文字fFind在字符串fSource中的位置, 未找到返回0
+'Find the position of fFind within fSource; returns 0 if not found
 Private Function InWStr Overload (ByRef fSource As Const WString, ByRef fFind As Const WString, ByVal MatchCase As Boolean = False) As Integer
 Dim lenSource As Integer = Len(fSource)
 If lenSource = 0 Then Return 0
@@ -114,7 +114,7 @@ End If
 Return rtn
 End Function
 
-'反向查找文字fFind在字符串fSource中的位置, 未找到返回0
+'Find the position of fFind within fSource searching backward; returns 0 if not found
 Private Function InWStrRev(ByRef fSource As Const WString, ByRef fFind As Const WString, ByVal fStartPos As Integer = -1, ByVal MatchCase As Boolean = False) As Integer
 Dim lenSource As Integer = Len(fSource)
 If lenSource = 0 Then Return 0
@@ -156,7 +156,7 @@ End If
 Return rtn
 End Function
 
-'寻找文字Finding在字符串Expression中的数量和位置FoundPositions,返回数量(从1开始)0表示没有找到
+'Find the count and positions (FoundPositions) of Finding within Expression; returns the count (1-based), 0 means not found
 Private Function FindCountWStr(ByRef Expression As WString, Finding As Const WString, ByRef FoundPositions As Integer Ptr, ByVal MatchCase As Boolean = False) As Integer
 Dim lenExpression As Integer = Len(Expression)
 Dim lenFinding As Integer = Len(Finding)
@@ -202,7 +202,7 @@ End If
 Return Count
 End Function
 
-'返回位置FindPos所在寻找结果FindPositions,FindCount,FindLength的索引
+'Return the index within FindPositions/FindCount/FindLength corresponding to FindPos
 Private Function FindIndexByPos(ByRef FindPositions As Integer Ptr, FindCount As Integer, FindPos As Integer, ByVal FindWarp As Boolean = True, ByVal FindBack As Boolean = False) As Integer
 Dim i As Integer
 If FindBack Then
@@ -223,7 +223,7 @@ End If
 Return -1
 End Function
 
-'用文字Delimiter将字符串Subject分离成数组Result,返回数组数
+'Split string Subject into array Result using Delimiter; returns the element count
 Private Function SplitWStr(ByRef Subject As WString, ByRef Delimiter As Const WString, Result(Any) As WString Ptr, ByVal MatchCase As Boolean = False) As Integer
 ArrayDeallocate(Result())
 Dim FoundPositions As Integer Ptr = 0
@@ -254,14 +254,14 @@ If FoundPositions Then Deallocate(FoundPositions)
 Return FindCount
 End Function
 
-'快排（Quick Sort）
+'Quick Sort
 Sub QuickSort(arr() As WString Ptr, ByVal low As Integer, ByVal high As Integer, ByVal Ascending As Boolean)
 Dim i As Integer = low
 Dim j As Integer = high
 Dim pivot As WString Ptr = arr((low + high) \ 2)
 Dim temp As WString Ptr
 
-' 快排核心：根据 pivot 分区
+' Quicksort core: partition around the pivot
 Do
 If Ascending Then
 While *arr(i) < *pivot: i += 1: Wend
@@ -280,12 +280,12 @@ j -= 1
 End If
 Loop While i <= j
 
-' 递归调用左右分区
+' Recurse into the left and right partitions
 If low < j Then QuickSort(arr(), low, j, Ascending)
 If i < high Then QuickSort(arr(), i, high, Ascending)
 End Sub
 
-'快速给字符串数组Subject()按照指定顺序Ordering排序
+'Quickly sort string array Subject() according to the specified Ordering
 Private Function SortArray(Subject() As WString Ptr, ByVal Ordering As SortOrders = SortOrders.Ascending) As Boolean
 If UBound(Subject) > 0 Then
 QuickSort(Subject(), 0, UBound(Subject), Ordering)
@@ -295,18 +295,18 @@ Return False
 End If
 End Function
 
-'字符串数组Subject用文字Delimiter从iStart到iEnd连接合并为Result,返回合并后的字符串长度
+'Join string array Subject from iStart to iEnd into Result using Delimiter; returns the length of the joined string
 Private Function JoinWStr(Subject(Any) As WString Ptr, ByRef Delimiter As Const WString, ByRef Result As WString Ptr, ByVal iStart As Integer = -1, ByVal iEnd As Integer = -1) As Integer
-Dim Ub As Integer = UBound(Subject)             '开始索引值
-Dim Lb As Integer = LBound(Subject)             '结束索引值
+Dim Ub As Integer = UBound(Subject)             'Start index value
+Dim Lb As Integer = LBound(Subject)             'End index value
 If iStart >= Lb And iStart <= Ub Then Lb = iStart
 If iEnd >= Lb And iEnd <= Ub Then Ub = iEnd
-If Ub < Lb Then Return -1                       '不符合返回-1
+If Ub < Lb Then Return -1                       'Return -1 if invalid
 
-'长度计算
-Dim lenResult As Integer = 0                    '返回长度
-Dim lenDelimiter As Integer = Len(Delimiter)    '分隔字符串长度
-Dim lenSubject() As Integer                     '每个元素的长度
+'Length calculation
+Dim lenResult As Integer = 0                    'Return length
+Dim lenDelimiter As Integer = Len(Delimiter)    'Delimiter string length
+Dim lenSubject() As Integer                     'Length of each element
 ReDim lenSubject(Lb To Ub)
 Dim i As Integer
 For i = Lb To Ub
@@ -315,11 +315,11 @@ lenResult += lenSubject(i)
 Next
 lenResult += (Ub - Lb)*lenDelimiter
 
-'申请返回空间
+'Allocate the return buffer
 If Result Then Deallocate(Result)
 Result = CAllocate(lenResult * 2 + 2)
 
-'填充返回内容
+'Fill the return content
 *Result = *Subject(Lb)
 Dim l As Integer = lenSubject(Lb)
 For i = Lb + 1 To Ub
@@ -329,11 +329,11 @@ l += lenDelimiter
 l += lenSubject(i)
 Next
 
-'返回长度
+'Return length
 Return lenResult
 End Function
 
-'寻找文字Finding在字符串Expression所在的所有行LinesFound,返回找到的行数(从0开始)
+'Find all lines (LinesFound) in Expression that contain Finding; returns the number of lines found (0-based)
 Private Function FindLinesWStr(ByRef Expression As WString, ByRef Finding As Const WString, ByRef LinesFound As WString Ptr, ByVal MatchCase As Boolean = False) As Integer
 Dim Lines(Any) As WString Ptr
 Dim Founds(Any) As WString Ptr
@@ -357,7 +357,7 @@ Erase Founds
 Return FoundIndex
 End Function
 
-'在Expression中寻找Finding并用Replacing替换成Replaced,返回找到的个数,从1开始,0表示未找到
+'Find Finding within Expression and replace with Replacing into Replaced; returns the number found (1-based), 0 means not found
 Private Function ReplaceWStr Overload(ByRef Expression As WString, ByRef Finding As WString, ByRef Replacing As WString, ByRef Replaced As WString Ptr, ByVal MatchCase As Boolean = False) As Integer
 Dim FoundPositions As Integer Ptr
 Dim CountFind As Integer = FindCountWStr(Expression, Finding, FoundPositions, MatchCase)
@@ -425,18 +425,18 @@ Function = *Replaced
 Deallocate(Replaced)
 End Function
 
-'全路径文件名补全
+'Complete the full-path filename
 Private Function FullNameFromFile(sFileName As WString, ByRef sDefPath As Const WString = "") As UString
 If Len(sFileName) Then
 If InStr(sFileName, "\") Then
-'如果文件名已经包含路径直接返回文件名
+'If the filename already includes a path, return it directly
 Return sFileName
 Else
 If sDefPath = "" Then
-'如果没有默认路径就用app路径
+'If there is no default path, use the app path
 Return ExePath & "\" & sFileName
 Else
-'如果有设置默认路径
+'If a default path is set
 Return sDefPath & sFileName
 End If
 End If
@@ -445,7 +445,7 @@ Return ""
 End If
 End Function
 
-'取全文件名sFullName的文件名部分
+'Extract the filename part of the full path sFullName
 Private Function FullName2File(sFullName As WString, ByRef sDefPath As Const WString = "\") As UString
 Dim sSLen As Integer = Len(sFullName)
 Dim sPLen As Integer
@@ -473,7 +473,7 @@ Return ""
 End If
 End Function
 
-'取全文件名sFullName的路径部分
+'Extract the path part of the full path sFullName
 Private Function FullName2Path(sFullName As WString, ByRef sDefPath As Const WString = "") As UString
 Dim sSLen As Integer = Len(sFullName)
 Dim sPLen As Integer
@@ -497,7 +497,7 @@ Return ""
 End If
 End Function
 
-'Ansi编码文字pAnsi用指定nCodePage转换为文本pToText
+'Convert ANSI-encoded text pAnsi to text pToText using the specified nCodePage
 Private Function TextFromAnsi(ByRef pAnsi As Const String, ByRef pToText As WString Ptr, ByVal nCodePage As Integer = -1) As Long
 Dim CodePage As Integer = IIf(nCodePage= -1, GetACP(), nCodePage)
 Dim nLength As LongInt = MultiByteToWideChar(CodePage, 0, StrPtr(pAnsi), -1, NULL, 0) - 1
@@ -506,7 +506,7 @@ pToText = CAllocate(nLength * 2 + 2)
 Return MultiByteToWideChar(CodePage, 0, StrPtr(pAnsi), -1, pToText, nLength)
 End Function
 
-'文本pText用指定nCodePage转换为Ansi编码到pToAnsi
+'Convert text pText to ANSI encoding pToAnsi using the specified nCodePage
 Private Function TextToAnsi(ByRef pText As Const WString, ByRef pToAnsi As ZString Ptr, ByVal nCodePage As Integer = -1) As Long
 Dim CodePage As Integer = IIf(nCodePage= -1, GetACP(), nCodePage)
 Dim nLength As LongInt = WideCharToMultiByte(CodePage, 0, StrPtr(pText), -1, NULL, 0, NULL, NULL) - 1
@@ -515,17 +515,17 @@ pToAnsi = CAllocate(nLength * 2 + 2)
 Return WideCharToMultiByte(CodePage, 0, StrPtr(pText), nLength, pToAnsi, nLength, NULL, NULL)
 End Function
 
-'文本pUtf8从Utf8转换为文本pToText
+'Convert UTF-8 text pUtf8 to text pToText
 Private Function TextFromUtf8(ByRef pUtf8 As Const ZString, ByRef pToText As WString Ptr) As Integer
 Return TextFromAnsi(pUtf8, pToText, CodePage_UTF8)
 End Function
 
-'文本pText转换为Utf8编码pToUtf8
+'Convert text pText to UTF-8 encoding pToUtf8
 Private Function TextToUtf8(ByRef pText As Const WString, ByRef pToUtf8 As ZString Ptr) As Integer
 Return TextToAnsi(pText, pToUtf8, CodePage_UTF8)
 End Function
 
-'文本pSource指定转换码CnvCode转换为pConverted
+'Convert text pSource to pConverted using the specified conversion code CnvCode
 Private Function TextConvert(ByRef pSource As Const WString, ByRef pConverted As WString Ptr, ByVal CnvCode As DWORD) As Long
 Dim lid As LCID = MAKELCID(MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED), SORT_CHINESE_PRC)
 Dim nLength As LongInt = LCMapString(lid, CnvCode, StrPtr(pSource), -1, NULL, 0)
@@ -535,7 +535,7 @@ LCMapString(lid, CnvCode, StrPtr(pSource), -1, pConverted, nLength)
 Return nLength
 End Function
 
-'返回换行SrcEOL编码对应的字符串
+'Return the string corresponding to line-ending encoding SrcEOL
 Private Function TextGetEofStr(ByVal SrcEOL As NewLineTypes = OsEol) ByRef As WString
 Select Case SrcEOL
 Case NewLineTypes.WindowsCRLF
@@ -547,7 +547,7 @@ Return WChr(13)
 End Select
 End Function
 
-'返回文本编码FileEncoding对应的字符串
+'Return the string corresponding to text encoding FileEncoding
 Private Function TextGetEncodeStr(FileEncoding As FileEncodings = FileEncodings.Utf8BOM) ByRef As WString
 Select Case FileEncoding
 Case FileEncodings.Utf8
@@ -565,7 +565,7 @@ Return WStr("")
 End Select
 End Function
 
-'获取文本文件FileName的文件编码格式FileEncoding和换行格式NewLineType, 并且返回文件的大小
+'Get the file encoding (FileEncoding) and line-ending format (NewLineType) of text file FileName, and return the file size
 Private Function TextFileGetFormat(ByRef FileName As Const WString, ByRef FileEncoding As FileEncodings = -1, ByRef NewLineType As NewLineTypes = -1, ByVal LoadSize As Integer = &Hfffff) As LongInt
 Dim Buff As String
 Dim Result As LongInt = -1
@@ -634,7 +634,7 @@ End If
 Return FileSize
 End Function
 
-'从件FileName中读取文本pText, 用指定的编码格式FileEncoding和换行格式NewLineType
+'Read text pText from file FileName using the specified encoding FileEncoding and line-ending format NewLineType
 Private Function TextFromFile(ByRef FileName As Const WString, ByRef pText As WString Ptr, ByRef FileEncoding As FileEncodings = FileEncodings.Utf8BOM, ByRef NewLineType As NewLineTypes = OsEol, ByRef nCodePage As Integer = -1, ByVal LoadSize As Integer = 0) As LongInt
 Dim FileSize As LongInt = TextFileGetFormat(FileName, FileEncoding, NewLineType)
 If FileSize = 0 Then Return 0
@@ -675,7 +675,7 @@ End If
 Return TempSize
 End Function
 
-'保存文本fSource到文件FileName, 用指定的编码格式FileEncoding,换行符NewLineType
+'Save text fSource to file FileName using the specified encoding FileEncoding and line ending NewLineType
 Private Function TextToFile(ByRef FileName As Const WString, pText As WString, ByVal FileEncoding As FileEncodings = FileEncodings.Utf8BOM, ByVal NewLineType As NewLineTypes = OsEol, ByVal nCodePage As Integer = -1) As Boolean
 Dim Fn As Integer = FreeFile
 Dim Result As Integer

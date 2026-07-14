@@ -1,25 +1,25 @@
-﻿' Gregorian Calendar Lunar Calendar公历农历
+﻿' Gregorian Calendar Lunar Calendar
 ' Copyright (c) 2024 CM.Wang
 ' Freeware. Use at your own risk.
 ' https://thuthuataccess.com/forum/thread-4765.html
 
 #include once "Lunar.bi"
 
-' 传入 y 传回干支, 0=甲子
+' pass in y, return the GanZhi (heavenly stem/earthly branch), 0=jiazi
 Private Function Lunar.GanZhi(y As Integer) As String
 	Dim TempStr As String
 	Dim i As Long
-	i = (y - 1864) Mod 60 '计算干支
+	i = (y - 1864) Mod 60 'compute the GanZhi
 	TempStr = Gan(i Mod 10) & Zhi(i Mod 12)
 	Return TempStr
 End Function
 
-'计算年的属相字串
+'compute the zodiac-animal string for the year
 Private Function Lunar.YearAttribute(y As Integer) As String
 	Return Animals((y - 1900) Mod 12)
 End Function
 
-'计算农历上的节气
+'compute the solar term on the lunar calendar
 Private Property Lunar.lSolarTerm() As String
 	Dim baseDateAndTime As Double
 	Dim newdate As Double
@@ -34,7 +34,7 @@ Private Property Lunar.lSolarTerm() As String
 	Dim i As Long
 	For i = 1 To 24
 		num = 525948.76 * (y - 1900) + TermInfo(i - 1)
-		newdate = DateAdd("n", num, baseDateAndTime)  '按分钟计算,之所以不按秒钟计算，是因为会溢出
+		newdate = DateAdd("n", num, baseDateAndTime)  'computed in minutes; not in seconds, because that would overflow
 		If Abs(DateDiff("d", newdate, sDate)) = 0 Then
 			TempStr = SolarTerm(i - 1)
 			Exit For
@@ -44,7 +44,7 @@ Private Property Lunar.lSolarTerm() As String
 	Return TempStr
 End Property
 
-'计算按第几周星期几计算的节日
+'compute holidays defined as the Nth weekday of a month
 Private Property Lunar.wHoliday() As String
 	Dim W As Long
 	Dim i As Long
@@ -54,10 +54,10 @@ Private Property Lunar.wHoliday() As String
 	TempStr = ""
 	b = UBound(wHolidayDB)
 	For i = 0 To b
-		If wHolidayDB(i).Month = sMonth Then  '当月份相当时
+		If wHolidayDB(i).Month = sMonth Then  'when the month matches
 			W = Weekday(sDate)
-			If wHolidayDB(i).Recess = W Then  '仅当星期几也相等时
-				FirstDay = DateValue(sMonth & "/" & 1 & "/" & sYear) '取当月第一天
+			If wHolidayDB(i).Recess = W Then  'only when the weekday also matches
+				FirstDay = DateValue(sMonth & "/" & 1 & "/" & sYear) 'get the first day of the month
 				If (DateDiff("ww", FirstDay, sDate) = wHolidayDB(i).Day) Then
 					TempStr = *wHolidayDB(i).HolidayName
 				End If
@@ -67,7 +67,7 @@ Private Property Lunar.wHoliday() As String
 	Return TempStr
 End Property
 
-'求农历节日
+'find lunar-calendar holiday
 Private Property Lunar.lHoliday() As String
 	Dim i As Long
 	Dim b As Long
@@ -78,13 +78,13 @@ Private Property Lunar.lHoliday() As String
 	TempStr = ""
 	b = UBound(lHolidayDB)
 	If lMonth = 12 And (lDay = 29 Or lDay = 30) Then
-		oy = lYear '保存农历年数
+		oy = lYear 'save the lunar year number
 		odate = sDate
 		ndate = sDate + 1
-		Init(Year(ndate), Month(ndate), Day(ndate)) '计算第二天的属性
-		If oy = lYear - 1 Then '如果农历年数增加了1
+		Init(Year(ndate), Month(ndate), Day(ndate)) 'compute the next day's attributes
+		If oy = lYear - 1 Then 'if the lunar year number has advanced by 1
 			TempStr = "除夕"
-			Init(Year(odate), Month(odate), Day(odate)) '恢复到今天原有数据
+			Init(Year(odate), Month(odate), Day(odate)) 'restore today's original data
 		End If
 	Else
 		For i = 0 To b
@@ -98,7 +98,7 @@ Private Property Lunar.lHoliday() As String
 	Return TempStr
 End Property
 
-'求公历节日
+'find Gregorian-calendar holiday
 Private Property Lunar.sHoliday() As String
 	Dim i As Long
 	Dim b As Long
@@ -116,7 +116,7 @@ Private Property Lunar.sHoliday() As String
 	Return TempStr
 End Property
 
-'农历日期名
+'lunar date name
 Private Function Lunar.lDayName(d As Integer) As String
 	Select Case d
 	Case 0
@@ -131,7 +131,7 @@ Private Function Lunar.lDayName(d As Integer) As String
 	End Select
 End Function
 
-'初始化
+'initialize
 Private Sub Lunar.Init(y As Integer, m As Integer, d As Integer)
 	sYear = y
 	sMonth = m
@@ -177,7 +177,7 @@ Private Sub Lunar.Init(y As Integer, m As Integer, d As Integer)
 	lDay = DiffADate - Counter
 End Sub
 
-'传回农历y年闰哪个月 1-12 , 没闰传回 0
+'return which month (1-12) is the leap month of lunar year y, 0 if none
 Private Function Lunar.LeapMonth(y As Integer) As Integer
 	If y >= 1900 Then
 		Return LunarInfo(y - 1900) And &HF
@@ -186,7 +186,7 @@ Private Function Lunar.LeapMonth(y As Integer) As Integer
 	End If
 End Function
 
-'传回农历y年闰月的天数
+'return the number of days in the leap month of lunar year y
 Private Function Lunar.LeapDays(y As Integer) As Integer
 	If LunarInfo(y - 1900) And &HF Then
 		If LunarInfo(y - 1900) And &H10000 Then
@@ -199,7 +199,7 @@ Private Function Lunar.LeapDays(y As Integer) As Integer
 	End If
 End Function
 
-'传回农历y年m月的总天数
+'return the total number of days in lunar year y, month m
 Private Function Lunar.lMonthDays(y As Integer, m As Integer) As Integer
 	If LunarInfo(y - 1900) And MonthMask(m - 1) Then
 		Return 30
@@ -208,7 +208,7 @@ Private Function Lunar.lMonthDays(y As Integer, m As Integer) As Integer
 	End If
 End Function
 
-'传回农历y年的总天数
+'return the total number of days in lunar year y
 Private Function Lunar.lYearDays(y As Integer) As Integer
 	Dim i As Integer
 	Dim mYearDays As Integer = 348

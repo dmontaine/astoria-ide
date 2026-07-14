@@ -1,4 +1,4 @@
-﻿' Trans Form 透明窗口
+﻿' Trans Form - Transparent window
 ' Copyright (c) 2024 CM.Wang
 ' Freeware. Use at your own risk.
 
@@ -17,17 +17,17 @@ Private Sub gdipForm.Initial()
 End Sub
 
 Private Sub gdipForm.Release()
-	'释放Graphics对象的函数
+	'Free the Graphics object
 	If mGraphics Then GdipDeleteGraphics(mGraphics)
-	'释放位图
+	'Free the bitmap
 	If hHBitmap Then DeleteObject(hHBitmap)
-	'释放绘制的对象
+	'Deselect the drawn object
 	If hOldDC AndAlso hMemDC Then SelectObject(hMemDC, hOldDC)
-	'释放兼容设备上下文
+	'Free the compatible device context
 	If hMemDC Then DeleteDC(hMemDC)
-	'释放设备
+	'Release the device
 	If hScrDC Then ReleaseDC(0, hScrDC)
-	'释放位图
+	'Free the image
 	If mImage Then GdipDisposeImage(mImage)
 	If mBitmap Then DeleteObject(mBitmap)
 End Sub
@@ -41,23 +41,23 @@ Private Sub gdipForm.Create(Handle As HWND, Img As GpImage Ptr)
 	
 	With bmHeader.bmiHeader
 		.biSize = SizeOf(bmHeader)
-		.biBitCount = 32  '当然要有透明通道，所以是32bppBitmap
+		.biBitCount = 32  'Needs an alpha channel, hence 32bpp bitmap
 		.biWidth = sWidth
 		.biHeight = sHeight
 		.biPlanes = 1
-		.biSizeImage = .biWidth * .biHeight * 4  '32位就是4个字节
+		.biSizeImage = .biWidth * .biHeight * 4  '4 bytes per pixel at 32-bit
 	End With
 	
-	'获取指定窗口的设备, 释放ReleaseDC
+	'Get the device context for the given window; release with ReleaseDC
 	hScrDC = GetDC(mHandle)
-	'创建一个与指定设备兼容的内存设备, 当不再需要时，释放DeleteDC
+	'Create a memory DC compatible with the given device; free with DeleteDC when no longer needed
 	hMemDC = CreateCompatibleDC(hScrDC)
-	'创建一个与设备无关的位图, 释放'DeleteObject
+	'Create a device-independent bitmap; free with DeleteObject
 	hHBitmap = CreateDIBSection(hMemDC, @bmHeader, DIB_RGB_COLORS, 0, 0, 0)
-	'用于在设备上下文（DC，Device Context）中选择一个可绘制的对象, 释放SelectObject(hMemDC, hOldDC)
+	'Select a drawable object into the device context (DC); restore with SelectObject(hMemDC, hOldDC)
 	hOldDC = SelectObject(hMemDC, hHBitmap)
 	
-	'创建一个Graphics对象用于在Windows设备驱动程序中绘制图形, 释放GdipDeleteGraphics
+	'Create a Graphics object for drawing via the Windows device driver; free with GdipDeleteGraphics
 	GdipCreateFromHDC(hMemDC, @mGraphics)
 	
 	GdipSetSmoothingMode(mGraphics, SmoothingModeAntiAlias)
@@ -65,10 +65,10 @@ Private Sub gdipForm.Create(Handle As HWND, Img As GpImage Ptr)
 	GdipSetPixelOffsetMode(mGraphics, PixelOffsetModeHighQuality)
 	GdipSetTextRenderingHint(mGraphics, TextRenderingHintAntiAlias)
 	
-	'背景色
+	'Background color
 	'GdipGraphicsClear(mGraphics, mBackColor)
 	
-	'在指定的矩形区域内绘制图像'释放GdipDisposeImage
+	'Draw the image into the given rectangle; free with GdipDisposeImage
 	GdipDrawImageRect(mGraphics, Img, 0, 0, sWidth, sHeight)
 End Sub
 
@@ -80,7 +80,7 @@ Private Sub gdipForm.DrawImage(sImg As GpImage Ptr, sX As Single = 0, sY As Sing
 End Sub
 
 Private Property gdipForm.Enabled() As Boolean
-	'返回窗口是否具有透明效果的窗口
+	'Return whether the window has the transparency effect
 	If mHandle = NULL Then Return False
 	mEnabled = IIf((GetWindowLong(mHandle, GWL_EXSTYLE) And WS_EX_LAYERED) = WS_EX_LAYERED, True, False)
 	Return mEnabled
@@ -90,10 +90,10 @@ Private Property gdipForm.Enabled(val As Boolean)
 	mEnabled = val
 	If mHandle = NULL Then Return
 	If mEnabled Then
-		'更新具有透明效果的窗口
+		'Update the window to enable the transparency effect
 		SetWindowLong(mHandle, GWL_EXSTYLE, GetWindowLong(mHandle, GWL_EXSTYLE) Or WS_EX_LAYERED)
 	Else
-		'更新不具有透明效果的窗口
+		'Update the window to disable the transparency effect
 		SetWindowLong(mHandle, GWL_EXSTYLE, GetWindowLong(mHandle, GWL_EXSTYLE) And Not WS_EX_LAYERED)
 	End If
 End Property
@@ -115,7 +115,7 @@ Private Sub gdipForm.Transform(ByVal Alpha As Integer = 255)
 	End With
 	
 	Dim lRT As Rect
-	'获取控件矩形
+	'Get the control's bounding rectangle
 	GetWindowRect(mHandle, @lRT)
 	With ULWpptDst
 		.X = lRT.Left
@@ -127,10 +127,10 @@ Private Sub gdipForm.Transform(ByVal Alpha As Integer = 255)
 		.Y = 0
 	End With
 	
-	'设置窗口WS_EX_LAYERED
+	'Set the window's WS_EX_LAYERED style
 	If Enabled <> True Then Exit Sub
 	
-	'更新具有透明效果的窗口
+	'Update the window with the transparency effect
 	UpdateLayeredWindow(mHandle, hScrDC, @ULWpptDst, @ULWpsize, hMemDC, @ULWpptSrc, ULWcrKey, @ULWpblend, ULW_ALPHA)
 End Sub
 

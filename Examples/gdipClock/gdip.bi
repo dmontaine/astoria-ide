@@ -213,10 +213,10 @@ Private Function Color2Gdip(fColor As ARGB) As ARGB
 End Function
 
 Private Function VBTimerMS() As Double
-	'获取标准时间
+	'Get UTC system time
 	Dim As SYSTEMTIME sysTime, locTime
 	GetSystemTime(@sysTime)
-	'换算成本地时间
+	'Convert to local time
 	Dim As TIME_ZONE_INFORMATION tizTime
 	GetTimeZoneInformation(@tizTime)
 	SystemTimeToTzSpecificLocalTime(@tizTime, @sysTime, @locTime)
@@ -224,14 +224,14 @@ Private Function VBTimerMS() As Double
 End Function
 
 Private Function VBTimer() As Double
-	'获取标准时间
+	'Get UTC system time
 	Dim As SYSTEMTIME sysTime, locTime
 	GetSystemTime(@sysTime)
-	'换算成本地时间
+	'Convert to local time
 	Dim As TIME_ZONE_INFORMATION tizTime
 	GetTimeZoneInformation(@tizTime)
 	SystemTimeToTzSpecificLocalTime(@tizTime, @sysTime, @locTime)
-	'凌晨开始的秒数
+	'Seconds elapsed since midnight
 	Return locTime.wHour * 3600 + locTime.wMinute* 60 + locTime.wSecond + locTime.wMilliseconds / 1000
 End Function
 

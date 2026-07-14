@@ -15,7 +15,7 @@ Private Destructor gdipToken
 End Destructor
 
 Private Sub gdipToken.Initial()
-	'初始化GDI+函数库
+	'Initialize the GDI+ library
 	If mToken Then Exit Sub
 	Dim uInput As GdiplusStartupInput
 	uInput.GdiplusVersion = 1
@@ -23,7 +23,7 @@ Private Sub gdipToken.Initial()
 End Sub
 
 Private Sub gdipToken.Release()
-	'清理GDI+使用过的资源
+	'Clean up resources used by GDI+
 	If mToken = 0 Then Exit Sub
 	GdiplusShutdown mToken
 	mToken = NULL
@@ -44,11 +44,11 @@ End Property
 Private Sub gdipDC.Initial(ByVal phWnd As HANDLE = 0, ByVal pWidth As Single = 400, ByVal pHeight As Single = 300)
 	Release()
 	If phWnd Then
-		'获取句柄显示设备
+		'Get the display device for the handle
 		mHWND = phWnd
 		mDC = GetDC(phWnd)
 	Else
-		'句柄为0时, 创建内存显示设备
+		'When the handle is 0, create an in-memory display device
 		mDC = CreateCompatibleDC(0)
 		mDtHWND = GetDesktopWindow()
 		mDtDC = GetDC(mDtHWND)
@@ -58,7 +58,7 @@ Private Sub gdipDC.Initial(ByVal phWnd As HANDLE = 0, ByVal pWidth As Single = 4
 End Sub
 
 Private Sub gdipDC.Release()
-	'释放资源
+	'Free resources
 	If mBitmap Then
 		DeleteObject(mBitmap)
 		mBitmap = NULL
@@ -92,7 +92,7 @@ Private Destructor gdipGraphics
 End Destructor
 
 Private Sub gdipGraphics.Initial(ByVal pDC As HDC = 0, ByVal pClear As Boolean = False)
-	'初始化画布mGraphics
+	'Initialize the mGraphics canvas
 	Release()
 	If pDC Then
 		GdipCreateFromHDC(pDC, @mGraphics)
@@ -105,7 +105,7 @@ Private Sub gdipGraphics.Initial(ByVal pDC As HDC = 0, ByVal pClear As Boolean =
 End Sub
 
 Private Sub gdipGraphics.Release()
-	'释放画布mGraphics资源
+	'Free the mGraphics canvas resources
 	If mGraphics Then
 		GdipDeleteGraphics(mGraphics)
 		mGraphics = NULL
@@ -117,7 +117,7 @@ Private Property gdipGraphics.Graphics() As GpGraphics Ptr
 End Property
 
 Private Sub gdipGraphics.DrawImage(pImage As GpImage Ptr, pX As Single = 0, pY As Single = 0)
-	'在画布mGraphics的px,py位置绘制pImage
+	'Draw pImage onto the mGraphics canvas at (pX, pY)
 	Dim As Single sWidth, sHeight
 	GdipGetImageDimension(pImage, @sWidth, @sHeight)
 	GdipDrawImageRect(mGraphics, pImage, pX, pY, sWidth, sHeight)
@@ -132,7 +132,7 @@ Private Destructor gdipImage
 End Destructor
 
 Private Sub gdipImage.Release
-	'释放图像资源
+	'Free image resources
 	If mImage Then
 		GdipDisposeImage(mImage)
 		mImage = NULL
@@ -153,7 +153,7 @@ Private Sub gdipImage.Release
 End Sub
 
 Private Property gdipImage.ImageFile(ByRef pFileName As WString)
-	'从文件加载图像到mImage
+	'Load the image from a file into mImage
 	Dim pImage As GpImage Ptr = NULL
 	If Dir(pFileName) <> "" Then
 		GdipLoadImageFromFile(@pFileName, @pImage)
@@ -179,7 +179,7 @@ Private Property gdipImage.Width As Single
 End Property
 
 Private Property gdipImage.Image(pImage As GpImage Ptr)
-	'从pImage赋值图像到mImage
+	'Assign the image from pImage into mImage
 	Release()
 	If pImage Then
 		mImage = pImage
@@ -194,20 +194,20 @@ Private Property gdipImage.Image As GpImage Ptr
 End Property
 
 Private Function gdipImage.Resize(pNewWidth As Single, pNewHeight As Single) As GpImage Ptr
-	'将mImage图像拉伸后输出
+	'Scale mImage and return the result
 	If mResizedImage Then GdipDisposeImage(mResizedImage)
 	
 	Dim fGraphics As GpGraphics Ptr
-	'准备画布和位图
+	'Prepare the canvas and bitmap
 	GdipCreateBitmapFromScan0(pNewWidth, pNewHeight, 0, PixelFormat32bppARGB, 0, @mResizedImage)
 	GdipGetImageGraphicsContext(mResizedImage, @fGraphics)
 	
-	'创建一个缩放矩阵
+	'Create a scaling matrix
 	Dim fMatrix As GpMatrix Ptr
 	GdipCreateMatrix(@fMatrix)
 	GdipScaleMatrix(fMatrix, pNewWidth / mWidth, pNewHeight / mHeight, 0)
 	GdipSetWorldTransform(fGraphics, fMatrix)
-	'绘制缩放后的图像
+	'Draw the scaled image
 	GdipDrawImageRect(fGraphics, mImage, 0, 0, mWidth, mHeight)
 	
 	GdipDeleteGraphics(fGraphics)
@@ -217,7 +217,7 @@ Private Function gdipImage.Resize(pNewWidth As Single, pNewHeight As Single) As 
 End Function
 
 Private Sub gdipBitmap.DrawScaleImage(pImage As GpImage Ptr, ByVal pWidth As Single = 0, ByVal pHeight As Single= 0)
-	'将pImage填满拉伸绘制到mGraphics(mBitmap)
+	'Stretch pImage to fill and draw it onto mGraphics (mBitmap)
 	If pImage = NULL Then Exit Sub
 	
 	Dim As Single fNewWidth, fNewHeight
@@ -227,39 +227,39 @@ Private Sub gdipBitmap.DrawScaleImage(pImage As GpImage Ptr, ByVal pWidth As Sin
 	Dim As Single fOriginalWidth, fOriginalHeight
 	GdipGetImageDimension(pImage, @fOriginalWidth, @fOriginalHeight)
 	
-	'准备画布和位图
+	'Prepare the canvas and bitmap
 	Dim fResizedImage As Any Ptr
 	Dim fGraphics As GpGraphics Ptr
 	GdipCreateBitmapFromScan0(fNewWidth, fNewHeight, 0, PixelFormat32bppARGB, 0, @fResizedImage)
 	GdipGetImageGraphicsContext(fResizedImage, @fGraphics)
 	
-	'创建一个缩放矩阵
+	'Create a scaling matrix
 	Dim fMatrix As GpMatrix Ptr
 	GdipCreateMatrix(@fMatrix)
 	GdipScaleMatrix(fMatrix, fNewWidth / fOriginalWidth, fNewHeight / fOriginalHeight, 0)
 	GdipSetWorldTransform(fGraphics, fMatrix)
 	
-	'绘制图像
+	'Draw the image
 	GdipDrawImageRect(fGraphics, pImage, 0, 0, fOriginalWidth, fOriginalHeight)
-	'绘制缩放后的图像
+	'Draw the scaled image
 	GdipDrawImageRect(mGraphics, fResizedImage, 0, 0, fNewWidth, fNewHeight)
 	
-	'释放资源
+	'Free resources
 	GdipDeleteGraphics(fGraphics)
 	GdipDeleteMatrix(fMatrix)
 	GdipDisposeImage(fResizedImage)
 End Sub
 
 Private Sub gdipBitmap.DrawAlphaImage(pImage As GpImage Ptr, pAlpha As Single)
-	'将pImage进行Alpha融合绘制到mGraphics(mBitmap)
+	'Alpha-blend pImage and draw it onto mGraphics (mBitmap)
 	Dim As Single fOriginalWidth, fOriginalHeight
 	GdipGetImageDimension(pImage, @fOriginalWidth, @fOriginalHeight)
 	
-	' 创建图像属性
+	' Create image attributes
 	Dim fImageAttr As GpImageAttributes Ptr
 	GdipCreateImageAttributes(@fImageAttr)
 	
-	' 设置颜色矩阵进行 alpha 混合
+	' Set the color matrix to perform alpha blending
 	Dim fColorMatrix As ColorMatrix = Type( _
 	{{1.0, 0.0, 0.0, 0.0, 0.0}, _
 	{0.0, 1.0, 0.0, 0.0, 0.0}, _
@@ -270,20 +270,20 @@ Private Sub gdipBitmap.DrawAlphaImage(pImage As GpImage Ptr, pAlpha As Single)
 	
 	GdipSetImageAttributesColorMatrix(fImageAttr, ColorAdjustTypeBitmap, True, @fColorMatrix, NULL, ColorMatrixFlagsDefault)
 	
-	' 绘制 alpha 混合后的图像
+	' Draw the alpha-blended image
 	GdipDrawImageRectRect(mGraphics, pImage, 0, 0, fOriginalWidth, fOriginalHeight, 0, 0, fOriginalWidth, fOriginalHeight, UnitPixel, fImageAttr, NULL, NULL)
 	GdipDisposeImageAttributes(fImageAttr)
 End Sub
 
 Private Sub gdipBitmap.DrawFromFile(ImageFile As WString)
-	'从文件加载图像到mImage
+	'Load the image from a file into mImage
 	Dim pImage As GpImage Ptr
 	GdipLoadImageFromFile(@ImageFile, @pImage)
 	Image = Cast(Any Ptr, pImage)
 End Sub
 
 Private Sub gdipBitmap.DrawRotateImage(pImage As GpImage Ptr, pAngle As Single)
-	'将pImage旋转pAngle角度绘制到mGraphics(mBitmap)
+	'Rotate pImage by pAngle and draw it onto mGraphics (mBitmap)
 	If pImage = NULL Then Exit Sub
 	
 	Dim As Single fOriginalWidth, fOriginalHeight
@@ -291,13 +291,13 @@ Private Sub gdipBitmap.DrawRotateImage(pImage As GpImage Ptr, pAngle As Single)
 	Dim fCenterX As Single = fOriginalWidth / 2.0
 	Dim fCenterY As Single = fOriginalHeight / 2.0
 	
-	'准备画布和位图
+	'Prepare the canvas and bitmap
 	Dim fResizedImage As Any Ptr
 	Dim fGraphics As GpGraphics Ptr
 	GdipCreateBitmapFromScan0(fOriginalWidth, fOriginalHeight, 0, PixelFormat32bppARGB, 0, @fResizedImage)
 	GdipGetImageGraphicsContext(fResizedImage, @fGraphics)
 	
-	'创建一个缩放矩阵
+	'Create a scaling matrix
 	Dim fMatrix As GpMatrix Ptr
 	GdipCreateMatrix(@fMatrix)
 	GdipTranslateMatrix(fMatrix, fCenterX, fCenterY, MatrixOrderPrepend)
@@ -305,25 +305,25 @@ Private Sub gdipBitmap.DrawRotateImage(pImage As GpImage Ptr, pAngle As Single)
 	GdipTranslateMatrix(fMatrix, -fCenterX, -fCenterY, MatrixOrderPrepend)
 	GdipSetWorldTransform(fGraphics, fMatrix)
 	
-	'绘制图像
+	'Draw the image
 	GdipDrawImageRect(fGraphics, pImage, 0, 0, fOriginalWidth, fOriginalHeight)
-	'绘旋转后的图像
+	'Draw the rotated image
 	GdipDrawImageRect(mGraphics, fResizedImage, 0, 0, mWidth, mHeight)
 	
-	'释放资源
+	'Free resources
 	GdipDeleteGraphics(fGraphics)
 	GdipDeleteMatrix(fMatrix)
 	GdipDisposeImage(fResizedImage)
 End Sub
 
 Private Sub gdipBitmap.DrawPartImage(pImage As GpImage Ptr, pDestX As Single, pDestY As Single,  pSrcX As Single, pSrcY As Single, pSrcWidth As Single, pSrcHeight As Single, ByVal pAlpha As Integer = &HFF)
-	'将部分的pImage绘制到mGraphics(mBitmap)
+	'Draw part of pImage onto mGraphics (mBitmap)
 	
-	' 创建图像属性
+	' Create image attributes
 	Dim fImageAttr As GpImageAttributes Ptr
 	GdipCreateImageAttributes(@fImageAttr)
 	
-	' 设置颜色矩阵进行 alpha 混合
+	' Set the color matrix to perform alpha blending
 	Dim fColorMatrix As ColorMatrix = Type( _
 	{{1.0, 0.0, 0.0, 0.0, 0.0}, _
 	{0.0, 1.0, 0.0, 0.0, 0.0}, _
@@ -340,7 +340,7 @@ Private Sub gdipBitmap.DrawPartImage(pImage As GpImage Ptr, pDestX As Single, pD
 End Sub
 
 Private Sub gdipBitmap.DrawImage(pImage As GpImage Ptr, pX As Single, pY As Single)
-	'原始尺寸的pImage绘制到mGraphics(mBitmap)
+	'Draw pImage at its original size onto mGraphics (mBitmap)
 	If pImage = NULL Then Exit Sub
 	Dim As Single sWidth, sHeight
 	GdipGetImageDimension(pImage, @sWidth, @sHeight)
@@ -354,7 +354,7 @@ Private Sub gdipBitmap.Release()
 End Sub
 Private Sub gdipBitmap.Initial(ByVal pWidth As Single = 400, ByVal pHeight As Single = 300)
 	Release()
-	'准备画布mGraphics和位图mBitmap
+	'Prepare the mGraphics canvas and mBitmap bitmap
 	mWidth = pWidth
 	mHeight = pHeight
 	GdipCreateBitmapFromScan0(mWidth, mHeight, 0, PixelFormat32bppARGB, 0, @mBitmap)
@@ -364,7 +364,7 @@ Private Sub gdipBitmap.Initial(ByVal pWidth As Single = 400, ByVal pHeight As Si
 	GdipSetTextRenderingHint(mGraphics, TextRenderingHintAntiAlias)
 End Sub
 Private Property gdipBitmap.Image(pImage As GpBitmap Ptr)
-	'从pImage赋值图像到mImage
+	'Assign the image from pImage into mImage
 	Release()
 	mBitmap = pImage
 	If mBitmap Then

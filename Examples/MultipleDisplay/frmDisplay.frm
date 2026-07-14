@@ -1,4 +1,4 @@
-﻿'MultipleMonitor多显示器
+﻿'MultipleMonitor - multi-monitor display
 ' Copyright (c) 2024 CM.Wang
 ' Freeware. Use at your own risk.
 

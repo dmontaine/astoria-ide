@@ -1,4 +1,4 @@
-﻿'AMCap摄像头捕捉
+﻿'AMCap Camera Capture
 ' Copyright (c) 2025 CM.Wang
 ' Freeware. Use at your own risk.
 

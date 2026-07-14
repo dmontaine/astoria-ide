@@ -1,4 +1,4 @@
-﻿'capturesound声音捕捉
+﻿'capturesound audio capture
 ' Copyright (c) 2024 CM.Wang
 ' Freeware. Use at your own risk.
 

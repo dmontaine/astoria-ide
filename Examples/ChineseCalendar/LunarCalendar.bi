@@ -1,4 +1,4 @@
-﻿' Gregorian Calendar Lunar Calendar公历农历
+﻿' Gregorian Calendar Lunar Calendar
 ' Copyright (c) 2023 CM.Wang
 ' Freeware. Use at your own risk.
 
@@ -13,9 +13,9 @@ Type LunarCalendar
 Private:
 	'0-31
 	BitPower(31) As Long
-	'内部使用标准的日期变量
+	'the standard date variable used internally
 	mvarDate As Double
-	'保持属性值的局部变量
+	'local variables holding property values
 	mvarsYear As Long
 	mvarsMonth As Long
 	mvarsDay As Long
@@ -24,7 +24,7 @@ Private:
 	mvarlDay As Long
 	mvarIsLeap As Boolean
 	
-	'定义类内部用公用变量
+	'shared variables used internally by the class
 	SolarMonth(11) As Long = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 	Gan(10) As String = {"甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"}
 	Zhi(11) As String = {"子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"}
@@ -34,7 +34,7 @@ Private:
 	nStr1(11) As String = {"日", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十"}
 	nStr2(4) As String = {"初", "十", "廿", "卅", "　"}
 	
-	'根据VB的位计算特点,故扩充原有的数据位,将其变成32位
+	'expanded to 32 bits from the original data width, to match VB's bit-computation behavior
 	LunarInfo(150) As Long = { _
 	&H104BD8, &H104AE0, &H10A570, &H1054D5, &H10D260, &H10D950, &H116554, &H1056A0, &H109AD0, &H1055D2, _
 	&H104AE0, &H10A5B6, &H10A4D0, &H10D250, &H11D255, &H10B540, &H10D6A0, &H10ADA2, &H1095B0, &H114977, _
@@ -69,7 +69,7 @@ Private:
 	354, 384, 355, 384, 354, 354, 384, 354, 354, 384, _
 	355, 355, 384, 354, 384, 354, 354, 384, 354, 355}
 	
-	'公历节日 1表示放假日
+	'Gregorian-calendar holidays; 1 means a day off
 	sHolidayInfo(65) As HolidayStruct = { _
 	(1, 1, 1, @"元旦"), _
 	(2, 2, 0, @"世界湿地日"), _
@@ -139,7 +139,7 @@ Private:
 	(10, 31, 0, @"万圣节") _
 	}
 	
-	'农历节日 1表示放假日
+	'Lunar-calendar holidays; 1 means a day off
 	lHolidayInfo(8) As HolidayStruct = { _
 	(1, 1, 1, @"春节"), _
 	(1, 15, 0, @"元宵节"), _
@@ -152,7 +152,7 @@ Private:
 	(12, 24, 0, @"小年") _
 	}
 	
-	'某月的第几个星期几
+	'Nth weekday of a given month
 	wHolidayInfo(8) As HolidayStruct = { _
 	(5, 2, 1, @"国际母亲节"), _
 	(5, 3, 1, @"全国助残日"), _
@@ -168,11 +168,11 @@ Public:
 	MonthNameS(11) As String = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"}
 	MonthNameEn(12) As String = {"*", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"}
 	MonthNameCn(12) As String = {"*", "一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"}
-	'时辰———十二地支纪一昼24小时为十二时辰
+	'"shichen" - the 12 traditional two-hour periods (one per earthly branch) dividing a 24-hour day
 	HourName(23) As String = {"子正", "丑初", "丑正", "寅初", "寅正", "卯初", "卯正", "辰初", "辰正", "巳初", "巳正", "午初", "午正", "未初", "未正", "申初", "申正", "酉初", "酉正", "戌初", "戌正", "亥初", "亥正", "子初"}
-	'农历月份名
+	'lunar month names
 	MonName(12) As String = {"*", "正", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "腊"}
-	'星期名称
+	'weekday names
 	WeekNameEn(7) As String = {" * ", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"}
 	WeekNameCn(7) As String = {" * ", "星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"}
 	WeekNameS(7) As String = {" * ", "日", "一", "二", "三", "四", "五", "六"}

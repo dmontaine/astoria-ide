@@ -7,7 +7,7 @@
 
 #include once "midi.bi"
 
-'更改乐器
+'Change instrument
 'see InstrumentEnum,InstrumentString for Instrument
 Function SendProgramChange(hDev As HMIDIOUT, Chn As ChannelsEnum, Instrument As UByte) As MMRESULT
 	Dim As Event ev
@@ -18,7 +18,7 @@ Function SendProgramChange(hDev As HMIDIOUT, Chn As ChannelsEnum, Instrument As 
 	Return midiOutShortMsg(hDev, ev.event)
 End Function
 
-'音调调节轮
+'Pitch bend wheel
 ' 7low and 7hi bits=14 bits (0 - 16383)
 Function SendPitchWheelControl(hDev As HMIDIOUT, Chn As ChannelsEnum, Num As InstrumentsEnum) As MMRESULT
 	Dim As Event ev
@@ -31,8 +31,8 @@ Function SendPitchWheelControl(hDev As HMIDIOUT, Chn As ChannelsEnum, Num As Ins
 	Return midiOutShortMsg(hDev, ev.event)
 End Function
 
-'音符发声
-'参数分别为通道编号，音调，速度
+'Note on
+'Parameters are channel number, note, velocity respectively
 Function SendNoteOn(hDev As HMIDIOUT, Chn As ChannelsEnum, Note As UByte, Vel As UByte) As MMRESULT
 	Dim As Event ev
 	InRange(Chn, 0, 15)
@@ -44,8 +44,8 @@ Function SendNoteOn(hDev As HMIDIOUT, Chn As ChannelsEnum, Note As UByte, Vel As
 	Return midiOutShortMsg(hDev, ev.event)
 End Function
 
-'音符禁声
-'参数分别为通道编号，音调，速度
+'Note off
+'Parameters are channel number, note, velocity respectively
 Function SendNoteOff(hDev As HMIDIOUT, Chn As ChannelsEnum, Note As UByte, Vel As UByte) As MMRESULT
 	Dim As Event ev
 	InRange(Chn, 0, 15)

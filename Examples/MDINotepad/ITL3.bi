@@ -4,19 +4,19 @@
 ' Freeware. Use at your own risk.
 
 Type ITL3
-Private : '私有变量
+Private : 'Private variables
 hWndForm As HWND
 mInit As Long
 tl3 As ITaskbarList3 Ptr
 Public :
-'构造与析构函数
+'Constructor and destructor
 Declare Constructor
 Declare Destructor
-'共有函数，类的方法
+'Public functions - class methods
 Declare Function SetState(tbpFlags As TBPFLAG) As HRESULT
 Declare Function SetValue(ullCompleted As ULONGLONG, ullTotal As ULONGLONG) As HRESULT
 Declare Sub Initial(ByVal nVal As HWND)
-'共有函数，类的属性
+'Public functions - class properties
 Declare Property WndForm() As HWND
 Declare Property WndForm(ByVal nVal As HWND)
 End Type

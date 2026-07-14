@@ -27,7 +27,7 @@
 	Dim Shared  As Integer SudoCellChildFontSize = 10, SudoCellChildSize = 20, SudoCellChildTop = 2, SudoCellChildLeft = 2
 	Dim Shared  As Integer SudoCellChildColorBK, SudoCellChildColorFore, SudoCellChildColorHover
 	Dim Shared  As Integer SudoCellCurr, SudoCellChildCurr, SudoCellLast, SudoCellChildLast, mTabIndex = 81
-	Dim Shared As Point MsCell, MsCellChild                  ' 记录鼠标按下时的坐标
+	Dim Shared As Point MsCell, MsCellChild                  ' Records the coordinates where the mouse was pressed down
 	Dim Shared  As Boolean GameOver, bCustomize, bDrawing
 	Dim Shared As My.Sys.Drawing.BitmapType ScreenShotBitm
 	Dim Shared  As Integer SudoKu(0 To 9, 0 To 8, 0 To 8), SudoAns(0 To 9, 0 To 8, 0 To 8), SudoIn(0 To 8, 0 To 8)
@@ -260,7 +260,7 @@ Private Sub Form1Type.Form_Show(ByRef Sender As Form)
 End Sub
 
 Private Sub Form1Type.cmdSolveSudo_Click(ByRef Sender As Control)
-	'Randomize ' 初始化随机数生成器
+	'Randomize ' Initialize the random number generator
 	'Input "", SudoString
 	Dim SudoAns(0 To 9, 0 To 8, 0 To 8) As Integer
 	Dim SudoIn(0 To 8, 0 To 8) As Integer
@@ -269,7 +269,7 @@ Private Sub Form1Type.cmdSolveSudo_Click(ByRef Sender As Control)
 	Next i
 	SolveSudo(SudoAns(), SudoIn())
 	GameOver = True
-	'' 如果需要解对角线数独
+	'' If diagonal sudoku needs to be solved
 	'While (dialog_sudoku(sudoans[0])==0) {
 	'    solvesudo(sudoans, sudoin);
 	'    print_a_sudoku(sudoans);
@@ -309,7 +309,7 @@ Private Sub Form1Type.cmdSolveSudo_Click(ByRef Sender As Control)
 	'	If i Mod 3 = 2 Then Debug.Print "  -- -- --   -- -- --   -- -- --"
 	'Next i
 	'
-	'[X-wing] 7在行0,2列1,4交叉点两行或两列的7只在交叉点上存在,意味着4个交叉点上的7一定存在两个,那么可以删去不在交叉点上的7
+	'[X-wing] Example: candidate 7 in rows 0,2 and columns 1,4 - if the 7 candidates in these two rows (or two columns) only occur at the four intersection cells, then exactly two of those four intersections must contain a 7, so any other 7 candidates not at the intersections can be eliminated
 	
 End Sub
 
@@ -547,9 +547,9 @@ Private Sub Form1Type.cmdDrawing_Click(ByRef Sender As Control)
 	If bDrawing Then
 		Dim As Rect ScreenshotRect
 		GetWindowRect(pnlBack.Handle, @ScreenshotRect)
-		'拷贝屏幕图像bi于背景，控件不能点选
+		'Copy the screen image onto the background bitmap; controls become unclickable
 		pnlBack.Graphic.Bitmap.LoadFromScreen(ScreenshotRect.Left, ScreenshotRect.Top, ScreenshotRect.Right, ScreenshotRect.Bottom) 'LoadFromScreen(ScreenshotRect.Left, ScreenshotRect.Top, (ScreenshotRect.Right - ScreenshotRect.Left), (ScreenshotRect.Bottom - ScreenshotRect.Top))
-		'隐藏控件
+		'Hide controls
 		For j As Integer = 0 To 8
 			For i As Integer = 0 To 8
 				With pnlSudoCell(i + j * 9)
@@ -561,7 +561,7 @@ Private Sub Form1Type.cmdDrawing_Click(ByRef Sender As Control)
 		'Canvas.DrawColor = clBlue
 	Else
 		pnlBack.Canvas.Cls
-		'显示控件
+		'Show controls
 		For j As Integer = 0 To 8
 			For i As Integer = 0 To 8
 				With pnlSudoCell(i + j * 9)

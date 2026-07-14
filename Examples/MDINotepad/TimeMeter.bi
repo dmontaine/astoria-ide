@@ -1,5 +1,5 @@
 ﻿#pragma once
-' TimeMeter 计时器
+' TimeMeter - timer
 ' Copyright (c) 2024 CM.Wang
 ' Freeware. Use at your own risk.
 
@@ -11,8 +11,8 @@ tEnd As LongInt
 Public :
 Declare Constructor
 Declare Destructor
-Declare Sub Start() '开始计时
-Declare Function Passed() As Double '过去的时间
+Declare Sub Start() 'Start timing
+Declare Function Passed() As Double 'Elapsed time
 End Type
 
 #ifndef __USE_MAKE__

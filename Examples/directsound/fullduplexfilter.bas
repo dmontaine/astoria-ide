@@ -1,4 +1,4 @@
-﻿'fullduplexfilter全双工滤波器
+﻿'fullduplexfilter full-duplex filter
 ' Copyright (c) 2024 CM.Wang
 ' Freeware. Use at your own risk.
 

@@ -1,4 +1,4 @@
-﻿' Gregorian Calendar Lunar Calendar公历农历
+﻿' Gregorian Calendar Lunar Calendar
 ' Copyright (c) 2024 CM.Wang
 ' Freeware. Use at your own risk.
 ' https://thuthuataccess.com/forum/thread-4765.html
@@ -49,7 +49,7 @@ Type Lunar
 	&H4AC950, &H32D556, &H58B4A0, &H42B690, &H2E5D94, &H5255B0, &H3E25FA, &H6425B0, &H4E92B0, &H36AAB6, &H5C6950, &H4674A0, &H31B2A5, &H54AD50, &H4055A0, &H2AAB73, &H522570, &H3A5377, &H6052B0, &H4A6950, _
 	&H346D56, &H585AA0, &H42AB50, &H2E56D4, &H544AE0, &H3CA570, &H2864D2, &H4CD260, &H36EAA6, &H5AD550, &H465AA0, &H30ADA5, &H5695D0, &H404AD0, &H2AA9B3, &H50A4D0, &H3AD2B7, &H5EB250, &H48B540, &H33D556}
 	
-	'公历节日 1表示放假日
+	'Gregorian-calendar holidays; 1 means a day off
 	sHolidayDB(65) As Holiday = { _
 	(1, 1, 1, @WStr("元旦")), _
 	(2, 2, 0, @WStr("世界湿地日")), _
@@ -119,7 +119,7 @@ Type Lunar
 	(10, 31, 0, @WStr("万圣节")) _
 	}
 	
-	'农历节日 1表示放假日
+	'Lunar-calendar holidays; 1 means a day off
 	lHolidayDB(8) As Holiday = { _
 	(1, 1, 1, @WStr("春节")), _
 	(1, 15, 0, @WStr("元宵节")), _
@@ -132,7 +132,7 @@ Type Lunar
 	(12, 24, 0, @WStr("小年")) _
 	}
 	
-	'某月的第几个星期几
+	'Nth weekday of a given month
 	wHolidayDB(8) As Holiday = { _
 	(5, 2, 1, @WStr("国际母亲节")), _
 	(5, 3, 1, @WStr("全国助残日")), _
@@ -144,19 +144,19 @@ Type Lunar
 	(11, 4, 5, @WStr("感恩节")) _
 	}
 	
-	Declare Sub Init(y As Integer, m As Integer, d As Integer)          '初始化
-	Declare Function LeapDays(y As Integer) As Integer                  '传回农历y年闰月的天数
-	Declare Function LeapMonth(y As Integer) As Integer                 '传回农历y年闰哪个月 1-12 , 没闰传回 0
-	Declare Function lMonthDays(y As Integer, m As Integer) As Integer  '传回农历y年m月的总天数
-	Declare Function lYearDays(y As Integer) As Integer                 '传回农历y年的总天数
-	
-	Declare Function GanZhi(y As Integer) As String                     '传回农历y年天干地支
-	Declare Function YearAttribute(y As Integer) As String              '传回农历y年生肖
-	Declare Property lSolarTerm() As String                             '节气
-	Declare Property wHoliday() As String                               '星期节日
-	Declare Property lHoliday() As String                               '农历节日
-	Declare Property sHoliday() As String                               '公历节日
-	Declare Function lDayName(d As Integer) As String                   '农历日期名
+	Declare Sub Init(y As Integer, m As Integer, d As Integer)          'initialize
+	Declare Function LeapDays(y As Integer) As Integer                  'return the number of days in the leap month of lunar year y
+	Declare Function LeapMonth(y As Integer) As Integer                 'return which month (1-12) is the leap month of lunar year y, 0 if none
+	Declare Function lMonthDays(y As Integer, m As Integer) As Integer  'return the total number of days in lunar year y, month m
+	Declare Function lYearDays(y As Integer) As Integer                 'return the total number of days in lunar year y
+
+	Declare Function GanZhi(y As Integer) As String                     'return the heavenly-stem/earthly-branch (GanZhi) of lunar year y
+	Declare Function YearAttribute(y As Integer) As String              'return the zodiac animal of lunar year y
+	Declare Property lSolarTerm() As String                             'solar term
+	Declare Property wHoliday() As String                               'weekday-based holiday
+	Declare Property lHoliday() As String                               'lunar-calendar holiday
+	Declare Property sHoliday() As String                               'Gregorian-calendar holiday
+	Declare Function lDayName(d As Integer) As String                   'lunar date name
 End Type
 
 #ifndef __USE_MAKE__

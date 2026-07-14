@@ -1,4 +1,4 @@
-﻿' Chinese Calendar 中国日历
+﻿' Chinese Calendar
 ' Copyright (c) 2024 CM.Wang
 ' Freeware. Use at your own risk.
 
@@ -841,7 +841,7 @@ End Sub
 Private Sub frmClockType.Form_Destroy(ByRef Sender As Control)
 	#ifdef __USE_WINAPI__
 		Shell_NotifyIcon(NIM_DELETE, @SystrayIcon)
-		'释放资源
+		'release resources
 		pSpVoice->Release()
 		CoUninitialize()
 	#endif

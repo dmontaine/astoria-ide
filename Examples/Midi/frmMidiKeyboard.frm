@@ -36,21 +36,21 @@
 		frmGraphic As gdipGraphics
 		mPiano As gdipBitmap
 		
-		KeyWhiteNumber As Integer = 37  '白键数start from 0
-		KeyPad(Any) As RectPi           '键盘位置数组
-		KeyBlack(Any) As Boolean        '是否黑键
-		KeyCount As Integer = -1        '键数
-		KeyIndex As Integer = -1        '当前键值
-		KeyBase As Integer = 0          '基本音调
-		KeyCanvas As Boolean = False    '用Canvas
+		KeyWhiteNumber As Integer = 37  'number of white keys, start from 0
+		KeyPad(Any) As RectPi           'array of key positions
+		KeyBlack(Any) As Boolean        'whether it's a black key
+		KeyCount As Integer = -1        'key count
+		KeyIndex As Integer = -1        'current key value
+		KeyBase As Integer = 0          'base note
+		KeyCanvas As Boolean = False    'use Canvas
 
 		mMidiID As UINT
 	    mMidiOut As HMIDIOUT
 		mMidiVelocity As Integer
 		
-		Declare Function KeyInvalid(ByRef Canvas As My.Sys.Drawing.Canvas) As Boolean   '是否需从新计算键盘位置
-		Declare Sub KeyLocate(ByRef Canvas As My.Sys.Drawing.Canvas)                    '获取键盘位置
-		Declare Function KeyIndexByXY(x As Integer, y As Integer) As Integer            '用xy定位键值
+		Declare Function KeyInvalid(ByRef Canvas As My.Sys.Drawing.Canvas) As Boolean   'whether key positions need recalculating
+		Declare Sub KeyLocate(ByRef Canvas As My.Sys.Drawing.Canvas)                    'get key positions
+		Declare Function KeyIndexByXY(x As Integer, y As Integer) As Integer            'locate key value by x, y
 		
 		Declare Sub Form_Create(ByRef Sender As Control)
 		Declare Sub cobDevice_Selected(ByRef Sender As ComboBoxEdit, ItemIndex As Integer)
@@ -287,29 +287,29 @@ Private Sub frmMidiKeyboardType.Form_Create(ByRef Sender As Control)
 	Dim i As Integer
 	Dim j As Integer
 	Dim midicaps As MIDIOUTCAPS
-	'添加设备
+	'Add device
 	If midiOutGetDevCaps(MIDIMAPPER, @midicaps, SizeOf(midicaps)) = 0 Then
-		cobDevice.AddItem(midicaps.szPname)                 '添加设备名称
+		cobDevice.AddItem(midicaps.szPname)                 'Add device name
 		j = cobDevice.NewIndex
-		cobDevice.ItemData(j) = Cast(Any Ptr, -1)   '这是默认设备ID  = -1
+		cobDevice.ItemData(j) = Cast(Any Ptr, -1)   'this is the default device ID = -1
 	End If
-	'添加其他设备
+	'Add other devices
 	For i = 0 To midiOutGetNumDevs() - 1
 		If midiOutGetDevCaps(i, @midicaps, SizeOf(midicaps)) = 0 Then
-			cobDevice.AddItem(midicaps.szPname)         '添加设备名称
+			cobDevice.AddItem(midicaps.szPname)         'Add device name
 			j = cobDevice.NewIndex
-			cobDevice.ItemData(j) = Cast(Any Ptr, i)    '设备ID
+			cobDevice.ItemData(j) = Cast(Any Ptr, i)    'device ID
 		End If
 	Next
 	cobDevice.ItemIndex = 0
 	cobDevice_Selected(cobDevice, 0)
-	'添加乐器
+	'Add instruments
 	For i = 0 To Gunshot
 		cobInstrument.AddItem(i + 1 & ". " & *InstrumentsStringC(i) & " (" & *InstrumentsStringE(i) & ")" )
 	Next
 	cobInstrument.ItemIndex = 0
 	cobInstrument_Selected(cobInstrument, 0)
-	'添加通道
+	'Add channels
 	For i = 0 To channel16
 		cobChannel.AddItem("Channel-" & i + 1)
 	Next

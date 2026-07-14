@@ -23,7 +23,7 @@ End Type
 	End If
 #endmacro
 
-'乐器
+'Instruments
 Enum InstrumentsEnum
 	' Piano
 	GrandPiano
@@ -186,7 +186,7 @@ Enum InstrumentsEnum
 	Gunshot
 End Enum
 
-'通道
+'Channels
 Enum ChannelsEnum
 	channel1 = 0
 	channel2
@@ -206,7 +206,7 @@ Enum ChannelsEnum
 	channel16
 End Enum
 
-'控制符
+'Control messages
 Enum ControlModeChangesEnum           ' Byte1, Byte2
 	BankSelectHi                  = &H00 ' 0-127 MSB
 	ModulationwheelHi                    ' 0-127 MSB
@@ -313,7 +313,7 @@ Enum MetaEventsEnum
 	SequencerSpecific    = &H7F
 End Enum
 
-'事件
+'Events
 Enum SequencerEventsEnum  'Statusbyte data  byte1            data byte2
 	NoteOff              = &H80 'b1000:chn  note 0-127       (none)
 	NoteOn               = &H90 'b1001:chn  note 0-127       velocity   0-127
@@ -344,7 +344,7 @@ Enum SequencerEventsEnum  'Statusbyte data  byte1            data byte2
 	SystemReset          = &HFF 'b1111:1111
 End Enum
 
-'八度音程
+'Octaves
 '+1=C# +3=D# +6=F# +8=G# +10=A#
 '+0=C  +2=D  +4=E  +5=F  +7=G   +9A   +11=B or H
 Enum OctavesEnum
@@ -361,7 +361,7 @@ Enum OctavesEnum
 	octave9 = 120
 End Enum
 
-'音调
+'Notes
 Enum NotesEnum
 	_C   =  0
 	_Cis =  1
@@ -388,7 +388,7 @@ End Type
 Public Const MidiChannelCount = channel16 'start from 0
 Public Const MidiInstrumentCount = Gunshot 'start from 0
 
-'乐器
+'Instruments
 Dim Shared InstrumentsStringE(Gunshot) As WString Ptr = { _
 @WStr("Acoustic Grand Piano"), _
 @WStr("Bright Acoustic Piano"), _

@@ -5,7 +5,7 @@
 '# See also https://github.com/tropicalwzc/ice_sudoku.github.io/blob/master/sudoku_solver.c #
 '############################################################################################
 
-''清空x,y点行列宫范围内的候选数
+''Clears candidates in the row, column, and box of point (x,y)
 Sub Clear_Point(sudo(Any, Any, Any) As Integer, ByVal tryNum As Integer, ByVal x As Integer, ByVal y As Integer)
 	For v As Integer = 0 To 8
 		sudo(tryNum, v, y) = 0
@@ -18,7 +18,7 @@ Sub Clear_Point(sudo(Any, Any, Any) As Integer, ByVal tryNum As Integer, ByVal x
 	Next r
 End Sub
 
-''完全清空候选数数组
+''Completely clears the candidate array
 Sub Clear_Bits(Save(Any, Any, Any) As Integer)
 	For i As Integer = 0 To 8
 		For j As Integer = 0 To 8
@@ -29,7 +29,7 @@ Sub Clear_Bits(Save(Any, Any, Any) As Integer)
 	Next i
 End Sub
 
-''判断两个数独否完全一致
+''Determines whether two sudoku grids are completely identical
 Function IsTheSame(Sudo(Any, Any) As Integer, SudoExt(Any, Any) As Integer) As Boolean
 	For i As Integer = 0 To 8
 		For k As Integer = 0 To 8
@@ -41,7 +41,7 @@ Function IsTheSame(Sudo(Any, Any) As Integer, SudoExt(Any, Any) As Integer) As B
 	Return False
 End Function
 
-''复制数独
+''Copies a sudoku grid
 Sub CopySudo(Sudo(Any, Any) As Integer, SudoExt(Any, Any) As Integer)
 	Dim As Integer  i, k
 	For i = 0 To 8
@@ -61,7 +61,7 @@ Sub CopySudoMix(Sudo(Any, Any, Any) As Integer, SudoExt(Any, Any) As Integer)
 End Sub
 
 
-''候选数模式复制数独 Sudo(0 To 9, 0 To 8, 0 To 8)
+''Copies a sudoku grid in candidate-bitmap form Sudo(0 To 9, 0 To 8, 0 To 8)
 Sub BitCopySudo(Sudo(Any, Any, Any) As Integer, SudoExt(Any, Any, Any) As Integer)
 	Dim As Integer i, k, p
 	For p = 0 To 9
@@ -73,7 +73,7 @@ Sub BitCopySudo(Sudo(Any, Any, Any) As Integer, SudoExt(Any, Any, Any) As Intege
 	Next p
 End Sub
 
-' 判断是否允许填入(x,y)点的z值
+' Determines whether value z may be placed at point (x,y)
 Function CanPutIn(Sudo(Any, Any, Any) As Integer, ByVal x As Integer, ByVal y As Integer, ByVal z As Integer) As Boolean
 	If Sudo(0, x, y) <> 0 Then
 		Return False
@@ -102,7 +102,7 @@ Function CanPutIn(Sudo(Any, Any, Any) As Integer, ByVal x As Integer, ByVal y As
 	Return True
 End Function
 
-' 求和  lay(0 To 8, 0 To 8)
+' Sums lay(0 To 8, 0 To 8)
 Function SumLay(lay(Any, Any) As Integer, ByVal q As Integer, ByVal p As Integer) As Integer
 	Dim As Integer  x, y
 	For x = q * 3 To q * 3 + 2
@@ -115,7 +115,7 @@ Function SumLay(lay(Any, Any) As Integer, ByVal q As Integer, ByVal p As Integer
 	Return 9
 End Function
 
-' 判断是否在(x,y)所在九宫格内存在z值
+' Determines whether value z already exists in the 3x3 box containing (x,y)
 Function IsExist(Sudo(Any, Any, Any) As Integer, ByVal x As Integer, ByVal y As Integer, ByVal z As Integer) As Boolean
 	Dim As Integer a, b
 	For a = (x \ 3) * 3 To (x \ 3) * 3 + 2
@@ -128,7 +128,7 @@ Function IsExist(Sudo(Any, Any, Any) As Integer, ByVal x As Integer, ByVal y As 
 	Return False
 End Function
 
-' 构建候选数全图，无自动更新   sudo(0 To 9, 0 To 8, 0 To 8)
+' Builds the full candidate map, without automatic updates   sudo(0 To 9, 0 To 8, 0 To 8)
 Sub Low_Build_Bit(Sudo(Any, Any, Any) As Integer)
 	Dim As Integer i, k, f
 	For f = 1 To 9
@@ -144,7 +144,7 @@ Sub Low_Build_Bit(Sudo(Any, Any, Any) As Integer)
 	Next f
 End Sub
 
-' 点排除模式刷新数独   sudo(0 To 9, 0 To 8, 0 To 8)
+' Refreshes the sudoku using cell (naked single) elimination   sudo(0 To 9, 0 To 8, 0 To 8)
 Function Change_Bit(Sudo(Any, Any, Any) As Integer) As Integer
 	Dim As Integer con, py, l, v, i, k
 	Dim As Boolean al = 0
@@ -179,7 +179,7 @@ Function Change_Bit(Sudo(Any, Any, Any) As Integer) As Integer
 	Return al
 End Function
 
-' 宫排除模式刷新数独
+' Refreshes the sudoku using box (hidden single) elimination
 Function Square_Bit(Sudo(Any, Any, Any) As Integer) As Boolean
 	Dim As Integer p, a, b, i, k, r, u, v, block(0 To 9)
 	Dim As Boolean label
@@ -222,7 +222,7 @@ Function Square_Bit(Sudo(Any, Any, Any) As Integer) As Boolean
 	Return label
 End Function
 
-' 行排除刷新数独
+' Refreshes the sudoku using row elimination
 Function Row_Bit(Sudo(Any, Any, Any) As Integer) As Boolean
 	Dim As Boolean ChangeOr = False
 	Dim As Integer i, k, p, u, v, r
@@ -264,7 +264,7 @@ Function Row_Bit(Sudo(Any, Any, Any) As Integer) As Boolean
 	Return ChangeOr
 End Function
 
-' 列排除模式刷新数独
+' Refreshes the sudoku using column elimination
 Function Col_Bit(Sudo(Any, Any, Any) As Integer) As Boolean
 	Dim As Boolean changeor
 	Dim As Integer Col(11), Colnum(11)
@@ -295,7 +295,7 @@ Function Col_Bit(Sudo(Any, Any, Any) As Integer) As Boolean
 	Return changeor
 End Function
 
-' 综合使用行列宫点排除进行快速刷新候选数图
+' Quickly refreshes the candidate map by combining row, column, box, and cell elimination
 Function PreSolveSudo(Sudo(Any, Any, Any) As Integer) As Boolean
 	Dim lok As Boolean
 	Do While Square_Bit(Sudo()) Or Row_Bit(Sudo()) Or Col_Bit(Sudo())
@@ -305,7 +305,7 @@ Function PreSolveSudo(Sudo(Any, Any, Any) As Integer) As Boolean
 	Return lok
 End Function
 
-' 构建基础候选数图并且加入自动快速更新
+' Builds the base candidate map and applies automatic fast refresh
 Sub Build_Bit(Sudo(Any, Any, Any) As Integer)
 	Dim As Integer i, k, f
 	For f = 1 To 9
@@ -322,7 +322,7 @@ Sub Build_Bit(Sudo(Any, Any, Any) As Integer)
 	PreSolveSudo(Sudo())
 End Sub
 
-' 从字符串构建基础候选数图并且加入自动快速更新
+' Builds the base candidate map from a string and applies automatic fast refresh
 Sub Build_Bit_FromStr(Sudo(Any, Any, Any) As Integer, SudoStr As String)
 	Dim As Integer i, k, f
 	If Len(SudoStr) = 81 Then
@@ -344,10 +344,10 @@ Sub Build_Bit_FromStr(Sudo(Any, Any, Any) As Integer, SudoStr As String)
 	PreSolveSudo(Sudo())
 End Sub
 
-' 判断当前数独是否存在无解矛盾  TempSudo(0 To 9, 0 To 8, 0 To 8)
+' Determines whether the current sudoku has an unsolvable contradiction  TempSudo(0 To 9, 0 To 8, 0 To 8)
 Function LineCheck(TempSudo(Any, Any, Any) As Integer) As Boolean
 	Dim As Integer i, k, p
-	' 检查行、列、宫是否符合逻辑
+	' Checks whether rows, columns, and boxes satisfy the logic
 	For p = 1 To 9
 		For i = 0 To 8
 			For k = 0 To 8
@@ -376,7 +376,7 @@ Function LineCheck(TempSudo(Any, Any, Any) As Integer) As Boolean
 		Next i
 	Next p
 	
-	' 检查是否有空格未填
+	' Checks whether any cell is left unfilled
 	For i = 0 To 8
 		For k = 0 To 8
 			Dim found As Integer = 0
@@ -393,7 +393,7 @@ Function LineCheck(TempSudo(Any, Any, Any) As Integer) As Boolean
 	Return True
 End Function
 
-' 数独是否存在空置?
+' Does the sudoku have any empty cells?
 Function IsVacant(Sudo(Any, Any, Any) As Integer) As Boolean
 	For i As Integer = 0 To 8
 		For k As Integer = 0 To 8
@@ -405,7 +405,7 @@ Function IsVacant(Sudo(Any, Any, Any) As Integer) As Boolean
 	Return False
 End Function
 
-' 数独是否求解完毕?
+' Is the sudoku fully solved?
 Function IsOK(Sudo(Any, Any, Any) As Integer) As Boolean
 	Dim As Integer i, k, mul, sum
 	sum = 0 : mul = 1
@@ -433,7 +433,7 @@ Function IsOK(Sudo(Any, Any, Any) As Integer) As Boolean
 	Return True
 End Function
 
-' 检测两个数独是否一样
+' Checks whether two sudoku grids are the same
 Function Check(Sudo(Any, Any, Any) As Integer, SudoExt(Any, Any) As Integer) As Boolean
 	For i As Integer = 0 To 8
 		For k As Integer = 0 To 8
@@ -447,7 +447,7 @@ Function Check(Sudo(Any, Any, Any) As Integer, SudoExt(Any, Any) As Integer) As 
 	Return True
 End Function
 
-''随机快速求解数独
+''Randomly and quickly solves the sudoku
 Sub SolveSudo(Sudo(Any, Any, Any) As Integer, SudoExt(Any, Any) As Integer)
 	Dim As Integer rng, x, y, q, p, tryNum
 	Dim Lay(0 To 8, 0 To 8) As Integer
@@ -455,16 +455,16 @@ Sub SolveSudo(Sudo(Any, Any, Any) As Integer, SudoExt(Any, Any) As Integer)
 	
 	Dim SudoP(0 To 9, 0 To 8, 0 To 8) As Integer
 	CopySudoMix(SudoP(), SudoExt())
-	''建立基础候选数图
+	''Builds the base candidate map
 	Build_Bit(SudoP())
-	
+
 	If Not IsVacant(SudoP()) Then
-		''90%以上的数独时最简单的，连一次刷新都挺不过就求解完毕了
-		''可以直接返回
+		''Over 90% of sudokus are this simple - they're solved before even a single refresh pass completes
+		''can return directly
 		BitCopySudo(Sudo(), SudoP())
 		Exit Sub
 	End If
-	''记录已访问
+	''Records values already tried
 	Dim havetry(0 To 9) As Integer
 	'For i As Integer = 0 To 9
 	'	havetry(i) = 0
@@ -476,7 +476,7 @@ Sub SolveSudo(Sudo(Any, Any, Any) As Integer, SudoExt(Any, Any) As Integer)
 		For i As Integer = 0 To 9
 			havetry(i) = 0
 		Next i
-		''候选数恢复现场
+		''Restores the candidate map to the saved state
 		BitCopySudo(Sudo(), SudoP())
 		
 		For dt = 1 To 9
@@ -489,7 +489,7 @@ Sub SolveSudo(Sudo(Any, Any, Any) As Integer, SudoExt(Any, Any) As Integer)
 			
 			If dt >= 2 Then
 				If Not LineCheck(Sudo()) Then
-					' 已经出现错误，返回恢复现场重新尝试
+					' An error has occurred; roll back to the saved state and retry
 					backer = 2
 					Exit For
 				End If
@@ -497,7 +497,7 @@ Sub SolveSudo(Sudo(Any, Any, Any) As Integer, SudoExt(Any, Any) As Integer)
 			
 			If dt >= 2 Then
 				If Not IsVacant(Sudo()) Then
-					''似乎已经求解完成,检测一下
+					''Looks like it may already be solved - check it
 					Exit Do
 				End If
 			End If
@@ -538,18 +538,18 @@ Sub SolveSudo(Sudo(Any, Any, Any) As Integer, SudoExt(Any, Any) As Integer)
 					Clear_Point(Sudo(), tryNum, x, y)
 					PreSolveSudo(Sudo())
 				Else
-					''已经尝试过所有情况，仍然没有返回意味着已经在这个九宫格的tryNum无法满足，返回重试
+					''All possibilities have been tried and none returned, meaning tryNum cannot be satisfied in this box; roll back and retry
 					'Debug.Print "dt = " & dt
 					backer = 2
 					Exit For
 				End If
 			Next b
 		Next dt
-		''只有经过验证和原有数字完全一样的已经完全符合数独规则的81个格全部填写完毕才算求解完毕
+		''Only counts as solved once verified identical to the original givens, with all 81 cells filled in full compliance with sudoku rules
 	Loop While CBool(backer = 2) OrElse IsOK(Sudo()) OrElse Check(Sudo(), SudoExt())
 End Sub
 
-' 打印数独 SudoKu(0 To 8, 0 To 8)
+' Prints the sudoku SudoKu(0 To 8, 0 To 8)
 Sub Print_a_Sudoku(SudoKu(Any, Any, Any) As Integer)
 	Print "  -- -- --   -- -- --   -- -- --"
 	For i As Integer = 0 To 8
@@ -563,7 +563,7 @@ Sub Print_a_Sudoku(SudoKu(Any, Any, Any) As Integer)
 	Next i
 End Sub
 
-' 对话框数独验证  SudoKu(0 To 8, 0 To 8)
+' Dialog sudoku validation  SudoKu(0 To 8, 0 To 8)
 Function Dialog_SudoKu(SudoKu(Any, Any) As Integer) As Boolean
 	Dim hp(0 To 9) As Integer
 	For i As Integer = 0 To 8
@@ -584,9 +584,9 @@ Function Dialog_SudoKu(SudoKu(Any, Any) As Integer) As Boolean
 	Return True
 End Function
 
-' 主函数
+' Main function
 Function main() As Boolean
-	Randomize ' 初始化随机数生成器
+	Randomize ' Initialize the random number generator
 	Dim As String inter = "500000300020100070008000009040007000000821000000600010300000800060004020009000005"
 	'Input "", inter
 	Dim SudoAns(0 To 9, 0 To 8, 0 To 8) As Integer
@@ -596,7 +596,7 @@ Function main() As Boolean
 	Next i
 	
 	SolveSudo(SudoAns(), SudoIn())
-	'' 如果需要解对角线数独
+	'' If diagonal sudoku needs to be solved
 	'While (dialog_sudoku(sudoans[0])==0) {
 	'    solvesudo(sudoans, sudoin);
 	'    print_a_sudoku(sudoans);
@@ -608,7 +608,7 @@ Function main() As Boolean
 End Function
 'Print main
 'Sleep
-/' 可以用以下这些超困难数独测试,可以肯定凭借人脑基本上都不可能做出来的
+/' These extremely difficult sudokus can be used for testing - virtually impossible for a human to solve by hand
 @"500000300020100070008000009040007000000821000000600010300000800060004020009000005",
 @"800000009040001030007000600000023000050904020000105000006000700010300040900000008",
 @"000070100000008050020900003530000000062000004094600000000001800300200009000050070",

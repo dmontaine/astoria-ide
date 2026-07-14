@@ -255,11 +255,11 @@ Private Sub frmSpRecognizerType.CommandButton_Click(ByRef Sender As Control)
 		End If
 		
 		If pSpRecoContext Then
-			'设置识别模式为听写（Dictation）
+			'Set recognition mode to dictation
 			Debug.Print "CreateGrammar          " & pSpRecoContext->CreateGrammar(0, @pSpRecoGrammar)
 			Debug.Print "LoadDictation          " & pSpRecoGrammar->LoadDictation(NULL, SPLO_STATIC)
 			
-			'开始语音识别
+			'Start speech recognition
 			Debug.Print "SetDictationState      " & pSpRecoGrammar->SetDictationState(SPRS_ACTIVE)
 			Debug.Print "SetContextState        " & pSpRecoContext->SetContextState(SPCS_ENABLED)
 		End If

@@ -1,10 +1,33 @@
 # Astoria-IDE — Project Status & Handoff
 
-**Last updated:** 2026-07-13 12:51:22 -07:00 (last push)
+**Last updated:** 2026-07-13 (this machine, unpushed — see banner below)
 **Repository:** [github.com/dmontaine/astoria-ide](https://github.com/dmontaine/astoria-ide)
 **Local path:** C:\Users\don\Astoria-IDE
 
 This is the concise, authoritative handoff for the next work session. Completed-work narratives, investigations, and dated session notes are archived in [HISTORY.md](HISTORY.md). Shipped changes are indexed in [CHANGELOG.md](CHANGELOG.md), and fuller enhancement specifications live in [ROADMAP.md](ROADMAP.md).
+
+## ⚠️ UNPUSHED — branches diverged, needs a manual merge before any more work
+
+This machine has one local commit, **`2e160bb` "Examples: English-only translation cleanup + dead code sweep"**, sitting on top of `ffc21f3`, that is **not pushed** to `origin/main`. `git push` was rejected because `origin/main` moved on (presumably from the other computer) to `56fb483`, nine commits ahead of `ffc21f3`:
+
+```
+ffc21f3 (common ancestor — last commit this machine had before today's work)
+├─ 2e160bb  Examples: English-only translation cleanup + dead code sweep   [LOCAL ONLY, this machine]
+└─ 05ff947 → 472b4b2 → d48a6cd → cc31921 → cac01fd → 7b26251 → 28ac835 → f875fcc → 56fb483   [origin/main, from the other computer]
+```
+
+**Two of the origin commits directly overlap this machine's work** — likely doing some or all of the same cleanup independently:
+- `56fb483 Translate Chinese comments to English in Examples/`
+- `f875fcc MFF hygiene: remove dead Chinese-language leftovers, close out the rest`
+
+**One origin commit renames a directory this machine's commit heavily edited**, which will produce path conflicts on merge/rebase:
+- `cc31921 Rename Controls/MyFbFramework to Controls/Framework` (then `cac01fd`/`472b4b2` move the DLL around inside it again)
+
+Did not attempt an automatic merge or rebase — real risk of silently duplicating or dropping work given the overlapping scope, and no budget left this session to see a conflict resolution through safely. **Before starting new work:**
+1. `git fetch origin` (already done, so `origin/main` is up to date locally as of this note) then `git log 56fb483 --stat` / diff the two overlapping commits above against `2e160bb` to see how much they actually duplicate.
+2. Likely resolution: `git rebase origin/main` (or merge) on this machine, dropping/skipping whatever hunks the other computer's `56fb483`/`f875fcc` already covered, keeping only what's genuinely new here (the dead-code sweep in `2e160bb` — batches 1/2/4/6/7/8 mostly touch files/categories the origin commits' titles don't mention, e.g. `SoundPlayer`, `directshow`/`directsound`, `Com_VBA`/`MDIScintilla`/`AiAgent`/`WebBrowser`, `Tools/` — but verify, don't assume).
+3. Re-home any surviving edits under `Controls/MyFbFramework/...` to `Controls/Framework/...` per the origin rename before pushing.
+4. This machine's full rationale for the translation cleanup (including the ChineseCalendar/gdipClock/gdipGoldFish/Midi deletion chain) and the dead-code sweep is below, unchanged — needed context for judging what's actually new vs. already covered upstream.
 
 <a id="active-sub-project--debugger-reliability-queued-2026-07-11"></a>
 

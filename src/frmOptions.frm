@@ -4131,20 +4131,20 @@ Private Sub frmOptions.cmdFont_Click(ByRef Designer As My.Sys.Object, ByRef Send
 End Sub
 
 Function LinearizeColorComponent(c As Double) As Double
-    If c <= 0.03928 Then Return c / 12.92
+	If c <= 0.03928 Then Return c / 12.92
 	Return ((c + 0.055) / 1.055) ^ 2.4
 End Function
 
 Function GetLuminance(r As UByte, g As UByte, b As UByte) As Double
-    Dim As Double fr = r / 255
-    Dim As Double fg = g / 255
-    Dim As Double fb = b / 255
+	Dim As Double fr = r / 255
+	Dim As Double fg = g / 255
+	Dim As Double fb = b / 255
 
-    fr = LinearizeColorComponent(fr)
-    fg = LinearizeColorComponent(fg)
-    fb = LinearizeColorComponent(fb)
+	fr = LinearizeColorComponent(fr)
+	fg = LinearizeColorComponent(fg)
+	fb = LinearizeColorComponent(fb)
 
-    Return 0.2126 * fr + 0.7152 * fg + 0.0722 * fb
+	Return 0.2126 * fr + 0.7152 * fg + 0.0722 * fb
 End Function
 
 Function GetReadableTextColor(bgColor As Integer) As ULong 'BGR format

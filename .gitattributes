@@ -1,1 +1,4 @@
 *.rc -crlf
+/src/*.bas -crlf
+/src/*.bi -crlf
+/src/*.frm -crlf

@@ -7,7 +7,7 @@ set "ROOT=%~dp0"
 if "%ROOT:~-1%"=="\" set "ROOT=%ROOT:~0,-1%"
 set "FBC64=%ROOT%\Compiler\fbc64.exe"
 set "MFF_DIR=%ROOT%\Controls\Framework\mff"
-set "MFF_DLL=%ROOT%\astoria.dll"
+set "MFF_DLL=%ROOT%\Controls\Framework\framework.dll"
 set "SRC_DIR=%ROOT%\src"
 set "EXE_OUT=%ROOT%\astoria.exe"
 

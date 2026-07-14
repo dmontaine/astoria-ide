@@ -84,7 +84,7 @@ Dim Shared As Boolean bQuitting
 	End If
 	
 	' MyFbFramework must load before any other FB control DLL in Controls\ (shared fbrt runtime).
-	DyLibLoad(App.Path & "\astoria.dll")
+	DyLibLoad(App.Path & "\Controls\Framework\framework.dll")
 	
 	InitDarkMode
 	' SetDarkMode is called from SettingsService's LoadSettings once the
@@ -5259,10 +5259,10 @@ Function GetTypeLink(ByRef TypeName As String, ByVal bMarkDown As Boolean = Fals
 End Function
 
 Function IsMyFbFrameworkLibrary(ByRef Path As UString) As Boolean
-	'' astoria.dll (built from Controls/Framework/mff) now lives at ExePath, next to
-	'' astoria.exe, not inside a "framework"-named folder -- match by filename alone.
+	'' framework.dll (built from Controls/Framework/mff) lives inside Controls/Framework/,
+	'' same folder as its headers/sources -- match both the folder and the filename.
 	Dim As String pathText = LCase(Path)
-	Return Right(pathText, 11) = "astoria.dll"
+	Return InStr(pathText, "framework") > 0 AndAlso Right(pathText, 13) = "framework.dll"
 End Function
 
 Function GetMyFbFrameworkLibrary() As Library Ptr

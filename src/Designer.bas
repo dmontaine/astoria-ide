@@ -1239,7 +1239,7 @@ Namespace My.Sys.Forms
 						'' DyLibLoad fails even though the module is already loaded. Re-load it by its
 						'' real on-disk path (recovered from the live handle) so the refcount stays
 						'' balanced: the Designer destructor DyLibFree's st->Handle, and borrowing the
-						'' handle without a matching DyLibLoad would unload astoria.dll after the first
+						'' handle without a matching DyLibLoad would unload framework.dll after the first
 						'' designer closes and break every project opened afterwards.
 						Dim As WString * (MAX_PATH + 1) modPath
 						If GetModuleFileNameW(Cast(HMODULE, CtlLib->Handle), @modPath, MAX_PATH) > 0 Then

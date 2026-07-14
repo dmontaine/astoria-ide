@@ -4,7 +4,7 @@
 '#  Authors: Xusinboy Bekchanov                                                #
 '###############################################################################
 '#define __USE_GTK3__
-		#cmdline "-x ../../../astoria.dll"
+		#cmdline "-x ../framework.dll"
 
 #ifndef _WIN32_WINNT
 	#define _WIN32_WINNT &h0602

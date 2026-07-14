@@ -4,6 +4,18 @@
 
 ---
 
+## astoria.dll renamed to framework.dll, moved back into Controls/Framework (2026-07-13)
+
+Immediate follow-up to the folder rename above: owner asked for the DLL to become `framework.dll` and move back inside `Controls/Framework/`, "for consistency" — reversing the earlier decision (same session, a few hours prior) to move it to the repo root as `astoria.dll`.
+
+The reversal turned out to be a net simplification, not just a rename. The whole reason the earlier root-move needed `Settings.ini`'s `HeadersFolder`/`SourcesFolder`/`IncludeFolder`/`Lib*Folder` keys rewritten as explicit `./Controls/Framework/...` root-relative paths (and `Lib64` written as `../../framework.dll`, which is what led to the `GetFullPath` `..`-collapsing bug two entries down) was that the DLL's folder and the headers/sources folder had stopped being the same folder. Moving the DLL back into `Controls/Framework/` puts them back together, so all of those keys revert cleanly to their original plain-relative forms — `Lib64=framework.dll`, `HeadersFolder=mff`, `IncludeFolder=./`, etc. — with no path trickery needed at all.
+
+Mechanical reversal, symmetric with the original move: build scripts' `-x` output path back to one level up from `Controls/Framework/mff/` (`-x "../framework.dll"`, was `../../../astoria.dll`); `mff.bi`'s `#cmdline` fallback matched; `Main.bas:87`'s startup `DyLibLoad` points at `App.Path & "\Controls\Framework\framework.dll"`; `IsMyFbFrameworkLibrary` restored its folder-name check (`InStr(pathText, "framework") > 0`) alongside the filename check, since a location-based check is meaningful again now that the DLL isn't sitting bare at `ExePath`; `frmOptions.frm`'s dead `MFFDll` display variable and the two `Examples/Add-In` samples' `DyLibLoad` calls updated to match. Deleted the old root-level `astoria.dll` (`git rm --cached`, it was tracked) and its gitignored `libastoria.dll.a` import-library artifact.
+
+Rebuilt with `FORCE_MFF=1` (needed this time — `Settings.ini` and the build scripts changed, and the staleness check only compares against `mff/` source mtimes, not config). Live-verified: Form Designer renders, Toolbox shows all 5 libraries.
+
+---
+
 ## Controls/MyFbFramework renamed to Controls/Framework (2026-07-13)
 
 Owner request, three explicit renames: `Controls/MyFbFramework/` → `Controls/Framework/`, `MyFbFramework.wiki` → `Framework.wiki`, `MyFbFramework.vfp` → `Framework.vfp`. Surveyed the full blast radius before touching anything, given how the previous two MFF-adjacent tasks this session (the DLL rename, the toolbox picker removal) each turned out deeper than they looked: **100 files outside the folder itself** referenced "MyFbFramework" in some form. Broke it down for the owner and got explicit scope confirmation before starting: yes to updating the ~80 Example/Template project files, yes to renaming the `Examples/MyFbFramework Examples` entry too.

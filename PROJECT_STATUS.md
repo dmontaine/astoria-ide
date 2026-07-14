@@ -1,6 +1,6 @@
 # Astoria-IDE — Project Status & Handoff
 
-**Last updated:** 2026-07-13 (merged: two machines' concurrent work reconciled — see the two Examples-cleanup bullets and the Chinese-comment-translation bullet below for how the overlap was resolved)
+**Last updated:** 2026-07-14 (see Session handoff below for this session's work)
 **Repository:** [github.com/dmontaine/astoria-ide](https://github.com/dmontaine/astoria-ide)
 **Local path:** C:\Users\don\Astoria-IDE
 
@@ -68,6 +68,15 @@ All DR-1 through DR-16 defects are fixed and owner-verified. This retained ancho
 - Documented the standing rule that `Settings/astoria.ini` must be committed and pushed whenever changed so both development computers remain synchronized (`e3f5817`).
 - `main` is synchronized with `origin/main`. No tracked changes remain at handoff.
 - Intentionally untracked local artifacts remain: `.claude/`, `Projects/Project3/Module1.exe`, `Projects/Project3/Temp.bas`, and six `Settings/debug_trace.*.log` files. Review or remove them only if explicitly requested.
+
+## Session handoff (2026-07-14)
+
+- T01 (partial): `src/` indentation standardized to tabs (three files had space or garbled mixed-tab/space indentation) and line endings normalized to CRLF, with scoped `.gitattributes` rules (`/src/*.bas`, `*.bi`, `*.frm -crlf`) so the CRLF actually persists on commit instead of being silently reverted by `core.autocrlf=true` — discovered that gap the hard way (`git add` after a plain conversion produced zero diff). `Controls/` and `Examples/` still need the same pass (`2f445e4`).
+- T16 done: toolbar tooltips added to `cboBuildConfiguration`, the four Designer search boxes (Explorer/Toolbox/Properties/Events), and the code editor's `cboClass`/`cboFunction` dropdowns (`6f933f4`).
+- Tools menu flattened: removed the "Advanced" submenu, Add-Ins and External Tools are now top-level items (`6f933f4`).
+- Backlog reconciled: `T02` (standardize variable naming) and `T13` (design-workspace status bar) dropped by owner decision (`6f933f4`).
+- Other Editors panel removed from Tools > Options > Code Editor — owner decision, since External Tools already covers per-extension launch tools. Removed entirely (panel, list view, buttons, tree node, load/save/ini wiring, the `OtherEditors` dictionary, extension-based double-click auto-launch routing, and `RunOtherEditorTool`), not just hidden. `frmPath.frm` (shared Add/Change dialog also used by Terminal Paths and Help Paths) is untouched (`2f9d513`).
+- `main` is synchronized with `origin/main` as of this handoff.
 
 ## Next ready work
 

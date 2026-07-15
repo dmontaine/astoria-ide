@@ -5,9 +5,11 @@
 	#include once "mff/Label.bi"
 	#include once "mff/TextBox.bi"
 	#include once "mff/Panel.bi"
-	
+	#include once "mff/CheckBox.bi"
+	#include once "mff/ComboBoxEdit.bi"
+
 	Using My.Sys.Forms
-	
+
 	Type frmNewProject Extends Form
 		Declare Static Sub cmdOK_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Sub cmdOK_Click(ByRef Sender As Control)
@@ -19,17 +21,22 @@
 		Declare Sub lvTemplates_ItemActivate(ByRef Sender As ListView, ByVal ItemIndex As Integer)
 		Declare Static Sub lvTemplates_SelectedItemChanged_(ByRef Designer As My.Sys.Object, ByRef Sender As ListView, ByVal ItemIndex As Integer)
 		Declare Sub lvTemplates_SelectedItemChanged(ByRef Sender As ListView, ByVal ItemIndex As Integer)
+		Declare Static Sub chkUseGit_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
+		Declare Sub chkUseGit_Click(ByRef Sender As Control)
 		Declare Static Sub Form_Create_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Sub Form_Create(ByRef Sender As Control)
 		Declare Sub AddProjectTemplateItem(ByRef TemplateName As String)
 		Declare Function GetTemplateMainFile(ByRef TemplateName As String) As UString
+		Declare Sub WriteLicenseFile(ByRef DestFolder As UString, ByRef LicenseName As String, ByRef AuthorName As String)
 		Declare Constructor
 
 		Dim As ListView lvTemplates
 		Dim As CommandButton cmdOK, cmdCancel, cmdOpenExisting
-		Dim As Label lblProjectTemplates, lblProjectName, lblFormName, lblModuleName
-		Dim As TextBox txtProjectName, txtFormName, txtModuleName
-		Dim As Panel pnlBottom, pnlProjectName, pnlFormName, pnlModuleName
+		Dim As Label lblProjectTemplates, lblProjectName, lblFormName, lblModuleName, lblAuthor, lblLicense
+		Dim As TextBox txtProjectName, txtFormName, txtModuleName, txtAuthor, txtGitURL
+		Dim As CheckBox chkUseGit, chkAIFriendly
+		Dim As ComboBoxEdit cboLicense
+		Dim As Panel pnlBottom, pnlProjectName, pnlFormName, pnlModuleName, pnlAuthor, pnlLicense, pnlGit, pnlAIFriendly
 		Dim As WStringList TemplateNames
 		Dim As UString SelectedTemplate, SelectedFolder, SelectedProjectFile
 		Dim As Boolean OpenExistingRequested

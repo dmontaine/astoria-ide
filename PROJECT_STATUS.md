@@ -1,6 +1,6 @@
 # Astoria-IDE — Project Status & Handoff
 
-**Last updated:** 2026-07-15 (see "Session handoff (2026-07-15) — Dark mode fully removed" below; supersedes the Form Designer context-menu submenu bug, which is now moot)
+**Last updated:** 2026-07-15 (see "Session handoff (2026-07-15) — New Project dialog: Author/License/Git/AI-friendly fields" below for this session's work)
 **Repository:** [github.com/dmontaine/astoria-ide](https://github.com/dmontaine/astoria-ide)
 **Local path:** C:\Users\don\Astoria-IDE
 
@@ -138,7 +138,26 @@ Owner decision: **remove dark mode entirely, for stability.** The trigger was a 
 - `src/EditControl2.bi` is an orphaned, non-`#include`d duplicate (listed only in `AstoriaIDE.vfp`) and still contains a stale `SetDark` decl — it does not compile, so it is inert; left untouched as pre-existing dead file.
 - `SysUtils.bas` keeps `WM_UAHDRAWMENU`/`WM_UAHDRAWMENUITEM` entries in its numeric message-name debug table (generic, not dark infrastructure).
 
-**Not committed yet** — awaiting owner live verification (build compiles clean and launches; owner should confirm the app looks/behaves correctly in normal use and that Tools ▸ Options ▸ General no longer shows a Dark Mode checkbox).
+Owner-verified (build compiles clean, launches, no Dark Mode checkbox in Tools ▸ Options ▸ General, app behaves correctly).
+
+## Session handoff (2026-07-15) — New Project dialog: Author/License/Git/AI-friendly fields
+
+Owner-requested: expand the New Project dialog (`src/frmNewProject.frm`/`.bi`) with four new fields — Use Git (checkbox), Git URL (entry field, same line as Use Git), Author (defaults from Options ▸ Personal Information ▸ Name), a License dropdown, and Make project AI friendly (checkbox). Owner-verified live and confirmed "looks good."
+
+**Scope decisions made up front** (owner chose, before implementation): Git URL is stored as project metadata only — **no `git` commands are ever run** by Astoria itself. License selection writes a real `LICENSE` file into the new project folder. "Make project AI friendly" is captured as a flag only for now — **no file is generated yet**; what it should produce is explicitly deferred to a later session ("we'll wire everything up needed for the git and ai project entries later").
+
+**What was built:**
+- Dialog expanded 480×290 → 480×418 to fit four new stacked rows, inserted after the existing Primary Module Name row and before the OK/Cancel/Open Existing button row: **Author** (TextBox, pre-filled from `*PersonalName` in `Form_Create`, editable per-project), **License** (`ComboBoxEdit` with `Style = ComboBoxEditStyle.cbDropDownList` so it's pick-only, not free-text — options `GPL, LGPL, Apache, MIT, Mozilla, BSD, Freeware, Proprietary, Other`, defaults to GPL), **Use Git + Git URL** (checkbox + TextBox on one row, TextBox `Enabled` gated by the checkbox via a new `chkUseGit_Click` handler — mirrors the existing `chkLicenseOther`/`txtPersonalLicenseOther` pattern in `frmOptions.frm`), **Make project AI friendly** (standalone checkbox).
+- `TabIndex` renumbered to a clean contiguous 0–25 across the whole form (verified via grep + sort — the project's established convention, see the 2026-07-14 New Project dialog history above and its `SelectNextControl` Tab-cycle rationale).
+- On OK, after the existing project-folder/`.vfp` creation logic completes (unchanged), a new block appends `Author=`, `License=`, `UseGit=`, `GitURL=`, `AIFriendly=` as plain `Key="value"` lines to the generated `.vfp`, in the same flat key=value format the template already uses for `CompanyName=`/`ProjectDescription=`/etc. Confirmed safe: `AddProject`'s `.vfp` key parser (`Main.bas`, ~line 974) is a long `If/ElseIf Parameter = "..."` chain with no matching branch for these new keys and no final catch-all `Else` — an unrecognized key is simply skipped, exactly like any other key the loader doesn't yet know about. Nothing reads these new keys back yet (deliberately out of scope — no Project Properties UI change was requested or made).
+- New `WriteLicenseFile` sub (`frmNewProject.frm`) writes a `LICENSE` file for every option except "Other" (which writes nothing, matching the existing free-text "Other" convention already used for the license checkboxes in Options): full text embedded for **MIT** and **BSD** (both short, standard, safe to vendor verbatim); the license's own official short-form notice + canonical URL for **GPL/LGPL/Apache/Mozilla** (the usual convention — their full legal text runs to tens of KB and is meant to be fetched from the authoritative source, not duplicated per-project); a short plain-language notice for **Freeware/Proprietary**.
+- `frmNewProject.bi`: added `#include once "mff/CheckBox.bi"` and `"mff/ComboBoxEdit.bi"`, new control `Dim`s, and the `WriteLicenseFile`/`chkUseGit_Click` declarations.
+
+**One implementation pitfall hit and fixed:** FreeBASIC's built-in `IIf` doesn't support `String`-typed return values cleanly (`error 24: Invalid data types`) — every `IIf(cond, "true", "false")`-shaped expression (used for the boolean-to-string metadata lines, and originally for a `HolderName` fallback in `WriteLicenseFile`) had to be rewritten as an explicit `If/Else` assignment instead. Worth remembering for any future boolean→string conversion in this codebase — this framework's own code never returns a `String` from `IIf` either, only numeric/enum values, which is presumably why this hadn't been hit before.
+
+**Explicitly NOT done this session (owner-deferred to later):** no `git init`/`git remote` execution, no LICENSE-file-content editing UI, no Project Properties display of the new fields, no CLAUDE.md/AI-scaffold generation. These are open follow-ups — see Open Items below.
+
+Build/verify: framework unchanged (IDE-only source), rebuilt via `Compile.bat` (no `FORCE_MFF=1` needed), 0 errors, owner live-verified in the running IDE (dialog layout, tab order, Author pre-fill, License dropdown lock, Git URL enable/disable gating).
 
 ## Next ready work
 
@@ -150,6 +169,7 @@ For the reasoning, exact code locations, and prior hot-path findings, see [HISTO
 
 ### Immediate
 
+- [ ] **New Project dialog: wire up Git and AI-friendly behavior (2026-07-15, owner-deferred).** The UI fields (Use Git/Git URL, Make project AI friendly) exist and their values are captured/persisted to the new project's `.vfp` (see the session handoff above), but neither field drives any actual behavior yet — that's intentional, explicitly deferred by the owner ("we'll wire everything up needed for the git and ai project entries later"). When picked up: **Git** — decide whether checking "Use Git" should run `git init`/`git remote add origin <url>` (no existing git integration anywhere in this codebase to be consistent with — this would be new); **AI friendly** — decide what it should actually generate (a `CLAUDE.md` scaffold was the leading idea floated but not committed to) using the already-captured Author/License values as context.
 - [x] **Form Designer context menu (`mnuDesigner`) format submenus — RESOLVED by removing dark mode (2026-07-15).** The empty-flyout symptom (Align worked, the other four format submenus showed an arrow but an empty flyout) occurred **only in dark mode**. Instrumentation this session proved the menu *data* was fully correct — every submenu HMENU was populated and correctly linked into `mnuDesigner` (right position, right `hSubMenu`, right item count) — so the fault was purely in the dark-mode owner-draw paint path, not the FreeBASIC menu structure or the build-order theories chased earlier. With dark mode removed, these context-menu submenus now render natively and correctly. No context-menu code change was needed beyond the dark-mode removal. (The Attempt A/B/C build-time rewrites of the `mnuDesigner` construction from the prior session remain in place; they're harmless and the pre-built-before-attach shape is fine.)
 
 ### Deferred enhancements

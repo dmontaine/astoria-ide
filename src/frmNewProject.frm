@@ -12,18 +12,19 @@
 			.MaximizeBox = False
 			.MinimizeBox = False
 			.OnCreate = @Form_Create_
-			.SetBounds 0, 0, 480, 290
+			.SetBounds 0, 0, 480, 418
 			.StartPosition = FormStartPosition.CenterParent
 		End With
-		' pnlBottom — footer: Project Name / Primary Form Name / Primary Module Name rows,
-		' stacked above the OK/Cancel/Open Existing button row. Everything the old two-dialog
-		' flow asked for across separate popups now lives in this one dialog.
+		' pnlBottom — footer: Project Name / Primary Form Name / Primary Module Name /
+		' Author / License / Use Git+URL / AI Friendly rows, stacked above the OK/Cancel/
+		' Open Existing button row. Everything the old two-dialog flow asked for across
+		' separate popups now lives in this one dialog.
 		With pnlBottom
 			.Name = "pnlBottom"
 			.Text = ""
 			.Align = DockStyle.alBottom
-			.TabIndex = 11
-			.SetBounds 0, 0, 464, 132
+			.TabIndex = 22
+			.SetBounds 0, 0, 464, 260
 			.Parent = @This
 		End With
 		' pnlProjectName — row 1
@@ -125,6 +126,134 @@
 			.SetBounds 150, 0, 314, 32
 			.Parent = @pnlModuleName
 		End With
+		' pnlAuthor — row 4, Author (defaults from Options > Personal Information > Name)
+		With pnlAuthor
+			.Name = "pnlAuthor"
+			.Text = ""
+			.Align = DockStyle.alTop
+			.TabIndex = 11
+			.ExtraMargins.Left = 10
+			.ExtraMargins.Right = 10
+			.SetBounds 0, 32, 464, 32
+			.Parent = @pnlBottom
+		End With
+		' lblAuthor
+		With lblAuthor
+			.Name = "lblAuthor"
+			.Text = ("Author") & ":"
+			.Align = DockStyle.alLeft
+			.TabIndex = 12
+			.ExtraMargins.Top = 8
+			.ExtraMargins.Bottom = 8
+			.SetBounds 0, 0, 150, 32
+			.Parent = @pnlAuthor
+		End With
+		' txtAuthor
+		With txtAuthor
+			.Name = "txtAuthor"
+			.Text = ""
+			.Align = DockStyle.alClient
+			.ExtraMargins.Top = 5
+			.ExtraMargins.Bottom = 5
+			.TabIndex = 13
+			.SetBounds 150, 0, 314, 32
+			.Parent = @pnlAuthor
+		End With
+		' pnlLicense — row 5
+		With pnlLicense
+			.Name = "pnlLicense"
+			.Text = ""
+			.Align = DockStyle.alTop
+			.TabIndex = 14
+			.ExtraMargins.Left = 10
+			.ExtraMargins.Right = 10
+			.SetBounds 0, 64, 464, 32
+			.Parent = @pnlBottom
+		End With
+		' lblLicense
+		With lblLicense
+			.Name = "lblLicense"
+			.Text = ("License") & ":"
+			.Align = DockStyle.alLeft
+			.TabIndex = 15
+			.ExtraMargins.Top = 8
+			.ExtraMargins.Bottom = 8
+			.SetBounds 0, 0, 150, 32
+			.Parent = @pnlLicense
+		End With
+		' cboLicense — fixed option list, populated in Form_Create
+		With cboLicense
+			.Name = "cboLicense"
+			.Text = ""
+			.Style = ComboBoxEditStyle.cbDropDownList
+			.Align = DockStyle.alClient
+			.ExtraMargins.Top = 5
+			.ExtraMargins.Bottom = 5
+			.TabIndex = 16
+			.SetBounds 150, 0, 314, 32
+			.Designer = @This
+			.Parent = @pnlLicense
+		End With
+		' pnlGit — row 6, Use Git checkbox gates the Git URL field on the same line
+		' (matching the existing chkLicenseOther/txtPersonalLicenseOther pattern in Options)
+		With pnlGit
+			.Name = "pnlGit"
+			.Text = ""
+			.Align = DockStyle.alTop
+			.TabIndex = 17
+			.ExtraMargins.Left = 10
+			.ExtraMargins.Right = 10
+			.SetBounds 0, 96, 464, 32
+			.Parent = @pnlBottom
+		End With
+		' chkUseGit
+		With chkUseGit
+			.Name = "chkUseGit"
+			.Text = ("Use Git") & ":"
+			.Align = DockStyle.alLeft
+			.TabIndex = 18
+			.Constraints.Height = 21
+			.AutoSize = True
+			.SetBounds 0, 6, 90, 21
+			.Designer = @This
+			.OnClick = @chkUseGit_Click_
+			.Parent = @pnlGit
+		End With
+		' txtGitURL — enabled only while Use Git is checked
+		With txtGitURL
+			.Name = "txtGitURL"
+			.Text = ""
+			.Align = DockStyle.alClient
+			.ExtraMargins.Top = 5
+			.ExtraMargins.Bottom = 5
+			.TabIndex = 19
+			.SetBounds 100, 0, 364, 32
+			.Enabled = False
+			.Parent = @pnlGit
+		End With
+		' pnlAIFriendly — row 7
+		With pnlAIFriendly
+			.Name = "pnlAIFriendly"
+			.Text = ""
+			.Align = DockStyle.alTop
+			.TabIndex = 20
+			.ExtraMargins.Left = 10
+			.ExtraMargins.Right = 10
+			.SetBounds 0, 128, 464, 32
+			.Parent = @pnlBottom
+		End With
+		' chkAIFriendly
+		With chkAIFriendly
+			.Name = "chkAIFriendly"
+			.Text = ("Make project AI friendly")
+			.Align = DockStyle.alLeft
+			.TabIndex = 21
+			.Constraints.Height = 21
+			.AutoSize = True
+			.SetBounds 0, 6, 220, 21
+			.Designer = @This
+			.Parent = @pnlAIFriendly
+		End With
 		' cmdCancel
 		With cmdCancel
 			.Name = "cmdCancel"
@@ -133,8 +262,8 @@
 			.ExtraMargins.Bottom = 8
 			.ExtraMargins.Top = 4
 			.ExtraMargins.Right = 10
-			.TabIndex = 14
-			.SetBounds 527, 100, 88, 20
+			.TabIndex = 25
+			.SetBounds 527, 228, 88, 20
 			.Designer = @This
 			.OnClick = @cmdCancel_Click_
 			.Parent = @pnlBottom
@@ -147,8 +276,8 @@
 			.ExtraMargins.Top = 4
 			.ExtraMargins.Right = 10
 			.ExtraMargins.Bottom = 8
-			.TabIndex = 13
-			.SetBounds 430, 100, 88, 20
+			.TabIndex = 24
+			.SetBounds 430, 228, 88, 20
 			.Default = True
 			.Designer = @This
 			.OnClick = @cmdOK_Click_
@@ -162,8 +291,8 @@
 			.ExtraMargins.Top = 4
 			.ExtraMargins.Left = 10
 			.ExtraMargins.Bottom = 8
-			.TabIndex = 12
-			.SetBounds 10, 100, 160, 20
+			.TabIndex = 23
+			.SetBounds 10, 228, 160, 20
 			.Designer = @This
 			.OnClick = @cmdOpenExisting_Click_
 			.Parent = @pnlBottom
@@ -390,6 +519,31 @@ Private Sub frmNewProject.cmdOK_Click(ByRef Sender As Control)
 		WDeAllocate(localTemplatePtr)
 		WDeAllocate(localProjectFilePtr)
 	End If
+	'' New-project metadata (Author/License/Git). Appended as plain key=value lines in
+	'' the same flat format already used by every other .vfp key (CompanyName, LegalCopyright,
+	'' etc.) -- AddProject's key parser (Main.bas) is an If/ElseIf chain with no matching
+	'' branch for these new keys, so they're safely ignored by today's project loader,
+	'' the same as any other key it doesn't recognize. Git URL is stored for reference only
+	'' -- no git commands are run. "Make project AI friendly" is captured as a flag only for
+	'' now; what it should actually generate is an open decision for a later session.
+	Dim As String chosenAuthor = Trim(txtAuthor.Text)
+	Dim As String chosenLicense = cboLicense.Text
+	Dim As Boolean useGit = chkUseGit.Checked
+	Dim As String gitURL = Trim(txtGitURL.Text)
+	Dim As String useGitText = "false"
+	If useGit Then useGitText = "true"
+	Dim As String aiFriendlyText = "false"
+	If chkAIFriendly.Checked Then aiFriendlyText = "true"
+	Dim As Integer FnMeta = FreeFile_
+	If Open(localProjectFile For Append Encoding "utf-8" As #FnMeta) = 0 Then
+		Print #FnMeta, "Author=" & Chr(34) & chosenAuthor & Chr(34)
+		Print #FnMeta, "License=" & Chr(34) & chosenLicense & Chr(34)
+		Print #FnMeta, "UseGit=" & useGitText
+		Print #FnMeta, "GitURL=" & Chr(34) & gitURL & Chr(34)
+		Print #FnMeta, "AIFriendly=" & aiFriendlyText
+		CloseFile_(FnMeta)
+	End If
+	WriteLicenseFile(localFolder, chosenLicense, chosenAuthor)
 	SelectedTemplate = localTemplate
 	SelectedFolder = localFolder
 	SelectedProjectFile = localProjectFile
@@ -476,6 +630,31 @@ Private Sub frmNewProject.Form_Create(ByRef Sender As Control)
 	txtFormName.Text = ""
 	txtModuleName.Enabled = False
 	txtModuleName.Text = ""
+	'' Author defaults from Options > Personal Information > Name, but stays editable so
+	'' a one-off project can credit someone else without touching the global setting.
+	txtAuthor.Text = *PersonalName
+	cboLicense.Clear
+	cboLicense.AddItem ("GPL")
+	cboLicense.AddItem ("LGPL")
+	cboLicense.AddItem ("Apache")
+	cboLicense.AddItem ("MIT")
+	cboLicense.AddItem ("Mozilla")
+	cboLicense.AddItem ("BSD")
+	cboLicense.AddItem ("Freeware")
+	cboLicense.AddItem ("Proprietary")
+	cboLicense.AddItem ("Other")
+	cboLicense.ItemIndex = 0
+	chkUseGit.Checked = False
+	txtGitURL.Enabled = False
+	txtGitURL.Text = ""
+	chkAIFriendly.Checked = False
+End Sub
+
+Private Sub frmNewProject.chkUseGit_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
+	(*Cast(frmNewProject Ptr, Sender.Designer)).chkUseGit_Click(Sender)
+End Sub
+Private Sub frmNewProject.chkUseGit_Click(ByRef Sender As Control)
+	txtGitURL.Enabled = chkUseGit.Checked
 End Sub
 
 Private Sub frmNewProject.AddProjectTemplateItem(ByRef TemplateName As String)
@@ -505,3 +684,74 @@ Private Function frmNewProject.GetTemplateMainFile(ByRef TemplateName As String)
 	End If
 	Return TemplateMainFile
 End Function
+
+'' Writes a LICENSE file into the new project's folder for the chosen dropdown option.
+'' GPL/LGPL/Apache/Mozilla get the license's own standard short-form notice plus a link to
+'' the canonical full text (the usual convention for those -- the full legal text runs to
+'' tens of KB and is meant to be fetched from the official source, not vendored per-project).
+'' MIT and BSD get their full text written out since both are short, standard, and safe to
+'' embed verbatim. Freeware/Proprietary get a short plain-language notice. "Other" writes
+'' nothing -- same "no generated boilerplate" convention already used by the free-text
+'' "Other" license field in Options (chkLicenseOther/txtPersonalLicenseOther).
+Private Sub frmNewProject.WriteLicenseFile(ByRef DestFolder As UString, ByRef LicenseName As String, ByRef AuthorName As String)
+	Dim As String CopyrightYear = Format(Now, "yyyy")
+	Dim As String HolderName = Trim(AuthorName)
+	If HolderName = "" Then HolderName = "the author"
+	Dim As String Body
+	Select Case LicenseName
+	Case "GPL"
+		Body = "GNU General Public License v3.0" & WChr(13,10) & WChr(13,10) & _
+			"Copyright (C) " & CopyrightYear & " " & HolderName & WChr(13,10) & WChr(13,10) & _
+			"This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version." & WChr(13,10) & WChr(13,10) & _
+			"This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details." & WChr(13,10) & WChr(13,10) & _
+			"You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>."
+	Case "LGPL"
+		Body = "GNU Lesser General Public License v3.0" & WChr(13,10) & WChr(13,10) & _
+			"Copyright (C) " & CopyrightYear & " " & HolderName & WChr(13,10) & WChr(13,10) & _
+			"This library is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version." & WChr(13,10) & WChr(13,10) & _
+			"This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details." & WChr(13,10) & WChr(13,10) & _
+			"You should have received a copy of the GNU Lesser General Public License along with this library. If not, see <https://www.gnu.org/licenses/>."
+	Case "Apache"
+		Body = "Apache License, Version 2.0" & WChr(13,10) & WChr(13,10) & _
+			"Copyright " & CopyrightYear & " " & HolderName & WChr(13,10) & WChr(13,10) & _
+			!"Licensed under the Apache License, Version 2.0 (the \"License\"); you may not use this file except in compliance with the License. You may obtain a copy of the License at" & WChr(13,10) & WChr(13,10) & _
+			"    http://www.apache.org/licenses/LICENSE-2.0" & WChr(13,10) & WChr(13,10) & _
+			!"Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License."
+	Case "MIT"
+		Body = "MIT License" & WChr(13,10) & WChr(13,10) & _
+			"Copyright (c) " & CopyrightYear & " " & HolderName & WChr(13,10) & WChr(13,10) & _
+			!"Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:" & WChr(13,10) & WChr(13,10) & _
+			"The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software." & WChr(13,10) & WChr(13,10) & _
+			!"THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
+	Case "Mozilla"
+		Body = "Mozilla Public License, v. 2.0" & WChr(13,10) & WChr(13,10) & _
+			"Copyright " & CopyrightYear & " " & HolderName & WChr(13,10) & WChr(13,10) & _
+			"This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/."
+	Case "BSD"
+		Body = "BSD 3-Clause License" & WChr(13,10) & WChr(13,10) & _
+			"Copyright (c) " & CopyrightYear & ", " & HolderName & WChr(13,10) & _
+			"All rights reserved." & WChr(13,10) & WChr(13,10) & _
+			"Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:" & WChr(13,10) & WChr(13,10) & _
+			"1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer." & WChr(13,10) & WChr(13,10) & _
+			"2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution." & WChr(13,10) & WChr(13,10) & _
+			"3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission." & WChr(13,10) & WChr(13,10) & _
+			!"THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
+	Case "Freeware"
+		Body = "Freeware" & WChr(13,10) & WChr(13,10) & _
+			"Copyright (c) " & CopyrightYear & " " & HolderName & WChr(13,10) & WChr(13,10) & _
+			!"This software is provided free of charge for personal and commercial use. Redistribution is permitted provided this notice is preserved. The software is provided \"AS IS\", without warranty of any kind, express or implied."
+	Case "Proprietary"
+		Body = "Proprietary" & WChr(13,10) & WChr(13,10) & _
+			"Copyright (c) " & CopyrightYear & " " & HolderName & WChr(13,10) & _
+			"All rights reserved." & WChr(13,10) & WChr(13,10) & _
+			"This software and associated documentation are proprietary and confidential. Unauthorized copying, modification, distribution, or use of this software, via any medium, is strictly prohibited without the express written permission of the copyright holder."
+	Case Else
+		'' "Other" -- no generated boilerplate; the owner supplies their own terms.
+		Exit Sub
+	End Select
+	Dim As Integer Fn = FreeFile_
+	If Open(DestFolder & WindowsSlash & "LICENSE" For Output Encoding "utf-8" As #Fn) = 0 Then
+		Print #Fn, Body
+		CloseFile_(Fn)
+	End If
+End Sub

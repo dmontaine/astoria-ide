@@ -127,7 +127,7 @@ For the reasoning, exact code locations, and prior hot-path findings, see [HISTO
 
 ### Immediate
 
-- [ ] **Form Designer context menu (`mnuDesigner`) not showing its new items live.** See "Session handoff (2026-07-14) — Context menu parity with toolbars" above for full detail and a concrete next-step checklist. Code pane side is done and owner-verified; only the Designer side needs debugging.
+- [~] **Form Designer context menu (`mnuDesigner`) not showing its new items live — fix applied 2026-07-15, awaiting owner verification.** Root cause found: the five new submenu-header items (`Align`, `MakeSameSize`, `HorizontalSpacing`, `VerticalSpacing`, `CenterInParent`) were added with a `@mClick` click handler (4-arg `Menu.Add`); a submenu header must take no handler (3-arg `Add`, as in the working `mnuCode` "Toggle" header, `TabWindow.bas:10279`). A header carrying a handler stopped its whole submenu from rendering — which is why the leaf items (`Duplicate`, `SizeToGrid`) still appeared but the format submenus did not. Dropped `@mClick` from the five headers in `Designer.bas` (kept it on the leaf `SizeToGrid`). IDE-only change, rebuilt clean. If any submenu still doesn't render, next look at whether `ChangeFirstMenuItem` runs before the popup on the exact right-click path (call sites `Designer.bas:1687`, `:2324`, `:2534`) and at `MenuItem.Visible`'s early-exit-if-unchanged (`Menus.bas:709`).
 
 ### Deferred enhancements
 

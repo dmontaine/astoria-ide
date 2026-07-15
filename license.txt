@@ -1,7 +1,9 @@
-﻿VisualFBEditor - Visual Code & Form Editor for the FreeBASIC Compiler
-Copyright (C) 2018 Xusinboy Bekchanov
+﻿Astoria IDE for Free Basic
+Copyright (C) 2026 Donald Montaine
 
-The VisualFBEditor is licensed under the GNU GPLv3 or later.
+Derived from VisualFBEditor, Copyright (C) 2018 Xusinboy Bekchanov
+
+Astoria IDE is licensed under the GNU GPLv3 or later.
 
 GNU GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007

@@ -12,6 +12,8 @@ mff32*.dll
 VisualFBEditor.wiki
 docompile.bat
 Logs/
+# IDE-generated per-build scratch file (written when compiling/previewing a form)
+Temp.bas
 src/Temp.bas
 src/Temp.rc
 src/compile_out.txt

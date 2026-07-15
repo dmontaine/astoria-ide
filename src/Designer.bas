@@ -2955,10 +2955,24 @@ mnuDesigner.Add(("Duplicate") & !"\t Ctrl+D", "", "Duplicate", @mClick)
 ' above only recognizes its own fixed, small command set and doesn't know
 ' these at all, unlike Duplicate which already proved @mClick works from here).
 mnuDesigner.Add("-", "", "FormatSeparator1")
-' Submenu-header items take no click handler (3-arg Add) - matching the working
-' mnuCode "Toggle" convention. Passing @mClick on a header (4-arg) stopped the
-' whole submenu from rendering in the Designer context menu.
-Var miDesignerAlign = mnuDesigner.Add(("Align"), "Align", "Align")
+' Each format submenu is built FULLY (header + all children) before it is
+' attached to mnuDesigner, instead of adding an empty header first and filling
+' it afterward. Root cause of the earlier "arrow but empty flyout" bug:
+' MenuItem.Add's leaf->submenu conversion (Menus.bas ~773) re-links an
+' already-attached header into its owner's real HMENU via a POSITION-based
+' SetMenuItemInfo(Owner->Handle, VisibleMenuIndex, ...) call - correct only for
+' the first header converted this way, since VisibleMenuIndex is computed at
+' conversion time and any earlier submenu's conversion shifts things enough to
+' break it for the rest. Deferring the fill to runtime (mirroring Show Panel)
+' didn't help, because Show Panel's difference isn't timing - it's that it's
+' the ONLY submenu built this way; a second one hits the same bug regardless
+' of when it's populated.
+' Pre-building each header's children before mnuDesigner.Add(header) sidesteps
+' the conversion path entirely: the header already carries a valid submenu
+' handle (MIIM_SUBMENU/hSubMenu set) when it's inserted, so it's a single,
+' ordinary InsertMenuItem - no later position-based update, no ordering bug.
+Var miDesignerAlign = _New(MenuItem(("Align"), "Align"))
+miDesignerAlign->Name = "Align"
 miDesignerAlign->Add(("Lefts") & HK("AlignLefts"), "AlignLefts", "AlignLefts", @mClick)
 miDesignerAlign->Add(("Centers") & HK("AlignCenters"), "AlignCenters", "AlignCenters", @mClick)
 miDesignerAlign->Add(("Rights") & HK("AlignRights"), "AlignRights", "AlignRights", @mClick)
@@ -2968,24 +2982,39 @@ miDesignerAlign->Add(("Middles") & HK("AlignMiddles"), "AlignMiddles", "AlignMid
 miDesignerAlign->Add(("Bottoms") & HK("AlignBottoms"), "AlignBottoms", "AlignBottoms", @mClick)
 miDesignerAlign->Add("-")
 miDesignerAlign->Add(("to Grid") & HK("AlignToGrid"), "AlignToGrid", "AlignToGrid", @mClick)
-Var miDesignerMakeSameSize = mnuDesigner.Add(("Make Same Size"), "MakeSameSize", "MakeSameSize")
+mnuDesigner.Add(miDesignerAlign)
+
+Var miDesignerMakeSameSize = _New(MenuItem(("Make Same Size"), "MakeSameSize"))
+miDesignerMakeSameSize->Name = "MakeSameSize"
 miDesignerMakeSameSize->Add(("Width") & HK("MakeSameSizeWidth"), "MakeSameSizeWidth", "MakeSameSizeWidth", @mClick)
 miDesignerMakeSameSize->Add(("Height") & HK("MakeSameSizeHeight"), "MakeSameSizeHeight", "MakeSameSizeHeight", @mClick)
 miDesignerMakeSameSize->Add(("Both") & HK("MakeSameSizeBoth"), "MakeSameSizeBoth", "MakeSameSizeBoth", @mClick)
+mnuDesigner.Add(miDesignerMakeSameSize)
+
 mnuDesigner.Add(("Size to Grid") & HK("SizeToGrid"), "SizeToGrid", "SizeToGrid", @mClick)
-Var miDesignerHSpacing = mnuDesigner.Add(("Horizontal Spacing"), "HorizontalSpacing", "HorizontalSpacing")
+
+Var miDesignerHSpacing = _New(MenuItem(("Horizontal Spacing"), "HorizontalSpacing"))
+miDesignerHSpacing->Name = "HorizontalSpacing"
 miDesignerHSpacing->Add(("Make Equal") & HK("HorizontalSpacingMakeEqual"), "HorizontalSpacingMakeEqual", "HorizontalSpacingMakeEqual", @mClick)
 miDesignerHSpacing->Add(("Increase") & HK("HorizontalSpacingIncrease"), "HorizontalSpacingIncrease", "HorizontalSpacingIncrease", @mClick)
 miDesignerHSpacing->Add(("Decrease") & HK("HorizontalSpacingDecrease"), "HorizontalSpacingDecrease", "HorizontalSpacingDecrease", @mClick)
 miDesignerHSpacing->Add(("Remove") & HK("HorizontalSpacingRemove"), "HorizontalSpacingRemove", "HorizontalSpacingRemove", @mClick)
-Var miDesignerVSpacing = mnuDesigner.Add(("Vertical Spacing"), "VerticalSpacing", "VerticalSpacing")
+mnuDesigner.Add(miDesignerHSpacing)
+
+Var miDesignerVSpacing = _New(MenuItem(("Vertical Spacing"), "VerticalSpacing"))
+miDesignerVSpacing->Name = "VerticalSpacing"
 miDesignerVSpacing->Add(("Make Equal") & HK("VerticalSpacingMakeEqual"), "VerticalSpacingMakeEqual", "VerticalSpacingMakeEqual", @mClick)
 miDesignerVSpacing->Add(("Increase") & HK("VerticalSpacingIncrease"), "VerticalSpacingIncrease", "VerticalSpacingIncrease", @mClick)
 miDesignerVSpacing->Add(("Decrease") & HK("VerticalSpacingDecrease"), "VerticalSpacingDecrease", "VerticalSpacingDecrease", @mClick)
 miDesignerVSpacing->Add(("Remove") & HK("VerticalSpacingRemove"), "VerticalSpacingRemove", "VerticalSpacingRemove", @mClick)
-Var miDesignerCenterInParent = mnuDesigner.Add(("Center in Parent"), "CenterInParent", "CenterInParent")
+mnuDesigner.Add(miDesignerVSpacing)
+
+Var miDesignerCenterInParent = _New(MenuItem(("Center in Parent"), "CenterInParent"))
+miDesignerCenterInParent->Name = "CenterInParent"
 miDesignerCenterInParent->Add(("Horizontally") & HK("CenterInParentHorizontally"), "CenterInParentHorizontally", "CenterInParentHorizontally", @mClick)
 miDesignerCenterInParent->Add(("Vertically") & HK("CenterInParentVertically"), "CenterInParentVertically", "CenterInParentVertically", @mClick)
+mnuDesigner.Add(miDesignerCenterInParent)
+
 mnuDesigner.Add("-", "", "FormatSeparator2")
 mnuDesigner.Add("-", "", "OrderSeparator")
 mnuDesigner.Add(("Bring to Front"), "BringToFront", "BringToFront", @PopupClick)

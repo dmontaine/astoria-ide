@@ -249,7 +249,6 @@ Namespace My.Sys.Forms
 			Declare Sub EditControlShow(ByVal tRow As Integer, ByVal tCol As Integer)
 			Declare Sub DrawRect(tDc As HDC, R As Rect, FillColor As Integer = -1, tSelctionRow As Integer = -1, tSelctionCol As Integer = -1)
 		Declare Virtual Sub ProcessMessage(ByRef Message As Message)
-			Declare Virtual Sub SetDark(Value As Boolean)
 			hHeader As HWND
 			headerTextColor As COLORREF
 	Protected:

@@ -162,7 +162,6 @@ Namespace My.Sys.Forms
 		Declare Static Sub GraphicChange(ByRef Sender As My.Sys.Drawing.GraphicType, Image As Any Ptr, ImageType As Integer)    ' Handle to the popup menu
 			Declare Static Sub WndProc(ByRef Message As Message)
 			Declare Static Sub HandleIsAllocated(ByRef Sender As My.Sys.Forms.Control)
-		FReBarDarkMode As Boolean
 	Protected:
 		Declare Virtual Sub ProcessMessage(ByRef Message As Message)
 	Public:

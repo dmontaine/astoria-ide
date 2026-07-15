@@ -131,7 +131,7 @@ Namespace My.Sys.Forms
 						Else
 							FillRect lpdis->hDC, @lpdis->rcItem, Brush.Handle ' GetSysColorBrush(COLOR_WINDOW)
 							SetBkColor lpdis->hDC, Brush.Color 'GetSysColor(COLOR_WINDOW)                    'Set text Background
-							SetTextColor lpdis->hDC, IIf(g_darkModeEnabled, darkTextColor, GetSysColor(COLOR_WINDOWTEXT))                'Set text color
+							SetTextColor lpdis->hDC, GetSysColor(COLOR_WINDOWTEXT)                'Set text color
 							If CInt(ItemIndex = -1) AndAlso CInt(lpdis->itemID = 0) AndAlso CInt(Focused) Then
 								rc.Left   = lpdis->rcItem.Left + ScaleX(16) : rc.Right = lpdis->rcItem.Right              '  Set cordinates
 								rc.Top    = lpdis->rcItem.Top

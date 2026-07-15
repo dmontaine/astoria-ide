@@ -582,19 +582,6 @@ Namespace My.Sys.Forms
 		Private Sub ReBar.HandleIsAllocated(ByRef Sender As My.Sys.Forms.Control)
 			If Sender.Child Then
 				With QReBar(Sender.Child)
-					If g_darkModeSupported AndAlso g_darkModeEnabled AndAlso .FDefaultBackColor = .FBackColor Then
-						'SetWindowTheme(.FHandle, "DarkModeNavbar", nullptr)
-						.Brush.Handle = hbrBkgnd
-						SendMessageW(.FHandle, WM_THEMECHANGED, 0, 0)
-						SendMessage(.FHandle, RB_SETTEXTCOLOR, 0, Cast(LPARAM, darkTextColor))
-						SendMessage(.FHandle, RB_SETBKCOLOR, 0, Cast(LPARAM, darkBkColor))
-						Dim As COLORSCHEME csch
-						csch.dwSize = SizeOf(COLORSCHEME)
-						csch.clrBtnShadow = darkBkColor
-						csch.clrBtnHighlight = darkHlBkColor
-						SendMessage(.FHandle, RB_SETCOLORSCHEME, 0, Cast(LPARAM, @csch))
-						.FDarkMode = True
-					End If
 					.UpdateReBar()
 					For i As Integer = 0 To .Bands.Count - 1
 						'.Bands.Item(i)->Child = .Bands.Item(i)->Child
@@ -610,18 +597,6 @@ Namespace My.Sys.Forms
 	Private Sub ReBar.ProcessMessage(ByRef Message As Message)
 			Select Case Message.Msg
 			Case WM_WINDOWPOSCHANGING
-				If g_darkModeSupported AndAlso g_darkModeEnabled AndAlso FDefaultBackColor = FBackColor Then
-					Brush.Handle = hbrBkgnd
-					SendMessage(FHandle, RB_SETTEXTCOLOR, 0, Cast(LPARAM, darkTextColor))
-					SendMessage(FHandle, RB_SETBKCOLOR, 0, Cast(LPARAM, darkBkColor))
-					Dim As COLORSCHEME csch
-					csch.dwSize = SizeOf(COLORSCHEME)
-					csch.clrBtnShadow = darkBkColor
-					csch.clrBtnHighlight = darkHlBkColor
-					SendMessage(FHandle, RB_SETCOLORSCHEME, 0, Cast(LPARAM, @csch))
-					SendMessageW(FHandle, WM_THEMECHANGED, 0, 0)
-					Repaint
-				End If
 			Case WM_DPICHANGED
 				Base.ProcessMessage(Message)
 				For i As Integer = 0 To Bands.Count - 1
@@ -632,28 +607,7 @@ Namespace My.Sys.Forms
 				SetBounds FLeft, FTop, FWidth, FHeight
 				Return
 			Case WM_ERASEBKGND
-				If g_darkModeSupported AndAlso g_darkModeEnabled Then
-					
-				End If
 			Case WM_PAINT
-				'If g_darkModeSupported AndAlso g_darkModeEnabled AndAlso FDefaultBackColor = FBackColor Then
-				'	If Not FDarkMode Then
-				'		If Not FDarkMode Then
-				'			FDarkMode = True
-				'			'SetWindowTheme(FHandle, "DarkModeNavbar", nullptr)
-				'			Brush.Handle = hbrBkgnd
-				'			SendMessage(FHandle, RB_SETTEXTCOLOR, 0, Cast(LPARAM, darkTextColor))
-				'			SendMessage(FHandle, RB_SETBKCOLOR, 0, Cast(LPARAM, darkBkColor))
-				'			Dim As COLORSCHEME csch
-				'			csch.dwSize = SizeOf(COLORSCHEME)
-				'			csch.clrBtnShadow = darkBkColor
-				'			csch.clrBtnHighlight = darkHlBkColor
-				'			SendMessage(FHandle, RB_SETCOLORSCHEME, 0, Cast(LPARAM, @csch))
-				'			SendMessageW(FHandle, WM_THEMECHANGED, 0, 0)
-				'			Repaint
-				'		End If
-				'	End If
-				'End If
 				'Dim As HDC Dc, memDC
 				'Dim As HBITMAP Bmp
 				'Dim As PAINTSTRUCT Ps
@@ -662,8 +616,6 @@ Namespace My.Sys.Forms
 				'Dc = BeginPaint(Handle, @Ps)
 				'FillRect Dc, @Ps.rcPaint, Brush.Handle
 				'Canvas.Handle = Dc
-				'Dim As HPEN GripperPen = CreatePen(PS_SOLID, 1, darkBkColor)
-				'Dim As HPEN GripperPen1 = CreatePen(PS_SOLID, 1, darkHlBkColor)
 				'Dim As HPEN PrevPen = SelectObject(Dc, GripperPen)
 				'Dim rc As My.Sys.Drawing.Rect
 				'For i As Integer = 0 To Bands.Count - 1
@@ -703,70 +655,6 @@ Namespace My.Sys.Forms
 				Case RBN_HEIGHTCHANGE
 					If OnHeightChange Then OnHeightChange(*Designer, This)
 				Case NM_CUSTOMDRAW
-					If g_darkModeSupported AndAlso g_darkModeEnabled AndAlso FDefaultBackColor = FBackColor Then
-						If Not FReBarDarkMode Then
-							FDarkMode = True
-							FReBarDarkMode = True
-							'SetWindowTheme(FHandle, "DarkModeNavbar", nullptr)
-							Brush.Handle = hbrBkgnd
-							SendMessage(FHandle, RB_SETTEXTCOLOR, 0, Cast(LPARAM, darkTextColor))
-							SendMessage(FHandle, RB_SETBKCOLOR, 0, Cast(LPARAM, darkBkColor))
-							Dim As COLORSCHEME csch
-							csch.dwSize = SizeOf(COLORSCHEME)
-							csch.clrBtnShadow = darkBkColor
-							csch.clrBtnHighlight = darkHlBkColor
-							SendMessage(FHandle, RB_SETCOLORSCHEME, 0, Cast(LPARAM, @csch))
-							SendMessageW(FHandle, WM_THEMECHANGED, 0, 0)
-							If This.Parent Then This.Parent->RequestAlign , , , @This
-							Repaint
-						End If
-						Dim As LPNMCUSTOMDRAW nmcd = Cast(LPNMCUSTOMDRAW, Message.lParam)
-						Select Case nmcd->dwDrawStage
-						Case CDDS_PREPAINT
-							'FillRect nmcd->hdc, @nmcd->rc, hbrBkgnd
-							Message.Result = CDRF_NOTIFYPOSTPAINT Or CDRF_NOTIFYPOSTERASE
-							Return
-						Case CDDS_POSTPAINT
-							Dim As HPEN GripperPen = CreatePen(PS_SOLID, 1, darkBkColor)
-							Dim As HPEN GripperPen1 = CreatePen(PS_SOLID, 1, darkBkColor)
-							Dim As HPEN PrevPen = SelectObject(nmcd->hdc, GripperPen)
-							'FillRect nmcd->hdc, @nmcd->rc, hbrBkgnd
-							Dim rc As My.Sys.Drawing.Rect
-							For i As Integer = 0 To Bands.Count - 1
-								SendMessage(FHandle, RB_GETRECT, i, Cast(LPARAM, @rc))
-								SelectObject(nmcd->hdc, GripperPen1)
-								MoveToEx nmcd->hdc, rc.Left + 2, rc.Top + 2, 0
-								LineTo nmcd->hdc, rc.Left + 2, rc.Bottom - 3
-								SelectObject(nmcd->hdc, GripperPen1)
-								MoveToEx nmcd->hdc, rc.Left + 3, rc.Top + 2, 0
-								LineTo nmcd->hdc, rc.Left + 3, rc.Bottom - 3
-							Next i
-							SelectObject(nmcd->hdc, PrevPen)
-							DeleteObject GripperPen
-							DeleteObject GripperPen1
-							Message.Result = CDRF_DODEFAULT
-							Return
-						End Select
-					Else
-						If FReBarDarkMode Then
-							FDarkMode = False
-							FReBarDarkMode = False
-							If FBackColor = -1 Then
-								Brush.Handle = 0
-							Else
-								Brush.Color = FBackColor
-							End If
-							SendMessage(Handle, RB_SETTEXTCOLOR, 0, Cast(LPARAM, This.Font.Color))
-							SendMessage(Handle, RB_SETBKCOLOR, 0, Cast(LPARAM, FBackColor))
-							Dim As COLORSCHEME csch
-							csch.dwSize = SizeOf(COLORSCHEME)
-							csch.clrBtnShadow = FBackColor
-							csch.clrBtnHighlight = FBackColor
-							SendMessage(FHandle, RB_SETCOLORSCHEME, 0, Cast(LPARAM, @csch))
-							SetWindowTheme(FHandle, NULL, NULL)
-							If This.Parent Then This.Parent->RequestAlign , , , @This
-						End If
-					End If
 				End Select
 			End Select
 		Base.ProcessMessage(Message)

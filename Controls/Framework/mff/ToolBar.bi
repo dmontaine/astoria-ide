@@ -209,7 +209,6 @@ Namespace My.Sys.Forms
 		Declare Static Sub HandleIsDestroyed(ByRef Sender As Control)
 		Declare Virtual Sub ProcessMessage(ByRef Message As Message)
 		Declare Sub GetDropDownMenuItems
-			Declare Virtual Sub SetDark(Value As Boolean)
 			Declare Sub SetButtonSizes()
 	Public:
 			'Loads properties from serialization stream

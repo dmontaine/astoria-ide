@@ -491,39 +491,6 @@ Namespace My.Sys.Forms
 			'        End If
 		End Sub
 	
-		Private Sub ComboBoxEx.SetDark(Value As Boolean)
-			Base.SetDark Value
-			If Value Then
-				Dim As HWND cmbHandle = Cast(HWND, SendMessageW(FHandle, CBEM_GETCOMBOCONTROL, 0, 0))
-				Dim As COMBOBOXINFO cbINFO
-				cbINFO.cbSize = SizeOf(COMBOBOXINFO)
-				GetComboBoxInfo(cmbHandle, @cbINFO)
-				Dim As HWND lstHandle = cbINFO.hwndList
-				Dim As HWND txtHandle = FindWindowEx(cmbHandle, 0, "Edit", 0)
-				SetWindowTheme(cmbHandle, "DarkMode_CFD", nullptr)
-				SetWindowTheme(lstHandle, "DarkMode_Explorer", nullptr)
-				If txtHandle Then SetWindowTheme(txtHandle, "DarkMode_Explorer", nullptr)
-				Brush.Handle = hbrBkgnd
-				SendMessageW(cmbHandle, WM_PRINTCLIENT, 0, 0)
-			Else
-				Dim As HWND cmbHandle = Cast(HWND, SendMessageW(FHandle, CBEM_GETCOMBOCONTROL, 0, 0))
-				Dim As COMBOBOXINFO cbINFO
-				cbINFO.cbSize = SizeOf(COMBOBOXINFO)
-				GetComboBoxInfo(cmbHandle, @cbINFO)
-				Dim As HWND lstHandle = cbINFO.hwndList
-				Dim As HWND txtHandle = FindWindowEx(cmbHandle, 0, "Edit", 0)
-				SetWindowTheme(cmbHandle, NULL, NULL)
-				SetWindowTheme(lstHandle, NULL, NULL)
-				If txtHandle Then SetWindowTheme(txtHandle, NULL, NULL)
-				If FBackColor = -1 Then
-					Brush.Handle = 0
-				Else
-					Brush.Color = FBackColor
-				End If
-				SendMessageW(cmbHandle, WM_PRINTCLIENT, 0, 0)
-			End If
-			'SendMessage FHandle, WM_THEMECHANGED, 0, 0
-		End Sub
 	
 	Private Sub ComboBoxEx.ProcessMessage(ByRef Message As Message)
 			Dim pt As ..Point, rc As ..Rect, t As Long, itd As Long
@@ -535,41 +502,6 @@ Namespace My.Sys.Forms
 				Message.Result = 0
 				Return
 			Case WM_PAINT
-				If g_darkModeSupported AndAlso g_darkModeEnabled AndAlso FDefaultBackColor = FBackColor Then
-					If Not FComboBoxDarkMode Then
-						FComboBoxDarkMode = True
-						SetDark True
-'						FDarkMode = True
-'						Dim As HWND cmbHandle = Cast(HWND, SendMessageW(FHandle, CBEM_GETCOMBOCONTROL, 0, 0))
-'						Dim As COMBOBOXINFO cbINFO
-'						cbINFO.cbSize = SizeOf(COMBOBOXINFO)
-'						GetComboBoxInfo(cmbHandle, @cbINFO)
-'						Dim As HWND lstHandle = cbINFO.hwndList
-'						SetWindowTheme(cmbHandle, "DarkMode_CFD", nullptr)
-'						SetWindowTheme(lstHandle, "DarkMode_Explorer", nullptr)
-'						Brush.Handle = hbrBkgnd
-'						SendMessageW(cmbHandle, WM_THEMECHANGED, 0, 0)
-					End If
-				Else
-					If FComboBoxDarkMode Then
-						FComboBoxDarkMode = False
-						SetDark False
-'						FDarkMode = False
-'						Dim As HWND cmbHandle = Cast(HWND, SendMessageW(FHandle, CBEM_GETCOMBOCONTROL, 0, 0))
-'						Dim As COMBOBOXINFO cbINFO
-'						cbINFO.cbSize = SizeOf(COMBOBOXINFO)
-'						GetComboBoxInfo(cmbHandle, @cbINFO)
-'						Dim As HWND lstHandle = cbINFO.hwndList
-'						SetWindowTheme(cmbHandle, NULL, NULL)
-'						SetWindowTheme(lstHandle, NULL, NULL)
-'						If FBackColor = -1 Then
-'							Brush.Handle = 0
-'						Else
-'							Brush.Color = FBackColor
-'						End If
-'						SendMessageW(cmbHandle, WM_THEMECHANGED, 0, 0)
-					End If
-				End If
 			Case WM_DESTROY
 				If ImagesList Then Perform CBEM_SETIMAGELIST, 0, 0
 			Case WM_DRAWITEM
@@ -592,11 +524,7 @@ Namespace My.Sys.Forms
 						If (lpdis->itemState And ODS_SELECTED)   Then                       'if selected Then
 							If (lpdis->itemState And ODS_COMBOBOXEDIT) Then
 								SetBkMode lpdis->hDC, TRANSPARENT
-								If g_darkModeSupported AndAlso g_darkModeEnabled AndAlso FDefaultBackColor = FBackColor Then
-									SetTextColor lpdis->hDC, darkTextColor                'Set text color
-								Else
-									SetTextColor lpdis->hDC, GetSysColor(COLOR_WINDOWTEXT)                'Set text color
-								End If
+								SetTextColor lpdis->hDC, GetSysColor(COLOR_WINDOWTEXT)                'Set text color
 								DrawFocusRect lpdis->hDC, @lpdis->rcItem  'draw focus rectangle
 							Else
 								FillRect lpdis->hDC, @lpdis->rcItem, GetSysColorBrush(COLOR_HIGHLIGHT)
@@ -613,11 +541,7 @@ Namespace My.Sys.Forms
 								FillRect lpdis->hDC, @lpdis->rcItem, Brush.Handle 'GetSysColorBrush(COLOR_WINDOW)
 								SetBkColor lpdis->hDC, Brush.Color 'GetSysColor(COLOR_WINDOW)                    'Set text Background
 							End If
-							If g_darkModeSupported AndAlso g_darkModeEnabled AndAlso FDefaultBackColor = FBackColor Then
-								SetTextColor lpdis->hDC, darkTextColor                'Set text color
-							Else
-								SetTextColor lpdis->hDC, GetSysColor(COLOR_WINDOWTEXT)                'Set text color
-							End If
+							SetTextColor lpdis->hDC, GetSysColor(COLOR_WINDOWTEXT)                'Set text color
 							If CInt(ItemIndex = -1) AndAlso CInt(lpdis->itemID = 0) AndAlso CInt(Focused) Then
 								rc.Left   = lpdis->rcItem.Left + 16 : rc.Right = lpdis->rcItem.Right              '  Set cordinates
 								rc.Top    = lpdis->rcItem.Top

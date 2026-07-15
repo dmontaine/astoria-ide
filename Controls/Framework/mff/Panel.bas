@@ -135,11 +135,6 @@ Namespace My.Sys.Forms
 					Message.Result = 0
 					Return
 				End If
-				If g_darkModeSupported AndAlso g_darkModeEnabled Then
-					If Not FDarkMode Then SetDark True
-				Else
-					If FDarkMode Then SetDark False
-				End If
 				If DoubleBuffered Then
 					memDC = CreateCompatibleDC(Dc)
 					MemBmp = CreateCompatibleBitmap(Dc, R.Right - R.Left, R.Bottom - R.Top)
@@ -219,17 +214,10 @@ Namespace My.Sys.Forms
 	End Sub
 	
 		Private Sub Panel.AdjustColors(FBevel As Integer)
-			If g_darkModeSupported AndAlso g_darkModeEnabled Then
-				FTopColor = 12632256 'Could be changed
-				If FBevel = bvLowered Then FTopColor = 8421504 'Could be changed
-				FBottomColor = 8421504 'Could be changed
-				If FBevel = bvLowered Then FBottomColor = 8421504 'Could be changed
-			Else
-				FTopColor = GetSysColor(COLOR_BTNHIGHLIGHT)
-				If FBevel = bvLowered Then FTopColor = GetSysColor(COLOR_BTNSHADOW)
-				FBottomColor = GetSysColor(COLOR_BTNSHADOW)
-				If FBevel = bvLowered Then FBottomColor = GetSysColor(COLOR_BTNHIGHLIGHT)
-			End If
+			FTopColor = GetSysColor(COLOR_BTNHIGHLIGHT)
+			If FBevel = bvLowered Then FTopColor = GetSysColor(COLOR_BTNSHADOW)
+			FBottomColor = GetSysColor(COLOR_BTNSHADOW)
+			If FBevel = bvLowered Then FBottomColor = GetSysColor(COLOR_BTNHIGHLIGHT)
 		End Sub
 		
 		Private Sub Panel.DoRect(R As My.Sys.Drawing.Rect, tTopColor As Integer = GetSysColor(COLOR_BTNSHADOW), tBottomColor As Integer = GetSysColor(COLOR_BTNSHADOW))

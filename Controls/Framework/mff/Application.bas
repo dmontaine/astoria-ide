@@ -13,7 +13,6 @@
 
 #include once "Application.bi"
 #include once "Form.bi"
-#include once "DarkMode/DarkMode.bi"
 
 'Provides methods and properties to manage an application, such as methods to start and stop an application, to process messages, and properties to get information about an application.
 Dim Shared App As My.Application
@@ -45,16 +44,6 @@ Namespace My
 			End If
 			Return True
 		End Function
-	
-	Private Property Application.DarkMode As Boolean
-		Return FDarkMode
-	End Property
-	
-	Private Property Application.DarkMode(Value As Boolean)
-		FDarkMode = Value
-			If g_buildNumber = 0 Then InitDarkMode
-		SetDarkMode Value, False
-	End Property
 	
 	#ifndef APP_TITLE
 		#define APP_TITLE ""
@@ -584,12 +573,6 @@ Namespace My
 				CloseHandle(m_hMutex)
 			End If
 			If hLibUser32 <> 0 Then DyLibFree(hLibUser32)
-			DeleteObject hbrBkgnd
-			DeleteObject hbrHlBkgnd
-			DeleteObject hbrBkgndMenu
-			DeleteObject g_brItemBackground
-			DeleteObject g_brItemBackgroundHot
-			DeleteObject g_brItemBackgroundSelected
 			OleUninitialize()
 	End Destructor
 End Namespace

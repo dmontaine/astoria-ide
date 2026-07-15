@@ -282,7 +282,6 @@ Namespace My.Sys.Forms
 			
 		Declare Virtual Sub ProcessMessage(ByRef Message As Message)
 		'Declare Virtual Sub ProcessMessageAfter(ByRef Message As Message)
-			Declare Virtual Sub SetDark(Value As Boolean)
 			'Font Property
 			FFontCyPixels             As Integer
 			FFontBolds(0 To 1)        As Integer = {400, 700}

@@ -94,7 +94,6 @@ Namespace My
 	'Provides methods and properties to manage an application, such as methods to start and stop an application, and properties to get information about an application. (Windows, Linux, Web, Android)
 	Private Type Application Extends My.Sys.Object
 	Private:
-		FDarkMode       As Boolean
 		FTitle          As WString Ptr
 		FCurLanguage    As WString Ptr
 		FCurLanguagePath As WString Ptr
@@ -137,8 +136,6 @@ Namespace My
 		Declare Property ActiveForm(Value As My.Sys.Forms.Form Ptr)
 		Declare Property ActiveMDIChild As My.Sys.Forms.Form Ptr
 		Declare Property ActiveMDIChild(Value As My.Sys.Forms.Form Ptr)
-		Declare Property DarkMode As Boolean
-		Declare Property DarkMode(Value As Boolean)
 		Declare Function FileName ByRef As WString
 		Declare Function Version() As String
 		Declare Function GetVerInfo(ByRef InfoName As String) As String

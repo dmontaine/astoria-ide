@@ -120,15 +120,6 @@ Namespace My.Sys.Forms
 				Dim As HDC Dc, memDC
 				Dim As HBITMAP Bmp
 				Dim As PAINTSTRUCT Ps
-				If g_darkModeSupported AndAlso g_darkModeEnabled Then
-					If Not FDarkMode Then
-						SetDark True
-					End If
-				Else
-					If FDarkMode Then
-						SetDark False
-					End If
-				End If
 				Dc = BeginPaint(Handle, @Ps)
 				If DoubleBuffered Then
 					memDC = CreateCompatibleDC(Dc)

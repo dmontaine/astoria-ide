@@ -183,9 +183,6 @@ Namespace My.Sys.Forms
 	Private Sub CommandButton.ProcessMessage(ByRef msg As Message)
 			Select Case msg.Msg
 			Case WM_PAINT
-				'If g_darkModeSupported AndAlso g_darkModeEnabled Then
-				'	SetWindowTheme(.FHandle, "DarkMode_Explorer", nullptr)
-				'	.Brush.Handle = hbrBkgnd
 				'	SendMessageW(.FHandle, WM_THEMECHANGED, 0, 0)
 				'End If
 			'Case BM_CLICK

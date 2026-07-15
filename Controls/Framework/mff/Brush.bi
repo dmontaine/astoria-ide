@@ -12,21 +12,6 @@
 
 #include once "Object.bi"
 
-	Dim Shared As COLORREF darkBkColorTitle = BGR(10, 10, 10)
-	Dim Shared As COLORREF darkBkColorMenu = BGR(41, 41, 41) 
-	Dim Shared As COLORREF darkBkColorGreen = BGR(55, 166, 96)
-	Dim Shared As COLORREF darkBkColorBlue = BGR(89, 143, 236)
-	Dim Shared As COLORREF darkBkColor = &H303030
-	Dim Shared As COLORREF darkBkColorDark = &H414141
-	Dim Shared As COLORREF darkHlBkColor = &h626262
-	Dim Shared As COLORREF darkTextColor = BGR(255, 255, 255) 
-	
-	' ugly colors for illustration purposes
-	Dim Shared As HBRUSH g_brItemBackground
-	Dim Shared As HBRUSH g_brItemBackgroundHot
-	Dim Shared As HBRUSH g_brItemBackgroundSelected
-	Dim Shared As HBRUSH hbrBkgnd, hbrHlBkgnd, hbrBkgndMenu
-	Dim Shared As HTHEME g_menuTheme = 0
 
 Namespace My.Sys.Drawing
 		Private Enum BrushStyles

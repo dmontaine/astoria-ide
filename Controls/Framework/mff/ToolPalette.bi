@@ -125,7 +125,6 @@ Namespace My.Sys.Forms
 		Declare Static Sub HandleIsDestroyed(ByRef Sender As Control)
 		Declare Virtual Sub ProcessMessage(ByRef Message As Message)
 		Declare Sub GetDropDownMenuItems
-			Declare Virtual Sub SetDark(Value As Boolean)
 	Public:
 		'Collection of tool category groups
 		Groups          As ToolGroups

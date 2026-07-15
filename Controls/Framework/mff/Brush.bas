@@ -12,15 +12,6 @@
 
 #include once "Brush.bi"
 
-	' ugly colors for illustration purposes
-	g_brItemBackground = CreateSolidBrush(BGR(&hC0, &hC0, &hFF))
-	g_brItemBackgroundHot = CreateSolidBrush(BGR(&hD0, &hD0, &hFF))
-	g_brItemBackgroundSelected = CreateSolidBrush(BGR(&hE0, &hE0, &hFF))
-	g_menuTheme = 0
-	hbrBkgnd = CreateSolidBrush(darkBkColor)
-	hbrHlBkgnd = CreateSolidBrush(darkHlBkColor)
-	hbrBkgndMenu = CreateSolidBrush(darkBkColorMenu)
-
 Namespace My.Sys.Drawing
 		Private Function Brush.ReadProperty(ByRef PropertyName As String) As Any Ptr
 			Select Case LCase(PropertyName)
@@ -82,13 +73,13 @@ Namespace My.Sys.Drawing
 				LB.lbStyle = BS_HATCHED
 				LB.lbHatch = FHatchStyle
 			End Select
-			If (FHandle <> 0) AndAlso (FHandle <> hbrBkgnd) Then DeleteObject(FHandle)
+			If FHandle <> 0 Then DeleteObject(FHandle)
 			FHandle = CreateBrushIndirect(@LB)
 			If FHandle Then If OnCreate Then OnCreate(*Designer, This)
 	End Sub
 	
 		Private Operator Brush.Let(Value As HBRUSH)
-			If (FHandle <> 0) AndAlso (FHandle <> hbrBkgnd) Then DeleteObject(FHandle)
+			If FHandle <> 0 Then DeleteObject(FHandle)
 			FHandle = Value
 		End Operator
 		
@@ -97,7 +88,7 @@ Namespace My.Sys.Drawing
 		End Property
 		
 		Private Property Brush.Handle(Value As HBRUSH)
-			If (FHandle <> 0) AndAlso (FHandle <> hbrBkgnd) Then DeleteObject(FHandle)
+			If FHandle <> 0 Then DeleteObject(FHandle)
 			FHandle = Value
 		End Property
 	
@@ -113,7 +104,7 @@ Namespace My.Sys.Drawing
 	End Constructor
 	
 	Private Destructor Brush
-			If FHandle AndAlso FHandle <> hbrBkgnd Then DeleteObject FHandle
+			If FHandle Then DeleteObject FHandle
 	End Destructor
 End Namespace
 

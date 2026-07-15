@@ -2048,17 +2048,6 @@ pfOptions = @fOptions
 		'' saved to/loaded from INI but never applied anywhere. The globals + their INI round-trip
 		'' are left in place (harmless, matches the S4 precedent of keeping a dead-but-referenced
 		'' field) in case a future session wires up real env-var injection for the debuggee.
-		' chkDarkMode
-		With chkDarkMode
-			.Name = "chkDarkMode"
-			.Text = ("Dark Mode (Windows 10 1809 and above)")
-			.TabIndex = 195
-			.Align = DockStyle.alTop
-			.Constraints.Height = 21
-			.AutoSize = True
-			.SetBounds 10, 142, 323, 21
-			.Parent = @grbThemes
-		End With
 		' chkPlaceStaticEventHandlersAfterTheConstructor
 		With chkPlaceStaticEventHandlersAfterTheConstructor
 			.Name = "chkPlaceStaticEventHandlersAfterTheConstructor"
@@ -2613,8 +2602,6 @@ pfOptions = @fOptions
 		chkDisplayIcons.ControlIndex = 1
 		chkShowMainToolbar.Parent = @vbxGeneral
 		chkShowMainToolbar.ControlIndex = 2
-		chkDarkMode.Parent = @vbxGeneral
-		chkDarkMode.ControlIndex = 4
 		' The rest of the "Themes" page (interface color/theme picker) is
 		' still broken and stays orphaned - see PROJECT_STATUS.md.
 		hbxInterfaceColors.Visible = False
@@ -2811,7 +2798,6 @@ Sub frmOptions.LoadSettings()
 		.chkDisplayIcons.Checked = DisplayMenuIcons
 		.chkShowMainToolbar.Checked = ShowMainToolBar
 		'.chkShowToolBoxLocal.Checked = gLocalToolBox
-		.chkDarkMode.Checked = DarkMode
 		Dim As String f
 		HotKeysChanged = False
 		.cboTheme.Clear
@@ -3297,8 +3283,6 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		DisplayMenuIcons = .chkDisplayIcons.Checked
 		ShowMainToolBar = .chkShowMainToolbar.Checked
 		'gLocalToolBox = .chkShowToolBoxLocal.Checked
-		DarkMode = .chkDarkMode.Checked
-		App.DarkMode = DarkMode
 		SetColors
 		UpdateAllTabWindows
 		If .HotKeysChanged Then
@@ -3635,9 +3619,6 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		End If
 		If IniValueChangedBool(piniSettings, "Options", "ShowMainToolbar", ShowMainToolBar) Then
 			piniSettings->WriteBool "Options", "ShowMainToolbar", ShowMainToolBar
-		End If
-		If IniValueChangedBool(piniSettings, "Options", "DarkMode", DarkMode) Then
-			piniSettings->WriteBool "Options", "DarkMode", DarkMode
 		End If
 		'piniSettings->WriteBool "Options", "ShowToolBoxLocal", gLocalToolBox
 		' Not applied live: setting Menu->ImagesList immediately drops the icon lookup for the
@@ -4301,7 +4282,6 @@ End Sub
 Private Sub frmOptions.Form_Close(ByRef Designer As My.Sys.Object, ByRef Sender As Form, ByRef Action As Integer)
 	If *InterfaceFontName <> *fOptions.oldInterfFontName OrElse InterfaceFontSize <> fOptions.oldInterfFontSize Then MsgBox ("Interface font changes will be applied the next time the application is run.")
 	If DisplayMenuIcons <> fOptions.oldDisplayMenuIcons Then MsgBox ("Display icons in the menu changes will be applied the next time the application is run.")
-	'If DarkMode <> fOptions.oldDarkMode Then MsgBox ML("Dark Mode changes will be applied the next time the application is run.")
 	'If fOptions.HotKeysChanged Then MsgBox ML("Hotkey changes will be applied the next time the application is run.")
 End Sub
 
@@ -4321,9 +4301,9 @@ Private Sub frmOptions.TreeView1_SelChange(ByRef Designer As My.Sys.Object, ByRe
 		.pnlHelp.Visible = Key = "Help"
 		If Key = "General" Then
 			' The interface-settings controls relocated into vbxGeneral at
-			' runtime (pnlInterfaceFont, chkDisplayIcons, chkShowMainToolbar,
-			' chkDarkMode) can end up repositioned back to
-			' their pre-relocation bounds by a native-window recreation that
+			' runtime (pnlInterfaceFont, chkDisplayIcons, chkShowMainToolbar)
+			' can end up repositioned back to their pre-relocation bounds by a
+			' native-window recreation that
 			' happens when this page first becomes visible. Forcing one more
 			' layout pass here, after that settles, guarantees the final
 			' on-screen stacking is correct regardless of that timing.
@@ -4879,9 +4859,9 @@ End Sub
 Private Sub frmOptions.cboInterfaceTheme_Change(ByRef Sender As ComboBoxEdit)
 	If UBound(InterfaceColors) = -1 Then Exit Sub
 	iniInterfaceTheme.Load ExePath & "/Settings/Themes/Interface/" & fOptions.cboInterfaceTheme.Text & ".ini"
-	InterfaceColors(0) = iniInterfaceTheme.ReadInteger("Colors", "DarkBackground", darkBkColor)
-	InterfaceColors(1) = iniInterfaceTheme.ReadInteger("Colors", "DarkBackgroundHighlight", darkHlBkColor)
-	InterfaceColors(2) = iniInterfaceTheme.ReadInteger("Colors", "Text", darkTextColor)
+	InterfaceColors(0) = iniInterfaceTheme.ReadInteger("Colors", "DarkBackground", &H303030)
+	InterfaceColors(1) = iniInterfaceTheme.ReadInteger("Colors", "DarkBackgroundHighlight", &H626262)
+	InterfaceColors(2) = iniInterfaceTheme.ReadInteger("Colors", "Text", BGR(255, 255, 255))
 	lstInterfaceColorKeys_Change(lstInterfaceColorKeys)
 End Sub
 

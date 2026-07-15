@@ -117,11 +117,6 @@ Namespace My.Sys.Forms
 					Message.Result = 0
 					Return
 				End If
-				If g_darkModeSupported AndAlso g_darkModeEnabled Then
-					If Not FDarkMode Then SetDark True
-				Else
-					If FDarkMode Then SetDark False
-				End If
 				If DoubleBuffered Then
 					memDC = CreateCompatibleDC(Dc)
 					MemBmp   = CreateCompatibleBitmap(Dc, R.Right - R.Left, R.Bottom - R.Top)

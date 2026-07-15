@@ -599,15 +599,6 @@ Namespace My.Sys.Forms
 				End Select
 			Case WM_DPICHANGED
 				Base.ProcessMessage message
-				If g_darkModeSupported AndAlso g_darkModeEnabled Then
-					If FDarkMode Then
-						SetDark True
-					End If
-				Else
-					If Not FDarkMode Then
-						SetDark False
-					End If
-				End If
 				If ReadOnly Then TextRTF = FTextRTF
 				Return
 			Case WM_SETCURSOR
@@ -637,35 +628,9 @@ Namespace My.Sys.Forms
 				' sits on an unselected tab page - so a description pane toggled
 				' while hidden kept its old colours (the Events pane staying white
 				' after switching to dark from the Properties tab).
-				' BroadcastThemeChangedToChildren delivers WM_THEMECHANGED to every
 				' window, visible or not; mirror the WM_PAINT self-flip here so
 				' SetDark re-colours background and text right away.
-				If g_darkModeSupported AndAlso g_darkModeEnabled Then
-					If Not FDarkMode Then SetDark True
-				Else
-					If FDarkMode Then SetDark False
-				End If
 			Case WM_PAINT
-				If g_darkModeSupported AndAlso g_darkModeEnabled Then
-					If Not FDarkMode Then
-						SetDark True
-					Else
-						' EM_SETBKGNDCOLOR can get silently reset back to the system
-						' default by the RichEdit control itself (observed after
-						' switching dark -> light -> dark again), and the full SetDark
-						' call above only re-runs on the FDarkMode transition, so a
-						' reset that happens while already dark was never caught -
-						' the pane stayed white even though FDarkMode reported True.
-						' Re-assert just the background colour (cheap, no text
-						' reformatting) on every paint before the RichEdit's own
-						' WM_PAINT below runs, so it can never paint a stale colour.
-						SendMessage(FHandle, EM_SETBKGNDCOLOR, 0, darkBkColor)
-					End If
-				Else
-					If FDarkMode Then
-						SetDark False
-					End If
-				End If
 				Dim As Any Ptr cp = GetClassProc(message.hWnd)
 				If cp <> 0 Then
 					message.Result = CallWindowProc(cp, message.hWnd, message.Msg, message.wParam, message.lParam)
@@ -690,11 +655,7 @@ Namespace My.Sys.Forms
 				r.Bottom -= 1
 				r.Left = 1
 				r.Top = 1
-				If FDarkMode Then
-					NewPen = CreatePen(PS_SOLID, 1, darkBkColor)
-				Else
-					NewPen = CreatePen(PS_SOLID, 1, FBackColor)
-				End If
+				NewPen = CreatePen(PS_SOLID, 1, FBackColor)
 				SelectObject(Dc, NewPen)
 				Rectangle Dc, r.Left, r.Top, r.Right, r.Bottom
 				SelectObject(Dc, PrevPen)
@@ -800,22 +761,14 @@ Namespace My.Sys.Forms
 				Perform(EM_SETTEXTEX, Cast(WPARAM, @bb), Cast(LPARAM, StrPtr(Buffer)))
 				Perform(EM_SETZOOM, FZoomWP, FZoomLP)
 				' Replacing the text (EM_SETTEXTEX) can reset the RichEdit's
-				' background to the system default (white). That persists because
-				' the WM_PAINT self-flip only re-themes on an FDarkMode transition,
-				' so a pane cleared or refilled while already dark went white and
-				' never recovered. Re-assert the current colours, mirroring SetDark.
+				' background and character colours to the system default, discarding
+				' any custom ForeColor/BackColor. Re-assert them here.
 				Dim As CHARFORMAT2 Cf
 				Cf.cbSize = SizeOf(Cf)
 				Cf.dwMask = CFM_COLOR Or CFM_BACKCOLOR
-				If g_darkModeSupported AndAlso FDarkMode Then
-					SendMessage(FHandle, EM_SETBKGNDCOLOR, 0, darkBkColor)
-					Cf.crTextColor = darkTextColor
-					Cf.crBackColor = darkBkColor
-				Else
-					SendMessage(FHandle, EM_SETBKGNDCOLOR, 0, FBackColor)
-					Cf.crTextColor = FForeColor
-					Cf.crBackColor = FBackColor
-				End If
+				SendMessage(FHandle, EM_SETBKGNDCOLOR, 0, FBackColor)
+				Cf.crTextColor = FForeColor
+				Cf.crBackColor = FBackColor
 				SendMessage(FHandle, EM_SETCHARFORMAT, SCF_ALL, Cast(LPARAM, @Cf))
 			End If
 	End Property
@@ -1079,31 +1032,10 @@ Namespace My.Sys.Forms
 					End If
 					If .ReadOnly Then .Perform(EM_SETREADONLY, True, 0)
 					.Perform(EM_SETEVENTMASK, 0, .Perform(EM_GETEVENTMASK, 0, 0) Or ENM_CHANGE Or ENM_SCROLL Or ENM_SELCHANGE Or ENM_CLIPFORMAT Or ENM_MOUSEEVENTS)
-					.SetDark .FDarkMode
 				End With
 			End If
 		End Sub
 		
-		Private Sub RichTextBox.SetDark(Value As Boolean)
-			Base.SetDark Value
-			If Value Then
-				SendMessage(FHandle, EM_SETBKGNDCOLOR, 0, darkBkColor)
-				Dim As CHARFORMAT2 Cf
-				Cf.cbSize = SizeOf(Cf)
-				Cf.dwMask = CFM_COLOR Or CFM_BACKCOLOR
-				Cf.crTextColor = darkTextColor
-				Cf.crBackColor = darkBkColor
-				SendMessage(FHandle, EM_SETCHARFORMAT, SCF_ALL, Cast(LPARAM, @Cf))
-			Else
-				SendMessage(FHandle, EM_SETBKGNDCOLOR, 0, FBackColor)
-				Dim As CHARFORMAT2 Cf
-				Cf.cbSize = SizeOf(Cf)
-				Cf.dwMask = CFM_COLOR Or CFM_BACKCOLOR
-				Cf.crTextColor = FForeColor
-				Cf.crBackColor = FBackColor
-				SendMessage(FHandle, EM_SETCHARFORMAT, SCF_ALL, Cast(LPARAM, @Cf))
-			End If
-		End Sub
 	
 	Private Operator RichTextBox.Cast As Control Ptr
 		Return Cast(Control Ptr, @This)

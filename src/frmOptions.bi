@@ -126,7 +126,6 @@ Using My.Sys.Forms
 		Dim ColorD As ColorDialog
 		Dim FontD As FontDialog
 		Dim As WString Ptr EditFontName, InterfFontName, oldInterfFontName
-		Dim As Boolean oldDarkMode
 		Dim As Integer EditFontSize, InterfFontSize, oldInterfFontSize
 		Dim InterfaceColors(Any) As Integer
 		Dim InterfaceColorsCount As Integer
@@ -148,7 +147,7 @@ Using My.Sys.Forms
 		Dim As CheckBox chkFrame, chkForeground, chkBackground, chkIndicator
 		Dim As CheckBox chkHighlightCurrentWord
 		Dim As CheckBox chkHighlightCurrentLine
-		Dim As CheckBox chkHighlightBrackets, chkIncludeMFFPath, chkLimitDebug, chkDisplayWarningsInDebug, chkCreateNonStaticEventHandlers, chkShowKeywordsTooltip, chkShowSymbolsTooltipsOnMouseHover, chkShowClassesExplorerOnOpenWindow, chkAddSpacesToOperators, chkCreateFormTypesWithoutTypeWord, chkDarkMode, chkPlaceStaticEventHandlersAfterTheConstructor, chkCreateStaticEventHandlersWithAnUnderscoreAtTheBeginning, chkAddRelativePathsToRecent, chkShowTooltipsAtTheTop, chkChangeIdentifiersCase, chkSyntaxHighlightingIdentifiers, chkEnableAutoSuggestions, chkShowHorizontalSeparatorLines, chkCreateEventHandlersWithoutStaticEventHandlerIfEventAllowsIt, chkShowHolidayFrame, ShowClassesExplorerOnOpenWindow, chkChangeEndingType, chkInterfaceColor, chkParameterInfoShow
+		Dim As CheckBox chkHighlightBrackets, chkIncludeMFFPath, chkLimitDebug, chkDisplayWarningsInDebug, chkCreateNonStaticEventHandlers, chkShowKeywordsTooltip, chkShowSymbolsTooltipsOnMouseHover, chkShowClassesExplorerOnOpenWindow, chkAddSpacesToOperators, chkCreateFormTypesWithoutTypeWord, chkPlaceStaticEventHandlersAfterTheConstructor, chkCreateStaticEventHandlersWithAnUnderscoreAtTheBeginning, chkAddRelativePathsToRecent, chkShowTooltipsAtTheTop, chkChangeIdentifiersCase, chkSyntaxHighlightingIdentifiers, chkEnableAutoSuggestions, chkShowHorizontalSeparatorLines, chkCreateEventHandlersWithoutStaticEventHandlerIfEventAllowsIt, chkShowHolidayFrame, ShowClassesExplorerOnOpenWindow, chkChangeEndingType, chkInterfaceColor, chkParameterInfoShow
 		Dim As Boolean oldDisplayMenuIcons
 		Dim As Boolean LastApplySucceeded = True
 		Dim As RadioButton optSaveCurrentFile, optDoNotSave, optSaveAllFiles, optPromptToSave, optMainFileFolder, optInFolder

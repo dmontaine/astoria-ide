@@ -72,13 +72,7 @@ Public Sub TabCtl.MoveCloseButtons(ptabCode As TabControl Ptr)
 			If ptabCode->UpDownControl.Handle AndAlso CInt(ptabCode->UpDownControl.Visible) AndAlso RR.Right - ptabCode->ScaleX(18) + ptabCode->ScaleX(18) > ptabCode->ScaleX(ptabCode->UpDownControl.Left) Then bVisible = False
 			tb->btnClose.Visible = bVisible
 			MoveWindow tb->btnClose.Handle, RR.Right - ptabCode->ScaleX(18) - (RR.Bottom - ptabCode->ScaleY(18)) / 2, (RR.Bottom - ptabCode->ScaleY(18)) / 2, ptabCode->ScaleX(18), ptabCode->ScaleY(18), True
-			'If g_darkModeSupported AndAlso g_darkModeEnabled Then
-			'	UpdateWindow ptabCode->Handle
-			'End If
 	Next i
-		If g_darkModeSupported AndAlso g_darkModeEnabled Then
-			UpdateWindow ptabCode->Handle
-		End If
 End Sub
 
 Sub PopupClick(ByRef Designer As My.Sys.Object, ByRef Sender As My.Sys.Object)

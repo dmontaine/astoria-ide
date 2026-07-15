@@ -150,7 +150,7 @@ Namespace My.Sys.Forms
 					If OnClick Then OnClick(*Designer, This)
 				End If
 			Case CM_NOTIFY
-				If (g_darkModeSupported AndAlso g_darkModeEnabled OrElse FForeColor <> 0) AndAlso Message.lParam <> 0 AndAlso Cast(LPNMHDR, Message.lParam)->code = NM_CUSTOMDRAW Then
+				If (FForeColor <> 0) AndAlso Message.lParam <> 0 AndAlso Cast(LPNMHDR, Message.lParam)->code = NM_CUSTOMDRAW Then
 					Dim As NMCUSTOMDRAW Ptr pnm = Cast(LPNMCUSTOMDRAW, Message.lParam)
 					Select Case pnm->dwDrawStage
 					Case CDDS_PREERASE
@@ -209,7 +209,7 @@ Namespace My.Sys.Forms
 						
 						SelectObject(pnm->hdc, Font.Handle)
 						If (uiItemState And CDIS_DISABLED) Then
-							SetTextColor(pnm->hdc, darkHlBkColor)
+							SetTextColor(pnm->hdc, &H626262)
 						End If
 						DrawText(pnm->hdc, This.Text, -1, @pnm->rc, DT_SINGLELINE Or DT_VCENTER)
 						If (uiItemState And CDIS_FOCUS) Then

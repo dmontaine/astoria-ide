@@ -370,53 +370,7 @@ Namespace My.Sys.Forms
 		Private Sub StatusBar.ProcessMessage(ByRef Message As Message)
 			Select Case Message.Msg
 			Case WM_ERASEBKGND
-				If g_darkModeSupported AndAlso g_darkModeEnabled Then
-					Message.Result = -1
-					Exit Sub
-				End If
 			Case WM_PAINT
-				If g_darkModeSupported AndAlso g_darkModeEnabled AndAlso FDefaultBackColor = FBackColor Then
-					If Not FDarkMode Then
-						FDarkMode = True
-						'SetWindowTheme(.FHandle, "DarkMode:ExplorerStatusBar", nullptr)
-						'SetWindowTheme(.FHandle, "DarkMode_InfoPaneToolbar", nullptr)
-						'SetWindowTheme(.FHandle, "", "")
-						SendMessage FHandle, SB_SETBKCOLOR, 0, darkBkColor
-						Brush.Handle = hbrBkgnd
-						SendMessageW(FHandle, WM_THEMECHANGED, 0, 0)
-						AllowDarkModeForWindow(FHandle, g_darkModeEnabled)
-						UpdateWindow(FHandle)
-					End If
-					Dim As HDC Dc, memDC
-					Dim As HBITMAP Bmp
-					Dim As PAINTSTRUCT Ps
-					Dim As ..Rect R
-					Dc = BeginPaint(Handle, @Ps)
-					FillRect Dc, @Ps.rcPaint, Brush.Handle
-					Canvas.SetHandle Dc
-					Dim As HFONT OldFontHandle, NewFontHandle
-					OldFontHandle = SelectObject(Dc, Font.Handle)
-					SetTextColor(Dc, darkTextColor)
-					SetBkMode(Dc, TRANSPARENT)
-					For i As Integer = 0 To Count - 1
-						SendMessage FHandle, SB_GETRECT, i, Cast(LPARAM, @R)
-						'Canvas.Pen.Color = clWhite
-						'SelectObject(Dc, Canvas.Pen.Handle)
-						'MoveToEx Dc, R.Left - 1, 3, 0
-						'LineTo Dc, R.Left - 1, R.Bottom - 3
-						R.Left += 3
-						R.Top += 3
-						DrawText Dc, Panels[i]->Caption, Len(Panels[i]->Caption), @R, DT_END_ELLIPSIS
-						'.TextOut(Dc, R.Left + 3, R.Top + 3, Panels[i]->Caption, Len(Panels[i]->Caption))
-					Next i
-					SetBkMode(Dc, OPAQUE)
-					NewFontHandle = SelectObject(Dc, OldFontHandle)
-					If OnPaint Then OnPaint(*Designer, This, Canvas)
-					Canvas.UnSetHandle
-					EndPaint Handle, @Ps
-					Message.Result = 0
-					Return
-				End If
 			Case CM_NOTIFY
 				Dim lvp As NMMOUSE Ptr = Cast(NMMOUSE Ptr, Message.lParam)
 				Dim As StatusPanel Ptr stPanel

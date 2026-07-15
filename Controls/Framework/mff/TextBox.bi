@@ -65,7 +65,6 @@ Namespace My.Sys.Forms
 		FWordWraps As Boolean
 		FInputFilter As WString Ptr 'David Change
 			Declare Static Sub WndProc(ByRef message As Message)
-			Declare Virtual Sub SetDark(Value As Boolean)
 		Declare Virtual Sub ProcessMessage(ByRef message As Message)
 	Public:
 			'Reads property from storage.

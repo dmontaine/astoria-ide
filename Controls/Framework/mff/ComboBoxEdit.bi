@@ -50,7 +50,6 @@ Namespace My.Sys.Forms
 			Declare Static Sub HandleIsAllocated(ByRef Sender As Control)
 			Declare Static Function WindowProc(FWindow As HWND, msg As UINT, wParam As WPARAM, lParam As LPARAM) As LRESULT
 			Declare Static Function SubClassProc(FWindow As HWND, msg As UINT, wParam As WPARAM, lParam As LPARAM) As LRESULT
-			Declare Virtual Sub SetDark(Value As Boolean)
 		Declare Virtual Sub ProcessMessage(ByRef Message As Message)
 	Public:
 		'Collection of list items.

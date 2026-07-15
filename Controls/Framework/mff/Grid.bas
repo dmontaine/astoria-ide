@@ -433,8 +433,8 @@ Namespace My.Sys.Forms
 		Text         = ""
 		Hint         = ""
 		FEditable    = False
-			FBackColor   = IIf(g_darkModeEnabled, darkBkColor, GetSysColor(COLOR_WINDOW))
-			FForeColor   = IIf(g_darkModeEnabled, darkTextColor, GetSysColor(COLOR_WINDOWTEXT))
+			FBackColor   = GetSysColor(COLOR_WINDOW)
+			FForeColor   = GetSysColor(COLOR_WINDOWTEXT)
 		FImageIndex = -1
 	End Constructor
 	
@@ -1165,23 +1165,6 @@ Namespace My.Sys.Forms
 		FShowHint = Value
 	End Property
 	
-		Private Sub Grid.SetDark(Value As Boolean)
-			Base.SetDark Value
-			If Value Then
-				hHeader = ListView_GetHeader(FHandle)
-				SetWindowTheme(hHeader, "DarkMode_ItemsView", nullptr) ' DarkMode
-				SetWindowTheme(FHandle, "DarkMode_Explorer", nullptr) ' DarkMode
-				AllowDarkModeForWindow(FHandle, g_darkModeEnabled)
-				AllowDarkModeForWindow(hHeader, g_darkModeEnabled)
-			Else
-				hHeader = ListView_GetHeader(FHandle)
-				SetWindowTheme(hHeader, NULL, NULL) ' DarkMode
-				SetWindowTheme(FHandle, NULL, NULL) ' DarkMode
-				AllowDarkModeForWindow(FHandle, g_darkModeEnabled)
-				AllowDarkModeForWindow(hHeader, g_darkModeEnabled)
-			End If
-			'SendMessage FHandle, WM_THEMECHANGED, 0, 0
-		End Sub
 	
 	Private Sub Grid.ProcessMessage(ByRef Message As Message)
 			Dim As Rect R, Rc, Rc_
@@ -1218,7 +1201,6 @@ Namespace My.Sys.Forms
 						Return
 					Case CDDS_ITEMPREPAINT
 						'Var info = Cast(SubclassInfo Ptr, dwRefData)
-						If g_darkModeEnabled Then SetTextColor(nmcd->hdc, headerTextColor)
 						Message.Result = CDRF_DODEFAULT
 						Return
 					End Select
@@ -1276,41 +1258,6 @@ Namespace My.Sys.Forms
 					Repaint
 				End Select
 			Case WM_THEMECHANGED
-				If (g_darkModeSupported) Then
-					Dim As HWND hHeader = ListView_GetHeader(Message.hWnd)
-					AllowDarkModeForWindow(Message.hWnd, g_darkModeEnabled)
-					AllowDarkModeForWindow(hHeader, g_darkModeEnabled)
-					Dim As HTHEME hTheme '= OpenThemeData(nullptr, "ItemsView")
-					'If (hTheme) Then
-					'	Dim As COLORREF Color1
-					'	If (SUCCEEDED(GetThemeColor(hTheme, 0, 0, TMT_TEXTCOLOR, @Color1))) Then
-					If g_darkModeEnabled Then
-						ListView_SetTextColor(Message.hWnd, darkTextColor) 'Color1)
-						ForeColor = darkTextColor
-					Else
-						ListView_SetTextColor(Message.hWnd, GetSysColor(COLOR_WINDOWTEXT)) 'Color1)
-						ForeColor = GetSysColor(COLOR_WINDOWTEXT)
-					End If
-					'	End If
-					'	If (SUCCEEDED(GetThemeColor(hTheme, 0, 0, TMT_FILLCOLOR, @Color1))) Then
-					If g_darkModeEnabled Then
-						ListView_SetTextBkColor(Message.hWnd, darkBkColor) 'Color1)
-						ListView_SetBkColor(Message.hWnd, darkBkColor) 'Color1)
-						BackColor = darkBkColor
-					Else
-						ListView_SetTextBkColor(Message.hWnd, GetSysColor(COLOR_WINDOW)) 'Color1)
-						ListView_SetBkColor(Message.hWnd, GetSysColor(COLOR_WINDOW)) 'Color1)
-						BackColor = GetSysColor(COLOR_WINDOW)
-					End If
-					hTheme = OpenThemeData(hHeader, "Header")
-					If (hTheme) Then
-						'Var info = reinterpret_cast<SubclassInfo*>(dwRefData);
-						GetThemeColor(hTheme, HP_HEADERITEM, 0, TMT_TEXTCOLOR, @headerTextColor)
-						CloseThemeData(hTheme)
-					End If
-					SendMessageW(hHeader, WM_THEMECHANGED, Message.wParam, Message.lParam)
-					RedrawWindow(Message.hWnd, nullptr, nullptr, RDW_FRAME Or RDW_INVALIDATE)
-				End If
 			Case CM_NOTIFY
 				Dim lvp As NMLISTVIEW Ptr = Cast(NMLISTVIEW Ptr, Message.lParam)
 				Select Case lvp->hdr.code
@@ -1422,7 +1369,7 @@ Namespace My.Sys.Forms
 					Case CDDS_ITEMPREPAINT
 						
 					Case CDDS_POSTPAINT
-						Dim As HPEN GridLinesPen = CreatePen(PS_SOLID, 1, IIf(FGridColorLine = -1, IIf(g_darkModeEnabled, darkHlBkColor, GetSysColor(COLOR_BTNFACE)), FGridColorLine))
+						Dim As HPEN GridLinesPen = CreatePen(PS_SOLID, 1, IIf(FGridColorLine = -1, GetSysColor(COLOR_BTNFACE), FGridColorLine))
 						Dim As HPEN PrevPen = SelectObject(nmcd->hdc, GridLinesPen)
 						Dim As Integer frmt, Widths, Heights, ScrollLeft, WidthCol0, TextColor, TextColorSave, TextColorCol, TextColorRow
 						Dim As Integer iRowsCount = Rows.Count, RowsCountPerPage = ListView_GetCountPerPage(FHandle)
@@ -1959,8 +1906,8 @@ Namespace My.Sys.Forms
 				'Dynamically switching to and from the LVS_OWNERDATA style is not supported.
 				.Style             = WS_CHILD Or WS_TABSTOP Or WS_VISIBLE Or LVS_REPORT Or LVS_SINGLESEL Or LVS_SHOWSELALWAYS Or LVS_OWNERDATA
 				.DoubleBuffered = True
-				.BackColor = IIf(g_darkModeEnabled, darkBkColor, GetSysColor(COLOR_WINDOW))
-				.ForeColor = IIf(g_darkModeEnabled, darkTextColor, Font.Color)
+				.BackColor = GetSysColor(COLOR_WINDOW)
+				.ForeColor = Font.Color
 				.RegisterClass "Grid", WC_LISTVIEW
 				WLet(FClassAncestor, WC_LISTVIEW)
 			.Child             = @This

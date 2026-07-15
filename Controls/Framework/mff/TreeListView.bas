@@ -1126,49 +1126,11 @@ Namespace My.Sys.Forms
 			Return CallWindowProc(GetProp(hDlg, "@@@Proc"), hDlg, uMsg, wParam, lParam)
 		End Function
 		
-		Private Sub TreeListView.SetDark(Value As Boolean)
-			Base.SetDark Value
-			If Value Then
-				hHeader = ListView_GetHeader(FHandle)
-				SetWindowTheme(hHeader, "DarkMode_ItemsView", nullptr) ' DarkMode
-				SetWindowTheme(FHandle, "DarkMode_Explorer", nullptr) ' DarkMode
-				AllowDarkModeForWindow(FHandle, g_darkModeEnabled)
-				AllowDarkModeForWindow(hHeader, g_darkModeEnabled)
-			Else
-				hHeader = ListView_GetHeader(FHandle)
-				SetWindowTheme(hHeader, NULL, NULL) ' DarkMode
-				SetWindowTheme(FHandle, NULL, NULL) ' DarkMode
-				AllowDarkModeForWindow(FHandle, g_darkModeEnabled)
-				AllowDarkModeForWindow(hHeader, g_darkModeEnabled)
-			End If
-			'SendMessage FHandle, WM_THEMECHANGED, 0, 0
-		End Sub
 	
 	Private Sub TreeListView.ProcessMessage(ByRef Message As Message)
 		'?message.msg, GetMessageName(message.msg)
 			Select Case Message.Msg
 			Case WM_PAINT
-				If g_darkModeSupported AndAlso g_darkModeEnabled AndAlso FDefaultBackColor = FBackColor Then
-					If Not FDarkMode Then
-						SetDark True
-						'						FDarkMode = True
-						'						hHeader = ListView_GetHeader(FHandle)
-						'						SetWindowTheme(hHeader, "DarkMode_ItemsView", nullptr) ' DarkMode
-						'						SetWindowTheme(FHandle, "DarkMode_Explorer", nullptr) ' DarkMode
-						'						AllowDarkModeForWindow(FHandle, g_darkModeEnabled)
-						'						AllowDarkModeForWindow(hHeader, g_darkModeEnabled)
-					End If
-				Else
-					If FDarkMode Then
-						SetDark False
-						'						FDarkMode = False
-						'						hHeader = ListView_GetHeader(FHandle)
-						'						SetWindowTheme(hHeader, NULL, NULL) ' DarkMode
-						'						SetWindowTheme(FHandle, NULL, NULL) ' DarkMode
-						'						AllowDarkModeForWindow(FHandle, g_darkModeEnabled)
-						'						AllowDarkModeForWindow(hHeader, g_darkModeEnabled)
-					End If
-				End If
 				Message.Result = 0
 			Case WM_DPICHANGED
 				Base.ProcessMessage(Message)
@@ -1203,64 +1165,11 @@ Namespace My.Sys.Forms
 						Return
 					Case CDDS_ITEMPREPAINT
 						'Var info = Cast(SubclassInfo Ptr, dwRefData)
-						If g_darkModeEnabled Then
-							SetTextColor(nmcd->hdc, headerTextColor)
-						End If
 						Message.Result = CDRF_DODEFAULT
 						Return
 					End Select
 				End If
 			Case WM_THEMECHANGED
-				If (g_darkModeSupported) Then
-					Dim As HWND hHeader = ListView_GetHeader(Message.hWnd)
-					
-					AllowDarkModeForWindow(Message.hWnd, g_darkModeEnabled)
-					' Theme the column header exactly as SetDark does. Do NOT route
-					' this through AllowDarkModeForWindow: that applies
-					' "DarkMode_Explorer", which leaves the header background light
-					' - so switching to dark left the header white. SetDark uses
-					' "DarkMode_ItemsView" (the theme that actually darkens a
-					' header), and startup works because it goes through SetDark;
-					' this path must match it or the two disagree.
-					If g_darkModeEnabled Then
-						SetWindowTheme(hHeader, "DarkMode_ItemsView", nullptr)
-					Else
-						SetWindowTheme(hHeader, NULL, NULL)
-					End If
-
-					Dim As HTHEME hTheme '= OpenThemeData(nullptr, "ItemsView")
-					'If (hTheme) Then
-					'	Dim As COLORREF Color1
-					'	If (SUCCEEDED(GetThemeColor(hTheme, 0, 0, TMT_TEXTCOLOR, @Color1))) Then
-					If g_darkModeEnabled Then
-						ListView_SetTextColor(Message.hWnd, darkTextColor) 'Color1)
-					Else
-						ListView_SetTextColor(Message.hWnd, Font.Color) 'Color1)
-					End If
-					'	End If
-					'	If (SUCCEEDED(GetThemeColor(hTheme, 0, 0, TMT_FILLCOLOR, @Color1))) Then
-					If g_darkModeEnabled Then
-						ListView_SetTextBkColor(Message.hWnd, darkBkColor) 'Color1)
-						ListView_SetBkColor(Message.hWnd, darkBkColor) 'Color1)
-					Else
-						ListView_SetTextBkColor(Message.hWnd, GetSysColor(COLOR_WINDOW)) 'Color1)
-						ListView_SetBkColor(Message.hWnd, GetSysColor(COLOR_WINDOW)) 'Color1)
-					End If
-					'	End If
-					'	CloseThemeData(hTheme)
-					'End If
-					
-					hTheme = OpenThemeData(hHeader, "Header")
-					If (hTheme) Then
-						'Var info = reinterpret_cast<SubclassInfo*>(dwRefData);
-						GetThemeColor(hTheme, HP_HEADERITEM, 0, TMT_TEXTCOLOR, @headerTextColor)
-						CloseThemeData(hTheme)
-					End If
-					
-					SendMessageW(hHeader, WM_THEMECHANGED, Message.wParam, Message.lParam)
-					
-					RedrawWindow(Message.hWnd, nullptr, nullptr, RDW_FRAME Or RDW_INVALIDATE)
-				End If
 			Case CM_DRAWITEM
 				Dim lpdis As DRAWITEMSTRUCT Ptr
 				Dim As Integer ItemID, State
@@ -1341,60 +1250,6 @@ Namespace My.Sys.Forms
 					Dim nmk As NMKEY Ptr = Cast(NMKEY Ptr, Message.lParam)
 					If OnItemKeyDown Then OnItemKeyDown(*Designer, This, GetTreeListViewItem(lvp->iItem))
 				Case NM_CUSTOMDRAW
-					If (g_darkModeSupported AndAlso g_darkModeEnabled) AndAlso FGridLines Then
-						Dim As LPNMCUSTOMDRAW nmcd = Cast(LPNMCUSTOMDRAW, Message.lParam)
-						Select Case nmcd->dwDrawStage
-						Case CDDS_PREPAINT
-							Message.Result = CDRF_NOTIFYPOSTPAINT
-							Return
-						Case CDDS_POSTPAINT
-							Dim As HPEN GridLinesPen = CreatePen(PS_SOLID, 1, darkHlBkColor)
-							Dim As HPEN PrevPen = SelectObject(nmcd->hdc, GridLinesPen)
-							Dim As Integer Widths, Heights
-							Dim As SCROLLINFO sif
-							sif.cbSize = SizeOf(sif)
-							sif.fMask  = SIF_POS
-							GetScrollInfo(FHandle, SB_HORZ, @sif)
-							Widths -= sif.nPos
-							Dim lvc As LVCOLUMN
-							For i As Integer = 0 To Columns.Count - 1
-								lvc.mask = LVCF_WIDTH Or LVCF_SUBITEM
-								lvc.iSubItem = i
-								ListView_GetColumn(FHandle, i, @lvc)
-								Widths += lvc.cx
-								MoveToEx nmcd->hdc, Widths, 0, 0
-								LineTo nmcd->hdc, Widths, ScaleY(This.Height)
-							Next i
-							Dim As HWND hHeader = ListView_GetHeader(FHandle)
-							Dim As ..Rect R
-							GetWindowRect(hHeader, @R)
-							Heights = R.Bottom - R.Top - 1
-							Dim rc As ..Rect
-							If ListView_GetItemCount(FHandle) = 0 Then
-								If FItemHeight = 0 Then
-									Dim As LVITEM lvi
-									lvi.mask = LVIF_PARAM
-									lvi.lParam = 0
-									ListView_InsertItem(FHandle, @lvi)
-									ListView_GetItemRect FHandle, 0, @rc, LVIR_BOUNDS
-									ListView_DeleteItem(FHandle, 0)
-									FItemHeight = rc.Bottom - rc.Top
-								End If
-							Else
-								ListView_GetItemRect FHandle, 0, @rc, LVIR_BOUNDS
-								FItemHeight = rc.Bottom - rc.Top
-							End If
-							For i As Integer = 0 To ListView_GetCountPerPage(FHandle)
-								Heights += FItemHeight '17
-								MoveToEx nmcd->hdc, 0, Heights, 0
-								LineTo nmcd->hdc, ScaleX(This.Width), Heights
-							Next i
-							SelectObject(nmcd->hdc, PrevPen)
-							DeleteObject GridLinesPen
-							Message.Result = CDRF_DODEFAULT
-							Return
-						End Select
-					End If
 				Case LVN_ITEMACTIVATE: If OnItemActivate Then OnItemActivate(*Designer, This, GetTreeListViewItem(lvp->iItem))
 				Case LVN_BEGINSCROLL: If OnBeginScroll Then OnBeginScroll(*Designer, This)
 				Case LVN_ENDSCROLL: If OnEndScroll Then OnEndScroll(*Designer, This)

@@ -44,9 +44,6 @@ Namespace My.Sys.Forms
 				'ti.uId    = Cast(UINT, FHandle)
 			
 				'FHandle = CreateWindowW(TOOLTIPS_CLASS, "", WS_POPUP, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, NULL, Cast(HMENU, NULL), GetModuleHandle(NULL), NULL)
-				If g_darkModeEnabled Then
-					SetWindowTheme(FHandle, "DarkMode_Explorer", nullptr)
-				End If
 				ti.uFlags = TTF_IDISHWND Or TTF_TRACK Or TTF_ABSOLUTE Or TTF_PARSELINKS Or TTF_TRANSPARENT
 				ti.hinst  = GetModuleHandle(NULL)
 				ti.lpszText  = FText.vptr
@@ -67,9 +64,6 @@ Namespace My.Sys.Forms
 			If FHandle = 0 Then
 				CreateWnd
 				'FHandle = CreateWindowW(TOOLTIPS_CLASS, "", WS_POPUP, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, NULL, Cast(HMENU, NULL), GetModuleHandle(NULL), NULL)
-				If g_darkModeEnabled Then
-					SetWindowTheme(FHandle, "DarkMode_Explorer", nullptr)
-				End If
 				ti.uFlags = TTF_IDISHWND Or TTF_TRACK Or TTF_ABSOLUTE Or TTF_PARSELINKS Or TTF_TRANSPARENT
 				ti.hinst  = GetModuleHandle(NULL)
 				ti.lpszText  = FText.vptr

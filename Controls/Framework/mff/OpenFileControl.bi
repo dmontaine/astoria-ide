@@ -28,7 +28,6 @@ Namespace My.Sys.Forms
 			ThreadID As Any Ptr
 	Protected:
 		FFirstShowed  As Boolean
-		FDarkMode     As Boolean
 		FInitialDir   As WString Ptr
 		FMultiSelect  As Boolean
 		FDefaultExt   As WString Ptr

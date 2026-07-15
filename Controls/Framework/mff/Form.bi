@@ -93,7 +93,6 @@ Namespace My.Sys.Forms
 			Declare Static Sub HandleIsDestroyed(ByRef Sender As Control)
 			Declare Static Sub WNDPROC(ByRef Message As Message)
 				Declare Static Function HookClientProc(hDlg As HWND, uMsg As UINT, wParam As WPARAM, lParam As LPARAM) As LRESULT
-				Declare Virtual Sub SetDark(Value As Boolean)
 		Declare Function EnumMenuItems(Item As MenuItem) As Boolean
 		Declare Sub GetMenuItems
 		Declare Sub ShowItems(Ctrl As Control Ptr)

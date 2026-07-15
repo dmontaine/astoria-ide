@@ -521,7 +521,6 @@ Namespace My.Sys.Forms
 			Dim As ..Point m_tP
 			Declare Static Sub EC_TimerProc(HWND As HWND, uMsg As UINT, idEvent As UINT_PTR, dwTime As DWORD)
 			Declare Static Sub EC_TimerProcBlink(HWND As HWND, uMsg As UINT, idEvent As UINT_PTR, dwTime As DWORD)
-			Declare Sub SetDark(Value As Boolean)
 			Declare Sub SetClientSize()
 		Declare Function deltaToScrollAmount(lDelta As Integer) As Integer
 		Declare Sub MiddleScroll

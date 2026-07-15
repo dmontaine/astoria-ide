@@ -205,13 +205,6 @@ Sub LoadSettings
 		InterfaceFontSize = iniSettings.ReadInteger("Options", "InterfaceFontSize", 9)
 	DisplayMenuIcons = iniSettings.ReadBool("Options", "DisplayMenuIcons", True)
 	ShowMainToolBar = iniSettings.ReadBool("Options", "ShowMainToolbar", True)
-	DarkMode = iniSettings.ReadBool("Options", "DarkMode", False)
-	' Bypass the App.DarkMode property (which broadcasts WM_SETTINGCHANGE to
-	' the whole desktop) here - at this point in startup nothing of ours has
-	' been created yet, so there's nothing to refresh, and every control
-	' will already paint correctly via its own first WM_PAINT.
-	If g_buildNumber = 0 Then InitDarkMode
-	SetDarkMode(DarkMode, False, False)
 	'gLocalToolBox = iniSettings.ReadBool("Options", "ShowToolBoxLocal", False)
 	'gLocalKeyWords = iniSettings.ReadBool("Options", "KeyWordsLocal", False)
 	ProjectAutoSuggestions = False

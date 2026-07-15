@@ -251,7 +251,6 @@ Namespace My.Sys.Forms
 			Declare Static Function EditControlProc(hDlg As HWND, uMsg As UINT, wParam As WPARAM, lParam As LPARAM) As LRESULT
 			Declare Static Function GetTreeListViewItemByIndex(Node As TreeListViewItem Ptr, Item As Integer, ByRef iCount As Integer) As TreeListViewItem Ptr
 			Declare Function GetTreeListViewItem(Item As Integer) As TreeListViewItem Ptr
-			Declare Virtual Sub SetDark(Value As Boolean)
 			hHeader As HWND
 			headerTextColor As COLORREF
 	Public:

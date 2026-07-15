@@ -3026,4 +3026,3 @@ mnuShowPanelDesigner = mnuDesigner.Add(("Show Panel"), "", "ShowPanel")
 mnuDesigner.Add("-")
 mnuDesigner.Add(("Properties"), "Property", "Properties", @PopupClick)
 
-

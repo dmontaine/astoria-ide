@@ -4999,24 +4999,14 @@ Namespace My.Sys.Forms
 		Next zz
 		If Not bDividedX Then
 				SetRect(@rc, 0, ScaleY(dwClientY - 17), ScaleX(7), ScaleY(dwClientY))
-				If g_darkModeEnabled Then
-					This.Canvas.Pen.Color = BGR(23, 23, 23)
-					This.Canvas.Brush.Color = darkBkColor
-				Else
-					This.Canvas.Pen.Color = BGR(217, 217, 217)
-					This.Canvas.Brush.Color = clBtnFace
-				End If
+				This.Canvas.Pen.Color = BGR(217, 217, 217)
+				This.Canvas.Brush.Color = clBtnFace
 				Rectangle bufDC, rc.Left, rc.Top, rc.Right, rc.Bottom
 		End If
 		If Not bDividedY Then
 				SetRect(@rc, ScaleX(dwClientX - 17), 0, ScaleX(dwClientX), ScaleY(7))
-				If g_darkModeEnabled Then
-					This.Canvas.Pen.Color = BGR(23, 23, 23)
-					This.Canvas.Brush.Color = darkBkColor
-				Else
-					This.Canvas.Pen.Color = BGR(217, 217, 217)
-					This.Canvas.Brush.Color = clBtnFace
-				End If
+				This.Canvas.Pen.Color = BGR(217, 217, 217)
+				This.Canvas.Brush.Color = clBtnFace
 				Rectangle bufDC, rc.Left, rc.Top, rc.Right, rc.Bottom
 		End If
 			'FillRect bufDC, @rc, This.Canvas.Brush.Handle
@@ -5028,23 +5018,13 @@ Namespace My.Sys.Forms
 		End If
 		If bDividedX Then
 				SetRect(@rc, ScaleX(iDividedX), -1, ScaleX(iDividedX + 7), ScaleY(dwClientY) + 1)
-				If g_darkModeEnabled Then
-					This.Canvas.Pen.Color = BGR(130, 135, 144)
-					This.Canvas.Brush.Color = darkBkColor
-				Else
-					This.Canvas.Pen.Color = BGR(217, 217, 217)
-					This.Canvas.Brush.Color = clBtnFace
-				End If
+				This.Canvas.Pen.Color = BGR(217, 217, 217)
+				This.Canvas.Brush.Color = clBtnFace
 				Rectangle bufDC, rc.Left, rc.Top, rc.Right, rc.Bottom
 		ElseIf bDividedY Then
 				SetRect(@rc, -1, ScaleY(iDividedY), ScaleX(dwClientX) + 1, ScaleY(iDividedY + 7))
-				If g_darkModeEnabled Then
-					This.Canvas.Pen.Color = BGR(130, 135, 144)
-					This.Canvas.Brush.Color = darkBkColor
-				Else
-					This.Canvas.Pen.Color = BGR(217, 217, 217)
-					This.Canvas.Brush.Color = clBtnFace
-				End If
+				This.Canvas.Pen.Color = BGR(217, 217, 217)
+				This.Canvas.Brush.Color = clBtnFace
 				Rectangle bufDC, rc.Left, rc.Top, rc.Right, rc.Bottom
 		End If
 		If bInDivideX Then
@@ -5241,24 +5221,6 @@ Namespace My.Sys.Forms
 		If OnShowDropDown Then OnShowDropDown(*Designer, This)
 	End Sub
 	
-		Private Sub EditControl.SetDark(Value As Boolean)
-			Base.SetDark Value
-			If Value Then
-				SetWindowTheme(hwndTT, "DarkMode_Explorer", nullptr)
-				SetWindowTheme(sbScrollBarvTop, "DarkMode_Explorer", nullptr)
-				SetWindowTheme(sbScrollBarvBottom, "DarkMode_Explorer", nullptr)
-				SetWindowTheme(sbScrollBarhLeft, "DarkMode_Explorer", nullptr)
-				SetWindowTheme(sbScrollBarhRight, "DarkMode_Explorer", nullptr)
-			Else
-				SetWindowTheme(hwndTT, NULL, NULL)
-				SetWindowTheme(sbScrollBarvTop, NULL, NULL)
-				SetWindowTheme(sbScrollBarvBottom, NULL, NULL)
-				SetWindowTheme(sbScrollBarhLeft, NULL, NULL)
-				SetWindowTheme(sbScrollBarhRight, NULL, NULL)
-			End If
-			cboIntellisense.SetDark Value
-			'SendMessage FHandle, WM_THEMECHANGED, 0, 0
-		End Sub
 	
 	Sub EditControl.ShowDropDownToolTipAt(X As Integer, Y As Integer)
 			DropDownToolTipItemIndex = cboIntellisense.ItemIndex
@@ -5273,9 +5235,6 @@ Namespace My.Sys.Forms
 			If hwndTTDropDown = 0 Then
 				TTDropDown.CreateWnd
 				hwndTTDropDown = TTDropDown.Handle 'CreateWindowW(TOOLTIPS_CLASS, "", WS_POPUP, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, NULL, Cast(HMENU, NULL), GetModuleHandle(NULL), NULL)
-				If g_darkModeEnabled Then
-					SetWindowTheme(hwndTTDropDown, "DarkMode_Explorer", nullptr)
-				End If
 				ti.uFlags = TTF_IDISHWND Or TTF_TRACK Or TTF_ABSOLUTE Or TTF_PARSELINKS Or TTF_TRANSPARENT
 				ti.hinst  = GetModuleHandle(NULL)
 				ti.lpszText  = FHintDropDown
@@ -5314,9 +5273,6 @@ Namespace My.Sys.Forms
 			If hwndTTMouseHover = 0 Then
 				TTMouseHover.CreateWnd
 				hwndTTMouseHover = TTMouseHover.Handle 'CreateWindowW(TOOLTIPS_CLASS, "", WS_POPUP, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, NULL, Cast(HMENU, NULL), GetModuleHandle(NULL), NULL)
-				If g_darkModeEnabled Then
-					SetWindowTheme(hwndTTMouseHover, "DarkMode_Explorer", nullptr)
-				End If
 				ti.uFlags = TTF_IDISHWND Or TTF_TRACK Or TTF_ABSOLUTE Or TTF_PARSELINKS Or TTF_TRANSPARENT
 				ti.hinst  = GetModuleHandle(NULL)
 				ti.lpszText  = FHintMouseHover
@@ -5358,9 +5314,6 @@ Namespace My.Sys.Forms
 			If hwndTT = 0 Then
 				TT.CreateWnd
 				hwndTT = TT.Handle 'CreateWindowW(TOOLTIPS_CLASS, "", WS_POPUP, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, NULL, Cast(HMENU, NULL), GetModuleHandle(NULL), NULL)
-				If g_darkModeEnabled Then
-					SetWindowTheme(hwndTT, "DarkMode_Explorer", nullptr)
-				End If
 				ti.uFlags = TTF_IDISHWND Or TTF_TRACK Or TTF_ABSOLUTE Or TTF_PARSELINKS Or TTF_TRANSPARENT
 				ti.hinst  = GetModuleHandle(NULL)
 				ti.lpszText  = FHint
@@ -6551,31 +6504,6 @@ Namespace My.Sys.Forms
 				If Not bPainted Then
 					bPainted = True
 				End If
-				If g_darkModeSupported AndAlso g_darkModeEnabled Then
-					If Not FDarkMode Then
-						SetDark True
-						'						FDarkMode = True
-						'						SetWindowTheme(FHandle, "DarkMode_Explorer", nullptr)
-						'						This.Brush.Handle = hbrBkgnd
-						'						SendMessageW(FHandle, WM_THEMECHANGED, 0, 0)
-						'						_AllowDarkModeForWindow(FHandle, g_darkModeEnabled)
-						Repaint
-					End If
-				Else
-					If FDarkMode Then
-						SetDark False
-						'						FDarkMode = False
-						'						SetWindowTheme(FHandle, NULL, NULL)
-						'						If FBackColor = -1 Then
-						'							This.Brush.Handle = 0
-						'						Else
-						'							This.Brush.Color = FBackColor
-						'						End If
-						'						SendMessageW(FHandle, WM_THEMECHANGED, 0, 0)
-						'						_AllowDarkModeForWindow(FHandle, g_darkModeEnabled)
-						Repaint
-					End If
-				End If
 			PaintControl
 			ShowCaretPos False
 		Case Else
@@ -6595,17 +6523,6 @@ Namespace My.Sys.Forms
 					ShowWindow .sbScrollBarvBottom, SW_SHOW
 					ShowWindow .sbScrollBarhLeft, SW_HIDE
 					ShowWindow .sbScrollBarhRight, SW_SHOW
-					If g_darkModeEnabled Then
-						SetWindowTheme(.sbScrollBarvTop, "DarkMode_Explorer", nullptr)
-						SetWindowTheme(.sbScrollBarvBottom, "DarkMode_Explorer", nullptr)
-						SetWindowTheme(.sbScrollBarhLeft, "DarkMode_Explorer", nullptr)
-						SetWindowTheme(.sbScrollBarhRight, "DarkMode_Explorer", nullptr)
-						'						.FDarkMode = True
-						'						SetWindowTheme(.FHandle, "DarkMode_Explorer", nullptr)
-						'						SendMessageW(.FHandle, WM_THEMECHANGED, 0, 0)
-						'						AllowDarkModeForWindow(.FHandle, g_darkModeEnabled)
-						'						UpdateWindow(.FHandle)
-					End If
 				'Var s1Pos = 100, s1Min = 1, s1Max = 100
 				'SetScrollRange(.FHandle, SB_CTL, s1Min, s1Max, TRUE)
 				'SetScrollPos(.FHandle, SB_CTL, s1Pos, TRUE)

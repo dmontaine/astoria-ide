@@ -41,7 +41,6 @@ Namespace My.Sys.Forms
 			Declare Static Sub HandleIsAllocated(ByRef Sender As Control)
 		Declare Virtual Sub ProcessMessage(ByRef Message As Message)
 		Declare Sub SetRange(AMin As Integer, AMax As Integer)
-			Declare Virtual Sub SetDark(Value As Boolean)
 	Public:
 			'Loads configuration from persistence stream
 			Declare Function ReadProperty(ByRef PropertyName As String) As Any Ptr

@@ -586,7 +586,7 @@ Namespace My.Sys.Forms
 				If Images AndAlso Images->Handle Then TreeView_SetImageList(FHandle, CInt(Images->Handle), TVSIL_NORMAL)
 				If SelectedImages AndAlso SelectedImages->Handle Then TreeView_SetImageList(FHandle, CInt(SelectedImages->Handle), TVSIL_STATE)
 				SendMessage(FHandle, TVM_SETINDENT, 0, 0)
-				RedrawWindow(Message.hWnd, nullptr, nullptr, RDW_FRAME Or RDW_INVALIDATE)
+				RedrawWindow(Message.hWnd, NULL, NULL, RDW_FRAME Or RDW_INVALIDATE)
 				Return
 			Case WM_DESTROY
 				If Images Then TreeView_SetImageList(FHandle, 0, TVSIL_NORMAL)
@@ -607,33 +607,6 @@ Namespace My.Sys.Forms
 					End Select
 				End If
 			Case WM_THEMECHANGED
-				If (g_darkModeSupported) Then
-					
-					AllowDarkModeForWindow(Message.hWnd, g_darkModeEnabled)
-					
-					'Dim As HTHEME hTheme = OpenThemeData(nullptr, "ItemsView")
-					'If (hTheme) Then
-					'Dim As COLORREF Color1
-					'If (SUCCEEDED(GetThemeColor(hTheme, 0, 0, TMT_TEXTCOLOR, @Color1))) Then
-					If g_darkModeEnabled Then
-						TreeView_SetTextColor(Message.hWnd, darkTextColor) 'Color1)
-					Else
-						TreeView_SetTextColor(Message.hWnd, Font.Color) 'Color1)
-					End If
-					'End If
-					'If (SUCCEEDED(GetThemeColor(hTheme, 0, 0, TMT_FILLCOLOR, @Color1))) Then
-					'TreeView_SetTextBkColor(Message.hWnd, Color1)
-					If g_darkModeEnabled Then
-						TreeView_SetBkColor(Message.hWnd, darkBkColor) 'Color1)
-					Else
-						TreeView_SetBkColor(Message.hWnd, FBackColor) 'Color1)
-					End If
-					'End If
-					'	CloseThemeData(hTheme)
-					'End If
-					
-					RedrawWindow(Message.hWnd, nullptr, nullptr, RDW_FRAME Or RDW_INVALIDATE)
-				End If
 			Case CM_NOTIFY
 				Dim tvp As NMTREEVIEW Ptr = Cast(NMTREEVIEW Ptr, Message.lParam)
 				'If tvp->itemNew.hItem <> 0 Then

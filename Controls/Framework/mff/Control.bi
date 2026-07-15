@@ -21,7 +21,6 @@
 #include once "Canvas.bi"
 #include once "IntegerList.bi"
 #include once "NotifyIcon.bi"
-#include once "DarkMode/DarkMode.bi"
 	#include once "win/commctrl.bi"
 	#include once "win/shellapi.bi"
 	#include once "win/shlobj.bi"
@@ -271,7 +270,6 @@ Namespace My.Sys.Forms
 				FClient As HWND
 				As Integer FClientX, FClientY, FClientW, FClientH
 				FToolInfo          As TOOLINFO
-				FDarkMode          As Boolean
 				FDropTarget        As CDropTarget
 				FDropSource        As CDropSource
 			FBorderStyle       As Integer
@@ -350,7 +348,6 @@ Namespace My.Sys.Forms
 				Declare Static Function CallWndProc(FWindow As HWND, MSG As UINT, WPARAM As WPARAM, LPARAM As LPARAM) As LRESULT
 				Declare Static Function SuperWndProc(FWindow As HWND, MSG As UINT, WPARAM As WPARAM, LPARAM As LPARAM) As LRESULT
 				Declare Function Perform(MSG As UINT, WPARAM As WPARAM, LPARAM As LPARAM) As LRESULT
-				Declare Virtual Sub SetDark(Value As Boolean)
 				Declare Sub AllocateHint
 				Declare Property ParentHandle As HWND
 				Declare Property ParentHandle(Value As HWND)

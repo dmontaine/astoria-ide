@@ -519,28 +519,10 @@ Namespace My.Sys.Forms
 	Private Sub ToolPalette.WndProc(ByRef Message As Message)
 	End Sub
 	
-		Private Sub ToolPalette.SetDark(Value As Boolean)
-			Base.SetDark Value
-			If Value Then
-				SetWindowTheme(FHandle, "DarkMode_InfoPaneToolbar", nullptr) 'DarkMode_BBComposited
-				Brush.Handle = hbrBkgnd
-				'SendMessageW(FHandle, WM_THEMECHANGED, 0, 0)
-			End If
-			'SendMessage FHandle, WM_THEMECHANGED, 0, 0
-		End Sub
 	
 	Private Sub ToolPalette.ProcessMessage(ByRef Message As Message)
 			Select Case Message.Msg
 			Case WM_PAINT
-				If g_darkModeSupported AndAlso g_darkModeEnabled AndAlso FDefaultBackColor = FBackColor Then
-					If Not FDarkMode Then
-						SetDark True
-'						FDarkMode = True
-'						SetWindowTheme(FHandle, "DarkMode_InfoPaneToolbar", nullptr) 'DarkMode_BBComposited
-'						Brush.Handle = hbrBkgnd
-'						SendMessageW(FHandle, WM_THEMECHANGED, 0, 0)
-					End If
-				End If
 				Message.Result = 0
 			Case WM_DPICHANGED
 				Base.ProcessMessage(Message)

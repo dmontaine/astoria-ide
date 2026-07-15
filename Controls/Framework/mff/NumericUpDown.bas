@@ -237,37 +237,6 @@ Namespace My.Sys.Forms
 					MoveUpDownControl
 				End With
 			Case WM_PAINT, WM_MOUSELEAVE, WM_MOUSEMOVE
-				If g_darkModeSupported AndAlso g_darkModeEnabled AndAlso (CBool(Message.Msg <> WM_MOUSEMOVE) OrElse (CBool(Message.Msg = WM_MOUSEMOVE) AndAlso FMouseInClient)) Then
-					If Not FDarkMode Then
-						FDarkMode = True
-						Brush.Handle = hbrBkgnd
-						SetWindowTheme(FHandle, "DarkMode_Explorer", nullptr)
-						SendMessageW(FHandle, WM_THEMECHANGED, 0, 0)
-						Repaint
-					End If
-					Dim As Any Ptr cp = GetClassProc(Message.hWnd)
-					If cp <> 0 Then
-						Message.Result = CallWindowProc(cp, Message.hWnd, Message.Msg, Message.wParam, Message.lParam)
-					End If
-					Dim As HDC Dc
-					Dc = GetWindowDC(Handle)
-					Dim As Rect r = Type( 0 )
-					GetWindowRect(Message.hWnd, @r)
-					r.Right -= r.Left + 1
-					r.Bottom -= r.Top + 1
-					r.Left = 1
-					r.Top = 1
-					Dim As HPEN NewPen = CreatePen(PS_SOLID, 1, darkBkColor)
-					Dim As HPEN PrevPen = SelectObject(Dc, NewPen)
-					Dim As HPEN PrevBrush = SelectObject(Dc, GetStockObject(NULL_BRUSH))
-					Rectangle Dc, r.Left, r.Top, r.Right, r.Bottom
-					SelectObject(Dc, PrevPen)
-					SelectObject(Dc, PrevBrush)
-					ReleaseDC(Handle, Dc)
-					DeleteObject NewPen
-					Message.Result = 0
-					Return
-				End If
 			Case CM_COMMAND
 				Select Case Message.wParamHi
 				Case EN_CHANGE

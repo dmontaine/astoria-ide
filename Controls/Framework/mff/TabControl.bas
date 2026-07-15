@@ -69,48 +69,9 @@ Namespace My.Sys.Forms
 			Case WM_DESTROY
 				CloseThemeData(FTheme)
 			Case WM_CTLCOLORSTATIC ', WM_CTLCOLORBTN
-				If UseVisualStyleBackColor AndAlso CBool(Not (g_darkModeEnabled AndAlso FDefaultBackColor = FBackColor)) Then
-					If IsAppThemed() Then
-						GetClientRect(Cast(HWND, msg.lParam), @rct)
-						DrawThemeParentBackground(Cast(HWND, msg.lParam), Cast(HDC, msg.wParam), @rct)
-						SetBkMode(Cast(HDC, msg.wParam), Transparent)
-						msg.Result = Cast(LRESULT, GetStockObject(NULL_BRUSH))
-						Return
-					End If
-				End If
 			Case WM_PAINT
-				If UseVisualStyleBackColor AndAlso CBool(Not (g_darkModeEnabled AndAlso FDefaultBackColor = FBackColor)) Then
-					If FDarkMode AndAlso msg.hWnd = FHandle Then
-						FDarkMode = False
-						SetWindowTheme(FHandle, NULL, "TAB")
-						FTheme = OpenThemeData(FHandle, "Window")
-					End If
-					If IsAppThemed() Then
-						GetClientRect(msg.hWnd, @rct)
-						DrawThemeBackground(FTheme, Cast(HDC, msg.wParam), 10, 0, @rct, NULL) 'TABP_BODY = 10
-						'Msg.Result = True
-						Return
-					End If
-				End If
 			Case WM_ERASEBKGND
-				If UseVisualStyleBackColor AndAlso CBool(Not (g_darkModeEnabled AndAlso FDefaultBackColor = FBackColor)) Then
-					If IsAppThemed() Then
-						GetClientRect(msg.hWnd, @rct)
-						DrawThemeBackground(FTheme, Cast(HDC, msg.wParam), 10, 0, @rct, NULL) 'TABP_BODY = 10
-						msg.Result = 1
-						Return
-					End If
-				End If
 			Case WM_PRINTCLIENT
-				If UseVisualStyleBackColor AndAlso CBool(Not (g_darkModeEnabled AndAlso FDefaultBackColor = FBackColor)) Then
-					If IsAppThemed() Then
-						Dim As ..Rect rct
-						GetClientRect(msg.hWnd, @rct)
-						FillRect(Cast(HDC, msg.wParam), @rct, GetStockObject(NULL_BRUSH))
-						msg.Result = True
-						Return
-					End If
-				End If
 				'Case WM_PAINT, WM_ERASEBKGND
 				'	    		Dim As PAINTSTRUCT ps
 				'				Dim As HDC hdc = BeginPaint(msg.hwnd, @ps)
@@ -686,25 +647,6 @@ Namespace My.Sys.Forms
 				Dim As LOGFONT LogRec
 				Dim As HFONT OldFontHandle, NewFontHandle
 				Dim hdc As HDC = lpdis->hDC
-				If CBool(g_darkModeSupported) AndAlso CBool(g_darkModeEnabled) AndAlso CBool(FTabPosition = tpLeft OrElse FTabPosition = tpRight) Then
-					GetObject Font.Handle, SizeOf(LogRec), @LogRec
-					LogRec.lfEscapement = 90 * 10
-					NewFontHandle = CreateFontIndirect(@LogRec)
-					OldFontHandle = SelectObject(hdc, NewFontHandle)
-					SetTextColor(hdc, darkTextColor)
-					SetBkMode(hdc, TRANSPARENT)
-					For i As Integer = 0 To TabCount - 1
-						Dim As ..Rect R
-						Perform(TCM_GETITEMRECT, i, CInt(@R))
-						If i = SelectedTabIndex Then FillRect(hdc, @R, hbrHlBkgnd)
-						.TextOut(hdc, IIf(FTabPosition = tpLeft, ScaleX(2), ScaleX(This.Width - ItemWidth(i))), ScaleY(ItemTop(i) + ItemHeight(i) - 5), Tabs[i]->Caption, Len(Tabs[i]->Caption))
-					Next i
-					SetBkMode(hdc, OPAQUE)
-					NewFontHandle = SelectObject(hdc, OldFontHandle)
-					DeleteObject(NewFontHandle)
-					Message.Result = 1
-					Exit Sub
-				End If
 				If FTabPosition = tpLeft OrElse FTabPosition = tpRight Then
 					GetObject Font.Handle, SizeOf(LogRec), @LogRec
 					LogRec.lfEscapement = 90 * 10
@@ -740,119 +682,7 @@ Namespace My.Sys.Forms
 			Case WM_THEMECHANGED
 				
 			Case WM_ERASEBKGND
-				If g_darkModeSupported AndAlso g_darkModeEnabled Then
-					' Actually fill dark before claiming the background is handled -
-					' this previously returned "erased" without painting anything, so
-					' whatever was underneath (usually the default white) showed
-					' through: most visibly as the big light body of an empty
-					' TabControl (the IDE's central area with no files open).
-					Dim As ..Rect RC
-					GetClientRect(FHandle, @RC)
-					FillRect(Cast(HDC, Message.wParam), @RC, hbrBkgnd)
-					Message.Result = -1
-					Exit Sub
-				End If
 			Case WM_PAINT, WM_NCPAINT
-				If g_darkModeSupported AndAlso g_darkModeEnabled AndAlso FDefaultBackColor = FBackColor Then
-					If Not FDarkMode Then
-						FDarkMode = True
-						'SetWindowTheme(FHandle, "DarkMode::Menu", nullptr)
-						SetWindowTheme(FHandle, "DarkMode_ImmersiveStart", nullptr) ' DarkMode
-						AllowDarkModeForWindow(FHandle, g_darkModeEnabled)
-						Brush.Handle = hbrBkgnd
-						SendMessageW(FHandle, WM_THEMECHANGED, 0, 0)
-						Repaint
-					End If
-					If FTabPosition = tpLeft OrElse FTabPosition = tpRight Then
-						Dim As HDC Dc, memDC
-						Dim As HBITMAP Bmp
-						Dim As PAINTSTRUCT Ps
-						Dc = BeginPaint(Handle, @Ps)
-						Canvas.SetHandle Dc
-						If OnPaint Then OnPaint(*Designer, This, Canvas)
-						FillRect Dc, @Ps.rcPaint, Brush.Handle
-						Dim As LOGFONT LogRec
-						Dim As HFONT OldFontHandle, NewFontHandle
-						GetObject Font.Handle, SizeOf(LogRec), @LogRec
-						LogRec.lfEscapement = 90 * 10
-						NewFontHandle = CreateFontIndirect(@LogRec)
-						OldFontHandle = SelectObject(Dc, NewFontHandle)
-						SetTextColor(Dc, darkTextColor)
-						SetBkMode(Dc, TRANSPARENT)
-						For i As Integer = 0 To TabCount - 1
-							Dim As ..Rect R
-							Perform(TCM_GETITEMRECT, i, CInt(@R))
-							If i = SelectedTabIndex Then
-								FillRect(Dc, @R, hbrHlBkgnd)
-							End If
-							.TextOut(Dc, IIf(FTabPosition = tpLeft, ScaleX(2), ScaleX(This.Width - ItemWidth(i))), ScaleY(ItemTop(i) + ItemHeight(i) - 5), Tabs[i]->Caption, Len(Tabs[i]->Caption))
-						Next i
-						SetBkMode(Dc, OPAQUE)
-						NewFontHandle = SelectObject(Dc, OldFontHandle)
-						DeleteObject(NewFontHandle)
-						Canvas.UnSetHandle
-						EndPaint Handle, @Ps
-						Message.Result = 0
-						Return
-					ElseIf FTabPosition = tpTop OrElse FTabPosition = tpBottom Then
-						' Same idea as the tpLeft/tpRight branch above, but for
-						' horizontal tab strips (no rotated font needed). Top-positioned
-						' tabs have TCS_OWNERDRAWFIXED switched off (see TabPosition
-						' setter), so the native control would otherwise paint the strip
-						' and items with the light visual-styles theme - this drop-in
-						' paint covers the strip background, item highlight, icon and
-						' caption in the dark palette instead.
-						Dim As HDC Dc
-						Dim As PAINTSTRUCT Ps
-						Dc = BeginPaint(Handle, @Ps)
-						Canvas.SetHandle Dc
-						If OnPaint Then OnPaint(*Designer, This, Canvas)
-						FillRect Dc, @Ps.rcPaint, Brush.Handle
-						Dim As HFONT OldFontHandle = SelectObject(Dc, Font.Handle)
-						SetTextColor(Dc, darkTextColor)
-						SetBkMode(Dc, TRANSPARENT)
-						For i As Integer = 0 To TabCount - 1
-							Dim As ..Rect R
-							Perform(TCM_GETITEMRECT, i, CInt(@R))
-							If i = SelectedTabIndex Then
-								FillRect(Dc, @R, hbrHlBkgnd)
-							End If
-							Dim As Integer iTextLeft = R.Left + ScaleX(5)
-							If Images <> 0 AndAlso Images->Handle <> 0 AndAlso Tabs[i]->ImageIndex > -1 Then
-								ImageList_Draw(Images->Handle, Tabs[i]->ImageIndex, Dc, iTextLeft, R.Top + (R.Bottom - R.Top - ScaleY(Images->ImageHeight)) \ 2, ILD_TRANSPARENT)
-								iTextLeft += ScaleX(Images->ImageWidth + 3)
-							End If
-							Dim As ..Rect RText = R
-							RText.Left = iTextLeft
-							DrawText(Dc, Tabs[i]->Caption, Len(Tabs[i]->Caption), @RText, DT_LEFT Or DT_SINGLELINE Or DT_VCENTER)
-						Next i
-						SetBkMode(Dc, OPAQUE)
-						SelectObject(Dc, OldFontHandle)
-						Canvas.UnSetHandle
-						EndPaint Handle, @Ps
-						Message.Result = 0
-						Return
-					End If
-				Else
-					If FDarkMode Then
-						FDarkMode = False
-						'SetWindowTheme(FHandle, "DarkMode::Menu", nullptr)
-						SetWindowTheme(FHandle, NULL, NULL) ' DarkMode
-						AllowDarkModeForWindow(FHandle, g_darkModeEnabled)
-						If FBackColor = -1 Then
-							Brush.Handle = 0
-						Else
-							Brush.Color = FBackColor
-						End If
-						SendMessageW(FHandle, WM_THEMECHANGED, 0, 0)
-						Repaint
-						'If Images Then
-						'	Images->SetImageSize Images->ImageWidth, Images->ImageHeight, 0, 0
-						'	Images->SetImageSize Images->ImageWidth, Images->ImageHeight, xdpi, xdpi
-						'	If Images->Handle Then Perform(TCM_SETIMAGELIST, 0, CInt(Images->Handle))
-						'End If
-					End If
-				End If
 			Case WM_LBUTTONDOWN
 				DownButton = 0
 				FMousePos = Message.lParamLo

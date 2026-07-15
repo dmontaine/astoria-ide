@@ -96,29 +96,6 @@ Namespace My.Sys.Forms
 	Private Sub GroupBox.ProcessMessage(ByRef Message As Message)
 			Select Case Message.Msg
 			Case WM_PAINT ', WM_ERASEBKGND
-				If g_darkModeSupported AndAlso g_darkModeEnabled AndAlso FDefaultBackColor = FBackColor Then
-					If Not FDarkMode Then
-						SetDark True
-'						FDarkMode = True
-'						'SetWindowTheme(.FHandle, "", "")
-'						'SetWindowTheme(.FHandle, "DarkMode", nullptr)
-'						This.Brush.Handle = hbrBkgnd
-'						SendMessageW(FHandle, WM_THEMECHANGED, 0, 0)
-					End If
-				Else
-					If FDarkMode Then
-						SetDark False
-'						FDarkMode = False
-'						'SetWindowTheme(.FHandle, "", "")
-'						'SetWindowTheme(.FHandle, "DarkMode", nullptr)
-'						If FBackColor = -1 Then
-'							This.Brush.Handle = 0
-'						Else
-'							This.Brush.Color = FBackColor
-'						End If
-'						SendMessageW(FHandle, WM_THEMECHANGED, 0, 0)
-					End If
-				End If
 				Dim As Integer W, H
 				Dim As HDC Dc, memDC
 				Dim As HBITMAP Bmp
@@ -131,35 +108,10 @@ Namespace My.Sys.Forms
 				'FillRect Dc, @Ps.rcPaint, This.Brush.Handle
 				FillRect Dc, @R, This.Brush.Handle
 				This.Canvas.SetHandle Dc
-				If g_darkModeSupported AndAlso g_darkModeEnabled Then
-					Dim As LRESULT state = SendMessage(FHandle, BM_GETSTATE, 0, 0)
-					Dim As Integer stateID
-					'stateID = GBS_DISABLED
-					stateID = GBS_NORMAL
-					Dim As HPEN NewPen = CreatePen(PS_SOLID, 1, darkHlBkColor)
-					Dim As HPEN PrevPen = SelectObject(Dc, NewPen)
-					Dim As HPEN PrevBrush = SelectObject(Dc, hbrBkgnd)
-					Rectangle Dc, 0, ScaleY(This.Canvas.TextHeight("A") / 2), ScaleX(This.Width) - 1, ScaleY(This.Height) - 1
-					SetTextColor(Dc, darkTextColor)
-					SetBkColor(Dc, darkBkColor)
-					Dim As HFONT OldFontHandle, NewFontHandle
-					OldFontHandle = SelectObject(Dc, This.Font.Handle)
-					TextOut(Dc, 6, 0, @This.Text, Len(This.Text))
-					This.Canvas.UnSetHandle
-					NewFontHandle = SelectObject(Dc, OldFontHandle)
-					SelectObject(Dc, PrevPen)
-					SelectObject(Dc, PrevBrush)
-					'EndPaint Handle, @Ps
-					ReleaseDC FHandle, Dc
-					DeleteObject NewPen
-					Message.Result = 0
-					Return
-				Else
-					This.Canvas.UnSetHandle
-					'EndPaint Handle, @Ps
-					ReleaseDC Handle, Dc
-					RedrawWindow(FHandle, NULL, NULL, RDW_INVALIDATE)
-				End If
+				This.Canvas.UnSetHandle
+				'EndPaint Handle, @Ps
+				ReleaseDC Handle, Dc
+				RedrawWindow(FHandle, NULL, NULL, RDW_INVALIDATE)
 			Case WM_COMMAND
 				'CallWindowProc(@SuperWndProc, GetParent(Handle), Message.Msg, Message.wParam, Message.lParam)
 			Case CM_CTLCOLOR

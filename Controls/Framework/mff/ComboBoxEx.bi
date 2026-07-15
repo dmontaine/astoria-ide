@@ -101,13 +101,11 @@ Namespace My.Sys.Forms
 			Declare Static Sub WNDPROC(ByRef Message As Message)
 			Declare Static Function HookChildProc(hDlg As HWND, uMsg As UINT, wParam As WPARAM, lParam As LPARAM) As LRESULT
 			Declare Static Sub HandleIsAllocated(ByRef Sender As Control)
-			FComboBoxDarkMode As Boolean
 	Protected:
 		Declare Sub UpdateListHeight
 		
 	Public:
 			'Enables dark theme rendering.
-			Declare Virtual Sub SetDark(Value As Boolean)
 		'Collection of image-text list items.
 		Items             As ComboBoxExItems
 		'ImageList containing icons for list items.

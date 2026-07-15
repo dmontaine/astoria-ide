@@ -645,9 +645,6 @@ Namespace My.Sys.Forms
 		Private Sub TextBox.WndProc(ByRef message As Message)
 		End Sub
 		
-		Private Sub TextBox.SetDark(Value As Boolean)
-			Base.SetDark Value
-		End Sub
 	
 		Private Sub TextBox.HandleIsAllocated(ByRef Sender As Control)
 			If Sender.Child Then
@@ -675,37 +672,6 @@ Namespace My.Sys.Forms
 	Private Sub TextBox.ProcessMessage(ByRef message As Message)
 			Select Case message.Msg
 			Case WM_PAINT, WM_MOUSELEAVE, WM_MOUSEMOVE
-				If g_darkModeSupported AndAlso g_darkModeEnabled AndAlso (CBool(message.Msg <> WM_MOUSEMOVE) OrElse (CBool(message.Msg = WM_MOUSEMOVE) AndAlso FMouseInClient)) Then
-					If Not FDarkMode Then
-						FDarkMode = True
-						Brush.Handle = hbrBkgnd
-						SetWindowTheme(FHandle, "DarkMode_Explorer", nullptr)
-						SendMessageW(FHandle, WM_THEMECHANGED, 0, 0)
-						Repaint
-					End If
-					Dim As Any Ptr cp = GetClassProc(message.hWnd)
-					If cp <> 0 Then
-						message.Result = CallWindowProc(cp, message.hWnd, message.Msg, message.wParam, message.lParam)
-					End If
-					Dim As HDC Dc
-					Dc = GetWindowDC(Handle)
-					Dim As Rect r = Type( 0 )
-					GetWindowRect(message.hWnd, @r)
-					r.Right -= r.Left + 1
-					r.Bottom -= r.Top + 1
-					r.Left = 1
-					r.Top = 1
-					Dim As HPEN NewPen = CreatePen(PS_SOLID, 1, darkBkColor)
-					Dim As HPEN PrevPen = SelectObject(Dc, NewPen)
-					Dim As HPEN PrevBrush = SelectObject(Dc, GetStockObject(NULL_BRUSH))
-					Rectangle Dc, r.Left, r.Top, r.Right, r.Bottom
-					SelectObject(Dc, PrevPen)
-					SelectObject(Dc, PrevBrush)
-					ReleaseDC(Handle, Dc)
-					DeleteObject NewPen
-					message.Result = 0
-					Return
-				End If
 			Case WM_DPICHANGED
 				Base.ProcessMessage message
 				If FLeftMargin <> 0 Then

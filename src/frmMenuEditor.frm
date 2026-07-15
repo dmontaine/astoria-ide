@@ -142,11 +142,7 @@ Private Sub frmMenuEditor.Form_Paint(ByRef Sender As Control, ByRef Canvas As My
 	Dim As SymbolsType Ptr stCurrentStatusBar = Des->Symbols(CurrentStatusBar)
 	With Canvas
 		.Font = This.Font
-		If g_darkModeEnabled Then
-			.Brush.Color = darkBkColor
-		Else
-			.Brush.Color = clBtnFace
-		End If
+		.Brush.Color = clBtnFace
 		.Rectangle 0, 0, Canvas.Width, Canvas.Height
 		If CurrentMenu <> 0 AndAlso stCurrentMenu AndAlso stCurrentMenu AndAlso stCurrentMenu->ReadPropertyFunc AndAlso QWString(stCurrentMenu->ReadPropertyFunc(CurrentMenu, "ClassName")) = "PopupMenu" Then IsPopup = True
 		If IsPopup AndAlso CurrentToolBar = 0 Then
@@ -259,7 +255,7 @@ Private Sub frmMenuEditor.Form_Paint(ByRef Sender As Control, ByRef Canvas As My
 							.Line Rects(RectsCount).Left + (Rects(RectsCount).Right - Rects(RectsCount).Left) / 2 + 1, Rects(RectsCount).Top + 5, Rects(RectsCount).Left + (Rects(RectsCount).Right - Rects(RectsCount).Left) / 2 + 1, Rects(RectsCount).Bottom - 5
 						Else
 								.TextOut Rects(RectsCount).Left + IIf(IsToolBarList, BitmapWidth + 7, (Rects(RectsCount).Right - Rects(RectsCount).Left - .TextWidth(QWString(stCurrentToolBar->ReadPropertyFunc(Ctrls(RectsCount), "Caption"))) - IIf(QInteger(stCurrentToolBar->ReadPropertyFunc(Ctrls(RectsCount), "Style")) = ToolButtonStyle.tbsDropDown, 15, 0)) / 2), _
-									IIf(IsToolBarList, Rects(RectsCount).Top + (Rects(RectsCount).Bottom - Rects(RectsCount).Top - .TextHeight("A")) / 2, Rects(RectsCount).Bottom - .TextHeight("A") - 6), QWString(stCurrentToolBar->ReadPropertyFunc(Ctrls(RectsCount), "Caption")), IIf(QBoolean(stCurrentToolBar->ReadPropertyFunc(Ctrls(RectsCount), "Enabled")), IIf(g_darkModeEnabled AndAlso RectsCount <> ActiveRect, darkTextColor, BGR(0, 0, 0)), BGR(109, 109, 109)), -1
+									IIf(IsToolBarList, Rects(RectsCount).Top + (Rects(RectsCount).Bottom - Rects(RectsCount).Top - .TextHeight("A")) / 2, Rects(RectsCount).Bottom - .TextHeight("A") - 6), QWString(stCurrentToolBar->ReadPropertyFunc(Ctrls(RectsCount), "Caption")), IIf(QBoolean(stCurrentToolBar->ReadPropertyFunc(Ctrls(RectsCount), "Enabled")), BGR(0, 0, 0), BGR(109, 109, 109)), -1
 						End If
 					End If
 				ElseIf CurrentStatusBar Then
@@ -277,14 +273,14 @@ Private Sub frmMenuEditor.Form_Paint(ByRef Sender As Control, ByRef Canvas As My
 									DrawIconEx .Handle, Rects(RectsCount).Left + 3, 3, IconHandle, 16, 16, 0, 0, DI_NORMAL
 								End If
 							End If
-							.TextOut Rects(RectsCount).Left + 5 + IIf(IconHandle, 16 + 2, 0), Rects(RectsCount).Top + 3, QWString(stCurrentStatusBar->ReadPropertyFunc(Ctrls(RectsCount), "Caption")), IIf(g_darkModeEnabled AndAlso RectsCount <> ActiveRect, darkTextColor, BGR(0, 0, 0)), -1
+							.TextOut Rects(RectsCount).Left + 5 + IIf(IconHandle, 16 + 2, 0), Rects(RectsCount).Top + 3, QWString(stCurrentStatusBar->ReadPropertyFunc(Ctrls(RectsCount), "Caption")), BGR(0, 0, 0), -1
 					End If
 				Else
 					If stCurrentMenu AndAlso stCurrentMenu->ReadPropertyFunc Then
 							If QWString(stCurrentMenu->ReadPropertyFunc(Ctrls(RectsCount), "Caption")) = "-" Then
-								.TextOut Rects(RectsCount).Left + 5, Rects(RectsCount).Top + 3, "|", IIf(g_darkModeEnabled AndAlso RectsCount <> ActiveRect, darkTextColor, BGR(0, 0, 0)), -1
+								.TextOut Rects(RectsCount).Left + 5, Rects(RectsCount).Top + 3, "|", BGR(0, 0, 0), -1
 							Else
-								.TextOut Rects(RectsCount).Left + 5, Rects(RectsCount).Top + 3, QWString(stCurrentMenu->ReadPropertyFunc(Ctrls(RectsCount), "Caption")), IIf(QBoolean(stCurrentMenu->ReadPropertyFunc(Ctrls(RectsCount), "Enabled")), IIf(g_darkModeEnabled AndAlso RectsCount <> ActiveRect, darkTextColor, BGR(0, 0, 0)), BGR(109, 109, 109)), -1
+								.TextOut Rects(RectsCount).Left + 5, Rects(RectsCount).Top + 3, QWString(stCurrentMenu->ReadPropertyFunc(Ctrls(RectsCount), "Caption")), IIf(QBoolean(stCurrentMenu->ReadPropertyFunc(Ctrls(RectsCount), "Enabled")), BGR(0, 0, 0), BGR(109, 109, 109)), -1
 							End If
 					End If
 				End If

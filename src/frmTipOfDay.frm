@@ -147,7 +147,7 @@ End Sub
 Private Sub frmTipOfDayType.cmdPreviousTip_Click(ByRef Sender As Control)
 	ShowTipoftheDayIndex -= 1
 	If ShowTipoftheDayIndex < 0 Then ShowTipoftheDayIndex = UBound(BuffTips)
-	Dim As WString * MAX_PATH imageFileName = ExePath & "/Help/Tip of the Day/images/" & Right("0000" & ShowTipoftheDayIndex, 4) & IIf(g_darkModeEnabled, "D", "") & ".png"
+	Dim As WString * MAX_PATH imageFileName = ExePath & "/Help/Tip of the Day/images/" & Right("0000" & ShowTipoftheDayIndex, 4) & "" & ".png"
 	If Dir(imageFileName) <> "" Then lblImage.Graphic.LoadFromFile(imageFileName, lblImage.Width, lblImage.Height)
 	lblTips.Text = *BuffTips(ShowTipoftheDayIndex)
 	
@@ -156,7 +156,7 @@ End Sub
 Private Sub frmTipOfDayType.cmdNextTip_Click(ByRef Sender As Control)
 	ShowTipoftheDayIndex += 1
 	If ShowTipoftheDayIndex > UBound(BuffTips) Then ShowTipoftheDayIndex = 0
-	Dim As WString * MAX_PATH imageFileName = ExePath & "/Help/Tip of the Day/images/" & Right("0000" & ShowTipoftheDayIndex, 4) & IIf(g_darkModeEnabled, "D", "") & ".png"
+	Dim As WString * MAX_PATH imageFileName = ExePath & "/Help/Tip of the Day/images/" & Right("0000" & ShowTipoftheDayIndex, 4) & "" & ".png"
 	If Dir(imageFileName) <> "" Then lblImage.Graphic.LoadFromFile(imageFileName, lblImage.Width, lblImage.Height)
 	lblTips.Text = *BuffTips(ShowTipoftheDayIndex)
 	
@@ -180,7 +180,7 @@ Private Sub frmTipOfDayType.Form_Create(ByRef Sender As Control)
 			i += 1
 		Loop
 		If ShowTipoftheDayIndex < i AndAlso ShowTipoftheDayIndex >= 0 Then lblTips.Text = *BuffTips(ShowTipoftheDayIndex)
-		Dim As WString * MAX_PATH imageFileName = ExePath & "/Help/Tip of the Day/images/" & Right("0000" & ShowTipoftheDayIndex, 4) & IIf(g_darkModeEnabled, "D", "") & ".png"
+		Dim As WString * MAX_PATH imageFileName = ExePath & "/Help/Tip of the Day/images/" & Right("0000" & ShowTipoftheDayIndex, 4) & "" & ".png"
 		If Dir(imageFileName) <> "" Then lblImage.Graphic.LoadFromFile(imageFileName, lblImage.Width, lblImage.Height)
 	Else
 		MsgBox ("File") & " """ & GetOSPath(ExePath & "/Help/Tip of the Day/") & App.CurLanguage & ".tip"" " & ("not found!")

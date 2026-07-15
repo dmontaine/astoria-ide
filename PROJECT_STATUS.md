@@ -1,6 +1,6 @@
 # Astoria-IDE — Project Status & Handoff
 
-**Last updated:** 2026-07-14 (see Session handoff below for this session's work)
+**Last updated:** 2026-07-14 (see "Session handoff (2026-07-14) — Context menu parity with toolbars" below for this session's work)
 **Repository:** [github.com/dmontaine/astoria-ide](https://github.com/dmontaine/astoria-ide)
 **Local path:** C:\Users\don\Astoria-IDE
 
@@ -106,6 +106,17 @@ Owner-selected T10 then T11, the two remaining items in the dark-mode area after
 
 Owner-selected T08. Full account under Open Items → Deferred enhancements above. Shipped: `StageRelease.ps1` (release-tree staging), `AstoriaIDE.iss` (Inno Setup packaging, Inno Setup 6.7.3 installed this session to build/test it), `BuildInstaller.ps1` (combined one-command build), a corrected `license.txt`, and an installer-side fix for `ProjectsPath` defaulting into a hidden folder. Verified end-to-end via a real clean install/uninstall cycle, not just a compile-clean check. One limitation investigated at length but deliberately not resolved this session: the app doesn't appear in Control Panel/Settings' installed-apps lists, most likely due to being unsigned — see the T08 entry for what was ruled out (Smart App Control, registry redirection) and what's still open (a Help topic documenting Start Menu launch/uninstall; possible future code-signing via SignPath.io).
 
+## Session handoff (2026-07-14) — Context menu parity with toolbars
+
+Owner-requested (personal accessibility preference — dislikes using icon/tool bars): audit the code pane's and Form Designer's right-click context menus and add whatever toolbar commands they were missing, so every toolbar action is also reachable by right-click.
+
+- **Code pane (`mnuCode`, `src/TabWindow.bas`) — done, owner-verified.** Added Undo, Redo, Find, Format, Unformat, Toggle Comment, Complete Word, Parameter Info, Syntax Check, Suggestions — all dispatched via the existing shared `@mClick` handler and using the `HK()` helper (`Localization.bas`) so a user-customized hotkey still shows correct text next to each item. Owner confirmed this menu looks correct.
+- **Form Designer (`mnuDesigner`, `src/Designer.bas`) — implemented, compiles clean, but NOT working as intended; owner reports "nothing much added" when right-clicking with a control selected.** Added an Align / Make Same Size / Size to Grid / Horizontal Spacing / Vertical Spacing / Center in Parent block (mirroring the Designer menu's own submenu structure) between the existing `Duplicate` item and `OrderSeparator`, bounded by two new separator keys `FormatSeparator1`/`FormatSeparator2`, all dispatched via `@mClick` (confirmed `PopupClick`, `mnuDesigner`'s other handler, only recognizes a small fixed command set and doesn't know these — `@mClick` is the same dispatcher the top menu bar/Format toolbar already use for these exact command strings). Added matching `Visible = True/False` toggle lines for all eight new keys in `Designer.ChangeFirstMenuItem` (~`src/Designer.bas:114`), following the exact pattern already used for `Copy`/`Cut`/`Delete`/`Duplicate`/etc. Build is clean (0 errors) and the toggle logic reads correctly on inspection, but the owner's live test showed no visible change. **Not debugged further this session — out of time/credits.** Next session should:
+  1. Confirm `ChangeFirstMenuItem` is actually being called on the right-click path the owner used (call sites: `src/Designer.bas:1687`, `:2324`, `:2534`) — it's possible one interaction path (e.g. right-click without first left-clicking to select) shows the menu before `ChangeFirstMenuItem` runs, leaving stale `Visible` state from a prior bare-background popup.
+  2. Check whether giving `@mClick` a handler on a submenu *header* item (e.g. `Align`, `MakeSameSize`) conflicts with the framework's submenu-arrow/flyout behavior — the existing convention for a header-only item (see `mnuCode`'s `Toggle` submenu, `src/TabWindow.bas`) passes no handler at all (`mnuCode.Add(("Toggle"), "", "Toggle")`, 3 args, not 4). Try dropping `@mClick` from the six new header items (`Align`, `MakeSameSize`, `HorizontalSpacing`, `VerticalSpacing`, `CenterInParent`; `SizeToGrid` has no submenu so keep its handler) as the first thing to try.
+  3. If still not visible, add temporary instrumented logging (or a debugger breakpoint) inside `ChangeFirstMenuItem`'s `Else` branch to confirm the `Item("Align")` lookups aren't silently failing (e.g. key typo/collision) before the `->Visible = True` assignment.
+- Rebuilt clean via `Compile.bat` (framework.dll unchanged, astoria.exe rebuilt, 0 errors). Not committed until this handoff.
+
 ## Next ready work
 
 No task is currently selected. Choose from the open items below when ready.
@@ -116,7 +127,7 @@ For the reasoning, exact code locations, and prior hot-path findings, see [HISTO
 
 ### Immediate
 
-No immediate items open.
+- [ ] **Form Designer context menu (`mnuDesigner`) not showing its new items live.** See "Session handoff (2026-07-14) — Context menu parity with toolbars" above for full detail and a concrete next-step checklist. Code pane side is done and owner-verified; only the Designer side needs debugging.
 
 ### Deferred enhancements
 

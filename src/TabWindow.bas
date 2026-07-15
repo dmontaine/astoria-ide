@@ -10264,9 +10264,17 @@ Sub TabWindow_Resize(ByRef Designer As My.Sys.Object, ByRef Sender As Control, N
 End Sub
 
 'mnuCode.ImagesList = pimgList '<m>
+' The owner doesn't use toolbars, so this menu is kept in parity with every
+' command the Standard/Edit toolbars offer for the code pane - HK() (not a
+' literal hotkey string) so a user-customized shortcut still shows correctly.
+mnuCode.Add(("Undo") & HK("Undo", "Ctrl+Z"), "Undo", "Undo", @mClick)
+mnuCode.Add(("Redo") & HK("Redo", "Ctrl+Shift+Z"), "Redo", "Redo", @mClick)
+mnuCode.Add("-")
 mnuCode.Add(("Cu&t") & !"\tCtrl+X", "Cut", "Cut", @mClick)
 mnuCode.Add(("&Copy") & !"\tCtrl+C", "Copy", "Copy", @mClick)
 mnuCode.Add(("&Paste") & !"\tCtrl+V", "Paste", "Paste", @mClick)
+mnuCode.Add("-")
+mnuCode.Add(("Find") & "..." & HK("Find", "Ctrl+F"), "Find", "Find", @mClick)
 mnuCode.Add("-")
 Var miToogle = mnuCode.Add(("Toggle"), "", "Toggle")
 miToogle->Add(("Breakpoint"), "Breakpoint", "Breakpoint", @mClick)
@@ -10277,6 +10285,16 @@ mnuCode.Add(("Run To Cursor"), "", "RunToCursor", @mClick)
 mnuCode.Add(("Set Next Statement"), "", "SetNextStatement", @mClick)
 mnuCode.Add("-")
 mnuCode.Add(("Define"), "", "Define", @mClick)
+mnuCode.Add("-")
+mnuCode.Add(("Format") & HK("Format", "Ctrl+Tab"), "Format", "Format", @mClick)
+mnuCode.Add(("Unformat") & HK("Unformat", "Ctrl+Shift+Tab"), "Unformat", "Unformat", @mClick)
+mnuCode.Add(("Toggle Comment") & HK("SingleComment", "Ctrl+I"), "Comment", "SingleComment", @mClick)
+mnuCode.Add("-")
+mnuCode.Add(("Complete Word") & HK("CompleteWord", "Ctrl+Space"), "CompleteWord", "CompleteWord", @mClick)
+mnuCode.Add(("Parameter Info") & HK("ParameterInfo", "Ctrl+J"), "", "InvokeParameterInfo", @mClick)
+mnuCode.Add("-")
+mnuCode.Add(("Syntax Check"), "SyntaxCheck", "SyntaxCheck", @mClick)
+mnuCode.Add(("Suggestions"), "", "AnalyzeSuggestions", @mClick)
 mnuCode.Add("-")
 mnuCode.Add(("Convert to Lowercase"), "", "ConvertToLowercase", @mClick)
 mnuCode.Add(("Convert to Uppercase"), "", "ConvertToUppercase", @mClick)

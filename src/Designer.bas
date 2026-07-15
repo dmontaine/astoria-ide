@@ -119,6 +119,13 @@ Namespace My.Sys.Forms
 			mnuDesigner.Item("Delete")->Visible = False
 			mnuDesigner.Item("DuplicateSeparator")->Visible = False
 			mnuDesigner.Item("Duplicate")->Visible = False
+			mnuDesigner.Item("FormatSeparator1")->Visible = False
+			mnuDesigner.Item("Align")->Visible = False
+			mnuDesigner.Item("MakeSameSize")->Visible = False
+			mnuDesigner.Item("SizeToGrid")->Visible = False
+			mnuDesigner.Item("HorizontalSpacing")->Visible = False
+			mnuDesigner.Item("VerticalSpacing")->Visible = False
+			mnuDesigner.Item("CenterInParent")->Visible = False
 			mnuDesigner.Item("OrderSeparator")->Visible = False
 			mnuDesigner.Item("BringToFront")->Visible = False
 			mnuDesigner.Item("SendToBack")->Visible = False
@@ -131,6 +138,13 @@ Namespace My.Sys.Forms
 			mnuDesigner.Item("Delete")->Visible = True
 			mnuDesigner.Item("DuplicateSeparator")->Visible = True
 			mnuDesigner.Item("Duplicate")->Visible = True
+			mnuDesigner.Item("FormatSeparator1")->Visible = True
+			mnuDesigner.Item("Align")->Visible = True
+			mnuDesigner.Item("MakeSameSize")->Visible = True
+			mnuDesigner.Item("SizeToGrid")->Visible = True
+			mnuDesigner.Item("HorizontalSpacing")->Visible = True
+			mnuDesigner.Item("VerticalSpacing")->Visible = True
+			mnuDesigner.Item("CenterInParent")->Visible = True
 			mnuDesigner.Item("OrderSeparator")->Visible = True
 			mnuDesigner.Item("BringToFront")->Visible = True
 			mnuDesigner.Item("SendToBack")->Visible = True
@@ -2932,6 +2946,42 @@ mnuDesigner.Add(("Paste") & !"\t Ctrl+V", "Paste", "Paste", @PopupClick)
 mnuDesigner.Add(("Delete"), "", "Delete", @PopupClick)
 mnuDesigner.Add("-", "", "DuplicateSeparator")
 mnuDesigner.Add(("Duplicate") & !"\t Ctrl+D", "", "Duplicate", @mClick)
+' The owner doesn't use toolbars, so this menu also carries every command the
+' Format toolbar offers - mirrors the Designer menu's Align/Make Same
+' Size/Horizontal Spacing/Vertical Spacing/Center in Parent submenu structure
+' exactly (same command keys, dispatched the same way via @mClick - PopupClick
+' above only recognizes its own fixed, small command set and doesn't know
+' these at all, unlike Duplicate which already proved @mClick works from here).
+mnuDesigner.Add("-", "", "FormatSeparator1")
+Var miDesignerAlign = mnuDesigner.Add(("Align"), "Align", "Align", @mClick)
+miDesignerAlign->Add(("Lefts") & HK("AlignLefts"), "AlignLefts", "AlignLefts", @mClick)
+miDesignerAlign->Add(("Centers") & HK("AlignCenters"), "AlignCenters", "AlignCenters", @mClick)
+miDesignerAlign->Add(("Rights") & HK("AlignRights"), "AlignRights", "AlignRights", @mClick)
+miDesignerAlign->Add("-")
+miDesignerAlign->Add(("Tops") & HK("AlignTops"), "AlignTops", "AlignTops", @mClick)
+miDesignerAlign->Add(("Middles") & HK("AlignMiddles"), "AlignMiddles", "AlignMiddles", @mClick)
+miDesignerAlign->Add(("Bottoms") & HK("AlignBottoms"), "AlignBottoms", "AlignBottoms", @mClick)
+miDesignerAlign->Add("-")
+miDesignerAlign->Add(("to Grid") & HK("AlignToGrid"), "AlignToGrid", "AlignToGrid", @mClick)
+Var miDesignerMakeSameSize = mnuDesigner.Add(("Make Same Size"), "MakeSameSize", "MakeSameSize", @mClick)
+miDesignerMakeSameSize->Add(("Width") & HK("MakeSameSizeWidth"), "MakeSameSizeWidth", "MakeSameSizeWidth", @mClick)
+miDesignerMakeSameSize->Add(("Height") & HK("MakeSameSizeHeight"), "MakeSameSizeHeight", "MakeSameSizeHeight", @mClick)
+miDesignerMakeSameSize->Add(("Both") & HK("MakeSameSizeBoth"), "MakeSameSizeBoth", "MakeSameSizeBoth", @mClick)
+mnuDesigner.Add(("Size to Grid") & HK("SizeToGrid"), "SizeToGrid", "SizeToGrid", @mClick)
+Var miDesignerHSpacing = mnuDesigner.Add(("Horizontal Spacing"), "HorizontalSpacing", "HorizontalSpacing", @mClick)
+miDesignerHSpacing->Add(("Make Equal") & HK("HorizontalSpacingMakeEqual"), "HorizontalSpacingMakeEqual", "HorizontalSpacingMakeEqual", @mClick)
+miDesignerHSpacing->Add(("Increase") & HK("HorizontalSpacingIncrease"), "HorizontalSpacingIncrease", "HorizontalSpacingIncrease", @mClick)
+miDesignerHSpacing->Add(("Decrease") & HK("HorizontalSpacingDecrease"), "HorizontalSpacingDecrease", "HorizontalSpacingDecrease", @mClick)
+miDesignerHSpacing->Add(("Remove") & HK("HorizontalSpacingRemove"), "HorizontalSpacingRemove", "HorizontalSpacingRemove", @mClick)
+Var miDesignerVSpacing = mnuDesigner.Add(("Vertical Spacing"), "VerticalSpacing", "VerticalSpacing", @mClick)
+miDesignerVSpacing->Add(("Make Equal") & HK("VerticalSpacingMakeEqual"), "VerticalSpacingMakeEqual", "VerticalSpacingMakeEqual", @mClick)
+miDesignerVSpacing->Add(("Increase") & HK("VerticalSpacingIncrease"), "VerticalSpacingIncrease", "VerticalSpacingIncrease", @mClick)
+miDesignerVSpacing->Add(("Decrease") & HK("VerticalSpacingDecrease"), "VerticalSpacingDecrease", "VerticalSpacingDecrease", @mClick)
+miDesignerVSpacing->Add(("Remove") & HK("VerticalSpacingRemove"), "VerticalSpacingRemove", "VerticalSpacingRemove", @mClick)
+Var miDesignerCenterInParent = mnuDesigner.Add(("Center in Parent"), "CenterInParent", "CenterInParent", @mClick)
+miDesignerCenterInParent->Add(("Horizontally") & HK("CenterInParentHorizontally"), "CenterInParentHorizontally", "CenterInParentHorizontally", @mClick)
+miDesignerCenterInParent->Add(("Vertically") & HK("CenterInParentVertically"), "CenterInParentVertically", "CenterInParentVertically", @mClick)
+mnuDesigner.Add("-", "", "FormatSeparator2")
 mnuDesigner.Add("-", "", "OrderSeparator")
 mnuDesigner.Add(("Bring to Front"), "BringToFront", "BringToFront", @PopupClick)
 mnuDesigner.Add(("Send to Back"), "SendToBack", "SendToBack", @PopupClick)

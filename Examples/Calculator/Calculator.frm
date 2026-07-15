@@ -306,12 +306,12 @@
 
 Private Function CalculatorType.EvalResult(ByRef s As String) As String
 On Error Goto ErrorHandler
-    Dim As Object_MSScriptControl oMSScriptControl = CreateObject("MSScriptControl.ScriptControl")
-    oMSScriptControl.Language = "vbscript"
-    EvalResult = oMSScriptControl.Eval(s)
-    Exit Function
+	Dim As Object_MSScriptControl oMSScriptControl = CreateObject("MSScriptControl.ScriptControl")
+	oMSScriptControl.Language = "vbscript"
+	EvalResult = oMSScriptControl.Eval(s)
+	Exit Function
 ErrorHandler:
-    	MsgBox ErrDescription(Err) & " (" & Err & ") " & _
+		MsgBox ErrDescription(Err) & " (" & Err & ") " & _
 	"in line " & Erl() & " " & _
 	"in function " & ZGet(Erfn()) & " " & _
 	"in module " & ZGet(Ermn())
@@ -320,16 +320,16 @@ End Function
 Private Sub CalculatorType.cmdNum_Click(ByRef Sender As Control)
 	Dim As Integer Index = Val(Mid(Sender.Name, InStrRev(Sender.Name, "(") + 1))
 	Dim As String key, tmpStr 
-    key = cmdNum(Index).Caption
-    If key = "=" Then
-    	tmpStr = Trim(txtExpressions.Text, " ")
-    	If Right(tmpStr, 1) = "="  Then tmpStr = Mid(tmpStr, 1, Len(tmpStr) - 1)
-        txtResult.Text  = EvalResult(tmpStr)
-        txtExpressions.Text  = tmpStr  & "="
-    Else
-        txtExpressions.Text = txtExpressions.Text  & key
-    End If
-    
+	key = cmdNum(Index).Caption
+	If key = "=" Then
+		tmpStr = Trim(txtExpressions.Text, " ")
+		If Right(tmpStr, 1) = "="  Then tmpStr = Mid(tmpStr, 1, Len(tmpStr) - 1)
+		txtResult.Text  = EvalResult(tmpStr)
+		txtExpressions.Text  = tmpStr  & "="
+	Else
+		txtExpressions.Text = txtExpressions.Text  & key
+	End If
+	
 End Sub
 
 Private Sub CalculatorType.cmdExit_Click(ByRef Sender As Control)

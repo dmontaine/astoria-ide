@@ -151,9 +151,9 @@ Private Sub Form2Type.cmdJson2_Click(ByRef Sender As Control)
 	Dim As Object_HTMLFILE oWindow = oDom.parentWindow
 	Dim As Object_Msxml2 oHttp = CreateObject("Msxml2.XMLHTTP")
 	oHttp.Open "GET", "https://www.msn.com", False
-    oHttp.send
-    Dim As String strHtml = oHttp.responseText ' get the data
-    TextBox1.Text = strHtml
+	oHttp.send
+	Dim As String strHtml = oHttp.responseText ' get the data
+	TextBox1.Text = strHtml
 End Sub
 
 Private Sub Form2Type.cmdShowForm1_Click(ByRef Sender As Control)

@@ -116,7 +116,7 @@ No immediate items open.
 
 ### Deferred enhancements
 
-- [ ] **T01 — Standardize indentation.** Done for `src/` (`2f445e4`): tabs enforced, CRLF normalized via scoped `.gitattributes` rules. Still needed for `Controls/` and `Examples/`.
+- [x] **T01 — Standardize indentation.** Done for all three trees. `src/` (`2f445e4`). `Controls/` (124 files converted to tabs via a per-file auto-detected indent unit, since files ranged 2/3/4-space plus stray-space typos with no single global unit; 2 files - `SystemInformation.bas`/`.bi` - hand-fixed instead since their spacing was too inconsistent for any unit to fit). `Examples/` (7 files, all clean 3- or 4-space, converted with zero remainder warnings). CRLF normalized throughout (only a handful of LF-only files existed by this point) via the same scoped `.gitattributes -crlf` pattern extended to `/Controls/**` and `/Examples/**`.
 - [x] **T03 — Extract repeated logic within files.**
 - [x] **T05 — Simplify the Development/Final compile-mode controls.**
 - [x] **T06 — Audit UI/settings for orphaned controls.**

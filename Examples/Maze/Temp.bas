@@ -358,7 +358,7 @@ Private Sub Form1Type.PanelRender_Paint(ByRef Sender As Control, ByRef Canvas As
 	Next
 	'Draw entry
 	x = 0: y = 0
-    xx = x*aMaze.WallSize + aMaze.WallSize
+	xx = x*aMaze.WallSize + aMaze.WallSize
 	yy = y*aMaze.WallSize + aMaze.WallSize
 	'Canvas.Line(xx - ws * 1.1, yy - ws * 0.7, xx - ws *.9, yy + ws *.8, PanelRender.BackColor) ', "bf")
 	Canvas.Line (xx - ws, yy - ws, xx - ws, yy + ws, PanelRender.BackColor)
@@ -366,7 +366,7 @@ Private Sub Form1Type.PanelRender_Paint(ByRef Sender As Control, ByRef Canvas As
 	
 	'Draw Exit
 	x = aMaze.MazeSize -1: y = aMaze.MazeSize -1
-    xx = x*aMaze.WallSize + aMaze.WallSize
+	xx = x*aMaze.WallSize + aMaze.WallSize
 	yy = y*aMaze.WallSize + aMaze.WallSize
 	'Canvas.Line(xx + ws *.9, yy - ws * 0.7, xx + ws * 1.1, yy + ws *.8, PanelRender.BackColor) ', "bf")
 	Canvas.Line (xx + ws, yy - ws, xx + ws, yy + ws, PanelRender.BackColor)

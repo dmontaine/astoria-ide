@@ -5,3 +5,6 @@
 /Controls/**/*.bas -crlf
 /Controls/**/*.bi -crlf
 /Controls/**/*.frm -crlf
+/Examples/**/*.bas -crlf
+/Examples/**/*.bi -crlf
+/Examples/**/*.frm -crlf

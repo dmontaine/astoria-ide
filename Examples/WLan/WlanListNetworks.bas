@@ -48,9 +48,9 @@ Print
 
 g_scanEvent = CreateEvent(NULL, False, False, NULL)
 If g_scanEvent = NULL Then
-    ?"CreateEvent failed, error: "; GetLastError()
-    WlanCloseHandle(hClient, NULL)
-    Sleep : End
+	?"CreateEvent failed, error: "; GetLastError()
+	WlanCloseHandle(hClient, NULL)
+	Sleep : End
 End If
 ?"CreateEvent "; g_scanEvent
 
@@ -88,11 +88,11 @@ Print
 
 ' Check if any interfaces are available
 If pIfList->dwNumberOfItems = 0 Then
-    ?"No WiFi interfaces found"
-    WlanFreeMemory(pIfList)
-    WlanCloseHandle(hClient, NULL)
-    Sleep
-    End
+	?"No WiFi interfaces found"
+	WlanFreeMemory(pIfList)
+	WlanCloseHandle(hClient, NULL)
+	Sleep
+	End
 End If
 
 For i As Integer = 0 To pIfList->dwNumberOfItems - 1
@@ -161,14 +161,14 @@ For i As Integer = 0 To pIfList->dwNumberOfItems - 1
 			For k As Integer = 0 To WLAN_MAX_PHY_TYPE_NUMBER - 1
 				If .dot11PhyTypes(k) <> dot11_phy_type_unknown Then
 					If Not hasPhyType Then
-					    ?"    PHY Types: ";
-					    hasPhyType = True
+						?"    PHY Types: ";
+						hasPhyType = True
 					End If
 					?"      - "; phy_type_to_string(.dot11PhyTypes(k))
 				End If
 			Next
 			If Not hasPhyType Then
-			    ?"    PHY Types: Unknown"
+				?"    PHY Types: Unknown"
 			End If
 			
 			?"    BSS Type: "; .dot11BssType
@@ -219,8 +219,8 @@ For i As Integer = 0 To pIfList->dwNumberOfItems - 1
 			
 			' Free BSS list memory
 			If pBssList <> NULL Then 
-			    WlanFreeMemory(pBssList)
-			    pBssList = NULL
+				WlanFreeMemory(pBssList)
+				pBssList = NULL
 			End If
 			Print
 		End With

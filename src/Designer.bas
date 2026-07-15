@@ -119,13 +119,15 @@ Namespace My.Sys.Forms
 			mnuDesigner.Item("Delete")->Visible = False
 			mnuDesigner.Item("DuplicateSeparator")->Visible = False
 			mnuDesigner.Item("Duplicate")->Visible = False
-			mnuDesigner.Item("FormatSeparator1")->Visible = False
-			mnuDesigner.Item("Align")->Visible = False
-			mnuDesigner.Item("MakeSameSize")->Visible = False
-			mnuDesigner.Item("SizeToGrid")->Visible = False
-			mnuDesigner.Item("HorizontalSpacing")->Visible = False
-			mnuDesigner.Item("VerticalSpacing")->Visible = False
-			mnuDesigner.Item("CenterInParent")->Visible = False
+			' Format items (FormatSeparator1 + Align/Make Same Size/Size to Grid/
+			' Horizontal Spacing/Vertical Spacing/Center in Parent) stay visible in
+			' every selection state, for toolbar parity. Do NOT toggle their Visible:
+			' setting it False removes the item from the popup HMENU, and re-inserting
+			' a *submenu* item via InsertMenuItem does not restore its flyout (leaf
+			' items like Copy/Cut re-insert fine, submenus do not). Because the form
+			' itself is the default selection when a designer loads, toggling here
+			' removed the format submenus up front and they never reappeared when a
+			' control was later selected. Leaving them always-present fixes that.
 			mnuDesigner.Item("OrderSeparator")->Visible = False
 			mnuDesigner.Item("BringToFront")->Visible = False
 			mnuDesigner.Item("SendToBack")->Visible = False

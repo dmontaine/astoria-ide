@@ -14,6 +14,7 @@
 #include once "WStringList.bi"
 #include once "Dictionary.bi"
 #include once "Form.bi"
+#include once "MsgBoxForm.bi"
 Dim Shared As Dictionary mlKeys
 	#include once "win/winver.bi"
 #ifndef APP_TITLE

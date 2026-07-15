@@ -686,58 +686,47 @@ Public Function ML(ByRef V As WString) ByRef As WString
 End Function
 
 Public Function MsgBox Alias "MsgBox" (ByRef MsgStr As WString, ByRef Caption As WString = "", MsgType As MessageType = MessageType.mtInfo, ButtonsType As ButtonsTypes = ButtonsTypes.btOK) As MessageResult __EXPORT__
-	Dim As Integer Result = -1
+	' Built on MsgBoxForm (a plain Form) rather than the native MessageBox API.
+	' T11 spent a long session methodically theming the real MessageBox dialog
+	' via a thread-scoped WH_CBT hook + SetWindowSubclass - title bar, message
+	' text, icon, and buttons all ended up correctly dark, but one background
+	' band survived every documented Win32/DWM fix tried against it with no
+	' tool available in this environment to identify what was actually
+	' painting it. See MsgBoxForm.bi/.bas and PROJECT_STATUS.md (T11) for the
+	' full account. A Form-based dialog sidesteps the problem entirely: it
+	' already dark-themes correctly (T12), so there's nothing left to fight.
 	Dim As WString Ptr FCaption
-	Dim As Integer MsgTypeIn, ButtonsTypeIn
 	WLet(FCaption, Caption)
-	Dim As My.Sys.Forms.Control Ptr ActiveForm
 	If *FCaption = "" Then WLet(FCaption, App.Title)
-	'    For i As Integer = 0 To App.FormCount -1
-	'        If GetActiveWindow = App.Forms[i]->Handle Then ActiveForm = App.Forms[i]
-	'        If App.Forms[i]->Handle Then App.Forms[i]->Enabled = False
-	'    Next i
-		Dim As HWND Wnd
-	'    If ActiveForm Then
-	'       If ActiveForm->Handle Then
-	'          Wnd = ActiveForm->Handle
-	'       Else
-	'          Wnd = MainHandle
-	'       End If
-	'    End If
-		'		Wnd = GetActiveWindow()
-		'		If App.MainForm <> 0 Then
-		'			Wnd = App.MainForm->Handle
-		'		End If
-		Select Case MsgType
-		Case mtInfo: MsgTypeIn = MB_ICONINFORMATION
-		Case mtWarning: MsgTypeIn = MB_ICONEXCLAMATION
-		Case mtQuestion: MsgTypeIn = MB_ICONQUESTION
-		Case mtError: MsgTypeIn = MB_ICONERROR
-		Case mtOther: MsgTypeIn = 0
-		End Select
-		Select Case ButtonsType
-		Case btNone: ButtonsTypeIn = 0
-		Case btOK: ButtonsTypeIn = MB_OK
-		Case btYesNo: ButtonsTypeIn = MB_YESNO
-		Case btYesNoCancel: ButtonsTypeIn = MB_YESNOCANCEL
-		Case btOkCancel: ButtonsTypeIn = MB_OKCANCEL
-		End Select
-		Result = MessageBox(0, @MsgStr, FCaption, MsgTypeIn Or ButtonsTypeIn Or MB_TOPMOST Or MB_TASKMODAL)
-		Select Case Result
-		Case IDABORT: Result = mrAbort
-		Case IDCANCEL: Result = mrCancel
-		Case IDIGNORE: Result = mrIgnore
-		Case IDNO: Result = mrNo
-		Case IDOK: Result = mrOK
-		Case IDRETRY: Result = mrRetry
-		Case IDYES: Result = mrYes
-		End Select
-	'Do
-	'    App.DoEvents
-	'Loop Until Result <> -1
-	'    For i As Integer = 0 To App.FormCount -1
-	'        If App.Forms[i]->Handle Then App.Forms[i]->Enabled = True
-	'    Next i
+
+	Dim As My.Sys.Forms.MsgBoxIcon IconIn
+	Select Case MsgType
+	Case mtInfo:    IconIn = My.Sys.Forms.mbxIconInfo
+	Case mtWarning: IconIn = My.Sys.Forms.mbxIconWarning
+	Case mtQuestion: IconIn = My.Sys.Forms.mbxIconQuestion
+	Case mtError:   IconIn = My.Sys.Forms.mbxIconError
+	Case mtOther:   IconIn = My.Sys.Forms.mbxIconNone
+	End Select
+
+	Dim As My.Sys.Forms.MsgBoxButtons ButtonsIn
+	Select Case ButtonsType
+	Case btNone, btOK: ButtonsIn = My.Sys.Forms.mbxOK
+	Case btYesNo:       ButtonsIn = My.Sys.Forms.mbxYesNo
+	Case btYesNoCancel: ButtonsIn = My.Sys.Forms.mbxYesNoCancel
+	Case btOkCancel:    ButtonsIn = My.Sys.Forms.mbxOKCancel
+	End Select
+
+	Static As My.Sys.Forms.MsgBoxForm gMsgBoxForm
+	Dim As Integer ModalResult_ = gMsgBoxForm.Execute(MsgStr, *FCaption, IconIn, ButtonsIn, pApp->MainForm)
+
+	Dim As MessageResult Result
+	Select Case ModalResult_
+	Case My.Sys.Forms.ModalResults.Cancel: Result = mrCancel
+	Case My.Sys.Forms.ModalResults.No:     Result = mrNo
+	Case My.Sys.Forms.ModalResults.Yes:    Result = mrYes
+	Case Else:                             Result = mrOK
+	End Select
+
 	WDeAllocate(FCaption)
 	Return Result
 End Function

@@ -1239,13 +1239,63 @@ Namespace My.Sys.Forms
 					If e.handled Then
 						Message.Result = 0
 					End If
+				Case WM_INITMENUPOPUP
+					' A context menu attached via Control.ContextMenu is tracked with this
+					' control as the TrackPopupMenu owner (see Control.ContextMenu's setter
+					' and PopupMenu.Popup), so its WM_INITMENUPOPUP/WM_MEASUREITEM/WM_DRAWITEM
+					' land here rather than in Form.ProcessMessage's identical handling for the
+					' main menu bar - without this, a context menu's items never got flagged
+					' owner-draw and Windows rendered them with plain light colors regardless
+					' of dark mode.
+					If g_darkModeSupported Then
+						Dim As HMENU hPopup = Cast(HMENU, Message.wParam)
+
+						Dim As MENUINFO mi
+						mi.cbSize = SizeOf(mi)
+						mi.fMask = MIM_BACKGROUND
+						If g_darkModeEnabled Then
+							mi.hbrBack = hbrBkgndMenu
+						Else
+							mi.hbrBack = NULL
+						End If
+						SetMenuInfo(hPopup, @mi)
+
+						Dim As Integer nCount = GetMenuItemCount(hPopup)
+						If nCount > 0 Then
+							Dim As MENUITEMINFO mii
+							mii.cbSize = SizeOf(mii)
+							mii.fMask = MIIM_FTYPE Or MIIM_BITMAP Or MIIM_STRING Or MIIM_ID
+							Dim As WString * 512 wszItemText
+							For i As Integer = 0 To nCount - 1
+								mii.dwTypeData = @wszItemText
+								mii.cch = 512
+								GetMenuItemInfo(hPopup, i, True, @mii)
+								If g_darkModeEnabled Then
+									If Not (mii.fType And MFT_OWNERDRAW) Then
+										mii.fType Or= MFT_OWNERDRAW
+										SetMenuItemInfo(hPopup, i, True, @mii)
+									End If
+								Else
+									If (mii.fType And MFT_OWNERDRAW) Then
+										mii.fType = mii.fType And (Not MFT_OWNERDRAW)
+										SetMenuItemInfo(hPopup, i, True, @mii)
+									End If
+								End If
+							Next i
+						End If
+					End If
 				Case WM_MEASUREITEM
 					Dim As MEASUREITEMSTRUCT Ptr miStruct
 					miStruct = Cast(MEASUREITEMSTRUCT Ptr, Message.lParam)
 					Select Case miStruct->CtlType
 					Case ODT_MENU
 						If g_darkModeSupported AndAlso g_darkModeEnabled Then
-							miStruct->itemHeight = ScaleY(22)
+							Dim As MenuItem Ptr pMiItem = Cast(MenuItem Ptr, miStruct->itemData)
+							If pMiItem <> 0 AndAlso pMiItem->Caption = "-" Then
+								miStruct->itemHeight = ScaleY(9)
+							Else
+								miStruct->itemHeight = ScaleY(22)
+							End If
 							miStruct->itemWidth  = ScaleX(300)
 						End If
 					Case ODT_LISTBOX, ODT_COMBOBOX, ODT_BUTTON, ODT_HEADER, ODT_LISTVIEW, ODT_STATIC, ODT_TAB
@@ -1269,6 +1319,106 @@ Namespace My.Sys.Forms
 						'If This.ContextMenu AndAlso This.ContextMenu->ImagesList AndAlso This.ContextMenu->ImagesList->Handle AndAlso diStruct->itemData <> 0 Then
 						'    ImageList_Draw(This.ContextMenu->ImagesList->Handle, Cast(MenuItem Ptr, diStruct->itemData)->ImageIndex, diStruct->hDC, 2, 2, ILD_NORMAL)
 						'End If
+						If g_darkModeSupported AndAlso g_darkModeEnabled Then
+							Dim As HDC hdc = diStruct->hDC
+							Dim As RECT rc = diStruct->rcItem
+							Dim As Boolean bSelected = (diStruct->itemState And ODS_SELECTED) <> 0
+							Dim As Boolean bDisabled = (diStruct->itemState And (ODS_GRAYED Or ODS_DISABLED)) <> 0
+							Dim As Boolean bHot = (diStruct->itemState And ODS_HOTLIGHT) <> 0
+							Dim As Boolean bChecked = (diStruct->itemState And ODS_CHECKED) <> 0
+							Dim As MenuItem Ptr pItem = Cast(MenuItem Ptr, diStruct->itemData)
+							Dim As Boolean bSeparator = (pItem = 0) OrElse (pItem->Caption = "-")
+
+							If bSelected Or bHot Then
+								FillRect(hdc, @rc, hbrHlBkgnd)
+							Else
+								FillRect(hdc, @rc, hbrBkgndMenu)
+							End If
+
+							If bSeparator Then
+								Dim As Integer yMid = rc.Top + (rc.Bottom - rc.Top) \ 2
+								Dim As HPEN hSepPen = CreatePen(PS_SOLID, 1, darkHlBkColor)
+								Dim As HPEN hSepPenPrev = SelectObject(hdc, hSepPen)
+								MoveToEx(hdc, rc.Left + ScaleX(4), yMid, 0)
+								LineTo(hdc, rc.Right - ScaleX(4), yMid)
+								SelectObject(hdc, hSepPenPrev)
+								DeleteObject(hSepPen)
+							ElseIf pItem Then
+								SetBkMode(hdc, TRANSPARENT)
+								If bDisabled Then
+									SetTextColor(hdc, darkHlBkColor)
+								Else
+									SetTextColor(hdc, darkTextColor)
+								End If
+
+								' DrawFrameControl(DFC_MENU, ...) fills its box with fixed system
+								' 3D-face colors regardless of what's selected into hdc, so it
+								' always drew a light square - drawn manually instead.
+								Dim As COLORREF glyphColor = IIf(bDisabled, darkHlBkColor, darkTextColor)
+								Dim As HPEN hGlyphPen = CreatePen(PS_NULL, 0, 0)
+								Dim As HBRUSH hGlyphBrush = CreateSolidBrush(glyphColor)
+								Dim As HPEN hGlyphPenPrev = SelectObject(hdc, hGlyphPen)
+								Dim As HBRUSH hGlyphBrushPrev = SelectObject(hdc, hGlyphBrush)
+
+								If bChecked Then
+									Dim As RECT rcCheck = rc
+									rcCheck.Left = rcCheck.Left + ScaleX(4)
+									rcCheck.Right = rcCheck.Left + ScaleX(16)
+									If pItem->RadioItem Then
+										Dim As Integer cx = (rcCheck.Left + rcCheck.Right) \ 2
+										Dim As Integer cy = (rcCheck.Top + rcCheck.Bottom) \ 2
+										Dim As Integer r = ScaleX(3)
+										Ellipse(hdc, cx - r, cy - r, cx + r, cy + r)
+									Else
+										Dim As HPEN hCheckPen = CreatePen(PS_SOLID, ScaleX(2), glyphColor)
+										SelectObject(hdc, hCheckPen)
+										MoveToEx(hdc, rcCheck.Left + ScaleX(2), rcCheck.Top + (rcCheck.Bottom - rcCheck.Top) \ 2, 0)
+										LineTo(hdc, rcCheck.Left + ScaleX(5), rcCheck.Bottom - ScaleY(3))
+										LineTo(hdc, rcCheck.Right - ScaleX(2), rcCheck.Top + ScaleY(3))
+										SelectObject(hdc, hGlyphPen)
+										DeleteObject(hCheckPen)
+									End If
+								End If
+
+								Dim As Boolean bHasSubMenu = (pItem->SubMenu <> 0)
+								If bHasSubMenu Then
+									Dim As RECT rcArrow = rc
+									rcArrow.Left = rcArrow.Right - ScaleX(20)
+									Dim As Integer ax = rcArrow.Left + ScaleX(6)
+									Dim As Integer ayMid = (rcArrow.Top + rcArrow.Bottom) \ 2
+									Dim As Integer aw = ScaleX(4)
+									Dim As Integer ah = ScaleY(4)
+									Dim As POINT pts(0 To 2)
+									pts(0) = Type(ax, ayMid - ah)
+									pts(1) = Type(ax, ayMid + ah)
+									pts(2) = Type(ax + aw, ayMid)
+									Polygon(hdc, @pts(0), 3)
+								End If
+
+								SelectObject(hdc, hGlyphPenPrev)
+								SelectObject(hdc, hGlyphBrushPrev)
+								DeleteObject(hGlyphPen)
+								DeleteObject(hGlyphBrush)
+
+								Dim As WString * 512 wszText
+								wszText = pItem->Caption & IIf(Len(pItem->ShortCut) = 0, WStr(""), WStr(!"\t") & pItem->ShortCut)
+								Dim As Integer tabPos = InStr(wszText, !"\t")
+								Dim As Integer margin = ScaleX(4) + IIf(bHasSubMenu, ScaleX(20), 0)
+								Dim As RECT rcText = rc
+								rcText.Left = rcText.Left + ScaleX(24)
+								rcText.Right = rcText.Right - margin
+
+								If tabPos > 0 Then
+									DrawTextW(hdc, @wszText, tabPos - 1, @rcText, DT_LEFT Or DT_VCENTER Or DT_SINGLELINE Or DT_HIDEPREFIX)
+									If Not bDisabled Then SetTextColor(hdc, darkHlBkColor)
+									DrawTextW(hdc, @wszText[tabPos], -1, @rcText, DT_RIGHT Or DT_VCENTER Or DT_SINGLELINE Or DT_NOPREFIX)
+								Else
+									DrawTextW(hdc, @wszText, -1, @rcText, DT_LEFT Or DT_VCENTER Or DT_SINGLELINE Or DT_HIDEPREFIX)
+								End If
+							End If
+
+							Message.Result = 1
+						End If
 					Case ODT_BUTTON,ODT_COMBOBOX,ODT_HEADER,ODT_LISTBOX,ODT_LISTVIEW,ODT_STATIC,ODT_TAB
 						SendMessage(Cast(HWND,diStruct->hwndItem),CM_DRAWITEM,Message.wParam,Message.lParam)
 					End Select

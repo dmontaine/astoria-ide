@@ -993,6 +993,23 @@ Namespace My.Sys.Forms
 					Dim As Boolean isSystemMenu = ((msg.lParam Shr 16) And &HFFFF) <> 0
 					If Not isSystemMenu Then
 						Dim As HMENU hPopup = Cast(HMENU, msg.wParam)
+
+						' MFT_OWNERDRAW only repaints each item's own rectangle; the popup's
+						' outer margin is filled separately by Windows from the menu's own
+						' background brush, which stays the light system color unless set
+						' here - otherwise every dark popup would sit inside a thin white
+						' frame. Symmetric with the per-item toggle below: set in dark,
+						' reverted to the default (NULL) brush in light.
+						Dim As MENUINFO mi
+						mi.cbSize = SizeOf(mi)
+						mi.fMask = MIM_BACKGROUND
+						If g_darkModeEnabled Then
+							mi.hbrBack = hbrBkgndMenu
+						Else
+							mi.hbrBack = NULL
+						End If
+						SetMenuInfo(hPopup, @mi)
+
 						Dim As Integer nCount = GetMenuItemCount(hPopup)
 						If nCount > 0 Then
 							' fMask covers MIIM_STRING/MIIM_BITMAP/MIIM_ID, not just MIIM_FTYPE,
@@ -1074,7 +1091,14 @@ Namespace My.Sys.Forms
 						Dim As Boolean bSelected = (diStruct->itemState And ODS_SELECTED) <> 0
 						Dim As Boolean bDisabled = (diStruct->itemState And (ODS_GRAYED Or ODS_DISABLED)) <> 0
 						Dim As Boolean bHot = (diStruct->itemState And ODS_HOTLIGHT) <> 0
+						Dim As Boolean bChecked = (diStruct->itemState And ODS_CHECKED) <> 0
 						Dim As MenuItem Ptr pItem = Cast(MenuItem Ptr, diStruct->itemData)
+						' Read straight from the live MenuItem (dwItemData is set to @This at
+						' creation) instead of re-querying GetMenuItemInfo by diStruct->itemID.
+						' Items that open a submenu are assigned wID = -1 (MenuItem.SetInfo), so
+						' an ID-based lookup is ambiguous whenever a popup has more than one
+						' submenu-opening item - it silently drew the wrong (or blank) caption.
+						Dim As Boolean bSeparator = (pItem = 0) OrElse (pItem->Caption = "-")
 
 						If bSelected Or bHot Then
 							FillRect(hdc, @rc, hbrHlBkgnd)
@@ -1082,34 +1106,91 @@ Namespace My.Sys.Forms
 							FillRect(hdc, @rc, hbrBkgndMenu)
 						End If
 
-						If pItem Then
+						If bSeparator Then
+							' Owner-draw suppresses the system's own separator groove, so without
+							' this the item was rendering as a literal "|" character (the internal
+							' placeholder MenuItem.SetInfo substitutes for a "-" caption).
+							Dim As Integer yMid = rc.Top + (rc.Bottom - rc.Top) \ 2
+							Dim As HPEN hSepPen = CreatePen(PS_SOLID, 1, darkHlBkColor)
+							Dim As HPEN hSepPenPrev = SelectObject(hdc, hSepPen)
+							MoveToEx(hdc, rc.Left + ScaleX(4), yMid, 0)
+							LineTo(hdc, rc.Right - ScaleX(4), yMid)
+							SelectObject(hdc, hSepPenPrev)
+							DeleteObject(hSepPen)
+						ElseIf pItem Then
+							SetBkMode(hdc, TRANSPARENT)
+							If bDisabled Then
+								SetTextColor(hdc, darkHlBkColor)
+							Else
+								SetTextColor(hdc, darkTextColor)
+							End If
+
+							' Owner-draw replaces the system's rendering of the whole item, so the
+							' checkmark/radio dot and submenu arrow glyphs it would normally draw
+							' also have to be painted here. DrawFrameControl(DFC_MENU, ...) was
+							' tried first, but it fills its box with fixed system 3D-face colors
+							' regardless of what's selected into hdc, so it always drew a light
+							' square - drawn manually instead so it actually follows dark mode.
+							Dim As COLORREF glyphColor = IIf(bDisabled, darkHlBkColor, darkTextColor)
+							Dim As HPEN hGlyphPen = CreatePen(PS_NULL, 0, 0)
+							Dim As HBRUSH hGlyphBrush = CreateSolidBrush(glyphColor)
+							Dim As HPEN hGlyphPenPrev = SelectObject(hdc, hGlyphPen)
+							Dim As HBRUSH hGlyphBrushPrev = SelectObject(hdc, hGlyphBrush)
+
+							If bChecked Then
+								Dim As RECT rcCheck = rc
+								rcCheck.Left = rcCheck.Left + ScaleX(4)
+								rcCheck.Right = rcCheck.Left + ScaleX(16)
+								If pItem->RadioItem Then
+									Dim As Integer cx = (rcCheck.Left + rcCheck.Right) \ 2
+									Dim As Integer cy = (rcCheck.Top + rcCheck.Bottom) \ 2
+									Dim As Integer r = ScaleX(3)
+									Ellipse(hdc, cx - r, cy - r, cx + r, cy + r)
+								Else
+									Dim As HPEN hCheckPen = CreatePen(PS_SOLID, ScaleX(2), glyphColor)
+									SelectObject(hdc, hCheckPen)
+									MoveToEx(hdc, rcCheck.Left + ScaleX(2), rcCheck.Top + (rcCheck.Bottom - rcCheck.Top) \ 2, 0)
+									LineTo(hdc, rcCheck.Left + ScaleX(5), rcCheck.Bottom - ScaleY(3))
+									LineTo(hdc, rcCheck.Right - ScaleX(2), rcCheck.Top + ScaleY(3))
+									SelectObject(hdc, hGlyphPen)
+									DeleteObject(hCheckPen)
+								End If
+							End If
+
+							Dim As Boolean bHasSubMenu = (pItem->SubMenu <> 0)
+							If bHasSubMenu Then
+								Dim As RECT rcArrow = rc
+								rcArrow.Left = rcArrow.Right - ScaleX(20)
+								Dim As Integer ax = rcArrow.Left + ScaleX(6)
+								Dim As Integer ayMid = (rcArrow.Top + rcArrow.Bottom) \ 2
+								Dim As Integer aw = ScaleX(4)
+								Dim As Integer ah = ScaleY(4)
+								Dim As POINT pts(0 To 2)
+								pts(0) = Type(ax, ayMid - ah)
+								pts(1) = Type(ax, ayMid + ah)
+								pts(2) = Type(ax + aw, ayMid)
+								Polygon(hdc, @pts(0), 3)
+							End If
+
+							SelectObject(hdc, hGlyphPenPrev)
+							SelectObject(hdc, hGlyphBrushPrev)
+							DeleteObject(hGlyphPen)
+							DeleteObject(hGlyphBrush)
+
 							Dim As WString * 512 wszText
-							Dim As MENUITEMINFO miiText
-							miiText.cbSize = SizeOf(miiText)
-							miiText.fMask = MIIM_STRING
-							miiText.dwTypeData = @wszText
-							miiText.cch = 512
-							If GetMenuItemInfo(Cast(HMENU, diStruct->hwndItem), diStruct->itemID, False, @miiText) Then
-								Dim As Integer tabPos = InStr(wszText, !"\t")
-								Dim As Integer margin = ScaleX(4)
-								Dim As RECT rcText = rc
-								rcText.Left = rcText.Left + ScaleX(24)
-								rcText.Right = rcText.Right - margin
+							wszText = pItem->Caption & IIf(Len(pItem->ShortCut) = 0, WStr(""), WStr(!"\t") & pItem->ShortCut)
+							Dim As Integer tabPos = InStr(wszText, !"\t")
+							Dim As Integer margin = ScaleX(4) + IIf(bHasSubMenu, ScaleX(20), 0)
+							Dim As RECT rcText = rc
+							rcText.Left = rcText.Left + ScaleX(24)
+							rcText.Right = rcText.Right - margin
 
-								SetBkMode(hdc, TRANSPARENT)
-								If bDisabled Then
-									SetTextColor(hdc, darkHlBkColor)
-								Else
-									SetTextColor(hdc, darkTextColor)
-								End If
-
-								If tabPos > 0 Then
-									DrawTextW(hdc, @wszText, tabPos - 1, @rcText, DT_LEFT Or DT_VCENTER Or DT_SINGLELINE Or DT_HIDEPREFIX)
-									If Not bDisabled Then SetTextColor(hdc, darkHlBkColor)
-									DrawTextW(hdc, @wszText[tabPos], -1, @rcText, DT_RIGHT Or DT_VCENTER Or DT_SINGLELINE Or DT_NOPREFIX)
-								Else
-									DrawTextW(hdc, @wszText, -1, @rcText, DT_LEFT Or DT_VCENTER Or DT_SINGLELINE Or DT_HIDEPREFIX)
-								End If
+							If tabPos > 0 Then
+								DrawTextW(hdc, @wszText, tabPos - 1, @rcText, DT_LEFT Or DT_VCENTER Or DT_SINGLELINE Or DT_HIDEPREFIX)
+								If Not bDisabled Then SetTextColor(hdc, darkHlBkColor)
+								DrawTextW(hdc, @wszText[tabPos], -1, @rcText, DT_RIGHT Or DT_VCENTER Or DT_SINGLELINE Or DT_NOPREFIX)
+							Else
+								DrawTextW(hdc, @wszText, -1, @rcText, DT_LEFT Or DT_VCENTER Or DT_SINGLELINE Or DT_HIDEPREFIX)
 							End If
 						End If
 

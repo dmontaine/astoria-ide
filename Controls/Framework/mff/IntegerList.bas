@@ -167,17 +167,17 @@ End Function
 
 Private Function IntegerList.Get(iItem As Integer, Obj As Any Ptr = 0) As Any Ptr
 	For i As Integer = 0 To FCount - 1
-        If QIntegerListItem(FItems.Items[i]).Value = iItem Then Return QIntegerListItem(FItems.Items[i]).Object
+	If QIntegerListItem(FItems.Items[i]).Value = iItem Then Return QIntegerListItem(FItems.Items[i]).Object
 	Next i
 	Return Obj
 End Function
 
 Private Sub IntegerList.Set(iItem As Integer, Obj As Any Ptr)
 	For i As Integer = 0 To FCount - 1
-        If QIntegerListItem(FItems.Items[i]).Value = iItem Then 
-        	QIntegerListItem(FItems.Items[i]).Object = Obj
-        	Exit Sub
-        End If
+	If QIntegerListItem(FItems.Items[i]).Value = iItem Then 
+		QIntegerListItem(FItems.Items[i]).Object = Obj
+		Exit Sub
+	End If
 	Next i
 End Sub
 

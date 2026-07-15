@@ -35,6 +35,6 @@ while fbs_Get_PlayingSounds()=0:sleep 10:wend
 
 print "press any key for quit ...!"
 while fbs_Get_PlayingSounds() and inkey()=""
-  sleep 100
+	sleep 100
 wend
 end

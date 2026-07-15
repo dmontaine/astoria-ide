@@ -29,24 +29,24 @@ dim as boolean ok=fbs_Init(,,,,1)
 ' but if it can't set this values it will try other setups too.
 ' it is not save that all values from FBS_Init() are the same as yours
 if ok=true then
-  ? "OK"
-  ? "Plugout                : " & FBS_Get_PlugName()
-  ? "Hardware output device : " & FBS_Get_PlugDevice()
-  ? "Samplerate             : " & FBS_Get_PlugRate()
-  ? "Bits per sample        : " & FBS_Get_PlugBits()
-  ? "Number of channels     : " & FBS_Get_PlugChannels()
-  ?
-  ? "Internal Buffersettings"
-  ? "Number of Buffers      : " & FBS_Get_PlugBuffers()
-  ? "Buffersize in bytes    : " & FBS_Get_PlugBuffersize()
-  ? "Number of Frames       : " & FBS_Get_PlugFrames()
-  ? "Framesize in bytes     : " & FBS_Get_PlugFramesize()
-  ?
-  ? "[any key] =  quit"
+	? "OK"
+	? "Plugout                : " & FBS_Get_PlugName()
+	? "Hardware output device : " & FBS_Get_PlugDevice()
+	? "Samplerate             : " & FBS_Get_PlugRate()
+	? "Bits per sample        : " & FBS_Get_PlugBits()
+	? "Number of channels     : " & FBS_Get_PlugChannels()
+	?
+	? "Internal Buffersettings"
+	? "Number of Buffers      : " & FBS_Get_PlugBuffers()
+	? "Buffersize in bytes    : " & FBS_Get_PlugBuffersize()
+	? "Number of Frames       : " & FBS_Get_PlugFrames()
+	? "Framesize in bytes     : " & FBS_Get_PlugFramesize()
+	?
+	? "[any key] =  quit"
 else
-  ? "error: fbs_Init() !"
-  ? FBS_Get_PlugError()
-  beep:sleep:end 1
+	? "error: fbs_Init() !"
+	? FBS_Get_PlugError()
+	beep:sleep:end 1
 end if
 
 sleep

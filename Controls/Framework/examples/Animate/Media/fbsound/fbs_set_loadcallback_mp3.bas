@@ -17,15 +17,15 @@ const File  = "legends.mp3"
 fbs_Set_PlugPath( FBSOUND_DLL_PATH )
 
 sub MyLoadCallback(byval percent as integer)
-  static as integer row=-1
-  if row=-1 then row=CsrLin()+1
-  locate row,1
-  print "loading '" & Media & File & "' " & percent & " % done"
+	static as integer row=-1
+	if row=-1 then row=CsrLin()+1
+	locate row,1
+	print "loading '" & Media & File & "' " & percent & " % done"
 end sub
 
 if fbs_Init()=false then
-  ? "fatal error: can't init fbsound 1.2 !"
-  beep : sleep : end 1
+	? "fatal error: can't init fbsound 1.2 !"
+	beep : sleep : end 1
 end if
 fbs_Set_LoadCallback(@MyLoadCallback)
 fbs_Enable_LoadCallback()

@@ -24,12 +24,12 @@ fbs_Play_MP3Stream()
 print "playing " & PATH & " press any key ..."
 sleep
 if fbs_Get_PlayingStreams()>0 then
-  print "fade out and quit !"
-  dim as single volume=1.0
-  while volume>0.025
-    volume*=0.95
-    fbs_Set_MP3StreamVolume(volume)
-    sleep 20,1
-  wend
+	print "fade out and quit !"
+	dim as single volume=1.0
+	while volume>0.025
+		volume*=0.95
+		fbs_Set_MP3StreamVolume(volume)
+		sleep 20,1
+	wend
 end if
 fbs_End_MP3Stream()

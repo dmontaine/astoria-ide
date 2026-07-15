@@ -14,13 +14,13 @@ chdir(exepath())
 fbs_Set_PlugPath( FBSOUND_DLL_PATH )
 
 sub fbs_PauseRewindSound(byval hSound as integer)
-  dim as short ptr pStart
-  ' stop playback
-  fbs_Set_SoundPaused(hSound,True)
-  ' get start position
-  fbs_Get_SoundPointers(hSound,@pStart)
-  ' set it as current play postion
-  fbs_Set_SoundPointers(hSound,,pStart)
+	dim as short ptr pStart
+	' stop playback
+	fbs_Set_SoundPaused(hSound,True)
+	' get start position
+	fbs_Get_SoundPointers(hSound,@pStart)
+	' set it as current play postion
+	fbs_Set_SoundPointers(hSound,,pStart)
 end sub
 
 dim as integer   hWave,hSound

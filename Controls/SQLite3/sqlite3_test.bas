@@ -41,16 +41,16 @@ Declare Function callback cdecl _
 	End If
 	
 	If sqlite3_open( database_name, @db ) Then 
-  		Print "Can't open database: "; *sqlite3_errmsg( db )
-  		sqlite3_close( db ) 
-  		End 1
+		Print "Can't open database: "; *sqlite3_errmsg( db )
+		sqlite3_close( db ) 
+		End 1
 	End If 
 	
 	Print "Using database: "; database_name
 	Print
 
 	If sqlite3_exec( db, query, @callback, 0, @ErrMsg ) <> SQLITE_OK Then 
-  		Print "SQL error: "; *ErrMsg
+		Print "SQL error: "; *ErrMsg
 	End If 
 
 	sqlite3_close(db) 
@@ -63,7 +63,7 @@ Function callback cdecl _
 		ByVal argv As ZString Ptr Ptr, _
 		ByVal colName As ZString Ptr Ptr _
 	) As Long
-  
+
 	Dim As Integer i 
 	Dim As String text
 
@@ -81,7 +81,7 @@ Function callback cdecl _
 	Print
 
 	Function = 0
-   
+
 End Function 
 
 '':::::

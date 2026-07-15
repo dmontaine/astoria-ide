@@ -199,8 +199,8 @@ Sub ThreadPooling._Thread(ByVal p As Any Ptr)
 		End If
 		'ReDim Preserve pThis->_pThread(UBound(pThis->_pThread) - 1)
 		With *pThis
-            ReDim Preserve ._pThread(UBound(pThis->_pThread) - 1)
-        End With
+	ReDim Preserve ._pThread(UBound(pThis->_pThread) - 1)
+End With
 		ReDim Preserve pThis->_p(UBound(pThis->_p) - 1)
 		MutexUnlock(pThis->_mutex)
 		ReDim Preserve pThis->_returnF(UBound(pThis->_returnF) + 1)

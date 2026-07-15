@@ -28,9 +28,9 @@ dim as boolean ok
 
 ok=fbs_Init()
 if ok=false then
-  ? "error: fbs_Init() !"
-  ? fbs_Get_PlugError()
-  beep:sleep:end 1
+	? "error: fbs_Init() !"
+	? fbs_Get_PlugError()
+	beep:sleep:end 1
 end if
 
 dim as string filename
@@ -38,13 +38,13 @@ dim as string filename
 ?
 ? "loading 10 MP3 files in memory ..."
 for i=0 to 9
-  filename=data_path & "mixertest" & trim(str(i+1)) & ".mp3"
-  if fbs_Load_MP3File(filename,@hWave(i))=false then
-    ? "loading [" & filename & "] = false !"
-    ? "error loading [" & filename & "] !"
-  else
-    ? "loading [" & filename & "] = true !"
-  end if
+	filename=data_path & "mixertest" & trim(str(i+1)) & ".mp3"
+	if fbs_Load_MP3File(filename,@hWave(i))=false then
+		? "loading [" & filename & "] = false !"
+		? "error loading [" & filename & "] !"
+	else
+		? "loading [" & filename & "] = true !"
+	end if
 next
 
 
@@ -55,20 +55,20 @@ while fbs_Get_PlayingSounds()=0:sleep 10:wend
 ' main loop
 '
 do
-  if maxSounds<100 then
-    SoundN=rnd*9
-    ' play hWave(0-9) 2-5 times in random speed 0.5 to 1.5
-    fbs_Play_Wave(hWave(SoundN),2+rnd*3,0.5+rnd)
-    sleep 20
-  end if
-  new_nSounds=fbs_Get_PlayingSounds()
-  if (new_nSounds <> old_nSounds) then
-    if new_nSounds>maxsounds then maxSounds=new_nSounds
-    print "Active playing sounds =" + str(new_nSounds)
-    old_nSounds = new_nSounds
-  end if
-  sleep 10
-  if inkey=chr(27) then exit do
+	if maxSounds<100 then
+		SoundN=rnd*9
+		' play hWave(0-9) 2-5 times in random speed 0.5 to 1.5
+		fbs_Play_Wave(hWave(SoundN),2+rnd*3,0.5+rnd)
+		sleep 20
+	end if
+	new_nSounds=fbs_Get_PlayingSounds()
+	if (new_nSounds <> old_nSounds) then
+		if new_nSounds>maxsounds then maxSounds=new_nSounds
+		print "Active playing sounds =" + str(new_nSounds)
+		old_nSounds = new_nSounds
+	end if
+	sleep 10
+	if inkey=chr(27) then exit do
 loop while (old_nSounds>0)
 
 #endif

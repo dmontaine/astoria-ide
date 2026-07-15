@@ -17,23 +17,23 @@ chdir(exepath())
 dim as boolean ok
 ok=fbs_Init()
 if ok=false then
-  ? "error: fbs_Init() !"
-  ? FBS_Get_PlugError()
-  beep:sleep:end 1
+	? "error: fbs_Init() !"
+	? FBS_Get_PlugError()
+	beep:sleep:end 1
 end if
 
 dim as integer hWave
 ok=fbs_Load_WAVFile(data_path & "fbsloop44.wav",@hWave)
 if ok=false then
-  ? "error: fbs_Load_WAVFile() !"
-  beep:sleep:end 1
+	? "error: fbs_Load_WAVFile() !"
+	beep:sleep:end 1
 end if
 
 ' get next free playback channel or create one
 ok=fbs_Play_Wave(hWave)
 if ok=false then
-  ? "error: fbs_Play_Wave() !"
-  beep:sleep:end 1
+	? "error: fbs_Play_Wave() !"
+	beep:sleep:end 1
 end if
 
 '
@@ -44,11 +44,11 @@ end if
 
 dim as integer KeyCode
 while KeyCode<>27
-  KeyCode=asc(Inkey())
-  if KeyCode=asc("p") then
-    fbs_Play_Wave(hWave,4) ' optional 4 times
-  else
-    sleep 100
-  end if
+	KeyCode=asc(Inkey())
+	if KeyCode=asc("p") then
+		fbs_Play_Wave(hWave,4) ' optional 4 times
+	else
+		sleep 100
+	end if
 wend
 end

@@ -91,7 +91,7 @@ Namespace My.Sys.Forms
 				lvi.mask = LVIF_STATE
 				lvi.iItem = Index
 				lvi.iSubItem = 0
-    			lvi.stateMask = LVIS_SELECTED
+				lvi.stateMask = LVIS_SELECTED
 				ListView_GetItem(Parent->Handle, @lvi)
 				FSelected = (lvi.state And LVIS_SELECTED) = LVIS_SELECTED
 			End If

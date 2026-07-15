@@ -539,126 +539,126 @@ End Sub
 
 Function frmGridDataTest.DataBindingCombo(ByRef tControl As ComboBoxEdit, db As sqlite3 Ptr,sSql As ZString Ptr,AddHeader As Boolean=True) As Integer
 ' https://www.cnblogs.com/hbtmwangjin/p/7941403.html
-    Dim As Integer i,j
-    Dim lpTable    As ZString Ptr Ptr ' Pointer to array for given table (from column names)
-    Dim nRows      As Long=0         ' Number of rows in result set
-    Dim nColumns   As Long=0         ' Number of columns in result set
-    Dim lpErrorSz  As ZString Ptr         ' Error message
-    Dim iFields    As Long=0         ' Number of fields returned for table
-    Dim iRow       As Long=0
-    Dim iCol       As Long=0
-    Dim iResult    As Long         ' Row count or error code returned by this function
+	Dim As Integer i,j
+	Dim lpTable    As ZString Ptr Ptr ' Pointer to array for given table (from column names)
+	Dim nRows      As Long=0         ' Number of rows in result set
+	Dim nColumns   As Long=0         ' Number of columns in result set
+	Dim lpErrorSz  As ZString Ptr         ' Error message
+	Dim iFields    As Long=0         ' Number of fields returned for table
+	Dim iRow       As Long=0
+	Dim iCol       As Long=0
+	Dim iResult    As Long         ' Row count or error code returned by this function
 
 	#ifdef __USE_WINAPI__
-	    Dim As HCURSOR hCurSave = GetCursor()
-	    SetCursor(LoadCursor(0, IDC_WAIT))
+		Dim As HCURSOR hCurSave = GetCursor()
+		SetCursor(LoadCursor(0, IDC_WAIT))
 	#endif
-    If sqlite3_get_table(db, sSql, @lpTable, @nRows, @nColumns, @lpErrorSz) = 0 Then ' Success
-        If nRows = 0 OrElse nColumns<1  Then
-            sqlite3_free_table lpTable  ' Free char** query result regardless of success
-            lpTable=0
-            Return  -1
-        End If
-        If AddHeader Then
-        End If
-        iFields = ((nRows+1) * nColumns)-1
-        For i = nColumns To iFields
-            iCol +=1
-            If iCol = nColumns Then iCol = 0
-            If ((i) Mod nColumns = 0) AndAlso i<iFields Then
-                iRow +=1
-                tControl.AddItem *lpTable[i]
-            End If
-        Next
-    Else
-        iResult = -1
-        sqlite3_free_table lpTable  ' Free char** query result regardless of success
-        lpTable=0
-        Return  -1
-    End If
-    sqlite3_free_table lpTable  ' Free char** query result regardless of success
-    lpTable=0
-    Return  nRows
+	If sqlite3_get_table(db, sSql, @lpTable, @nRows, @nColumns, @lpErrorSz) = 0 Then ' Success
+		If nRows = 0 OrElse nColumns<1  Then
+			sqlite3_free_table lpTable  ' Free char** query result regardless of success
+			lpTable=0
+			Return  -1
+		End If
+		If AddHeader Then
+		End If
+		iFields = ((nRows+1) * nColumns)-1
+		For i = nColumns To iFields
+			iCol +=1
+			If iCol = nColumns Then iCol = 0
+			If ((i) Mod nColumns = 0) AndAlso i<iFields Then
+				iRow +=1
+				tControl.AddItem *lpTable[i]
+			End If
+		Next
+	Else
+		iResult = -1
+		sqlite3_free_table lpTable  ' Free char** query result regardless of success
+		lpTable=0
+		Return  -1
+	End If
+	sqlite3_free_table lpTable  ' Free char** query result regardless of success
+	lpTable=0
+	Return  nRows
 End Function
 
 Function frmGridDataTest.DataBindingGrid(ByRef tControl As GridData, db As sqlite3 Ptr,sSql As ZString Ptr,AddHeader As Boolean=True) As Integer
-    ' https://www.cnblogs.com/hbtmwangjin/p/7941403.html
-    ' Get data; returns row count, <=0 on error (see ErrStr)
-    ' Returns saRecSetZ() 2D array
-    ' Query result in saRecSetZ(row, col), zero-based
-    ' Row 0 contains column names
-    ' Data rows start at index 1
-    Dim As Integer i, j, CountPerPage
-    #ifdef __USE_WINAPI__
-    	CountPerPage = ListView_GetCountPerPage(tControl.Handle)
-    #endif
-    Dim lpTable    As ZString Ptr Ptr ' Pointer to array for given table (from column names)
-    Dim nRows      As Long=0         ' Number of rows in result set
-    Dim nColumns   As Long=0         ' Number of columns in result set
-    Dim lpErrorSz  As ZString Ptr         ' Error message
-    Dim iFields    As Long=0         ' Number of fields returned for table
-    Dim iRow       As Long=0
-    Dim iCol       As Long=0
-    Dim iResult    As Long         ' Row count or error code returned by this function
+	' https://www.cnblogs.com/hbtmwangjin/p/7941403.html
+	' Get data; returns row count, <=0 on error (see ErrStr)
+	' Returns saRecSetZ() 2D array
+	' Query result in saRecSetZ(row, col), zero-based
+	' Row 0 contains column names
+	' Data rows start at index 1
+	Dim As Integer i, j, CountPerPage
+	#ifdef __USE_WINAPI__
+		CountPerPage = ListView_GetCountPerPage(tControl.Handle)
+	#endif
+	Dim lpTable    As ZString Ptr Ptr ' Pointer to array for given table (from column names)
+	Dim nRows      As Long=0         ' Number of rows in result set
+	Dim nColumns   As Long=0         ' Number of columns in result set
+	Dim lpErrorSz  As ZString Ptr         ' Error message
+	Dim iFields    As Long=0         ' Number of fields returned for table
+	Dim iRow       As Long=0
+	Dim iCol       As Long=0
+	Dim iResult    As Long         ' Row count or error code returned by this function
 
 	#ifdef __USE_WINAPI__
-	    Dim As HCURSOR hCurSave = GetCursor()
-	    SetCursor(LoadCursor(0, IDC_WAIT))
+		Dim As HCURSOR hCurSave = GetCursor()
+		SetCursor(LoadCursor(0, IDC_WAIT))
 	#endif
-    If sqlite3_get_table(db, sSql, @lpTable, @nRows, @nColumns, @lpErrorSz) = 0 Then ' Success
-        If nRows = 0 OrElse nColumns<1  Then
-            sqlite3_free_table lpTable  ' Free char** query result regardless of success
-            tControl.Columns.Add "NO", 0, 43,cfCenter,CT_Header,False,CT_Header,,ssSortAscending
-            tControl.Columns.Add "  ", 0,130,cfCenter,DT_String,False,CT_TextBox,,ssSortAscending
-            For i = nRows+1 To CountPerPage
-                tControl.ListItems.Add Str(BLANKROW+(i-nRows)/10000),0,1
-            Next
-             tControl.ListItems.Item(0)->Text(1) = " "
-            lpTable=0
-            Return  -1
-        End If
-        If AddHeader Then
-            tControl.Columns.Add "NO", 0, 43,cfCenter, CT_Header,False,CT_Header,,ssSortAscending
-            For i = 0 To nColumns-1
-                tControl.Columns.Add *lpTable[i], 0, 100,cfCenter,DT_String,False,CT_TextBox,,ssSortAscending
-            Next
-        End If
-        tControl.ListItems.Add  Str(iRow+1),0,1
-        tControl.ListItems.Item(iRow)->Text(0) = Str(iRow+1)
-        iFields = ((nRows+1) * nColumns)-1
-        For i = nColumns To iFields
-             pApp->DoEvents
-            tControl.ListItems.Item(iRow)->Text(iCol+1) = *lpTable[i]
-            iCol +=1
-            If iCol = nColumns Then iCol = 0
-            If ((i+1) Mod nColumns = 0) AndAlso i<iFields Then
-                iRow +=1
-                tControl.ListItems.Add  Str(iRow+1),0,1
-                tControl.ListItems.Item(iRow)->Text(0) = Str(iRow+1)
-            End If
-        Next
-        ' Marked the last row is BLANKROW
-        tControl.ListItems.Item(nRows)->Text(0) = Str(BLANKROW+0.00005)
-        If nRows<CountPerPage Then
-            For i = nRows+1 To CountPerPage
-                tControl.ListItems.Add Str(BLANKROW+(i-nRows)/10000),0,1
-            Next
-        End If
-    Else
-        iResult = -1
-        sqlite3_free_table lpTable  ' Free char** query result regardless of success
-        tControl.Columns.Add " ", 0, 43,cfCenter,CT_Header,True,CT_Header,,ssSortAscending
-        tControl.Columns.Add "  ", 0,130,cfCenter,DT_String,False,CT_TextBox,,ssSortAscending
-        For i = nRows+1 To CountPerPage
-            tControl.ListItems.Add Str(BLANKROW+(i-nRows)/10000),0,1
-        Next
-        tControl.ListItems.Item(0)->Text(1) = " "
-        lpTable=0
-        Return  -1
-    End If
-    sqlite3_free_table lpTable  ' Free char** query result regardless of success
-    lpTable=0
-    Return  nRows
+	If sqlite3_get_table(db, sSql, @lpTable, @nRows, @nColumns, @lpErrorSz) = 0 Then ' Success
+		If nRows = 0 OrElse nColumns<1  Then
+			sqlite3_free_table lpTable  ' Free char** query result regardless of success
+			tControl.Columns.Add "NO", 0, 43,cfCenter,CT_Header,False,CT_Header,,ssSortAscending
+			tControl.Columns.Add "  ", 0,130,cfCenter,DT_String,False,CT_TextBox,,ssSortAscending
+			For i = nRows+1 To CountPerPage
+				tControl.ListItems.Add Str(BLANKROW+(i-nRows)/10000),0,1
+			Next
+			tControl.ListItems.Item(0)->Text(1) = " "
+			lpTable=0
+			Return  -1
+		End If
+		If AddHeader Then
+			tControl.Columns.Add "NO", 0, 43,cfCenter, CT_Header,False,CT_Header,,ssSortAscending
+			For i = 0 To nColumns-1
+				tControl.Columns.Add *lpTable[i], 0, 100,cfCenter,DT_String,False,CT_TextBox,,ssSortAscending
+			Next
+		End If
+		tControl.ListItems.Add  Str(iRow+1),0,1
+		tControl.ListItems.Item(iRow)->Text(0) = Str(iRow+1)
+		iFields = ((nRows+1) * nColumns)-1
+		For i = nColumns To iFields
+			pApp->DoEvents
+			tControl.ListItems.Item(iRow)->Text(iCol+1) = *lpTable[i]
+			iCol +=1
+			If iCol = nColumns Then iCol = 0
+			If ((i+1) Mod nColumns = 0) AndAlso i<iFields Then
+				iRow +=1
+				tControl.ListItems.Add  Str(iRow+1),0,1
+				tControl.ListItems.Item(iRow)->Text(0) = Str(iRow+1)
+			End If
+		Next
+		' Marked the last row is BLANKROW
+		tControl.ListItems.Item(nRows)->Text(0) = Str(BLANKROW+0.00005)
+		If nRows<CountPerPage Then
+			For i = nRows+1 To CountPerPage
+				tControl.ListItems.Add Str(BLANKROW+(i-nRows)/10000),0,1
+			Next
+		End If
+	Else
+		iResult = -1
+		sqlite3_free_table lpTable  ' Free char** query result regardless of success
+		tControl.Columns.Add " ", 0, 43,cfCenter,CT_Header,True,CT_Header,,ssSortAscending
+		tControl.Columns.Add "  ", 0,130,cfCenter,DT_String,False,CT_TextBox,,ssSortAscending
+		For i = nRows+1 To CountPerPage
+			tControl.ListItems.Add Str(BLANKROW+(i-nRows)/10000),0,1
+		Next
+		tControl.ListItems.Item(0)->Text(1) = " "
+		lpTable=0
+		Return  -1
+	End If
+	sqlite3_free_table lpTable  ' Free char** query result regardless of success
+	lpTable=0
+	Return  nRows
 End Function
 
 

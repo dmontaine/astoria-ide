@@ -307,7 +307,7 @@ Using My.Sys.Forms
 
 	Function ObjectDelete Alias "ObjectDelete"(Obj As Any Ptr) As Boolean Export
 		If Obj = 0 Then Return False
- 		Select Case LCase(Cast(My.Sys.Object Ptr, Obj)->ClassName)
+		Select Case LCase(Cast(My.Sys.Object Ptr, Obj)->ClassName)
 		Case "bitmaptype": _Delete( Cast(My.Sys.Drawing.BitmapType Ptr, Obj))
 		Case "menuitem": _Delete( Cast(MenuItem Ptr, Obj))
 		Case "statuspanel": _Delete( Cast(StatusPanel Ptr, Obj))

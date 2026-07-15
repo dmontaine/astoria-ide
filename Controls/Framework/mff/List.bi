@@ -19,8 +19,8 @@
 Private Type List
 Private:
 	m_Count As Integer = 0
-    m_Capacity As Integer = 0
-    Declare Sub EnsureCapacity(NewSize As Integer)
+	m_Capacity As Integer = 0
+	Declare Sub EnsureCapacity(NewSize As Integer)
 Public:
 	Items As Any Ptr Ptr = 0
 	Declare Property Count() As Integer

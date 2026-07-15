@@ -6,27 +6,27 @@
 #inclib "raylib"
 
 #if defined(__FB_CYGWIN__) Or defined(__FB_LINUX__) Or defined(__FB_FREEBSD__) Or defined(__FB_OPENBSD__) Or defined(__FB_NETBSD__)
-    #inclib "GL"
-    #inclib "X11"
+		#inclib "GL"
+		#inclib "X11"
 #endif
 
 #ifdef __FB_LINUX__
-    #inclib "dl"
-    #inclib "rt"
+		#inclib "dl"
+		#inclib "rt"
 #elseif defined(__FB_CYGWIN__) Or defined(__FB_FREEBSD__) Or defined(__FB_OPENBSD__) Or defined(__FB_NETBSD__)
-    #inclib "Xrandr"
-    #inclib "Xinerama"
-    #inclib "Xi"
-    #inclib "Xxf86vm"
-    #inclib "Xcursor"
+		#inclib "Xrandr"
+		#inclib "Xinerama"
+		#inclib "Xi"
+		#inclib "Xxf86vm"
+		#inclib "Xcursor"
 #elseif defined(__FB_DARWIN__)
-    #inclib "OpenGL"
-    #inclib "Cocoa"
+		#inclib "OpenGL"
+		#inclib "Cocoa"
 #elseif defined(__FB_WIN32__)
-    #inclib "opengl32"
-    #inclib "gdi32"
-    #inclib "winmm"
-    #inclib "shell32"
+		#inclib "opengl32"
+		#inclib "gdi32"
+		#inclib "winmm"
+		#inclib "shell32"
 #endif
 Namespace RayLib
 Extern "C"
@@ -115,7 +115,7 @@ Const RAD2DEG = 180.0f / PI
 	Constructor Vector3(x As Single, y As Single, z As Single)
 		This.x = x
 		This.y = y
-	    This.z = z
+			This.z = z
 	End Constructor
 #endif
 
@@ -790,7 +790,7 @@ Enum BlendMode
 	BLEND_SUBTRACT_COLORS
 	BLEND_ALPHA_PREMULTIPLY
 	BLEND_CUSTOM
-  BLEND_CUSTOM_SEPARATE
+	BLEND_CUSTOM_SEPARATE
 End Enum
 
 Enum Gesture

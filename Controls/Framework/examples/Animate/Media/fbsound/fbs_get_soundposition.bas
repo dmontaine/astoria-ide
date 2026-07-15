@@ -25,11 +25,11 @@ fbs_Play_Sound(hSound)
 dim as ubyte c=1
 dim as single position
 while inkey()=""
-  if fbs_Get_SoundPosition(hSound,@Position) then
-    ' end of sound trigger new playback
-    if Position>=1.0 then fbs_Play_Sound(hSound):c+=1
-    dim as integer x=Position*scr_w
-    line(x-3,0)-step(6,99),c,BF
-  end if
-  sleep(5)
+	if fbs_Get_SoundPosition(hSound,@Position) then
+		' end of sound trigger new playback
+		if Position>=1.0 then fbs_Play_Sound(hSound):c+=1
+		dim as integer x=Position*scr_w
+		line(x-3,0)-step(6,99),c,BF
+	end if
+	sleep(5)
 wend

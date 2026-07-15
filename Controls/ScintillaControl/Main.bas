@@ -76,7 +76,7 @@
 	
 	Function ObjectDelete Alias "ObjectDelete"(Obj As Any Ptr) As Boolean Export
 		If Obj = 0 Then Return False
- 		Select Case LCase(Cast(My.Sys.Object Ptr, Obj)->ClassName)
+		Select Case LCase(Cast(My.Sys.Object Ptr, Obj)->ClassName)
 		Case Else: Return DeleteComponent(Obj)
 		End Select
 		If bNotRemoveObject = False Then

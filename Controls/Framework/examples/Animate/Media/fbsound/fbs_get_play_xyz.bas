@@ -19,23 +19,23 @@ chdir(exepath())
 dim as boolean ok
 ok=fbs_Init()
 if ok=false then
-  ? "error: fbs_Init() !"
-  ? FBS_Get_PlugError()
-  beep:sleep:end 1
+	? "error: fbs_Init() !"
+	? FBS_Get_PlugError()
+	beep:sleep:end 1
 end if
 
 dim as integer hWave
 ok=fbs_Load_MP3File(data_path & "rnb_loop.mp3",@hWave)
 if ok=false then
-  ? "erro: fbs_LoadMP3File() !"
-  beep:sleep:end 1
+	? "erro: fbs_LoadMP3File() !"
+	beep:sleep:end 1
 end if
 
 
 ok=fbs_PLay_Wave(hWave,16) ' loop 16 times
 if ok=false then
-  ? "error: fbs_Play_Wave() !"
-  beep:sleep:end 1
+	? "error: fbs_Play_Wave() !"
+	beep:sleep:end 1
 end if
 
 '
@@ -50,20 +50,20 @@ dim as integer KeyCode
 
 
 while (KeyCode<>27)
-  KeyCode=asc(Inkey()) 
+	KeyCode=asc(Inkey()) 
 	if KeyCode=asc("s") then
-	  Status xor = True ' togle printing on/off
+		Status xor = True ' togle printing on/off
 	elseif KeyCode=asc("p") then 
-	  fbs_PLay_Wave(hWave,16)
-  end if
-  if Status=True then
-    cls
-    ? "playtime in sec. =" & str(fbs_Get_PlayTime())
-    ? "played samples   =" & str(fbs_Get_PlayedSamples())
-    ? "played bytes     =" & str(fbs_Get_PlayedBytes())
-    ? "[s]  = togle printing status on/off"
-    ? "[p]  = play it again or parallel"
-    ? "[esc]= quit"
+		fbs_PLay_Wave(hWave,16)
 	end if
-  sleep 100	
+	if Status=True then
+		cls
+		? "playtime in sec. =" & str(fbs_Get_PlayTime())
+		? "played samples   =" & str(fbs_Get_PlayedSamples())
+		? "played bytes     =" & str(fbs_Get_PlayedBytes())
+		? "[s]  = togle printing status on/off"
+		? "[p]  = play it again or parallel"
+		? "[esc]= quit"
+	end if
+	sleep 100	
 wend

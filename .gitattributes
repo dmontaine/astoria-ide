@@ -2,3 +2,6 @@
 /src/*.bas -crlf
 /src/*.bi -crlf
 /src/*.frm -crlf
+/Controls/**/*.bas -crlf
+/Controls/**/*.bi -crlf
+/Controls/**/*.frm -crlf

@@ -1,4 +1,4 @@
- ' ######################################
+	' ######################################
 ' # fbs_get_playingsounds_mp3stream.bas #
 ' #######################################
 
@@ -48,29 +48,29 @@ screenres scr_width,scr_height
 ' in this example i use same samplerate as the mp3 file!
 if fbs_Init(22050)=true then
 
-  setmouse ,,0
-  if fbs_Create_MP3Stream(data_path & "legends.mp3")=true then
-    if fbs_Play_MP3Stream()=false then
-       ? "error: fbs_Play_MP3Stream() !"
-       beep:sleep:end 1
-    else
-      while fbs_Get_PlayingStreams()=0:sleep 10:wend
-    end if
-  else
-    ? "error: fbs_Create_MP3File() !"
-    beep:sleep:end 1
-  end if
+		setmouse ,,0
+		if fbs_Create_MP3Stream(data_path & "legends.mp3")=true then
+				if fbs_Play_MP3Stream()=false then
+							? "error: fbs_Play_MP3Stream() !"
+							beep:sleep:end 1
+				else
+						while fbs_Get_PlayingStreams()=0:sleep 10:wend
+				end if
+		else
+				? "error: fbs_Create_MP3File() !"
+				beep:sleep:end 1
+		end if
 end if
 
 
 
 ' color table
 for l=1 to 254
-  rc=sin(w)*0.5+0.5
-  gc=cos(w*1.125)*0.5+0.5
-  bc=sin(w*1.333)*0.5+0.5
-  palette l,rc*255,gc*255,bc*255
-  w=w+cfstep
+		rc=sin(w)*0.5+0.5
+		gc=cos(w*1.125)*0.5+0.5
+		bc=sin(w*1.333)*0.5+0.5
+		palette l,rc*255,gc*255,bc*255
+		w=w+cfstep
 next
 
 restore waypoints
@@ -79,183 +79,183 @@ palette 255,255,255,255
 stime=timer():fps=24
 ' [esq]=end
 while (a<>27) ' and (fbs_Get_PlayingStreams()>0) 
-  rstep=rdiff*zoom/xmax
-  istep=idiff*zoom/ymax
-  r_min=roffset-(rdiff*zoom*0.5)
-  i_min=ioffset-(idiff*zoom*0.5)
+		rstep=rdiff*zoom/xmax
+		istep=idiff*zoom/ymax
+		r_min=roffset-(rdiff*zoom*0.5)
+		i_min=ioffset-(idiff*zoom*0.5)
 
-  ScreenLock
-  video_mem=screenptr()
-  select case fake
-    case 0
+		ScreenLock
+		video_mem=screenptr()
+		select case fake
+				case 0
 
-    case 1
-      video_mem+=scr_width+1:r_min+=rstep*0.5:i_min+=istep*0.5
-    case 2
-      video_mem+=1:r_min+=rstep*0.5
-    case 3
-      video_mem+=scr_width:i_min+=istep*0.5
-  end select
-  fake+=1:if fake=4 then fake=0
-  asm
+				case 1
+						video_mem+=scr_width+1:r_min+=rstep*0.5:i_min+=istep*0.5
+				case 2
+						video_mem+=1:r_min+=rstep*0.5
+				case 3
+						video_mem+=scr_width:i_min+=istep*0.5
+		end select
+		fake+=1:if fake=4 then fake=0
+		asm
 #ifndef __FB_64BIT__
-  #define REG EDI
+		#define REG EDI
 #else
-  #define REG RDI
+		#define REG RDI
 #endif  
-  
-    mov REG,[video_mem]
-    fld qword ptr [rstep] 'rstep on fpu stack
-    fld qword ptr [i_min] 'i,rstep
-    mov dx,ymax
-    asm_for_i:
-      fld qword ptr [r_min] 'r,i,rstep
-      shl edx,16
-      mov dx,xmax
-      asm_for_r:
-        xor cl,cl           ' iterations counter = 0
-        fldz                'y2=0,r,i,rstep
-        fldz                'x2=0,y2=0,r,i,rstep
-        fldz                'y=0,x2=0,y2=0,r,i,rstep
-        fldz                'x=0,y=0,x2=0,y2=0,r,i,rstep
-        asm_itera_loop:
-          ' y=2*x*y+i
-          fld  st(0)          'x,x,y,x2,y2,r,i,rstep
-          fadd st(0),st(1)    '2*x,x,y,x2,y2,r,i,rstep
-          fmul st(0),st(2)    '2*x*y,x,y,x2,y2,r,i,rstep
-          fadd st(0),st(6)    '2*y*x+i,x,y,x2,y2,r,i,rstep
-          fxch st(2)          'y,x,y,2*x*y+i,x2,y2,r,i,rstep
-          fstp st(0)          'x,y,x2,y2,r,i,2
-          ' x=x2-y2+r
-          fld  st(2)          'x2,x,y,x2,y2,r,i,rstep
-          fsub st(0),st(4)    'x2-y2,x,y,x2,y2,r,i,rstep
-          fadd st(0),st(5)    'x2-y2+r,x,y,x2,y2,r,i,rstep
-          fxch st(1)          'x,x2-y2+r,y,x2,y2,r,i,rstep
-          fstp st(0)          'x,y,x2,y2,r,i,rstep
-          ' x2=x*x
-          fld  st(0)          'x,x,y,x2,y2,r,i,rstep
-          fmul st(0)          'x*x,x,y,x2,y2,r,i,rstep
-          fxch st(3)          'x2,x,y,x*x,y2,r,i,rstep
-          fstp st(0)          'x,y,x2,y2,r,i,rstep
-          ' y2=y*y
-          fld  st(1)          'y,x,y,x2,y2,i,r,rstep
-          fmul st(0)          'y*y,x,y,x2,y2,r,i,rstep
-          fxch st(4)          'y2,x,y,x2,y*y,r,i,rstep
-          fstp st(0)          'x,y,x2,y2,r,i,rstep
+		
+				mov REG,[video_mem]
+				fld qword ptr [rstep] 'rstep on fpu stack
+				fld qword ptr [i_min] 'i,rstep
+				mov dx,ymax
+				asm_for_i:
+						fld qword ptr [r_min] 'r,i,rstep
+						shl edx,16
+						mov dx,xmax
+						asm_for_r:
+								xor cl,cl           ' iterations counter = 0
+								fldz                'y2=0,r,i,rstep
+								fldz                'x2=0,y2=0,r,i,rstep
+								fldz                'y=0,x2=0,y2=0,r,i,rstep
+								fldz                'x=0,y=0,x2=0,y2=0,r,i,rstep
+								asm_itera_loop:
+										' y=2*x*y+i
+										fld  st(0)          'x,x,y,x2,y2,r,i,rstep
+										fadd st(0),st(1)    '2*x,x,y,x2,y2,r,i,rstep
+										fmul st(0),st(2)    '2*x*y,x,y,x2,y2,r,i,rstep
+										fadd st(0),st(6)    '2*y*x+i,x,y,x2,y2,r,i,rstep
+										fxch st(2)          'y,x,y,2*x*y+i,x2,y2,r,i,rstep
+										fstp st(0)          'x,y,x2,y2,r,i,2
+										' x=x2-y2+r
+										fld  st(2)          'x2,x,y,x2,y2,r,i,rstep
+										fsub st(0),st(4)    'x2-y2,x,y,x2,y2,r,i,rstep
+										fadd st(0),st(5)    'x2-y2+r,x,y,x2,y2,r,i,rstep
+										fxch st(1)          'x,x2-y2+r,y,x2,y2,r,i,rstep
+										fstp st(0)          'x,y,x2,y2,r,i,rstep
+										' x2=x*x
+										fld  st(0)          'x,x,y,x2,y2,r,i,rstep
+										fmul st(0)          'x*x,x,y,x2,y2,r,i,rstep
+										fxch st(3)          'x2,x,y,x*x,y2,r,i,rstep
+										fstp st(0)          'x,y,x2,y2,r,i,rstep
+										' y2=y*y
+										fld  st(1)          'y,x,y,x2,y2,i,r,rstep
+										fmul st(0)          'y*y,x,y,x2,y2,r,i,rstep
+										fxch st(4)          'y2,x,y,x2,y*y,r,i,rstep
+										fstp st(0)          'x,y,x2,y2,r,i,rstep
 
-          inc cl              ' itera+=1
-          cmp cl,255            ' if itera>max_iterations then exit do
-          je asm_nothing
-          ' if (x2+y2)>4 same as sqr(x2*x2+y2*y2)>2
-          fld st(2)              'x2,x,y,x2,y2,r,i,rstep
-          fadd st(0),st(4)       'x2+y2,x,y,x2,y2,r,i,rstep
-          fistp dword ptr [x2y2] 'x,y,x2,y2,r,i,rstep
-          cmp dword ptr [x2y2],4
-          jg asm_found_it
-        jmp asm_itera_loop
-        asm_nothing:
-        mov byte ptr [REG],0
+										inc cl              ' itera+=1
+										cmp cl,255            ' if itera>max_iterations then exit do
+										je asm_nothing
+										' if (x2+y2)>4 same as sqr(x2*x2+y2*y2)>2
+										fld st(2)              'x2,x,y,x2,y2,r,i,rstep
+										fadd st(0),st(4)       'x2+y2,x,y,x2,y2,r,i,rstep
+										fistp dword ptr [x2y2] 'x,y,x2,y2,r,i,rstep
+										cmp dword ptr [x2y2],4
+										jg asm_found_it
+								jmp asm_itera_loop
+								asm_nothing:
+								mov byte ptr [REG],0
 
-        jmp asm_next
-        asm_found_it:
+								jmp asm_next
+								asm_found_it:
 
-        mov byte ptr [REG],cl '*video_ptr=itera (color)
+								mov byte ptr [REG],cl '*video_ptr=itera (color)
 
-        asm_next:
+								asm_next:
 
-        add REG,2             ' video_ptr+=1
+								add REG,2             ' video_ptr+=1
 
-        fstp st(0)            'y,x2,y2,r,i,rstep
-        fstp st(0)            'x2,y2,r,i,rstep
-        fstp st(0)            'y2,r,i,rstep
-        fstp st(0)            'r,i,rstep
+								fstp st(0)            'y,x2,y2,r,i,rstep
+								fstp st(0)            'x2,y2,r,i,rstep
+								fstp st(0)            'y2,r,i,rstep
+								fstp st(0)            'r,i,rstep
 
-        dec dx
-        cmp dx,0
-        je asm_exit_for_r
-        ' r+=rstep
-        fadd st(0),st(2) 'r+rstep,i,rstep
-      jmp asm_for_r
+								dec dx
+								cmp dx,0
+								je asm_exit_for_r
+								' r+=rstep
+								fadd st(0),st(2) 'r+rstep,i,rstep
+						jmp asm_for_r
 
-      asm_exit_for_r:
-      add REG,scr_width
-      fstp st(0) 'i,rstep
-      shr edx,16
-      dec dx
-      cmp dx,0
-      je asm_exit_for_i
-      ' i+=istep
-      fadd qword ptr [istep] 'i+istep,rstep
-    jmp asm_for_i
-  asm_exit_for_i:
-  fstp st(0) 'rstep
-  fstp st(0) 'fpu stack empty
-  end asm
-  locate 1,1
-  color 255
-  draw string (0,0),"fps:" & int(fps) & "    "
-  ScreenUnlock
+						asm_exit_for_r:
+						add REG,scr_width
+						fstp st(0) 'i,rstep
+						shr edx,16
+						dec dx
+						cmp dx,0
+						je asm_exit_for_i
+						' i+=istep
+						fadd qword ptr [istep] 'i+istep,rstep
+				jmp asm_for_i
+		asm_exit_for_i:
+		fstp st(0) 'rstep
+		fstp st(0) 'fpu stack empty
+		end asm
+		locate 1,1
+		color 255
+		draw string (0,0),"fps:" & int(fps) & "    "
+		ScreenUnlock
 
-  frames+=1
-  if frames=50 then
-    etime=timer()
-    fps=50.0/(etime-stime)
-    frames=0
-    stime=etime
-  end if
+		frames+=1
+		if frames=50 then
+				etime=timer()
+				fps=50.0/(etime-stime)
+				frames=0
+				stime=etime
+		end if
 
-  k=inkey:a=len(k)
-  if a then
-    a=asc(right(k,1))
-    select case a
-      case 32
-        anim=anim xor 1   ' [space] = togle animation on/off
-      case 99             ' [c]     = togle colorfade on/off
-        cfade=cfade xor 1
-      case 72             '[left]   = move left
-        ioffset-=istep*4
-      case 80             '[right]  = move right
-        ioffset+=istep*4
-      case 75             '[up]     = move up
-        roffset-=rstep*4
-      case 77             '[down]   = move down
-        roffset+=rstep*4
-      case 45             '[+]      = zoom out
-        zoom+=rstep*4
-      case 43             '[-]      = zoom in
-        zoom-=rstep*4
-    end select
-  else
-    sleep 1
-  end if
-  if anim then
-    if flag=0 then
-      read roffsetsoll,ioffsetsoll,zoomsoll
-      if roffsetsoll=-1.0 and ioffsetsoll=-1.0 and zoomsoll=-1.0 then
-        restore waypoints
-        read roffsetsoll,ioffsetsoll,zoomsoll
-      end if
-      roffsetdiff=(roffset-roffsetsoll)/(fps*5)
-      ioffsetdiff=(ioffset-ioffsetsoll)/(fps*5)
-      zoomdiff=(zoom-zoomsoll)/(fps*5)
-      flag=(fps*5)
-    end if
-    roffset-=roffsetdiff
-    ioffset-=ioffsetdiff
-    zoom-=zoomdiff
-    flag-=1
-  end if
-  if cfade then
-    for l=1 to 253
-      palette get l+1,col2
-      palette l,col2
-    next
-    rc=sin(w)*0.5+0.5
-    gc=cos(w*1.125)*0.5+0.5
-    bc=sin(w*1.333)*0.5+0.5
-    palette 254,rc*255,gc*255,bc*255
-    w=w+cfstep
-  end if
+		k=inkey:a=len(k)
+		if a then
+				a=asc(right(k,1))
+				select case a
+						case 32
+								anim=anim xor 1   ' [space] = togle animation on/off
+						case 99             ' [c]     = togle colorfade on/off
+								cfade=cfade xor 1
+						case 72             '[left]   = move left
+								ioffset-=istep*4
+						case 80             '[right]  = move right
+								ioffset+=istep*4
+						case 75             '[up]     = move up
+								roffset-=rstep*4
+						case 77             '[down]   = move down
+								roffset+=rstep*4
+						case 45             '[+]      = zoom out
+								zoom+=rstep*4
+						case 43             '[-]      = zoom in
+								zoom-=rstep*4
+				end select
+		else
+				sleep 1
+		end if
+		if anim then
+				if flag=0 then
+						read roffsetsoll,ioffsetsoll,zoomsoll
+						if roffsetsoll=-1.0 and ioffsetsoll=-1.0 and zoomsoll=-1.0 then
+								restore waypoints
+								read roffsetsoll,ioffsetsoll,zoomsoll
+						end if
+						roffsetdiff=(roffset-roffsetsoll)/(fps*5)
+						ioffsetdiff=(ioffset-ioffsetsoll)/(fps*5)
+						zoomdiff=(zoom-zoomsoll)/(fps*5)
+						flag=(fps*5)
+				end if
+				roffset-=roffsetdiff
+				ioffset-=ioffsetdiff
+				zoom-=zoomdiff
+				flag-=1
+		end if
+		if cfade then
+				for l=1 to 253
+						palette get l+1,col2
+						palette l,col2
+				next
+				rc=sin(w)*0.5+0.5
+				gc=cos(w*1.125)*0.5+0.5
+				bc=sin(w*1.333)*0.5+0.5
+				palette 254,rc*255,gc*255,bc*255
+				w=w+cfstep
+		end if
 wend
 
 

@@ -5,7 +5,7 @@
 #include "tests-common.bi"
 
 #ifdef NOSID
- #error 666: sorry no SID decoder !
+	#error 666: sorry no SID decoder !
 #endif
 
 ' example of:
@@ -31,21 +31,21 @@ dim as boolean ok
 
 ok=fbs_Init()
 if ok=false then
-  ? "error: fbs_Init() !"
-  ? fbs_Get_PlugError()
-  beep:sleep:end 1
+		? "error: fbs_Init() !"
+		? fbs_Get_PlugError()
+		beep:sleep:end 1
 end if
 
 ok=FBS_Create_SIDStream(PATH)
 if ok=false then
-  ? "error: fbs_Create_SIDStream( '" & PATH & "') !"
-  beep:sleep:end 1  
+		? "error: fbs_Create_SIDStream( '" & PATH & "') !"
+		beep:sleep:end 1  
 end if
 
 ok=FBS_Play_SIDStream()
 if ok=false then
-  ? "error: fbs_Play_SIDStream() !"
-  beep:sleep:end 1  
+		? "error: fbs_Play_SIDStream() !"
+		beep:sleep:end 1  
 end if
 
 print "SID title : " & FBS_Get_SIDTitle()
@@ -56,12 +56,12 @@ print "playing " & PATH
 print "press any key ..."
 sleep
 if fbs_Get_PlayingStreams()>0 then
-  print "fade out and quit !"
-  dim as single volume=1.0
-  while volume>0.025
-    volume*=0.95
-    fbs_Set_SIDStreamVolume(volume)
-    sleep 30,1
-  wend
+		print "fade out and quit !"
+		dim as single volume=1.0
+		while volume>0.025
+				volume*=0.95
+				fbs_Set_SIDStreamVolume(volume)
+				sleep 30,1
+		wend
 end if
 fbs_End_SIDStream()

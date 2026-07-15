@@ -331,7 +331,7 @@ Private Sub Form1Type.cmdLargeData_Click(ByRef Sender As Control)
 	
 	Dim As Double StartShow = Timer
 	Dim As WString * 255 RowStr
-    Dim As Integer  MAX_ROW = 20000
+	Dim As Integer  MAX_ROW = 20000
 	With Grid1
 		.Clear
 		.OwnerData = chkOwnerData.Checked

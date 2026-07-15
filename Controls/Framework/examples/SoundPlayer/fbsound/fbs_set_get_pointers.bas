@@ -38,6 +38,6 @@ fbs_Play_Sound(hSound,4) ' 4 times
 while fbs_Get_PlayingSounds()=0:sleep 10:wend
 
 while fbs_Get_PlayingSounds() and inkey()=""
-  sleep 100
+	sleep 100
 wend
 

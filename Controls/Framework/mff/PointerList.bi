@@ -10,8 +10,8 @@
 #define QPointerList(__Ptr__) (*Cast(PointerList Ptr,__Ptr__))
 
 Private Type PointerListItem Extends Object
-    Value As Any Ptr
-    Object As Any Ptr
+	Value As Any Ptr
+	Object As Any Ptr
 End Type
 
 'Represents a list of pointers that can be accessed by index. Provides methods to search, sort, and manipulate lists (Windows, Linux, Android, Web).

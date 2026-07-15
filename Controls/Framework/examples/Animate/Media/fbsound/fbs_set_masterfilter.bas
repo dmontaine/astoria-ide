@@ -19,9 +19,9 @@ windowTitle "[ESC]=quit move the mouse x,y"
 dim as boolean ok
 ok=fbs_Init()
 if ok=False then
-  ? "error: fbs_Init() !"
-  ? fbs_Get_PlugError()
-  beep:sleep:end 1
+? "error: fbs_Init() !"
+? fbs_Get_PlugError()
+beep:sleep:end 1
 end if
 
 dim as integer hWave
@@ -42,17 +42,17 @@ ox=320:oy=240
 setmouse ox,oy
 
 while (asc(Inkey)<>27) and (fbs_Get_PlayingSounds()>0)
-  if getmouse(mx,my)=0 then
-    if (mx<>ox) or (my<>oy) then
-       ox=mx:oy=my
-       Hz=40+ (10000.0f/640.0f)*mx
-       Volume=0.01 + (    1.5f/480.0f)*my
-       locate 1,1
-       ? str(Hz)     & " Hz.           "
-       ? str(Volume) & " volume        "
-       fbs_Set_MasterFilter(0,Hz,fbs_Volume_2_dB(Volume))
-     end if
-  end if
-  sleep 10
+if getmouse(mx,my)=0 then
+if (mx<>ox) or (my<>oy) then
+	ox=mx:oy=my
+	Hz=40+ (10000.0f/640.0f)*mx
+	Volume=0.01 + (    1.5f/480.0f)*my
+	locate 1,1
+	? str(Hz)     & " Hz.           "
+	? str(Volume) & " volume        "
+	fbs_Set_MasterFilter(0,Hz,fbs_Volume_2_dB(Volume))
+end if
+end if
+sleep 10
 wend
 end

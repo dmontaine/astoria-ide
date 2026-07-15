@@ -15,6 +15,6 @@ Sound.Play
 print "play time: " & Samples.Length & " seconds"
 print "wait on end of playback or press any key ..."
 while inkey()="" andalso Sound.PlayPosition()<1.0
-  Sound.Pan = sin(w) : w+=0.01
-  sleep 10,1
+	Sound.Pan = sin(w) : w+=0.01
+	sleep 10,1
 wend

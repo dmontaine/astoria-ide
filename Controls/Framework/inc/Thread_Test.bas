@@ -80,105 +80,105 @@ Print
 Dim Shared As Double TestArray(1 To 800000)  '' only used by the [For...Next] waiting loop in UserCode()
 
 Sub UserCodeSub (ByVal p As Any Ptr)
-    Dim As String Ptr ps = p
-    For I As Integer = 1 To 2
-        Print *ps;
-        For J As Integer = 1 To 800000
-            TestArray(J) = Tan(J) * Atn(J) * Exp(J) * Log(J)  '' [For...Next] waiting loop not freeing any CPU resource
-        Next J
-    Next I
+	Dim As String Ptr ps = p
+	For I As Integer = 1 To 2
+		Print *ps;
+		For J As Integer = 1 To 800000
+			TestArray(J) = Tan(J) * Atn(J) * Exp(J) * Log(J)  '' [For...Next] waiting loop not freeing any CPU resource
+		Next J
+	Next I
 End Sub
 
 Function UserCodeFct (ByVal p As Any Ptr) As String
-    Dim As String Ptr ps = p
-    For I As Integer = 1 To 2
-        Print *ps;
-        For J As Integer = 1 To 800000
-            TestArray(J) = Tan(J) * Atn(J) * Exp(J) * Log(J)  '' [For...Next] waiting loop not freeing any CPU resource
-        Next J
-    Next I
-    Return ""
+	Dim As String Ptr ps = p
+	For I As Integer = 1 To 2
+		Print *ps;
+		For J As Integer = 1 To 800000
+			TestArray(J) = Tan(J) * Atn(J) * Exp(J) * Log(J)  '' [For...Next] waiting loop not freeing any CPU resource
+		Next J
+	Next I
+	Return ""
 End Function
 
 Dim As String TestStr(0 To 31)
 For i As Integer = 0 To 15
-    TestStr(i) = Str(Hex(i))
+	TestStr(i) = Str(Hex(i))
 Next i
 For i As Integer = 16 To 31
-    TestStr(i) = Chr(55 + i)
+	TestStr(i) = Chr(55 + i)
 Next i
 
 '---------------------------------------------------
 
 #macro ThreadInitThenMultiStartSequence(nbThread)
-    ReDim Preserve As ThreadInitThenMultiStart ts(nbThread - 1)
-    Scope
-        Print "   ";
-        Dim As Double t = Timer
-        For I As Integer = 0 To 32 - nbThread Step nbThread
-            For J As Integer = 0 To nbThread - 1
-                Static As Integer count
-                If (count Mod 2) = 0 Then
-                    ts(J).ThreadInit(@UserCodeSub, @TestStr(I + J))
-                Else
-                    ts(J).ThreadInit(@UserCodeFct, @TestStr(I + J))
-                End If
-                ts(J).ThreadStart()
-                count += 1
-            Next J
-            For J As Integer = 0 To nbThread - 1
-                ts(J).ThreadWait()
-            Next J
-        Next I
-        t = Timer - t
-        Print Using " : ####.## s"; t
-    End Scope
+	ReDim Preserve As ThreadInitThenMultiStart ts(nbThread - 1)
+	Scope
+		Print "   ";
+		Dim As Double t = Timer
+		For I As Integer = 0 To 32 - nbThread Step nbThread
+			For J As Integer = 0 To nbThread - 1
+				Static As Integer count
+				If (count Mod 2) = 0 Then
+					ts(J).ThreadInit(@UserCodeSub, @TestStr(I + J))
+				Else
+					ts(J).ThreadInit(@UserCodeFct, @TestStr(I + J))
+				End If
+				ts(J).ThreadStart()
+				count += 1
+			Next J
+			For J As Integer = 0 To nbThread - 1
+				ts(J).ThreadWait()
+			Next J
+		Next I
+		t = Timer - t
+		Print Using " : ####.## s"; t
+	End Scope
 #endmacro
 
 #macro ThreadPoolingSequence(nbThread)
-    ReDim Preserve As ThreadPooling tp(nbThread - 1)
-    Scope
-        Print "   ";
-        Dim As Double t = Timer
-        For I As Integer = 0 To 32 - nbThread Step nbThread
-            For J As Integer = 0 To nbThread - 1
-                Static As Integer count
-                If (count Mod 2) = 0 Then
-                    tp(J).PoolingSubmit(@UserCodeSub, @TestStr(I + J))
-                Else
-                    tp(J).PoolingSubmit(@UserCodeFct, @TestStr(I + J))
-                End If
-                count += 1
-            Next J
-        Next I
-        For I As Integer = 0 To nbThread - 1
-            tp(I).PoolingWait()
-        Next I
-        t = Timer - t
-        Print Using " : ####.## s"; t
-    End Scope
+	ReDim Preserve As ThreadPooling tp(nbThread - 1)
+	Scope
+		Print "   ";
+		Dim As Double t = Timer
+		For I As Integer = 0 To 32 - nbThread Step nbThread
+			For J As Integer = 0 To nbThread - 1
+				Static As Integer count
+				If (count Mod 2) = 0 Then
+					tp(J).PoolingSubmit(@UserCodeSub, @TestStr(I + J))
+				Else
+					tp(J).PoolingSubmit(@UserCodeFct, @TestStr(I + J))
+				End If
+				count += 1
+			Next J
+		Next I
+		For I As Integer = 0 To nbThread - 1
+			tp(I).PoolingWait()
+		Next I
+		t = Timer - t
+		Print Using " : ####.## s"; t
+	End Scope
 #endmacro
 
 #macro ThreadDispatchingSequence(nbThreadmax)
-    Scope
-        Dim As ThreadDispatching td##nbThreadmax = nbThreadmax
-        Print "   ";
-        Dim As Double t = Timer
-        For I As Integer = 0 To 31
-            Static As Integer count
-            If (count Mod 2) = 0 Then
-                td##nbThreadmax.DispatchingSubmit(@UserCodeSub, @TestStr(I))
-            Else
-                td##nbThreadmax.DispatchingSubmit(@UserCodeFct, @TestStr(I))
-            End If
-            count += 1
-        Next I
-        td##nbThreadmax.DispatchingWait()
-        t = Timer - t
-        Print Using " : ####.## s"; t
-    End Scope
+	Scope
+		Dim As ThreadDispatching td##nbThreadmax = nbThreadmax
+		Print "   ";
+		Dim As Double t = Timer
+		For I As Integer = 0 To 31
+			Static As Integer count
+			If (count Mod 2) = 0 Then
+				td##nbThreadmax.DispatchingSubmit(@UserCodeSub, @TestStr(I))
+			Else
+				td##nbThreadmax.DispatchingSubmit(@UserCodeFct, @TestStr(I))
+			End If
+			count += 1
+		Next I
+		td##nbThreadmax.DispatchingWait()
+		t = Timer - t
+		Print Using " : ####.## s"; t
+	End Scope
 #endmacro
-    
+	
 '---------------------------------------------------
 
 Print "'ThreadInitThenMultiStart' with 1 secondary thread:"

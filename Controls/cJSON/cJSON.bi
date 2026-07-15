@@ -173,31 +173,31 @@ Type JSON_GETARRAYSIZEPROC As Function cdecl (ByVal item As Const cJSON Ptr) As 
 Type JSON_GETARRAYITEMPROC As Function cdecl (ByVal array As Const cJSON Ptr, ByVal index As Long) As cJSON Ptr
 
 #ifdef __FB_64BIT__
-   #define DECL_CJSON_DLL_NAME        "./cJSON64.dll"
-   #define DECL_CJSON_VERSION         "cJSON_Version"
-   #define DECL_CJSON_PARSE           "cJSON_Parse"
-   #define DECL_CJSON_DELETE          "cJSON_Delete"
-   #define DECL_CJSON_ISSTRING        "cJSON_IsString"
-   #define DECL_CJSON_ISNUMBER        "cJSON_IsNumber"
-   #define DECL_CJSON_ISBOOL          "cJSON_IsBool"
-   #define DECL_CJSON_ISTRUE          "cJSON_IsTrue"
-   #define DECL_CJSON_ISFALSE         "cJSON_IsFalse"
-   #define DECL_CJSON_GETOBJECTITEM   "cJSON_GetObjectItem"
-   #define DECL_CJSON_GETARRAYSIZE    "cJSON_GetArraySize"
-   #define DECL_CJSON_GETARRAYITEM    "cJSON_GetArrayItem"
+	#define DECL_CJSON_DLL_NAME        "./cJSON64.dll"
+	#define DECL_CJSON_VERSION         "cJSON_Version"
+	#define DECL_CJSON_PARSE           "cJSON_Parse"
+	#define DECL_CJSON_DELETE          "cJSON_Delete"
+	#define DECL_CJSON_ISSTRING        "cJSON_IsString"
+	#define DECL_CJSON_ISNUMBER        "cJSON_IsNumber"
+	#define DECL_CJSON_ISBOOL          "cJSON_IsBool"
+	#define DECL_CJSON_ISTRUE          "cJSON_IsTrue"
+	#define DECL_CJSON_ISFALSE         "cJSON_IsFalse"
+	#define DECL_CJSON_GETOBJECTITEM   "cJSON_GetObjectItem"
+	#define DECL_CJSON_GETARRAYSIZE    "cJSON_GetArraySize"
+	#define DECL_CJSON_GETARRAYITEM    "cJSON_GetArrayItem"
 #else
-   #define DECL_CJSON_DLL_NAME        "./cJSON32.dll"
-   #define DECL_CJSON_VERSION         "_cJSON_Version@0"
-   #define DECL_CJSON_PARSE           "_cJSON_Parse@4"
-   #define DECL_CJSON_DELETE          "_cJSON_Delete@4"
-   #define DECL_CJSON_ISSTRING        "_cJSON_IsString@4"
-   #define DECL_CJSON_ISNUMBER        "_cJSON_IsNumber@4"
-   #define DECL_CJSON_ISBOOL          "_cJSON_IsBool@4"
-   #define DECL_CJSON_ISTRUE          "_cJSON_IsTrue@4"
-   #define DECL_CJSON_ISFALSE         "_cJSON_IsFalse@4"
-   #define DECL_CJSON_GETOBJECTITEM   "_cJSON_GetObjectItem@8"
-   #define DECL_CJSON_GETARRAYSIZE    "_cJSON_GetArraySize@4"
-   #define DECL_CJSON_GETARRAYITEM    "_cJSON_GetArrayItem@8"
+	#define DECL_CJSON_DLL_NAME        "./cJSON32.dll"
+	#define DECL_CJSON_VERSION         "_cJSON_Version@0"
+	#define DECL_CJSON_PARSE           "_cJSON_Parse@4"
+	#define DECL_CJSON_DELETE          "_cJSON_Delete@4"
+	#define DECL_CJSON_ISSTRING        "_cJSON_IsString@4"
+	#define DECL_CJSON_ISNUMBER        "_cJSON_IsNumber@4"
+	#define DECL_CJSON_ISBOOL          "_cJSON_IsBool@4"
+	#define DECL_CJSON_ISTRUE          "_cJSON_IsTrue@4"
+	#define DECL_CJSON_ISFALSE         "_cJSON_IsFalse@4"
+	#define DECL_CJSON_GETOBJECTITEM   "_cJSON_GetObjectItem@8"
+	#define DECL_CJSON_GETARRAYSIZE    "_cJSON_GetArraySize@4"
+	#define DECL_CJSON_GETARRAYITEM    "_cJSON_GetArrayItem@8"
 #endif
 
 #include once "mff/Component.bi"
@@ -205,181 +205,181 @@ Type JSON_GETARRAYITEMPROC As Function cdecl (ByVal array As Const cJSON Ptr, By
 Using My.Sys.ComponentModel
 
 Type CJSON_TYPE Extends Component
-   Private:
-      _hLib As HMODULE = NULL
+	Private:
+		_hLib As HMODULE = NULL
 
-   Public:
-      Declare Constructor()
-      Declare Destructor()
-      Declare Property hLib( ByVal libHandle As HMODULE )
-      Declare Property hLib() As HMODULE
-      Declare Function version() As String
-      Declare Function parse(ByVal jsonString As Const ZString Ptr) As cJSON Ptr
-      Declare Sub deleteptr(ByVal jsonPtr As cJSON Ptr)
-      Declare Function isString(ByVal jsonPtr As Const cJSON Ptr) As Boolean
-      Declare Function isNumber(ByVal jsonPtr As Const cJSON Ptr) As Boolean
-      Declare Function isBool(ByVal jsonPtr As Const cJSON Ptr) As Boolean
-      Declare Function isTrue(ByVal jsonPtr As Const cJSON Ptr) As Boolean
-      Declare Function isFalse(ByVal jsonPtr As Const cJSON Ptr) As Boolean
-      Declare Function getptr(ByVal jsonPtr As Const cJSON Ptr, ByVal itemKey As Const ZString Ptr) As cJSON Ptr
-      Declare Function gettext(ByVal jsonPtr As Const cJSON Ptr, ByVal itemKey As Const ZString Ptr) As String
-      Declare Function getnumber(ByVal jsonPtr As Const cJSON Ptr, ByVal itemKey As Const ZString Ptr) As Double
-      Declare Function getbool(ByVal jsonPtr As Const cJSON Ptr, ByVal itemKey As Const ZString Ptr) As Boolean
-      Declare Function arraycount(ByVal jsonPtr As Const cJSON Ptr) As Long
-      Declare Function arrayitem(ByVal jsonPtr As Const cJSON Ptr, ByVal index As Long) As cJSON Ptr
+	Public:
+		Declare Constructor()
+		Declare Destructor()
+		Declare Property hLib( ByVal libHandle As HMODULE )
+		Declare Property hLib() As HMODULE
+		Declare Function version() As String
+		Declare Function parse(ByVal jsonString As Const ZString Ptr) As cJSON Ptr
+		Declare Sub deleteptr(ByVal jsonPtr As cJSON Ptr)
+		Declare Function isString(ByVal jsonPtr As Const cJSON Ptr) As Boolean
+		Declare Function isNumber(ByVal jsonPtr As Const cJSON Ptr) As Boolean
+		Declare Function isBool(ByVal jsonPtr As Const cJSON Ptr) As Boolean
+		Declare Function isTrue(ByVal jsonPtr As Const cJSON Ptr) As Boolean
+		Declare Function isFalse(ByVal jsonPtr As Const cJSON Ptr) As Boolean
+		Declare Function getptr(ByVal jsonPtr As Const cJSON Ptr, ByVal itemKey As Const ZString Ptr) As cJSON Ptr
+		Declare Function gettext(ByVal jsonPtr As Const cJSON Ptr, ByVal itemKey As Const ZString Ptr) As String
+		Declare Function getnumber(ByVal jsonPtr As Const cJSON Ptr, ByVal itemKey As Const ZString Ptr) As Double
+		Declare Function getbool(ByVal jsonPtr As Const cJSON Ptr, ByVal itemKey As Const ZString Ptr) As Boolean
+		Declare Function arraycount(ByVal jsonPtr As Const cJSON Ptr) As Long
+		Declare Function arrayitem(ByVal jsonPtr As Const cJSON Ptr, ByVal index As Long) As cJSON Ptr
 End Type
 
 Constructor CJSON_TYPE
 	WLet FClassName, "CJSON_TYPE"
-   If _hLib = NULL Then
-      _hLib = LoadLibrary(DECL_CJSON_DLL_NAME)
-      If _hLib = NULL Then
-         ? "Unable to load " & DECL_CJSON_DLL_NAME
-      End If
-   End If   
+	If _hLib = NULL Then
+		_hLib = LoadLibrary(DECL_CJSON_DLL_NAME)
+		If _hLib = NULL Then
+			? "Unable to load " & DECL_CJSON_DLL_NAME
+		End If
+	End If   
 End Constructor
 
 Destructor CJSON_TYPE
-   If _hLib Then
-      FreeLibrary(_hLib)
-      _hLib = NULL
-   End If   
+	If _hLib Then
+		FreeLibrary(_hLib)
+		_hLib = NULL
+	End If   
 End Destructor
 
 Property CJSON_TYPE.hLib( ByVal libHandle As HMODULE )
-   _hLib = libHandle
+	_hLib = libHandle
 End Property
 
 Property CJSON_TYPE.hLib() As HMODULE
-   Property = _hLib
+	Property = _hLib
 End Property
 
 Function CJSON_TYPE.version() As String
-   If This.hLib = NULL Then Exit Function
-   Dim pProc As JSON_VERSIONPROC = _
-   Cast(JSON_VERSIONPROC, GetProcAddress(This.hLib, DECL_CJSON_VERSION))
-   If pProc Then
-      Dim psz As Const ZString Ptr = pProc()
-      If psz Then Function = *psz
-   End If
+	If This.hLib = NULL Then Exit Function
+	Dim pProc As JSON_VERSIONPROC = _
+	Cast(JSON_VERSIONPROC, GetProcAddress(This.hLib, DECL_CJSON_VERSION))
+	If pProc Then
+		Dim psz As Const ZString Ptr = pProc()
+		If psz Then Function = *psz
+	End If
 End Function
 
 Function CJSON_TYPE.parse(ByVal jsonString As Const ZString Ptr) As cJSON Ptr
-   If This.hLib = NULL Then Exit Function
-   Dim pProc As JSON_PARSEPROC = _
-   Cast(JSON_PARSEPROC, GetProcAddress(This.hLib, DECL_CJSON_PARSE))
-   If pProc Then
-      Function = pProc(jsonString)
-   End If
+	If This.hLib = NULL Then Exit Function
+	Dim pProc As JSON_PARSEPROC = _
+	Cast(JSON_PARSEPROC, GetProcAddress(This.hLib, DECL_CJSON_PARSE))
+	If pProc Then
+		Function = pProc(jsonString)
+	End If
 End Function
 
 Sub CJSON_TYPE.deleteptr(ByVal jsonPtr As cJSON Ptr)
-   If This.hLib = NULL Then Exit Sub
-   Dim pProc As JSON_DELETEPROC = _
-   Cast(JSON_DELETEPROC, GetProcAddress(This.hLib, DECL_CJSON_DELETE))
-   If pProc Then pProc(jsonPtr)
+	If This.hLib = NULL Then Exit Sub
+	Dim pProc As JSON_DELETEPROC = _
+	Cast(JSON_DELETEPROC, GetProcAddress(This.hLib, DECL_CJSON_DELETE))
+	If pProc Then pProc(jsonPtr)
 End Sub
 
 Function CJSON_TYPE.isString(ByVal jsonPtr As Const cJSON Ptr) As Boolean
-   If This.hLib = NULL Then Exit Function
-   Dim pProc As JSON_ISSTRINGPROC = _
-   Cast(JSON_ISSTRINGPROC, GetProcAddress(This.hLib, DECL_CJSON_ISSTRING))
-   If pProc Then
-      Function = CBool(pProc(jsonPtr))
-   End If
+	If This.hLib = NULL Then Exit Function
+	Dim pProc As JSON_ISSTRINGPROC = _
+	Cast(JSON_ISSTRINGPROC, GetProcAddress(This.hLib, DECL_CJSON_ISSTRING))
+	If pProc Then
+		Function = CBool(pProc(jsonPtr))
+	End If
 End Function
 
 Function CJSON_TYPE.isNumber(ByVal jsonPtr As Const cJSON Ptr) As Boolean
-   If This.hLib = NULL Then Exit Function
-   Dim pProc As JSON_ISNUMBERPROC = _
-   Cast(JSON_ISNUMBERPROC, GetProcAddress(This.hLib, DECL_CJSON_ISNUMBER))
-   If pProc Then
-      Function = CBool(pProc(jsonPtr))
-   End If
+	If This.hLib = NULL Then Exit Function
+	Dim pProc As JSON_ISNUMBERPROC = _
+	Cast(JSON_ISNUMBERPROC, GetProcAddress(This.hLib, DECL_CJSON_ISNUMBER))
+	If pProc Then
+		Function = CBool(pProc(jsonPtr))
+	End If
 End Function
 
 Function CJSON_TYPE.isBool(ByVal jsonPtr As Const cJSON Ptr) As Boolean
-   If This.hLib = NULL Then Exit Function
-   Dim pProc As JSON_ISBOOLPROC = _
-   Cast(JSON_ISBOOLPROC, GetProcAddress(This.hLib, DECL_CJSON_ISBOOL))
-   If pProc Then
-      Function = CBool(pProc(jsonPtr))
-   End If
+	If This.hLib = NULL Then Exit Function
+	Dim pProc As JSON_ISBOOLPROC = _
+	Cast(JSON_ISBOOLPROC, GetProcAddress(This.hLib, DECL_CJSON_ISBOOL))
+	If pProc Then
+		Function = CBool(pProc(jsonPtr))
+	End If
 End Function
 
 Function CJSON_TYPE.isTrue(ByVal jsonPtr As Const cJSON Ptr) As Boolean
-   If This.hLib = NULL Then Exit Function
-   Dim pProc As JSON_ISTRUEPROC = _
-   Cast(JSON_ISTRUEPROC, GetProcAddress(This.hLib, DECL_CJSON_ISTRUE))
-   If pProc Then
-      Function = CBool(pProc(jsonPtr))
-   End If
+	If This.hLib = NULL Then Exit Function
+	Dim pProc As JSON_ISTRUEPROC = _
+	Cast(JSON_ISTRUEPROC, GetProcAddress(This.hLib, DECL_CJSON_ISTRUE))
+	If pProc Then
+		Function = CBool(pProc(jsonPtr))
+	End If
 End Function
 
 Function CJSON_TYPE.isFalse(ByVal jsonPtr As Const cJSON Ptr) As Boolean
-   If This.hLib = NULL Then Exit Function
-   Dim pProc As JSON_ISFALSEPROC = _
-   Cast(JSON_ISFALSEPROC, GetProcAddress(This.hLib, DECL_CJSON_ISFALSE))
-   If pProc Then
-      Function = CBool(pProc(jsonPtr))
-   End If
+	If This.hLib = NULL Then Exit Function
+	Dim pProc As JSON_ISFALSEPROC = _
+	Cast(JSON_ISFALSEPROC, GetProcAddress(This.hLib, DECL_CJSON_ISFALSE))
+	If pProc Then
+		Function = CBool(pProc(jsonPtr))
+	End If
 End Function
 
 Function CJSON_TYPE.getptr(ByVal jsonPtr As Const cJSON Ptr, ByVal itemKey As Const ZString Ptr) As cJSON Ptr
-   If This.hLib = NULL Then Exit Function
-   Dim pProc As JSON_GETOBJECTITEMPROC = _
-   Cast(JSON_GETOBJECTITEMPROC, GetProcAddress(This.hLib, DECL_CJSON_GETOBJECTITEM))
-   If pProc Then
-      Function = pProc(jsonPtr, itemKey)
-   End If
+	If This.hLib = NULL Then Exit Function
+	Dim pProc As JSON_GETOBJECTITEMPROC = _
+	Cast(JSON_GETOBJECTITEMPROC, GetProcAddress(This.hLib, DECL_CJSON_GETOBJECTITEM))
+	If pProc Then
+		Function = pProc(jsonPtr, itemKey)
+	End If
 End Function
 
 Function CJSON_TYPE.gettext(ByVal jsonPtr As Const cJSON Ptr, ByVal itemKey As Const ZString Ptr) As String
-   If This.hLib = NULL Then Exit Function
-   Dim As cJSON Ptr jsonPtr2 = This.getptr(jsonPtr, itemKey)
-   If jsonPtr2 Then 
-      If (This.isString(jsonPtr2) AndAlso (jsonPtr2->valuestring <> NULL)) Then
-         Function = *jsonPtr2->valuestring
-      End If   
-   End If
+	If This.hLib = NULL Then Exit Function
+	Dim As cJSON Ptr jsonPtr2 = This.getptr(jsonPtr, itemKey)
+	If jsonPtr2 Then 
+		If (This.isString(jsonPtr2) AndAlso (jsonPtr2->valuestring <> NULL)) Then
+			Function = *jsonPtr2->valuestring
+		End If   
+	End If
 End Function
 
 Function CJSON_TYPE.getnumber(ByVal jsonPtr As Const cJSON Ptr, ByVal itemKey As Const ZString Ptr) As Double
-   If This.hLib = NULL Then Exit Function
-   Dim As cJSON Ptr jsonPtr2 = This.getptr(jsonPtr, itemKey)
-   If jsonPtr2 Then 
-      If (This.isNumber(jsonPtr2)) Then
-         Function = jsonPtr2->valuedouble
-      End If   
-   End If
+	If This.hLib = NULL Then Exit Function
+	Dim As cJSON Ptr jsonPtr2 = This.getptr(jsonPtr, itemKey)
+	If jsonPtr2 Then 
+		If (This.isNumber(jsonPtr2)) Then
+			Function = jsonPtr2->valuedouble
+		End If   
+	End If
 End Function
 
 Function CJSON_TYPE.getbool(ByVal jsonPtr As Const cJSON Ptr, ByVal itemKey As Const ZString Ptr) As Boolean
-   If This.hLib = NULL Then Exit Function
-   Dim As cJSON Ptr jsonPtr2 = This.getptr(jsonPtr, itemKey)
-   If jsonPtr2 Then 
-      If (This.isBool(jsonPtr2)) Then
-         Function = CBool(This.isTrue(jsonPtr2))
-      End If   
-   End If
+	If This.hLib = NULL Then Exit Function
+	Dim As cJSON Ptr jsonPtr2 = This.getptr(jsonPtr, itemKey)
+	If jsonPtr2 Then 
+		If (This.isBool(jsonPtr2)) Then
+			Function = CBool(This.isTrue(jsonPtr2))
+		End If   
+	End If
 End Function
 
 Function CJSON_TYPE.arraycount(ByVal jsonPtr As Const cJSON Ptr) As Long
-   If This.hLib = NULL Then Exit Function
-   Dim pProc As JSON_GETARRAYSIZEPROC = _
-   Cast(JSON_GETARRAYSIZEPROC, GetProcAddress(This.hLib, DECL_CJSON_GETARRAYSIZE))
-   If pProc Then
-      Function = pProc(jsonPtr)
-   End If
+	If This.hLib = NULL Then Exit Function
+	Dim pProc As JSON_GETARRAYSIZEPROC = _
+	Cast(JSON_GETARRAYSIZEPROC, GetProcAddress(This.hLib, DECL_CJSON_GETARRAYSIZE))
+	If pProc Then
+		Function = pProc(jsonPtr)
+	End If
 End Function
 
 Function CJSON_TYPE.arrayitem(ByVal jsonPtr As Const cJSON Ptr, ByVal index As Long) As cJSON Ptr
-   If This.hLib = NULL Then Exit Function
-   Dim pProc As JSON_GETARRAYITEMPROC = _
-   Cast(JSON_GETARRAYITEMPROC, GetProcAddress(This.hLib, DECL_CJSON_GETARRAYITEM))
-   If pProc Then
-      Function = pProc(jsonPtr, index)
-   End If
+	If This.hLib = NULL Then Exit Function
+	Dim pProc As JSON_GETARRAYITEMPROC = _
+	Cast(JSON_GETARRAYITEMPROC, GetProcAddress(This.hLib, DECL_CJSON_GETARRAYITEM))
+	If pProc Then
+		Function = pProc(jsonPtr, index)
+	End If
 End Function
 
 

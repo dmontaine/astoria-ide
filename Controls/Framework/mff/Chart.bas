@@ -1052,7 +1052,7 @@ Namespace My.Sys.Forms
 	End Function
 	
 	Private Sub Chart.Draw()
-    On Error Goto ErrorHandler
+	On Error Goto ErrorHandler
 			Dim hPath As GpPath Ptr
 			Dim hBrush As GpBrush Ptr, hPen As GpPen Ptr
 		Dim mRect As RectL
@@ -3051,12 +3051,12 @@ Namespace My.Sys.Forms
 		
 			GdipDeleteGraphics(hGraphics)
 		
-    Exit Sub
+	Exit Sub
 ErrorHandler:
-    MsgBox ErrDescription(Err) & " (" & Err & ") " & _
-        "in line " & Erl() & " (Handler line: " & __LINE__ & ") " & _
-        "in function " & ZGet(Erfn()) & " (Handler function: " & __FUNCTION__ & ") " & _
-        "in module " & ZGet(Ermn()) & " (Handler file: " & __FILE__ & ") "
+	MsgBox ErrDescription(Err) & " (" & Err & ") " & _
+		"in line " & Erl() & " (Handler line: " & __LINE__ & ") " & _
+		"in function " & ZGet(Erfn()) & " (Handler function: " & __FUNCTION__ & ") " & _
+		"in module " & ZGet(Ermn()) & " (Handler file: " & __FILE__ & ") "
 	End Sub
 	
 	'*3

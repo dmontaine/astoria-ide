@@ -5,7 +5,7 @@
 'http://www.easyrgb.com/index.php?X=MATH&H=09#text9
 
 Const DE1976 = 0.0, DE1994_Textiles = 0.0, DE1994_GraphicArts = 0.0, DE2000 = 0.0, DECMC_11 = 0.0, DECMC_21 = 0.0, PI = Acos(-1), _
-	 _16d116 = 16 / 116, _1d3 = 1 / 3, _2d3 = 2 / 3, _1d6 = 1 / 6, _1d24 = 1 / 2.4, _16d116 = 16 / 116
+	_16d116 = 16 / 116, _1d3 = 1 / 3, _2d3 = 2 / 3, _1d6 = 1 / 6, _1d24 = 1 / 2.4, _16d116 = 16 / 116
 Type Lab
 	As Double L, a, b
 End Type
@@ -123,70 +123,70 @@ End Function
 
 Function ColorConvert.RGB2HSL(Byval RGB1 As ColorRGB) As HSL
 	Dim As Double var_r = RGB1.r / 255, var_g = RGB1.g / 255, var_b = RGB1.b / 255 , _
-				  H, S, L, var_Min, var_Max, del_Max, del_Max2, del_R, del_G, del_B
+				H, S, L, var_Min, var_Max, del_Max, del_Max2, del_R, del_G, del_B
 	
-    var_Min = This.Min3(var_r, var_g, var_b)
-    var_Max = This.Max3(var_r, var_g, var_b)
-    del_Max = var_Max - var_Min
-    L = (var_Max + var_Min) / 2	
-    If del_Max = 0 Then
-        H = 0
-        S = 0
-    Else
-        S = Iif(L < 0.5, del_Max / (var_Max + var_Min), del_Max / (2 - var_Max - var_Min))
-        del_Max2 = del_Max / 2
-        del_R = (((var_Max - var_R) / 6) + del_Max2) / del_Max
-        del_G = (((var_Max - var_G) / 6) + del_Max2) / del_Max
-        del_B = (((var_Max - var_B) / 6) + del_Max2) / del_Max
-        If (var_R = var_Max) Then
-            H = del_B - del_G
-        Elseif var_G = var_Max Then
-            H = 0.333333333333333 + del_R - del_B
-        Elseif var_B = var_Max Then
-            H = 0.666666666666667 + del_G - del_R
-        EndIf
-        If H < 0 Then H += 1
-        If H > 1 Then H -= 1
-    Endif
+	var_Min = This.Min3(var_r, var_g, var_b)
+	var_Max = This.Max3(var_r, var_g, var_b)
+	del_Max = var_Max - var_Min
+	L = (var_Max + var_Min) / 2	
+	If del_Max = 0 Then
+		H = 0
+		S = 0
+	Else
+		S = Iif(L < 0.5, del_Max / (var_Max + var_Min), del_Max / (2 - var_Max - var_Min))
+		del_Max2 = del_Max / 2
+		del_R = (((var_Max - var_R) / 6) + del_Max2) / del_Max
+		del_G = (((var_Max - var_G) / 6) + del_Max2) / del_Max
+		del_B = (((var_Max - var_B) / 6) + del_Max2) / del_Max
+		If (var_R = var_Max) Then
+			H = del_B - del_G
+		Elseif var_G = var_Max Then
+			H = 0.333333333333333 + del_R - del_B
+		Elseif var_B = var_Max Then
+			H = 0.666666666666667 + del_G - del_R
+		EndIf
+		If H < 0 Then H += 1
+		If H > 1 Then H -= 1
+	Endif
 
 	Return Type(H * 360, S, L)
 End Function
 
 Function ColorConvert.RGB2HSV(Byval RGB1 As ColorRGB) As HSV
 	Dim As Double var_r = RGB1.r / 255, var_g = RGB1.g / 255, var_b = RGB1.b / 255 , _
-				  H, S, V, var_Min, var_Max, del_Max, del_Max2, del_R, del_G, del_B
+				H, S, V, var_Min, var_Max, del_Max, del_Max2, del_R, del_G, del_B
 	
-    var_Min = This.Min3(var_r, var_g, var_b)
-    var_Max = This.Max3(var_r, var_g, var_b)
-    del_Max = var_Max - var_Min
-    V = var_Max	
-    If del_Max = 0 Then
-        H = 0
-        S = 0
-    Else
-        S = del_Max / var_Max
-        del_Max2 = del_Max / 2
-        del_R = (((var_Max - var_r) / 6) + del_Max2) / del_Max
-        del_G = (((var_Max - var_g) / 6) + del_Max2) / del_Max
-        del_B = (((var_Max - var_b) / 6) + del_Max2) / del_Max
-        If var_r = var_Max Then
-            H = del_B - del_G
-        ElseIf var_g = var_Max Then
-            H = 0.333333333333333 + del_R - del_B
-        ElseIf var_b = var_Max Then
-            H = 0.666666666666667 + del_G - del_R
-        EndIf
-        If H < 0 Then H += 1
-        If H > 1 Then H -= 1
-    EndIf
+	var_Min = This.Min3(var_r, var_g, var_b)
+	var_Max = This.Max3(var_r, var_g, var_b)
+	del_Max = var_Max - var_Min
+	V = var_Max	
+	If del_Max = 0 Then
+		H = 0
+		S = 0
+	Else
+		S = del_Max / var_Max
+		del_Max2 = del_Max / 2
+		del_R = (((var_Max - var_r) / 6) + del_Max2) / del_Max
+		del_G = (((var_Max - var_g) / 6) + del_Max2) / del_Max
+		del_B = (((var_Max - var_b) / 6) + del_Max2) / del_Max
+		If var_r = var_Max Then
+			H = del_B - del_G
+		ElseIf var_g = var_Max Then
+			H = 0.333333333333333 + del_R - del_B
+		ElseIf var_b = var_Max Then
+			H = 0.666666666666667 + del_G - del_R
+		EndIf
+		If H < 0 Then H += 1
+		If H > 1 Then H -= 1
+	EndIf
 
 	Return Type(H * 360, S, V)
 End Function
 
 Function ColorConvert.RGB2CMYK(ByVal RGB1 As ColorRGB) As CMYK_
 	Dim As Double r = RGB1.r, g = RGB1.g, b = RGB1.b, _
-				  C = 1 - (r / 255), M = 1 - (g / 255), Y = 1 - (b / 255), K = 1
-				  
+				C = 1 - (r / 255), M = 1 - (g / 255), Y = 1 - (b / 255), K = 1
+				
 	If (C < K) Then K = C
 	If (M < K) Then K = M
 	If (Y < K) Then K = Y
@@ -278,9 +278,9 @@ End Function
 
 Function ColorConvert.XYZ2RGB(Byval XYZ1 As XYZ) As ColorRGB
 	Dim As Double var_X = XYZ1.X / 100, var_Y = XYZ1.Y / 100, var_Z = XYZ1.Z / 100, _
-				  var_R = var_X *  3.2406 + var_Y * -1.5372 + var_Z * -0.4986, _
-				  var_G = var_X * -0.9689 + var_Y *  1.8758 + var_Z *  0.0415, _
-				  var_B = var_X *  0.0557 + var_Y * -0.2040 + var_Z *  1.0570
+				var_R = var_X *  3.2406 + var_Y * -1.5372 + var_Z * -0.4986, _
+				var_G = var_X * -0.9689 + var_Y *  1.8758 + var_Z *  0.0415, _
+				var_B = var_X *  0.0557 + var_Y * -0.2040 + var_Z *  1.0570
 	If var_R > 0.0031308 Then
 		var_R = 1.055 * (var_R ^ _1d24) - 0.055
 	Else
@@ -384,9 +384,9 @@ End Function
 Function ColorDiff.DeltaE1994(Byval Lab1 As Lab, Byval Lab2 As Lab, Byval textiles As Boolean = False) As Double
 	Dim As Single k1 = Iif(textiles, 0.048, 0.045), k2 = Iif(textiles, 0.014, 0.015), kL =  Iif(textiles, 2, 1), kC = 1, kH = 1
 	Dim As Double C1 = Sqr(Lab1.a * Lab1.a + Lab1.b * Lab1.b), C2 = Sqr(Lab2.a * Lab2.a + Lab2.b * Lab2.b), _
-				  delA = Lab1.a - Lab2.a, delB = Lab1.b - Lab2.b, delC = C1 - C2, delH2 = delA * delA + delB * delB - delC * delC, delH = Iif(delH2 > 0.0, Sqr(delH2), 0), delL = Lab1.L - Lab2.L, _
-				  sL = 1.0, sC = 1.0 + k1 * C1, sH = 1.0 + k2 * C1, _
-				  vL = delL / (kL * sL), vC = delC / (kC * sC), vH = delH / (kH * sH)
+				delA = Lab1.a - Lab2.a, delB = Lab1.b - Lab2.b, delC = C1 - C2, delH2 = delA * delA + delB * delB - delC * delC, delH = Iif(delH2 > 0.0, Sqr(delH2), 0), delL = Lab1.L - Lab2.L, _
+				sL = 1.0, sC = 1.0 + k1 * C1, sH = 1.0 + k2 * C1, _
+				vL = delL / (kL * sL), vC = delC / (kC * sC), vH = delH / (kH * sH)
 	If textiles Then Return Sqr(vL * vL + vC * vC + vH * vH)
 	Return Sqr(vL * vL + vC * vC + vH * vH)
 End Function
@@ -394,9 +394,9 @@ End Function
 Function ColorDiff.DeltaE2000(Byval Lab1 As Lab, Byval Lab2 As Lab) As Double
 	Const kL = 1, kC = 1, kH = 1
 	Dim As Double lBarPrime = 0.5 * (Lab1.L + Lab2.L), c1 = Sqr(Lab1.a * Lab1.a + Lab1.b * Lab1.b), c2 = Sqr(Lab2.a * Lab2.a + Lab2.b * Lab2.b), cBar = 0.5 * (c1 + c2), _
-				  cBar7 = cBar * cBar * cBar * cBar * cBar * cBar * cBar, g = 0.5 * (1.0 - Sqr(cBar7 / (cBar7 + 6103515625))), a1Prime = Lab1.a * (1.0 + g), a2Prime = Lab2.a * (1.0 + g), _
-				  c1Prime = Sqr(a1Prime * a1Prime + Lab1.b * Lab1.b), c2Prime = Sqr(a2Prime * a2Prime + Lab2.b * Lab2.b), cBarPrime = 0.5 * (c1Prime + c2Prime), h1Prime = (Atan2(Lab1.b, a1Prime) * 180.0) / PI, _
-				  h2Prime = (Atan2(Lab2.b, a2Prime) * 180.0) / PI, hBarPrime, t, dLPrime, dCPrime, dHPrime, dH2Prime, sL, sC, sH, dTheta, cBarPrime7, rC, rT
+				cBar7 = cBar * cBar * cBar * cBar * cBar * cBar * cBar, g = 0.5 * (1.0 - Sqr(cBar7 / (cBar7 + 6103515625))), a1Prime = Lab1.a * (1.0 + g), a2Prime = Lab2.a * (1.0 + g), _
+				c1Prime = Sqr(a1Prime * a1Prime + Lab1.b * Lab1.b), c2Prime = Sqr(a2Prime * a2Prime + Lab2.b * Lab2.b), cBarPrime = 0.5 * (c1Prime + c2Prime), h1Prime = (Atan2(Lab1.b, a1Prime) * 180.0) / PI, _
+				h2Prime = (Atan2(Lab2.b, a2Prime) * 180.0) / PI, hBarPrime, t, dLPrime, dCPrime, dHPrime, dH2Prime, sL, sC, sH, dTheta, cBarPrime7, rC, rT
 	If h1Prime < 0.0 Then h1Prime += 360.0
 	If h2Prime < 0.0 Then h2Prime += 360.0
 	hBarPrime = Iif(Abs(h1Prime - h2Prime) > 180.0, (0.5 * (h1Prime + h2Prime + 360.0)), 0.5 * (h1Prime + h2Prime))

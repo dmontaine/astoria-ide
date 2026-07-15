@@ -15,6 +15,6 @@ Sound.Play
 Print "wait on end of playback or press any key ..."
 Var w=0.0
 While Inkey()="" AndAlso Sound.Playposition()<1.0
-  Device.Volume = 0.6+Sin(w)*0.4 : w+=0.01
-  Sleep 10,1
+	Device.Volume = 0.6+Sin(w)*0.4 : w+=0.01
+	Sleep 10,1
 Wend

@@ -173,6 +173,23 @@ Sub LoadSettings
 	HistoryCodeDays = iniSettings.ReadInteger("Options", "HistoryCodeDays", 100)
 	HistoryCodeCleanDay = iniSettings.ReadInteger("Options", "HistoryCodeCleanDay", DateValue(Format(Now, "yyyy/mm/dd")))
 	If HistoryCodeCleanDay <> DateValue(Format(Now, "yyyy/mm/dd")) Then HistoryCodeClean(ExePath & "/Temp")
+	' Personal Information (Tools > Options > Personal Information)
+	WLet(PersonalName, iniSettings.ReadString("PersonalInfo", "Name", ""))
+	WLet(PersonalCompany, iniSettings.ReadString("PersonalInfo", "Company", ""))
+	WLet(PersonalWebsite, iniSettings.ReadString("PersonalInfo", "Website", ""))
+	WLet(PersonalEmail, iniSettings.ReadString("PersonalInfo", "Email", ""))
+	' Address is a multiline field; stored with a "\n" placeholder since IniFile
+	' stores each key as a single line, so a literal embedded CRLF would corrupt
+	' the ini's line-based structure.
+	WLet(PersonalAddress, Replace(iniSettings.ReadString("PersonalInfo", "Address", ""), "\n", !"\r\n"))
+	PersonalLicenseGPL3 = iniSettings.ReadBool("PersonalInfo", "LicenseGPL3", False)
+	PersonalLicenseLGPL = iniSettings.ReadBool("PersonalInfo", "LicenseLGPL", False)
+	PersonalLicenseApache = iniSettings.ReadBool("PersonalInfo", "LicenseApache", False)
+	PersonalLicenseBSD = iniSettings.ReadBool("PersonalInfo", "LicenseBSD", False)
+	PersonalLicenseFreeware = iniSettings.ReadBool("PersonalInfo", "LicenseFreeware", False)
+	PersonalLicenseProprietary = iniSettings.ReadBool("PersonalInfo", "LicenseProprietary", False)
+	PersonalLicenseOther = iniSettings.ReadBool("PersonalInfo", "LicenseOther", False)
+	WLet(PersonalLicenseOtherText, iniSettings.ReadString("PersonalInfo", "LicenseOtherText", ""))
 	SyntaxHighlightingIdentifiers = iniSettings.ReadBool("Options", "SyntaxHighlightingIdentifiers", True)
 	ChangeIdentifiersCase = iniSettings.ReadBool("Options", "ChangeIdentifiersCase", True)
 	ChangeKeyWordsCase = iniSettings.ReadBool("Options", "ChangeKeyWordsCase", True)

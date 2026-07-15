@@ -128,6 +128,315 @@ pfOptions = @fOptions
 		pnlDesigner.TabIndex = 71
 		pnlDesigner.SetBounds -162, 4, 427, 400
 		pnlDesigner.Parent = @pplGeneral
+		' pnlPersonalInfo
+		pnlPersonalInfo.Name = "pnlPersonalInfo"
+		pnlPersonalInfo.Text = ""
+		pnlPersonalInfo.Align = DockStyle.alClient
+		pnlPersonalInfo.TabIndex = 800
+		pnlPersonalInfo.SetBounds 188, 4, 427, 400
+		pnlPersonalInfo.Parent = @pplGeneral
+		' pnlPersonalName
+		With pnlPersonalName
+			.Name = "pnlPersonalName"
+			.Text = "Panel1"
+			.Align = DockStyle.alTop
+			.TabIndex = 801
+			.SetBounds 0, 0, 417, 24
+			.Designer = @This
+			.Parent = @pnlPersonalInfo
+		End With
+		' lblPersonalName
+		With lblPersonalName
+			.Name = "lblPersonalName"
+			.Text = ("Name") & ":"
+			.Align = DockStyle.alLeft
+			.ExtraMargins.Left = 10
+			.TabIndex = 802
+			.SetBounds 10, 0, 115, 24
+			.Designer = @This
+			.Parent = @pnlPersonalName
+		End With
+		' txtPersonalName
+		With txtPersonalName
+			.Name = "txtPersonalName"
+			.Align = DockStyle.alClient
+			.ExtraMargins.Left = 6
+			.ExtraMargins.Right = 20
+			.TabIndex = 803
+			.SetBounds 135, 2, 262, 20
+			.Text = ""
+			.Designer = @This
+			.Parent = @pnlPersonalName
+		End With
+		' pnlPersonalCompany
+		With pnlPersonalCompany
+			.Name = "pnlPersonalCompany"
+			.Text = "Panel1"
+			.Align = DockStyle.alTop
+			.TabIndex = 804
+			.SetBounds 0, 24, 417, 24
+			.Designer = @This
+			.Parent = @pnlPersonalInfo
+		End With
+		' lblPersonalCompany
+		With lblPersonalCompany
+			.Name = "lblPersonalCompany"
+			.Text = ("Company") & ":"
+			.Align = DockStyle.alLeft
+			.ExtraMargins.Left = 10
+			.TabIndex = 805
+			.SetBounds 10, 0, 115, 24
+			.Designer = @This
+			.Parent = @pnlPersonalCompany
+		End With
+		' txtPersonalCompany
+		With txtPersonalCompany
+			.Name = "txtPersonalCompany"
+			.Align = DockStyle.alClient
+			.ExtraMargins.Left = 6
+			.ExtraMargins.Right = 20
+			.TabIndex = 806
+			.SetBounds 135, 2, 262, 20
+			.Text = ""
+			.Designer = @This
+			.Parent = @pnlPersonalCompany
+		End With
+		' pnlPersonalWebsite
+		With pnlPersonalWebsite
+			.Name = "pnlPersonalWebsite"
+			.Text = "Panel1"
+			.Align = DockStyle.alTop
+			.TabIndex = 807
+			.SetBounds 0, 48, 417, 24
+			.Designer = @This
+			.Parent = @pnlPersonalInfo
+		End With
+		' lblPersonalWebsite
+		With lblPersonalWebsite
+			.Name = "lblPersonalWebsite"
+			.Text = ("Web site") & ":"
+			.Align = DockStyle.alLeft
+			.ExtraMargins.Left = 10
+			.TabIndex = 808
+			.SetBounds 10, 0, 115, 24
+			.Designer = @This
+			.Parent = @pnlPersonalWebsite
+		End With
+		' txtPersonalWebsite
+		With txtPersonalWebsite
+			.Name = "txtPersonalWebsite"
+			.Align = DockStyle.alClient
+			.ExtraMargins.Left = 6
+			.ExtraMargins.Right = 20
+			.TabIndex = 809
+			.SetBounds 135, 2, 262, 20
+			.Text = ""
+			.Designer = @This
+			.Parent = @pnlPersonalWebsite
+		End With
+		' pnlPersonalEmail
+		With pnlPersonalEmail
+			.Name = "pnlPersonalEmail"
+			.Text = "Panel1"
+			.Align = DockStyle.alTop
+			.TabIndex = 810
+			.SetBounds 0, 72, 417, 24
+			.Designer = @This
+			.Parent = @pnlPersonalInfo
+		End With
+		' lblPersonalEmail
+		With lblPersonalEmail
+			.Name = "lblPersonalEmail"
+			.Text = ("E-mail address") & ":"
+			.Align = DockStyle.alLeft
+			.ExtraMargins.Left = 10
+			.TabIndex = 811
+			.SetBounds 10, 0, 115, 24
+			.Designer = @This
+			.Parent = @pnlPersonalEmail
+		End With
+		' txtPersonalEmail
+		With txtPersonalEmail
+			.Name = "txtPersonalEmail"
+			.Align = DockStyle.alClient
+			.ExtraMargins.Left = 6
+			.ExtraMargins.Right = 20
+			.TabIndex = 812
+			.SetBounds 135, 2, 262, 20
+			.Text = ""
+			.Designer = @This
+			.Parent = @pnlPersonalEmail
+		End With
+		' pnlPersonalAddress
+		With pnlPersonalAddress
+			.Name = "pnlPersonalAddress"
+			.Text = "Panel1"
+			.ExtraMargins.Top = 6
+			.Align = DockStyle.alTop
+			.TabIndex = 813
+			.SetBounds 0, 96, 417, 90
+			.Designer = @This
+			.Parent = @pnlPersonalInfo
+		End With
+		' lblPersonalAddress
+		With lblPersonalAddress
+			.Name = "lblPersonalAddress"
+			.Text = ("Address") & ":"
+			.Align = DockStyle.alTop
+			.ExtraMargins.Left = 10
+			.TabIndex = 814
+			.SetBounds 10, 0, 175, 18
+			.Designer = @This
+			.Parent = @pnlPersonalAddress
+		End With
+		' txtPersonalAddress
+		With txtPersonalAddress
+			.Name = "txtPersonalAddress"
+			.Align = DockStyle.alClient
+			.ExtraMargins.Left = 10
+			.ExtraMargins.Right = 20
+			.TabIndex = 815
+			.ScrollBars = ScrollBarsType.Vertical
+			.WantReturn = True
+			.Multiline = True
+			.SetBounds 10, 18, 387, 72
+			.Text = ""
+			.Designer = @This
+			.Parent = @pnlPersonalAddress
+		End With
+		' grbPersonalLicense
+		With grbPersonalLicense
+			.Name = "grbPersonalLicense"
+			.Text = ("License")
+			.Align = DockStyle.alTop
+			.ExtraMargins.Top = 6
+			.AutoSize = True
+			.TabIndex = 816
+			.SetBounds 0, 186, 417, 22
+			.Designer = @This
+			.Parent = @pnlPersonalInfo
+		End With
+		' chkLicenseGPL3
+		With chkLicenseGPL3
+			.Name = "chkLicenseGPL3"
+			.Text = ("GPL3")
+			.Align = DockStyle.alTop
+			.ExtraMargins.Top = 2
+			.ExtraMargins.Left = 10
+			.TabIndex = 817
+			.Constraints.Height = 21
+			.AutoSize = True
+			.SetBounds 10, 0, 175, 21
+			.Designer = @This
+			.Parent = @grbPersonalLicense
+		End With
+		' chkLicenseLGPL
+		With chkLicenseLGPL
+			.Name = "chkLicenseLGPL"
+			.Text = ("LGPL")
+			.Align = DockStyle.alTop
+			.ExtraMargins.Top = 2
+			.ExtraMargins.Left = 10
+			.TabIndex = 818
+			.Constraints.Height = 21
+			.AutoSize = True
+			.SetBounds 10, 21, 175, 21
+			.Designer = @This
+			.Parent = @grbPersonalLicense
+		End With
+		' chkLicenseApache
+		With chkLicenseApache
+			.Name = "chkLicenseApache"
+			.Text = ("Apache")
+			.Align = DockStyle.alTop
+			.ExtraMargins.Top = 2
+			.ExtraMargins.Left = 10
+			.TabIndex = 819
+			.Constraints.Height = 21
+			.AutoSize = True
+			.SetBounds 10, 42, 175, 21
+			.Designer = @This
+			.Parent = @grbPersonalLicense
+		End With
+		' chkLicenseBSD
+		With chkLicenseBSD
+			.Name = "chkLicenseBSD"
+			.Text = ("BSD")
+			.Align = DockStyle.alTop
+			.ExtraMargins.Top = 2
+			.ExtraMargins.Left = 10
+			.TabIndex = 820
+			.Constraints.Height = 21
+			.AutoSize = True
+			.SetBounds 10, 63, 175, 21
+			.Designer = @This
+			.Parent = @grbPersonalLicense
+		End With
+		' chkLicenseFreeware
+		With chkLicenseFreeware
+			.Name = "chkLicenseFreeware"
+			.Text = ("Freeware")
+			.Align = DockStyle.alTop
+			.ExtraMargins.Top = 2
+			.ExtraMargins.Left = 10
+			.TabIndex = 821
+			.Constraints.Height = 21
+			.AutoSize = True
+			.SetBounds 10, 84, 175, 21
+			.Designer = @This
+			.Parent = @grbPersonalLicense
+		End With
+		' chkLicenseProprietary
+		With chkLicenseProprietary
+			.Name = "chkLicenseProprietary"
+			.Text = ("Proprietary")
+			.Align = DockStyle.alTop
+			.ExtraMargins.Top = 2
+			.ExtraMargins.Left = 10
+			.TabIndex = 822
+			.Constraints.Height = 21
+			.AutoSize = True
+			.SetBounds 10, 105, 175, 21
+			.Designer = @This
+			.Parent = @grbPersonalLicense
+		End With
+		' pnlPersonalLicenseOther
+		With pnlPersonalLicenseOther
+			.Name = "pnlPersonalLicenseOther"
+			.Text = "Panel1"
+			.Align = DockStyle.alTop
+			.ExtraMargins.Top = 2
+			.TabIndex = 823
+			.SetBounds 0, 126, 417, 24
+			.Designer = @This
+			.Parent = @grbPersonalLicense
+		End With
+		' chkLicenseOther
+		With chkLicenseOther
+			.Name = "chkLicenseOther"
+			.Text = ("Other") & ":"
+			.Align = DockStyle.alLeft
+			.ExtraMargins.Left = 10
+			.TabIndex = 824
+			.Constraints.Height = 21
+			.AutoSize = True
+			.SetBounds 10, 2, 90, 21
+			.Designer = @This
+			.OnClick = @chkLicenseOther_Click_
+			.Parent = @pnlPersonalLicenseOther
+		End With
+		' txtPersonalLicenseOther
+		With txtPersonalLicenseOther
+			.Name = "txtPersonalLicenseOther"
+			.Align = DockStyle.alClient
+			.ExtraMargins.Right = 20
+			.TabIndex = 825
+			.SetBounds 100, 2, 297, 20
+			.Text = ""
+			.Enabled = False
+			.Designer = @This
+			.Parent = @pnlPersonalLicenseOther
+		End With
 		'pnlThemes.ExtraMargins.Top = 4
 		'pnlThemes.ExtraMargins.Bottom = 9
 		'pnlThemes.ExtraMargins.Right = 10
@@ -2331,7 +2640,10 @@ pfOptions = @fOptions
 	Private Sub frmOptions.chkCreateNonStaticEventHandlers_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As CheckBox)
 		(*Cast(frmOptions Ptr, Sender.Designer)).chkCreateNonStaticEventHandlers_Click(Sender)
 	End Sub
-	
+	Private Sub frmOptions.chkLicenseOther_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As CheckBox)
+		(*Cast(frmOptions Ptr, Sender.Designer)).chkLicenseOther_Click(Sender)
+	End Sub
+
 	Destructor frmOptions
 		FDisposing = True
 		WDeAllocate(InterfFontName)
@@ -2439,6 +2751,20 @@ Sub frmOptions.LoadSettings()
 		.chkChangeEndingType.Checked = ChangeEndingType
 		.chkAddSpacesToOperators.Checked = AddSpacesToOperators
 		.chkLimitDebug.Checked = LimitDebug
+		.txtPersonalName.Text = *PersonalName
+		.txtPersonalCompany.Text = *PersonalCompany
+		.txtPersonalWebsite.Text = *PersonalWebsite
+		.txtPersonalEmail.Text = *PersonalEmail
+		.txtPersonalAddress.Text = *PersonalAddress
+		.chkLicenseGPL3.Checked = PersonalLicenseGPL3
+		.chkLicenseLGPL.Checked = PersonalLicenseLGPL
+		.chkLicenseApache.Checked = PersonalLicenseApache
+		.chkLicenseBSD.Checked = PersonalLicenseBSD
+		.chkLicenseFreeware.Checked = PersonalLicenseFreeware
+		.chkLicenseProprietary.Checked = PersonalLicenseProprietary
+		.chkLicenseOther.Checked = PersonalLicenseOther
+		.txtPersonalLicenseOther.Text = *PersonalLicenseOtherText
+		.txtPersonalLicenseOther.Enabled = PersonalLicenseOther
 		.txtTabSize.Text = Str(TabWidth)
 		.txtHistoryLimit.Text = Str(HistoryLimit)
 		.txtIntellisenseLimit.Text = Str(IntellisenseLimit)
@@ -2690,6 +3016,7 @@ Private Sub frmOptions.Form_Create(ByRef Designer As My.Sys.Object, ByRef Sender
 		Var tnCompiler = .tvOptions.Nodes.Add(("Compiler"), "Compiler")
 		Var tnDebugger = .tvOptions.Nodes.Add(("Debugger"), "Debugger")
 		.tvOptions.Nodes.Add(("Designer"), "Designer")
+		.tvOptions.Nodes.Add(("Personal Information"), "PersonalInfo")
 		tnGeneral->Nodes.Add(("Shortcuts"), "Shortcuts")
 		tnEditor->Nodes.Add(("Colors And Fonts"), "ColorsAndFonts")
 		tnDebugger->Nodes.Add(("Terminal"), "Terminal")
@@ -2906,6 +3233,19 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		End If
 		AutoSaveCharMax = Val(.txtAutoSaveCharMax.Text)
 		LimitDebug = .chkLimitDebug.Checked
+		WLet(PersonalName, .txtPersonalName.Text)
+		WLet(PersonalCompany, .txtPersonalCompany.Text)
+		WLet(PersonalWebsite, .txtPersonalWebsite.Text)
+		WLet(PersonalEmail, .txtPersonalEmail.Text)
+		WLet(PersonalAddress, .txtPersonalAddress.Text)
+		PersonalLicenseGPL3 = .chkLicenseGPL3.Checked
+		PersonalLicenseLGPL = .chkLicenseLGPL.Checked
+		PersonalLicenseApache = .chkLicenseApache.Checked
+		PersonalLicenseBSD = .chkLicenseBSD.Checked
+		PersonalLicenseFreeware = .chkLicenseFreeware.Checked
+		PersonalLicenseProprietary = .chkLicenseProprietary.Checked
+		PersonalLicenseOther = .chkLicenseOther.Checked
+		WLet(PersonalLicenseOtherText, .txtPersonalLicenseOther.Text)
 		DisplayWarningsInDebug = .chkDisplayWarningsInDebug.Checked
 		AutoIndentation = .chkAutoIndentation.Checked
 		AutoComplete = .chkEnableAutoComplete.Checked
@@ -3104,6 +3444,47 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		End If
 		If IniValueChangedBool(piniSettings, "Options", "LimitDebug", LimitDebug) Then
 			piniSettings->WriteBool "Options", "LimitDebug", LimitDebug
+		End If
+		If IniValueChangedStr(piniSettings, "PersonalInfo", "Name", *PersonalName) Then
+			piniSettings->WriteString "PersonalInfo", "Name", *PersonalName
+		End If
+		If IniValueChangedStr(piniSettings, "PersonalInfo", "Company", *PersonalCompany) Then
+			piniSettings->WriteString "PersonalInfo", "Company", *PersonalCompany
+		End If
+		If IniValueChangedStr(piniSettings, "PersonalInfo", "Website", *PersonalWebsite) Then
+			piniSettings->WriteString "PersonalInfo", "Website", *PersonalWebsite
+		End If
+		If IniValueChangedStr(piniSettings, "PersonalInfo", "Email", *PersonalEmail) Then
+			piniSettings->WriteString "PersonalInfo", "Email", *PersonalEmail
+		End If
+		' Encoded the same way it's decoded in SettingsService.bas: a literal
+		' embedded CRLF would corrupt the ini's one-key-per-line structure.
+		If IniValueChangedStr(piniSettings, "PersonalInfo", "Address", Replace(Replace(*PersonalAddress, !"\r\n", "\n"), !"\n", "\n")) Then
+			piniSettings->WriteString "PersonalInfo", "Address", Replace(Replace(*PersonalAddress, !"\r\n", "\n"), !"\n", "\n")
+		End If
+		If IniValueChangedBool(piniSettings, "PersonalInfo", "LicenseGPL3", PersonalLicenseGPL3) Then
+			piniSettings->WriteBool "PersonalInfo", "LicenseGPL3", PersonalLicenseGPL3
+		End If
+		If IniValueChangedBool(piniSettings, "PersonalInfo", "LicenseLGPL", PersonalLicenseLGPL) Then
+			piniSettings->WriteBool "PersonalInfo", "LicenseLGPL", PersonalLicenseLGPL
+		End If
+		If IniValueChangedBool(piniSettings, "PersonalInfo", "LicenseApache", PersonalLicenseApache) Then
+			piniSettings->WriteBool "PersonalInfo", "LicenseApache", PersonalLicenseApache
+		End If
+		If IniValueChangedBool(piniSettings, "PersonalInfo", "LicenseBSD", PersonalLicenseBSD) Then
+			piniSettings->WriteBool "PersonalInfo", "LicenseBSD", PersonalLicenseBSD
+		End If
+		If IniValueChangedBool(piniSettings, "PersonalInfo", "LicenseFreeware", PersonalLicenseFreeware) Then
+			piniSettings->WriteBool "PersonalInfo", "LicenseFreeware", PersonalLicenseFreeware
+		End If
+		If IniValueChangedBool(piniSettings, "PersonalInfo", "LicenseProprietary", PersonalLicenseProprietary) Then
+			piniSettings->WriteBool "PersonalInfo", "LicenseProprietary", PersonalLicenseProprietary
+		End If
+		If IniValueChangedBool(piniSettings, "PersonalInfo", "LicenseOther", PersonalLicenseOther) Then
+			piniSettings->WriteBool "PersonalInfo", "LicenseOther", PersonalLicenseOther
+		End If
+		If IniValueChangedStr(piniSettings, "PersonalInfo", "LicenseOtherText", *PersonalLicenseOtherText) Then
+			piniSettings->WriteString "PersonalInfo", "LicenseOtherText", *PersonalLicenseOtherText
 		End If
 		If IniValueChangedBool(piniSettings, "Options", "DisplayWarningsInDebug", DisplayWarningsInDebug) Then
 			piniSettings->WriteBool "Options", "DisplayWarningsInDebug", DisplayWarningsInDebug
@@ -3936,6 +4317,7 @@ Private Sub frmOptions.TreeView1_SelChange(ByRef Designer As My.Sys.Object, ByRe
 		.pnlDebugger.Visible = Key = "Debugger"
 		.pnlTerminal.Visible = Key = "Terminal"
 		.pnlDesigner.Visible = Key = "Designer"
+		.pnlPersonalInfo.Visible = Key = "PersonalInfo"
 		.pnlHelp.Visible = Key = "Help"
 		If Key = "General" Then
 			' The interface-settings controls relocated into vbxGeneral at
@@ -4444,6 +4826,10 @@ Private Sub frmOptions.chkCreateNonStaticEventHandlers_Click(ByRef Sender As Che
 	chkPlaceStaticEventHandlersAfterTheConstructor.Enabled = chkCreateNonStaticEventHandlers.Checked
 	chkCreateStaticEventHandlersWithAnUnderscoreAtTheBeginning.Enabled = chkCreateNonStaticEventHandlers.Checked
 	chkCreateEventHandlersWithoutStaticEventHandlerIfEventAllowsIt.Enabled = chkCreateNonStaticEventHandlers.Checked
+End Sub
+
+Private Sub frmOptions.chkLicenseOther_Click(ByRef Sender As CheckBox)
+	txtPersonalLicenseOther.Enabled = chkLicenseOther.Checked
 End Sub
 
 Private Sub frmOptions.txtColorForeground_KeyPress(ByRef Sender As Control, Key As Integer)

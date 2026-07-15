@@ -108,6 +108,7 @@ Common Shared As Boolean UseMakeOnStartWithCompile
 Common Shared As Boolean CreateNonStaticEventHandlers, CreateFormTypesWithoutTypeWord
 Common Shared As Boolean PlaceStaticEventHandlersAfterTheConstructor, CreateStaticEventHandlersWithAnUnderscoreAtTheBeginning, CreateEventHandlersWithoutStaticEventHandlerIfEventAllowsIt
 Common Shared As Boolean LimitDebug, DisplayWarningsInDebug, TurnOnEnvironmentVariables
+Common Shared As Boolean PersonalLicenseGPL3, PersonalLicenseLGPL, PersonalLicenseApache, PersonalLicenseBSD, PersonalLicenseFreeware, PersonalLicenseProprietary, PersonalLicenseOther
 Common Shared As Boolean UseDebugger, ParameterInfoShow, LockControls
 Common Shared As Boolean CompileGUI
 Common Shared As Boolean mFormFindInFile
@@ -132,6 +133,7 @@ Const BUNDLED_GDB_PATH As String = "Debuggers\gdb-11.2.90.20220320-x86_64\bin\gd
 Common Shared As WString Ptr DefaultProjectFile
 Common Shared As WString Ptr InterfaceFontName
 Common Shared As WString Ptr gSearchSave, EnvironmentVariables
+Common Shared As WString Ptr PersonalName, PersonalCompany, PersonalWebsite, PersonalEmail, PersonalAddress, PersonalLicenseOtherText
 Common Shared As WString Ptr ProjectsPath, LastOpenPath, CommandPromptFolder
 Common Shared As WString Ptr DefaultHelp, HelpPath, KeywordsHelpPath, AsmKeywordsHelpPath, DefaultBuildConfiguration
 Common Shared As WString Ptr DefaultMakeTool, CurrentMakeTool1, CurrentMakeTool2

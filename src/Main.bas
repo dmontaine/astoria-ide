@@ -9728,6 +9728,12 @@ Sub OnProgramQuit() Destructor
 	WDeAllocate(gSearchSave)
 	WDeAllocate(EnvironmentVariables)
 	WDeAllocate(CommandPromptFolder)
+	WDeAllocate(PersonalName)
+	WDeAllocate(PersonalCompany)
+	WDeAllocate(PersonalWebsite)
+	WDeAllocate(PersonalEmail)
+	WDeAllocate(PersonalAddress)
+	WDeAllocate(PersonalLicenseOtherText)
 	'For i As Integer = 0 To Threads.Count - 1
 	'	If Threads.Item(i) <> 0 Then ThreadWait Threads.Item(i)
 	'Next

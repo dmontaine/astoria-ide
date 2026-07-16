@@ -1,6 +1,6 @@
 # Astoria-IDE — Project Status & Handoff
 
-**Last updated:** 2026-07-15 (see "Session handoff (2026-07-15) — New Project dialog: Git wiring, provider/username/email fields, and a framework Z-order fix" below for this session's work)
+**Last updated:** 2026-07-16 (see "Session handoff (2026-07-16) — MsgBox was silently non-modal on its first use per run" below for this session's work)
 **Repository:** [github.com/dmontaine/astoria-ide](https://github.com/dmontaine/astoria-ide)
 **Local path:** C:\Users\don\Astoria-IDE
 
@@ -203,7 +203,26 @@ Continues directly from the two sessions above. **Not yet owner-verified end-to-
 - No GitHub/GitLab/etc. API-based repo auto-creation — Astoria only wires up a *local* repo pointing at a remote the user creates first (matching every `Templates/Git/*.md` guide's own manual steps). Auto-creating the remote repo itself would need a token or an authenticated CLI (e.g. `gh`), which isn't part of this codebase.
 - Gitea/Forgejo (self-hostable, no single fixed public domain) and SourceHut/SourceForge (different URL shape entirely — `~user/repo` and project-path-based, respectively) were deliberately left out of the provider dropdown.
 
-**Build/verify:** framework changed (`Controls/Framework/mff/Application.bas`, `Form.bas`), so rebuilt with `FORCE_MFF=1 NOPAUSE=1 Compile.bat` — 0 errors. **Owner has not yet live-verified this session's changes** (git automation across providers, the existence-check dialog, AI stamping, or the Z-order fix's effect on other dialogs) — treat all of the above as implemented-but-unverified until that happens.
+**Build/verify:** framework changed (`Controls/Framework/mff/Application.bas`, `Form.bas`), so rebuilt with `FORCE_MFF=1 NOPAUSE=1 Compile.bat` — 0 errors. **Owner has not yet live-verified this session's changes** (git automation across providers, the existence-check dialog, AI stamping, or the Z-order fix's effect on other dialogs) — treat all of the above as implemented-but-unverified until that happens. **Update 2026-07-16: the "Z-order" symptom's real root cause was found and fixed — see the next handoff section; it was never a z-order bug at all.**
+
+## Session handoff (2026-07-16) — MsgBox was silently non-modal on its first use per run (the real "Z-order" bug)
+
+Owner re-tested the Repository Not Found warning and it still misbehaved after both prior fixes (the one-shot `SetWindowPos(HWND_TOP)` from `987e8b7` and an uncommitted `GWLP_HWNDPARENT` re-own attempt). Root cause was pinned with temporary trace instrumentation (`ShowModal` entry/exit, `WM_ACTIVATE`, `WM_WINDOWPOSCHANGED` logging to a file), which produced a decisive timeline. Fixed in `84d066a`, owner-verified live.
+
+**The actual bug — nothing to do with z-order:** the **first `MsgBox` of every app run was silently non-modal.**
+1. `MsgBoxForm.Execute` pre-creates its window (`This.CreateWnd`) so the message text can be measured via the window's font/HDC before layout.
+2. `Control`'s constructor defaults `FVisible = True`, and `Control.CreateWnd` ends with "if FVisible, show the form" — so the box appeared on screen, **visible and activated, in the middle of Execute's setup** (the owner-observed "briefly appears in the top position").
+3. `Form.ShowModal()` begins with an already-visible guard (`If IsWindowVisible(FHandle) Then SetFocus : Exit Function`) — it early-exited: **no modal loop, no form disabling, and an immediate garbage return value** (`Exit Function` without setting a result → 0).
+4. In the New Project Git flow, that garbage result fell into `cmdOK_Click`'s `Case Else` → `Me.BringToFront` — and since the New Project dialog is *owned by* frmMain, Windows raised the **owner group as a unit** over the unowned, stranded box: the "sinks two layers back, behind both windows" symptom. (Before the `BringToFront` was added, nothing raised the pair, hence the older one-layer-behind variant.)
+5. **Only the first `MsgBox` per run was affected** — later calls find `Handle <> 0`, skip the pre-create, and run genuinely modally. This is why T11's owner verification passed (a stranded box still *looks* functional: the app's main message pump delivers its button clicks, the box closes on click — you can't see that `MsgBox` already returned), and why both prior "fixes" appeared not to work: **they sit after the early exit and never executed in the failing scenario.**
+
+**The fix (one real line, `MsgBoxForm.bas`):** set `This.Visible = False` before the measurement `CreateWnd`, so the window is created hidden and `ShowModal` runs its normal path. The `GWLP_HWNDPARENT` re-own in `Form.ShowModal()` was kept (with a corrected comment): the singleton's window is created before any `OwnerForm` is known, so its native owner is otherwise missing/stale, and Windows z-orders owned windows as a group relative to their owner. The prior `SetWindowPos(HWND_TOP)`/`SetForegroundWindow` calls also remain. All trace instrumentation was removed before commit.
+
+**Owner-verified live:** the Repository Not Found dialog appears on top of the New Project dialog, stays there, is truly modal, and Yes/No/Cancel return real results.
+
+**Implication worth spot-checking sometime:** every result-consuming confirmation in the app (file-delete prompts, save-on-close, etc.) was in this bug's blast radius whenever it happened to be the session's first message box — each would have proceeded with answer 0 (→ `mrOK` via `MsgBox`'s `Case Else` mapping) regardless of what the user clicked. Worth keeping in mind if any past "it ignored my answer" weirdness gets reported.
+
+**Debugging lesson recorded for next time:** the first instrumentation pass wrote its trace to a CWD-relative path — a native file dialog (`GetOpenFileName` etc.) changes the process CWD, which silently dropped exactly the trace lines that mattered. Framework-side trace logging must use an absolute path (e.g. `ExePath & "\Settings\..."`).
 
 ## AI template folders — what each agent needs to do
 
@@ -237,7 +256,7 @@ For the reasoning, exact code locations, and prior hot-path findings, see [HISTO
 
 ### Immediate
 
-- [ ] **Live-verify the 2026-07-15 Git/AI-friendly wiring session (not yet owner-tested).** Git init/commit/remote-add across all four providers (GitHub/GitLab/Bitbucket/Codeberg), the repo-existence Yes/No/Cancel warning dialog, AI-friendly template stamping, and — most importantly — the `Form.ShowModal()` Z-order/foreground fix's effect on *other* dialogs across the app (Options, Find/Replace, delete confirmations, etc.), since that change is framework-wide, not scoped to just the one new dialog. See the full session handoff above for exactly what changed and why.
+- [ ] **Live-verify the remaining 2026-07-15 Git/AI-friendly wiring (partially done 2026-07-16).** Still to test: git init/config/add/commit/remote-add after answering Yes (and across the other providers — GitLab/Bitbucket/Codeberg), the No and Cancel answer paths' effects, and AI-friendly template stamping. **Done 2026-07-16:** the repo-existence Yes/No/Cancel warning dialog now appears on top, stays there, and is truly modal — its misbehavior turned out to be the first-MsgBox-per-run non-modality bug (`84d066a`, see the 2026-07-16 handoff), not a z-order problem. A light spot-check of other modals (Options, Find/Replace, delete confirmations) is still worthwhile since `ShowModal` now also re-owns windows to their current parent.
 - [x] **Form Designer context menu (`mnuDesigner`) format submenus — RESOLVED by removing dark mode (2026-07-15).** The empty-flyout symptom (Align worked, the other four format submenus showed an arrow but an empty flyout) occurred **only in dark mode**. Instrumentation this session proved the menu *data* was fully correct — every submenu HMENU was populated and correctly linked into `mnuDesigner` (right position, right `hSubMenu`, right item count) — so the fault was purely in the dark-mode owner-draw paint path, not the FreeBASIC menu structure or the build-order theories chased earlier. With dark mode removed, these context-menu submenus now render natively and correctly. No context-menu code change was needed beyond the dark-mode removal. (The Attempt A/B/C build-time rewrites of the `mnuDesigner` construction from the prior session remain in place; they're harmless and the pre-built-before-attach shape is fine.)
 
 ### Deferred enhancements

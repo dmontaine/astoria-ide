@@ -22,6 +22,10 @@ today-incomplete features into real ones:
 - **Git** — `UseGit`/`GitURL` are stored as `.vfp` metadata only; no git runs.
   Add stamped git files + an instructional, host-aware setup wizard.
 
+And make those choices **editable after creation** (Task 8): a Project Properties
+editor so License / Git / AI tool / Description aren't locked in at the New Project
+dialog.
+
 **Target audience note (owner):** beginners/hobbyists may use these features to
 *learn* git and AI-assisted development. Instructions-first; automation later.
 
@@ -206,6 +210,46 @@ Build, then walk New Project for: each license, each AI tool, Git on/off, README
 present, wizard launches and SSH detection works both ways. Use the `/run` or
 `/verify` skill.
 
+### Task 8 — Project Properties / setup editor (post-creation)
+**Model: Opus 4.8** · **Depends: 1, 2a, 3, 4** (reuses their templates, helpers, and
+option lists) · Risk: med-high (new form; can regenerate already-stamped files)
+
+*(Numeric ID only — sequenced before Task 7 verification; see §7.)*
+
+A dialog to **change, after creation, the setup choices `frmNewProject` captured** —
+Author, Project Description, License, Use Git + Git URL, and AI tool. Reads current
+values from the project's `.vfp` metadata (`Author`/`License`/`UseGit`/`GitURL`/
+`AIFriendly` + the new `AITool`; [src/frmNewProject.frm:539-543](src/frmNewProject.frm))
+and writes changes back in the same flat `key="value"` format (safely ignored by
+`AddProject`'s loader, same as today).
+
+- **Access point:** most naturally the project node's **Properties** — verify the exact
+  host in the existing menu structure (project-tree context menu vs. a Project menu)
+  before wiring it. *(Owner suggested the Properties menu.)*
+- **Reuse `frmNewProject`'s controls verbatim** — same `cboLicense`/`cboAITool`
+  population and the same `chkUseGit`→`txtGitURL` / `chkAIFriendly`→`cboAITool` gating —
+  so the create and edit dialogs never drift.
+- **Add a Project Description field** (new): multi-line box, persisted as a new
+  `Description="..."` `.vfp` key. Add it to the *create* dialog too (small addition)
+  and to the token set as `{{DESCRIPTION}}` (used by the README front matter).
+- **Reconciling on-disk files is the risky part.** By the time someone opens Properties
+  they may have hand-edited `LICENSE`, `README.md`, or the AI files, so **every
+  regeneration is opt-in and confirmed, never silent**:
+  - License changed → offer to regenerate `LICENSE` (confirm overwrite).
+  - AI tool changed → offer to stamp the newly selected `Templates/AI/<tool>/`; leave the
+    previously stamped tool's files in place by default (removing them is a separate,
+    explicit choice).
+  - Use Git switched on → offer to stamp `.gitignore`/`.gitattributes` and/or launch the
+    Git wizard (Task 5).
+  - Description/Author changed → only touch files if the user opts to refresh README/AI
+    templates.
+- Follow the existing `.frm`/`.bi` static-handler + `Designer` dispatch pattern (as Task 5).
+
+**Acceptance:** open Properties on an existing project; every field reflects the `.vfp`;
+changing each and confirming updates the `.vfp` and, **only when opted in**, the matching
+files; declining leaves files untouched; unrelated `.vfp` keys and body preserved
+byte-for-byte.
+
 ## 7. Suggested sequencing
 
 ```
@@ -216,10 +260,16 @@ Task 0  (foundation)
   └─ Task 4  README           (Sonnet) │
 Task 6  host content (Sonnet, anytime) │
 Task 5  Git wizard (Opus, after 3 & 6) ┘
-Task 7  verify (last)
+Task 8  Properties editor (Opus, after 1/2a/3/4)
+Task 7  verify (last — now also covers Task 8)
 ```
 
-Lowest-risk-first: **0 → 1 → 3 → 4 → 2a/2b → 6 → 5 → 7.**
+Lowest-risk-first: **0 → 1 → 3 → 4 → 2a/2b → 6 → 5 → 8 → 7.**
+
+**v1 vs v2 (owner-agreed):** ship Tasks **0–4** as v1 (licenses, AI templates, git files,
+README). The Git wizard (5/6) and the Properties editor (8) are v2 — both are new forms
+and higher risk. Task 8 could ship in v1 as a *metadata-only* editor (no file
+regeneration) if the reconciliation work is deferred.
 
 ## 8. Open questions for owner
 
@@ -233,6 +283,14 @@ Lowest-risk-first: **0 → 1 → 3 → 4 → 2a/2b → 6 → 5 → 7.**
    OpenCode, Kun (Deepseek) — and which is the default (assumed Claude Code).
 5. **Shared AGENTS.md:** self-contained per-tool folders for v1 (recommended), or
    a `_shared/` folder from the start?
+6. **Properties editor (Task 8) access point:** project-tree context-menu
+   **Properties**, a **Project ▸ Properties** menu item, or both?
+7. **Properties editor regeneration policy:** confirm-then-overwrite for
+   `LICENSE`/README/AI files on change (recommended), or **metadata-only** (never
+   touch already-stamped files) for v1? And on an AI-tool switch, leave vs. remove
+   the previously stamped tool's files?
+8. **Project Description:** add the field to the *create* dialog now (with a
+   `{{DESCRIPTION}}` token in README), or edit-only in the Properties editor?
 
 ## 9. Notes
 

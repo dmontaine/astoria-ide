@@ -36,7 +36,18 @@ Namespace My.Sys.Forms
 		' The window (and its children) needs to exist before its font/HDC can
 		' be used to measure the wrapped message text below - Show/ShowModal
 		' create it lazily on first display, which is too late for that.
-		If This.Handle = 0 Then This.CreateWnd
+		'
+		' Create it HIDDEN: Control's constructor defaults FVisible=True and
+		' CreateWnd auto-shows a Form whose FVisible is still True, which put
+		' this box on screen (visible, activated) right here in the middle of
+		' setup. A Form that is already visible makes ShowModal below take its
+		' "already visible" early exit -- no modal loop ever runs, Execute
+		' returns immediately with a garbage result, and the box is left
+		' stranded on screen where the caller's next window raise buries it.
+		If This.Handle = 0 Then
+			This.Visible = False
+			This.CreateWnd
+		End If
 		If FMessage.Handle = 0 Then FMessage.CreateWnd
 
 		Select Case Icon

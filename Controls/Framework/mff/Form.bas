@@ -885,7 +885,7 @@ Namespace My.Sys.Forms
 			CenterToParent
 			Return This.ShowModal()
 		End Function
-		
+
 		Private Function Form.ShowModal() As Integer
 				Dim As Integer i
 				Dim As Any Ptr Mtx
@@ -901,19 +901,22 @@ Namespace My.Sys.Forms
 					pApp->Forms[i]->Enabled = False
 				Next i
 				Enabled = True
+				'' Re-own the window to the CURRENT parent before showing it. A reused
+				'' Form instance (e.g. the app-wide MsgBoxForm singleton) gets its
+				'' native Win32 owner fixed once, at first CreateWnd, from whatever
+				'' FParent was then -- often no owner at all: MsgBoxForm.Execute
+				'' pre-creates its window for text measurement before any OwnerForm
+				'' is known. CreateWnd is a no-op once FHandle exists, so a later
+				'' ShowModal passing a different OwnerForm updates FParent (used by
+				'' CenterToParent) but NOT the actual native owner. Windows z-orders
+				'' owned windows as a group relative to their OWNER, so an unowned or
+				'' stale-owned modal sinks behind its spawning window the next time
+				'' that window is raised or activated. Re-setting an unchanged owner
+				'' is a harmless no-op, so this is safe for every modal in the app.
+				If FParent AndAlso FParent->Handle Then
+					SetWindowLongPtr(FHandle, GWLP_HWNDPARENT, CInt(FParent->Handle))
+				End If
 				Visible = True
-				'' A Form used as a shared/reused instance across many call sites (e.g.
-				'' the app-wide MsgBoxForm singleton in Application.MsgBox) only has its
-				'' real Win32 owner set once, at first CreateWnd -- CreateWnd is a no-op
-				'' on every later call once FHandle already exists, so passing a
-				'' different OwnerForm on a later ShowModal call changes this Form's
-				'' FParent bookkeeping (affects CenterToParent) but NOT its actual native
-				'' owner/z-order relationship. Without an explicit bring-to-front here,
-				'' such a reused Form can end up hidden behind whichever window is
-				'' genuinely on top (e.g. another already-open modal dialog) even though
-				'' EnableWindow(False) above stops that window from receiving input --
-				'' disabling a window never changes its z-order. Forcing z-order/focus
-				'' explicitly here fixes that regardless of the owner-reuse quirk.
 				SetWindowPos(FHandle, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE)
 				SetForegroundWindow(FHandle)
 				InShowModal = True

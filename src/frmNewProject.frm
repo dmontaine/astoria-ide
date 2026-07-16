@@ -12,7 +12,7 @@
 			.MaximizeBox = False
 			.MinimizeBox = False
 			.OnCreate = @Form_Create_
-			.SetBounds 0, 0, 480, 530
+			.SetBounds 0, 0, 480, 626
 			.StartPosition = FormStartPosition.CenterParent
 		End With
 		' pnlBottom — footer: Project Name / Primary Form Name / Primary Module Name /
@@ -23,8 +23,8 @@
 			.Name = "pnlBottom"
 			.Text = ""
 			.Align = DockStyle.alBottom
-			.TabIndex = 28
-			.SetBounds 0, 0, 464, 372
+			.TabIndex = 35
+			.SetBounds 0, 0, 464, 468
 			.Parent = @This
 		End With
 		' pnlProjectName — row 1
@@ -189,8 +189,8 @@
 			.Designer = @This
 			.Parent = @pnlLicense
 		End With
-		' pnlGit — row 6, Use Git checkbox gates the Git URL field on the same line
-		' (matching the existing chkLicenseOther/txtPersonalLicenseOther pattern in Options)
+		' pnlGit — row 6, Use Git checkbox; the Provider/Username/Email rows just below
+		' are what actually gets combined into the remote URL (see BuildGitURL)
 		With pnlGit
 			.Name = "pnlGit"
 			.Text = ""
@@ -214,38 +214,119 @@
 			.OnClick = @chkUseGit_Click_
 			.Parent = @pnlGit
 		End With
-		' lblGitURL -- 'URL:' label, right-aligned so it sits just before the field
-		With lblGitURL
-			.Name = "lblGitURL"
-			.Text = ("URL") & ":"
-			.Align = DockStyle.alLeft
+		' pnlGitProvider — row 6b, Git host (GitHub/GitLab/Bitbucket/Codeberg); combined
+		' with Git Username + Project Name to build the remote URL (see BuildGitURL)
+		With pnlGitProvider
+			.Name = "pnlGitProvider"
+			.Text = ""
+			.Align = DockStyle.alTop
 			.TabIndex = 19
-			.Alignment = AlignmentConstants.taRight
-			.CenterImage = True
-			.SetBounds 0, 0, 90, 32
-			.Parent = @pnlGit
+			.ExtraMargins.Left = 10
+			.ExtraMargins.Right = 10
+			.SetBounds 0, 128, 464, 32
+			.Parent = @pnlBottom
 		End With
-		' txtGitURL — enabled only while Use Git is checked
-		With txtGitURL
-			.Name = "txtGitURL"
+		' lblGitProvider
+		With lblGitProvider
+			.Name = "lblGitProvider"
+			.Text = ("Git Provider") & ":"
+			.Align = DockStyle.alLeft
+			.TabIndex = 20
+			.CenterImage = True
+			.SetBounds 0, 0, 150, 32
+			.Parent = @pnlGitProvider
+		End With
+		' cboGitProvider -- fixed option list, populated in Form_Create; enabled only
+		' while Use Git is checked
+		With cboGitProvider
+			.Name = "cboGitProvider"
+			.Text = ""
+			.Style = ComboBoxEditStyle.cbDropDownList
+			.Align = DockStyle.alClient
+			.ExtraMargins.Top = 5
+			.ExtraMargins.Bottom = 5
+			.TabIndex = 21
+			.SetBounds 150, 0, 314, 32
+			.Enabled = False
+			.Designer = @This
+			.Parent = @pnlGitProvider
+		End With
+		' pnlGitUserName — row 6c
+		With pnlGitUserName
+			.Name = "pnlGitUserName"
+			.Text = ""
+			.Align = DockStyle.alTop
+			.TabIndex = 22
+			.ExtraMargins.Left = 10
+			.ExtraMargins.Right = 10
+			.SetBounds 0, 160, 464, 32
+			.Parent = @pnlBottom
+		End With
+		' lblGitUserName
+		With lblGitUserName
+			.Name = "lblGitUserName"
+			.Text = ("Git Username") & ":"
+			.Align = DockStyle.alLeft
+			.TabIndex = 23
+			.CenterImage = True
+			.SetBounds 0, 0, 150, 32
+			.Parent = @pnlGitUserName
+		End With
+		' txtGitUserName — enabled only while Use Git is checked
+		With txtGitUserName
+			.Name = "txtGitUserName"
 			.Text = ""
 			.Align = DockStyle.alClient
 			.ExtraMargins.Top = 5
 			.ExtraMargins.Bottom = 5
-			.TabIndex = 20
+			.TabIndex = 24
 			.SetBounds 150, 0, 314, 32
 			.Enabled = False
-			.Parent = @pnlGit
+			.Parent = @pnlGitUserName
+		End With
+		' pnlGitEmail — row 6d
+		With pnlGitEmail
+			.Name = "pnlGitEmail"
+			.Text = ""
+			.Align = DockStyle.alTop
+			.TabIndex = 25
+			.ExtraMargins.Left = 10
+			.ExtraMargins.Right = 10
+			.SetBounds 0, 192, 464, 32
+			.Parent = @pnlBottom
+		End With
+		' lblGitEmail
+		With lblGitEmail
+			.Name = "lblGitEmail"
+			.Text = ("Git Email") & ":"
+			.Align = DockStyle.alLeft
+			.TabIndex = 26
+			.CenterImage = True
+			.SetBounds 0, 0, 150, 32
+			.Parent = @pnlGitEmail
+		End With
+		' txtGitEmail — enabled only while Use Git is checked; defaults from
+		' Options > Personal Information > E-mail (Form_Create), stays editable
+		With txtGitEmail
+			.Name = "txtGitEmail"
+			.Text = ""
+			.Align = DockStyle.alClient
+			.ExtraMargins.Top = 5
+			.ExtraMargins.Bottom = 5
+			.TabIndex = 27
+			.SetBounds 150, 0, 314, 32
+			.Enabled = False
+			.Parent = @pnlGitEmail
 		End With
 		' pnlAIFriendly — row 7
 		With pnlAIFriendly
 			.Name = "pnlAIFriendly"
 			.Text = ""
 			.Align = DockStyle.alTop
-			.TabIndex = 21
+			.TabIndex = 28
 			.ExtraMargins.Left = 10
 			.ExtraMargins.Right = 10
-			.SetBounds 0, 128, 464, 32
+			.SetBounds 0, 224, 464, 32
 			.Parent = @pnlBottom
 		End With
 		' chkAIFriendly
@@ -253,7 +334,7 @@
 			.Name = "chkAIFriendly"
 			.Text = ("Make project AI friendly")
 			.Align = DockStyle.alLeft
-			.TabIndex = 22
+			.TabIndex = 29
 			.Constraints.Height = 21
 			.AutoSize = True
 			.SetBounds 0, 6, 220, 21
@@ -266,7 +347,7 @@
 			.Name = "lblAITool"
 			.Text = ("AI Agent") & ":"
 			.Align = DockStyle.alLeft
-			.TabIndex = 23
+			.TabIndex = 30
 			.ExtraMargins.Left = 20
 			.CenterImage = True
 			.SetBounds 0, 0, 70, 32
@@ -280,7 +361,7 @@
 			.Align = DockStyle.alClient
 			.ExtraMargins.Top = 5
 			.ExtraMargins.Bottom = 5
-			.TabIndex = 24
+			.TabIndex = 31
 			.Enabled = False
 			.Designer = @This
 			.Parent = @pnlAIFriendly
@@ -290,7 +371,7 @@
 			.Name = "pnlDescription"
 			.Text = ""
 			.Align = DockStyle.alTop
-			.TabIndex = 25
+			.TabIndex = 32
 			.ExtraMargins.Left = 10
 			.ExtraMargins.Right = 10
 			.SetBounds 0, 0, 464, 112
@@ -301,7 +382,7 @@
 			.Name = "lblDescription"
 			.Text = ("Description") & ":"
 			.Align = DockStyle.alTop
-			.TabIndex = 26
+			.TabIndex = 33
 			.ExtraMargins.Top = 6
 			.SetBounds 0, 0, 464, 22
 			.Parent = @pnlDescription
@@ -316,7 +397,7 @@
 			.Multiline = True
 			.ExtraMargins.Top = 3
 			.ExtraMargins.Bottom = 5
-			.TabIndex = 27
+			.TabIndex = 34
 			.SetBounds 0, 22, 464, 90
 			.Parent = @pnlDescription
 		End With
@@ -328,7 +409,7 @@
 			.ExtraMargins.Bottom = 8
 			.ExtraMargins.Top = 4
 			.ExtraMargins.Right = 10
-			.TabIndex = 31
+			.TabIndex = 38
 			.SetBounds 527, 228, 88, 20
 			.Designer = @This
 			.OnClick = @cmdCancel_Click_
@@ -342,7 +423,7 @@
 			.ExtraMargins.Top = 4
 			.ExtraMargins.Right = 10
 			.ExtraMargins.Bottom = 8
-			.TabIndex = 30
+			.TabIndex = 37
 			.SetBounds 430, 228, 88, 20
 			.Default = True
 			.Designer = @This
@@ -357,7 +438,7 @@
 			.ExtraMargins.Top = 4
 			.ExtraMargins.Left = 10
 			.ExtraMargins.Bottom = 8
-			.TabIndex = 29
+			.TabIndex = 36
 			.SetBounds 10, 228, 160, 20
 			.Designer = @This
 			.OnClick = @cmdOpenExisting_Click_
@@ -435,6 +516,53 @@ Private Sub frmNewProject.cmdOK_Click(ByRef Sender As Control)
 		MsgBox ("Template not found!")
 		Me.BringToFront
 		Exit Sub
+	End If
+	'' Use Git / provider / username are read here, before anything is written to disk,
+	'' so a Cancel answer below can return to the dialog with nothing created -- matches
+	'' "Cancel" actually meaning "stop the whole process", not just "skip the Git step".
+	Dim As Boolean useGit = chkUseGit.Checked
+	Dim As String gitProvider = cboGitProvider.Text
+	Dim As String gitUserName = Trim(txtGitUserName.Text)
+	If useGit AndAlso gitUserName = "" Then
+		MsgBox ("Enter a Git username, or uncheck Use Git."), , mtWarning
+		Me.BringToFront
+		Exit Sub
+	End If
+	Dim As String gitURL = ""
+	If useGit Then gitURL = BuildGitURL(gitProvider, gitUserName, ProjectName)
+	If useGit AndAlso SshKeyExists() Then
+		If Not RemoteRepoExists(gitURL) Then
+			'' If OK was triggered by pressing Enter (cmdOK.Default = True), a held
+			'' key repeats WM_KEYDOWN(VK_RETURN) messages that are still queued at
+			'' this point -- they'd otherwise land on this dialog's own Default
+			'' button (Yes) the instant its modal loop starts pumping messages,
+			'' auto-dismissing it within a fraction of a second. Discard (not
+			'' dispatch) any pending keyboard messages first so a stray Enter
+			'' can't answer this warning on the user's behalf.
+			Dim As MSG flushMsg
+			While PeekMessage(@flushMsg, 0, &H100, &H108, PM_REMOVE)
+			Wend
+			Dim As MessageResult mr = MsgBox( _
+				("The repository") & " " & gitURL & " " & ("could not be found on") & " " & gitProvider & "." & Chr(13,10) & Chr(13,10) & _
+				("Yes") & " -- " & ("I've created it -- continue.") & Chr(13,10) & _
+				("No") & " -- " & ("Continue creating the project without Git (unchecks Use Git and clears these fields).") & Chr(13,10) & _
+				("Cancel") & " -- " & ("Stop here and return to the New Project dialog."), _
+				("Repository Not Found"), mtWarning, btYesNoCancel)
+			Select Case mr
+			Case mrYes
+				'' Proceed as normal -- SetupGitRepository (below) does the real work.
+			Case mrNo
+				chkUseGit.Checked = False
+				cboGitProvider.Enabled = False
+				txtGitUserName.Enabled = False
+				txtGitUserName.Text = ""
+				useGit = False
+				gitURL = ""
+			Case Else
+				Me.BringToFront
+				Exit Sub
+			End Select
+		End If
 	End If
 	'' Find the template's own default file (every shipped project template has exactly
 	'' one) so its real name can be validated/renamed from the inline Form/Module Name
@@ -599,8 +727,7 @@ Private Sub frmNewProject.cmdOK_Click(ByRef Sender As Control)
 	chosenDescription = Replace(chosenDescription, Chr(10), "\n")
 	chosenDescription = Replace(chosenDescription, Chr(13), "\n")
 	Dim As String chosenAITool = cboAITool.Text
-	Dim As Boolean useGit = chkUseGit.Checked
-	Dim As String gitURL = Trim(txtGitURL.Text)
+	Dim As String chosenGitEmail = Trim(txtGitEmail.Text)
 	Dim As String useGitText = "false"
 	If useGit Then useGitText = "true"
 	Dim As String aiFriendlyText = "false"
@@ -611,12 +738,20 @@ Private Sub frmNewProject.cmdOK_Click(ByRef Sender As Control)
 		Print #FnMeta, "License=" & Chr(34) & chosenLicense & Chr(34)
 		Print #FnMeta, "Description=" & Chr(34) & chosenDescription & Chr(34)
 		Print #FnMeta, "UseGit=" & useGitText
+		Print #FnMeta, "GitProvider=" & Chr(34) & gitProvider & Chr(34)
+		Print #FnMeta, "GitUserName=" & Chr(34) & gitUserName & Chr(34)
+		Print #FnMeta, "GitEmail=" & Chr(34) & chosenGitEmail & Chr(34)
 		Print #FnMeta, "GitURL=" & Chr(34) & gitURL & Chr(34)
 		Print #FnMeta, "AIFriendly=" & aiFriendlyText
 		Print #FnMeta, "AITool=" & Chr(34) & chosenAITool & Chr(34)
 		CloseFile_(FnMeta)
 	End If
 	WriteLicenseFile(localFolder, chosenLicense, chosenAuthor)
+	If useGit Then SetupGitRepository(localFolder, gitURL, gitUserName, chosenGitEmail)
+	If chkAIFriendly.Checked Then
+		Dim As UString aiFolder = AIToolFolderName(chosenAITool)
+		If aiFolder <> "" Then StampAITemplate(localFolder, aiFolder, ProjectName, chosenAuthor, chosenLicense, txtDescription.Text)
+	End If
 	SelectedTemplate = localTemplate
 	SelectedFolder = localFolder
 	SelectedProjectFile = localProjectFile
@@ -718,8 +853,20 @@ Private Sub frmNewProject.Form_Create(ByRef Sender As Control)
 	cboLicense.AddItem ("Other")
 	cboLicense.ItemIndex = 0
 	chkUseGit.Checked = False
-	txtGitURL.Enabled = False
-	txtGitURL.Text = ""
+	cboGitProvider.Clear
+	cboGitProvider.AddItem ("GitHub")
+	cboGitProvider.AddItem ("GitLab")
+	cboGitProvider.AddItem ("Bitbucket")
+	cboGitProvider.AddItem ("Codeberg")
+	cboGitProvider.ItemIndex = 0
+	cboGitProvider.Enabled = False
+	txtGitUserName.Enabled = False
+	txtGitUserName.Text = ""
+	'' Git Email defaults from Options > Personal Information > E-mail, but stays
+	'' editable -- a GitHub/GitLab/etc. account's commit email is often different
+	'' from the general contact address on file.
+	txtGitEmail.Text = *PersonalEmail
+	txtGitEmail.Enabled = False
 	chkAIFriendly.Checked = False
 	cboAITool.Clear
 	cboAITool.AddItem ("Claude Code")
@@ -735,7 +882,9 @@ Private Sub frmNewProject.chkUseGit_Click_(ByRef Designer As My.Sys.Object, ByRe
 	(*Cast(frmNewProject Ptr, Sender.Designer)).chkUseGit_Click(Sender)
 End Sub
 Private Sub frmNewProject.chkUseGit_Click(ByRef Sender As Control)
-	txtGitURL.Enabled = chkUseGit.Checked
+	cboGitProvider.Enabled = chkUseGit.Checked
+	txtGitUserName.Enabled = chkUseGit.Checked
+	txtGitEmail.Enabled = chkUseGit.Checked
 End Sub
 
 Private Sub frmNewProject.chkAIFriendly_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
@@ -841,5 +990,225 @@ Private Sub frmNewProject.WriteLicenseFile(ByRef DestFolder As UString, ByRef Li
 	If Open(DestFolder & WindowsSlash & "LICENSE" For Output Encoding "utf-8" As #Fn) = 0 Then
 		Print #Fn, Body
 		CloseFile_(Fn)
+	End If
+End Sub
+
+'' Maps the AI Agent dropdown's display label to its Templates/AI/<Tool> folder
+'' name. Returns "" for an unrecognized label (defensive only -- the dropdown is
+'' cbDropDownList, so this can't happen via normal use).
+Private Function frmNewProject.AIToolFolderName(ByRef ToolLabel As String) As UString
+	Select Case ToolLabel
+	Case "Claude Code": Return "ClaudeCode"
+	Case "Cursor": Return "Cursor"
+	Case "ChatGPT (Codex)": Return "ChatGPT"
+	Case "OpenCode": Return "OpenCode"
+	Case "Kun (Deepseek)": Return "Kun"
+	Case Else: Return ""
+	End Select
+End Function
+
+'' Stamps Templates/AI/<ToolFolder>/ into the new project's folder, substituting
+'' {{PROJECT}}/{{AUTHOR}}/{{YEAR}}/{{DATE}}/{{LICENSE}}/{{DESCRIPTION}} tokens in
+'' every file along the way (see Templates/AI/README.md for the token contract).
+Private Sub frmNewProject.StampAITemplate(ByRef DestFolder As UString, ByRef ToolFolder As UString, ByRef ProjectName As String, ByRef AuthorName As String, ByRef LicenseName As String, ByRef DescriptionText As String)
+	Dim As UString SrcFolder = WinOsPath(ExePath & "/Templates/AI/" & ToolFolder)
+	If Not FolderExistsU(SrcFolder) Then Exit Sub
+	CopyTemplateTree(SrcFolder, DestFolder, ProjectName, AuthorName, LicenseName, DescriptionText)
+End Sub
+
+'' Recursively copies SrcFolder's contents into DestFolder, stamping each file.
+'' ".gitkeep" placeholders (used only to keep an empty resources/ folder tracked
+'' in this repo) are skipped -- an empty destination folder is still created.
+'' Fully drains each directory's Dir() listing into a list before recursing,
+'' since Dir() keeps only one search handle at a time; interleaving a nested
+'' Dir() call while an outer one is still in progress would corrupt it.
+Private Sub frmNewProject.CopyTemplateTree(ByRef SrcFolder As UString, ByRef DestFolder As UString, ByRef ProjectName As String, ByRef AuthorName As String, ByRef LicenseName As String, ByRef DescriptionText As String)
+	If Not EnsureDirectoryExists(DestFolder) Then Exit Sub
+	Dim As WStringList names
+	Dim As UInteger Attr
+	Dim As String f = Dir(SrcFolder & WindowsSlash & "*", fbReadOnly Or fbHidden Or fbSystem Or fbDirectory Or fbArchive, Attr)
+	Do While f <> ""
+		If f <> "." AndAlso f <> ".." AndAlso f <> ".gitkeep" Then names.Add f
+		f = Dir(Attr)
+	Loop
+	For i As Integer = 0 To names.Count - 1
+		Dim As UString itemName = names.Item(i)
+		Dim As UString srcItem = SrcFolder & WindowsSlash & itemName
+		Dim As UString destItem = DestFolder & WindowsSlash & itemName
+		If FolderExistsU(srcItem) Then
+			CopyTemplateTree(srcItem, destItem, ProjectName, AuthorName, LicenseName, DescriptionText)
+		Else
+			StampTemplateFile(srcItem, destItem, ProjectName, AuthorName, LicenseName, DescriptionText)
+		End If
+	Next i
+End Sub
+
+'' Reads SrcFile as raw bytes, substitutes the six tokens, and writes the result
+'' to DestFile. Byte-based (not encoding-aware) since every shipped template file
+'' is plain ASCII/UTF-8 and the token markers themselves are pure ASCII.
+Private Sub frmNewProject.StampTemplateFile(ByRef SrcFile As UString, ByRef DestFile As UString, ByRef ProjectName As String, ByRef AuthorName As String, ByRef LicenseName As String, ByRef DescriptionText As String)
+	Dim As Integer FnIn = FreeFile_
+	If Open(SrcFile For Binary Access Read As #FnIn) <> 0 Then Exit Sub
+	Dim As Integer FileSize = LOF(FnIn)
+	Dim As String Contents = String(FileSize, 0)
+	If FileSize > 0 Then Get #FnIn, 1, Contents
+	CloseFile_(FnIn)
+	Dim As String authorForToken = Trim(AuthorName)
+	If authorForToken = "" Then authorForToken = "the author"
+	Contents = Replace(Contents, "{{PROJECT}}", ProjectName)
+	Contents = Replace(Contents, "{{AUTHOR}}", authorForToken)
+	Contents = Replace(Contents, "{{YEAR}}", Format(Now, "yyyy"))
+	Contents = Replace(Contents, "{{DATE}}", Format(Now, "yyyy-mm-dd"))
+	Contents = Replace(Contents, "{{LICENSE}}", LicenseName)
+	Contents = Replace(Contents, "{{DESCRIPTION}}", DescriptionText)
+	Dim As Integer FnOut = FreeFile_
+	If Open(DestFile For Binary Access Write As #FnOut) = 0 Then
+		If Len(Contents) > 0 Then Put #FnOut, 1, Contents
+		CloseFile_(FnOut)
+	End If
+End Sub
+
+'' Whether a usable SSH key already exists for the current Windows user --
+'' checked at %USERPROFILE%\.ssh\ for the three common key types. Mirrors the
+'' check Templates/Git/sshkeys.md walks the user through by hand.
+Private Function frmNewProject.SshKeyExists() As Boolean
+	Dim As UString sshFolder = Environ("USERPROFILE") & "\.ssh\"
+	If FileExistsU(sshFolder & "id_ed25519.pub") Then Return True
+	If FileExistsU(sshFolder & "id_rsa.pub") Then Return True
+	If FileExistsU(sshFolder & "id_ecdsa.pub") Then Return True
+	Return False
+End Function
+
+'' Whether GitURL already exists and is reachable, via a preflight "git ls-remote"
+'' (works against a bare remote URL -- no local repo needed yet). Runs from a temp
+'' .bat (Temp\, same convention as SetupGitRepository) so the exit code can be
+'' captured through a small result file, since PipeCmd itself returns nothing.
+'' GIT_TERMINAL_PROMPT=0 and a batch-mode/timeout-bounded SSH command guarantee
+'' this can't block waiting on a credential or host-key prompt that never comes --
+'' the exact class of hang SetupGitRepository already hit once from a different
+'' cause (see its own comments).
+Private Function frmNewProject.RemoteRepoExists(ByRef GitURL As String) As Boolean
+	EnsureDirectoryExists(ExePath & WindowsSlash & "Temp")
+	Dim As UString batPath = ExePath & WindowsSlash & "Temp" & WindowsSlash & "_astoria_git_check.bat"
+	Dim As UString resultPath = ExePath & WindowsSlash & "Temp" & WindowsSlash & "_astoria_git_check.result"
+	If FileExistsU(resultPath) Then Kill resultPath
+	Dim As Integer Fn = FreeFile_
+	If Open(batPath For Output As #Fn) <> 0 Then Return False
+	Print #Fn, "@echo off"
+	Print #Fn, "set GIT_TERMINAL_PROMPT=0"
+	Print #Fn, "set GIT_SSH_COMMAND=ssh -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new"
+	Print #Fn, "git ls-remote " & Chr(34) & Trim(GitURL) & Chr(34) & " >NUL 2>&1"
+	Print #Fn, "echo %errorlevel% > " & Chr(34) & resultPath & Chr(34)
+	CloseFile_(Fn)
+	PipeCmd batPath, True
+	Dim As Boolean Exists = False
+	If FileExistsU(resultPath) Then
+		Dim As Integer FnR = FreeFile_
+		If Open(resultPath For Input As #FnR) = 0 Then
+			Dim As String resultLine
+			Line Input #FnR, resultLine
+			CloseFile_(FnR)
+			Exists = (Trim(resultLine) = "0")
+		End If
+		Kill resultPath
+	End If
+	If FileExistsU(batPath) Then Kill batPath
+	Return Exists
+End Function
+
+'' Maps the Git Provider dropdown's label to its fixed public SSH host. All four
+'' providers offered here (GitHub/GitLab/Bitbucket/Codeberg) use one canonical
+'' hosted domain and the standard git@host:user/repo.git shape -- unlike
+'' self-hostable Gitea/Forgejo (no single domain) or SourceHut/SourceForge
+'' (different URL shape entirely), which is why the dropdown stops at these four.
+Private Function frmNewProject.GitProviderHost(ByRef ProviderLabel As String) As UString
+	Select Case ProviderLabel
+	Case "GitHub": Return "github.com"
+	Case "GitLab": Return "gitlab.com"
+	Case "Bitbucket": Return "bitbucket.org"
+	Case "Codeberg": Return "codeberg.org"
+	Case Else: Return ""
+	End Select
+End Function
+
+'' Matching Templates/Git/*.md guide for a provider label. No bitbucket.md exists
+'' yet, so Bitbucket falls back to the generic other.md until one is written.
+Private Function frmNewProject.GitProviderGuideName(ByRef ProviderLabel As String) As String
+	Select Case ProviderLabel
+	Case "GitHub": Return "github.md"
+	Case "GitLab": Return "gitlab.md"
+	Case "Codeberg": Return "codeberg.md"
+	Case Else: Return "other.md"
+	End Select
+End Function
+
+'' Builds the SSH remote URL from Provider + Git Username + the project's own
+'' name -- the whole reason those three fields replaced the old free-typed Git
+'' URL field.
+Private Function frmNewProject.BuildGitURL(ByRef ProviderLabel As String, ByRef GitUserName As String, ByRef ProjName As String) As UString
+	Dim As UString host = GitProviderHost(ProviderLabel)
+	If host = "" OrElse Trim(GitUserName) = "" Then Return ""
+	Return "git@" & host & ":" & Trim(GitUserName) & "/" & ProjName & ".git"
+End Function
+
+'' Scope decision (owner, 2026-07-15, extended to all four providers same day):
+'' automatic git init/remote setup runs for GitHub/GitLab/Bitbucket/Codeberg alike,
+'' gated only on an existing SSH key -- that's the one precondition Astoria can
+'' safely wire up without typed credentials, and the repo-existence preflight in
+'' cmdOK_Click already covers the "create the empty repo first" step generically
+'' for any of the four. No SSH key falls back to pointing at the matching
+'' Templates/Git/*.md guide instead of doing nothing silently (no bitbucket.md
+'' exists yet -- falls back to other.md until one is written, a later task).
+'' Deliberately stops at `git remote add origin` -- `git push` is a separate,
+'' explicit action the user takes themselves (it's the first action that
+'' actually reaches a remote server / creates public history), not part of
+'' project creation.
+Private Sub frmNewProject.SetupGitRepository(ByRef ProjectFolder As UString, ByRef GitURL As String, ByRef GitUserName As String, ByRef GitEmail As String)
+	Dim As String urlLower = LCase(GitURL)
+	If SshKeyExists() Then
+		'' Written to ExePath\Temp, not the new project folder itself -- if the
+		'' script lived inside the project folder, "git add ." would stage (and
+		'' "git commit" would then include) the setup script itself in the very
+		'' first commit, since Kill only runs after PipeCmd returns.
+		EnsureDirectoryExists(ExePath & WindowsSlash & "Temp")
+		Dim As UString batPath = ExePath & WindowsSlash & "Temp" & WindowsSlash & "_astoria_git_setup.bat"
+		'' A machine with no global git user.name/user.email configured makes
+		'' "git commit" fail silently (non-zero exit, no commit, script keeps
+		'' going) -- found by direct reproduction: init/add/remote-add all
+		'' succeeded but the repo was left with zero commits. Set the identity
+		'' local to this one repo (never --global) from the dialog's own Git
+		'' Username/Email fields, so the commit can't be skipped for that reason.
+		Dim As String gitCfgName = Trim(GitUserName)
+		If gitCfgName = "" Then gitCfgName = "Astoria IDE User"
+		Dim As String gitCfgEmail = Trim(GitEmail)
+		If gitCfgEmail = "" Then gitCfgEmail = "astoria-user@localhost"
+		Dim As Integer Fn = FreeFile_
+		If Open(batPath For Output As #Fn) <> 0 Then Exit Sub
+		Print #Fn, "@echo off"
+		Print #Fn, "cd /d " & Chr(34) & ProjectFolder & Chr(34)
+		Print #Fn, "git init"
+		Print #Fn, "git config user.name " & Chr(34) & gitCfgName & Chr(34)
+		Print #Fn, "git config user.email " & Chr(34) & gitCfgEmail & Chr(34)
+		Print #Fn, "git add ."
+		Print #Fn, "git commit -m " & Chr(34) & "Initial commit" & Chr(34)
+		Print #Fn, "git branch -M main"
+		If Trim(GitURL) <> "" Then Print #Fn, "git remote add origin " & Trim(GitURL)
+		CloseFile_(Fn)
+		'' PipeCmd's UseShell:=True path already wraps this in cmd /c "...";
+		'' quoting batPath ourselves here as well would double the outer quotes
+		'' into cmd /c ""<path>"", which cmd.exe can misparse into a stray
+		'' interactive shell that never exits -- and since PipeCmd waits
+		'' INFINITE on the process, that hangs the whole UI thread. Pass the
+		'' raw path, matching every other UseShell:=True call site.
+		PipeCmd batPath, True
+		If FileExistsU(batPath) Then Kill batPath
+	Else
+		Dim As String guideName = "other.md"
+		If InStr(urlLower, "gitlab.com") > 0 Then guideName = "gitlab.md"
+		If InStr(urlLower, "codeberg.org") > 0 Then guideName = "codeberg.md"
+		If InStr(urlLower, "github.com") > 0 Then guideName = "github.md"
+		MsgBox ("Automatic Git setup needs an existing SSH key.") & Chr(13,10) & Chr(13,10) & _
+			("See") & " Templates\Git\" & guideName & " " & ("and") & " Templates\Git\sshkeys.md" & " " & ("for manual setup steps.")
+		Me.BringToFront
 	End If
 End Sub

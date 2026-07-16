@@ -700,7 +700,17 @@ Public Function MsgBox Alias "MsgBox" (ByRef MsgStr As WString, ByRef Caption As
 	End Select
 
 	Static As My.Sys.Forms.MsgBoxForm gMsgBoxForm
-	Dim As Integer ModalResult_ = gMsgBoxForm.Execute(MsgStr, *FCaption, IconIn, ButtonsIn, pApp->MainForm)
+	'' Owning this by MainForm unconditionally put it behind whatever dialog was
+	'' actually on top and modal (e.g. the New Project dialog) -- Windows has no
+	'' reason to stack an owned window above its owner's OTHER owned windows, so
+	'' it could end up hidden behind the still-active modal that spawned it,
+	'' looking like it "flashed and disappeared" when it was really just hidden
+	'' underneath, still blocking input. ActiveForm tracks whichever Form last
+	'' got WM_ACTIVATE, which is exactly the currently-active modal in this
+	'' scenario; fall back to MainForm only if nothing has activated yet.
+	Dim As My.Sys.Forms.Form Ptr OwnerFormForMsg = pApp->ActiveForm
+	If OwnerFormForMsg = 0 Then OwnerFormForMsg = pApp->MainForm
+	Dim As Integer ModalResult_ = gMsgBoxForm.Execute(MsgStr, *FCaption, IconIn, ButtonsIn, OwnerFormForMsg)
 
 	Dim As MessageResult Result
 	Select Case ModalResult_

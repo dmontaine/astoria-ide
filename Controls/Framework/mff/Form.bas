@@ -902,6 +902,20 @@ Namespace My.Sys.Forms
 				Next i
 				Enabled = True
 				Visible = True
+				'' A Form used as a shared/reused instance across many call sites (e.g.
+				'' the app-wide MsgBoxForm singleton in Application.MsgBox) only has its
+				'' real Win32 owner set once, at first CreateWnd -- CreateWnd is a no-op
+				'' on every later call once FHandle already exists, so passing a
+				'' different OwnerForm on a later ShowModal call changes this Form's
+				'' FParent bookkeeping (affects CenterToParent) but NOT its actual native
+				'' owner/z-order relationship. Without an explicit bring-to-front here,
+				'' such a reused Form can end up hidden behind whichever window is
+				'' genuinely on top (e.g. another already-open modal dialog) even though
+				'' EnableWindow(False) above stops that window from receiving input --
+				'' disabling a window never changes its z-order. Forcing z-order/focus
+				'' explicitly here fixes that regardless of the owner-reuse quirk.
+				SetWindowPos(FHandle, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE)
+				SetForegroundWindow(FHandle)
 				InShowModal = True
 				Dim As MSG msg
 				Dim TranslateAndDispatch As Boolean

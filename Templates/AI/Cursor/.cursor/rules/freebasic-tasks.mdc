@@ -1,0 +1,46 @@
+---
+description: Task playbooks for {{PROJECT}} — building/running, adding modules, adding MFF controls and events, adding forms, and fixing FreeBASIC compile errors. Apply when doing any of those tasks.
+globs:
+alwaysApply: false
+---
+
+# Task playbooks — {{PROJECT}}
+
+## Build and run
+1. Astoria IDE: open `{{PROJECT}}.vfp`, press **F5**.
+2. Console CLI: `fbc -s console <MainFile>.bas`; the main file is the `*File=` entry in the `.vfp`.
+3. GUI CLI: `<AstoriaDir>\Compiler\fbc64.exe -s gui -i <AstoriaDir>\Controls\Framework <MainFile>.bas` — but `fbc` rejects `.frm` input and the `.rc` is IDE-generated, so prefer the IDE.
+
+## Add a module
+1. Create `NewName.bas` (+ `NewName.bi` for the `Declare` lines and shared `Type`s if other files call in).
+2. `#include once "NewName.bi"` where needed.
+3. Register: add `File=NewName.bas` to `{{PROJECT}}.vfp` (or add via the IDE Explorer).
+
+## Add a control + event (GUI)
+Preferred: Astoria Form Designer (drop control, double-click for handler). By hand:
+1. `#include once "mff/CommandButton.bi"` (or the control's header).
+2. In the form `Type`: `Declare Sub cmdGo_Click(ByRef Sender As Control)` and `Dim As CommandButton cmdGo`.
+3. In the `Constructor`:
+   ```
+   ' cmdGo
+   With cmdGo
+       .Name = "cmdGo" : .Text = "Go"
+       .SetBounds 10, 10, 90, 28
+       .Designer = @This : .Parent = @This
+       .OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As Control), @cmdGo_Click)
+   End With
+   ```
+4. Implement `Private Sub <FormType>.cmdGo_Click(ByRef Sender As Control) … End Sub` after the `Type`.
+
+## Add a form (GUI)
+1. Preferred: IDE right-click project → Add → Form. By hand: copy an existing `.frm`'s shape, rename Type/instance/`.Name`s, add `File=NewForm.frm` to the `.vfp`.
+2. Only the MAIN form keeps the `#if _MAIN_FILE_ = __FILE__` bootstrap (`MainForm = True`, `.Show`, `App.Run`) — remove it from secondary forms.
+3. Show with `NewForm.Show` (modeless) or `NewForm.ShowModal(OwnerForm)` (modal).
+
+## Fix compile errors
+- `error 18: Element not defined, X` → missing `#include once` or typo (names are case-insensitive).
+- `error 4: Duplicated definition` → collision, possibly case-only.
+- Linker `undefined reference` → declared but unimplemented, or the `.bas` isn't in the `.vfp`.
+- `error 24: Invalid data types` on `IIf` → `IIf` can't return `String`; use `If/Else`.
+- Unexpected variable visibility → `Dim` is procedure-scoped.
+- Always fix the FIRST reported error before the rest.

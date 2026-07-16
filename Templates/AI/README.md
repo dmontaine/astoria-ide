@@ -22,13 +22,21 @@ Replaced on stamping (see the plan's substitution helper):
 
 ## Folders
 
+All five folders carry the same **default rules + skills set** (2026-07-16): a
+shared canonical `AGENTS.md` (rules: language / build / Astoria-project /
+editing discipline; skills: build-run, add-module, add-control-event, add-form,
+fix-compile-errors), plus each tool's native convention on top.
+
 | Tool | Primary file(s) | Status |
 |---|---|---|
-| `ClaudeCode/` | `CLAUDE.md`, `AGENTS.md` | **Complete** (authored by Claude Code) |
-| `Cursor/` | `.cursorrules`, `.cursor/rules/*.mdc`, `AGENTS.md` | Starter — have Cursor finish it |
-| `ChatGPT/` | `AGENTS.md` (Codex convention) | Starter — have ChatGPT/Codex finish it |
-| `OpenCode/` | `AGENTS.md`, `opencode.json` | Starter — have OpenCode finish it |
-| `Kun/` | `AGENTS.md` | Starter — **verify Kun's actual config convention** (deepseek-gui.com landing page did not document it; `AGENTS.md` assumed as the cross-tool default) |
+| `ClaudeCode/` | `CLAUDE.md`, `.claude/skills/*/SKILL.md` (5 skills), `AGENTS.md` | **Complete** |
+| `Cursor/` | `.cursor/rules/freebasic.mdc` (always-on rules), `.cursor/rules/freebasic-tasks.mdc` (playbooks), `.cursorrules` (legacy pointer), `AGENTS.md` | **Complete** |
+| `ChatGPT/` | `AGENTS.md` (Codex convention; rules + playbooks inline) | **Complete** |
+| `OpenCode/` | `AGENTS.md`, `opencode.json` | **Complete** |
+| `Kun/` | `SKILL.md` (rules + playbooks), `AGENTS.md` | **Complete** — but **verify Kun's actual config convention** (deepseek-gui.com landing page did not document it; `SKILL.md`/`AGENTS.md` assumed as the cross-tool default) |
+
+When editing the shared baseline, change it in **all five** `AGENTS.md` files
+(and the per-tool mirrors) — they are deliberately kept in lockstep.
 
 Every folder carries a `resources/` directory (with a `.gitkeep`) for the
 assistant to drop project-specific context into.

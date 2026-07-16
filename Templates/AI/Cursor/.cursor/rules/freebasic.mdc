@@ -1,0 +1,29 @@
+---
+description: FreeBASIC + Astoria IDE core rules for {{PROJECT}}
+globs:
+alwaysApply: true
+---
+
+# FreeBASIC rules — {{PROJECT}}
+
+FreeBASIC is **not** VB.NET, VBA, QBASIC, or C — do not assume their syntax.
+
+## Language
+- Variables: `Dim As Integer x` / `Var x = 1`; strings are `String` (ASCII), `WString`/`ZString` wide/C.
+- Procedures: `Sub`/`Function … End`; declare in `.bi` headers; `#include once "file.bi"`.
+- Types: `Type … End Type`, `Extends`, `Declare Virtual`. Manual memory for pointers (`New`/`Delete`).
+- Comments `'` or `/' … '/`; line continuation trailing `_`; identifiers case-insensitive.
+- `Dim` is **procedure-scoped**, not block-scoped — a `Dim` inside an `If`/loop lives until `End Sub`.
+- `IIf(...)` cannot return a `String` — use explicit `If/Else` assignment.
+
+## Astoria project
+- `{{PROJECT}}.vfp` is the manifest: every source file is a `File=` line, the main file is starred (`*File=`). Mirror any add/rename/delete there; a file not listed is invisible to the project.
+- Leave the IDE-maintained `.vfp` metadata keys alone (`Author=` … `AITool=`) — the IDE round-trips them on save.
+- `.frm` files are Form-Designer-managed: edit event-handler bodies freely; prefer the Designer for layout; if hand-editing, keep the `With`-block shape and `' <ControlName>` comment lines.
+- GUI projects use the bundled MFF framework: `#include once "mff/<Control>.bi"`, `Using My.Sys.Forms`.
+- Do not edit `Temp/`, produced `.exe` files, or `{{PROJECT}}_Change.log`.
+
+## Build / verify
+- Preferred: open the `.vfp` in the Astoria IDE, press **F5** (handles `.frm` mains, `.rc` generation, include paths).
+- CLI (console): `fbc -s console <MainFile>.bas`. CLI (GUI): add `-i <AstoriaDir>\Controls\Framework`; `fbc` rejects `.frm` as direct input and the `#cmdline "<name>.rc"` needs the IDE-generated resource — prefer the IDE.
+- Errors are `file(line) error N: message` — fix the FIRST error first; keep changes small and compile-checked.

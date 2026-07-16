@@ -3,22 +3,31 @@
 **Author:** {{AUTHOR}} · **License:** {{LICENSE}} · **Created:** {{DATE}}
 
 This is a **FreeBASIC** project created with the Astoria IDE. This file orients
-Claude Code (and other assistants) working in this repository. Edit it freely as
-the project grows — describe what the program does, its layout, and any rules you
-want the assistant to follow.
+Claude Code working in this repository. Edit it freely as the project grows —
+describe what the program does, its layout, and any rules you want followed.
 
 ## What this project is
 
 - **Language:** FreeBASIC — `.bas` (modules), `.bi` (headers), `.frm` (GUI forms
   if this is a windowed app).
-- **How it's normally built:** open the `.vfp` project file in the **Astoria
-  IDE** and press **F5** (build) / **Run**.
-- **From the command line:** compile with the FreeBASIC compiler, e.g.
-  `fbc {{PROJECT}}.bas` — add `-s console` for a console program or `-s gui` for a
-  windowed one, then run the produced executable. (Adjust the main file name to
-  match this project.)
+- **Project manifest:** `{{PROJECT}}.vfp` — INI-style; lists every source file
+  (`File=`), stars the main file (`*File=`), and carries build settings and
+  project metadata.
+- **How it's normally built:** open the `.vfp` in the **Astoria IDE** and press
+  **F5** (build + run). GUI projects use the bundled MFF framework
+  (`#include once "mff/Form.bi"`, `Using My.Sys.Forms`).
 
-## FreeBASIC ground rules for an assistant
+## Skills
+
+Task playbooks live in `.claude/skills/` and load on demand:
+
+- **build-run** — build and run (IDE F5, or `fbc` CLI with its GUI caveats).
+- **add-module** — new `.bas`/`.bi` pair, registered in the `.vfp`.
+- **add-control-event** — MFF control + event-handler wiring pattern.
+- **add-form** — a new `.frm`, the main-form bootstrap rule, Show/ShowModal.
+- **fix-compile-errors** — decoding `fbc`'s errors and this stack's common ones.
+
+## FreeBASIC ground rules
 
 FreeBASIC is **not** VB.NET, VBA, QBASIC, or C — do not assume their syntax.
 
@@ -38,12 +47,28 @@ FreeBASIC is **not** VB.NET, VBA, QBASIC, or C — do not assume their syntax.
 - A local `Dim` is **procedure-scoped**, not block-scoped — a variable declared
   inside an `If`/loop is visible for the rest of the `Sub`, so deleting that block
   can leave later code referencing an undeclared name.
+- `IIf(...)` cannot return a `String` — use an explicit `If/Else` assignment.
+
+## Astoria project rules
+
+- **Keep the `.vfp` in sync** — adding, renaming, or deleting a source file must
+  be mirrored in its `File=` lines (easiest via the IDE's project Explorer). A
+  file not listed there is invisible to the project.
+- **Leave the IDE-maintained metadata keys alone** (`Author=`, `License=`,
+  `Description=`, `UseGit=`, `GitProvider=`, `GitUserName=`, `GitEmail=`,
+  `GitURL=`, `AIFriendly=`, `AITool=`) — the IDE round-trips them on save.
+- **`.frm` files are designer-managed.** The `'#Region "Form"` block is generated
+  by Astoria's Form Designer — edit event-handler bodies freely; prefer the
+  Designer for layout/control changes; keep the `With`-block shape and
+  `' <ControlName>` comment lines if editing by hand.
+- **Do not edit** `Temp/`, produced `.exe` files, or `{{PROJECT}}_Change.log`.
 
 ## Editing discipline
 
-- Match each file's existing indentation and line endings.
+- Match each file's existing indentation (tabs in generated files) and line
+  endings.
 - Keep changes small and compile-checked. FreeBASIC reports precise errors
-  (`file(line) error N: …`) — read them and fix the root cause.
+  (`file(line) error N: …`) — fix the first one first.
 - Prefer building/running through the Astoria IDE to confirm a change actually
   works, not just that it compiles.
 
@@ -51,7 +76,8 @@ FreeBASIC is **not** VB.NET, VBA, QBASIC, or C — do not assume their syntax.
 
 - Ask before anything destructive or irreversible (deleting files, force-pushing,
   etc.).
-- Commit only when asked; write clear, scoped commit messages.
+- Commit only when asked; write clear, scoped commit messages. If this project
+  uses Git, a `.gitignore`/`.gitattributes` pair is already provided.
 - Put project-specific context you want me to remember into `resources/` or add
   it to this file.
 

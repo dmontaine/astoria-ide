@@ -34,6 +34,7 @@
 		Declare Sub StampAITemplate(ByRef DestFolder As UString, ByRef ToolFolder As UString, ByRef ProjectName As String, ByRef AuthorName As String, ByRef LicenseName As String, ByRef DescriptionText As String)
 		Declare Sub CopyTemplateTree(ByRef SrcFolder As UString, ByRef DestFolder As UString, ByRef ProjectName As String, ByRef AuthorName As String, ByRef LicenseName As String, ByRef DescriptionText As String)
 		Declare Sub StampTemplateFile(ByRef SrcFile As UString, ByRef DestFile As UString, ByRef ProjectName As String, ByRef AuthorName As String, ByRef LicenseName As String, ByRef DescriptionText As String)
+		Declare Sub WriteGitSupportFiles(ByRef DestFolder As UString, ByRef ProjectName As String, ByRef AuthorName As String, ByRef LicenseName As String, ByRef DescriptionText As String)
 		Declare Function SshKeyExists() As Boolean
 		Declare Function RemoteRepoExists(ByRef GitURL As String) As Boolean
 		Declare Sub SetupGitRepository(ByRef ProjectFolder As UString, ByRef GitURL As String, ByRef GitUserName As String, ByRef GitEmail As String)

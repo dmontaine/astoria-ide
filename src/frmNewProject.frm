@@ -531,7 +531,13 @@ Private Sub frmNewProject.cmdOK_Click(ByRef Sender As Control)
 	Dim As String gitURL = ""
 	If useGit Then gitURL = BuildGitURL(gitProvider, gitUserName, ProjectName)
 	If useGit AndAlso SshKeyExists() Then
-		If Not RemoteRepoExists(gitURL) Then
+		'' Loop: answering Yes ("I've created it") re-runs the ls-remote existence
+		'' check rather than being taken on trust -- if the repository still can't
+		'' be found (typo'd name, wrong provider, not actually created yet), the
+		'' warning comes back with a "still could not be found" lead-in instead of
+		'' silently proceeding to a local-only repo whose remote doesn't exist.
+		Dim As Boolean askedBefore = False
+		Do While useGit AndAlso (Not RemoteRepoExists(gitURL))
 			'' If OK was triggered by pressing Enter (cmdOK.Default = True), a held
 			'' key repeats WM_KEYDOWN(VK_RETURN) messages that are still queued at
 			'' this point -- they'd otherwise land on this dialog's own Default
@@ -542,15 +548,23 @@ Private Sub frmNewProject.cmdOK_Click(ByRef Sender As Control)
 			Dim As MSG flushMsg
 			While PeekMessage(@flushMsg, 0, &H100, &H108, PM_REMOVE)
 			Wend
+			Dim As String notFoundLine
+			If askedBefore Then
+				notFoundLine = ("The repository") & " " & gitURL & " " & ("STILL could not be found on") & " " & gitProvider & "."
+			Else
+				notFoundLine = ("The repository") & " " & gitURL & " " & ("could not be found on") & " " & gitProvider & "."
+			End If
+			askedBefore = True
 			Dim As MessageResult mr = MsgBox( _
-				("The repository") & " " & gitURL & " " & ("could not be found on") & " " & gitProvider & "." & Chr(13,10) & Chr(13,10) & _
-				("Yes") & " -- " & ("I've created it -- continue.") & Chr(13,10) & _
+				notFoundLine & Chr(13,10) & Chr(13,10) & _
+				("Yes") & " -- " & ("I've created it -- check again and continue.") & Chr(13,10) & _
 				("No") & " -- " & ("Continue creating the project without Git (unchecks Use Git and clears these fields).") & Chr(13,10) & _
 				("Cancel") & " -- " & ("Stop here and return to the New Project dialog."), _
 				("Repository Not Found"), mtWarning, btYesNoCancel)
 			Select Case mr
 			Case mrYes
-				'' Proceed as normal -- SetupGitRepository (below) does the real work.
+				'' Loop around: RemoteRepoExists runs again. Only an actual
+				'' successful ls-remote lets the Git setup below proceed.
 			Case mrNo
 				chkUseGit.Checked = False
 				cboGitProvider.Enabled = False
@@ -562,7 +576,7 @@ Private Sub frmNewProject.cmdOK_Click(ByRef Sender As Control)
 				Me.BringToFront
 				Exit Sub
 			End Select
-		End If
+		Loop
 	End If
 	'' Find the template's own default file (every shipped project template has exactly
 	'' one) so its real name can be validated/renamed from the inline Form/Module Name
@@ -747,10 +761,16 @@ Private Sub frmNewProject.cmdOK_Click(ByRef Sender As Control)
 		CloseFile_(FnMeta)
 	End If
 	WriteLicenseFile(localFolder, chosenLicense, chosenAuthor)
-	If useGit Then SetupGitRepository(localFolder, gitURL, gitUserName, chosenGitEmail)
+	'' Everything that writes project files must run BEFORE SetupGitRepository:
+	'' its script does "git add ." + "git commit", so anything written after it
+	'' (AI templates, .gitignore) would be left out of the initial commit.
 	If chkAIFriendly.Checked Then
 		Dim As UString aiFolder = AIToolFolderName(chosenAITool)
 		If aiFolder <> "" Then StampAITemplate(localFolder, aiFolder, ProjectName, chosenAuthor, chosenLicense, txtDescription.Text)
+	End If
+	If useGit Then
+		WriteGitSupportFiles(localFolder, ProjectName, chosenAuthor, chosenLicense, txtDescription.Text)
+		SetupGitRepository(localFolder, gitURL, gitUserName, chosenGitEmail)
 	End If
 	SelectedTemplate = localTemplate
 	SelectedFolder = localFolder
@@ -1066,6 +1086,17 @@ Private Sub frmNewProject.StampTemplateFile(ByRef SrcFile As UString, ByRef Dest
 		If Len(Contents) > 0 Then Put #FnOut, 1, Contents
 		CloseFile_(FnOut)
 	End If
+End Sub
+
+'' Stamps Templates/Git/gitignore.txt and gitattributes.txt into the new project
+'' as .gitignore / .gitattributes (token-substituted -- gitattributes.txt uses
+'' {{PROJECT}}). Written whenever Use Git is checked, before SetupGitRepository's
+'' "git add ." so they land in -- and govern -- the initial commit. Missing
+'' template files are skipped silently (StampTemplateFile's own behavior).
+Private Sub frmNewProject.WriteGitSupportFiles(ByRef DestFolder As UString, ByRef ProjectName As String, ByRef AuthorName As String, ByRef LicenseName As String, ByRef DescriptionText As String)
+	Dim As UString gitTplFolder = WinOsPath(ExePath & "/Templates/Git")
+	StampTemplateFile(gitTplFolder & WindowsSlash & "gitignore.txt", DestFolder & WindowsSlash & ".gitignore", ProjectName, AuthorName, LicenseName, DescriptionText)
+	StampTemplateFile(gitTplFolder & WindowsSlash & "gitattributes.txt", DestFolder & WindowsSlash & ".gitattributes", ProjectName, AuthorName, LicenseName, DescriptionText)
 End Sub
 
 '' Whether a usable SSH key already exists for the current Windows user --

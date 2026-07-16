@@ -1,0 +1,12 @@
+# Cursor rules -- {{PROJECT}}
+# Author: {{AUTHOR}} - License: {{LICENSE}} - Created: {{DATE}}
+#
+# STARTER SCAFFOLD -- ask Cursor to complete this for your project.
+# This is a FreeBASIC project created with the Astoria IDE.
+
+You are helping with a FreeBASIC project (.bas modules, .bi headers, .frm forms).
+FreeBASIC is not VB.NET, VBA, QBASIC, or C -- do not assume their syntax.
+Build/run via the Astoria IDE (open the .vfp, press F5) or `fbc {{PROJECT}}.bas`.
+Match existing indentation and line endings; keep changes small and compile-checked.
+Note: a local Dim is procedure-scoped, not block-scoped.
+See AGENTS.md in this folder for the fuller guide.

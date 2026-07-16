@@ -1,0 +1,25 @@
+# .gitignore for a FreeBASIC project (created by Astoria).
+
+# Build output
+*.exe
+*.o
+*.obj
+*.a
+*.lib
+*.dll
+*.so
+*.dylib
+*.map
+
+# Debug / temporary
+*.log
+*.tmp
+*.bak
+Temp/
+temp/
+
+# OS / editor cruft
+Thumbs.db
+Desktop.ini
+.DS_Store
+*~

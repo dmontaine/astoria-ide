@@ -238,27 +238,16 @@ Same day, continuing directly from the MsgBox fix above — with the warning dia
 
 **Minor recorded nit:** after answering No, the `.vfp` metadata still records the `GitUserName=` typed before the No cleared the field (the metadata block uses variables captured before the dialog); harmless, fix only if the owner cares. **Local test artifacts:** `Projects/Test10`/`TestA`/`TestB`/`TestAI`/`TestAI3` (and a `TestA` repo on the owner's GitHub) are disposable leftovers from this verification.
 
-## AI template folders — what each agent needs to do
+## AI template folders — complete (2026-07-16)
 
-When the owner asks **you** (an AI coding agent — Cursor, ChatGPT/Codex, OpenCode, Kun, …) to complete your project-setup template, here's the what and where. These files get **stamped into a newly created end-user FreeBASIC project** when "Make project AI friendly" is checked — so write for a **beginner using *your* tool to work on a FreeBASIC project**, NOT for Astoria's own repo.
+All five `Templates/AI/<Tool>/` folders now carry a **default rules + skills set** (`2a515c9`, owner-verified) — the starter-scaffold phase is over. These files get **stamped into a newly created end-user FreeBASIC project** when "Make project AI friendly" is checked, written for a beginner using that tool on a FreeBASIC project (NOT for Astoria's own repo).
 
-**Your folder:** `Templates/AI/<Tool>/`
-- `ClaudeCode/` — **complete; use its `CLAUDE.md` as the reference to match.**
-- `Cursor/`, `ChatGPT/`, `OpenCode/`, `Kun/` — starter scaffolds to finish.
+- **Shared canonical `AGENTS.md`** (identical baseline in all five folders, deliberately kept in lockstep): rules — FreeBASIC language rules (incl. `IIf` can't return `String`), build/run facts verified by real compiles (IDE **F5** preferred; `fbc` rejects `.frm` as direct input; GUI CLI needs `-i Controls\Framework` and the IDE-generated `.rc`), Astoria project rules (`.vfp` manifest sync, IDE-maintained metadata keys, designer-managed `.frm` regions, hands off `Temp/`/exes/change log), editing discipline, VCS conduct — plus five task playbooks: build-run, add-module, add-control-event (wiring pattern from `Examples/Calculator`), add-form (main-form bootstrap rule, Show/ShowModal), fix-compile-errors (real fbc error numbers).
+- **Per-tool native conventions on top:** ClaudeCode → `CLAUDE.md` + five `.claude/skills/*/SKILL.md`; Cursor → `.cursor/rules/freebasic.mdc` (alwaysApply) + `freebasic-tasks.mdc` + legacy `.cursorrules` pointer; ChatGPT (Codex) → `AGENTS.md` inline; Kun → full `SKILL.md` + `AGENTS.md` (its real config convention is still unverified — deepseek-gui.com doesn't document one); OpenCode → `AGENTS.md` via `opencode.json`.
+- **Tokens** (`{{PROJECT}}`/`{{AUTHOR}}`/`{{YEAR}}`/`{{DATE}}`/`{{LICENSE}}`/`{{DESCRIPTION}}`) are used throughout, never hardcoded; each folder keeps a `resources/` for extra per-project context. Owner-verified live (`TestAI4`): the `.claude/` dot-folder tree stamps correctly with all tokens substituted.
+- **Maintenance rule:** edit the shared baseline in **all five** `AGENTS.md` files (and per-tool mirrors) together — see [Templates/AI/README.md](Templates/AI/README.md).
 
-**What to do:**
-1. Read `Templates/AI/ClaudeCode/CLAUDE.md` — match its structure, coverage, and tone for your tool.
-2. Complete your tool's primary instruction file in its native convention:
-   - Cursor → `.cursorrules` (or `.cursor/rules/*.mdc`)
-   - ChatGPT (Codex) → `AGENTS.md`
-   - OpenCode → `AGENTS.md` + `opencode.json`
-   - Kun → `AGENTS.md` and/or `SKILL.md` (**verify Kun's real config convention** — deepseek-gui.com didn't document it; `SKILL.md`/`AGENTS.md` assumed as the cross-tool default)
-3. Keep the shared FreeBASIC baseline already in each `AGENTS.md` (language rules; build via the Astoria IDE **F5** or `fbc`; editing discipline; the procedure-scoped-`Dim` gotcha) and add anything tool-specific.
-4. **Use the tokens, do NOT hardcode:** `{{PROJECT}}`, `{{AUTHOR}}`, `{{YEAR}}`, `{{DATE}}`, `{{LICENSE}}` (and `{{DESCRIPTION}}` once the create dialog wires it) — they're replaced at stamp time.
-5. Drop any extra reference material the assistant should have into your `resources/` folder.
-6. Keep it short, correct, and self-contained (v1 keeps each folder self-contained — no `_shared/`). Replace the "STARTER SCAFFOLD" banner when done.
-
-See [Templates/AI/README.md](Templates/AI/README.md) (folder table + token list) and `PROJECT_SETUP_PLAN.md` **Task 2b** for the surrounding plan.
+Same session: found and fixed (`9ca88b6`) a dead `App.DarkMode = True` in **both new-project templates** — left over from the 2026-07-15 dark-mode removal, it made every new Windows Application project fail with `error 18: Element not defined` (verified by standalone `fbc64` compiles both with and without the line). **87 `Examples/` files still carry the same dead reference** (the Examples build audit predates the removal) — queued as separate work; a few of those have full dark-mode toggle UI needing feature removal, not just line deletion.
 
 ## Next ready work
 

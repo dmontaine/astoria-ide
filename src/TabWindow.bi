@@ -81,6 +81,20 @@ Type ProjectElement Extends ExplorerElement
 	AndroidSDKLocation As WString Ptr
 	AndroidNDKLocation As WString Ptr
 	JDKLocation As WString Ptr
+	' New Project dialog metadata (Author/License/Description/Git/AI) -- written at
+	' project creation (frmNewProject) and round-tripped through load/save here so a
+	' later project save doesn't silently drop the keys. No IDE UI reads them yet
+	' (PROJECT_SETUP_PLAN Task 8, the Project Properties editor, will).
+	Author As WString Ptr
+	License As WString Ptr
+	Description As WString Ptr
+	UseGit As Boolean
+	GitProvider As WString Ptr
+	GitUserName As WString Ptr
+	GitEmail As WString Ptr
+	GitURL As WString Ptr
+	AIFriendly As Boolean
+	AITool As WString Ptr
 	bQuitThread As Boolean
 	LastThread As Any Ptr
 	Files As WStringList

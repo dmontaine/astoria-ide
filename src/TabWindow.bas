@@ -54,6 +54,14 @@ Destructor ProjectElement
 	WDeAllocate(AndroidSDKLocation)
 	WDeAllocate(AndroidNDKLocation)
 	WDeAllocate(JDKLocation)
+	WDeAllocate(Author)
+	WDeAllocate(License)
+	WDeAllocate(Description)
+	WDeAllocate(GitProvider)
+	WDeAllocate(GitUserName)
+	WDeAllocate(GitEmail)
+	WDeAllocate(GitURL)
+	WDeAllocate(AITool)
 	Files.Clear
 End Destructor
 

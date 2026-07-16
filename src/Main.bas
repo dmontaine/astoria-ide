@@ -1039,6 +1039,26 @@ Function AddProject(ByRef FileName As WString, pFilesList As WStringList Ptr, tn
 					WLet(ppe->AndroidNDKLocation, Mid(Buff, Pos1 + 2, Len(Buff) - Pos1 - 2))
 				ElseIf Parameter = "JDKLocation" Then
 					WLet(ppe->JDKLocation, Mid(Buff, Pos1 + 2, Len(Buff) - Pos1 - 2))
+				ElseIf Parameter = "Author" Then
+					WLet(ppe->Author, Mid(Buff, Pos1 + 2, Len(Buff) - Pos1 - 2))
+				ElseIf Parameter = "License" Then
+					WLet(ppe->License, Mid(Buff, Pos1 + 2, Len(Buff) - Pos1 - 2))
+				ElseIf Parameter = "Description" Then
+					WLet(ppe->Description, Mid(Buff, Pos1 + 2, Len(Buff) - Pos1 - 2))
+				ElseIf Parameter = "UseGit" Then
+					ppe->UseGit = CBool(Mid(Buff, Pos1 + 1))
+				ElseIf Parameter = "GitProvider" Then
+					WLet(ppe->GitProvider, Mid(Buff, Pos1 + 2, Len(Buff) - Pos1 - 2))
+				ElseIf Parameter = "GitUserName" Then
+					WLet(ppe->GitUserName, Mid(Buff, Pos1 + 2, Len(Buff) - Pos1 - 2))
+				ElseIf Parameter = "GitEmail" Then
+					WLet(ppe->GitEmail, Mid(Buff, Pos1 + 2, Len(Buff) - Pos1 - 2))
+				ElseIf Parameter = "GitURL" Then
+					WLet(ppe->GitURL, Mid(Buff, Pos1 + 2, Len(Buff) - Pos1 - 2))
+				ElseIf Parameter = "AIFriendly" Then
+					ppe->AIFriendly = CBool(Mid(Buff, Pos1 + 1))
+				ElseIf Parameter = "AITool" Then
+					WLet(ppe->AITool, Mid(Buff, Pos1 + 2, Len(Buff) - Pos1 - 2))
 				ElseIf Parameter = "IncludePath" Then
 					ppe->IncludePaths.Add Mid(Buff, Pos1 + 2, Len(Buff) - Pos1 - 2)
 				ElseIf Parameter = "LibraryPath" Then
@@ -1899,6 +1919,19 @@ Function SaveProject(ByRef tnP As TreeNode Ptr, bWithQuestion As Boolean = False
 	Print #Fn, "AndroidSDKLocation=""" & *ppe->AndroidSDKLocation & """"
 	Print #Fn, "AndroidNDKLocation=""" & *ppe->AndroidNDKLocation & """"
 	Print #Fn, "JDKLocation=""" & *ppe->JDKLocation & """"
+	' New Project dialog metadata (see TabWindow.bi). WGet (not *) on purpose:
+	' any project created before these keys existed still has null pointers here,
+	' and every template .vfp ships without these keys too.
+	Print #Fn, "Author=""" & WGet(ppe->Author) & """"
+	Print #Fn, "License=""" & WGet(ppe->License) & """"
+	Print #Fn, "Description=""" & WGet(ppe->Description) & """"
+	Print #Fn, "UseGit=" & ppe->UseGit
+	Print #Fn, "GitProvider=""" & WGet(ppe->GitProvider) & """"
+	Print #Fn, "GitUserName=""" & WGet(ppe->GitUserName) & """"
+	Print #Fn, "GitEmail=""" & WGet(ppe->GitEmail) & """"
+	Print #Fn, "GitURL=""" & WGet(ppe->GitURL) & """"
+	Print #Fn, "AIFriendly=" & ppe->AIFriendly
+	Print #Fn, "AITool=""" & WGet(ppe->AITool) & """"
 	For i As Integer = 0 To ppe->Components.Count - 1
 		Dim As UString ComponentPath = GetControlLibraryVfpPath(ppe->Components.Item(i))
 		If ComponentPath <> "" Then Print #Fn, "ControlLibrary=""" & ComponentPath & """"

@@ -12,7 +12,7 @@
 			.MaximizeBox = False
 			.MinimizeBox = False
 			.OnCreate = @Form_Create_
-			.SetBounds 0, 0, 480, 418
+			.SetBounds 0, 0, 480, 530
 			.StartPosition = FormStartPosition.CenterParent
 		End With
 		' pnlBottom — footer: Project Name / Primary Form Name / Primary Module Name /
@@ -23,8 +23,8 @@
 			.Name = "pnlBottom"
 			.Text = ""
 			.Align = DockStyle.alBottom
-			.TabIndex = 22
-			.SetBounds 0, 0, 464, 260
+			.TabIndex = 28
+			.SetBounds 0, 0, 464, 372
 			.Parent = @This
 		End With
 		' pnlProjectName — row 1
@@ -44,8 +44,7 @@
 			.Text = ("Project Name") & ":"
 			.Align = DockStyle.alLeft
 			.TabIndex = 3
-			.ExtraMargins.Top = 8
-			.ExtraMargins.Bottom = 8
+			.CenterImage = True
 			.SetBounds 0, 0, 150, 32
 			.Parent = @pnlProjectName
 		End With
@@ -77,8 +76,7 @@
 			.Text = ("Primary Form Name") & ":"
 			.Align = DockStyle.alLeft
 			.TabIndex = 6
-			.ExtraMargins.Top = 8
-			.ExtraMargins.Bottom = 8
+			.CenterImage = True
 			.SetBounds 0, 0, 150, 32
 			.Parent = @pnlFormName
 		End With
@@ -110,8 +108,7 @@
 			.Text = ("Primary Module Name") & ":"
 			.Align = DockStyle.alLeft
 			.TabIndex = 9
-			.ExtraMargins.Top = 8
-			.ExtraMargins.Bottom = 8
+			.CenterImage = True
 			.SetBounds 0, 0, 150, 32
 			.Parent = @pnlModuleName
 		End With
@@ -143,8 +140,7 @@
 			.Text = ("Author") & ":"
 			.Align = DockStyle.alLeft
 			.TabIndex = 12
-			.ExtraMargins.Top = 8
-			.ExtraMargins.Bottom = 8
+			.CenterImage = True
 			.SetBounds 0, 0, 150, 32
 			.Parent = @pnlAuthor
 		End With
@@ -176,8 +172,7 @@
 			.Text = ("License") & ":"
 			.Align = DockStyle.alLeft
 			.TabIndex = 15
-			.ExtraMargins.Top = 8
-			.ExtraMargins.Bottom = 8
+			.CenterImage = True
 			.SetBounds 0, 0, 150, 32
 			.Parent = @pnlLicense
 		End With
@@ -209,7 +204,7 @@
 		' chkUseGit
 		With chkUseGit
 			.Name = "chkUseGit"
-			.Text = ("Use Git") & ":"
+			.Text = ("Use Git")
 			.Align = DockStyle.alLeft
 			.TabIndex = 18
 			.Constraints.Height = 21
@@ -219,6 +214,17 @@
 			.OnClick = @chkUseGit_Click_
 			.Parent = @pnlGit
 		End With
+		' lblGitURL -- 'URL:' label, right-aligned so it sits just before the field
+		With lblGitURL
+			.Name = "lblGitURL"
+			.Text = ("URL") & ":"
+			.Align = DockStyle.alLeft
+			.TabIndex = 19
+			.Alignment = AlignmentConstants.taRight
+			.CenterImage = True
+			.SetBounds 0, 0, 90, 32
+			.Parent = @pnlGit
+		End With
 		' txtGitURL — enabled only while Use Git is checked
 		With txtGitURL
 			.Name = "txtGitURL"
@@ -226,8 +232,8 @@
 			.Align = DockStyle.alClient
 			.ExtraMargins.Top = 5
 			.ExtraMargins.Bottom = 5
-			.TabIndex = 19
-			.SetBounds 100, 0, 364, 32
+			.TabIndex = 20
+			.SetBounds 150, 0, 314, 32
 			.Enabled = False
 			.Parent = @pnlGit
 		End With
@@ -236,7 +242,7 @@
 			.Name = "pnlAIFriendly"
 			.Text = ""
 			.Align = DockStyle.alTop
-			.TabIndex = 20
+			.TabIndex = 21
 			.ExtraMargins.Left = 10
 			.ExtraMargins.Right = 10
 			.SetBounds 0, 128, 464, 32
@@ -247,12 +253,72 @@
 			.Name = "chkAIFriendly"
 			.Text = ("Make project AI friendly")
 			.Align = DockStyle.alLeft
-			.TabIndex = 21
+			.TabIndex = 22
 			.Constraints.Height = 21
 			.AutoSize = True
 			.SetBounds 0, 6, 220, 21
 			.Designer = @This
+			.OnClick = @chkAIFriendly_Click_
 			.Parent = @pnlAIFriendly
+		End With
+		' lblAITool -- "AI Agent:" label on the AI-friendly row
+		With lblAITool
+			.Name = "lblAITool"
+			.Text = ("AI Agent") & ":"
+			.Align = DockStyle.alLeft
+			.TabIndex = 23
+			.ExtraMargins.Left = 20
+			.CenterImage = True
+			.SetBounds 0, 0, 70, 32
+			.Parent = @pnlAIFriendly
+		End With
+		' cboAITool -- AI agent choice; enabled only while "AI friendly" is checked
+		With cboAITool
+			.Name = "cboAITool"
+			.Text = ""
+			.Style = ComboBoxEditStyle.cbDropDownList
+			.Align = DockStyle.alClient
+			.ExtraMargins.Top = 5
+			.ExtraMargins.Bottom = 5
+			.TabIndex = 24
+			.Enabled = False
+			.Designer = @This
+			.Parent = @pnlAIFriendly
+		End With
+		' pnlDescription -- Project Description; label ABOVE a full-width multiline box
+		With pnlDescription
+			.Name = "pnlDescription"
+			.Text = ""
+			.Align = DockStyle.alTop
+			.TabIndex = 25
+			.ExtraMargins.Left = 10
+			.ExtraMargins.Right = 10
+			.SetBounds 0, 0, 464, 112
+			.Parent = @pnlBottom
+		End With
+		' lblDescription -- above the box, full width
+		With lblDescription
+			.Name = "lblDescription"
+			.Text = ("Description") & ":"
+			.Align = DockStyle.alTop
+			.TabIndex = 26
+			.ExtraMargins.Top = 6
+			.SetBounds 0, 0, 464, 22
+			.Parent = @pnlDescription
+		End With
+		' txtDescription -- full-width multiline with a vertical scrollbar
+		With txtDescription
+			.Name = "txtDescription"
+			.Text = ""
+			.Align = DockStyle.alClient
+			.ScrollBars = ScrollBarsType.Vertical
+			.WantReturn = True
+			.Multiline = True
+			.ExtraMargins.Top = 3
+			.ExtraMargins.Bottom = 5
+			.TabIndex = 27
+			.SetBounds 0, 22, 464, 90
+			.Parent = @pnlDescription
 		End With
 		' cmdCancel
 		With cmdCancel
@@ -262,7 +328,7 @@
 			.ExtraMargins.Bottom = 8
 			.ExtraMargins.Top = 4
 			.ExtraMargins.Right = 10
-			.TabIndex = 25
+			.TabIndex = 31
 			.SetBounds 527, 228, 88, 20
 			.Designer = @This
 			.OnClick = @cmdCancel_Click_
@@ -276,7 +342,7 @@
 			.ExtraMargins.Top = 4
 			.ExtraMargins.Right = 10
 			.ExtraMargins.Bottom = 8
-			.TabIndex = 24
+			.TabIndex = 30
 			.SetBounds 430, 228, 88, 20
 			.Default = True
 			.Designer = @This
@@ -291,7 +357,7 @@
 			.ExtraMargins.Top = 4
 			.ExtraMargins.Left = 10
 			.ExtraMargins.Bottom = 8
-			.TabIndex = 23
+			.TabIndex = 29
 			.SetBounds 10, 228, 160, 20
 			.Designer = @This
 			.OnClick = @cmdOpenExisting_Click_
@@ -528,6 +594,11 @@ Private Sub frmNewProject.cmdOK_Click(ByRef Sender As Control)
 	'' now; what it should actually generate is an open decision for a later session.
 	Dim As String chosenAuthor = Trim(txtAuthor.Text)
 	Dim As String chosenLicense = cboLicense.Text
+	Dim As String chosenDescription = txtDescription.Text
+	chosenDescription = Replace(chosenDescription, Chr(13) & Chr(10), "\n")
+	chosenDescription = Replace(chosenDescription, Chr(10), "\n")
+	chosenDescription = Replace(chosenDescription, Chr(13), "\n")
+	Dim As String chosenAITool = cboAITool.Text
 	Dim As Boolean useGit = chkUseGit.Checked
 	Dim As String gitURL = Trim(txtGitURL.Text)
 	Dim As String useGitText = "false"
@@ -538,9 +609,11 @@ Private Sub frmNewProject.cmdOK_Click(ByRef Sender As Control)
 	If Open(localProjectFile For Append Encoding "utf-8" As #FnMeta) = 0 Then
 		Print #FnMeta, "Author=" & Chr(34) & chosenAuthor & Chr(34)
 		Print #FnMeta, "License=" & Chr(34) & chosenLicense & Chr(34)
+		Print #FnMeta, "Description=" & Chr(34) & chosenDescription & Chr(34)
 		Print #FnMeta, "UseGit=" & useGitText
 		Print #FnMeta, "GitURL=" & Chr(34) & gitURL & Chr(34)
 		Print #FnMeta, "AIFriendly=" & aiFriendlyText
+		Print #FnMeta, "AITool=" & Chr(34) & chosenAITool & Chr(34)
 		CloseFile_(FnMeta)
 	End If
 	WriteLicenseFile(localFolder, chosenLicense, chosenAuthor)
@@ -648,6 +721,14 @@ Private Sub frmNewProject.Form_Create(ByRef Sender As Control)
 	txtGitURL.Enabled = False
 	txtGitURL.Text = ""
 	chkAIFriendly.Checked = False
+	cboAITool.Clear
+	cboAITool.AddItem ("Claude Code")
+	cboAITool.AddItem ("Cursor")
+	cboAITool.AddItem ("ChatGPT (Codex)")
+	cboAITool.AddItem ("OpenCode")
+	cboAITool.AddItem ("Kun (Deepseek)")
+	cboAITool.ItemIndex = 0
+	cboAITool.Enabled = False
 End Sub
 
 Private Sub frmNewProject.chkUseGit_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
@@ -655,6 +736,13 @@ Private Sub frmNewProject.chkUseGit_Click_(ByRef Designer As My.Sys.Object, ByRe
 End Sub
 Private Sub frmNewProject.chkUseGit_Click(ByRef Sender As Control)
 	txtGitURL.Enabled = chkUseGit.Checked
+End Sub
+
+Private Sub frmNewProject.chkAIFriendly_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
+	(*Cast(frmNewProject Ptr, Sender.Designer)).chkAIFriendly_Click(Sender)
+End Sub
+Private Sub frmNewProject.chkAIFriendly_Click(ByRef Sender As Control)
+	cboAITool.Enabled = chkAIFriendly.Checked
 End Sub
 
 Private Sub frmNewProject.AddProjectTemplateItem(ByRef TemplateName As String)

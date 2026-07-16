@@ -23,6 +23,8 @@
 		Declare Sub lvTemplates_SelectedItemChanged(ByRef Sender As ListView, ByVal ItemIndex As Integer)
 		Declare Static Sub chkUseGit_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Sub chkUseGit_Click(ByRef Sender As Control)
+		Declare Static Sub chkAIFriendly_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
+		Declare Sub chkAIFriendly_Click(ByRef Sender As Control)
 		Declare Static Sub Form_Create_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Sub Form_Create(ByRef Sender As Control)
 		Declare Sub AddProjectTemplateItem(ByRef TemplateName As String)
@@ -32,11 +34,11 @@
 
 		Dim As ListView lvTemplates
 		Dim As CommandButton cmdOK, cmdCancel, cmdOpenExisting
-		Dim As Label lblProjectTemplates, lblProjectName, lblFormName, lblModuleName, lblAuthor, lblLicense
-		Dim As TextBox txtProjectName, txtFormName, txtModuleName, txtAuthor, txtGitURL
+		Dim As Label lblProjectTemplates, lblProjectName, lblFormName, lblModuleName, lblAuthor, lblLicense, lblDescription, lblAITool, lblGitURL
+		Dim As TextBox txtProjectName, txtFormName, txtModuleName, txtAuthor, txtDescription, txtGitURL
 		Dim As CheckBox chkUseGit, chkAIFriendly
-		Dim As ComboBoxEdit cboLicense
-		Dim As Panel pnlBottom, pnlProjectName, pnlFormName, pnlModuleName, pnlAuthor, pnlLicense, pnlGit, pnlAIFriendly
+		Dim As ComboBoxEdit cboLicense, cboAITool
+		Dim As Panel pnlBottom, pnlProjectName, pnlFormName, pnlModuleName, pnlAuthor, pnlDescription, pnlLicense, pnlGit, pnlAIFriendly
 		Dim As WStringList TemplateNames
 		Dim As UString SelectedTemplate, SelectedFolder, SelectedProjectFile
 		Dim As Boolean OpenExistingRequested

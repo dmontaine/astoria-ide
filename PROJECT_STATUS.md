@@ -159,6 +159,48 @@ Owner-requested: expand the New Project dialog (`src/frmNewProject.frm`/`.bi`) w
 
 Build/verify: framework unchanged (IDE-only source), rebuilt via `Compile.bat` (no `FORCE_MFF=1` needed), 0 errors, owner live-verified in the running IDE (dialog layout, tab order, Author pre-fill, License dropdown lock, Git URL enable/disable gating).
 
+## Session handoff (2026-07-15) — Project Setup Templates: scaffolding + New Project Description/AI dropdown
+
+Continues the Project Setup Templates feature (full plan: [PROJECT_SETUP_PLAN.md](PROJECT_SETUP_PLAN.md)).
+
+**Template scaffolding shipped** (commit `894598f`) under `Templates/` — stampable, ship-with-the-app content (tokens `{{PROJECT}} {{AUTHOR}} {{YEAR}} {{DATE}} {{LICENSE}}`):
+- `Templates/Licenses/*.txt` — 8 licenses extracted verbatim from `WriteLicenseFile` and tokenized (Task 1 essentially pre-done).
+- `Templates/Git/` — `gitignore.txt`, `gitattributes.txt` (`* text=auto`), per-host wizard guides + `sshkeys.md` (public key only).
+- `Templates/Readme/README.md` — tokened front-door with a "Status / Next steps" section (the lightweight stand-in for a per-project status doc; **owner decided end-user projects do NOT need a full PROJECT_STATUS** — a README section covers it).
+- `Templates/AI/<tool>/` — per-tool assistant guidance (ClaudeCode complete; Cursor/ChatGPT/OpenCode/Kun are starter scaffolds — see "AI template folders" below).
+- `PROJECT_SETUP_PLAN.md` gained **Task 8** (post-creation Project Properties editor, commit `f2b28a7`).
+
+**New Project dialog — Description + AI Agent dropdown** (`frmNewProject.frm`/`.bi`):
+- **Project Description** — multiline (vertical scrollbar) field; **label-above, full-width**, positioned as the **last field** just above the buttons. Persisted to the `.vfp` as `Description="…"` with newlines encoded as `\n` (same technique as the Personal-Info Address field).
+- **AI Agent** dropdown on the "Make project AI friendly" row (label "AI Agent:"): Claude Code (default), Cursor, ChatGPT (Codex), OpenCode, Kun (Deepseek); **disabled until the checkbox is ticked** (gated like Use Git → Git URL). Persisted as `AITool="…"`.
+- Layout: `URL:` label added to the Git row (right-aligned; field aligned to the 150px column like the others); all inline labels vertically centered via `CenterImage` (SS_CENTERIMAGE) rather than a fixed top margin; `TabIndex` renumbered to the new order (Author → License → Git → AI → Description → buttons).
+- Owner: "looks good"; a couple of minor alignment tweaks the owner will handle manually.
+- Build: IDE-only, rebuilt via `Compile.bat` (no `FORCE_MFF`), 0 errors, owner-verified live.
+
+Still deferred (see the plan): the token-substitution/stamping helpers (Task 0), wiring the AI-tool/Git/README stamping (Tasks 2a/3/4), the Git setup wizard (Task 5), and the Project Properties editor (Task 8).
+
+## AI template folders — what each agent needs to do
+
+When the owner asks **you** (an AI coding agent — Cursor, ChatGPT/Codex, OpenCode, Kun, …) to complete your project-setup template, here's the what and where. These files get **stamped into a newly created end-user FreeBASIC project** when "Make project AI friendly" is checked — so write for a **beginner using *your* tool to work on a FreeBASIC project**, NOT for Astoria's own repo.
+
+**Your folder:** `Templates/AI/<Tool>/`
+- `ClaudeCode/` — **complete; use its `CLAUDE.md` as the reference to match.**
+- `Cursor/`, `ChatGPT/`, `OpenCode/`, `Kun/` — starter scaffolds to finish.
+
+**What to do:**
+1. Read `Templates/AI/ClaudeCode/CLAUDE.md` — match its structure, coverage, and tone for your tool.
+2. Complete your tool's primary instruction file in its native convention:
+   - Cursor → `.cursorrules` (or `.cursor/rules/*.mdc`)
+   - ChatGPT (Codex) → `AGENTS.md`
+   - OpenCode → `AGENTS.md` + `opencode.json`
+   - Kun → `AGENTS.md` and/or `SKILL.md` (**verify Kun's real config convention** — deepseek-gui.com didn't document it; `SKILL.md`/`AGENTS.md` assumed as the cross-tool default)
+3. Keep the shared FreeBASIC baseline already in each `AGENTS.md` (language rules; build via the Astoria IDE **F5** or `fbc`; editing discipline; the procedure-scoped-`Dim` gotcha) and add anything tool-specific.
+4. **Use the tokens, do NOT hardcode:** `{{PROJECT}}`, `{{AUTHOR}}`, `{{YEAR}}`, `{{DATE}}`, `{{LICENSE}}` (and `{{DESCRIPTION}}` once the create dialog wires it) — they're replaced at stamp time.
+5. Drop any extra reference material the assistant should have into your `resources/` folder.
+6. Keep it short, correct, and self-contained (v1 keeps each folder self-contained — no `_shared/`). Replace the "STARTER SCAFFOLD" banner when done.
+
+See [Templates/AI/README.md](Templates/AI/README.md) (folder table + token list) and `PROJECT_SETUP_PLAN.md` **Task 2b** for the surrounding plan.
+
 ## Next ready work
 
 No task is currently selected. Choose from the open items below when ready.

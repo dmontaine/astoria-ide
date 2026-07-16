@@ -93,7 +93,6 @@
 	Dim Shared frmIFileDialog As frmIFileDialogType
 	
 	#if _MAIN_FILE_ = __FILE__
-		App.DarkMode = True
 		frmIFileDialog.MainForm = True
 		frmIFileDialog.Show
 		App.Run

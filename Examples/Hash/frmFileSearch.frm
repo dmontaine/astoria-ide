@@ -403,7 +403,6 @@ End Constructor
 Dim Shared frmFileSearch As frmFileSearchType
 
 #if _MAIN_FILE_ = __FILE__
-App.DarkMode = True
 frmFileSearch.MainForm = True
 frmFileSearch.Show
 App.Run

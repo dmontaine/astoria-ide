@@ -55,7 +55,6 @@
 		Declare Sub ListView1_ItemClick(ByRef Sender As ListView, ByVal ItemIndex As Integer)
 		Declare Sub rbtnLogFile_Click(ByRef Sender As RadioButton)
 		Declare Sub TimerComponent1_Timer(ByRef Sender As TimerComponent)
-		Declare Sub chkDarkmode_Click(ByRef Sender As CheckBox)
 		Declare Sub rbtnSmall_Click(ByRef Sender As RadioButton)
 		Declare Sub ProgressBar1_Click(ByRef Sender As Control)
 		Declare Constructor
@@ -63,7 +62,7 @@
 		Dim As TextBox txtLogFile, txtLogText
 		Dim As CommandButton cmdAPath, cmdBPath, cmdPathBRemove, cmdPathBCreate, cmdPathBWFD, cmdStart, cmdProfileSave, cmdProfileDel, cmdProfileFresh
 		Dim As Panel Panel1, Panel2, Panel4, Panel3, Panel5
-		Dim As CheckBox chkCpyEmptyPath, chkDarkmode
+		Dim As CheckBox chkCpyEmptyPath
 		Dim As RadioButton rbtnIncrement, rbtnDuplication, rbtnSynchronization, rbtnLogNothing, rbtnLogMemory, rbtnLogFile, rbtnSmall, rbtnMiddle, rbtnLarge, rbtnFull
 		Dim As ListView ListView1
 		Dim As ProgressBar ProgressBar1
@@ -530,20 +529,6 @@
 			.Designer = @This
 			.Parent = @Panel2
 		End With
-		#ifndef __MDI__
-			' chkDarkmode
-			With chkDarkmode
-				.Name = "chkDarkmode"
-				.Text = "Dark mode"
-				.TabIndex = 32
-				.Caption = "Dark mode"
-				.Checked = True
-				.SetBounds 0, 99, 90, 20
-				.Designer = @This
-				.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As CheckBox), @chkDarkmode_Click)
-				.Parent = @Panel3
-			End With
-		#endif
 		' rbtnSmall
 		With rbtnSmall
 			.Name = "rbtnSmall"
@@ -594,7 +579,6 @@
 	Dim Shared frmFileSync As frmFileSyncType
 	
 	#if _MAIN_FILE_ = __FILE__
-		App.DarkMode = True
 		frmFileSync.MainForm = True
 		frmFileSync.Show
 		App.Run
@@ -1213,11 +1197,6 @@ Private Sub frmFileSyncType.Form_Close(ByRef Sender As Form, ByRef Action As Int
 		fpsync.Cancel = True
 		Action = False
 	End If
-End Sub
-
-Private Sub frmFileSyncType.chkDarkmode_Click(ByRef Sender As CheckBox)
-	App.DarkMode = chkDarkmode.Checked
-	InvalidateRect(0, 0, True)
 End Sub
 
 Private Sub frmFileSyncType.rbtnSmall_Click(ByRef Sender As RadioButton)

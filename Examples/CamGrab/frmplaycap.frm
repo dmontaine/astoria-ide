@@ -65,7 +65,6 @@
 	Dim Shared frmplaycap As frmplaycapType
 	
 	#if _MAIN_FILE_ = __FILE__
-		App.DarkMode = True
 		frmplaycap.MainForm = True
 		frmplaycap.Show
 		App.Run

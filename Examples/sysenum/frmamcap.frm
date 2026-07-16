@@ -360,7 +360,6 @@
 	Dim Shared frmamcap As frmamcapType
 	
 	#if _MAIN_FILE_ = __FILE__
-		App.DarkMode = True
 		frmamcap.MainForm = True
 		frmamcap.Show
 		App.Run

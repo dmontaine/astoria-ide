@@ -96,7 +96,7 @@
 		Dim As MainMenu MainMenu1
 		Dim As MenuItem mnuFile, mnuFileNew, mnuFileOpen, mnuFileBar1, mnuFileSave, mnuFileSaveAs, mnuFileSaveAll, mnuFileBar2, mnuFileBrowse, mnuFileBar3, mnuFilePageSetup, mnuFilePrintPreview, mnuFilePrint, mnuFileBar4, mnuFileExit
 		Dim As MenuItem mnuEdit, mnuEditRedo, mnuEditUndo, mnuEditBar1, mnuEditCut, mnuEditCopy, mnuEditPaste, mnuEditDelete, mnuEditBar2, mnuEditFileInsert, mnuEditBar3, mnuEditFind, mnuEditFindNext, mnuEditFindBack, mnuEditReplace, mnuEditGoto, mnuEditBar4, mnuEditSortA, mnuEditSortD, mnuEditBar5, mnuEditDSelectAll, mnuEditDateTime
-		Dim As MenuItem mnuView, mnuViewToolbar, mnuViewStatusBar, mnuViewBar1, mnuViewDarkMode, mnuViewBar2, mnuViewWordWarps, mnuViewFont, mnuViewAllFont, mnuViewBackColor, mnuViewAllBackColor
+		Dim As MenuItem mnuView, mnuViewToolbar, mnuViewStatusBar, mnuViewBar1, mnuViewWordWarps, mnuViewFont, mnuViewAllFont, mnuViewBackColor, mnuViewAllBackColor
 		Dim As MenuItem mnuFormat, mnuEncodingPlainText, mnuEncodingUtf8, mnuEncodingUtf8BOM, mnuEncodingUtf16BOM, mnuEncodingUtf32BOM, mnuEncodingBar1, mnuEOLCRLF, mnuEOLLF, mnuEOLCR
 		Dim As MenuItem mnuConvert, mnuConvertTraditional, mnuConvertSimplified, mnuConvertBar1, mnuConvertFullWidth, mnuConvertHalfWidth, mnuConvertLowerCase, mnuConvertUpperCase, mnuConvertTitleCase, mnuConvertBar2, mnuConvertBIG5ToGB, mnuConvertGBToBIG5
 		Dim As MenuItem mnuTools, mnuToolsFileSearch, mnuToolsFileSync, mnuToolsHash, mnuToolsFilePreview
@@ -107,7 +107,7 @@
 		Dim As ToolButton tbFileNew, tbFileOpen, tbFileSave, tbFileSaveAll
 		Dim As ToolButton ToolButton1, tbEditRedo, tbEditUndo, tbEditCut, tbEditCopy, tbEditPaste
 		Dim As ToolButton ToolButton2, tbEditFind, tbEditFindNext, tbEditFindBack, tbEditReplace
-		Dim As ToolButton ToolButton3, tbViewFont, tbViewBColor, tbViewDarkMode
+		Dim As ToolButton ToolButton3, tbViewFont, tbViewBColor
 		Dim As ToolButton ToolButton4, tbToolFileSearch, tbToolFileSync, tbToolHash
 		Dim As ToolButton ToolButton5, tbWindowHorizontal, tbWindowVertical, tbWindowCascade, tbWindowIcon, tbWindowClose, tbWindowCloseAll
 		Dim As StatusBar StatusBar1
@@ -164,7 +164,6 @@
 			.Add "Color", "Color"
 			.Add "Copy", "Copy"
 			.Add "Cut", "Cut"
-			.Add "DarkMode", "DarkMode"
 			.Add "Deleted", "Deleted"
 			.Add "Exit", "Exit"
 			.Add "File", "File"
@@ -210,7 +209,6 @@
 			.Add "ColorD", "Color"
 			.Add "CopyD", "Copy"
 			.Add "CutD", "Cut"
-			.Add "DarkModeD", "DarkMode"
 			.Add "Deleted", "Deleted"
 			.Add "Exit", "Exit"
 			.Add "File", "File"
@@ -696,23 +694,6 @@
 			.Designer = @This
 			.Parent = @mnuView
 		End With
-		' mnuViewDarkMode
-		With mnuViewDarkMode
-			.Name = "mnuViewDarkMode"
-			.Designer = @This
-			.Caption = "Dark Mode"
-			.Checked = True
-			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As MenuItem), @mnuView_Click)
-			.ImageKey = "DarkMode"
-			.Parent = @mnuView
-		End With
-		' mnuViewBar2
-		With mnuViewBar2
-			.Name = "mnuViewBar2"
-			.Designer = @This
-			.Caption = "-"
-			.Parent = @mnuView
-		End With
 		' mnuViewWordWarps
 		With mnuViewWordWarps
 			.Name = "mnuViewWordWarps"
@@ -1121,15 +1102,6 @@
 			.Hint = "Back Color..."
 			.Parent = @ToolBar1
 		End With
-		' tbViewDarkMode
-		With tbViewDarkMode
-			.Name = "tbViewDarkMode"
-			.Designer = @This
-			.ImageKey = "DarkMode"
-			.Hint = "Dark Mode"
-			.Checked = True
-			.Parent = @ToolBar1
-		End With
 		' ToolButton4
 		With ToolButton4
 			.Name = "ToolButton4"
@@ -1413,7 +1385,6 @@
 	Dim Shared MDIMain As MDIMainType
 	
 	#if _MAIN_FILE_ = __FILE__
-		App.DarkMode = True
 		MDIMain.MainForm = True
 		MDIMain.Show
 		App.Run
@@ -1539,9 +1510,7 @@ Private Sub MDIMainType.ToolBar1_ButtonClick(ByRef Sender As ToolBar, ByRef Butt
 		mnuView_Click(mnuViewFont)
 	Case "tbViewBColor"
 		mnuView_Click(mnuViewBackColor)
-	Case "tbViewDarkMode"
-		mnuView_Click(mnuViewDarkMode)
-		
+
 	Case "tbToolFileSearch"
 		mnuTools_Click(mnuToolsFileSearch)
 	Case "tbToolFileSync"
@@ -1718,15 +1687,6 @@ Private Sub MDIMainType.mnuView_Click(ByRef Sender As MenuItem)
 			Sender.Checked = True
 		End If
 		StatusBar1.Visible = Sender.Checked = True
-	Case "mnuViewDarkMode"
-		If Sender.Checked Then
-			Sender.Checked = False
-		Else
-			Sender.Checked = True
-		End If
-		tbViewDarkMode.Checked = Sender.Checked
-		App.DarkMode = Sender.Checked
-		InvalidateRect(0, 0, True)
 	Case "mnuViewWordWarps"
 		Dim As MDIChildType Ptr a = actMdiChild
 		Dim As WString Ptr p
@@ -2298,7 +2258,6 @@ Private Sub MDIMainType.MenuEnabled(Enabled As Boolean)
 	
 	mnuEdit.Enabled = Enabled
 	
-	mnuViewBar2.Enabled = Enabled
 	mnuViewWordWarps.Enabled = Enabled
 	mnuViewFont.Enabled = Enabled
 	mnuViewBackColor.Enabled = Enabled

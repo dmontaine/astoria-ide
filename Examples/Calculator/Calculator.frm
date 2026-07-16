@@ -297,7 +297,6 @@
 	Dim Shared Calculator As CalculatorType
 	
 	#ifndef _NOT_AUTORUN_FORMS_
-		App.DarkMode= True
 		Calculator.MainForm = True
 		Calculator.Show
 		App.Run

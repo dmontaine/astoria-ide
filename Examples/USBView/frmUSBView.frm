@@ -26,7 +26,6 @@
 	
 	Type frmUSUViewType Extends Form
 		Declare Sub CommandButton_Click(ByRef Sender As Control)
-		Declare Sub CheckBox3_Click(ByRef Sender As CheckBox)
 		Declare Sub TreeView1_SelChanged(ByRef Sender As TreeView, ByRef Item As TreeNode)
 		Declare Sub Form_Show(ByRef Sender As Form)
 		Declare Sub Form_Close(ByRef Sender As Form, ByRef Action As Integer)
@@ -40,7 +39,7 @@
 		Dim As CommandButton cmdRefresh, cmdEnabled, cmdDisabled, cmdRemoved, cmdEject
 		Dim As StatusBar StatusBar1
 		Dim As StatusPanel StatusPanel1
-		Dim As CheckBox CheckBox1, CheckBox2, CheckBox3
+		Dim As CheckBox CheckBox1, CheckBox2
 		Dim As ImageList ImageList1
 	End Type
 	
@@ -217,17 +216,6 @@
 			.Designer = @This
 			.Parent = @Panel2
 		End With
-		' CheckBox3
-		With CheckBox3
-			.Name = "CheckBox3"
-			.Text = ML("Dark mode")
-			.TabIndex = 11
-			.Checked = True
-			.SetBounds 80, 11, 70, 20
-			.Designer = @This
-			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As CheckBox), @CheckBox3_Click)
-			.Parent = @Panel2
-		End With
 		' ImageList1
 		With ImageList1
 			.Name = "ImageList1"
@@ -240,7 +228,6 @@
 	Dim Shared frmUSUView As frmUSUViewType
 	
 	#if _MAIN_FILE_ = __FILE__
-		App.DarkMode = True
 		frmUSUView.MainForm = True
 		frmUSUView.Show
 		App.Run
@@ -256,11 +243,6 @@ Private Sub frmUSUViewType.CommandButton_Click(ByRef Sender As Control)
 	Case "cmdRemoved"
 	Case "cmdEject"
 	End Select
-End Sub
-
-Private Sub frmUSUViewType.CheckBox3_Click(ByRef Sender As CheckBox)
-	App.DarkMode= Sender.Checked
-	InvalidateRect(0, 0, True)
 End Sub
 
 Private Sub frmUSUViewType.TreeView1_SelChanged(ByRef Sender As TreeView, ByRef Item As TreeNode)

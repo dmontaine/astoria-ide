@@ -27,7 +27,6 @@
 	Type frmDeviceExplorerType Extends Form
 		Declare Sub CommandButton_Enabled(e As Boolean)
 		Declare Sub CommandButton_Click(ByRef Sender As Control)
-		Declare Sub CheckBox_Click(ByRef Sender As CheckBox)
 		Declare Sub TreeView1_SelChanged(ByRef Sender As TreeView, ByRef Item As TreeNode)
 		Declare Sub Form_Show(ByRef Sender As Form)
 		Declare Sub Form_Close(ByRef Sender As Form, ByRef Action As Integer)
@@ -41,7 +40,7 @@
 		Dim As CommandButton cmdRefresh, cmdEnabled, cmdDisabled, cmdRemoved, cmdEject, cmdUninstall, cmdUpdate
 		Dim As StatusBar StatusBar1
 		Dim As StatusPanel StatusPanel1
-		Dim As CheckBox chkShowHidden, chkDarkmode, chkShowCategories
+		Dim As CheckBox chkShowHidden, chkShowCategories
 		Dim As ImageList ImageList1
 	End Type
 	
@@ -150,17 +149,6 @@
 			.Designer = @This
 			.Parent = @Panel2
 		End With
-		' chkDarkmode
-		With chkDarkmode
-			.Name = "chkDarkmode"
-			.Text = ML("Dark mode")
-			.TabIndex = 6
-			.Checked = True
-			.SetBounds 250, 10, 70, 18
-			.Designer = @This
-			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As CheckBox), @CheckBox_Click)
-			.Parent = @Panel2
-		End With
 		' cmdRefresh
 		With cmdRefresh
 			.Name = "cmdRefresh"
@@ -258,17 +246,11 @@
 	Dim Shared frmDeviceExplorer As frmDeviceExplorerType
 	
 	#if _MAIN_FILE_ = __FILE__
-		App.DarkMode = True
 		frmDeviceExplorer.MainForm = True
 		frmDeviceExplorer.Show
 		App.Run
 	#endif
 '#End Region
-
-Private Sub frmDeviceExplorerType.CheckBox_Click(ByRef Sender As CheckBox)
-	App.DarkMode= Sender.Checked
-	InvalidateRect(0, 0, True)
-End Sub
 
 Private Sub frmDeviceExplorerType.TreeView1_SelChanged(ByRef Sender As TreeView, ByRef Item As TreeNode)
 	Dim i As Integer

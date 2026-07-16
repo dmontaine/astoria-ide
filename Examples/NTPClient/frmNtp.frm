@@ -224,7 +224,6 @@
 	Dim Shared frmNtp As frmNtpType
 	
 	#if _MAIN_FILE_ = __FILE__
-		App.DarkMode = True
 		frmNtp.MainForm = True
 		frmNtp.Show
 		App.Run

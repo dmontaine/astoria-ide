@@ -52,13 +52,13 @@
 		
 		Dim As MenuItem mnuFile, mnuFileNew, mnuFileOpen, mnuFileBar1, mnuFileSave, mnuFileSaveAs, mnuFileSaveAll, mnuFileBar2, mnuFileRecent, mnuRecentEdit, mnuFileBar3, mnuFileProperties, mnuFileBar4, mnuFilePrintSetup, mnuFilePrintPreview, mnuFilePrint, mnuFileBar5, mnuFileExit
 		Dim As MenuItem mnuEdit, mnuEditUndo, mnuRedo, mnuEditCopy, mnuEditCut, mnuEditPaste, mnuEditBar1, mnuEditDelete, mnuEditBar2, mnuEditSelectAll
-		Dim As MenuItem mnuView, mnuViewToolbar, mnuViewStatusBar, mnuViewBar1
-		Dim As MenuItem mnuWindow, mnuWindowCascade, mnuWindowTileHorizontal, mnuWindowTileVertical, mnuWindowArrangeIcons, mnuWindowClose, mnuWindowCloseAll, mnuWindowBar1, mnuViewDarkMode
+		Dim As MenuItem mnuView, mnuViewToolbar, mnuViewStatusBar
+		Dim As MenuItem mnuWindow, mnuWindowCascade, mnuWindowTileHorizontal, mnuWindowTileVertical, mnuWindowArrangeIcons, mnuWindowClose, mnuWindowCloseAll, mnuWindowBar1
 		Dim As MenuItem mnuHelp, mnuHelpAbout, mnuPopRecent
 		Dim As ImageList ImageList1, ImageList2
 		Dim As StatusBar StatusBar1
 		Dim As ToolBar ToolBar1
-		Dim As ToolButton tbFileNew, tbFileOpen, tbFileSave, tbFileSaveAll, ToolButton1, tbDarkMode
+		Dim As ToolButton tbFileNew, tbFileOpen, tbFileSave, tbFileSaveAll
 		Dim As StatusPanel StatusPanel1
 		Dim As OpenFileDialog OpenFileDialog1
 		Dim As SaveFileDialog SaveFileDialog1
@@ -110,7 +110,6 @@
 			.Add "About", "About"
 			.Add "Copy", " Copy"
 			.Add "Cut", " Cut"
-			.Add "DarkMode", "DarkMode"
 			.Add "Exit", "Exit"
 			.Add "File", "File"
 			.Add "New", "New"
@@ -128,7 +127,6 @@
 			.Add "About", "About"
 			.Add "Copy", " Copy"
 			.Add "Cut", " Cut"
-			.Add "DarkMode", "DarkMode"
 			.Add "Exit", "Exit"
 			.Add "File", "File"
 			.Add "New", "New"
@@ -395,22 +393,6 @@
 			.Checked = True
 			.Parent = @mnuView
 		End With
-		' mnuViewBar1
-		With mnuViewBar1
-			.Name = "mnuViewBar1"
-			.Caption = "-"
-			.Designer = @This
-			.Parent = @mnuView
-		End With
-		' mnuViewDarkMode
-		With mnuViewDarkMode
-			.Name = "mnuViewDarkMode"
-			.Designer = @This
-			.Caption = ML("Dark Mode")
-			.Checked = True
-			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As MenuItem), @mnuView_Click)
-			.Parent = @mnuView
-		End With
 		' mnuWindow
 		With mnuWindow
 			.Name = "mnuWindow"
@@ -550,22 +532,6 @@
 			.Enabled = False
 			.Parent = @ToolBar1
 		End With
-		' ToolButton1
-		With ToolButton1
-			.Name = "ToolButton1"
-			.Designer = @This
-			.Style = ToolButtonStyle.tbsSeparator
-			.Parent = @ToolBar1
-		End With
-		' tbDarkMode
-		With tbDarkMode
-			.Name = "tbDarkMode"
-			.Designer = @This
-			.ImageKey = "DarkMode"
-			.Checked = True
-			.Style = ToolButtonStyle.tbsCheck
-			.Parent = @ToolBar1
-		End With
 		' StatusBar1
 		With StatusBar1
 			.Name = "StatusBar1"
@@ -611,7 +577,6 @@
 	Dim Shared MDIMain As MDIMainType
 	
 	#if _MAIN_FILE_ = __FILE__
-		App.DarkMode = True
 		MDIMain.MainForm = True
 		MDIMain.Show
 		App.Run
@@ -680,16 +645,6 @@ Private Sub MDIMainType.mnuView_Click(ByRef Sender As MenuItem)
 		End If
 		StatusBar1.Visible = Sender.Checked
 		RequestAlign
-	Case mnuViewDarkMode.Name
-		If Sender.Checked Then
-			Sender.Checked = False
-		Else
-			Sender.Checked = True
-		End If
-		App.DarkMode = Sender.Checked
-		SetDarkMode(Sender.Checked, Sender.Checked)
-		InvalidateRect(Handle, NULL, False)
-		UpdateWindow(Handle)
 	Case Else
 		MsgBox Sender.Name & !"\r\n" & ML("This function is under construction "), "View"
 	End Select
@@ -751,8 +706,6 @@ Private Sub MDIMainType.ToolBar1_ButtonClick(ByRef Sender As ToolBar, ByRef Butt
 		mnuFile_Click(mnuFileSave)
 	Case tbFileSaveAll.Name
 		mnuFile_Click(mnuFileSaveAll)
-	Case tbDarkMode.Name
-		mnuView_Click(mnuViewDarkMode)
 	End Select
 End Sub
 

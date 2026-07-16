@@ -365,7 +365,6 @@
 	'Dim Shared frmTinezone As frmTinezoneType
 	'
 	'#if _MAIN_FILE_ = __FILE__
-	'	App.DarkMode = True
 	'	frmTinezone.MainForm = True
 	'	frmTinezone.Show
 	'	App.Run

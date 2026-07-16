@@ -150,7 +150,6 @@
 	Dim Shared frmSpRecognizer As frmSpRecognizerType
 	
 	#if _MAIN_FILE_ = __FILE__
-		App.DarkMode = True
 		frmSpRecognizer.MainForm = True
 		frmSpRecognizer.Show
 		App.Run
@@ -176,7 +175,7 @@ Private Sub frmSpRecognizerType.ProcessRecognition()
 			#endif
 			Debug.Print "pSpRecoResult  " & pSpRecoResult
 			Dim As WString Ptr pwszText
-			pSpRecoResult->GetText(SP_GETWHOLEPHRASE, SP_GETWHOLEPHRASE, True, @pwszText, nullptr)
+			pSpRecoResult->GetText(SP_GETWHOLEPHRASE, SP_GETWHOLEPHRASE, True, @pwszText, NULL)
 			TextBox1.AddLine *pwszText
 			CoTaskMemFree(pwszText)
 		Case Else

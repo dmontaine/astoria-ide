@@ -309,7 +309,6 @@
 	
 	#ifndef _NOT_AUTORUN_FORMS_
 		#define _NOT_AUTORUN_FORMS_
-		App.DarkMode = True
 		frmWuziqi.MainForm = True
 		frmWuziqi.Show
 		App.Run

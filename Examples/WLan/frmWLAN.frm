@@ -164,7 +164,6 @@
 	Dim Shared frmWLAN As frmWLANType
 	
 	#if _MAIN_FILE_ = __FILE__
-		App.DarkMode = True
 		frmWLAN.MainForm = True
 		frmWLAN.Show
 		App.Run

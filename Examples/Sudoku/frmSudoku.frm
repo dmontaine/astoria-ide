@@ -225,7 +225,6 @@
 	Dim Shared Form1 As Form1Type
 	
 	#if _MAIN_FILE_ = __FILE__
-		App.DarkMode = True
 		Form1.MainForm = True
 		Form1.Show
 		App.Run
@@ -233,8 +232,8 @@
 '#End Region
 
 Private Sub Form1Type.Form_Show(ByRef Sender As Form)
-	SudoCellChildColorFore = IIf(App.DarkMode, darkTextColor, This.ForeColor)  ' can not got the value "This.BackColor" in darkmode '  clDarkCyan
-	SudoCellChildColorBK = IIf(App.DarkMode, darkBkColor, This.BackColor)  ' can not got the value "This.BackColor" in darkmode '  clDarkCyan
+	SudoCellChildColorFore = This.ForeColor  '  clDarkCyan
+	SudoCellChildColorBK = This.BackColor  '  clDarkCyan
 	SudoCellChildColorHover = clGreenYellow
 	
 	SudoCellColorFore = clDarkOliveGreen

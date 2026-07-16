@@ -154,7 +154,6 @@
 	Dim Shared frmSysEnum As frmSysEnumType
 	
 	#if _MAIN_FILE_ = __FILE__
-		App.DarkMode = True	
 		frmSysEnum.MainForm = True
 		frmSysEnum.Show
 		App.Run

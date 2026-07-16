@@ -276,7 +276,6 @@
 	Dim Shared frmSapiTTS As frmSapiTTSType
 	
 	#if _MAIN_FILE_ = __FILE__
-		App.DarkMode= True
 		frmSapiTTS.MainForm = True
 		frmSapiTTS.Show
 		App.Run

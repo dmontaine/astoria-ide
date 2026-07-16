@@ -379,7 +379,6 @@
 	Dim Shared frmHash As frmHashType
 	
 	#if _MAIN_FILE_ = __FILE__
-		App.DarkMode = True
 		frmHash.MainForm = True
 		frmHash.Show
 		App.Run

@@ -285,7 +285,6 @@
 	Dim Shared frmDisplay As frmDisplayType
 	
 	#if _MAIN_FILE_ = __FILE__
-		App.DarkMode = True
 		frmDisplay.MainForm = True
 		frmDisplay.Show
 		App.Run

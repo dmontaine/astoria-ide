@@ -17,7 +17,7 @@
 	#include once "mff/Panel.bi"
 	#include once "mff/CommandButton.bi"
 	
-	#include once "../MDINotepad/FileAct.bi"
+	#include once "../Hash/FileAct.bi"
 	#include once "win/shlobj.bi"
 	
 	Using My.Sys.Forms
@@ -55,7 +55,7 @@
 		Dim As TreeView TreeView1
 		Dim As ListView ListView1
 		Dim As PopupMenu PopupMenu1
-		Dim As MenuItem MenuItem1, MenuItem2, MenuItem3, MenuItem4, MenuItem5, MenuItem6, MenuOpen, MenuBrowser, MenuItem9, MenuNotepad, MenuItem7, MenuItem8
+		Dim As MenuItem MenuItem1, MenuItem2, MenuItem3, MenuItem4, MenuItem5, MenuItem6, MenuOpen, MenuBrowser, MenuItem9, MenuNotepad
 		Dim As StatusBar StatusBar1
 		Dim As StatusPanel StatusPanel1
 		Dim As Splitter Splitter1
@@ -286,22 +286,6 @@
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As MenuItem), @MenuView_Click)
 			.Parent = @PopupMenu1
 		End With
-		' MenuItem7
-		With MenuItem7
-			.Name = "MenuItem7"
-			.Designer = @This
-			.Caption = "-"
-			.Parent = @PopupMenu1
-		End With
-		' MenuItem8
-		With MenuItem8
-			.Name = "MenuItem8"
-			.Designer = @This
-			.Caption = ML("Dark mode")
-			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As MenuItem), @MenuView_Click)
-			.Checked = true
-			.Parent = @PopupMenu1
-		End With
 		' ImageList1
 		With ImageList1
 			.Name = "ImageList1"
@@ -315,7 +299,6 @@
 	Debug.Clear
 	
 	#if _MAIN_FILE_ = __FILE__
-		App.DarkMode = True
 		frmBrowser.MainForm = True
 		frmBrowser.Show
 		App.Run
@@ -587,12 +570,6 @@ Private Sub frmBrowserType.MenuFile_Click(ByRef Sender As MenuItem)
 End Sub
 
 Private Sub frmBrowserType.MenuView_Click(ByRef Sender As MenuItem)
-	Select Case Sender.Name
-	Case "MenuItem8"
-		Sender.Checked = Not Sender.Checked
-		App.DarkMode= Sender.Checked
-		InvalidateRect(0, 0, True) 
-	Case Else
 	MenuItem1.Checked = False
 	MenuItem1.Checked = False
 	MenuItem2.Checked = False
@@ -602,7 +579,6 @@ Private Sub frmBrowserType.MenuView_Click(ByRef Sender As MenuItem)
 	MenuItem6.Checked = False
 	Sender.Checked = True
 	ListView1.View = Cast(ViewStyle, CLng(*Cast(WString Ptr, Sender.Tag)))
-	End Select
 End Sub
 
 Private Sub frmBrowserType.Form_Close(ByRef Sender As Form, ByRef Action As Integer)

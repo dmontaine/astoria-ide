@@ -188,8 +188,8 @@
 		Dim As ComboBoxEx ComboBoxEx1
 		Dim As MainMenu MainMenu1
 		Dim As PopupMenu PopupMenu1
-		Dim As MenuItem mnuFull, mnu11scale, mnu12scale, mnu13scale, mnu14scale, mnuBar5, mnuCapture, mnuBar4, mnuFaster, mnuSlower, mnuNormal, mnuBar3, mnuLoop, mnuBar2, mnuBar6, mnuExit, mnuDark, mnuClose, mnuPlay, mnuOpen, mnuFile, mnuPause, mnuBar1, mnuScale, mnuMonitor, mnuNotDesktop
-		Dim As MenuItem MenuItem1, mnuMainFile, MenuItem3, mnuMainOpen, mnuMainPlay, mnuMainPause, mnuMainClose, MenuItem8, mnuMainLoop, mnuMainDark, MenuItem11, mnuMainSlower, mnuMainNormal, mnuMainFaster, MenuItem15, mnuMainNone, mnuMainCapture, MenuItem18, mnuMainExit, MenuItem2, mnuMain14scale, mnuMain12scale, mnuMain11scale, mnuMainFull, mnuMain13scale
+		Dim As MenuItem mnuFull, mnu11scale, mnu12scale, mnu13scale, mnu14scale, mnuBar5, mnuCapture, mnuBar4, mnuFaster, mnuSlower, mnuNormal, mnuBar3, mnuLoop, mnuBar2, mnuBar6, mnuExit, mnuClose, mnuPlay, mnuOpen, mnuFile, mnuPause, mnuBar1, mnuScale, mnuMonitor, mnuNotDesktop
+		Dim As MenuItem MenuItem1, mnuMainFile, MenuItem3, mnuMainOpen, mnuMainPlay, mnuMainPause, mnuMainClose, MenuItem8, mnuMainLoop, MenuItem11, mnuMainSlower, mnuMainNormal, mnuMainFaster, MenuItem15, mnuMainNone, mnuMainCapture, MenuItem18, mnuMainExit, MenuItem2, mnuMain14scale, mnuMain12scale, mnuMain11scale, mnuMainFull, mnuMain13scale
 	End Type
 	
 	Constructor frmMediaType
@@ -540,15 +540,6 @@
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As MenuItem), @mnu_Click)
 			.Parent = @PopupMenu1
 		End With
-		' mnuDark
-		With mnuDark
-			.Name = "mnuDark"
-			.Designer = @This
-			.Caption = !"&Dark\tCtrl+D"
-			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As MenuItem), @mnu_Click)
-			.Checked = True
-			.Parent = @PopupMenu1
-		End With
 		' mnuBar3
 		With mnuBar3
 			.Name = "mnuBar3"
@@ -765,14 +756,6 @@
 			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As MenuItem), @mnuMain_Click)
 			.Parent = @MenuItem1
 		End With
-		' mnuMainDark
-		With mnuMainDark
-			.Name = "mnuMainDark"
-			.Designer = @This
-			.Caption = !"Dark\tCtrl+D"
-			.OnClick = Cast(Sub(ByRef Designer As My.Sys.Object, ByRef Sender As MenuItem), @mnuMain_Click)
-			.Parent = @MenuItem1
-		End With
 		' MenuItem11
 		With MenuItem11
 			.Name = "MenuItem11"
@@ -895,7 +878,6 @@
 	Dim Shared frmMedia As frmMediaType
 	
 	#if __MAIN_FILE__ = __FILE__
-		App.DarkMode = True
 		frmMedia.MainForm = True
 		frmMedia.Show
 		App.Run
@@ -1379,10 +1361,6 @@ Private Sub frmMediaType.mnu_Click(ByRef Sender As MenuItem)
 		DSCtrl(DSStatus.DS_Close)
 	Case "mnuLoop"
 		Sender.Checked = Not Sender.Checked
-	Case "mnuDark"
-		Sender.Checked = Not Sender.Checked
-		App.DarkMode= Sender.Checked
-		InvalidateRect(0, 0, True)
 	Case "mnuFaster"
 		If Sender.Enabled = False Then Exit Sub
 		If pIMediaPosition = False Then Exit Sub
@@ -1614,8 +1592,6 @@ Private Sub frmMediaType.mnuMain_Click(ByRef Sender As MenuItem)
 		mnu_Click mnuClose
 	Case "mnuMainLoop"
 		mnu_Click mnuLoop
-	Case "mnuMainDark"
-		mnu_Click mnuDark
 	Case "mnuMainSlower"
 		mnu_Click mnuSlower
 	Case "mnuMainNormal"

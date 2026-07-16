@@ -125,7 +125,6 @@
 	Dim Shared Form2 As Form2Type
 	
 	#if _MAIN_FILE_ = __FILE__
-		App.DarkMode = True
 		Form2.MainForm = True
 		Form2.Show
 		App.Run

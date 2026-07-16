@@ -141,7 +141,6 @@
 	Dim Shared frmPlayerGrab As frmPlayerGrabType
 	
 	#if _MAIN_FILE_ = __FILE__
-		App.DarkMode = True
 		frmPlayerGrab.MainForm = True
 		frmPlayerGrab.Show
 		App.Run

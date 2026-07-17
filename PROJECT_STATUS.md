@@ -332,6 +332,8 @@ For the reasoning, exact code locations, and prior hot-path findings, see [HISTO
 - [HISTORY.md](HISTORY.md) — detailed investigations, completed sub-projects, dated session notes, and rationale.
 - [CHANGELOG.md](CHANGELOG.md) — shipped work and commit history.
 - [ROADMAP.md](ROADMAP.md) — full enhancement specifications.
+- [PROJECT_SETUP_PLAN.md](PROJECT_SETUP_PLAN.md) — Project Setup Templates feature (licenses/git/readme/AI stamping, Properties editor) plan & task breakdown.
+- [MCP_SERVER_PLAN.md](MCP_SERVER_PLAN.md) — Agent MCP Server spec: architecture, the v1 tool surface, pipe protocol, and phased tasks for letting an AI agent drive the live IDE (scoped, not started).
 - [DIRECT2D_REMOVAL.md](DIRECT2D_REMOVAL.md) — why Direct2D was removed (2026-07-13), full scope, and git-based instructions to bring it back.
 
 *End of status document.*

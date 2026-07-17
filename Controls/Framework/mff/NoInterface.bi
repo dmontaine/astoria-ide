@@ -49,6 +49,11 @@ Enum NewLineTypes
 	MacOSCR
 End Enum
 Declare Function MsgBox Alias "MsgBox" (ByRef MsgStr As WString, ByRef Caption As WString = "", MsgType As MessageType = MessageType.mtInfo, ButtonsType As ButtonsTypes = ButtonsTypes.btOK) As MessageResult
+'Gets a handle to the debug window when the application is launched from the IDE.
+'Declared here (as in Application.bas) so a no-interface/console program that
+'includes NoInterface.bi without Application still compiles; stays null (debug
+'routing inactive) unless the IDE supplies it.
+Dim Shared As Any Ptr DebugWindowHandle
 Namespace Debug
 	Declare Sub Print Overload(ByRef Msg As String, bWriteLog As Boolean = False, bPrintMsg As Boolean = True, bShowMsg As Boolean = False, bPrintToDebugWindow As Boolean = True)
 	Declare Sub Print(ByVal MSG As Integer, ByVal Msg1 As Integer = -1, ByVal Msg2 As Integer = -1, ByVal Msg3 As Integer = -1, ByVal Msg4 As Integer = -1, bWriteLog As Boolean = False, bPrintMsg As Boolean = True, bShowMsg As Boolean = False, bPrintToDebugWindow As Boolean = True)

@@ -318,6 +318,20 @@ Private Function AgentHandleBuildCmd(ByRef cmd As String, ByRef idJson As String
 	Return resp
 End Function
 
+'' The single source file shipped inside a project template folder
+'' (Templates/Projects/<template>/), e.g. "Module1.bas". "" if none.
+Private Function AgentTemplateMainFile(ByRef templateName As String) As UString
+	Dim As UString folder = WinOsPath(ExePath & "/Templates/Projects/" & templateName)
+	If Not FolderExistsU(folder) Then Return ""
+	Dim As UInteger attr
+	Dim As String f = Dir(folder & WindowsSlash & "*", fbReadOnly Or fbHidden Or fbSystem Or fbDirectory Or fbArchive, attr)
+	Do While f <> ""
+		If (attr And fbDirectory) = 0 AndAlso f <> "." AndAlso f <> ".." Then Return f
+		f = Dir(attr)
+	Loop
+	Return ""
+End Function
+
 '' ---------------------------------------------------------------- UI thread
 
 '' Command dispatch, run on the UI thread. MCP Task 1+ grows this Select Case;
@@ -431,6 +445,102 @@ Sub AgentPipe_ExecutePendingOnUi()
 		'' Structured errors parsed from the last build (the Problems list).
 		Dim As JsonValue Ptr res = JsonNewObject()
 		res->SetMember("errors", AgentBuildErrorsArray())
+		gCmdOk = True
+		gCmdResult = res
+
+	Case "open_project"
+		'' Open an existing .vfp (switches the IDE to that project).
+		Dim As String rawPath
+		If gCmdArgs Then rawPath = gCmdArgs->GetStr("path")
+		If rawPath = "" Then
+			gCmdErrCode = "bad_args" : gCmdErrMsg = "open_project requires a 'path'." : SetEvent(gCmdDone) : Exit Sub
+		End If
+		Dim As WString Ptr rawW = Utf8ToWStr(rawPath)
+		Dim As UString full = GetFullPathU(*rawW)
+		WDeAllocate(rawW)
+		If Right(LCase(full), 4) <> ".vfp" Then
+			gCmdErrCode = "bad_args" : gCmdErrMsg = "open_project path must be a .vfp file." : SetEvent(gCmdDone) : Exit Sub
+		End If
+		If Not FileExistsU(full) Then
+			gCmdErrCode = "not_found" : gCmdErrMsg = "Project not found: " & rawPath : SetEvent(gCmdDone) : Exit Sub
+		End If
+		Dim As WString Ptr fw
+		WLet(fw, full)
+		OpenFiles(*fw)
+		WDeAllocate(fw)
+		Dim As JsonValue Ptr res = JsonNewObject()
+		Dim As ProjectElement Ptr ppe = AgentProject()
+		If ppe Then res->SetMember("project", JsonNewString(WStrToUtf8(WGet(ppe->FileName)))) Else res->SetMember("project", JsonNewString(WStrToUtf8(full)))
+		gCmdOk = True
+		gCmdResult = res
+
+	Case "create_project"
+		'' Create a new project from a template under the configured Projects path
+		'' and open it. Headless equivalent of the New Project dialog's core (git/
+		'' AI/license extras are separate tools / a later unification with the dialog).
+		Dim As String nm, template
+		If gCmdArgs Then
+			nm = Trim(gCmdArgs->GetStr("name"))
+			template = Trim(gCmdArgs->GetStr("template"))
+		End If
+		If template = "" Then template = "Console Application"
+		If nm = "" OrElse Not IsValidProjectItemName(nm) Then
+			gCmdErrCode = "bad_args" : gCmdErrMsg = "create_project needs a valid 'name' (no path or extension)." : SetEvent(gCmdDone) : Exit Sub
+		End If
+		Dim As UString templateVfp = WinOsPath(ExePath & "/Templates/Projects/" & template & ".vfp")
+		Dim As UString mainFile = AgentTemplateMainFile(template)
+		If Not FileExistsU(templateVfp) OrElse mainFile = "" Then
+			gCmdErrCode = "bad_args" : gCmdErrMsg = "Unknown project template: " & template : SetEvent(gCmdDone) : Exit Sub
+		End If
+		'' <ProjectsPath>/<name>/ -- ProjectsPath is relative to ExePath by default.
+		Dim As WString Ptr ppW
+		WLet(ppW, *ProjectsPath)
+		Dim As UString projectsRoot = GetFullPath(*ppW)
+		WDeAllocate(ppW)
+		Dim As UString newFolder = WinOsPath(projectsRoot & "/" & nm)
+		If FolderExistsU(newFolder) Then
+			gCmdErrCode = "exists" : gCmdErrMsg = "A project folder named '" & nm & "' already exists." : SetEvent(gCmdDone) : Exit Sub
+		End If
+		If Not EnsureDirectoryExists(newFolder) Then
+			gCmdErrCode = "write_failed" : gCmdErrMsg = "Could not create the project folder." : SetEvent(gCmdDone) : Exit Sub
+		End If
+		'' Copy the template's main file into the new folder.
+		Dim As UString srcMain = WinOsPath(ExePath & "/Templates/Projects/" & template & "/" & mainFile)
+		Dim As UString destMain = WinOsPath(newFolder & "/" & mainFile)
+		If Not CopyFileU(srcMain, destMain) Then
+			gCmdErrCode = "write_failed" : gCmdErrMsg = "Could not copy the template main file." : SetEvent(gCmdDone) : Exit Sub
+		End If
+		'' Rewrite the template .vfp: bare main-file reference + ProjectName; write as
+		'' <name>.vfp in the new folder.
+		Dim As String vfpText = AgentReadFileBytes(templateVfp)
+		Dim As String outVfp
+		Dim As Integer p = 1
+		While p <= Len(vfpText)
+			Dim As Integer nl = InStr(p, vfpText, Chr(10))
+			Dim As String ln
+			If nl = 0 Then ln = Mid(vfpText, p) : p = Len(vfpText) + 1 Else ln = Mid(vfpText, p, nl - p) : p = nl + 1
+			Dim As String bare = ln
+			If Right(bare, 1) = Chr(13) Then bare = Left(bare, Len(bare) - 1)
+			If Left(bare, 6) = "*File=" Then
+				ln = "*File=" & mainFile & Chr(13)
+			ElseIf Left(bare, 12) = "ProjectName=" Then
+				ln = "ProjectName=""" & nm & """" & Chr(13)
+			End If
+			outVfp &= ln
+			If nl <> 0 Then outVfp &= Chr(10)
+		Wend
+		Dim As UString newVfp = WinOsPath(newFolder & "/" & nm & ".vfp")
+		If Not AgentWriteFileBytes(newVfp, outVfp) Then
+			gCmdErrCode = "write_failed" : gCmdErrMsg = "Could not write the project file." : SetEvent(gCmdDone) : Exit Sub
+		End If
+		'' Open it.
+		Dim As WString Ptr vfpW
+		WLet(vfpW, newVfp)
+		OpenFiles(*vfpW)
+		WDeAllocate(vfpW)
+		Dim As JsonValue Ptr res = JsonNewObject()
+		res->SetMember("project", JsonNewString(WStrToUtf8(newVfp)))
+		res->SetMember("main_file", JsonNewString(WStrToUtf8(destMain)))
 		gCmdOk = True
 		gCmdResult = res
 

@@ -9501,6 +9501,19 @@ Function utf16BeByte2wchars( ta() As UByte ) ByRef As WString
 End Function
 
 Sub frmMain_Show(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
+	'' Agent MCP pipe (MCP_SERVER_PLAN.md): off by default; the INI gate stands in
+	'' for the Tools > Options toggle until MCP Task 6 ships it. Started here (top
+	'' of OnShow) rather than after pApp->Run in AstoriaIDE.bas -- frmMain.Show can
+	'' block on a startup modal (Tip of the Day, further down) that opens its own
+	'' message loop, so code after the Main.bas include wouldn't run until the user
+	'' dismissed the tip. The window handle already exists once OnShow fires.
+	Static As Boolean bAgentPipeStarted
+	If Not bAgentPipeStarted Then
+		bAgentPipeStarted = True
+		If LCase(iniSettings.ReadString("Options", "EnableAgentPipe", "false")) = "true" Then
+			StartAgentPipe(frmMain.Handle)
+		End If
+	End If
 	Var MainMaximized = iniSettings.ReadBool("MainWindow", "Maximized", False)
 	If MainMaximized Then frmMain.WindowState = WindowStates.wsMaximized
 	If GetLeftClosedStyle Then UpdateLeftPinLayout()

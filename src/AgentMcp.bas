@@ -110,7 +110,7 @@ Type McpTool
 	schema As String     '' inputSchema (JSON Schema), embedded verbatim
 End Type
 
-Dim Shared gTools(0 To 12) As McpTool
+Dim Shared gTools(0 To 14) As McpTool
 
 Sub InitTools()
 	Dim As String noArgs = "{""type"":""object"",""properties"":{}}"
@@ -154,6 +154,12 @@ Sub InitTools()
 	gTools(12).name = "get_errors"
 	gTools(12).description = "Structured errors[] (file, line, severity, message) parsed from the last build."
 	gTools(12).schema = noArgs
+	gTools(13).name = "create_project"
+	gTools(13).description = "Create a new project from a template under the configured Projects folder and open it."
+	gTools(13).schema = "{""type"":""object"",""properties"":{""name"":{""type"":""string"",""description"":""Project name (also the folder name); no path or extension.""},""template"":{""type"":""string"",""enum"":[""Console Application"",""Windows Application"",""Dynamic Library"",""Static Library"",""Control Library""],""description"":""Default Console Application.""}},""required"":[""name""]}"
+	gTools(14).name = "open_project"
+	gTools(14).description = "Open an existing Astoria project by its .vfp path (switches the IDE to that project)."
+	gTools(14).schema = "{""type"":""object"",""properties"":{""path"":{""type"":""string"",""description"":""Path to a .vfp project file.""}},""required"":[""path""]}"
 End Sub
 
 Function ToolsListJson() As String

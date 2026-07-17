@@ -32,8 +32,8 @@ fix-compile-errors), plus each tool's native convention on top.
 | `ClaudeCode/` | `CLAUDE.md`, `.claude/skills/*/SKILL.md` (5 skills), `AGENTS.md` | **Complete** |
 | `Cursor/` | `.cursor/rules/freebasic.mdc` (always-on rules), `.cursor/rules/freebasic-tasks.mdc` (compact playbooks), `.cursor/skills/*/SKILL.md` (13 native Cursor skills), `.cursorrules` (legacy pointer), `AGENTS.md` | **Complete** |
 | `ChatGPT/` | `AGENTS.md`, `.agents/skills/*/SKILL.md` (13 native Codex skills; inline fallback retained) | **Complete** |
-| `OpenCode/` | `AGENTS.md`, `opencode.json` | **Complete** |
-| `Kun/` | `SKILL.md` (rules + playbooks), `AGENTS.md` | **Complete** — but **verify Kun's actual config convention** (deepseek-gui.com landing page did not document it; `SKILL.md`/`AGENTS.md` assumed as the cross-tool default) |
+| `OpenCode/` | `AGENTS.md`, `opencode.json` (references `.opencode/skills/`), `.opencode/skills/*/SKILL.md` (13 native OpenCode skills) | **Complete** |
+| `Kun/` | `SKILL.md` (rules + playbook summary), `AGENTS.md`, `.kun/skills/*/SKILL.md` (13 native Kun skills) | **Complete** — 13 native `.kun/skills/` match the Cursor/ChatGPT set (build-run, add-module, add-control-event, add-form, fix-compile-errors, add-resource, audit-project-manifest, debug-freebasic-app, edit-form-safely, find-framework-control, prepare-release, refactor-freebasic, winapi-interop); `SKILL.md` kept as the working summary |
 
 When editing the shared baseline, change it in **all five** `AGENTS.md` files
 (and the per-tool mirrors) — they are deliberately kept in lockstep.
@@ -41,11 +41,12 @@ When editing the shared baseline, change it in **all five** `AGENTS.md` files
 Every folder carries a `resources/` directory (with a `.gitkeep`) for the
 assistant to drop project-specific context into.
 
-The Cursor and ChatGPT/Codex templates additionally provide native skills for
-safe form editing, manifest audits, framework-control discovery, resources,
-runtime debugging, WinAPI interop, refactoring, and release preparation. These
-extend the five shared playbooks without changing the shared `AGENTS.md`
-baseline (Cursor: `.cursor/skills/`; ChatGPT: `.agents/skills/`).
+The Cursor, ChatGPT/Codex, Kun, and OpenCode templates additionally provide
+native skills for safe form editing, manifest audits, framework-control
+discovery, resources, runtime debugging, WinAPI interop, refactoring, and
+release preparation. These extend the five shared playbooks without changing
+the shared `AGENTS.md` baseline (Cursor: `.cursor/skills/`; ChatGPT:
+`.agents/skills/`; Kun: `.kun/skills/`; OpenCode: `.opencode/skills/`).
 
 ## Design intent
 

@@ -216,6 +216,7 @@ LoadSettings
 #include once "file.bi"
 #include once "Designer.bi"
 #include once "TabWindow.bi"
+#include once "AgentPipe.bi"
 #include once "Debug.bi"
 #include once "frmFind.bi"
 #include once "frmGoto.bi"
@@ -9634,6 +9635,9 @@ Sub frmMain_Close(ByRef Designer As My.Sys.Object, ByRef Sender As Form, ByRef A
 	SaveWorkspace()
 	If Not CloseAllDocuments Then Action = 0: Return
 	FormClosing = True
+	'' Agent MCP pipe: stop the listener and join its worker before teardown so a
+	'' worker mid-command can't touch dying windows (no-op when never started).
+	StopAgentPipe()
 	If frmMain.WindowState <> WindowStates.wsMaximized Then
 		iniSettings.WriteInteger("MainWindow", "Width", frmMain.Width)
 		iniSettings.WriteInteger("MainWindow", "Height", frmMain.Height)
@@ -9690,6 +9694,12 @@ End Sub
 
 Sub frmMain_Message(ByRef Designer As My.Sys.Object, ByRef Sender As Control, ByRef Msg As Message)
 		Select Case Msg.Msg
+		Case WM_APP_AGENTCMD
+			'' Agent MCP pipe: run the pending pipe command on the UI thread
+			'' (see AgentPipe.bi / MCP_SERVER_PLAN.md section 5).
+			AgentPipe_ExecutePendingOnUi()
+			Msg.Result = 0
+			Return
 		Case WM_COPYDATA
 			Dim pCDS As COPYDATASTRUCT Ptr = Cast(COPYDATASTRUCT Ptr, Msg.lParam)
 			Dim As ZString Ptr FileNameFromCmdLine = Cast(ZString Ptr, pCDS->lpData)

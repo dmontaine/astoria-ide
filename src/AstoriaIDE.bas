@@ -644,6 +644,12 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 End Sub
 
 pApp->MainForm = @frmMain
+'' Agent MCP pipe (MCP_SERVER_PLAN.md): off by default; the INI gate stands in
+'' for the Tools > Options toggle until MCP Task 6 ships it. frmMain.Show has
+'' already run (Main.bas), so the window handle exists here.
+If LCase(iniSettings.ReadString("Options", "EnableAgentPipe", "false")) = "true" Then
+	StartAgentPipe(frmMain.Handle)
+End If
 pApp->Run
 
 End

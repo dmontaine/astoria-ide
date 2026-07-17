@@ -538,6 +538,19 @@ Sub AgentPipe_ExecutePendingOnUi()
 		WLet(vfpW, newVfp)
 		OpenFiles(*vfpW)
 		WDeAllocate(vfpW)
+		'' Also open the main file in an editor tab, so get_active_file /
+		'' set_active_file_content work immediately after creation.
+		Dim As WString Ptr mfW
+		WLet(mfW, destMain)
+		Dim As TabWindow Ptr mtb = GetTab(*mfW)
+		If mtb = 0 Then mtb = AddTab(*mfW)
+		If mtb Then
+			'' BOM-less UTF-8: a UTF-8 BOM makes FreeBASIC treat string literals as
+			'' wide, so a saved-with-BOM source prints garbled (wide) console output.
+			mtb->FileEncoding = FileEncodings.Utf8
+			mtb->SelectTab
+		End If
+		WDeAllocate(mfW)
 		Dim As JsonValue Ptr res = JsonNewObject()
 		res->SetMember("project", JsonNewString(WStrToUtf8(newVfp)))
 		res->SetMember("main_file", JsonNewString(WStrToUtf8(destMain)))
@@ -623,6 +636,8 @@ Sub AgentPipe_ExecutePendingOnUi()
 			Dim As TabWindow Ptr tb = GetTab(*fw)
 			If tb = 0 Then
 				tb = AddTab(*fw)
+				'' BOM-less UTF-8 (a BOM makes FreeBASIC emit wide console output).
+				If tb Then tb->FileEncoding = FileEncodings.Utf8
 			Else
 				'' Already open: sync the editor to what we just wrote (we have the
 				'' bytes in hand, so no disk re-read is needed).
@@ -695,6 +710,22 @@ Sub AgentPipe_ExecutePendingOnUi()
 		gCmdOk = True
 		gCmdResult = res
 
+	Case "__save_dirty"
+		'' Internal (not an MCP tool): flush every modified editor buffer to disk so
+		'' the build that follows compiles the agent's edits. UI thread only.
+		For j As Integer = 0 To ptabCode->TabCount - 1
+			Dim As TabWindow Ptr tb = Cast(TabWindow Ptr, ptabCode->Tabs[j])
+			If tb <> 0 AndAlso tb->Modified Then
+				'' FreeBASIC treats a UTF-8 BOM as a signal to make string literals
+				'' wide, so a BOM'd source prints garbled (wide) console output. The
+				'' IDE tends to open/save source as Utf8BOM; force BOM-less for the
+				'' agent build so create -> edit -> build -> run yields clean output.
+				If tb->FileEncoding = FileEncodings.Utf8BOM Then tb->FileEncoding = FileEncodings.Utf8
+				tb->Save
+			End If
+		Next j
+		gCmdOk = True
+
 	Case Else
 		gCmdErrCode = "unknown_cmd"
 		gCmdErrMsg = "Unknown command: " & gCmdName
@@ -743,6 +774,20 @@ Private Sub AgentHandleLine(hPipe As HANDLE, ByRef reqLine As String)
 	'' through the single UI-thread command slot below.
 	Dim As String cmdEarly = req->GetStr("cmd")
 	If cmdEarly = "build" OrElse cmdEarly = "syntax_check" OrElse cmdEarly = "run" Then
+		'' Flush unsaved editor buffers to disk FIRST, on the UI thread (Compile reads
+		'' from disk). The menu build does this via SaveAllBeforeCompile; the agent
+		'' build otherwise compiles stale text after set_active_file_content. Marshal
+		'' an internal save into the UI-thread slot and wait for it before compiling.
+		gCmdName = "__save_dirty"
+		gCmdArgs = 0
+		ResetEvent(gCmdDone)
+		gCmdPending = True
+		PostMessageW(gAgentHwnd, WM_APP_AGENTCMD, 0, 0)
+		Dim As HANDLE sw(0 To 1)
+		sw(0) = gCmdDone : sw(1) = gAgentStopEvent
+		If WaitForMultipleObjects(2, @sw(0), FALSE, INFINITE) <> WAIT_OBJECT_0 Then
+			Delete req : Exit Sub   '' shutting down
+		End If
 		resp = AgentHandleBuildCmd(cmdEarly, idJson)
 		Delete req
 		AgentWriteLine(hPipe, resp)

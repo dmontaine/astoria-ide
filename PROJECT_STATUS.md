@@ -1,6 +1,6 @@
 # Astoria-IDE — Project Status & Handoff
 
-**Last updated:** 2026-07-17 (Agent MCP Server: Task 6 done — Options toggle (default on), status-bar indicator, sidecar auto-launch, packaging, `AGENT_MCP_SETUP.md`; committed `83426ef`. Plus all five `Templates/AI/<tool>/` folders gained a `use-astoria-mcp` skill + native MCP server config for the other agents to verify. Only Task 7 (real-client verify) remains.)
+**Last updated:** 2026-07-17 (Agent MCP Server **COMPLETE — Tasks 0–7**. Task 7 verified end-to-end from a real stdio MCP client: create → write → build → get_errors → fix → run produced the correct output (`Primes below 1000000 = 78498`). Verification fixed two MCP bugs — Fix B: `create_project` opens the main file; Fix C: agent build saves dirty editors first — and flagged two pre-existing ones (broken Console Application template; `run`-capture NUL truncation). Earlier today: Task 6 (toggle default-on, status-bar indicator, auto-launch, packaging) `83426ef`; five AI templates gained MCP config `b70143c`.)
 **Repository:** [github.com/dmontaine/astoria-ide](https://github.com/dmontaine/astoria-ide)
 **Local path:** C:\Users\don\Astoria-IDE
 
@@ -293,14 +293,19 @@ Still pending from the other machine's session: the New Project dialog's minor a
 
 ## Next ready work
 
-**Agent MCP Server — Task 7 (end-to-end verify from a real MCP client).** This is the
-last piece of the MCP project; Tasks 0–6 are done and pushed. Point a real MCP client
-(Claude Code or Claude Desktop) at `astoria-mcp.exe` per [AGENT_MCP_SETUP.md](AGENT_MCP_SETUP.md)
-and drive the full loop — `create_project` → `write_file` → `build` → `get_errors` → fix
-→ `run` — e.g. the "primes below 1,000,000" example. Everything it needs now ships: the
-sidecar auto-launches the IDE, the pipe is on by default (status bar shows "MCP Agent:
-On"), and the tool surface is live (15 tools). Nothing has exercised it from an actual
-MCP client yet — only a PowerShell/stdio harness. See [MCP_SERVER_PLAN.md](MCP_SERVER_PLAN.md) §Implementation progress.
+**Agent MCP Server — COMPLETE (Tasks 0–7, 2026-07-17).** Verified end-to-end from a real
+MCP client (stdio JSON-RPC 2.0): `create_project` → `write_file` → `build` → `get_errors`
+→ fix → `run` produced the correct output (`Primes below 1000000 = 78498`). Two MCP-side
+bugs found and fixed during verification (Fix B: `create_project` opens the main file;
+Fix C: agent build saves dirty editors first — see [MCP_SERVER_PLAN.md](MCP_SERVER_PLAN.md) Task 7).
+
+No task is currently selected. Candidate follow-ups (both spun off as task chips
+2026-07-17, both pre-existing, neither in the MCP loop):
+- **Fix the Console Application project template** — it doesn't compile (`DebugWindowHandle`
+  undeclared in `mff/NoInterface.bi`) and its UTF-8 BOM makes FB emit wide/garbled console
+  output. Affects normal File▸New users too, so `create_project` currently yields a broken project.
+- **Harden the MCP `run` output capture** — it truncates at the first NUL byte (wide/binary
+  output is cut off; `AgentCaptureRun`/`OemToUtf8` in `AgentPipe.bas`).
 
 *Parallel, owner-driven:* have each of the five AI agents review its own
 `Templates/AI/<tool>/` folder and confirm/adjust its MCP config (the `use-astoria-mcp`

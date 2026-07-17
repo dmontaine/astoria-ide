@@ -1,4 +1,4 @@
-﻿#include once "mff/UserControl.bi"
+#include once "mff/UserControl.bi"
 
 Using My.Sys.Forms
 

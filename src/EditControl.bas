@@ -2178,7 +2178,7 @@ Namespace My.Sys.Forms
 		Dim As Boolean FileSaved
 		If FileEncoding = FileEncodings.Utf8 Then
 			FileEncodingText = "utf-8"
-			FileEncodingSymbols = Chr(&HEF, &HBB, &HBF)
+			FileEncodingSymbols = ""                       '' Utf8 = BOM-less (a BOM was wrongly written here, making Utf8 == Utf8BOM; FB reads a BOM'd source as wide)
 		ElseIf FileEncoding = FileEncodings.Utf8BOM Then
 			FileEncodingText = "utf-8"
 			FileEncodingSymbols = Chr(&HEF, &HBB, &HBF)

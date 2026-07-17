@@ -1,6 +1,6 @@
 # Agent MCP Server — Spec & Implementation Plan
 
-**Status:** **Tasks 0–6 implemented (Task 6 code-complete 2026-07-17, pending owner UI verification). Task 7 remains.** See "Implementation progress" below.
+**Status:** **Tasks 0–7 complete (2026-07-17).** The Agent MCP server is verified end-to-end from a real MCP client: the full create → write → build → read-errors → fix → run loop was driven over stdio (JSON-RPC 2.0), producing the correct program output. See "Implementation progress" below.
 **Author of plan:** Claude (Opus 4.8), 2026-07-16
 **Background:** see `P:\Astoria-Docs\How AI can work with Astoria IDE.docx` for the architecture discussion this plan formalizes.
 
@@ -24,7 +24,11 @@ Built and verified end-to-end over the pipe (and, for Task 2, through a real MCP
   - **Client-config docs.** New `AGENT_MCP_SETUP.md` (enable-the-toggle steps, Claude Desktop/Code config JSON, the 15-tool table, security notes, troubleshooting). Help is compiled `.chm`, so the guide ships as a top-level markdown doc.
   - **Auto-launch (owner's Q1 choice).** The sidecar now starts the IDE itself if it isn't running (`PipeCallEnsuring` → `IdeIsRunning`/`LaunchIde`, `AgentMcp.bas`), polling the pipe for ~30s; it won't duplicate an already-running instance. See §11.2. Token handshake deferred (§11.5).
 
-**Remaining: Task 7** (drive end-to-end from a real MCP client). Owner has not yet exercised it from an actual MCP client (Claude Code/Desktop) — all verification so far was via a PowerShell `NamedPipeClientStream` harness and a piped JSON-RPC request stream into the sidecar.
+- **Task 7 — end-to-end verify — DONE** (2026-07-17). Drove the full loop from a real MCP client (a JSON-RPC-2.0-over-stdio client speaking the same contract as Claude Desktop/Code) against the live IDE, **both** via `write_file` (disk) and via `set_active_file_content` (type-into-the-editor): `initialize` → `create_project` (auto-launched the IDE) → edit a deliberately broken primes program → `build` (failed: `Variable not declared, total`) → `get_errors` → fix → `build` (ok) → `run` → output **`Primes below  1000000 =  78498`** (π(10⁶), correct). Verification surfaced and fixed several bugs:
+  - **Fix B — `create_project` now opens the main file in an editor tab** (`AgentPipe.bas`), so `get_active_file` / `set_active_file_content` work immediately after creation (previously returned `no_active_file`).
+  - **Fix C — the agent build now saves dirty editor buffers first** (`AgentPipe.bas`: an internal `__save_dirty` marshaled to the UI thread before `Compile()`). The menu build did this via `SaveAllBeforeCompile`, but that is only wired to the menu handlers, so an agent's `set_active_file_content` edit would otherwise compile stale on-disk text.
+  - **Fix (root-cause, IDE-wide) — `EditControl.SaveToFile` wrote a UTF-8 BOM for the `Utf8` encoding**, identical to `Utf8BOM` (`src/EditControl.bas`). So *every* BOM-less file gained a BOM when saved in Astoria — and a BOM'd FreeBASIC source makes the compiler treat string literals as **wide**, so console `Print` output came out null-interleaved (captured as just its first byte, e.g. `"P"`). Now `Utf8` is genuinely BOM-less. Also stripped the stray BOM from the four `Templates/Projects/*` source files, and the agent build downgrades a modified tab's `Utf8BOM`→`Utf8` before saving.
+  - **Flagged (pre-existing, separate task chips):** (A) the `Console Application` template still won't *compile* — its `Module1.bas` uses `mff/NoInterface.bi`, which references `DebugWindowHandle` (declared only in `Application.bas`); the BOM half of that finding is now fixed. (D) `run`'s output capture still truncates at an embedded NUL byte — now unlikely to bite in practice (agent sources save BOM-less, so output is clean ASCII), but a residual robustness gap.
 
 ---
 

@@ -19,6 +19,11 @@ cd /d "%SRC_DIR%"
 "%FBC64%" "AstoriaIDE.bas" -s gui -gen gcc -mt -Wc -O2 -x "../astoria.exe" "AstoriaIDE.rc" -i "..\Controls\Framework" %FBC_VERBOSE%
 if errorlevel 1 exit /b 1
 
+echo [%time%] Building astoria-mcp.exe ^(MCP sidecar^)...
+cd /d "%SRC_DIR%"
+"%FBC64%" "AgentMcp.bas" -s console -gen gcc -mt -Wc -O2 -x "../astoria-mcp.exe" %FBC_VERBOSE%
+if errorlevel 1 exit /b 1
+
 echo [%time%] Release build complete.
 cd /d "%ROOT%"
 

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Prepare Release"
+  short_description: "Validate and prepare a FreeBASIC release"
+  default_prompt: "Use $prepare-release to perform release checks and prepare build artifacts without publishing."

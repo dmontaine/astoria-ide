@@ -1,0 +1,4 @@
+interface:
+  display_name: "Debug FreeBASIC App"
+  short_description: "Diagnose FreeBASIC runtime and debugger issues"
+  default_prompt: "Use $debug-freebasic-app to reproduce and diagnose a FreeBASIC runtime problem."

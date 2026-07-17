@@ -1,0 +1,4 @@
+interface:
+  display_name: "Add Resource"
+  short_description: "Add project resources and sync references"
+  default_prompt: "Use $add-resource to add a resource while keeping RC, VFP, and source references synchronized."

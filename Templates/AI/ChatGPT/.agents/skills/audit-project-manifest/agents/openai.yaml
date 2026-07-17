@@ -1,0 +1,4 @@
+interface:
+  display_name: "Audit Project Manifest"
+  short_description: "Check source files against the VFP manifest"
+  default_prompt: "Use $audit-project-manifest to find missing, stale, duplicate, or incorrect VFP entries."

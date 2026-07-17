@@ -1,0 +1,4 @@
+interface:
+  display_name: "WinAPI Interop"
+  short_description: "Write safe Win64 FreeBASIC API interop"
+  default_prompt: "Use $winapi-interop to add or review Win64 API declarations and calls in FreeBASIC."

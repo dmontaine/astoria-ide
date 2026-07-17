@@ -31,7 +31,7 @@ fix-compile-errors), plus each tool's native convention on top.
 |---|---|---|
 | `ClaudeCode/` | `CLAUDE.md`, `.claude/skills/*/SKILL.md` (5 skills), `AGENTS.md` | **Complete** |
 | `Cursor/` | `.cursor/rules/freebasic.mdc` (always-on rules), `.cursor/rules/freebasic-tasks.mdc` (playbooks), `.cursorrules` (legacy pointer), `AGENTS.md` | **Complete** |
-| `ChatGPT/` | `AGENTS.md` (Codex convention; rules + playbooks inline) | **Complete** |
+| `ChatGPT/` | `AGENTS.md`, `.agents/skills/*/SKILL.md` (13 native Codex skills; inline fallback retained) | **Complete** |
 | `OpenCode/` | `AGENTS.md`, `opencode.json` | **Complete** |
 | `Kun/` | `SKILL.md` (rules + playbooks), `AGENTS.md` | **Complete** — but **verify Kun's actual config convention** (deepseek-gui.com landing page did not document it; `SKILL.md`/`AGENTS.md` assumed as the cross-tool default) |
 
@@ -40,6 +40,11 @@ When editing the shared baseline, change it in **all five** `AGENTS.md` files
 
 Every folder carries a `resources/` directory (with a `.gitkeep`) for the
 assistant to drop project-specific context into.
+
+The ChatGPT/Codex template additionally provides native skills for safe form
+editing, manifest audits, framework-control discovery, resources, runtime
+debugging, WinAPI interop, refactoring, and release preparation. These extend
+the five shared playbooks without changing the shared `AGENTS.md` baseline.
 
 ## Design intent
 

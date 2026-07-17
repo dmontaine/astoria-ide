@@ -1,0 +1,4 @@
+interface:
+  display_name: "Find Framework Control"
+  short_description: "Find MFF controls, headers, and examples"
+  default_prompt: "Use $find-framework-control to locate the right MFF control and its usage pattern."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Refactor FreeBASIC"
+  short_description: "Safely refactor FreeBASIC project code"
+  default_prompt: "Use $refactor-freebasic to rename or extract code while preserving FreeBASIC project structure."

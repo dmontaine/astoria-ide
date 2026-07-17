@@ -1,0 +1,4 @@
+interface:
+  display_name: "Edit Form Safely"
+  short_description: "Safely edit Astoria-managed FreeBASIC forms"
+  default_prompt: "Use $edit-form-safely to update a FreeBASIC form without damaging designer-managed regions."

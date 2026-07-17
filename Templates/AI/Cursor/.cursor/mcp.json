@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "astoria": {
+      "command": "{{ASTORIA_MCP_EXE}}",
+      "args": []
+    }
+  }
+}

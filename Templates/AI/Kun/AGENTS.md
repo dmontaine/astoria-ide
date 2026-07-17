@@ -17,7 +17,8 @@ the project grows.
 
 ### Build and run
 
-- **Preferred:** open `{{PROJECT}}.vfp` in the Astoria IDE and press **F5** (build + run). The IDE handles `.frm` main files, resource (`.rc`) generation, and the framework include path automatically.
+- **AI agent / MCP (preferred when available):** if the `astoria` MCP server is connected, build and run through its `build` / `run` tools and read `get_errors` -- see the **use-astoria-mcp** skill. The options below are the fallback when MCP isn't connected.
+- **Manual:** open `{{PROJECT}}.vfp` in the Astoria IDE and press **F5** (build + run). The IDE handles `.frm` main files, resource (`.rc`) generation, and the framework include path automatically.
 - **Command line (console projects):** `fbc -s console <MainFile>.bas`, then run the produced `.exe`.
 - **Command line (GUI projects):** needs the framework include path: `<AstoriaDir>\Compiler\fbc64.exe -s gui -i <AstoriaDir>\Controls\Framework <MainFile>.bas`. Two caveats: `fbc` does not accept a `.frm` file as direct input, and the generated `#cmdline "<name>.rc"` line expects an IDE-generated resource file -- **prefer building GUI projects in the IDE**.
 - **Errors** are precise: `file.bas(12) error 18: Element not defined, X` -- open that line, fix the root cause, recompile. Fix the FIRST error; later ones often cascade from it.

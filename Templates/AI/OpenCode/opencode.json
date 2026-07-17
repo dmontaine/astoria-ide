@@ -3,5 +3,12 @@
   "instructions": ["AGENTS.md"],
   "skills": {
     "paths": [".opencode/skills"]
+  },
+  "mcp": {
+    "astoria": {
+      "type": "local",
+      "command": ["{{ASTORIA_MCP_EXE}}"],
+      "enabled": true
+    }
   }
 }

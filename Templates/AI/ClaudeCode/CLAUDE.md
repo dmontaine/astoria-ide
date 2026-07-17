@@ -15,13 +15,16 @@ describe what the program does, its layout, and any rules you want followed.
   project metadata.
 - **How it's normally built:** open the `.vfp` in the **Astoria IDE** and press
   **F5** (build + run). GUI projects use the bundled MFF framework
-  (`#include once "mff/Form.bi"`, `Using My.Sys.Forms`).
+  (`#include once "mff/Form.bi"`, `Using My.Sys.Forms`). When the `astoria` MCP
+  server is connected, build/run it yourself with the `build`/`run` tools instead
+  (see **use-astoria-mcp**).
 
 ## Skills
 
 Task playbooks live in `.claude/skills/` and load on demand:
 
-- **build-run** — build and run (IDE F5, or `fbc` CLI with its GUI caveats).
+- **use-astoria-mcp** — drive the live IDE through the `astoria` MCP server (build, run, read errors, edit files) when it's connected; preferred over manual F5/CLI.
+- **build-run** — build and run (via MCP if connected, else IDE F5 or `fbc` CLI with its GUI caveats).
 - **fix-compile-errors** — decoding `fbc`'s errors and this stack's common ones.
 - **add-module** — new `.bas`/`.bi` pair, registered in the `.vfp`.
 - **add-form** — a new `.frm`, the main-form bootstrap rule, Show/ShowModal.

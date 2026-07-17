@@ -19,6 +19,9 @@ Replaced on stamping (see the plan's substitution helper):
 | `{{YEAR}}` | Current year |
 | `{{DATE}}` | Creation date |
 | `{{LICENSE}}` | Selected license name |
+| `{{ASTORIA_MCP_EXE}}` | Full path to `astoria-mcp.exe` (the MCP sidecar, beside `astoria.exe`) — used by each tool's MCP server config |
+
+> **`{{ASTORIA_MCP_EXE}}` is not yet wired into the stamping substitution helper.** Until it is, a stamped project's MCP config file keeps the literal `{{ASTORIA_MCP_EXE}}` placeholder; the `use-astoria-mcp` skill tells the user to replace it (or run `claude mcp add …`). Add the substitution when the Project Setup Templates stamping is implemented — the IDE knows the path from `ExePath`.
 
 ## Folders
 
@@ -37,6 +40,23 @@ fix-compile-errors), plus each tool's native convention on top.
 
 When editing the shared baseline, change it in **all five** `AGENTS.md` files
 (and the per-tool mirrors) — they are deliberately kept in lockstep.
+
+## MCP (Agent MCP server) — added 2026-07-17
+
+Astoria is now an MCP server (`astoria-mcp.exe`; see `AGENT_MCP_SETUP.md` and
+`MCP_SERVER_PLAN.md` at the repo root). All five folders gained:
+
+- a **`use-astoria-mcp`** skill — tells the agent to drive the live IDE via the
+  `astoria` MCP tools (`build`/`run`/`get_errors`/`write_file`/…) instead of manual
+  F5/CLI when the server is connected;
+- an **MCP server config** in the tool's native place — Claude `.mcp.json`, Cursor
+  `.cursor/mcp.json`, OpenCode `opencode.json` (`mcp` block); ChatGPT/Codex and Kun
+  carry the config **in the skill's "Connecting" section** (their client formats are
+  global/unverified), for the owning agent to formalize;
+- an MCP-first note in each `build-run` skill and `AGENTS.md` (+ `CLAUDE.md`).
+
+The config files use the `{{ASTORIA_MCP_EXE}}` placeholder (see Tokens above). Each
+tool's owning agent should confirm its client's exact MCP config format and adjust.
 
 Every folder carries a `resources/` directory (with a `.gitkeep`) for the
 assistant to drop project-specific context into.

@@ -5,6 +5,10 @@ description: Build and run this FreeBASIC project. Use when compiling, running, 
 
 # Build and run {{PROJECT}}
 
+> **If the `astoria` MCP server is connected, build/run through it** -- call the `build`
+> or `run` tool and read `get_errors`, rather than the manual steps below. See the
+> **use-astoria-mcp** skill. The steps below are the fallback when MCP isn't available.
+
 1. **Preferred:** open `{{PROJECT}}.vfp` in the Astoria IDE and press **F5** (build + run). The IDE handles `.frm` main files, resource (`.rc`) generation, and the framework include path automatically.
 2. **Console project, command line:** `fbc -s console <MainFile>.bas`, then run the `.exe` produced next to it.
 3. **GUI project, command line:** `<AstoriaDir>\Compiler\fbc64.exe -s gui -i <AstoriaDir>\Controls\Framework <MainFile>.bas`. Caveats: `fbc` does not accept a `.frm` file as direct input, and the generated `#cmdline "<name>.rc"` line expects an IDE-generated resource file -- the IDE is the reliable path for GUI builds.

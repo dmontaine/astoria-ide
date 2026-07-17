@@ -1891,7 +1891,9 @@ Namespace My.Sys.Forms
 		'check the Newlinetype again for missing Cr in AsicII file
 		Fn = FreeFile_
 		If Not FileExists(FileName) Then
-			MsgBox ("File not found") & ": " & FileName
+			'' A workspace tab whose file was deleted/moved since last session: skip it
+			'' silently during reload rather than popping a modal on startup.
+			If Not mApplyingWorkspaceLoad Then MsgBox ("File not found") & ": " & FileName
 			Exit Sub
 		End If
 		ModifiedLine = False

@@ -799,7 +799,10 @@ Function AddProject(ByRef FileName As WString, pFilesList As WStringList Ptr, tn
 	Else
 		If FileName <> "" AndAlso Not bNew Then
 			If Not FileExists(FileName) Then
-				MsgBox ("File not found") & ":" & WChr(13, 10) & WChr(13, 10) & FormatMsgPath(FileName)
+				'' During workspace reload, silently skip a project whose file no longer
+				'' exists (deleted/moved since last session) instead of blocking startup
+				'' with a modal for something the user isn't actively opening.
+				If Not mApplyingWorkspaceLoad Then MsgBox ("File not found") & ":" & WChr(13, 10) & WChr(13, 10) & FormatMsgPath(FileName)
 				Return tn
 			End If
 			AddMRUProject FileName

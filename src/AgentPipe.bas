@@ -270,6 +270,24 @@ Private Sub AgentCaptureRun(ByRef outText As String, ByRef exitCode As Integer, 
 	If Not FileExists(exe) Then Exit Sub
 	isConsole = (InStr(LCase(firstLine & " " & compileLine), "-s gui") = 0)
 
+	'' GUI target: no console output to capture, and its window runs until the user
+	'' closes it -- blocking the agent (WaitForSingleObject INFINITE) on a
+	'' human-closed window is wrong. Launch it detached, report started, and return.
+	If Not isConsole Then
+		Dim As STARTUPINFOW giSi
+		Dim As PROCESS_INFORMATION giPi
+		giSi.cb = SizeOf(giSi)
+		Dim As WString Ptr gCmdW, gWorkW
+		WLet(gCmdW, """" & exe & """")
+		WLet(gWorkW, GetFolderName(exe))
+		If CreateProcessW(NULL, gCmdW, NULL, NULL, FALSE, CREATE_UNICODE_ENVIRONMENT, NULL, *gWorkW, @giSi, @giPi) Then
+			launched = True
+			CloseHandle(giPi.hThread) : CloseHandle(giPi.hProcess)
+		End If
+		WDeAllocate(gCmdW) : WDeAllocate(gWorkW)
+		Exit Sub
+	End If
+
 	Dim As SECURITY_ATTRIBUTES sa
 	sa.nLength = SizeOf(sa) : sa.bInheritHandle = True : sa.lpSecurityDescriptor = NULL
 	Dim As HANDLE hRead, hWrite
@@ -352,8 +370,15 @@ Private Function AgentHandleBuildCmd(ByRef cmd As String, ByRef idJson As String
 			res->SetMember("started", JsonNewBool(launched))
 			res->SetMember("console", JsonNewBool(isConsole))
 			If launched Then
-				res->SetMember("exit_code", JsonNewNumber(exitCode))
-				res->SetMember("output", JsonNewString(AgentDecodeRunOutput(outText)))
+				If isConsole Then
+					'' Console target: ran to completion, output captured.
+					res->SetMember("exit_code", JsonNewNumber(exitCode))
+					res->SetMember("output", JsonNewString(AgentDecodeRunOutput(outText)))
+				Else
+					'' GUI target: launched detached (its window runs until closed); no
+					'' console output and no exit code to wait for.
+					res->SetMember("note", JsonNewString("GUI program launched; its window runs until closed. No console output to capture."))
+				End If
 			Else
 				res->SetMember("note", JsonNewString("Executable not found after build."))
 			End If

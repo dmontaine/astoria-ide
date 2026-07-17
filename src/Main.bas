@@ -9552,10 +9552,17 @@ Sub frmMain_Show(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	If SplashExtraMs > 0 Then Sleep(SplashExtraMs)
 	pfSplash->CloseForm
 
+	'' --mcp-agent: the sidecar auto-launched us for agent control (MCP). Suppress the
+	'' interactive startup modals (New Project when there's nothing to reopen, and Tip of
+	'' the Day) -- they would block the UI thread while the agent drives the IDE over the
+	'' pipe, and the agent opens/creates whatever project it wants itself. The last
+	'' workspace still reloads as normal, so get_status reflects the prior project.
+	Dim As Boolean bAgentLaunched = (InStr(LCase(Command(-1)), "--mcp-agent") > 0)
 	Var File = Command(-1)
 	Var Pos1 = InStr(File, "2>CON")
 	Var bFileOpening = False
 	If Pos1 > 0 Then File = Left(File, Pos1 - 1)
+	If bAgentLaunched Then File = ""   '' the only arg is our flag, not a file to open
 	If File <> "" AndAlso Right(LCase(File), 4) <> ".exe" Then
 		bFileOpening = True
 	End If
@@ -9581,7 +9588,7 @@ Sub frmMain_Show(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		' IDE. This is the original design intent (see the commented Case 1: NewProject below) and a
 		' startup modal here is already the norm (frmTipOfDay.ShowModal further down). Cancelling just
 		' leaves the empty IDE, which is fine.
-		If Not bWorkspaceLoaded Then
+		If Not bWorkspaceLoaded AndAlso Not bAgentLaunched Then
 			NewProject
 		End If
 	End If
@@ -9600,7 +9607,7 @@ Sub frmMain_Show(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	'			OpenFiles GetFullPath(*RecentFiles)
 	'		End Select
 	'	End If
-	If ShowTipoftheDay Then frmTipOfDay.ShowModal *pfrmMain
+	If ShowTipoftheDay AndAlso Not bAgentLaunched Then frmTipOfDay.ShowModal *pfrmMain
 	bApplyingStartupLayout = True
 	ActivateMainWindow()
 	' ActivateMainWindow steals focus; re-expand auto-hide bottom if that was the saved state.

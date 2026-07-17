@@ -148,7 +148,10 @@ Sub LaunchIde()
 		If (*exe)[i] = 92 OrElse (*exe)[i] = 47 Then cut = i : Exit For
 	Next
 	If cut >= 0 Then ideDir = Left(*exe, cut)
-	Dim As WString * 4096 cmd = """" & *exe & """"   '' CreateProcessW needs a writable command line
+	'' --mcp-agent tells the IDE this is an agent-driven launch: it must NOT show the
+	'' interactive startup modals (New Project / Tip of the Day), which would block the
+	'' UI while the agent drives it over the pipe. See frmMain_Show in Main.bas.
+	Dim As WString * 4096 cmd = """" & *exe & """ --mcp-agent"   '' CreateProcessW needs a writable command line
 	Dim As STARTUPINFOW si
 	Dim As PROCESS_INFORMATION pi
 	si.cb = SizeOf(STARTUPINFOW)

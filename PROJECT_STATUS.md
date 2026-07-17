@@ -1,6 +1,6 @@
 # Astoria-IDE — Project Status & Handoff
 
-**Last updated:** 2026-07-17 (Agent MCP Server **COMPLETE — Tasks 0–7**. Task 7 verified end-to-end from a real stdio MCP client: create → write → build → get_errors → fix → run produced the correct output (`Primes below 1000000 = 78498`). Verification fixed two MCP bugs — Fix B: `create_project` opens the main file; Fix C: agent build saves dirty editors first — and flagged two pre-existing ones (broken Console Application template; `run`-capture NUL truncation). Earlier today: Task 6 (toggle default-on, status-bar indicator, auto-launch, packaging) `83426ef`; five AI templates gained MCP config `b70143c`.)
+**Last updated:** 2026-07-17 (Agent MCP Server **COMPLETE — Tasks 0–7**. Task 7 verified end-to-end from a real stdio MCP client: create → write → build → get_errors → fix → run produced the correct output (`Primes below 1000000 = 78498`). Verification fixed two MCP bugs — Fix B: `create_project` opens the main file; Fix C: agent build saves dirty editors first — and flagged two pre-existing ones, both since fixed (broken Console Application template; `run`-capture NUL truncation — the latter hardened 2026-07-17, pending GUI/MCP verify on the other computer). Earlier today: Task 6 (toggle default-on, status-bar indicator, auto-launch, packaging) `83426ef`; five AI templates gained MCP config `b70143c`.)
 **Repository:** [github.com/dmontaine/astoria-ide](https://github.com/dmontaine/astoria-ide)
 **Local path:** C:\Users\don\Astoria-IDE
 
@@ -291,6 +291,28 @@ Still pending from the other machine's session: the New Project dialog's minor a
 - **Task 7:** drive the whole thing from an actual MCP client (Claude Code/Desktop) — nothing has exercised it outside the PowerShell/stdio harness yet.
 - **Open design question the plan raises (§11):** whether `create_project` should eventually share one `CreateProjectHeadless` with `frmNewProject.cmdOK_Click` (today the agent has its own focused creator; the dialog's OK handler still owns git/AI/license/form+module logic). Not required for Task 6/7; note it if the dialog and agent creation ever diverge.
 
+## Session handoff (2026-07-17) — MCP `run` output capture hardened against NUL truncation
+
+**Code-complete, compiles clean, unit-verified against the real `fbc64`. NOT yet verified through the live GUI + MCP `run` — that is the next step, to be done on the other computer.** Commit on branch `claude/objective-lewin-0172b6` (see the git note at the end of this section for where it lands).
+
+**The bug:** MCP `run` returned only the *first character* of a program's stdout when that output contained NUL bytes — the classic trigger being a FreeBASIC source with a UTF-8 BOM, which makes `Print` emit UTF-16LE (null-interleaved) wide text (e.g. `"Primes…"` came back as `"P"`). Contrary to the original hypothesis, the truncation was **not** in `JsonNewString`/`JsonEscape` (FB `String` is length-prefixed and `JsonEscape` already renders byte 0 as a `\u0000` escape). The real culprit was `OemToUtf8` (`src/AgentPipe.bas`): it converted the OEM bytes to a wide buffer with an explicit length (correct), then called `WStrToUtf8(*w)`, which uses `-1` (NUL-terminated) in `WideCharToMultiByte` and so stopped at the first `0x0000` wide char.
+
+**The fix (`src/AgentPipe.bas` only, +58/−2):**
+- **`WBufToUtf8(w, nWide)`** — new NUL-safe wide→UTF-8 converter that passes an explicit length instead of `-1`, so interior NULs survive (each becomes a `\u0000` in the JSON) rather than truncating.
+- **`OemToUtf8`** now routes through `WBufToUtf8`, making the OEM path itself NUL-safe (stray NULs in binary output round-trip instead of cutting the string).
+- **`AgentDecodeRunOutput(s)`** — new entry point for captured stdout. Detects UTF-16LE by BOM (`FF FE`) or by heuristic (≥50% NULs in the odd/high byte positions, sampled over ≤1 KB) and decodes it as little-endian wide; otherwise falls back to the (now NUL-safe) OEM path.
+- The `run` result builder calls `AgentDecodeRunOutput(outText)` in place of `OemToUtf8(outText)` (`AgentHandleBuildCmd`).
+
+This fixes the wide-text case *and* hardens capture against any stray NULs, independent of the separate template-BOM trigger (which the agent's BOM-less save already avoids for agent-created sources — but a user-opened BOM'd source, or genuinely binary output, still needs this).
+
+**Verification done here (no GUI available in this environment):**
+- Extracted the three functions verbatim into a standalone program, compiled with the project's own `Compiler/fbc64.exe`, and ran 5 cases — all PASS: UTF-16LE with BOM, UTF-16LE without BOM (heuristic), plain ASCII (untouched), a long wide string, and empty input. The exact repro `"Primes..."` now round-trips fully (was `"P"`).
+- Full IDE compile-only check (`fbc64 -c AstoriaIDE.bas …`, which `#include`s `AgentPipe.bas`) succeeds with 0 errors, confirming it compiles in real context.
+
+**Next step (on the other computer, GUI test):** rebuild (`Compile.bat` — IDE-only, no `FORCE_MFF` needed; `AgentPipe.bas` is IDE-side), then from a real MCP client do `create_project` (or open a project) → make a source that prints wide/UTF-16 output (a BOM'd FB source is the easy trigger) → `build` → `run`, and confirm the `output` field contains the **full** text, matching what the exe prints when run directly. A plain ASCII program should be unchanged.
+
+**Aside (self-inflicted, already cleaned up):** while editing comments, a literal `\u0000` typed into an Edit was interpreted as an actual NUL byte and written into the source twice; both were stripped via a lossless Latin1 round-trip and the file now has zero NUL bytes. That's why the new comments avoid writing that escape literally.
+
 ## Next ready work
 
 **Agent MCP Server — COMPLETE (Tasks 0–7, 2026-07-17).** Verified end-to-end from a real
@@ -299,10 +321,10 @@ MCP client (stdio JSON-RPC 2.0): `create_project` → `write_file` → `build` �
 bugs found and fixed during verification (Fix B: `create_project` opens the main file;
 Fix C: agent build saves dirty editors first — see [MCP_SERVER_PLAN.md](MCP_SERVER_PLAN.md) Task 7).
 
-No task is currently selected. Candidate follow-up (one remaining, pre-existing, not in the MCP loop):
-- **Harden the MCP `run` output capture** — it truncates at the first NUL byte (wide/binary
-  output is cut off; `AgentCaptureRun`/`OemToUtf8` in `AgentPipe.bas`). Low priority now that
-  agent sources save BOM-less (output is clean ASCII).
+No task is currently selected.
+
+*Done 2026-07-17 (code-complete, pending GUI/MCP verify on the other computer):* the **MCP
+`run` output capture is hardened against NUL truncation** — see the 2026-07-17 handoff below.
 
 *Done 2026-07-17:* the **Console Application template** is fixed — `mff/NoInterface.bi` now
 declares `DebugWindowHandle` (it referenced but never declared it), so console projects compile;

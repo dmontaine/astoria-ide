@@ -153,9 +153,25 @@ End Function
 
 '' ---------------------------------------------------------------- build/run (pipe-worker thread)
 
+'' Convert a wide-char buffer of a KNOWN length (which may contain interior
+'' U+0000) to UTF-8. Unlike WStrToUtf8, this passes the explicit length rather
+'' than -1, so embedded NULs survive (JsonEscape renders each as a Unicode
+'' escape) instead of truncating the string at the first one. Used by the
+'' run-output path, where a program can legitimately emit NUL bytes.
+Private Function WBufToUtf8(w As WString Ptr, nWide As Integer) As String
+	If w = 0 OrElse nWide <= 0 Then Return ""
+	Dim As Integer n = WideCharToMultiByte(CP_UTF8, 0, w, nWide, NULL, 0, NULL, NULL)
+	If n <= 0 Then Return ""
+	Dim As String s = String(n, 0)
+	WideCharToMultiByte(CP_UTF8, 0, w, nWide, StrPtr(s), n, NULL, NULL)
+	Return s
+End Function
+
 '' Convert console-codepage (OEM) bytes to UTF-8. A captured program's stdout is
 '' in the console output codepage, not UTF-8; passing raw high-bit bytes into
 '' JSON would produce invalid UTF-8. ASCII passes through unchanged either way.
+'' NUL-safe: interior NULs are preserved (converted whole via an explicit length)
+'' rather than truncating the text.
 Private Function OemToUtf8(ByRef s As String) As String
 	If Len(s) = 0 Then Return ""
 	Dim As Integer n = MultiByteToWideChar(CP_OEMCP, 0, StrPtr(s), Len(s), NULL, 0)
@@ -163,7 +179,47 @@ Private Function OemToUtf8(ByRef s As String) As String
 	Dim As WString Ptr w = CAllocate((n + 1) * SizeOf(WString))
 	MultiByteToWideChar(CP_OEMCP, 0, StrPtr(s), Len(s), w, n)
 	w[n] = 0
-	Dim As String r = WStrToUtf8(*w)
+	Dim As String r = WBufToUtf8(w, n)
+	Deallocate(w)
+	Return r
+End Function
+
+'' Decode a captured program's raw stdout bytes into a UTF-8 string for JSON.
+'' Console programs normally emit OEM-codepage text, but a FreeBASIC source with
+'' a UTF-8 BOM makes Print emit UTF-16LE (null-interleaved) wide text; running
+'' that through the OEM path would emit a stream of interior NULs. Detect
+'' UTF-16LE -- by a BOM, or by a strong run of NULs in the high byte of each
+'' unit -- and decode it as wide; otherwise fall back to the OEM path (which is
+'' itself NUL-safe now, so any stray NULs are preserved rather than truncating).
+Private Function AgentDecodeRunOutput(ByRef s As String) As String
+	If Len(s) = 0 Then Return ""
+	Dim As Integer startByte = 0
+	Dim As Boolean isUtf16 = False
+	If Len(s) >= 2 AndAlso s[0] = &HFF AndAlso s[1] = &HFE Then
+		isUtf16 = True : startByte = 2          '' explicit UTF-16LE BOM
+	Else
+		'' Heuristic: in UTF-16LE ASCII text the high byte of each unit is 0, so
+		'' the odd byte positions are almost all NUL. Plain OEM/ASCII output has
+		'' essentially none. Sample up to 1 KB; treat >=50% odd-position NULs as
+		'' UTF-16LE.
+		Dim As Integer lim = Len(s) : If lim > 1024 Then lim = 1024
+		Dim As Integer checked = 0, nul = 0
+		For i As Integer = 1 To lim - 1 Step 2
+			checked += 1
+			If s[i] = 0 Then nul += 1
+		Next i
+		If checked > 0 AndAlso nul * 2 >= checked Then isUtf16 = True
+	End If
+	If Not isUtf16 Then Return OemToUtf8(s)
+	'' Reinterpret bytes [startByte..] as little-endian UTF-16 code units.
+	Dim As Integer nWide = (Len(s) - startByte) \ 2
+	If nWide <= 0 Then Return ""
+	Dim As WString Ptr w = CAllocate((nWide + 1) * SizeOf(WString))
+	For i As Integer = 0 To nWide - 1
+		w[i] = s[startByte + i * 2] Or (CUInt(s[startByte + i * 2 + 1]) Shl 8)
+	Next i
+	w[nWide] = 0
+	Dim As String r = WBufToUtf8(w, nWide)
 	Deallocate(w)
 	Return r
 End Function
@@ -297,7 +353,7 @@ Private Function AgentHandleBuildCmd(ByRef cmd As String, ByRef idJson As String
 			res->SetMember("console", JsonNewBool(isConsole))
 			If launched Then
 				res->SetMember("exit_code", JsonNewNumber(exitCode))
-				res->SetMember("output", JsonNewString(OemToUtf8(outText)))
+				res->SetMember("output", JsonNewString(AgentDecodeRunOutput(outText)))
 			Else
 				res->SetMember("note", JsonNewString("Executable not found after build."))
 			End If

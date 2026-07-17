@@ -110,7 +110,7 @@ Type McpTool
 	schema As String     '' inputSchema (JSON Schema), embedded verbatim
 End Type
 
-Dim Shared gTools(0 To 8) As McpTool
+Dim Shared gTools(0 To 12) As McpTool
 
 Sub InitTools()
 	Dim As String noArgs = "{""type"":""object"",""properties"":{}}"
@@ -142,6 +142,18 @@ Sub InitTools()
 	gTools(8).name = "open_in_editor"
 	gTools(8).description = "Open (or focus) an editor tab for a project file."
 	gTools(8).schema = pathReq
+	gTools(9).name = "build"
+	gTools(9).description = "Compile the open project. Blocks until the build finishes; returns success, an exit code, the raw build output, and structured errors[]."
+	gTools(9).schema = "{""type"":""object"",""properties"":{""all"":{""type"":""boolean"",""description"":""Build all projects (default false).""}}}"
+	gTools(10).name = "syntax_check"
+	gTools(10).description = "Parse-only syntax check of the open project (no executable produced). Returns success and structured errors[]."
+	gTools(10).schema = noArgs
+	gTools(11).name = "run"
+	gTools(11).description = "Build the open project and run it. Blocks until the program exits; for a console program returns its captured output and exit code. Returns build errors[] if the build fails."
+	gTools(11).schema = noArgs
+	gTools(12).name = "get_errors"
+	gTools(12).description = "Structured errors[] (file, line, severity, message) parsed from the last build."
+	gTools(12).schema = noArgs
 End Sub
 
 Function ToolsListJson() As String

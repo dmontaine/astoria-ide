@@ -151,6 +151,173 @@ Private Function AgentRegisterFileInProject(ByRef fullPath As UString) As Boolea
 	Return True
 End Function
 
+'' ---------------------------------------------------------------- build/run (pipe-worker thread)
+
+'' Convert console-codepage (OEM) bytes to UTF-8. A captured program's stdout is
+'' in the console output codepage, not UTF-8; passing raw high-bit bytes into
+'' JSON would produce invalid UTF-8. ASCII passes through unchanged either way.
+Private Function OemToUtf8(ByRef s As String) As String
+	If Len(s) = 0 Then Return ""
+	Dim As Integer n = MultiByteToWideChar(CP_OEMCP, 0, StrPtr(s), Len(s), NULL, 0)
+	If n <= 0 Then Return s
+	Dim As WString Ptr w = CAllocate((n + 1) * SizeOf(WString))
+	MultiByteToWideChar(CP_OEMCP, 0, StrPtr(s), Len(s), w, n)
+	w[n] = 0
+	Dim As String r = WStrToUtf8(*w)
+	Deallocate(w)
+	Return r
+End Function
+
+'' Whether the last build produced any error-severity problems. This -- not
+'' Compile's return value -- is the truthful pass/fail signal: Compile("Check")
+'' returns success (the check ran) even when it reported errors.
+Private Function AgentHasBuildErrors() As Boolean
+	For i As Integer = 0 To lvProblems.ListItems.Count - 1
+		Dim As ListViewItem Ptr it = lvProblems.ListItems.Item(i)
+		If it AndAlso LCase(it->ImageKey) = "error" Then Return True
+	Next
+	Return False
+End Function
+
+'' Structured errors[] from the last build's Problems list (lvProblems), which
+'' Compile populated: item caption = message, ImageKey = Warning/Error/Info,
+'' Text(1) = line, Text(2) = file.
+Private Function AgentBuildErrorsArray() As JsonValue Ptr
+	Dim As JsonValue Ptr arr = JsonNewArray()
+	For i As Integer = 0 To lvProblems.ListItems.Count - 1
+		Dim As ListViewItem Ptr it = lvProblems.ListItems.Item(i)
+		If it = 0 Then Continue For
+		Dim As JsonValue Ptr e = JsonNewObject()
+		e->SetMember("severity", JsonNewString(LCase(WStrToUtf8(it->ImageKey))))
+		e->SetMember("message", JsonNewString(WStrToUtf8(it->Text(0))))
+		Dim As String lnStr = Trim(WStrToUtf8(it->Text(1)))
+		If lnStr <> "" Then e->SetMember("line", JsonNewNumber(Val(lnStr))) Else e->SetMember("line", JsonNewNull())
+		e->SetMember("file", JsonNewString(WStrToUtf8(it->Text(2))))
+		arr->Append(e)
+	Next
+	Return arr
+End Function
+
+'' Launch the freshly built executable with stdout/stderr captured to a pipe;
+'' block until it exits; return its output and exit code. Console targets only
+'' produce output; a GUI target still launches but yields no captured text.
+'' Runs on the pipe-worker thread (mirrors how the menu Run derives paths).
+Private Sub AgentCaptureRun(ByRef outText As String, ByRef exitCode As Integer, ByRef launched As Boolean, ByRef isConsole As Boolean)
+	launched = False : outText = "" : exitCode = -1 : isConsole = False
+	Dim As ProjectElement Ptr proj
+	Dim As TreeNode Ptr node
+	Dim As UString mainFile = GetMainFile(False, proj, node)
+	If mainFile = "" Then Exit Sub
+	Dim As UString compileLine
+	Dim As UString firstLine = GetFirstCompileLine(mainFile, proj, compileLine)
+	Dim As UString exe = GetExeFileName(mainFile, compileLine & " " & firstLine)
+	If Not FileExists(exe) Then Exit Sub
+	isConsole = (InStr(LCase(firstLine & " " & compileLine), "-s gui") = 0)
+
+	Dim As SECURITY_ATTRIBUTES sa
+	sa.nLength = SizeOf(sa) : sa.bInheritHandle = True : sa.lpSecurityDescriptor = NULL
+	Dim As HANDLE hRead, hWrite
+	If CreatePipe(@hRead, @hWrite, @sa, 0) = 0 Then Exit Sub
+	SetHandleInformation(hRead, HANDLE_FLAG_INHERIT, 0)   '' the child must not inherit our read end
+
+	Dim As STARTUPINFOW si
+	si.cb = SizeOf(si)
+	si.dwFlags = STARTF_USESTDHANDLES
+	si.hStdOutput = hWrite
+	si.hStdError = hWrite
+	si.hStdInput = GetStdHandle(STD_INPUT_HANDLE)
+	Dim As PROCESS_INFORMATION pi
+	Dim As WString Ptr cmdW, workW
+	WLet(cmdW, """" & exe & """")
+	WLet(workW, GetFolderName(exe))
+	Dim As DWORD flags = CREATE_NO_WINDOW Or CREATE_UNICODE_ENVIRONMENT
+	If CreateProcessW(NULL, cmdW, NULL, NULL, TRUE, flags, NULL, *workW, @si, @pi) = 0 Then
+		CloseHandle(hRead) : CloseHandle(hWrite) : WDeAllocate(cmdW) : WDeAllocate(workW) : Exit Sub
+	End If
+	CloseHandle(hWrite)   '' parent closes write end so ReadFile sees EOF at child exit
+	launched = True
+	Dim As UByte buf(0 To 4095)
+	Do
+		Dim As DWORD got
+		If ReadFile(hRead, @buf(0), 4096, @got, NULL) = 0 OrElse got = 0 Then Exit Do
+		Dim As String chunk = String(got, 0)
+		For i As Integer = 0 To got - 1
+			chunk[i] = buf(i)
+		Next i
+		outText &= chunk
+		If Len(outText) > 1048576 Then   '' cap runaway output at ~1 MB
+			outText &= Chr(10) & "[output truncated at 1 MB]"
+			Exit Do
+		End If
+	Loop
+	WaitForSingleObject(pi.hProcess, INFINITE)
+	Dim As DWORD ec
+	GetExitCodeProcess(pi.hProcess, @ec)
+	exitCode = ec
+	CloseHandle(hRead) : CloseHandle(pi.hProcess) : CloseHandle(pi.hThread)
+	WDeAllocate(cmdW) : WDeAllocate(workW)
+End Sub
+
+'' Runs build / syntax_check / run synchronously on the pipe-worker thread and
+'' returns the full response line. Compile() self-marshals its UI writes (the
+'' menu build runs it on a background thread the same way); reading the results
+'' back on this same thread afterwards is race-free. One build at a time.
+Private Function AgentHandleBuildCmd(ByRef cmd As String, ByRef idJson As String) As String
+	If gAgentBuilding Then
+		Return "{""id"":" & idJson & ",""ok"":false,""error"":{""code"":""busy"",""message"":""A build or run is already in progress.""}}"
+	End If
+	gAgentBuilding = True
+
+	Dim As String param
+	Dim As Boolean isRun = False
+	Select Case cmd
+	Case "syntax_check" : param = "Check"
+	Case "run"          : param = "" : isRun = True
+	Case Else           : param = ""   '' build
+	End Select
+
+	Dim As Integer result = Compile(param, False)
+	'' Success = the build ran AND no error-severity problems were reported.
+	'' (Compile("Check") returns success even with errors -- see AgentHasBuildErrors.)
+	Dim As Boolean buildOk = (result <> 0) AndAlso (Not AgentHasBuildErrors())
+	Dim As JsonValue Ptr res = JsonNewObject()
+
+	If cmd = "syntax_check" Then
+		res->SetMember("ok", JsonNewBool(buildOk))
+		res->SetMember("errors", AgentBuildErrorsArray())
+	ElseIf cmd = "run" Then
+		res->SetMember("build_ok", JsonNewBool(buildOk))
+		res->SetMember("errors", AgentBuildErrorsArray())
+		If buildOk Then
+			Dim As String outText
+			Dim As Integer exitCode
+			Dim As Boolean launched, isConsole
+			AgentCaptureRun(outText, exitCode, launched, isConsole)
+			res->SetMember("started", JsonNewBool(launched))
+			res->SetMember("console", JsonNewBool(isConsole))
+			If launched Then
+				res->SetMember("exit_code", JsonNewNumber(exitCode))
+				res->SetMember("output", JsonNewString(OemToUtf8(outText)))
+			Else
+				res->SetMember("note", JsonNewString("Executable not found after build."))
+			End If
+		Else
+			res->SetMember("started", JsonNewBool(False))
+			res->SetMember("note", JsonNewString("Build failed; program not run."))
+		End If
+	Else   '' build
+		res->SetMember("ok", JsonNewBool(buildOk))
+		res->SetMember("exit_code", JsonNewNumber(IIf(buildOk, 0, 1)))
+		res->SetMember("output", JsonNewString(WStrToUtf8(txtOutput.Text)))
+		res->SetMember("errors", AgentBuildErrorsArray())
+	End If
+
+	gAgentBuilding = False
+	Dim As String resp = "{""id"":" & idJson & ",""ok"":true,""result"":" & JsonSerialize(res) & "}"
+	Delete res
+	Return resp
+End Function
+
 '' ---------------------------------------------------------------- UI thread
 
 '' Command dispatch, run on the UI thread. MCP Task 1+ grows this Select Case;
@@ -257,6 +424,13 @@ Sub AgentPipe_ExecutePendingOnUi()
 		'' Raw text of the Output/messages pane from the last build/run.
 		Dim As JsonValue Ptr res = JsonNewObject()
 		res->SetMember("text", JsonNewString(WStrToUtf8(txtOutput.Text)))
+		gCmdOk = True
+		gCmdResult = res
+
+	Case "get_errors"
+		'' Structured errors parsed from the last build (the Problems list).
+		Dim As JsonValue Ptr res = JsonNewObject()
+		res->SetMember("errors", AgentBuildErrorsArray())
 		gCmdOk = True
 		gCmdResult = res
 
@@ -449,6 +623,18 @@ Private Sub AgentHandleLine(hPipe As HANDLE, ByRef reqLine As String)
 	If req = 0 OrElse req->Kind <> jkObject Then
 		If req Then Delete req
 		resp = "{""id"":null,""ok"":false,""error"":{""code"":""bad_json"",""message"":""Request is not a valid JSON object.""}}"
+		AgentWriteLine(hPipe, resp)
+		Exit Sub
+	End If
+
+	'' Long-running build/run/syntax_check run synchronously on THIS worker thread
+	'' (Compile self-marshals its UI writes; the menu build uses the same pattern),
+	'' so they never block or reenter the UI-thread slot. Everything else goes
+	'' through the single UI-thread command slot below.
+	Dim As String cmdEarly = req->GetStr("cmd")
+	If cmdEarly = "build" OrElse cmdEarly = "syntax_check" OrElse cmdEarly = "run" Then
+		resp = AgentHandleBuildCmd(cmdEarly, idJson)
+		Delete req
 		AgentWriteLine(hPipe, resp)
 		Exit Sub
 	End If

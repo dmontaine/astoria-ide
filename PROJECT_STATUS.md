@@ -293,7 +293,19 @@ Still pending from the other machine's session: the New Project dialog's minor a
 
 ## Next ready work
 
-No task is currently selected. Choose from the open items below when ready.
+**Agent MCP Server — Task 7 (end-to-end verify from a real MCP client).** This is the
+last piece of the MCP project; Tasks 0–6 are done and pushed. Point a real MCP client
+(Claude Code or Claude Desktop) at `astoria-mcp.exe` per [AGENT_MCP_SETUP.md](AGENT_MCP_SETUP.md)
+and drive the full loop — `create_project` → `write_file` → `build` → `get_errors` → fix
+→ `run` — e.g. the "primes below 1,000,000" example. Everything it needs now ships: the
+sidecar auto-launches the IDE, the pipe is on by default (status bar shows "MCP Agent:
+On"), and the tool surface is live (15 tools). Nothing has exercised it from an actual
+MCP client yet — only a PowerShell/stdio harness. See [MCP_SERVER_PLAN.md](MCP_SERVER_PLAN.md) §Implementation progress.
+
+*Parallel, owner-driven:* have each of the five AI agents review its own
+`Templates/AI/<tool>/` folder and confirm/adjust its MCP config (the `use-astoria-mcp`
+skill + native server config landed 2026-07-17; Codex/Kun formats need per-client
+verification).
 
 For the reasoning, exact code locations, and prior hot-path findings, see [HISTORY.md](HISTORY.md).
 

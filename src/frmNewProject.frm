@@ -27,6 +27,43 @@
 			.SetBounds 0, 0, 464, 500
 			.Parent = @This
 		End With
+		' pnlMode — the very top row: choose how the project is created. The two radios
+		' auto-group (same parent). Create Local = purely local from a template; Use
+		' Existing Git = clone an existing remote repo. UpdateModeFields enables the
+		' fields each mode needs.
+		With pnlMode
+			.Name = "pnlMode"
+			.Text = ""
+			.Align = DockStyle.alTop
+			.TabIndex = 1
+			.ExtraMargins.Left = 10
+			.ExtraMargins.Right = 10
+			.SetBounds 0, 0, 464, 32
+			.Parent = @pnlBottom
+		End With
+		' optCreateLocal
+		With optCreateLocal
+			.Name = "optCreateLocal"
+			.Caption = ("Create Local Project")
+			.Align = DockStyle.alLeft
+			.TabIndex = 1
+			.SetBounds 0, 6, 170, 21
+			.Checked = True
+			.Designer = @This
+			.OnClick = @optMode_Click_
+			.Parent = @pnlMode
+		End With
+		' optUseExistingGit
+		With optUseExistingGit
+			.Name = "optUseExistingGit"
+			.Caption = ("Use Existing Git Project")
+			.Align = DockStyle.alLeft
+			.TabIndex = 2
+			.SetBounds 170, 6, 200, 21
+			.Designer = @This
+			.OnClick = @optMode_Click_
+			.Parent = @pnlMode
+		End With
 		' pnlProjectTemplate — row 0: project template (label-left + dropdown, matching
 		' the other field rows). Added before pnlProjectName so it docks as the top row.
 		With pnlProjectTemplate
@@ -225,31 +262,6 @@
 			.SetBounds 150, 0, 314, 32
 			.Designer = @This
 			.Parent = @pnlLicense
-		End With
-		' pnlGit — row 6, Use Git checkbox; the Provider/Username/Email rows just below
-		' are what actually gets combined into the remote URL (see BuildGitURL)
-		With pnlGit
-			.Name = "pnlGit"
-			.Text = ""
-			.Align = DockStyle.alTop
-			.TabIndex = 17
-			.ExtraMargins.Left = 10
-			.ExtraMargins.Right = 10
-			.SetBounds 0, 96, 464, 32
-			.Parent = @pnlBottom
-		End With
-		' chkUseGit
-		With chkUseGit
-			.Name = "chkUseGit"
-			.Text = ("Use Git")
-			.Align = DockStyle.alLeft
-			.TabIndex = 18
-			.Constraints.Height = 21
-			.AutoSize = True
-			.SetBounds 0, 6, 90, 21
-			.Designer = @This
-			.OnClick = @chkUseGit_Click_
-			.Parent = @pnlGit
 		End With
 		' pnlGitProvider — row 6b, Git host (GitHub/GitLab/Bitbucket/Codeberg); combined
 		' with Git Username + Project Name to build the remote URL (see BuildGitURL)
@@ -527,66 +539,60 @@ Private Sub frmNewProject.cmdOK_Click(ByRef Sender As Control)
 		Me.BringToFront
 		Exit Sub
 	End If
-	'' Use Git / provider / username are read here, before anything is written to disk,
-	'' so a Cancel answer below can return to the dialog with nothing created -- matches
-	'' "Cancel" actually meaning "stop the whole process", not just "skip the Git step".
-	Dim As Boolean useGit = chkUseGit.Checked
+	'' Mode: Create Local Project vs Use Existing Git Project. In git mode we clone the
+	'' remote first and classify what came down; only an empty clone falls through to the
+	'' template-populate block below (Astoria fills the empty repo like a new project).
+	Dim As Boolean bModeGit = optUseExistingGit.Checked
 	Dim As String gitProvider = cboGitProvider.Text
 	Dim As String gitUserName = Trim(txtGitUserName.Text)
-	If useGit AndAlso gitUserName = "" Then
-		MsgBox ("Enter a Git username, or uncheck Use Git."), , mtWarning
-		Me.BringToFront
-		Exit Sub
-	End If
 	Dim As String gitURL = ""
-	If useGit Then gitURL = BuildGitURL(gitProvider, gitUserName, ProjectName)
-	If useGit AndAlso SshKeyExists() Then
-		'' Loop: answering Yes ("I've created it") re-runs the ls-remote existence
-		'' check rather than being taken on trust -- if the repository still can't
-		'' be found (typo'd name, wrong provider, not actually created yet), the
-		'' warning comes back with a "still could not be found" lead-in instead of
-		'' silently proceeding to a local-only repo whose remote doesn't exist.
-		Dim As Boolean askedBefore = False
-		Do While useGit AndAlso (Not RemoteRepoExists(gitURL))
-			'' If OK was triggered by pressing Enter (cmdOK.Default = True), a held
-			'' key repeats WM_KEYDOWN(VK_RETURN) messages that are still queued at
-			'' this point -- they'd otherwise land on this dialog's own Default
-			'' button (Yes) the instant its modal loop starts pumping messages,
-			'' auto-dismissing it within a fraction of a second. Discard (not
-			'' dispatch) any pending keyboard messages first so a stray Enter
-			'' can't answer this warning on the user's behalf.
-			Dim As MSG flushMsg
-			While PeekMessage(@flushMsg, 0, &H100, &H108, PM_REMOVE)
-			Wend
-			Dim As String notFoundLine
-			If askedBefore Then
-				notFoundLine = ("The repository") & " " & gitURL & " " & ("STILL could not be found on") & " " & gitProvider & "."
-			Else
-				notFoundLine = ("The repository") & " " & gitURL & " " & ("could not be found on") & " " & gitProvider & "."
+	If bModeGit Then
+		If gitUserName = "" Then
+			MsgBox ("Enter a Git username."), , mtWarning
+			Me.BringToFront
+			Exit Sub
+		End If
+		If Not SshKeyExists() Then
+			MsgBox ("Cloning an existing Git project needs an SSH key.") & Chr(13,10) & Chr(13,10) & _
+				("See") & " Templates\Git\sshkeys.md " & ("for setup steps."), , mtWarning
+			Me.BringToFront
+			Exit Sub
+		End If
+		gitURL = BuildGitURL(gitProvider, gitUserName, ProjectName)
+		If Not CloneGitRepository(gitURL, localFolder) Then
+			MsgBox ("The repository could not be cloned") & ":" & Chr(13,10) & Chr(13,10) & gitURL & Chr(13,10) & Chr(13,10) & _
+				("Check that it exists on") & " " & gitProvider & " " & ("and that you have access."), , mtWarning
+			Me.BringToFront
+			Exit Sub
+		End If
+		If IsAstoriaProject(localFolder) Then
+			'' A complete Astoria project cloned down -- load it as-is; the creation
+			'' fields don't apply. Stamp the AI template if asked (harmless if present).
+			If chkAIFriendly.Checked Then
+				Dim As UString aiFolderC = AIToolFolderName(cboAITool.Text)
+				If aiFolderC <> "" Then StampAITemplate(localFolder, aiFolderC, ProjectName, Trim(txtAuthor.Text), cboLicense.Text, txtDescription.Text)
 			End If
-			askedBefore = True
-			Dim As MessageResult mr = MsgBox( _
-				notFoundLine & Chr(13,10) & Chr(13,10) & _
-				("Yes") & " -- " & ("I've created it -- check again and continue.") & Chr(13,10) & _
-				("No") & " -- " & ("Continue creating the project without Git (unchecks Use Git and clears these fields).") & Chr(13,10) & _
-				("Cancel") & " -- " & ("Stop here and return to the New Project dialog."), _
-				("Repository Not Found"), mtWarning, btYesNoCancel)
-			Select Case mr
-			Case mrYes
-				'' Loop around: RemoteRepoExists runs again. Only an actual
-				'' successful ls-remote lets the Git setup below proceed.
-			Case mrNo
-				chkUseGit.Checked = False
-				cboGitProvider.Enabled = False
-				txtGitUserName.Enabled = False
-				txtGitUserName.Text = ""
-				useGit = False
-				gitURL = ""
-			Case Else
-				Me.BringToFront
-				Exit Sub
-			End Select
-		Loop
+			Dim As UString foundVfp = FindProjectVfp(localFolder)
+			If foundVfp <> "" Then
+				SelectedProjectFile = foundVfp
+			Else
+				SelectedFolder = localFolder
+			End If
+			SelectedTemplate = localFolder
+			ModalResult = ModalResults.OK
+			Me.CloseForm
+			Exit Sub
+		ElseIf Not FolderIsEffectivelyEmpty(localFolder) Then
+			'' Non-empty repo that is NOT an Astoria project: we don't try to interpret
+			'' foreign projects. Remove the clone and refuse.
+			DeleteFolderRecursive(localFolder)
+			MsgBox ("This Git repository is not an Astoria project and is not empty.") & Chr(13,10) & Chr(13,10) & _
+				("Astoria only loads its own projects (with a project.astoria file) or empty repositories."), , mtWarning
+			Me.BringToFront
+			Exit Sub
+		End If
+		'' Empty repo -- fall through and populate it from the chosen template, exactly
+		'' like a new local project (localFolder already exists as the empty clone).
 	End If
 	'' Find the template's own default file (every shipped project template has exactly
 	'' one) so its real name can be validated/renamed from the inline Form/Module Name
@@ -753,7 +759,7 @@ Private Sub frmNewProject.cmdOK_Click(ByRef Sender As Control)
 	Dim As String chosenAITool = cboAITool.Text
 	Dim As String chosenGitEmail = Trim(txtGitEmail.Text)
 	Dim As String useGitText = "false"
-	If useGit Then useGitText = "true"
+	If bModeGit Then useGitText = "true"
 	Dim As String aiFriendlyText = "false"
 	If chkAIFriendly.Checked Then aiFriendlyText = "true"
 	Dim As Integer FnMeta = FreeFile_
@@ -770,17 +776,36 @@ Private Sub frmNewProject.cmdOK_Click(ByRef Sender As Control)
 		Print #FnMeta, "AITool=" & Chr(34) & chosenAITool & Chr(34)
 		CloseFile_(FnMeta)
 	End If
+	'' project.astoria -- the canonical Astoria description file (the marker that lets the
+	'' clone flow recognise this as an Astoria project). Written for every created project.
+	Dim As ProjectDescriptionData descData
+	descData.Mode        = IIf(bModeGit, ProjectCreateMode.pcmExistingGit, ProjectCreateMode.pcmLocalProject)
+	descData.ProjectName = ProjectName
+	descData.Template    = TemplateName
+	descData.Author      = chosenAuthor
+	descData.License     = chosenLicense
+	descData.Description  = txtDescription.Text
+	If bModeGit Then
+		descData.GitProvider = gitProvider
+		descData.GitUserName = gitUserName
+		descData.GitEmail    = chosenGitEmail
+	End If
+	descData.GitURL      = gitURL
+	descData.AIFriendly  = chkAIFriendly.Checked
+	descData.AITool      = chosenAITool
+	descData.Created     = Format(Now, "yyyy-mm-dd")
+	WriteProjectDescription(localFolder, descData)
 	WriteLicenseFile(localFolder, chosenLicense, chosenAuthor)
-	'' Everything that writes project files must run BEFORE SetupGitRepository:
-	'' its script does "git add ." + "git commit", so anything written after it
-	'' (AI templates, .gitignore) would be left out of the initial commit.
 	If chkAIFriendly.Checked Then
 		Dim As UString aiFolder = AIToolFolderName(chosenAITool)
 		If aiFolder <> "" Then StampAITemplate(localFolder, aiFolder, ProjectName, chosenAuthor, chosenLicense, txtDescription.Text)
 	End If
-	If useGit Then
+	'' Existing-git empty clone: seed .gitignore/.gitattributes so the eventual commit
+	'' (Project menu > Git Commit/Push) governs line endings and ignores build output.
+	'' No git init/commit/push here -- the clone already set up git, and commit/push are
+	'' the user's explicit Project-menu actions.
+	If bModeGit Then
 		WriteGitSupportFiles(localFolder, ProjectName, chosenAuthor, chosenLicense, txtDescription.Text)
-		SetupGitRepository(localFolder, gitURL, gitUserName, chosenGitEmail)
 	End If
 	SelectedTemplate = localTemplate
 	SelectedFolder = localFolder
@@ -875,7 +900,9 @@ Private Sub frmNewProject.Form_Create(ByRef Sender As Control)
 	cboLicense.AddItem ("Proprietary")
 	cboLicense.AddItem ("Other")
 	cboLicense.ItemIndex = 0
-	chkUseGit.Checked = False
+	'' Default to Create Local Project.
+	optCreateLocal.Checked = True
+	optUseExistingGit.Checked = False
 	cboGitProvider.Clear
 	cboGitProvider.AddItem ("GitHub")
 	cboGitProvider.AddItem ("GitLab")
@@ -899,15 +926,32 @@ Private Sub frmNewProject.Form_Create(ByRef Sender As Control)
 	cboAITool.AddItem ("Kun (Deepseek)")
 	cboAITool.ItemIndex = 0
 	cboAITool.Enabled = False
+	'' Apply the default mode's field enabling (git fields off for Create Local).
+	UpdateModeFields()
 End Sub
 
-Private Sub frmNewProject.chkUseGit_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-	(*Cast(frmNewProject Ptr, Sender.Designer)).chkUseGit_Click(Sender)
+Private Sub frmNewProject.optMode_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As RadioButton)
+	(*Cast(frmNewProject Ptr, Sender.Designer)).optMode_Click(Sender)
 End Sub
-Private Sub frmNewProject.chkUseGit_Click(ByRef Sender As Control)
-	cboGitProvider.Enabled = chkUseGit.Checked
-	txtGitUserName.Enabled = chkUseGit.Checked
-	txtGitEmail.Enabled = chkUseGit.Checked
+Private Sub frmNewProject.optMode_Click(ByRef Sender As RadioButton)
+	UpdateModeFields()
+End Sub
+
+'' Enable the fields each creation mode needs.
+''  - Create Local Project: template + names + author/license/description/AI; git fields off.
+''  - Use Existing Git Project: git Provider/Username/Email on. Template + Form/Module stay
+''    enabled too -- they're used only if the cloned repo turns out to be empty (Astoria
+''    then populates the empty repo like a new local project); ignored for a repo that
+''    already contains an Astoria project.
+Private Sub frmNewProject.UpdateModeFields()
+	Dim As Boolean bGit = optUseExistingGit.Checked
+	cboGitProvider.Enabled = bGit
+	txtGitUserName.Enabled = bGit
+	txtGitEmail.Enabled = bGit
+	'' Template/Form/Module: enabled in both modes. In existing-git mode the Windows
+	'' Application template still gates the Form field via cboTemplate_Change.
+	cboTemplate.Enabled = True
+	cboTemplate_Change(cboTemplate)
 End Sub
 
 Private Sub frmNewProject.chkAIFriendly_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
@@ -1112,6 +1156,73 @@ Private Function frmNewProject.SshKeyExists() As Boolean
 	If FileExistsU(sshFolder & "id_ecdsa.pub") Then Return True
 	Return False
 End Function
+
+'' git clone GitURL into DestFolder (which must not already exist -- git creates it).
+'' Runs from a temp .bat so the exit code can be captured (PipeCmd returns nothing),
+'' batch-mode SSH so it can't block on a credential/host-key prompt. Returns True only
+'' when clone exits 0 and the folder actually materialised. Mirrors RemoteRepoExists.
+Private Function frmNewProject.CloneGitRepository(ByRef GitURL As String, ByRef DestFolder As UString) As Boolean
+	EnsureDirectoryExists(ExePath & WindowsSlash & "Temp")
+	Dim As UString batPath = ExePath & WindowsSlash & "Temp" & WindowsSlash & "_astoria_git_clone.bat"
+	Dim As UString resultPath = ExePath & WindowsSlash & "Temp" & WindowsSlash & "_astoria_git_clone.result"
+	If FileExistsU(resultPath) Then Kill resultPath
+	Dim As Integer Fn = FreeFile_
+	If Open(batPath For Output As #Fn) <> 0 Then Return False
+	Print #Fn, "@echo off"
+	Print #Fn, "set GIT_TERMINAL_PROMPT=0"
+	Print #Fn, "set GIT_SSH_COMMAND=ssh -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=accept-new"
+	Print #Fn, "git clone " & Chr(34) & Trim(GitURL) & Chr(34) & " " & Chr(34) & DestFolder & Chr(34) & " >NUL 2>&1"
+	Print #Fn, "echo %errorlevel% > " & Chr(34) & resultPath & Chr(34)
+	CloseFile_(Fn)
+	PipeCmd batPath, True
+	Dim As Boolean ok = False
+	If FileExistsU(resultPath) Then
+		Dim As Integer FnR = FreeFile_
+		If Open(resultPath For Input As #FnR) = 0 Then
+			Dim As String resultLine
+			Line Input #FnR, resultLine
+			CloseFile_(FnR)
+			ok = (Trim(resultLine) = "0")
+		End If
+		Kill resultPath
+	End If
+	If FileExistsU(batPath) Then Kill batPath
+	If ok AndAlso Not FolderExistsU(DestFolder) Then ok = False
+	Return ok
+End Function
+
+'' Find a project (.vfp) file in Folder, preferring one named after the folder.
+'' "" if none. Used to pick the project file of a cloned complete Astoria project.
+Private Function frmNewProject.FindProjectVfp(ByRef Folder As UString) As UString
+	Dim As UString wantName = LCase(GetFileNameU(Folder)) & ".vfp"
+	Dim As UString firstVfp = ""
+	Dim As UInteger attr
+	Dim As String f = Dir(WinOsPath(Folder & "/*.vfp"), fbNormal Or fbArchive Or fbReadOnly, attr)
+	Do While f <> ""
+		Dim As UString full = WinOsPath(Folder & "/" & f)
+		If firstVfp = "" Then firstVfp = full
+		If LCase(f) = wantName Then Return full
+		f = Dir(attr)
+	Loop
+	Return firstVfp
+End Function
+
+'' Delete a folder and everything under it (used to remove a refused clone). Shells
+'' `rmdir /s /q` via a temp .bat -- robust against a cloned .git tree's many files,
+'' and attrib -r first so read-only git objects don't block the removal.
+Private Sub frmNewProject.DeleteFolderRecursive(ByRef Folder As UString)
+	If Trim(Folder) = "" OrElse Not FolderExistsU(Folder) Then Exit Sub
+	EnsureDirectoryExists(ExePath & WindowsSlash & "Temp")
+	Dim As UString batPath = ExePath & WindowsSlash & "Temp" & WindowsSlash & "_astoria_rmdir.bat"
+	Dim As Integer Fn = FreeFile_
+	If Open(batPath For Output As #Fn) <> 0 Then Exit Sub
+	Print #Fn, "@echo off"
+	Print #Fn, "attrib -r -h -s " & Chr(34) & Folder & "\*.*" & Chr(34) & " /s /d >NUL 2>&1"
+	Print #Fn, "rmdir /s /q " & Chr(34) & Folder & Chr(34) & " >NUL 2>&1"
+	CloseFile_(Fn)
+	PipeCmd batPath, True
+	If FileExistsU(batPath) Then Kill batPath
+End Sub
 
 '' Whether GitURL already exists and is reachable, via a preflight "git ls-remote"
 '' (works against a bare remote URL -- no local repo needed yet). Runs from a temp

@@ -6,6 +6,7 @@
 	#include once "mff/TextBox.bi"
 	#include once "mff/Panel.bi"
 	#include once "mff/CheckBox.bi"
+	#include once "mff/RadioButton.bi"
 	#include once "mff/ComboBoxEdit.bi"
 
 	Using My.Sys.Forms
@@ -19,8 +20,12 @@
 		Declare Sub cmdOpenExisting_Click(ByRef Sender As Control)
 		Declare Static Sub cboTemplate_Change_(ByRef Designer As My.Sys.Object, ByRef Sender As ComboBoxEdit)
 		Declare Sub cboTemplate_Change(ByRef Sender As ComboBoxEdit)
-		Declare Static Sub chkUseGit_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-		Declare Sub chkUseGit_Click(ByRef Sender As Control)
+		Declare Static Sub optMode_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As RadioButton)
+		Declare Sub optMode_Click(ByRef Sender As RadioButton)
+		Declare Sub UpdateModeFields()
+		Declare Function CloneGitRepository(ByRef GitURL As String, ByRef DestFolder As UString) As Boolean
+		Declare Function FindProjectVfp(ByRef Folder As UString) As UString
+		Declare Sub DeleteFolderRecursive(ByRef Folder As UString)
 		Declare Static Sub chkAIFriendly_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Sub chkAIFriendly_Click(ByRef Sender As Control)
 		Declare Static Sub Form_Create_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
@@ -45,9 +50,11 @@
 		Dim As CommandButton cmdOK, cmdCancel, cmdOpenExisting
 		Dim As Label lblProjectTemplates, lblProjectName, lblFormName, lblModuleName, lblAuthor, lblLicense, lblDescription, lblAITool, lblGitProvider, lblGitUserName, lblGitEmail
 		Dim As TextBox txtProjectName, txtFormName, txtModuleName, txtAuthor, txtDescription, txtGitUserName, txtGitEmail
-		Dim As CheckBox chkUseGit, chkAIFriendly
+		Dim As CheckBox chkAIFriendly
+		Dim As RadioButton optCreateLocal, optUseExistingGit
+		Dim As Label lblMode
 		Dim As ComboBoxEdit cboLicense, cboAITool, cboGitProvider
-		Dim As Panel pnlBottom, pnlProjectTemplate, pnlProjectName, pnlFormName, pnlModuleName, pnlAuthor, pnlDescription, pnlLicense, pnlGit, pnlGitProvider, pnlGitUserName, pnlGitEmail, pnlAIFriendly
+		Dim As Panel pnlBottom, pnlMode, pnlProjectTemplate, pnlProjectName, pnlFormName, pnlModuleName, pnlAuthor, pnlDescription, pnlLicense, pnlGitProvider, pnlGitUserName, pnlGitEmail, pnlAIFriendly
 		Dim As WStringList TemplateNames
 		Dim As UString SelectedTemplate, SelectedFolder, SelectedProjectFile
 		Dim As Boolean OpenExistingRequested

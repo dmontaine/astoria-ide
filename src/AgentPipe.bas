@@ -707,6 +707,17 @@ Sub AgentPipe_ExecutePendingOnUi()
 		'' Project dialog's "Make project AI friendly" produces.
 		Dim As UString aiFolder = AgentAiToolFolder(aiToolMeta)
 		Dim As Boolean aiStamped = AgentStampAiTemplate(newFolder, aiFolder, nm)
+		'' project.astoria -- the canonical Astoria description file (same as the New
+		'' Project dialog writes). Marks this as an Astoria project. MCP create_project
+		'' is always a local template-based create (no clone tool), so Mode=LocalProject.
+		Dim As ProjectDescriptionData descData
+		descData.Mode        = ProjectCreateMode.pcmLocalProject
+		descData.ProjectName = nm
+		descData.Template    = template
+		descData.AIFriendly  = True
+		descData.AITool      = aiToolMeta
+		descData.Created     = Format(Now, "yyyy-mm-dd")
+		WriteProjectDescription(newFolder, descData)
 		'' Open it.
 		Dim As WString Ptr vfpW
 		WLet(vfpW, newVfp)

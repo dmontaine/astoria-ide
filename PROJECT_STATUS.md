@@ -1,6 +1,6 @@
 # Astoria-IDE — Project Status & Handoff
 
-**Last updated:** 2026-07-17 (Agent MCP Server **COMPLETE — Tasks 0–7**. Task 7 verified end-to-end from a real stdio MCP client: create → write → build → get_errors → fix → run produced the correct output (`Primes below 1000000 = 78498`). Verification fixed two MCP bugs — Fix B: `create_project` opens the main file; Fix C: agent build saves dirty editors first — and flagged two pre-existing ones, both since fixed (broken Console Application template; `run`-capture NUL truncation — the latter hardened 2026-07-17, pending GUI/MCP verify on the other computer). Earlier today: Task 6 (toggle default-on, status-bar indicator, auto-launch, packaging) `83426ef`; five AI templates gained MCP config `b70143c`.)
+**Last updated:** 2026-07-17 (In progress: **New Project two-mode redesign + `project.astoria`** — built, compiles clean, NOT yet owner-verified; owner continuing tests on the other computer. See "Session handoff (2026-07-17) — New Project two-mode redesign" below. Earlier: Agent MCP Server **COMPLETE — Tasks 0–7**. Task 7 verified end-to-end from a real stdio MCP client: create → write → build → get_errors → fix → run produced the correct output (`Primes below 1000000 = 78498`). Verification fixed two MCP bugs — Fix B: `create_project` opens the main file; Fix C: agent build saves dirty editors first — and flagged two pre-existing ones, both since fixed (broken Console Application template; `run`-capture NUL truncation — the latter hardened 2026-07-17, pending GUI/MCP verify on the other computer). Earlier today: Task 6 (toggle default-on, status-bar indicator, auto-launch, packaging) `83426ef`; five AI templates gained MCP config `b70143c`.)
 **Repository:** [github.com/dmontaine/astoria-ide](https://github.com/dmontaine/astoria-ide)
 **Local path:** C:\Users\don\Astoria-IDE
 
@@ -271,6 +271,65 @@ Still pending from the other machine's session: the New Project dialog's minor a
 
 **Owner direction recorded (2026-07-16): teachers/educators added as a named target audience** — easy-to-learn language, one tool for text+GUI, built-in Git and AI integration, working with both frontier models and open-source models via OpenCode (school-budget friendly). Teaching plans and resources for educators are a future task set **gated on a final stable IDE** — see [ROADMAP.md](ROADMAP.md) §13.13 and the new entry in Deferred enhancements below.
 
+## Session handoff (2026-07-17) — New Project two-mode redesign + project.astoria (WIP, owner testing)
+
+**Owner-driven redesign of project creation. Built + compiles clean; NOT yet owner-verified —
+owner is testing on the other computer.** This is a 3-task feature; tracked in the task list as
+"New Project dialog: two modes…", "Project menu: Edit Project Description", "Project menu: Git
+Commit / Push automation". Only task 1 is (partly) done.
+
+**The design (owner-confirmed decisions):**
+- Project creation has **two mutually-exclusive modes** (radio at the top of the New Project
+  dialog): **Create Local Project** (purely local, no git) and **Use Existing Git Project**
+  (clone an existing remote). This *replaces* the old "Use Git" checkbox + the whole
+  try-remote/fail/"create the repo first" prompt loop.
+- **Use Existing Git** clones `git@<provider-host>:<username>/<ProjectName>.git` (built from the
+  existing Provider dropdown + Git Username + the Project Name = repo name), then classifies:
+  clone fails → "could not be cloned"; **empty repo** → Astoria populates it from the chosen
+  template like a new local project; **complete Astoria project** (has a `project.astoria`) →
+  load as-is; **foreign** (non-empty, no `project.astoria`) → delete the clone + refuse
+  ("Astoria only loads its own projects or empty repositories").
+- **`project.astoria`** — a dedicated, human-readable description file written into *every*
+  Astoria-created project, recording all creation choices (`Mode`, ProjectName, Template,
+  Author, License, Description, Git provider/user/email/URL, AIFriendly, AITool, Created). It is
+  the **marker** that identifies a folder as an Astoria project (drives the clone-classify
+  refuse logic). The `.vfp` stays the build manifest.
+- Commit & push are **NOT** done at creation — they become **Project-menu options** (task 3),
+  for git-backed projects (empty or populated).
+- **Teaching angle** (owner): local-create lets students build from scratch; existing-git lets an
+  instructor hand students an example repo to clone.
+
+**Done this session (task 1, uncommitted→committed in this handoff):**
+- `src/ProjectDescription.bi/.bas` — the `project.astoria` module: `WriteProjectDescription` /
+  `ReadProjectDescription` / `IsAstoriaProject` / `FolderIsEffectivelyEmpty`. **Verified working**
+  by driving an MCP `create_project` — it wrote a clean, correct `project.astoria`. Wired into
+  both the New Project dialog *and* MCP `create_project` (every Astoria project gets one).
+- New Project dialog (`src/frmNewProject.frm`/`.bi`) rewritten: two-radio mode selector
+  (`optCreateLocal`/`optUseExistingGit` in a new `pnlMode` first row; the old `pnlGit`/`chkUseGit`
+  removed), `UpdateModeFields` (git fields on only in existing-git mode), and `cmdOK_Click`
+  reworked into the local-vs-clone branch above. New helpers: `CloneGitRepository` (temp-.bat +
+  batch-mode SSH `git clone`, mirrors `RemoteRepoExists`), `FindProjectVfp`, `DeleteFolderRecursive`
+  (`rmdir /s /q` after `attrib -r`). `SetupGitRepository`/`RemoteRepoExists` are now **unused dead
+  code** (left in place; the create-new-repo flow they served is gone) — remove in a cleanup pass.
+- Compiles clean (IDE + sidecar); the redesigned dialog opens without crashing (constructor +
+  `Form_Create` + `UpdateModeFields` all run).
+
+**One decision left for the owner to confirm (flagged in-session):** in Use-Existing-Git mode the
+Template/Form/Module fields are kept **enabled** (not greyed) — they're "used only if the cloned
+repo turns out empty," which avoids a mid-dialog re-prompt. Owner had earlier leaned toward
+"disable them while checked, re-prompt on empty"; the simpler enabled/single-pass version was
+shipped for now. Switch to disabled+reprompt if the owner prefers.
+
+**What still needs owner testing (needs real SSH remotes):** (1) Local create → project opens, a
+`project.astoria` lands in the folder; (2) mode switch enables/disables the git fields; (3) clone
+paths against the owner's own repos — an **empty** repo, a **complete** Astoria project pushed up,
+and a **foreign** repo (to see refuse-and-delete).
+
+**Remaining tasks:** task 2 — Project menu **Edit Project Description** (open `project.astoria` for
+editing; enabled when the open project has one). Task 3 — Project menu **Git Commit / Push**
+automation for git-backed projects (read the remote from `project.astoria`; same temp-.bat +
+`PipeCmd` + SSH pattern). Both depend on the task-1 module (already in place).
+
 ## Session handoff (2026-07-16) — Agent MCP Server (Tasks 0–5 of 8)
 
 **Astoria is now a working MCP server.** An MCP client (Claude Code/Desktop) can drive the live IDE — create/open projects, read/write files, type into the editor, build, run, and read back errors and program output. Full spec + per-task detail: [MCP_SERVER_PLAN.md](MCP_SERVER_PLAN.md) (its "Implementation progress" section is authoritative). Commits `6799e6f` (T0) → `438404e` (T5), all on `origin/main`.
@@ -315,13 +374,18 @@ This fixes the wide-text case *and* hardens capture against any stray NULs, inde
 
 ## Next ready work
 
+**In progress: New Project dialog two-mode redesign + `project.astoria` (Task 1 of 3).** Built
+and compiles clean; **not yet owner-verified** — owner is continuing to test on the other
+computer. See "Session handoff (2026-07-17) — New Project two-mode redesign" below for the
+full plan, what's done, the field enabled/disabled decision to confirm, and exactly what to
+test. Tasks 2 (Project menu → Edit Project Description) and 3 (Project menu → Git Commit/Push)
+are queued and depend on Task 1's `project.astoria` module.
+
 **Agent MCP Server — COMPLETE (Tasks 0–7, 2026-07-17).** Verified end-to-end from a real
 MCP client (stdio JSON-RPC 2.0): `create_project` → `write_file` → `build` → `get_errors`
 → fix → `run` produced the correct output (`Primes below 1000000 = 78498`). Two MCP-side
 bugs found and fixed during verification (Fix B: `create_project` opens the main file;
 Fix C: agent build saves dirty editors first — see [MCP_SERVER_PLAN.md](MCP_SERVER_PLAN.md) Task 7).
-
-No task is currently selected.
 
 *Done 2026-07-17 (code-complete, pending GUI/MCP verify on the other computer):* the **MCP
 `run` output capture is hardened against NUL truncation** — see the 2026-07-17 handoff below.

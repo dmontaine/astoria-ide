@@ -1,6 +1,6 @@
 # Astoria-IDE — Project Status & Handoff
 
-**Last updated:** 2026-07-16 (Claude Code AI template brought to the shared 13-skill set and Kun's `.kun/skills/` committed — `08ba401`; see "AI template folders" below)
+**Last updated:** 2026-07-16 (Main-menu Code/Form restructure in progress — WIP checkpoint committed for cross-machine handoff; two UX items await owner answers. See "Session handoff (2026-07-16) — Main-menu Code/Form restructure" below.)
 **Repository:** [github.com/dmontaine/astoria-ide](https://github.com/dmontaine/astoria-ide)
 **Local path:** C:\Users\don\Astoria-IDE
 
@@ -248,6 +248,23 @@ All five `Templates/AI/<Tool>/` folders now carry a **default rules + skills set
 - **Maintenance rule:** edit the shared baseline in **all five** `AGENTS.md` files (and per-tool mirrors) together — see [Templates/AI/README.md](Templates/AI/README.md).
 
 Same session: found and fixed (`9ca88b6`) a dead `App.DarkMode = True` in **both new-project templates** — left over from the 2026-07-15 dark-mode removal, it made every new Windows Application project fail with `error 18: Element not defined` (verified by standalone `fbc64` compiles both with and without the line). **The matching `Examples/` sweep is also done (`51bd45a`, ran as a spun-off task session):** 68 files lost their single dead bootstrap line; 8 projects (DeviceExplorer, USBView, FileBrowser, MediaPlayer, Sudoku, Hash ×2 forms, MDIForm) had the whole dark-mode toggle feature removed (menus, toolbar buttons, handlers, ImageList/`.rc` entries, 3 PNG resources). Verification (26/26 touched projects compile clean) surfaced and fixed three more pre-existing breakages: the `nullptr` define that lived in the deleted `DarkMode.bi` (both `frmSpRecognizer.frm` copies → `NULL`), FileBrowser's include of removed `../MDINotepad/FileAct.bi` (→ Hash's identical copy), Hash's missing `ITL3.bas` (restored from history), plus the accidentally-deleted `DeviceExplorer.vfp` from `e9bc31d` (restored, owner decision). Zero `DarkMode`/`darkTextColor`/`darkBkColor`/`nullptr` references remain under `Examples/`.
+
+## Session handoff (2026-07-16) — Main-menu Code/Form restructure (WIP, owner feedback pending)
+
+Owner-requested (accessibility — dislikes toolbars, wants every command reachable from the menu bar): put the code-pane and form-pane right-click menus onto the main menu bar too. **This is a WIP checkpoint** — it compiles clean (`Compile.bat`, no `FORCE_MFF`, 0 errors) and runs, committed so the *other machine can continue*. **Two UX items are still open (owner was mid-reply when switching machines).** All changes are in `src/Main.bas`'s menu construction (~line 6115+, `mnuMain`).
+
+**Done:**
+- **Edit → Code** and **Designer → Form** top menus renamed (captions only; the keys `Tahrir`/`FormFormat` and the `mi*` variables are unchanged, so the existing contextual enable/disable wiring is untouched).
+- **Code menu** (was Edit) keeps all its items and gained: **Complete Word**, **Syntax Check**, **Suggestions**, a **Convert** submenu (to Lower/Upper/Capitalize, to/from Unicode Hex), a **Lines** submenu (Split/Combine/Sort/Format-With-Basis-Word), and **Split Horizontally / Split Vertically / Fold** moved in from the **View** menu (code-pane specific). The old **Search** top menu was folded in as a **Code ▸ Search** submenu and removed from the bar.
+- **Form menu** (was Designer) keeps Align/Make-Same-Size/Size-to-Grid/Spacing/Center/Order/Lock and gained the form right-click's control ops: **Default Event, Copy, Cut, Paste, Delete, Duplicate** (top) and **Previous/Next Layer + Properties** (bottom), all via `@PopupClick` (acts on the active designer's selection; `PopupClick` is forward-declared in `Main.bi:74`, so it is usable from `Main.bas`). Only **Show Panel** was omitted (it's built dynamically per-selection at right-click time — can't be a static top entry).
+- **Menu bar reordered** → `File · View · Project · Code · Form · Run · Tools · Window · Help` (owner wanted Project/Code/Form adjacent in that order).
+- New duplicate items use **plain captions (no accelerator text)** so they don't double-register in the accelerator table (the shortcuts stay owned by the original items / the Run menu / the folded-in Search submenu). The code right-click's **debug ops** (Toggle Breakpoint, Add Watch, Run To Cursor, Set Next Statement) were **left in the Run menu**, not duplicated into Code.
+
+**OPEN — needs owner answers before finishing:**
+1. **Form-menu greying.** Owner reports the Form menu doesn't grey when no form is active. Mechanism is sound (`frmMain.Menu = @mnuMain` sets the menu's `ParentWindow`; framework's `MenuItem.Enabled` setter greys the bar item **and** calls `DrawMenuBar`) — so it's the *condition*, not repaint. The rule (`ApplyFormTabView`, `src/Main.bas` ~8402/8414/8432 and `TabWindow.bas` ~336/375/388) enables `miFormFormat` whenever `cboClass.Items.Count > 1` — i.e. **any file with a class, not just a `.frm`** — so a `.bas` defining a `Type` wrongly lights it up. **Likely fix:** gate on `EndsWith(LCase(tb->FileName), ".frm")` (the `bFormFile` value already computed in that else branch). Confirm the owner's exact scenario (empty IDE / `.bas` / `.frm`-in-Code-view) first — the question was posed and is unanswered.
+2. **Right-click vs main-menu consistency.** Owner noted the code right-click has all items active while the main Code menu greys some by context. Decision pending: also grey inactive items in the right-click menus (more work), or leave right-clicks all-active and only ensure the main Code/Form menus grey correctly (recommended). No change made yet.
+
+Also still pending review from the earlier part of this session: the New Project dialog's minor alignment tweaks the owner said they'd handle manually.
 
 ## Next ready work
 

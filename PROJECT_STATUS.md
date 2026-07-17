@@ -266,6 +266,10 @@ Owner-requested (accessibility — dislikes toolbars, wants every command reacha
 
 Still pending from the other machine's session: the New Project dialog's minor alignment tweaks the owner said they'd handle manually.
 
+**Same-day follow-up — view selector restyled + a framework TabControl bug fixed (`6aa6961`, owner-verified):** the per-document Code+Form/Code/Form strip rendered as flat buttons — bare grey-on-grey text with nothing visually attaching it to the viewport (owner report: "lost in the surrounding sea of grey"). Final form after three owner-eyeballed iterations: **button-style tabs (`TabStyle.tsButtons`) with icons** (the old toolbar toggles' own `imgList` images: CodeAndForm/Code/Form), **docked below the viewport** (`alBottom` — owner: "removes possible confusion" with the document tab strip above). The button restyle exposed a real framework bug, fixed in `TabControl.bas`: the message hook took `SetCapture`/`ReleaseCapture` around **every** click, unconditionally, for the drag-reorder/detach features — button-style tabs commit their click on mouse-UP (classic tabs select on DOWN, which masked this for years), and the early `ReleaseCapture` generates `WM_CAPTURECHANGED` before the native control processes the up-click, cancelling the press, so unselected button tabs never changed selection. Capture is now conditional on `Reorderable`/`Detachable`; owner-verified that view buttons switch views and drag-reorder still works on the document and left/right panel strips (the only opt-in users).
+
+**Owner direction recorded (2026-07-16): teachers/educators added as a named target audience** — easy-to-learn language, one tool for text+GUI, built-in Git and AI integration, working with both frontier models and open-source models via OpenCode (school-budget friendly). Teaching plans and resources for educators are a future task set **gated on a final stable IDE** — see [ROADMAP.md](ROADMAP.md) §13.13 and the new entry in Deferred enhancements below.
+
 ## Next ready work
 
 No task is currently selected. Choose from the open items below when ready.
@@ -281,6 +285,7 @@ For the reasoning, exact code locations, and prior hot-path findings, see [HISTO
 
 ### Deferred enhancements
 
+- [ ] **Teaching plans and resources for educators (owner-added 2026-07-16, gated on a final stable IDE).** Teachers/educators are now a named target audience: Astoria's pitch to them is an easy-to-learn language + a single tool for both text and GUI development + built-in Git and AI integration, with the AI side working across both frontier models (high cost) and open-source models via OpenCode — the latter appealing for limited school budgets. Full rationale and scope notes in [ROADMAP.md](ROADMAP.md) §13.13. Do not start until the IDE is declared stable.
 - [x] **T01 — Standardize indentation.** Done for all three trees. `src/` (`2f445e4`). `Controls/` (124 files converted to tabs via a per-file auto-detected indent unit, since files ranged 2/3/4-space plus stray-space typos with no single global unit; 2 files - `SystemInformation.bas`/`.bi` - hand-fixed instead since their spacing was too inconsistent for any unit to fit). `Examples/` (7 files, all clean 3- or 4-space, converted with zero remainder warnings). CRLF normalized throughout (only a handful of LF-only files existed by this point) via the same scoped `.gitattributes -crlf` pattern extended to `/Controls/**` and `/Examples/**`.
 - [x] **T03 — Extract repeated logic within files.**
 - [x] **T05 — Simplify the Development/Final compile-mode controls.**

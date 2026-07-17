@@ -245,4 +245,17 @@ Toggling Dark Mode on in Options and clicking **Apply** re-themes some controls 
 
 Traced the call chain but stopped short of isolating the actual gap (owner deferred mid-investigation): `frmOptions.frm`'s `cmdApply_Click` does `DarkMode = .chkDarkMode.Checked : App.DarkMode = DarkMode : SetColors : UpdateAllTabWindows`. **`SetColors` is a false lead** — despite the name, it only reapplies syntax-highlighting colors (keywords, comments, identifiers, etc. via `SetColor`), unrelated to the app-wide dark theme. The real mechanism is the `App.DarkMode` property setter (`Application.bas:53-56`), which calls `SetDarkMode(Value, False)` (also invoked once at startup from `SettingsService.bas:214` with a `False, False` — differently, worth comparing the two call sites' parameter differences). Next step when picked up: find `SetDarkMode`'s implementation (not yet located this session — grep didn't surface a definition, only these two call sites and one in `Controls/Framework/mff/Application.bas`; may be in a `.bi`-declared-only + linked-elsewhere form, or named differently than expected) and determine which controls it does/doesn't walk and repaint, likely comparing against whatever full-repaint path runs at startup that the "next launch" case benefits from.
 
+### 13.13 Target audience: teachers/educators — teaching plans and resources (owner-added 2026-07-16, gated on a stable IDE)
+
+**Owner decision: educators are a named target audience for Astoria**, alongside end-user developers. The positioning: many development stacks overwhelm beginners and the people teaching them. Astoria combines:
+
+- an **easy-to-learn language** (FreeBASIC),
+- a **single tool** covering both text/console and GUI development,
+- built-in **Git integration** (New Project dialog wires up the local repo, `.gitignore`/`.gitattributes`, provider guides), and
+- built-in **AI integration** (the "AI friendly" project stamping with per-tool rules and skills),
+
+with the AI side deliberately working across **both frontier models** (higher cost) **and open-source models via OpenCode** — the latter specifically appealing for schools operating on limited budgets.
+
+**The task set — to be scoped only after the IDE is declared final/stable:** create **teaching plans and resources for educators**. (Curriculum/lesson plans, classroom setup guidance presumably including the per-user installer and the OpenCode path, and teaching-oriented reference material — exact scope to be defined with the owner when picked up. Nothing here has started; this section records the audience decision and the rationale so the intent survives until then.)
+
 ---

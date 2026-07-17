@@ -117,7 +117,9 @@ Dim Shared As MenuItem Ptr miUndo, miRedo, miCutCurrentLine, miCut, miCopy, miPa
 Dim Shared As MenuItem Ptr dmiMake, dmiMakeClean
 Dim Shared As MenuItem Ptr miCode, miForm, miCodeAndForm, miGotoCodeForm, miFold, miDebugWindows, miCollapseCurrent, miCollapseAllProcedures, miCollapseAll, miUnCollapseCurrent, miUnCollapseAllProcedures, miUnCollapseAll, miImageManager, miAddProcedure, miAddType, miFind, miReplace, miFindNext, miFindPrevious, miGoto, miDefine, miToggleBookmark, miNextBookmark, miPreviousBookmark, miClearAllBookmarks, miSyntaxCheck, miCompile, miCompileAll, miMake, miMakeClean
 Dim Shared As MenuItem Ptr miAlignLefts, miAlignCenters, miAlignRights, miAlignTops, miAlignMiddles, miAlignBottoms, miAlignToGrid, miMakeSameSizeWidth, miMakeSameSizeHeight, miMakeSameSizeBoth, miSizeToGrid, miHorizontalSpacingMakeEqual, miHorizontalSpacingIncrease, miHorizontalSpacingDecrease, miHorizontalSpacingRemove, miVerticalSpacingMakeEqual, miVerticalSpacingIncrease, miVerticalSpacingDecrease, miVerticalSpacingRemove, miCenterInParentHorizontally, miCenterInParentVertically, miOrderBringToFront, miOrderSendToBack, miLockControls
-Dim Shared As MenuItem Ptr miFormFormat ' D1 (2026-07-07): top-level Designer menu; disabled when no form with controls is active
+Dim Shared As MenuItem Ptr miFormFormat ' D1 (2026-07-07): top-level Form menu; greyed contextually by UpdateCodeFormMenuEnabled (TabWindow.bas)
+Dim Shared As MenuItem Ptr miCodeMenu ' top-level Code menu; greyed contextually alongside miFormFormat (see UpdateCodeFormMenuEnabled)
+Dim Shared As Boolean gDesignerPaneFocused ' split view: True while the form-designer pane (not the code editor) last held focus
 Dim Shared As MenuItem Ptr miShowWithFolders, miShowWithoutFolders, miShowAsFolder
 Dim Shared As ToolButton Ptr tbtAlignLefts, tbtAlignCenters, tbtAlignRights, tbtAlignTops, tbtAlignMiddles, tbtAlignBottoms, tbtAlignToGrid, tbtMakeSameSizeWidth, tbtMakeSameSizeHeight, tbtMakeSameSizeBoth, tbtSizeToGrid, tbtHorizontalSpacingMakeEqual, tbtHorizontalSpacingIncrease, tbtHorizontalSpacingDecrease, tbtHorizontalSpacingRemove, tbtVerticalSpacingMakeEqual, tbtVerticalSpacingIncrease, tbtVerticalSpacingDecrease, tbtVerticalSpacingRemove, tbtCenterInParentHorizontally, tbtCenterInParentVertically, tbtOrderBringToFront, tbtOrderSendToBack, tbtLockControls
 Dim Shared As ToolButton Ptr tbtSave, tbtSaveAll, tbtSyntaxCheck, tbtSuggestions, tbtCompile, tbtUndo, tbtRedo, tbtCut, tbtCopy, tbtPaste, tbtSingleComment, tbtFormat, tbtUnformat, tbtCompleteWord, tbtParameterInfo, tbtFind, tbtRemoveFileFromProject, tbtStartWithCompile, tbtStart, tbtBreak, tbtEnd, tbtUseDebugger, tbtNotSetted, tbtConsole, tbtGUI, tbtStepInto, tbtStepOver, tbtStepOut, tbtRunToCursor, tbtToggleBreakpoint, tbtSetNextStatement, tbtShowNextStatement
@@ -3094,6 +3096,12 @@ Sub ChangeEnabledDebug(bStart As Boolean, bBreak As Boolean, bEnd As Boolean)
 	tbtStepOut->Enabled = bDebugCommands
 	tbtRunToCursor->Enabled = bDebugCommands
 	tbtSetNextStatement->Enabled = bDebugCommands
+	'' Code-pane right-click mirrors of the same debug commands -- owner decision
+	'' (2026-07-16): context menus grey by context exactly like the main menus, so
+	'' these three no longer offer debugger actions while the debugger is off/busy.
+	If mnuCode.Item("AddWatch") Then mnuCode.Item("AddWatch")->Enabled = bDebugCommands
+	If mnuCode.Item("RunToCursor") Then mnuCode.Item("RunToCursor")->Enabled = bDebugCommands
+	If mnuCode.Item("SetNextStatement") Then mnuCode.Item("SetNextStatement")->Enabled = bDebugCommands
 	tbtToggleBreakpoint->Enabled = True
 	If mnuUseProfiler <> 0 Then mnuUseProfiler->Enabled = UseDebugger
 	SetDebugTabsVisible UseDebugger
@@ -6221,6 +6229,7 @@ Sub CreateMenusAndToolBars
 	miProjectProperties = miProject->Add(("&Project Properties") & "..." & HK("ProjectProperties"), "", "ProjectProperties", @mClick, , , False)
 	
 	Var miEdit = mnuMain.Add(("&Code"), "", "Tahrir")
+	miCodeMenu = miEdit ' shared pointer so UpdateCodeFormMenuEnabled can grey the whole menu contextually
 	miUndo = miEdit->Add(("Undo") & HK("Undo", "Ctrl+Z"), "Undo", "Undo", @mClick, , , False)
 	miRedo = miEdit->Add(("Redo") & HK("Redo", "Ctrl+Shift+Z"), "Redo", "Redo", @mClick, , , False)
 	miEdit->Add("-")
@@ -8360,7 +8369,7 @@ txtEvents.OnChange = @txtEvents_Change
 
 Sub tabCode_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As TabControl, newIndex As Integer)
 	Static tbOld As TabWindow Ptr
-	If newIndex = -1 Then miFormFormat->Enabled = False: Exit Sub ' D1: no tab selected → no form open
+	If newIndex = -1 Then UpdateCodeFormMenuEnabled: Exit Sub ' no tab selected → both Code and Form menus grey
 	Dim tb As TabWindow Ptr = Cast(TabWindow Ptr, Sender.Tab(newIndex))
 	If tb = 0 Then tbFormat.Visible = False: Exit Sub
 	If tb = tbOld Then Exit Sub
@@ -8411,7 +8420,6 @@ Sub tabCode_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As TabContro
 		mnuSplitHorizontally->Enabled = tb->CurrentView() <> "Form"
 		mnuSplitVertically->Enabled = tb->CurrentView() <> "Form"
 		miFold->Enabled = tb->CurrentView() <> "Form"
-		miFormFormat->Enabled = True ' D1: form with controls is active
 		tb->SetFormViewsEnabled(True)
 	Else
 		lvProperties.Nodes.Clear
@@ -8429,13 +8437,14 @@ Sub tabCode_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As TabContro
 		mnuSplitHorizontally->Enabled = tb->CurrentView() <> "Form"
 		mnuSplitVertically->Enabled = tb->CurrentView() <> "Form"
 		miFold->Enabled = tb->CurrentView() <> "Form"
-		miFormFormat->Enabled = False ' D1: no controls to design (Designer ops need existing controls)
 		tb->SetFormViewsEnabled(bFormFile)
 		If mApplyingDeferredFormDesign = False AndAlso mApplyingFormTabView = False Then
 			tb->ShowView("Code")
 		End If
 		'SetRightClosedStyle True, True
 	End If
+	'' Code/Form top menus: recompute for the newly selected tab (view/design state settled above).
+	UpdateCodeFormMenuEnabled
 	If tb->FileName = "" Then
 		frmMain.Caption = tb->Caption & " - " & App.Title
 	Else
@@ -9016,6 +9025,34 @@ Sub frmMain_ActiveControlChanged(ByRef Designer As My.Sys.Object, ByRef sender A
 	Case @txtExplorer, @tvExplorer, @txtForm, @tvToolBox, @txtProperties, @lvProperties, @txtEvents, @lvEvents
 		bEnabledIndentAndOutdent = True
 	End Select
+	'' Split view: the Code/Form top menus track whichever editing pane last took focus.
+	'' Only the two panes themselves flip the flag -- focus moving to Properties, the
+	'' Toolbox, output panels etc. keeps the current pane context. The designer surface
+	'' is a foreign window hosted inside pnlForm, so the MFF control that reports focus
+	'' may be pnlForm itself or a wrapper inside it -- walk the parent chain to find out.
+	Scope
+		Dim As TabWindow Ptr tbPane = Cast(TabWindow Ptr, ptabCode->SelectedTab)
+		If tbPane Then
+			If ActiveForm->ActiveControl = Cast(Control Ptr, @tbPane->txtCode) Then
+				If gDesignerPaneFocused Then
+					gDesignerPaneFocused = False
+					UpdateCodeFormMenuEnabled
+				End If
+			Else
+				Dim As Control Ptr cWalk = ActiveForm->ActiveControl
+				While cWalk
+					If cWalk = Cast(Control Ptr, @tbPane->pnlForm) Then
+						If Not gDesignerPaneFocused Then
+							gDesignerPaneFocused = True
+							UpdateCodeFormMenuEnabled
+						End If
+						Exit While
+					End If
+					cWalk = cWalk->Parent
+				Wend
+			End If
+		End If
+	End Scope
 	If bEnabledIndentAndOutdent Then
 		If miIndent->Caption <> ("Move focus forward") & !"\tTab" Then
 			miIndent->Caption = ("Move focus forward") & !"\tTab"

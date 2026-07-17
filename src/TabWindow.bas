@@ -246,6 +246,39 @@ Function ProjectNameSameWithFolder(ptn As TreeNode Ptr) As Boolean
 	Return False
 End Function
 
+'' Central enable rule for the Code and Form top-level menus (owner spec, 2026-07-16):
+''   no tab open      -> both greyed
+''   Code-only view   -> Code enabled, Form greyed
+''   Form-only view   -> Form enabled (when a design is loaded), Code greyed
+''   split view       -> tracks whichever pane last held focus (gDesignerPaneFocused,
+''                       maintained by frmMain_ActiveControlChanged and ApplyView)
+'' "A design is loaded" is tb->Des->DesignControl, NOT cboClass.Items.Count -- that combo
+'' is the code editor's class dropdown and fills for ANY file containing a Type, which is
+'' exactly what wrongly lit the Form menu up for plain .bas modules. Des/DesignControl is
+'' only set once the Form Designer has actually built this tab's design (entering a form
+'' view triggers that), and it also keeps UserControl.bas designs working.
+Sub UpdateCodeFormMenuEnabled()
+	Dim As TabWindow Ptr tb = Cast(TabWindow Ptr, ptabCode->SelectedTab)
+	Dim As Boolean bCode, bForm
+	If tb Then
+		Dim As Boolean bFormDesignable = (tb->Des <> 0 AndAlso tb->Des->DesignControl <> 0)
+		Select Case tb->CurrentView()
+		Case "Form"
+			bForm = bFormDesignable
+		Case "CodeAndForm"
+			If gDesignerPaneFocused AndAlso bFormDesignable Then
+				bForm = True
+			Else
+				bCode = True
+			End If
+		Case Else '' "Code"
+			bCode = True
+		End Select
+	End If
+	If miCodeMenu Then miCodeMenu->Enabled = bCode
+	If miFormFormat Then miFormFormat->Enabled = bForm
+End Sub
+
 Sub ChangeMenuItemsEnabled
 	If iFlagStartDebug = 1 Then Exit Sub
 	Dim As TreeNode Ptr ptn = GetParentNode(tvExplorer.SelectedNode)
@@ -329,11 +362,10 @@ Sub ChangeMenuItemsEnabled
 	dmiMakeClean->Enabled = bEnabled
 	miFormatProject->Enabled = bEnabled
 	miUnformatProject->Enabled = bEnabled
-	' D1: the top-level Designer menu is enabled only when the ACTIVE tab holds a form with
-	' controls. Computed here (not only in tabCode_SelChange/ApplyFormTabView) so it also greys
-	' on tab/form CLOSE -- CloseTab calls ChangeMenuItemsEnabled, whereas tabCode_SelChange's
-	' "If tb = tbOld Then Exit Sub" early-exits can skip the per-select update.
-	miFormFormat->Enabled = (tbActiveView <> 0 AndAlso tbActiveView->cboClass.Items.Count > 1)
+	' Code/Form top menus: recomputed here (not only in tabCode_SelChange/ApplyFormTabView) so
+	' they also grey on tab/form CLOSE -- CloseTab calls ChangeMenuItemsEnabled, whereas
+	' tabCode_SelChange's "If tb = tbOld Then Exit Sub" early-exits can skip the update.
+	UpdateCodeFormMenuEnabled
 	ChangeEnabledDebug bEnabled, False, False
 End Sub
 
@@ -372,7 +404,6 @@ Sub ApplyFormTabView(tb As TabWindow Ptr)
 		mnuSplitHorizontally->Enabled = True
 		mnuSplitVertically->Enabled = True
 		miFold->Enabled = True
-		miFormFormat->Enabled = False ' D1: no controls to design
 		tb->SetFormViewsEnabled(bFormFile)
 		tb->ShowView("Code")
 	Else
@@ -385,11 +416,13 @@ Sub ApplyFormTabView(tb As TabWindow Ptr)
 		mnuSplitHorizontally->Enabled = True
 		mnuSplitVertically->Enabled = True
 		miFold->Enabled = True
-		miFormFormat->Enabled = True ' D1: form with controls is active
 		tb->SetFormViewsEnabled(True)
 		tb->ShowView("CodeAndForm")
 		RefreshDesignSurface(tb)
 	End If
+	'' Code/Form top menus: recompute once the view has settled (ShowView above already
+	'' updated them via ApplyView; this also covers the ShowView("Code") branch).
+	UpdateCodeFormMenuEnabled
 	mApplyingFormTabView = False
 End Sub
 
@@ -10186,6 +10219,17 @@ Sub TabWindow.ApplyView(ByRef ViewName As String)
 		mnuSplitVertically->Enabled = ViewName <> "Form"
 		' Fold operates on the code editor, which isn't visible in Form-only view.
 		miFold->Enabled = ViewName <> "Form"
+		'' Code/Form top menus: a view switch resets which pane counts as focused --
+		'' single-pane views imply their own pane; entering split view starts on the
+		'' code pane (tabCode_SelChange focuses txtCode) until the user clicks the
+		'' designer (tracked by frmMain_ActiveControlChanged).
+		Select Case ViewName
+		Case "Form"
+			gDesignerPaneFocused = True
+		Case Else '' "Code", "CodeAndForm"
+			gDesignerPaneFocused = False
+		End Select
+		UpdateCodeFormMenuEnabled
 	End If
 	RequestAlign
 End Sub

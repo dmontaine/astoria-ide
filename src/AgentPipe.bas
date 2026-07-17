@@ -399,6 +399,85 @@ Private Function AgentHandleBuildCmd(ByRef cmd As String, ByRef idJson As String
 	Return resp
 End Function
 
+'' Map an AI-tool label (as the New Project dialog uses) to its Templates/AI
+'' subfolder. Mirrors frmNewProject.AIToolFolderName so agent-created and
+'' dialog-created projects stamp identically. "" for an unknown label.
+Private Function AgentAiToolFolder(ByRef toolLabel As String) As UString
+	Select Case toolLabel
+	Case "Claude Code":     Return "ClaudeCode"
+	Case "Cursor":          Return "Cursor"
+	Case "ChatGPT (Codex)": Return "ChatGPT"
+	Case "OpenCode":        Return "OpenCode"
+	Case "Kun (Deepseek)":  Return "Kun"
+	Case Else:              Return ""
+	End Select
+End Function
+
+'' Read SrcFile, substitute the six {{...}} tokens, write to DestFile (byte-based;
+'' template files are ASCII/UTF-8 and the markers are pure ASCII). Mirrors
+'' frmNewProject.StampTemplateFile.
+Private Sub AgentStampTemplateFile(ByRef srcFile As UString, ByRef destFile As UString, ByRef projectName As String, ByRef authorName As String, ByRef licenseName As String, ByRef descriptionText As String)
+	Dim As Integer fnIn = FreeFile
+	If Open(srcFile For Binary Access Read As #fnIn) <> 0 Then Exit Sub
+	Dim As Integer fileSize = LOF(fnIn)
+	Dim As String contents = String(fileSize, 0)
+	If fileSize > 0 Then Get #fnIn, 1, contents
+	Close #fnIn
+	Dim As String authorForToken = Trim(authorName)
+	If authorForToken = "" Then authorForToken = "the author"
+	contents = Replace(contents, "{{PROJECT}}", projectName)
+	contents = Replace(contents, "{{AUTHOR}}", authorForToken)
+	contents = Replace(contents, "{{YEAR}}", Format(Now, "yyyy"))
+	contents = Replace(contents, "{{DATE}}", Format(Now, "yyyy-mm-dd"))
+	contents = Replace(contents, "{{LICENSE}}", licenseName)
+	contents = Replace(contents, "{{DESCRIPTION}}", descriptionText)
+	'' {{ASTORIA_MCP_EXE}} (the AI templates' .mcp.json / setup-skill placeholder): an
+	'' agent creating this project via MCP necessarily has a working sidecar next to
+	'' astoria.exe, so auto-fill its real path. Forward slashes -> valid unescaped in
+	'' JSON (.mcp.json) and a valid Windows path, readable in markdown too.
+	Dim As String mcpExe = Replace(ExePath & "/astoria-mcp.exe", "\", "/")
+	contents = Replace(contents, "{{ASTORIA_MCP_EXE}}", mcpExe)
+	Dim As Integer fnOut = FreeFile
+	If Open(destFile For Binary Access Write As #fnOut) = 0 Then
+		If Len(contents) > 0 Then Put #fnOut, 1, contents
+		Close #fnOut
+	End If
+End Sub
+
+'' Recursively copy SrcFolder into DestFolder, stamping each file; skip .gitkeep.
+'' Drains each dir listing before recursing (Dir keeps one search handle).
+'' Mirrors frmNewProject.CopyTemplateTree.
+Private Sub AgentCopyTemplateTree(ByRef srcFolder As UString, ByRef destFolder As UString, ByRef projectName As String, ByRef authorName As String, ByRef licenseName As String, ByRef descriptionText As String)
+	If Not EnsureDirectoryExists(destFolder) Then Exit Sub
+	Dim As WStringList names
+	Dim As UInteger attr
+	Dim As String f = Dir(srcFolder & WindowsSlash & "*", fbReadOnly Or fbHidden Or fbSystem Or fbDirectory Or fbArchive, attr)
+	Do While f <> ""
+		If f <> "." AndAlso f <> ".." AndAlso f <> ".gitkeep" Then names.Add f
+		f = Dir(attr)
+	Loop
+	For i As Integer = 0 To names.Count - 1
+		Dim As UString itemName = names.Item(i)
+		Dim As UString srcItem = srcFolder & WindowsSlash & itemName
+		Dim As UString destItem = destFolder & WindowsSlash & itemName
+		If FolderExistsU(srcItem) Then
+			AgentCopyTemplateTree(srcItem, destItem, projectName, authorName, licenseName, descriptionText)
+		Else
+			AgentStampTemplateFile(srcItem, destItem, projectName, authorName, licenseName, descriptionText)
+		End If
+	Next i
+End Sub
+
+'' Stamp Templates/AI/<folder>/ into a project (token-substituted). No-op if the
+'' template folder is missing. Returns whether it stamped anything.
+Private Function AgentStampAiTemplate(ByRef destFolder As UString, ByRef toolFolder As UString, ByRef projectName As String) As Boolean
+	If toolFolder = "" Then Return False
+	Dim As UString srcFolder = WinOsPath(ExePath & "/Templates/AI/" & toolFolder)
+	If Not FolderExistsU(srcFolder) Then Return False
+	AgentCopyTemplateTree(srcFolder, destFolder, projectName, "", "", "")
+	Return True
+End Function
+
 '' The single source file shipped inside a project template folder
 '' (Templates/Projects/<template>/), e.g. "Module1.bas". "" if none.
 Private Function AgentTemplateMainFile(ByRef templateName As String) As UString
@@ -559,10 +638,11 @@ Sub AgentPipe_ExecutePendingOnUi()
 		'' Create a new project from a template under the configured Projects path
 		'' and open it. Headless equivalent of the New Project dialog's core (git/
 		'' AI/license extras are separate tools / a later unification with the dialog).
-		Dim As String nm, template
+		Dim As String nm, template, aiTool
 		If gCmdArgs Then
 			nm = Trim(gCmdArgs->GetStr("name"))
 			template = Trim(gCmdArgs->GetStr("template"))
+			aiTool = Trim(gCmdArgs->GetStr("ai_tool"))   '' AI-tool label from the sidecar (the client's identity)
 		End If
 		If template = "" Then template = "Console Application"
 		If nm = "" OrElse Not IsValidProjectItemName(nm) Then
@@ -610,10 +690,23 @@ Sub AgentPipe_ExecutePendingOnUi()
 			outVfp &= ln
 			If nl <> 0 Then outVfp &= Chr(10)
 		Wend
+		'' AI-friendly metadata: an agent-created project is always AI-friendly. The
+		'' AITool label (the creating client, mapped by the sidecar) drives which
+		'' Templates/AI folder gets stamped below. Round-tripped by AddProject's
+		'' parser/writer (commit 86948b5), so a project save preserves these keys.
+		Dim As String aiToolMeta = aiTool
+		If aiToolMeta = "" Then aiToolMeta = "Claude Code"
+		outVfp &= "AIFriendly=true" & Chr(13) & Chr(10)
+		outVfp &= "AITool=""" & aiToolMeta & """" & Chr(13) & Chr(10)
 		Dim As UString newVfp = WinOsPath(newFolder & "/" & nm & ".vfp")
 		If Not AgentWriteFileBytes(newVfp, outVfp) Then
 			gCmdErrCode = "write_failed" : gCmdErrMsg = "Could not write the project file." : SetEvent(gCmdDone) : Exit Sub
 		End If
+		'' Stamp the creating agent's AI template (CLAUDE.md / AGENTS.md / skills /
+		'' etc.) into the project folder, token-substituted -- same content the New
+		'' Project dialog's "Make project AI friendly" produces.
+		Dim As UString aiFolder = AgentAiToolFolder(aiToolMeta)
+		Dim As Boolean aiStamped = AgentStampAiTemplate(newFolder, aiFolder, nm)
 		'' Open it.
 		Dim As WString Ptr vfpW
 		WLet(vfpW, newVfp)
@@ -635,6 +728,9 @@ Sub AgentPipe_ExecutePendingOnUi()
 		Dim As JsonValue Ptr res = JsonNewObject()
 		res->SetMember("project", JsonNewString(WStrToUtf8(newVfp)))
 		res->SetMember("main_file", JsonNewString(WStrToUtf8(destMain)))
+		res->SetMember("ai_friendly", JsonNewBool(True))
+		res->SetMember("ai_tool", JsonNewString(aiToolMeta))
+		res->SetMember("ai_template_stamped", JsonNewBool(aiStamped))
 		gCmdOk = True
 		gCmdResult = res
 

@@ -27,6 +27,21 @@ Dim Shared hStdIn As HANDLE
 Dim Shared hStdOut As HANDLE
 Dim Shared gStdinAcc As String       '' leftover bytes between ReadStdinLine calls
 Dim Shared gPipeReqId As LongInt     '' monotonic id for pipe requests
+Dim Shared gClientName As String     '' MCP client identity from initialize (clientInfo.name)
+
+'' Map the MCP client name (initialize clientInfo.name) to an Astoria AI-tool
+'' label, so an agent-created project gets that agent's AI template stamped in.
+'' Substring match, case-insensitive; defaults to Claude Code (the reference
+'' template) for an unknown or unset client.
+Function ClientToAiTool(ByRef clientName As String) As String
+	Dim As String c = LCase(clientName)
+	If InStr(c, "opencode") > 0 Then Return "OpenCode"
+	If InStr(c, "cursor") > 0 Then Return "Cursor"
+	If InStr(c, "codex") > 0 OrElse InStr(c, "chatgpt") > 0 OrElse InStr(c, "openai") > 0 Then Return "ChatGPT (Codex)"
+	If InStr(c, "kun") > 0 OrElse InStr(c, "deepseek") > 0 Then Return "Kun (Deepseek)"
+	If InStr(c, "claude") > 0 Then Return "Claude Code"
+	Return "Claude Code"
+End Function
 
 '' ---------------------------------------------------------------- stdio
 
@@ -237,8 +252,8 @@ Sub InitTools()
 	gTools(12).description = "Structured errors[] (file, line, severity, message) parsed from the last build."
 	gTools(12).schema = noArgs
 	gTools(13).name = "create_project"
-	gTools(13).description = "Create a new project from a template under the configured Projects folder and open it."
-	gTools(13).schema = "{""type"":""object"",""properties"":{""name"":{""type"":""string"",""description"":""Project name (also the folder name); no path or extension.""},""template"":{""type"":""string"",""enum"":[""Console Application"",""Windows Application"",""Dynamic Library"",""Static Library"",""Control Library""],""description"":""Default Console Application.""}},""required"":[""name""]}"
+	gTools(13).description = "Create a new project from a template under the configured Projects folder and open it. The project is marked AI-friendly and your AI template (rules + skills) is stamped in automatically."
+	gTools(13).schema = "{""type"":""object"",""properties"":{""name"":{""type"":""string"",""description"":""Project name (also the folder name); no path or extension.""},""template"":{""type"":""string"",""enum"":[""Console Application"",""Windows Application"",""Dynamic Library"",""Static Library"",""Control Library""],""description"":""Default Console Application.""},""ai_tool"":{""type"":""string"",""enum"":[""Claude Code"",""Cursor"",""ChatGPT (Codex)"",""OpenCode"",""Kun (Deepseek)""],""description"":""Which AI template to stamp in. Defaults to the calling client's own tool.""}},""required"":[""name""]}"
 	gTools(14).name = "open_project"
 	gTools(14).description = "Open an existing Astoria project by its .vfp path (switches the IDE to that project)."
 	gTools(14).schema = "{""type"":""object"",""properties"":{""path"":{""type"":""string"",""description"":""Path to a .vfp project file.""}},""required"":[""path""]}"
@@ -297,6 +312,9 @@ Sub HandleInitialize(req As JsonValue Ptr, ByRef idJson As String)
 	If params Then
 		Dim As String rv = params->GetStr("protocolVersion")
 		If rv <> "" Then ver = rv
+		'' Remember who the client is, to pick the AI template for create_project.
+		Dim As JsonValue Ptr ci = params->Find("clientInfo")
+		If ci Then gClientName = ci->GetStr("name")
 	End If
 	Dim As String r = "{""protocolVersion"":""" & JsonEscape(ver) & """,""capabilities"":{""tools"":{}}," & _
 		"""serverInfo"":{""name"":""" & MCP_SERVER_NAME & """,""version"":""" & MCP_SERVER_VERSION & """}}"
@@ -316,9 +334,20 @@ Sub HandleToolsCall(req As JsonValue Ptr, ByRef idJson As String)
 	End If
 
 	'' Serialize the arguments object (default {}) straight through to the pipe.
+	'' For create_project, inject ai_tool from the client's identity (unless the
+	'' caller set it) so an agent-created project is stamped AI-friendly with the
+	'' creating agent's template.
 	Dim As String argsJson = "{}"
 	Dim As JsonValue Ptr argsV = params->Find("arguments")
-	If argsV Then argsJson = JsonSerialize(argsV)
+	If toolName = "create_project" Then
+		Dim As Boolean ownArgs = False
+		If argsV = 0 Then argsV = JsonNewObject() : ownArgs = True
+		If argsV->Find("ai_tool") = 0 Then argsV->SetMember("ai_tool", JsonNewString(ClientToAiTool(gClientName)))
+		argsJson = JsonSerialize(argsV)
+		If ownArgs Then Delete argsV
+	ElseIf argsV Then
+		argsJson = JsonSerialize(argsV)
+	End If
 
 	gPipeReqId += 1
 	Dim As String pipeReq = "{""id"":" & Str(gPipeReqId) & ",""cmd"":""" & JsonEscape(toolName) & """,""args"":" & argsJson & "}"

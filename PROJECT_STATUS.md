@@ -290,6 +290,7 @@ For the reasoning, exact code locations, and prior hot-path findings, see [HISTO
 - [x] **T18 — Audit and replace applicable magic numbers.**
 - [x] **T19 — Audit remaining GTK/Linux/32-bit artifacts.**
 - [x] **T20 — Clean obsolete platform references from build documentation.**
+- [x] **`Documentation/` folder removed (2026-07-16, `2d833f4`).** 1092 loose HTML pages (~15 MB) that duplicated the FreeBASIC language reference already shipped compiled in `Help/FB-manual-en_US-1.10.1.chm`; nothing in code/build/help referenced it (StageRelease already excluded it — its comment updated to past tense). Staging re-verified clean afterward (3,771 files, 302 MB; `Documentation/` absent, Help CHM intact).
 
 ## Essential gotchas
 

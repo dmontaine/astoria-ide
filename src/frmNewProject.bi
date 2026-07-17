@@ -17,10 +17,8 @@
 		Declare Sub cmdCancel_Click(ByRef Sender As Control)
 		Declare Static Sub cmdOpenExisting_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Sub cmdOpenExisting_Click(ByRef Sender As Control)
-		Declare Static Sub lvTemplates_ItemActivate_(ByRef Designer As My.Sys.Object, ByRef Sender As ListView, ByVal ItemIndex As Integer)
-		Declare Sub lvTemplates_ItemActivate(ByRef Sender As ListView, ByVal ItemIndex As Integer)
-		Declare Static Sub lvTemplates_SelectedItemChanged_(ByRef Designer As My.Sys.Object, ByRef Sender As ListView, ByVal ItemIndex As Integer)
-		Declare Sub lvTemplates_SelectedItemChanged(ByRef Sender As ListView, ByVal ItemIndex As Integer)
+		Declare Static Sub cboTemplate_Change_(ByRef Designer As My.Sys.Object, ByRef Sender As ComboBoxEdit)
+		Declare Sub cboTemplate_Change(ByRef Sender As ComboBoxEdit)
 		Declare Static Sub chkUseGit_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Sub chkUseGit_Click(ByRef Sender As Control)
 		Declare Static Sub chkAIFriendly_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
@@ -43,13 +41,13 @@
 		Declare Function BuildGitURL(ByRef ProviderLabel As String, ByRef GitUserName As String, ByRef ProjName As String) As UString
 		Declare Constructor
 
-		Dim As ListView lvTemplates
+		Dim As ComboBoxEdit cboTemplate
 		Dim As CommandButton cmdOK, cmdCancel, cmdOpenExisting
 		Dim As Label lblProjectTemplates, lblProjectName, lblFormName, lblModuleName, lblAuthor, lblLicense, lblDescription, lblAITool, lblGitProvider, lblGitUserName, lblGitEmail
 		Dim As TextBox txtProjectName, txtFormName, txtModuleName, txtAuthor, txtDescription, txtGitUserName, txtGitEmail
 		Dim As CheckBox chkUseGit, chkAIFriendly
 		Dim As ComboBoxEdit cboLicense, cboAITool, cboGitProvider
-		Dim As Panel pnlBottom, pnlProjectName, pnlFormName, pnlModuleName, pnlAuthor, pnlDescription, pnlLicense, pnlGit, pnlGitProvider, pnlGitUserName, pnlGitEmail, pnlAIFriendly
+		Dim As Panel pnlBottom, pnlProjectTemplate, pnlProjectName, pnlFormName, pnlModuleName, pnlAuthor, pnlDescription, pnlLicense, pnlGit, pnlGitProvider, pnlGitUserName, pnlGitEmail, pnlAIFriendly
 		Dim As WStringList TemplateNames
 		Dim As UString SelectedTemplate, SelectedFolder, SelectedProjectFile
 		Dim As Boolean OpenExistingRequested

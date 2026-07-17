@@ -216,6 +216,7 @@ LoadSettings
 #include once "file.bi"
 #include once "Designer.bi"
 #include once "TabWindow.bi"
+#include once "ProjectDescription.bi"
 #include once "AgentPipe.bi"
 #include once "Debug.bi"
 #include once "frmFind.bi"

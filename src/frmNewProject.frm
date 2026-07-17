@@ -12,20 +12,57 @@
 			.MaximizeBox = False
 			.MinimizeBox = False
 			.OnCreate = @Form_Create_
-			.SetBounds 0, 0, 480, 626
+			.SetBounds 0, 0, 480, 539
 			.StartPosition = FormStartPosition.CenterParent
 		End With
-		' pnlBottom — footer: Project Name / Primary Form Name / Primary Module Name /
-		' Author / License / Use Git+URL / AI Friendly rows, stacked above the OK/Cancel/
-		' Open Existing button row. Everything the old two-dialog flow asked for across
-		' separate popups now lives in this one dialog.
+		' pnlBottom — footer: Project Template / Project Name / Primary Form Name / Primary
+		' Module Name / Author / License / Use Git+URL / AI Friendly rows, stacked above the
+		' OK/Cancel/Open Existing button row. Everything the old two-dialog flow asked for
+		' across separate popups now lives in this one dialog.
 		With pnlBottom
 			.Name = "pnlBottom"
 			.Text = ""
 			.Align = DockStyle.alBottom
 			.TabIndex = 35
-			.SetBounds 0, 0, 464, 468
+			.SetBounds 0, 0, 464, 500
 			.Parent = @This
+		End With
+		' pnlProjectTemplate — row 0: project template (label-left + dropdown, matching
+		' the other field rows). Added before pnlProjectName so it docks as the top row.
+		With pnlProjectTemplate
+			.Name = "pnlProjectTemplate"
+			.Text = ""
+			.Align = DockStyle.alTop
+			.TabIndex = 1
+			.ExtraMargins.Left = 10
+			.ExtraMargins.Right = 10
+			.SetBounds 0, 0, 464, 32
+			.Parent = @pnlBottom
+		End With
+		' lblProjectTemplates
+		With lblProjectTemplates
+			.Name = "lblProjectTemplates"
+			.Text = ("Project Template") & ":"
+			.Align = DockStyle.alLeft
+			.TabIndex = 0
+			.CenterImage = True
+			.SetBounds 0, 0, 150, 32
+			.Parent = @pnlProjectTemplate
+		End With
+		' cboTemplate — pick-only dropdown; populated in Form_Create, defaults to
+		' Windows Application. Same label-left/combo-alClient layout as Git Provider.
+		With cboTemplate
+			.Name = "cboTemplate"
+			.Text = ""
+			.Style = ComboBoxEditStyle.cbDropDownList
+			.Align = DockStyle.alClient
+			.ExtraMargins.Top = 5
+			.ExtraMargins.Bottom = 5
+			.TabIndex = 1
+			.SetBounds 150, 0, 314, 32
+			.Designer = @This
+			.OnChange = @cboTemplate_Change_
+			.Parent = @pnlProjectTemplate
 		End With
 		' pnlProjectName — row 1
 		With pnlProjectName
@@ -444,33 +481,6 @@
 			.OnClick = @cmdOpenExisting_Click_
 			.Parent = @pnlBottom
 		End With
-		' lvTemplates
-		With lvTemplates
-			.Name = "lvTemplates"
-			.Text = "ListView1"
-			.View = ViewStyle.vsIcon
-			.Images = @imgList32
-			.Align = DockStyle.alClient
-			.ExtraMargins.Top = 32
-			.ExtraMargins.Right = 10
-			.ExtraMargins.Left = 10
-			.ExtraMargins.Bottom = 10
-			.TabIndex = 1
-			.SetBounds 10, 32, 460, 120
-			.Designer = @This
-			.Columns.Add ("Template"), , 500, cfLeft
-			.OnItemActivate = @lvTemplates_ItemActivate_
-			.OnSelectedItemChanged = @lvTemplates_SelectedItemChanged_
-			.Parent = @This
-		End With
-		' lblProjectTemplates
-		With lblProjectTemplates
-			.Name = "lblProjectTemplates"
-			.Text = ("Project Templates")
-			.TabIndex = 0
-			.SetBounds 10, 10, 300, 18
-			.Parent = @This
-		End With
 	End Constructor
 
 '#End Region
@@ -482,7 +492,7 @@ Private Sub frmNewProject.cmdOK_Click(ByRef Sender As Control)
 	SelectedTemplate = ""
 	SelectedFolder = ""
 	SelectedProjectFile = ""
-	If lvTemplates.SelectedItemIndex = -1 Then
+	If cboTemplate.ItemIndex = -1 Then
 		MsgBox ("Select template!")
 		Me.BringToFront
 		Exit Sub
@@ -498,7 +508,7 @@ Private Sub frmNewProject.cmdOK_Click(ByRef Sender As Control)
 		Me.BringToFront
 		Exit Sub
 	End If
-	Dim As String TemplateName = TemplateNames.Item(lvTemplates.SelectedItemIndex)
+	Dim As String TemplateName = cboTemplate.Text
 	Dim As UString projectsPathInput = Trim(*ProjectsPath, Any !" \t" + Chr(10) + Chr(13))
 	Dim As UString localTemplate = WinOsPath(ExePath & "/Templates/Projects/" & TemplateName & ".vfp")
 	Dim As UString localFolder = WinOsPath(GetFullPathU(projectsPathInput & "/" & ProjectName))
@@ -797,18 +807,11 @@ Private Sub frmNewProject.cmdOpenExisting_Click(ByRef Sender As Control)
 	Me.CloseForm
 End Sub
 
-Private Sub frmNewProject.lvTemplates_ItemActivate_(ByRef Designer As My.Sys.Object, ByRef Sender As ListView, ByVal ItemIndex As Integer)
-	(*Cast(frmNewProject Ptr, Sender.Designer)).lvTemplates_ItemActivate(Sender, ItemIndex)
+Private Sub frmNewProject.cboTemplate_Change_(ByRef Designer As My.Sys.Object, ByRef Sender As ComboBoxEdit)
+	(*Cast(frmNewProject Ptr, Sender.Designer)).cboTemplate_Change(Sender)
 End Sub
-Private Sub frmNewProject.lvTemplates_ItemActivate(ByRef Sender As ListView, ByVal ItemIndex As Integer)
-	cmdOK_Click cmdOK
-End Sub
-
-Private Sub frmNewProject.lvTemplates_SelectedItemChanged_(ByRef Designer As My.Sys.Object, ByRef Sender As ListView, ByVal ItemIndex As Integer)
-	(*Cast(frmNewProject Ptr, Sender.Designer)).lvTemplates_SelectedItemChanged(Sender, ItemIndex)
-End Sub
-Private Sub frmNewProject.lvTemplates_SelectedItemChanged(ByRef Sender As ListView, ByVal ItemIndex As Integer)
-	If lvTemplates.SelectedItemIndex = -1 Then
+Private Sub frmNewProject.cboTemplate_Change(ByRef Sender As ComboBoxEdit)
+	If cboTemplate.ItemIndex = -1 Then
 		txtFormName.Enabled = False
 		txtFormName.Text = ""
 		txtModuleName.Enabled = False
@@ -820,8 +823,7 @@ Private Sub frmNewProject.lvTemplates_SelectedItemChanged(ByRef Sender As ListVi
 	'' creating that file). Windows Application ships a Form and can optionally also get
 	'' a fresh Module (from the generic Templates\Files\Module.bas, not part of the
 	'' Windows Application template itself); every other template only offers a Module.
-	Dim As String TemplateName = TemplateNames.Item(lvTemplates.SelectedItemIndex)
-	If TemplateName = "Windows Application" Then
+	If cboTemplate.Text = "Windows Application" Then
 		txtFormName.Enabled = True
 		txtModuleName.Enabled = True
 	Else
@@ -836,7 +838,7 @@ Private Sub frmNewProject.Form_Create_(ByRef Designer As My.Sys.Object, ByRef Se
 End Sub
 Private Sub frmNewProject.Form_Create(ByRef Sender As Control)
 	ModalResult = ModalResults.Cancel
-	lvTemplates.ListItems.Clear
+	cboTemplate.Clear
 	TemplateNames.Clear
 	Dim As String PreferredTemplates(4)
 	PreferredTemplates(0) = "Windows Application"
@@ -849,15 +851,16 @@ Private Sub frmNewProject.Form_Create(ByRef Sender As Control)
 			AddProjectTemplateItem(PreferredTemplates(i))
 		End If
 	Next
-	lvTemplates.View = ViewStyle.vsIcon
+	'' Default to Windows Application (first in the preferred order, so index 0 when it
+	'' ships). cboTemplate_Change enables the Form/Module fields to match.
+	Dim As Integer defaultIdx = TemplateNames.IndexOf("Windows Application")
+	If defaultIdx = -1 AndAlso cboTemplate.ItemCount > 0 Then defaultIdx = 0
+	If defaultIdx <> -1 Then cboTemplate.ItemIndex = defaultIdx
+	cboTemplate_Change(cboTemplate)
 	'' No auto-generated name in any of the three fields -- project name is required and
 	'' the owner types their own; the form/module name fields are optional (left blank,
 	'' cmdOK_Click skips creating that file).
 	txtProjectName.Text = ""
-	txtFormName.Enabled = False
-	txtFormName.Text = ""
-	txtModuleName.Enabled = False
-	txtModuleName.Text = ""
 	'' Author defaults from Options > Personal Information > Name, but stays editable so
 	'' a one-off project can credit someone else without touching the global setting.
 	txtAuthor.Text = *PersonalName
@@ -915,9 +918,9 @@ Private Sub frmNewProject.chkAIFriendly_Click(ByRef Sender As Control)
 End Sub
 
 Private Sub frmNewProject.AddProjectTemplateItem(ByRef TemplateName As String)
-	Dim As String ImageName = "App" & ..Left(TemplateName, IfNegative(InStr(TemplateName, " ") - 1, Len(TemplateName)))
-	If imgList32.IndexOf(ImageName) < 0 Then ImageName = "AppGUI"
-	lvTemplates.ListItems.Add (TemplateName), ImageName
+	'' The dropdown holds the template names directly; TemplateNames stays in sync so
+	'' cboTemplate.ItemIndex maps back to a name (and drives the default selection).
+	cboTemplate.AddItem (TemplateName)
 	TemplateNames.Add TemplateName
 End Sub
 

@@ -71,6 +71,7 @@ File=EditControl.bas
 File=Localization.bas
 File=Main.bas
 File=PathUtils.bas
+File=ProjectDescription.bas
 File=SettingsService.bas
 File=TabWindow.bas
 *File=AstoriaIDE.rc

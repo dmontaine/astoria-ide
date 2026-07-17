@@ -141,7 +141,7 @@ Using My.Sys.Forms
 		Dim As Label lblInterfaceFont
 		Dim As CommandButton cmdInterfaceFont
 		Dim As Label lblInterfaceFontLabel
-		Dim As CheckBox chkDisplayIcons, chkShowMainToolbar, chkAutoCreateBakFiles, chkShowToolBoxLocal
+		Dim As CheckBox chkDisplayIcons, chkShowMainToolbar, chkAutoCreateBakFiles, chkShowToolBoxLocal, chkAllowAgentControl
 		Dim As Label lblFrame, lblOpenCommandPromptIn, lblIntellisenseLimit, lblHistoryDay, lbAutoSaveCharMax, lblCodeEditorHoverTime, lblInterfaceColor
 		Dim As CommandButton cmdFrame, cmdAddHelp, cmdChangeHelp, cmdRemoveHelp, cmdClearHelps, cmdInFolder, cmdReplaceInFiles(0), cmdInterfaceThemeAdd, cmdInterfaceThemeRemove, cmdInterfaceColor
 		Dim As CheckBox chkFrame, chkForeground, chkBackground, chkIndicator

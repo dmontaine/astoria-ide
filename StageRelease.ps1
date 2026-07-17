@@ -49,6 +49,7 @@ New-Item -ItemType Directory -Path $ReleaseRoot -Force | Out-Null
 # --- Top-level files: runtime artifacts, not source ---
 $TopLevelFiles = @(
     "astoria.exe",
+    "astoria-mcp.exe",   # MCP sidecar: bridges an external MCP client to astoria.exe's agent pipe (opt-in via Tools > Options)
     "license.txt"
 )
 

@@ -15,6 +15,7 @@
 '###############################################################################
 
 #include once "windows.bi"
+#include once "win/tlhelp32.bi"
 #include once "JsonLite.bi"
 
 Const AGENT_PIPE_NAME = "\\.\pipe\AstoriaAgent"
@@ -97,6 +98,84 @@ Function PipeCall(ByRef reqJson As String, ByRef respJson As String) As Boolean
 	Dim As Integer nl = InStr(respJson, Chr(10))
 	If nl > 0 Then respJson = Left(respJson, nl - 1)
 	Return True
+End Function
+
+'' ------------------------------------------------------------ auto-launch
+'' If the IDE isn't running, the sidecar starts it (owner's choice, MCP_SERVER_PLAN
+'' Q1). astoria.exe sits next to this sidecar. The pipe still only comes up if the
+'' user has ticked Tools > Options > Allow AI agent control, so a launch does not
+'' by itself grant access -- it just spares the user from starting the IDE by hand.
+
+'' Full path to astoria.exe (same folder as astoria-mcp.exe). Cached after first call.
+Dim Shared gIdeExe As WString * 4096
+
+Function IdeExePathW() As WString Ptr
+	If gIdeExe[0] = 0 Then
+		Dim As WString * 4096 selfPath
+		GetModuleFileNameW(NULL, @selfPath, 4096)
+		Dim As Integer cut = -1
+		For i As Integer = Len(selfPath) - 1 To 0 Step -1
+			If selfPath[i] = 92 OrElse selfPath[i] = 47 Then cut = i : Exit For   '' \ or /
+		Next
+		If cut >= 0 Then gIdeExe = Left(selfPath, cut) & "\astoria.exe" Else gIdeExe = "astoria.exe"
+	End If
+	Return @gIdeExe
+End Function
+
+'' True if an astoria.exe process is already running (any instance). Lets us avoid
+'' launching a duplicate when the IDE is up but the pipe is down (e.g. toggle off).
+Function IdeIsRunning() As Boolean
+	Dim As HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0)
+	If snap = INVALID_HANDLE_VALUE Then Return False
+	Dim As PROCESSENTRY32W pe
+	pe.dwSize = SizeOf(PROCESSENTRY32W)
+	Dim As Boolean found = False
+	If Process32FirstW(snap, @pe) Then
+		Do
+			If LCase(*Cast(WString Ptr, @pe.szExeFile)) = "astoria.exe" Then found = True : Exit Do
+		Loop While Process32NextW(snap, @pe)
+	End If
+	CloseHandle(snap)
+	Return found
+End Function
+
+'' Launch the IDE (non-blocking). Working directory = the IDE's own folder.
+Sub LaunchIde()
+	Dim As WString Ptr exe = IdeExePathW()
+	Dim As WString * 4096 ideDir
+	Dim As Integer cut = -1
+	For i As Integer = Len(*exe) - 1 To 0 Step -1
+		If (*exe)[i] = 92 OrElse (*exe)[i] = 47 Then cut = i : Exit For
+	Next
+	If cut >= 0 Then ideDir = Left(*exe, cut)
+	Dim As WString * 4096 cmd = """" & *exe & """"   '' CreateProcessW needs a writable command line
+	Dim As STARTUPINFOW si
+	Dim As PROCESS_INFORMATION pi
+	si.cb = SizeOf(STARTUPINFOW)
+	If CreateProcessW(exe, @cmd, NULL, NULL, FALSE, 0, NULL, IIf(cut >= 0, Cast(WString Ptr, @ideDir), NULL), @si, @pi) Then
+		CloseHandle(pi.hThread)
+		CloseHandle(pi.hProcess)
+	End If
+End Sub
+
+'' PipeCall with auto-launch: if the IDE isn't reachable, start it (unless already
+'' running) and poll the pipe until it comes up or we give up.
+Function PipeCallEnsuring(ByRef reqJson As String, ByRef respJson As String) As Boolean
+	If PipeCall(reqJson, respJson) Then Return True
+	If IdeIsRunning() Then
+		'' Up but pipe down: still starting, busy, or the toggle is off. Give it a moment.
+		For i As Integer = 1 To 6                 '' ~3s
+			Sleep 500, 1
+			If PipeCall(reqJson, respJson) Then Return True
+		Next
+	Else
+		LaunchIde()
+		For i As Integer = 1 To 60                '' ~30s for startup+splash
+			Sleep 500, 1
+			If PipeCall(reqJson, respJson) Then Return True
+		Next
+	End If
+	Return False
 End Function
 
 '' ---------------------------------------------------------------- tool table
@@ -242,8 +321,8 @@ Sub HandleToolsCall(req As JsonValue Ptr, ByRef idJson As String)
 	Dim As String pipeReq = "{""id"":" & Str(gPipeReqId) & ",""cmd"":""" & JsonEscape(toolName) & """,""args"":" & argsJson & "}"
 
 	Dim As String pipeResp
-	If Not PipeCall(pipeReq, pipeResp) Then
-		SendToolText(idJson, "Astoria IDE is not reachable. Start the IDE and enable Tools > Options > Allow AI agent control, then retry.", True)
+	If Not PipeCallEnsuring(pipeReq, pipeResp) Then
+		SendToolText(idJson, "Astoria IDE is not reachable. If it just launched, enable Tools > Options > Allow AI agent control, then retry.", True)
 		Exit Sub
 	End If
 

@@ -1,6 +1,6 @@
 # Agent MCP Server — Spec & Implementation Plan
 
-**Status:** **Tasks 0–5 implemented and owner-verified live (2026-07-16). Tasks 6–7 remain.** See "Implementation progress" below.
+**Status:** **Tasks 0–6 implemented (Task 6 code-complete 2026-07-17, pending owner UI verification). Task 7 remains.** See "Implementation progress" below.
 **Author of plan:** Claude (Opus 4.8), 2026-07-16
 **Background:** see `P:\Astoria-Docs\How AI can work with Astoria IDE.docx` for the architecture discussion this plan formalizes.
 
@@ -17,9 +17,14 @@ Built and verified end-to-end over the pipe (and, for Task 2, through a real MCP
 
 **Tool surface live now (15):** `get_status`, `list_files`, `read_file`, `get_active_file`, `get_build_output`, `write_file`, `add_file`, `set_active_file_content`, `open_in_editor`, `build`, `syntax_check`, `run`, `get_errors`, `create_project`, `open_project`. Adding a tool = one row in `gTools` (`AgentMcp.bas`) + one `Case` on the IDE side.
 
-**Currently gated by an INI key, not a UI toggle:** `[Options] EnableAgentPipe=true` in `Settings/astoria.ini` starts the listener (default off / absent). Task 6 replaces this with the Tools ▸ Options checkbox. `astoria-mcp.exe` is built at the repo root and committed but **not yet in `StageRelease.ps1`/the installer** (also Task 6).
+- **Task 6 — security/opt-in + packaging — CODE-COMPLETE** (2026-07-17, pending owner UI verification). Four parts:
+  - **Options toggle.** Tools ▸ Options ▸ General now has **“Allow AI agent control (MCP)”** (`chkAllowAgentControl`), backed by the `AllowAgentControl` global and the `[Options] AllowAgentControl` INI key (migrates the old `EnableAgentPipe` stopgap on first load). The startup gate in `frmMain_Show` reads the global; the OK handler calls `ReconcileAgentPipe()` (`Main.bas`) so ticking/un-ticking starts/stops the pipe live, no restart.
+  - **Path-scoping audit.** Verified: all file tools route through `AgentResolveProjectPath` (absolutize, collapse `..`, trailing-slash containment vs the project root — defends against sibling-prefix bypass); `create_project` names go through `IsValidProjectItemName` (rejects `\ / : .`) under the configured Projects path; `open_project` accepts any `.vfp` by design (mirrors File ▸ Open Project), extension + existence checked. No code changes needed.
+  - **Packaging.** `astoria-mcp.exe` added to `$TopLevelFiles` in `StageRelease.ps1`; the Inno installer (`AstoriaIDE.iss`) already globs `{#ReleaseDir}\*`, so it's picked up automatically.
+  - **Client-config docs.** New `AGENT_MCP_SETUP.md` (enable-the-toggle steps, Claude Desktop/Code config JSON, the 15-tool table, security notes, troubleshooting). Help is compiled `.chm`, so the guide ships as a top-level markdown doc.
+  - **Auto-launch (owner's Q1 choice).** The sidecar now starts the IDE itself if it isn't running (`PipeCallEnsuring` → `IdeIsRunning`/`LaunchIde`, `AgentMcp.bas`), polling the pipe for ~30s; it won't duplicate an already-running instance. See §11.2. Token handshake deferred (§11.5).
 
-**Remaining: Task 6** (Options toggle, path-scoping audit, ship the sidecar in the installer, client-config docs + Help topic) and **Task 7** (drive end-to-end from a real MCP client). Owner has not yet exercised it from an actual MCP client (Claude Code/Desktop) — all verification so far was via a PowerShell `NamedPipeClientStream` harness and a piped JSON-RPC request stream into the sidecar.
+**Remaining: Task 7** (drive end-to-end from a real MCP client). Owner has not yet exercised it from an actual MCP client (Claude Code/Desktop) — all verification so far was via a PowerShell `NamedPipeClientStream` harness and a piped JSON-RPC request stream into the sidecar.
 
 ---
 
@@ -147,7 +152,7 @@ Most operations already exist and are reachable through `mClick` (`AstoriaIDE.ba
 
 A pipe that creates files and runs compiled binaries is a **code-execution surface**. Therefore:
 
-- **Off by default.** A Tools ▸ Options toggle ("Allow AI agent control", default off) starts/stops the pipe listener. No listener, no surface.
+- **User-controllable via a Tools ▸ Options toggle ("Allow AI agent control").** Default **ON** (agent-first product; owner, 2026-07-17); un-tick to stop the listener. A status-bar panel shows "MCP Agent: On/Off". No listener, no surface.
 - **Local only.** Named pipes are machine-local; do **not** add a TCP/HTTP transport in v1.
 - **Project-scoped paths.** Every path argument is resolved against the open project's root and rejected (`bad_path`) if it escapes it. No writing outside the project.
 - **Single client.** Accept one sidecar connection at a time.
@@ -180,14 +185,14 @@ Lowest-risk first; each phase is independently testable.
 - **Task 6 — Security/opt-in + packaging.** Options toggle, path scoping, ship `astoria-mcp.exe`, client-config docs. *(Sonnet.)*
 - **Task 7 — End-to-end verify.** Drive the primes-program loop from a real MCP client: create → write → build → read errors → fix → run → read output. *(via `/run` `/verify`.)*
 
-## 11. Open questions for owner
+## 11. Open questions for owner — resolved
 
-1. **Sidecar name/location** — `astoria-mcp.exe` beside `astoria.exe`? Ship it built, or build on first use?
-2. **IDE-not-running behavior** — error out (v1) or have the sidecar launch the IDE?
-3. **`run` output** — is capturing the program's stdout/stderr in scope early, or is "launched, watch the IDE" acceptable for v1? (Console targets are easy; GUI targets don't have stdout.)
-4. **Multiple projects/windows** — scope the agent to the single active project (simplest), or address projects by path?
-5. **Token handshake** — include the token in v1, or rely on local-pipe + opt-in and add it later?
-6. **Tool naming** — confirm the v1 tool names now (they become a stable interface): `get_status`, `list_files`, `read_file`, `get_active_file`, `write_file`, `add_file`, `set_active_file_content`, `open_in_editor`, `build`, `syntax_check`, `run`, `get_build_output`, `get_errors`.
+1. **Sidecar name/location** — ✅ `astoria-mcp.exe` beside `astoria.exe`, shipped pre-built (Tasks 2/6).
+2. **IDE-not-running behavior** — ✅ **Auto-launch** (owner, 2026-07-17). The sidecar starts `astoria.exe` from its own folder and polls the pipe until it comes up (`PipeCallEnsuring`/`LaunchIde`/`IdeIsRunning` in `AgentMcp.bas`). It won't spawn a duplicate if an `astoria.exe` process is already running (Toolhelp check). A launch alone does not grant access — the pipe still only opens when the user has ticked the opt-in — so if the toggle is off the client gets clear guidance after the poll times out.
+3. **`run` output** — ✅ Console stdout/stderr captured (Task 4); GUI targets are "launched, watch the IDE".
+4. **Multiple projects/windows** — ✅ Scoped to the single active project (v1).
+5. **Token handshake** — ✅ **Deferred to a later hardening pass** (owner left it to implementer, 2026-07-17). v1 relies on the pipe being opt-in (exists only when the toggle is on) + local-only. A shared-secret token (or a per-user pipe ACL/SDDL) is the natural next hardening step if the threat model grows to distrust same-machine same-user processes; noted here so it isn't lost.
+6. **Tool naming** — ✅ Locked (15 tools; see the "Tool surface live now" list above).
 
 ## 12. Notes
 

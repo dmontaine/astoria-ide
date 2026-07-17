@@ -74,6 +74,8 @@ Common Shared As HelpOptions HelpOption
 Declare Sub PopupClick(ByRef Designer As My.Sys.Object, ByRef Sender As My.Sys.Object)
 Declare Sub ShowPanelMenuItem_Click(ByRef Sender As MenuItem)
 Declare Sub mClick(ByRef Designer As My.Sys.Object, Sender As My.Sys.Object)
+Declare Sub ReconcileAgentPipe()   '' start/stop the MCP agent pipe to match AllowAgentControl (MCP_SERVER_PLAN.md Task 6)
+Declare Sub UpdateMcpAgentStatusBar()   '' refresh the status-bar MCP Agent On/Off indicator
 Declare Sub mClickMRU(ByRef Designer As My.Sys.Object, Sender As My.Sys.Object)
 Declare Sub mClickHelp(ByRef Designer As My.Sys.Object, Sender As My.Sys.Object)
 Declare Sub mClickTool(ByRef Designer As My.Sys.Object, Sender As My.Sys.Object)
@@ -103,6 +105,7 @@ Common Shared As Boolean AutoComplete
 Common Shared As Boolean AutoSuggestions, ProjectAutoSuggestions
 Common Shared As Boolean AutoCreateRC
 Common Shared As Boolean AutoCreateBakFiles
+Common Shared As Boolean AllowAgentControl        '' Tools > Options: MCP/agent pipe (default ON, agent-first). Gates StartAgentPipe. See MCP_SERVER_PLAN.md.
 Common Shared As Boolean AddRelativePathsToRecent
 Common Shared As Boolean UseMakeOnStartWithCompile
 Common Shared As Boolean CreateNonStaticEventHandlers, CreateFormTypesWithoutTypeWord

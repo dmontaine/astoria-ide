@@ -771,6 +771,18 @@ pfOptions = @fOptions
 			.SetBounds 0, 98, 190, 21
 			.Parent = @vbxGeneral
 		End With
+		' chkAllowAgentControl
+		With chkAllowAgentControl
+			.Name = "chkAllowAgentControl"
+			.Text = ("Allow AI agent control (MCP)")
+			.TabIndex = 104
+			.ExtraMargins.Top = 0
+			.Align = DockStyle.alTop
+			.Constraints.Height = 21
+			.AutoSize = True
+			.SetBounds 0, 119, 380, 21
+			.Parent = @vbxGeneral
+		End With
 		' grbIncludePaths
 		With grbIncludePaths
 			.Name = "grbIncludePaths"
@@ -2765,6 +2777,7 @@ Sub frmOptions.LoadSettings()
 		.chkAutoIndentation.Checked = AutoIndentation
 		.chkAutoCreateRC.Checked = AutoCreateRC
 		.chkAutoCreateBakFiles.Checked = AutoCreateBakFiles
+		.chkAllowAgentControl.Checked = AllowAgentControl
 		.chkAddRelativePathsToRecent.Checked = AddRelativePathsToRecent
 		.chkCreateNonStaticEventHandlers.Checked = CreateNonStaticEventHandlers
 		.chkPlaceStaticEventHandlersAfterTheConstructor.Checked = PlaceStaticEventHandlersAfterTheConstructor
@@ -3239,6 +3252,7 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		AutoSuggestions = .chkEnableAutoSuggestions.Checked
 		AutoCreateRC = .chkAutoCreateRC.Checked
 		AutoCreateBakFiles = .chkAutoCreateBakFiles.Checked
+		AllowAgentControl = .chkAllowAgentControl.Checked
 		AddRelativePathsToRecent = .chkAddRelativePathsToRecent.Checked
 		CreateNonStaticEventHandlers = .chkCreateNonStaticEventHandlers.Checked
 		PlaceStaticEventHandlersAfterTheConstructor = .chkPlaceStaticEventHandlersAfterTheConstructor.Checked
@@ -3496,6 +3510,9 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		End If
 		If IniValueChangedBool(piniSettings, "Options", "AutoCreateBakFiles", AutoCreateBakFiles) Then
 			piniSettings->WriteBool "Options", "AutoCreateBakFiles", AutoCreateBakFiles
+		End If
+		If IniValueChangedBool(piniSettings, "Options", "AllowAgentControl", AllowAgentControl) Then
+			piniSettings->WriteBool "Options", "AllowAgentControl", AllowAgentControl
 		End If
 		If IniValueChangedBool(piniSettings, "Options", "AddRelativePathsToRecent", AddRelativePathsToRecent) Then
 			piniSettings->WriteBool "Options", "AddRelativePathsToRecent", AddRelativePathsToRecent
@@ -4270,6 +4287,8 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 			Next
 		Next
 	End With
+	'' Apply the AI-agent opt-in live so the pipe starts/stops without a restart (MCP Task 6).
+	ReconcileAgentPipe()
 	Exit Sub
 	ErrorHandler:
 	fOptions.LastApplySucceeded = False

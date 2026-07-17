@@ -143,6 +143,10 @@ Sub LoadSettings
 	AutoCreateRC = iniSettings.ReadBool("Options", "AutoCreateRC", True)
 	AutoSaveBeforeCompiling = iniSettings.ReadInteger("Options", "AutoSaveBeforeCompiling", 1)
 	AutoCreateBakFiles = iniSettings.ReadBool("Options", "AutoCreateBakFiles", False)
+	'' MCP/agent pipe. Default ON -- Astoria is used agent-first, so the pipe listens
+	'' unless the user unticks Tools > Options > Allow AI agent control. Migrates the
+	'' Task 0-5 stopgap key EnableAgentPipe if that was set explicitly.
+	AllowAgentControl = iniSettings.ReadBool("Options", "AllowAgentControl", iniSettings.ReadBool("Options", "EnableAgentPipe", True))
 	AddRelativePathsToRecent = iniSettings.ReadBool("Options", "AddRelativePathsToRecent", True)
 	WhenVisualFBEditorStarts = iniSettings.ReadInteger("Options", "WhenVisualFBEditorStarts", 0)
 	WLet(DefaultProjectFile, SanitizeIniPath(iniSettings.ReadString("Options", "DefaultProjectFile", "Files/Form.frm")))

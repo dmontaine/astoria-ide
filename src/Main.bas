@@ -3064,7 +3064,21 @@ Sub ChangeLockControls(bLockControls As Boolean, ChangeObject As Integer = -1)
 End Sub
 
 Sub ChangeFileEncoding(FileEncoding As FileEncodings)
-	If stBar.Count > 3 Then stBar.Panels[3]->Caption = "UTF-8"
+	'' Status-bar panel 3 was the file-encoding readout, but UTF-8 is the only
+	'' supported encoding, so it never varied. The panel now shows the MCP agent
+	'' state instead (see UpdateMcpAgentStatusBar); this hook is kept as a no-op
+	'' for its call sites.
+End Sub
+
+'' Reflect the agent pipe's live state in the repurposed status-bar panel (3).
+Sub UpdateMcpAgentStatusBar()
+	If stBar.Count > 3 Then
+		If AgentPipeActive() Then
+			stBar.Panels[3]->Caption = "MCP Agent: On"
+		Else
+			stBar.Panels[3]->Caption = "MCP Agent: Off"
+		End If
+	End If
 End Sub
 
 Sub ChangeNewLineType(NewLineType As NewLineTypes)
@@ -5943,7 +5957,7 @@ stBar.Align = DockStyle.alBottom
 stBar.Add ("Press F1 for help"), tWidth * 25
 stBar.Add("", tWidth * 50) 'Row +Col 
 stBar.Add ("IntelliSense fully loaded"), tWidth * 27
-stBar.Add "UTF-8 (BOM)", tWidth * 11
+stBar.Add "MCP Agent: Off", tWidth * 17     '' repurposed from the (always-UTF-8) encoding readout; set live by UpdateMcpAgentStatusBar
 stBar.Add "CR+LF", tWidth * 6
 stBar.Add "NUM", tWidth * 4
 stBar.Panels[0]->Width = Max(stBar.Width - 50 - stBar.Panels[1]->Width - stBar.Panels[2]->Width - stBar.Panels[3]->Width  - stBar.Panels[4]->Width - stBar.Panels[5]->Width, 20)
@@ -9500,6 +9514,17 @@ Function utf16BeByte2wchars( ta() As UByte ) ByRef As WString
 	Function = *mstr.p
 End Function
 
+'' Bring the MCP agent pipe into line with the AllowAgentControl setting. Called
+'' from Tools > Options (OK) so toggling the checkbox takes effect without a restart.
+Sub ReconcileAgentPipe()
+	If AllowAgentControl Then
+		If Not AgentPipeActive() Then StartAgentPipe(frmMain.Handle)
+	Else
+		If AgentPipeActive() Then StopAgentPipe()
+	End If
+	UpdateMcpAgentStatusBar()
+End Sub
+
 Sub frmMain_Show(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	'' Agent MCP pipe (MCP_SERVER_PLAN.md): off by default; the INI gate stands in
 	'' for the Tools > Options toggle until MCP Task 6 ships it. Started here (top
@@ -9510,9 +9535,8 @@ Sub frmMain_Show(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	Static As Boolean bAgentPipeStarted
 	If Not bAgentPipeStarted Then
 		bAgentPipeStarted = True
-		If LCase(iniSettings.ReadString("Options", "EnableAgentPipe", "false")) = "true" Then
-			StartAgentPipe(frmMain.Handle)
-		End If
+		If AllowAgentControl Then StartAgentPipe(frmMain.Handle)
+		UpdateMcpAgentStatusBar()
 	End If
 	Var MainMaximized = iniSettings.ReadBool("MainWindow", "Maximized", False)
 	If MainMaximized Then frmMain.WindowState = WindowStates.wsMaximized

@@ -686,11 +686,18 @@ Namespace My.Sys.Forms
 			Case WM_LBUTTONDOWN
 				DownButton = 0
 				FMousePos = Message.lParamLo
-				SetCapture FHandle
+				'' Capture only when the drag features that need it are on. Unconditional
+				'' capture broke TCS_BUTTONS-style tabs outright: button tabs commit their
+				'' click on mouse-UP (classic tabs select on mouse-DOWN, which masked this),
+				'' and the unconditional ReleaseCapture below ran before the native control
+				'' processed the up-click -- the WM_CAPTURECHANGED that ReleaseCapture
+				'' generates cancels the native button-press tracking, so an unselected
+				'' button tab never changed the selection.
+				If FReorderable OrElse FDetachable Then SetCapture FHandle
 			Case WM_LBUTTONUP
 				DownButton = -1
 				DownTab = 0
-				ReleaseCapture
+				If FReorderable OrElse FDetachable Then ReleaseCapture
 			Case WM_MOUSEMOVE
 				If CInt(FReorderable) AndAlso CInt(DownButton = 0) Then
 					Dim As ..Rect R1, R2, R3

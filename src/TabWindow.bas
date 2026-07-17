@@ -10673,13 +10673,22 @@ Constructor TabWindow(ByRef wFileName As WString, bNewForm As Boolean, TreeN As 
 	' View selector strip: replaces the old Code / Form / Code+Form toolbar toggle buttons with tabs.
 	' Fixed tab order: 0 = Code+Form (default), 1 = Code, 2 = Form. The panels are NOT parented into
 	' the tab pages; tcView is a header-only selector and tcView_SelChange drives panel visibility.
-	tcView.Align = DockStyle.alTop
+	' Docked BELOW the viewport (owner request 2026-07-16).
+	tcView.Align = DockStyle.alBottom
 	tcView.Height = 26
-	tcView.FlatButtons = True
+	' Button-style tabs (raised push buttons, the selected one renders pressed), NOT flat
+	' buttons: flat buttons render as bare grey-on-grey text with nothing visually
+	' attaching them to the viewport below -- owner picked buttons+icons over classic
+	' notebook tabs (both were tried live). All native theming, no owner-draw. Icons
+	' (the old toolbar toggle buttons' own images, still in the shared imgList) anchor
+	' each tab visually; the ImageKey AddTab overload resolves keys at add time, so
+	' Images must be assigned first.
+	tcView.TabStyle = TabStyle.tsButtons
+	tcView.Images = @imgList
 	tcView.Tag = @This
-	tcView.AddTab(("Code And Form"))
-	tcView.AddTab(("Code"))
-	tcView.AddTab(("Form"))
+	tcView.AddTab(("Code And Form"), , "CodeAndForm")
+	tcView.AddTab(("Code"), , "Code")
+	tcView.AddTab(("Form"), , "Form")
 	tcView.OnSelChange = @tcView_SelChange
 	mViewName = "CodeAndForm"
 	mFormViewsEnabled = True

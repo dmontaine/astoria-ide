@@ -22,10 +22,18 @@ describe what the program does, its layout, and any rules you want followed.
 Task playbooks live in `.claude/skills/` and load on demand:
 
 - **build-run** — build and run (IDE F5, or `fbc` CLI with its GUI caveats).
-- **add-module** — new `.bas`/`.bi` pair, registered in the `.vfp`.
-- **add-control-event** — MFF control + event-handler wiring pattern.
-- **add-form** — a new `.frm`, the main-form bootstrap rule, Show/ShowModal.
 - **fix-compile-errors** — decoding `fbc`'s errors and this stack's common ones.
+- **add-module** — new `.bas`/`.bi` pair, registered in the `.vfp`.
+- **add-form** — a new `.frm`, the main-form bootstrap rule, Show/ShowModal.
+- **add-control-event** — MFF control + event-handler wiring pattern.
+- **add-resource** — icons/images/manifests/strings via `.rc`, kept in sync with source + `.vfp`.
+- **edit-form-safely** — change a `.frm` without damaging the Designer-managed region.
+- **find-framework-control** — locate the right MFF control, its header, properties, events, examples.
+- **audit-project-manifest** — check the `.vfp` against the actual source/resource files for stale or missing entries.
+- **refactor-freebasic** — rename/move/split code safely (case-insensitive symbols, includes, `.vfp`).
+- **debug-freebasic-app** — runtime crashes/hangs/wrong behaviour, breakpoints, GDB, exit codes.
+- **winapi-interop** — Win64 API declarations, structs, callbacks, window procs, Unicode, COM.
+- **prepare-release** — clean release build, artifact/dependency checks, pre-release checklist.
 
 ## FreeBASIC ground rules
 

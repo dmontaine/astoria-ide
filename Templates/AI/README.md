@@ -29,7 +29,7 @@ fix-compile-errors), plus each tool's native convention on top.
 
 | Tool | Primary file(s) | Status |
 |---|---|---|
-| `ClaudeCode/` | `CLAUDE.md`, `.claude/skills/*/SKILL.md` (5 skills), `AGENTS.md` | **Complete** |
+| `ClaudeCode/` | `CLAUDE.md`, `.claude/skills/*/SKILL.md` (13 native Claude Code skills), `AGENTS.md` | **Complete** — the 13 `.claude/skills/` match the shared Cursor/ChatGPT/OpenCode/Kun set |
 | `Cursor/` | `.cursor/rules/freebasic.mdc` (always-on rules), `.cursor/rules/freebasic-tasks.mdc` (compact playbooks), `.cursor/skills/*/SKILL.md` (13 native Cursor skills), `.cursorrules` (legacy pointer), `AGENTS.md` | **Complete** |
 | `ChatGPT/` | `AGENTS.md`, `.agents/skills/*/SKILL.md` (13 native Codex skills; inline fallback retained) | **Complete** |
 | `OpenCode/` | `AGENTS.md`, `opencode.json` (references `.opencode/skills/`), `.opencode/skills/*/SKILL.md` (13 native OpenCode skills) | **Complete** |

@@ -1,8 +1,25 @@
 # Agent MCP Server — Spec & Implementation Plan
 
-**Status:** Scoped, not started. Design locked for a later implementation session; owner has UI tweaks to finish first.
+**Status:** **Tasks 0–5 implemented and owner-verified live (2026-07-16). Tasks 6–7 remain.** See "Implementation progress" below.
 **Author of plan:** Claude (Opus 4.8), 2026-07-16
 **Background:** see `P:\Astoria-Docs\How AI can work with Astoria IDE.docx` for the architecture discussion this plan formalizes.
+
+## Implementation progress (2026-07-16)
+
+Built and verified end-to-end over the pipe (and, for Task 2, through a real MCP request stream). Commits `6799e6f` (T0) → `438404e` (T5).
+
+- **Task 0 — pipe + UI dispatch skeleton — DONE** (`6799e6f`). `src/JsonLite.bi/.bas` (dependency-free UTF-8 JSON), `src/AgentPipe.bi/.bas` (named-pipe worker `\\.\pipe\AstoriaAgent`, one in-flight request, `WM_APP_AGENTCMD` marshal to the UI thread, completion event). `ping` works. Clean shutdown via `CancelIoEx` on the pipe handle (note: `CancelSynchronousIo` does NOT work — FB's `ThreadCreate` handle is the runtime's struct, not the Win32 thread handle).
+- **Task 1 — read-only commands — DONE** (`04a9c4c`). `get_status`, `list_files`, `read_file`, `get_active_file`, `get_build_output`. `WStrToUtf8`/`Utf8ToWStr` boundary conversions; `AgentResolveProjectPath` project-root containment guard.
+- **Task 2 — `astoria-mcp.exe` sidecar — DONE** (`8ad6f61`). `src/AgentMcp.bas`: JSON-RPC 2.0 / MCP over stdio (raw Win32 std handles, no CRT CR/LF translation), `initialize`/`tools/list`/`tools/call`/`ping`, notifications ignored, tolerant of a leading BOM. Built via the sidecar step added to `Compile.bat`.
+- **Task 3 — file & editor mutations — DONE** (`8293bd9`). `write_file`, `add_file`, `set_active_file_content`, `open_in_editor`. `AgentRegisterFileInProject` mirrors `AddFilesToProject`'s non-dialog branch so a project save persists the `File=` line. Forward-declared `GetTreeNodeChild` in `Main.bi`.
+- **Task 4 — build/run/errors + console capture — DONE** (`730b3f4`). `build`, `syntax_check`, `run`, `get_errors`. Builds run synchronously on the pipe-worker thread calling `Compile()` (framework `ThreadsEnter/Leave` are no-ops; the menu build uses the same background pattern), so the agent call blocks for the build while the GUI stays live; one build at a time (`gAgentBuilding`→`busy`). `run` launches the exe with stdout/stderr captured (`CREATE_NO_WINDOW`), OEM→UTF-8, ~1 MB cap. **Success is derived from error-severity Problems, not `Compile`'s return** (`Compile("Check")` returns success even with errors).
+- **Task 5 — headless project ops — DONE** (`438404e`). `create_project` (from a `Templates/Projects/*` template, into `<ProjectsPath>/<name>/`, opened), `open_project`. **Also fixed a pipe-start bug affecting every task:** `StartAgentPipe` ran after `pApp->Run`, but `frmMain.Show` blocks on the Tip-of-the-Day startup modal, so the pipe never came up on a no-argument launch — moved to the top of `frmMain_Show`. (Every earlier test launched *with* a file arg, which skips the tip, masking it.)
+
+**Tool surface live now (15):** `get_status`, `list_files`, `read_file`, `get_active_file`, `get_build_output`, `write_file`, `add_file`, `set_active_file_content`, `open_in_editor`, `build`, `syntax_check`, `run`, `get_errors`, `create_project`, `open_project`. Adding a tool = one row in `gTools` (`AgentMcp.bas`) + one `Case` on the IDE side.
+
+**Currently gated by an INI key, not a UI toggle:** `[Options] EnableAgentPipe=true` in `Settings/astoria.ini` starts the listener (default off / absent). Task 6 replaces this with the Tools ▸ Options checkbox. `astoria-mcp.exe` is built at the repo root and committed but **not yet in `StageRelease.ps1`/the installer** (also Task 6).
+
+**Remaining: Task 6** (Options toggle, path-scoping audit, ship the sidecar in the installer, client-config docs + Help topic) and **Task 7** (drive end-to-end from a real MCP client). Owner has not yet exercised it from an actual MCP client (Claude Code/Desktop) — all verification so far was via a PowerShell `NamedPipeClientStream` harness and a piped JSON-RPC request stream into the sidecar.
 
 ---
 

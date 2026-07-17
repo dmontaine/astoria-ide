@@ -1,6 +1,6 @@
 # Astoria-IDE — Project Status & Handoff
 
-**Last updated:** 2026-07-16 (Main-menu Code/Form restructure complete — contextual Code/Form menu greying with split-view focus tracking, owner-verified. See "Session handoff (2026-07-16) — Main-menu Code/Form restructure" below.)
+**Last updated:** 2026-07-16 (Agent MCP Server: Tasks 0–5 built and owner-verified — Astoria is now a working MCP server with 15 tools; Tasks 6–7 remain. See "Session handoff (2026-07-16) — Agent MCP Server (Tasks 0–5)" below.)
 **Repository:** [github.com/dmontaine/astoria-ide](https://github.com/dmontaine/astoria-ide)
 **Local path:** C:\Users\don\Astoria-IDE
 
@@ -269,6 +269,26 @@ Still pending from the other machine's session: the New Project dialog's minor a
 **Same-day follow-up — view selector restyled + a framework TabControl bug fixed (`6aa6961`, owner-verified):** the per-document Code+Form/Code/Form strip rendered as flat buttons — bare grey-on-grey text with nothing visually attaching it to the viewport (owner report: "lost in the surrounding sea of grey"). Final form after three owner-eyeballed iterations: **button-style tabs (`TabStyle.tsButtons`) with icons** (the old toolbar toggles' own `imgList` images: CodeAndForm/Code/Form), **docked below the viewport** (`alBottom` — owner: "removes possible confusion" with the document tab strip above). The button restyle exposed a real framework bug, fixed in `TabControl.bas`: the message hook took `SetCapture`/`ReleaseCapture` around **every** click, unconditionally, for the drag-reorder/detach features — button-style tabs commit their click on mouse-UP (classic tabs select on DOWN, which masked this for years), and the early `ReleaseCapture` generates `WM_CAPTURECHANGED` before the native control processes the up-click, cancelling the press, so unselected button tabs never changed selection. Capture is now conditional on `Reorderable`/`Detachable`; owner-verified that view buttons switch views and drag-reorder still works on the document and left/right panel strips (the only opt-in users).
 
 **Owner direction recorded (2026-07-16): teachers/educators added as a named target audience** — easy-to-learn language, one tool for text+GUI, built-in Git and AI integration, working with both frontier models and open-source models via OpenCode (school-budget friendly). Teaching plans and resources for educators are a future task set **gated on a final stable IDE** — see [ROADMAP.md](ROADMAP.md) §13.13 and the new entry in Deferred enhancements below.
+
+## Session handoff (2026-07-16) — Agent MCP Server (Tasks 0–5 of 8)
+
+**Astoria is now a working MCP server.** An MCP client (Claude Code/Desktop) can drive the live IDE — create/open projects, read/write files, type into the editor, build, run, and read back errors and program output. Full spec + per-task detail: [MCP_SERVER_PLAN.md](MCP_SERVER_PLAN.md) (its "Implementation progress" section is authoritative). Commits `6799e6f` (T0) → `438404e` (T5), all on `origin/main`.
+
+**Architecture (from the plan):** MCP client ⇄ `astoria-mcp.exe` sidecar (JSON-RPC 2.0 over stdio) ⇄ named pipe `\\.\pipe\AstoriaAgent` ⇄ a worker thread in `astoria.exe` that marshals each command onto the UI thread. New source: `src/JsonLite.bi/.bas` (dependency-free UTF-8 JSON, shared by both exes), `src/AgentPipe.bi/.bas` (the IDE-side pipe + command dispatch), `src/AgentMcp.bas` (the sidecar). `Compile.bat` builds `astoria-mcp.exe` alongside `astoria.exe`; both are committed at the repo root.
+
+**15 tools live and owner-verified via a PowerShell `NamedPipeClientStream` harness** (and Task 2 through a real JSON-RPC request stream into the sidecar): `get_status`, `list_files`, `read_file`, `get_active_file`, `get_build_output`, `write_file`, `add_file`, `set_active_file_content`, `open_in_editor`, `build`, `syntax_check`, `run`, `get_errors`, `create_project`, `open_project`. The full loop was exercised end-to-end: create a project → write code with an error → build → read the structured error (file/line/severity/message) → fix via write_file → rebuild clean → run → read captured program stdout. Every path argument is guarded to the open project's root (relative and absolute escapes rejected as `bad_path`); `create_project`/`open_project` are the intentional exceptions (they target new/other projects).
+
+**How to turn it on (until the Task 6 UI toggle):** add `EnableAgentPipe=true` under `[Options]` in `Settings/astoria.ini`, launch the IDE, and the listener starts. **Do not commit that key** — it's a dev gate; `astoria.ini` is tracked and shared between machines, so revert it before committing (every MCP commit this session did). A key wrinkle fixed in T5: the pipe now starts from the top of `frmMain_Show`, so it comes up even on a no-argument launch (previously the Tip-of-the-Day startup modal blocked it).
+
+**Testing notes for the next session (learned the hard way):**
+- Launch the IDE, then talk to the pipe from PowerShell with a **blocking** `StreamReader.ReadLine()` — `build`/`run` just take longer and `ReadLine` waits. (An async `Task.Run`/`Wait` wrapper threw spuriously; don't bother.)
+- Use a **disposable copy** of a project (e.g. a throwaway `Projects/AgentX/`) for mutation/build tests; closing the IDE with a dirty project pops a save prompt, so force-kill (`Stop-Process -Name astoria -Force`) when a test left unsaved changes.
+- Rebuild picks up in the *next* IDE launch only — restart the IDE after `Compile.bat` to test new behavior.
+
+**Remaining — Task 6 (make it shippable/user-controllable) and Task 7 (real-client verify):**
+- **Task 6:** a Tools ▸ Options **"Allow AI agent control"** checkbox (default off) that starts/stops the listener, replacing the INI gate; a path-scoping audit; add `astoria-mcp.exe` to `StageRelease.ps1` + the installer; write the copy-paste MCP client config + a Help topic. (Plan §8–9. Flagged Sonnet-suitable.)
+- **Task 7:** drive the whole thing from an actual MCP client (Claude Code/Desktop) — nothing has exercised it outside the PowerShell/stdio harness yet.
+- **Open design question the plan raises (§11):** whether `create_project` should eventually share one `CreateProjectHeadless` with `frmNewProject.cmdOK_Click` (today the agent has its own focused creator; the dialog's OK handler still owns git/AI/license/form+module logic). Not required for Task 6/7; note it if the dialog and agent creation ever diverge.
 
 ## Next ready work
 

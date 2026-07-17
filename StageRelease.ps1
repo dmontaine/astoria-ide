@@ -63,10 +63,11 @@ foreach ($f in $TopLevelFiles) {
 }
 
 # --- Top-level directories: included wholesale (runtime deps, templates, docs users need) ---
-# Documentation/ (a standalone HTML copy of the FreeBasic language reference) is
-# deliberately NOT included: Help/ already ships this same information in the
-# IDE's own compiled help form, and the FreeBASIC website covers anything beyond
-# that - keeping both is redundant given this fork's opinionated, focused scope.
+# Documentation/ (a standalone HTML copy of the FreeBasic language reference) was
+# removed from the repo entirely: Help/ already ships this same information in the
+# IDE's own compiled help form (FB-manual-en_US-1.10.1.chm), and the FreeBASIC
+# website covers anything beyond that - keeping both was redundant given this
+# fork's opinionated, focused scope.
 $WholesaleDirs = @(
     "Compiler",       # bundled fbc64 - users need this to compile their own programs
     "Debuggers",      # bundled gdb - needed for the IDE's debugging feature

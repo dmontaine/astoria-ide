@@ -53,6 +53,31 @@ FreeBASIC is **not** VB.NET, VBA, QBASIC, or C -- do not assume their syntax.
 
 ## Skills (task playbooks)
 
+Native Cursor skills live in `.cursor/skills/*/SKILL.md` and load on demand.
+The five shared playbooks below are also spelled out here as a fallback; eight
+Cursor-specific skills extend them (safe form editing, manifest audits,
+framework-control discovery, resources, runtime debugging, WinAPI interop,
+refactoring, and release preparation).
+
+| Skill | When to use |
+|---|---|
+| `build-run` | Compile / run / check a build |
+| `add-module` | New `.bas` / `.bi` |
+| `add-control-event` | MFF control + event wiring |
+| `add-form` | New `.frm` / Show / ShowModal |
+| `fix-compile-errors` | `fbc` error decoding |
+| `edit-form-safely` | Hand-edit designer `.frm` regions |
+| `audit-project-manifest` | `.vfp` vs on-disk files |
+| `find-framework-control` | Unfamiliar MFF control API |
+| `add-resource` | Icons, `.rc`, other resources |
+| `debug-freebasic-app` | Runtime / debugger issues |
+| `winapi-interop` | Win64 API declarations |
+| `refactor-freebasic` | Rename / move / split |
+| `prepare-release` | Pre-release checklist |
+
+Always-on rules also live in `.cursor/rules/freebasic.mdc`; compact playbook
+mirrors are in `.cursor/rules/freebasic-tasks.mdc`.
+
 ### Build and run the project
 
 1. In the Astoria IDE: open `{{PROJECT}}.vfp`, press **F5**.

@@ -3,8 +3,8 @@
 #
 # This is a FreeBASIC project created with the Astoria IDE.
 # Full rules live in .cursor/rules/freebasic.mdc (always applied) and
-# .cursor/rules/freebasic-tasks.mdc (task playbooks); AGENTS.md holds the
-# complete cross-tool guide.
+# .cursor/rules/freebasic-tasks.mdc (compact playbooks). On-demand task skills
+# live in .cursor/skills/*/SKILL.md. AGENTS.md holds the complete cross-tool guide.
 
 You are helping with a FreeBASIC project (.bas modules, .bi headers, .frm forms).
 FreeBASIC is not VB.NET, VBA, QBASIC, or C -- do not assume their syntax.

@@ -1,10 +1,14 @@
 ---
-description: Task playbooks for {{PROJECT}} — building/running, adding modules, adding MFF controls and events, adding forms, and fixing FreeBASIC compile errors. Apply when doing any of those tasks.
+description: Task playbooks for {{PROJECT}} — building/running, adding modules, adding MFF controls and events, adding forms, and fixing FreeBASIC compile errors. Apply when doing any of those tasks. Fuller on-demand skills also live under .cursor/skills/.
 globs:
 alwaysApply: false
 ---
 
 # Task playbooks — {{PROJECT}}
+
+Compact mirrors of the shared playbooks. Prefer the matching skill under
+`.cursor/skills/<name>/SKILL.md` when available (includes eight extended skills
+beyond the five below).
 
 ## Build and run
 1. Astoria IDE: open `{{PROJECT}}.vfp`, press **F5**.

@@ -110,10 +110,11 @@ Type McpTool
 	schema As String     '' inputSchema (JSON Schema), embedded verbatim
 End Type
 
-Dim Shared gTools(0 To 4) As McpTool
+Dim Shared gTools(0 To 8) As McpTool
 
 Sub InitTools()
 	Dim As String noArgs = "{""type"":""object"",""properties"":{}}"
+	Dim As String pathReq = "{""type"":""object"",""properties"":{""path"":{""type"":""string"",""description"":""Project-relative or absolute path inside the project folder.""}},""required"":[""path""]}"
 	gTools(0).name = "get_status"
 	gTools(0).description = "Health check and current IDE context: open project, main file, open editor tabs, and whether a build or program is running."
 	gTools(0).schema = noArgs
@@ -122,13 +123,25 @@ Sub InitTools()
 	gTools(1).schema = noArgs
 	gTools(2).name = "read_file"
 	gTools(2).description = "Read a file from the open project. The path is project-relative or an absolute path inside the project folder; paths outside the project are rejected."
-	gTools(2).schema = "{""type"":""object"",""properties"":{""path"":{""type"":""string"",""description"":""Project-relative or absolute path inside the project folder.""}},""required"":[""path""]}"
+	gTools(2).schema = pathReq
 	gTools(3).name = "get_active_file"
 	gTools(3).description = "Get the path and full text of the currently focused editor tab."
 	gTools(3).schema = noArgs
 	gTools(4).name = "get_build_output"
 	gTools(4).description = "Get the raw text of the IDE Output/messages pane from the last build or run."
 	gTools(4).schema = noArgs
+	gTools(5).name = "write_file"
+	gTools(5).description = "Create or overwrite a file in the open project. Optionally register it in the project (.vfp) and open it in an editor tab. Paths outside the project are rejected."
+	gTools(5).schema = "{""type"":""object"",""properties"":{""path"":{""type"":""string"",""description"":""Project-relative or absolute path inside the project folder.""},""content"":{""type"":""string""},""register"":{""type"":""boolean"",""description"":""Add the file to the project manifest (default false).""},""open"":{""type"":""boolean"",""description"":""Open the file in an editor tab (default false).""}},""required"":[""path"",""content""]}"
+	gTools(6).name = "add_file"
+	gTools(6).description = "Add a new source file to the open project from the matching template. Registered in the project and opened by default."
+	gTools(6).schema = "{""type"":""object"",""properties"":{""name"":{""type"":""string"",""description"":""File name, with or without extension.""},""kind"":{""type"":""string"",""enum"":[""module"",""header"",""form""],""description"":""module (.bas), header (.bi), or form (.frm). Default module.""},""register"":{""type"":""boolean""},""open"":{""type"":""boolean""}},""required"":[""name""]}"
+	gTools(7).name = "set_active_file_content"
+	gTools(7).description = "Replace the full text of the currently focused editor tab."
+	gTools(7).schema = "{""type"":""object"",""properties"":{""content"":{""type"":""string""}},""required"":[""content""]}"
+	gTools(8).name = "open_in_editor"
+	gTools(8).description = "Open (or focus) an editor tab for a project file."
+	gTools(8).schema = pathReq
 End Sub
 
 Function ToolsListJson() As String

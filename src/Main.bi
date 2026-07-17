@@ -238,6 +238,7 @@ Declare Function GetOpenProjectNode() As TreeNode Ptr
 Declare Function GetProjectDirectory() As UString
 Declare Sub AddNewProjectFile(ByRef Template As WString, ByRef ItemName As WString)
 Declare Function ContainsFileName(tn As TreeNode Ptr, ByRef FileName As WString) As Boolean
+Declare Function GetTreeNodeChild(tn As TreeNode Ptr, ByRef FileName As WString) As TreeNode Ptr
 Declare Function PrepareForAnotherProject(ByRef NewProjectPath As WString = "") As Boolean
 Declare Sub SaveWorkspace()
 Declare Function LoadWorkspace() As Boolean

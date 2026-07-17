@@ -115,6 +115,42 @@ Private Function AgentReadFileBytes(ByRef path As UString) As String
 	Return buf
 End Function
 
+'' Write raw bytes to a file, creating/overwriting. Content is written as-is
+'' (UTF-8 from JSON, no BOM -- matches the source-file convention). Returns False
+'' on open failure. UI thread.
+Private Function AgentWriteFileBytes(ByRef path As UString, ByRef content As String) As Boolean
+	Dim As Integer fn = FreeFile
+	If Open(path For Output As #fn) <> 0 Then Return False   '' truncates/creates
+	Close #fn
+	If Open(path For Binary Access Write As #fn) <> 0 Then Return False
+	If Len(content) > 0 Then Put #fn, 1, content
+	Close #fn
+	Return True
+End Function
+
+'' Register an existing on-disk file into the open project's tree + model, so a
+'' project save persists its File= line. Mirrors AddFilesToProject's non-dialog
+'' branch (folder routing via GetTreeNodeChild, ExplorerElement + tree node, mark
+'' the project dirty). Idempotent: a file already present is left as-is. UI thread.
+Private Function AgentRegisterFileInProject(ByRef fullPath As UString) As Boolean
+	Dim As TreeNode Ptr tnP = GetOpenProjectNode()
+	If tnP = 0 Then Return False
+	Dim As WString Ptr fpW
+	WLet(fpW, fullPath)
+	Dim As TreeNode Ptr tnFolder = GetTreeNodeChild(tnP, *fpW)
+	If ContainsFileName(tnFolder, *fpW) Then WDeAllocate(fpW) : Return True
+	Dim As String iconName = GetIconName(*fpW)
+	Dim As TreeNode Ptr tn3 = tnFolder->Nodes.Add(GetFileName(*fpW), , , iconName, iconName, True)
+	Dim As ExplorerElement Ptr ee = _New(ExplorerElement)
+	WLet(ee->FileName, *fpW)
+	tn3->Tag = ee
+	If Not EndsWith(tnP->Text, "*") Then tnP->Text &= "*"
+	If Not tnP->IsExpanded Then tnP->Expand
+	If Not tnFolder->IsExpanded Then tnFolder->Expand
+	WDeAllocate(fpW)
+	Return True
+End Function
+
 '' ---------------------------------------------------------------- UI thread
 
 '' Command dispatch, run on the UI thread. MCP Task 1+ grows this Select Case;
@@ -221,6 +257,157 @@ Sub AgentPipe_ExecutePendingOnUi()
 		'' Raw text of the Output/messages pane from the last build/run.
 		Dim As JsonValue Ptr res = JsonNewObject()
 		res->SetMember("text", JsonNewString(WStrToUtf8(txtOutput.Text)))
+		gCmdOk = True
+		gCmdResult = res
+
+	Case "set_active_file_content"
+		'' Replace the active editor's text (the "type into the code pane" op).
+		Dim As TabWindow Ptr tb = Cast(TabWindow Ptr, ptabCode->SelectedTab)
+		If tb = 0 Then
+			gCmdErrCode = "no_active_file" : gCmdErrMsg = "No editor tab is active." : SetEvent(gCmdDone) : Exit Sub
+		End If
+		Dim As String content
+		Dim As Boolean hasContent = False
+		If gCmdArgs Then
+			Dim As JsonValue Ptr cv = gCmdArgs->Find("content")
+			If cv AndAlso cv->Kind = jkString Then content = cv->StrValue : hasContent = True
+		End If
+		If Not hasContent Then
+			gCmdErrCode = "bad_args" : gCmdErrMsg = "set_active_file_content requires 'content'." : SetEvent(gCmdDone) : Exit Sub
+		End If
+		Dim As WString Ptr wtext = Utf8ToWStr(content)
+		tb->txtCode.Text = *wtext
+		WDeAllocate(wtext)
+		Dim As JsonValue Ptr res = JsonNewObject()
+		res->SetMember("path", JsonNewString(WStrToUtf8(tb->FileName)))
+		gCmdOk = True
+		gCmdResult = res
+
+	Case "open_in_editor"
+		Dim As String rawPath
+		If gCmdArgs Then rawPath = gCmdArgs->GetStr("path")
+		If rawPath = "" Then
+			gCmdErrCode = "bad_args" : gCmdErrMsg = "open_in_editor requires a 'path'." : SetEvent(gCmdDone) : Exit Sub
+		End If
+		Dim As String ec, em
+		Dim As UString full = AgentResolveProjectPath(rawPath, ec, em)
+		If ec <> "" Then
+			gCmdErrCode = ec : gCmdErrMsg = em : SetEvent(gCmdDone) : Exit Sub
+		End If
+		If Not FileExistsU(full) Then
+			gCmdErrCode = "not_found" : gCmdErrMsg = "File not found: " & rawPath : SetEvent(gCmdDone) : Exit Sub
+		End If
+		Dim As WString Ptr fw
+		WLet(fw, full)
+		Dim As TabWindow Ptr tb = GetTab(*fw)
+		If tb = 0 Then tb = AddTab(*fw)
+		If tb Then tb->SelectTab
+		WDeAllocate(fw)
+		Dim As JsonValue Ptr res = JsonNewObject()
+		res->SetMember("path", JsonNewString(WStrToUtf8(full)))
+		gCmdOk = True
+		gCmdResult = res
+
+	Case "write_file"
+		'' Create/overwrite a file; optionally register it in the .vfp and open it.
+		Dim As String rawPath, content
+		Dim As Boolean doRegister, doOpen
+		If gCmdArgs Then
+			rawPath = gCmdArgs->GetStr("path")
+			content = gCmdArgs->GetStr("content")
+			doRegister = gCmdArgs->GetBool("register")
+			doOpen = gCmdArgs->GetBool("open")
+		End If
+		If rawPath = "" Then
+			gCmdErrCode = "bad_args" : gCmdErrMsg = "write_file requires a 'path'." : SetEvent(gCmdDone) : Exit Sub
+		End If
+		Dim As String ec, em
+		Dim As UString full = AgentResolveProjectPath(rawPath, ec, em)
+		If ec <> "" Then
+			gCmdErrCode = ec : gCmdErrMsg = em : SetEvent(gCmdDone) : Exit Sub
+		End If
+		'' Ensure the parent folder exists (write_file may target a new subfolder).
+		EnsureDirectoryExists(GetFolderNameU(full))
+		If Not AgentWriteFileBytes(full, content) Then
+			gCmdErrCode = "write_failed" : gCmdErrMsg = "Could not write file: " & rawPath : SetEvent(gCmdDone) : Exit Sub
+		End If
+		Dim As Boolean registered = False, opened = False
+		If doRegister Then registered = AgentRegisterFileInProject(full)
+		If doOpen Then
+			Dim As WString Ptr fw
+			WLet(fw, full)
+			Dim As TabWindow Ptr tb = GetTab(*fw)
+			If tb = 0 Then
+				tb = AddTab(*fw)
+			Else
+				'' Already open: sync the editor to what we just wrote (we have the
+				'' bytes in hand, so no disk re-read is needed).
+				Dim As WString Ptr wtext = Utf8ToWStr(content)
+				tb->txtCode.Text = *wtext
+				WDeAllocate(wtext)
+			End If
+			If tb Then tb->SelectTab
+			opened = (tb <> 0)
+			WDeAllocate(fw)
+		End If
+		Dim As JsonValue Ptr res = JsonNewObject()
+		res->SetMember("path", JsonNewString(WStrToUtf8(full)))
+		res->SetMember("registered", JsonNewBool(registered))
+		res->SetMember("opened", JsonNewBool(opened))
+		gCmdOk = True
+		gCmdResult = res
+
+	Case "add_file"
+		'' New source file from the matching template, registered in the project.
+		Dim As String nm, kind
+		Dim As Boolean doRegister = True, doOpen = True
+		If gCmdArgs Then
+			nm = gCmdArgs->GetStr("name")
+			kind = LCase(gCmdArgs->GetStr("kind"))
+			If gCmdArgs->Find("register") Then doRegister = gCmdArgs->GetBool("register")
+			If gCmdArgs->Find("open") Then doOpen = gCmdArgs->GetBool("open")
+		End If
+		If nm = "" Then
+			gCmdErrCode = "bad_args" : gCmdErrMsg = "add_file requires a 'name'." : SetEvent(gCmdDone) : Exit Sub
+		End If
+		Dim As String tmplFile, ext
+		Select Case kind
+		Case "module", "" : tmplFile = "Module.bas"      : ext = ".bas"
+		Case "header"     : tmplFile = "Include File.bi" : ext = ".bi"
+		Case "form"       : tmplFile = "Form.frm"        : ext = ".frm"
+		Case Else
+			gCmdErrCode = "bad_args" : gCmdErrMsg = "add_file 'kind' must be module, header, or form." : SetEvent(gCmdDone) : Exit Sub
+		End Select
+		'' name may already carry the extension; don't double it.
+		Dim As String fileName = nm
+		If Right(LCase(fileName), Len(ext)) <> ext Then fileName &= ext
+		Dim As String ec, em
+		Dim As UString full = AgentResolveProjectPath(fileName, ec, em)
+		If ec <> "" Then
+			gCmdErrCode = ec : gCmdErrMsg = em : SetEvent(gCmdDone) : Exit Sub
+		End If
+		If FileExistsU(full) Then
+			gCmdErrCode = "exists" : gCmdErrMsg = "File already exists: " & fileName : SetEvent(gCmdDone) : Exit Sub
+		End If
+		Dim As UString tmplPath = WinOsPath(ExePath & "/Templates/Files/" & tmplFile)
+		If Not CopyFileU(tmplPath, full) Then
+			gCmdErrCode = "write_failed" : gCmdErrMsg = "Could not create file from template: " & fileName : SetEvent(gCmdDone) : Exit Sub
+		End If
+		Dim As Boolean registered = False, opened = False
+		If doRegister Then registered = AgentRegisterFileInProject(full)
+		If doOpen Then
+			Dim As WString Ptr fw
+			WLet(fw, full)
+			Dim As Boolean bIsForm = (kind = "form")
+			Dim As TabWindow Ptr tb = AddTab(*fw, bIsForm)
+			If tb Then tb->SelectTab
+			opened = (tb <> 0)
+			WDeAllocate(fw)
+		End If
+		Dim As JsonValue Ptr res = JsonNewObject()
+		res->SetMember("path", JsonNewString(WStrToUtf8(full)))
+		res->SetMember("registered", JsonNewBool(registered))
+		res->SetMember("opened", JsonNewBool(opened))
 		gCmdOk = True
 		gCmdResult = res
 

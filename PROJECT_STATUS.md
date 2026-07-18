@@ -441,6 +441,32 @@ the real `Projects\`. **Always build + run owner test builds from the main tree
 `localFolder = <ProjectsPath>\<ProjectName>` and clones there — never derived from the origin repo's
 directory, so a teacher's `Examples\...` upload location never follows a student's clone.
 
+## Session handoff (2026-07-17) — AI Agent dropdown data-driven + ClaudeCode template git/MCP updates
+
+Two owner-requested changes, both on `origin/main`, compile clean, owner GUI-testing the dropdown.
+
+**AI Agent dropdown now populates from `Templates/AI/` subfolders (`a34dc2f`, `frmNewProject.frm`).**
+The New Project dialog's AI Agent list was a hardcoded five-item list with a label→folder map
+(`AIToolFolderName`). It now **scans `Templates/AI/` for subdirectories** and lists them verbatim,
+sorted, defaulting to `ClaudeCode` when present — so adding or removing an agent is just
+adding/removing a folder there (rescanned each time the dialog opens; no rebuild). The folder name
+is now used as the label, the stored `AITool=` value (`.vfp` + `project.astoria`), and the
+`StampAITemplate` source folder, so `AIToolFolderName` is reduced to an identity. **Behavior change:**
+`AITool=` now stores the folder name (e.g. `ClaudeCode`) instead of the old pretty label
+(`Claude Code`); nothing reads it back into logic, so it's harmless. Trade-off: the dropdown shows
+raw folder names — a prettier display would re-introduce the hardcoded map the owner wanted gone.
+
+**ClaudeCode AI template: git-workflow skill + `project.astoria` documented (`fcf2b67`).** Git and
+MCP are now shipped features, but the AI templates never mentioned `project.astoria` and had no git
+guidance. Added `.claude/skills/git-workflow/SKILL.md` (remote lives in `project.astoria`;
+commit/push via Project menu or git CLI over SSH; SSH-key requirement; commit-only-when-asked /
+no-force-push rules; MCP exposes no git ops) and documented `project.astoria` (the `AstoriaProject=1`
+marker file, edited via **Project ▸ Edit Project Description**) in both `CLAUDE.md` and `AGENTS.md`.
+**Scope: ClaudeCode only** — owner will have the other four tool agents mirror this into their own
+`Templates/AI/<tool>/` folders using ClaudeCode as the model. (Corrected a wrong assumption along the
+way: the `.vfp` *does* still carry the git/metadata keys — `frmNewProject` writes them to both the
+`.vfp` and `project.astoria` — so that existing template rule was not stale.)
+
 ## Next ready work
 
 **In progress: New Project dialog two-mode redesign + `project.astoria`.** Task 1 (dialog +

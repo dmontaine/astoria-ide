@@ -1,4 +1,4 @@
-﻿'' Project3 - AstoriaIDE debugger test bench (console)
+'' Project3 - AstoriaIDE debugger test bench (console)
 '' A longer program for exercising the debugger: breakpoints via F9 / gutter /
 '' menu, step in / over / out, the Locals and Watches panels, run-to-cursor,
 '' and Stop-while-running. Blank and comment lines are here on purpose so the

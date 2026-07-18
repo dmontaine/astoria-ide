@@ -325,10 +325,10 @@ shipped for now. Switch to disabled+reprompt if the owner prefers.
 paths against the owner's own repos — an **empty** repo, a **complete** Astoria project pushed up,
 and a **foreign** repo (to see refuse-and-delete).
 
-**Remaining tasks:** ~~task 2~~ **DONE 2026-07-17** (`fc9fc8a`; see the Task-2 handoff below).
-Task 3 — Project menu **Git Commit / Push** automation for git-backed projects (read the remote
-from `project.astoria`; same temp-.bat + `PipeCmd` + SSH pattern). Depends on the task-1 module
-(already in place). **Tasks 4 & 5 (git onboarding automation) queued after Task 3 — see below.**
+**Remaining tasks:** ~~task 2~~ **DONE 2026-07-17** (`fc9fc8a`). ~~Task 3~~ **DONE 2026-07-17**
+— delivered as a dedicated top-level **Git menu** (owner chose that over burying it under Project),
+with **Git Commit / Pull / Push**; see the "Git menu" handoff below. **Tasks 4 & 5 (git onboarding
+automation — SSH key + remote-repo creation) are next — see the "Git onboarding automation" section.**
 
 ## Git onboarding automation — Tasks 4 & 5 (queued after Task 3, owner-requested 2026-07-17)
 
@@ -441,6 +441,41 @@ the real `Projects\`. **Always build + run owner test builds from the main tree
 `localFolder = <ProjectsPath>\<ProjectName>` and clones there — never derived from the origin repo's
 directory, so a teacher's `Examples\...` upload location never follows a student's clone.
 
+## Session handoff (2026-07-17) — Git menu (Task 3): Commit / Pull / Push
+
+**Task 3, delivered as a dedicated top-level Git menu** (owner's call: its own menu between Run and
+Tools, room to grow — not buried under Project). Built, compiles clean, **owner GUI-verified** on a
+real cloned repo (commit + push worked end to end). Commits `d61eb06` → `60da4ee`.
+
+- **Menu** `mnuMain` "&Git" between Run and Tools ([Main.bas](src/Main.bas) `CreateMenusAndToolBars`):
+  **Git Commit…** · separator · **Git Pull** · **Git Push**. All three enabled only when the open
+  project's folder is a Git working tree (`OpenProjectIsGitRepo` = a `.git` entry, wired into
+  `ChangeMenuItemsEnabled`); dispatched in [AstoriaIDE.bas](src/AstoriaIDE.bas) `mClick`.
+- **Execution:** `RunGitInProject(args, out, exit)` runs `git <args>` in the project folder via a
+  temp `.bat` with batch-mode SSH (`GIT_SSH_COMMAND=ssh -o BatchMode=yes -o ConnectTimeout=15 -o
+  StrictHostKeyChecking=accept-new`, `GIT_TERMINAL_PROMPT=0`) — same plumbing as
+  `CloneGitRepository`; can't hang on a prompt; captures combined stdout+stderr and the exit code.
+  Commit = `git add -A` then `git commit -F <tempfile>` (message via file, no cmd-quoting risk).
+- **Commit dialog** `frmGitCommit` ([.bi](src/frmGitCommit.bi)/[.frm](src/frmGitCommit.frm), new;
+  registered in `src/AstoriaIDE.vfp`): a **themed** modal (replaced the crude framework `InputBox`)
+  with a read-only **"Files to be committed"** list (from `git status --porcelain`, formatted
+  modified/new/deleted/renamed) above a multiline message box + OK/Cancel. A clean tree
+  short-circuits to "Nothing to commit" without opening the dialog.
+- **Result boxes are plain-English** (`ShowGitResult`), not raw git dumps: commit → "Committed to
+  <branch> as <hash>" + message + change line; pull → "Pulled changes" / "Already up to date"; push
+  → "Pushed your commits" / "Nothing to push". Failures keep git's own text (the actionable part).
+- **Two bugs fixed on the way:** the message file was written with `Encoding "utf-8"` (BOM) so
+  `git commit -F` folded a BOM into the message (`i>>?` garble) — now raw UTF-8, no BOM; and a
+  scratch file (`Temp.bas`, which Astoria writes into the project folder for an unsaved main file —
+  [TabWindow.bas:11171](src/TabWindow.bas:11171)) was being swept into commits by `git add -A`.
+  `Templates/Git/gitignore.txt` now ignores `Temp.bas`. **Note:** a git repo created *outside*
+  Astoria (hand `git init` + push) has no `.gitignore`, so scratch/build files still get committed
+  there until one is added — the new commit-dialog file list at least makes that visible.
+
+**Not done / possible follow-ups:** no Git menu items yet for status/log/branch/diff (the menu is
+built to grow); commit is "all" (`git add -A`) with no per-file staging UI; `DeviceExplorer64.exe`
+and similar already-tracked build artifacts in hand-made repos aren't auto-untracked.
+
 ## Session handoff (2026-07-17) — AI Agent dropdown data-driven + ClaudeCode template git/MCP updates
 
 Two owner-requested changes, both on `origin/main`, compile clean, owner GUI-testing the dropdown.
@@ -473,9 +508,10 @@ way: the `.vfp` *does* still carry the git/metadata keys — `frmNewProject` wri
 module) and **Task 2 (Edit Project Description, `fc9fc8a`)** are done and compile clean; Task 1 is
 **not yet fully owner-verified** (clone paths need real remotes). See "Session handoff (2026-07-17)
 — New Project two-mode redesign" and the Task-2 handoff below for the full plan, what's done, the
-field enabled/disabled decision to confirm, and exactly what to test. **Task 3 (Project menu → Git
-Commit/Push) is next**, then **Tasks 4 & 5 (git onboarding automation — SSH key + remote-repo
-creation; see "Git onboarding automation" above)**. All depend on Task 1's `project.astoria` module.
+field enabled/disabled decision to confirm, and exactly what to test. **Task 3 is done** — the
+top-level **Git menu** (Commit/Pull/Push; see its handoff below). **Tasks 4 & 5 (git onboarding
+automation — SSH key + remote-repo creation; see "Git onboarding automation" above) are next.** All
+depend on Task 1's `project.astoria` module.
 
 **Agent MCP Server — COMPLETE (Tasks 0–7, 2026-07-17).** Verified end-to-end from a real
 MCP client (stdio JSON-RPC 2.0): `create_project` → `write_file` → `build` → `get_errors`

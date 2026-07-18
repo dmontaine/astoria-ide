@@ -800,14 +800,21 @@ Private Sub frmNewProject.Form_Create(ByRef Sender As Control)
 	optCreateLocal.Checked = True
 	optUseExistingGit.Checked = False
 	'' Git provider is GitHub-only for now -- shown as a static label, no dropdown to fill.
+	'' Git identity defaults come from Options > Personal Information so it isn't retyped
+	'' per project; both stay editable (a host account can differ from the usual details).
+	'' Git Login Name is the account segment of the remote URL (git@host:<login>/repo.git).
+	txtGitUserName.Text = *PersonalGitLogin
 	txtGitUserName.Enabled = False
-	txtGitUserName.Text = ""
-	'' Git Email defaults from Options > Personal Information > E-mail, but stays
-	'' editable -- a GitHub/GitLab/etc. account's commit email is often different
-	'' from the general contact address on file.
-	txtGitEmail.Text = *PersonalEmail
+	'' Git E-Mail falls back to the general E-mail address when no Git-specific one is set.
+	If Trim(*PersonalGitEmail) <> "" Then
+		txtGitEmail.Text = *PersonalGitEmail
+	Else
+		txtGitEmail.Text = *PersonalEmail
+	End If
 	txtGitEmail.Enabled = False
-	chkAIFriendly.Checked = False
+	'' AI-friendly is ON by default (agent-first): a new project ships with the selected
+	'' agent's rules/skills stamped in unless the user opts out.
+	chkAIFriendly.Checked = True
 	cboAITool.Clear
 	'' Populate the AI Agent list from the Templates/AI subfolders, so adding or
 	'' removing an agent is just adding/removing a folder there -- no code change.
@@ -837,7 +844,8 @@ Private Sub frmNewProject.Form_Create(ByRef Sender As Control)
 		If aiNames(aiI) = "ClaudeCode" Then aiDefault = aiI   '' prefer Claude Code as default
 	Next aiI
 	If aiCount > 0 Then cboAITool.ItemIndex = aiDefault
-	cboAITool.Enabled = False
+	'' Tool picker follows the checkbox, which now defaults to checked.
+	cboAITool.Enabled = chkAIFriendly.Checked
 	'' Apply the default mode's field enabling (git fields off for Create Local).
 	UpdateModeFields()
 End Sub

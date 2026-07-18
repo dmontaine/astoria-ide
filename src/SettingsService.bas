@@ -58,6 +58,27 @@ Sub ResolveFbcExePath(ByRef FbcExe As WString Ptr, CompilerTool As ToolType Ptr,
 End Sub
 
 Sub LoadSettingsIni()
+	'' No settings file yet -- a fresh install, or the user deleted it. Seed a minimal
+	'' one before loading.
+	''
+	'' This is load-bearing, not cosmetic: IniFile records its target path only inside
+	'' Load(), and the guarded call below skips Load entirely when the file is absent.
+	'' With no path recorded, every later iniSettings.Write* call ends in
+	'' IniFile.Update -> SaveToFile("") which fails silently (a Debug.Print only) -- so
+	'' the whole session's settings went nowhere AND no astoria.ini was ever created,
+	'' leaving the IDE permanently unable to persist anything. Seeding one real section
+	'' also keeps Update's FLines.Item(0) access valid on the very first write.
+	''
+	'' Written as UTF-8 *with* BOM to match the shipped astoria.ini's encoding, so the
+	'' file IniFile subsequently rewrites keeps the same form.
+	If Not FileExists(SettingsPath) Then
+		EnsureDirectoryExists(ExePath & "/Settings")
+		Dim As Integer fnNew = FreeFile
+		If Open(SettingsPath For Output Encoding "utf-8" As #fnNew) = 0 Then
+			Print #fnNew, "[Options]"
+			Close #fnNew
+		End If
+	End If
 	If FileExists(SettingsPath) Then
 		iniSettings.Load SettingsPath
 	End If
@@ -186,6 +207,11 @@ Sub LoadSettings
 	' stores each key as a single line, so a literal embedded CRLF would corrupt
 	' the ini's line-based structure.
 	WLet(PersonalAddress, Replace(iniSettings.ReadString("PersonalInfo", "Address", ""), "\n", !"\r\n"))
+	'' Git identity -- feeds the New Project dialog's Use Existing Git mode and the
+	'' Git Commit/Push dialogs so the user isn't retyping it per project.
+	WLet(PersonalGitLogin, iniSettings.ReadString("PersonalInfo", "GitLogin", ""))
+	WLet(PersonalGitUserName, iniSettings.ReadString("PersonalInfo", "GitUserName", ""))
+	WLet(PersonalGitEmail, iniSettings.ReadString("PersonalInfo", "GitEmail", ""))
 	PersonalLicenseGPL3 = iniSettings.ReadBool("PersonalInfo", "LicenseGPL3", False)
 	PersonalLicenseLGPL = iniSettings.ReadBool("PersonalInfo", "LicenseLGPL", False)
 	PersonalLicenseApache = iniSettings.ReadBool("PersonalInfo", "LicenseApache", False)

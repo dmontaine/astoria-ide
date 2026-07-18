@@ -24,7 +24,7 @@ pfOptions = @fOptions
 		This.ExtraMargins.Bottom = -1
 		This.ExtraMargins.Left = 0
 		This.ExtraMargins.Top = 0
-		This.SetBounds 0, 0, 631, 488
+		This.SetBounds 0, 0, 679, 536
 		This.StartPosition = FormStartPosition.CenterParent
 		'This.Caption = ML("Options")
 		This.CancelButton = @cmdCancel
@@ -140,6 +140,7 @@ pfOptions = @fOptions
 			.Name = "pnlPersonalName"
 			.Text = "Panel1"
 			.Align = DockStyle.alTop
+			.ExtraMargins.Top = 6
 			.TabIndex = 801
 			.SetBounds 0, 0, 417, 24
 			.Designer = @This
@@ -173,6 +174,7 @@ pfOptions = @fOptions
 			.Name = "pnlPersonalCompany"
 			.Text = "Panel1"
 			.Align = DockStyle.alTop
+			.ExtraMargins.Top = 6
 			.TabIndex = 804
 			.SetBounds 0, 24, 417, 24
 			.Designer = @This
@@ -206,6 +208,7 @@ pfOptions = @fOptions
 			.Name = "pnlPersonalWebsite"
 			.Text = "Panel1"
 			.Align = DockStyle.alTop
+			.ExtraMargins.Top = 6
 			.TabIndex = 807
 			.SetBounds 0, 48, 417, 24
 			.Designer = @This
@@ -239,6 +242,7 @@ pfOptions = @fOptions
 			.Name = "pnlPersonalEmail"
 			.Text = "Panel1"
 			.Align = DockStyle.alTop
+			.ExtraMargins.Top = 6
 			.TabIndex = 810
 			.SetBounds 0, 72, 417, 24
 			.Designer = @This
@@ -304,6 +308,124 @@ pfOptions = @fOptions
 			.Designer = @This
 			.Parent = @pnlPersonalAddress
 		End With
+		' grbPersonalGit — Git identity group (used by the New Project dialog's Use
+		' Existing Git mode and the Git Commit/SSH-key operations). Grouping these in
+		' their own box, like License, sets them off from the Address field above and
+		' lets the labels drop the redundant "Git" prefix.
+		With grbPersonalGit
+			.Name = "grbPersonalGit"
+			.Text = ("Git")
+			.Align = DockStyle.alTop
+			.ExtraMargins.Top = 12
+			.AutoSize = True
+			.TabIndex = 829
+			.SetBounds 0, 186, 417, 22
+			.Designer = @This
+			.Parent = @pnlPersonalInfo
+		End With
+		' pnlPersonalGitLogin — first row inside the group; the larger top margin clears
+		' the group box's own "Git" caption.
+		With pnlPersonalGitLogin
+			.Name = "pnlPersonalGitLogin"
+			.Text = "Panel1"
+			.Align = DockStyle.alTop
+			.ExtraMargins.Top = 16
+			.TabIndex = 830
+			.SetBounds 0, 0, 417, 24
+			.Designer = @This
+			.Parent = @grbPersonalGit
+		End With
+		' lblPersonalGitLogin
+		With lblPersonalGitLogin
+			.Name = "lblPersonalGitLogin"
+			.Text = ("Login Name") & ":"
+			.Align = DockStyle.alLeft
+			.ExtraMargins.Left = 10
+			.TabIndex = 831
+			.SetBounds 10, 0, 115, 24
+			.Designer = @This
+			.Parent = @pnlPersonalGitLogin
+		End With
+		' txtPersonalGitLogin
+		With txtPersonalGitLogin
+			.Name = "txtPersonalGitLogin"
+			.Align = DockStyle.alClient
+			.ExtraMargins.Left = 6
+			.ExtraMargins.Right = 20
+			.TabIndex = 832
+			.SetBounds 135, 2, 262, 20
+			.Text = ""
+			.Designer = @This
+			.Parent = @pnlPersonalGitLogin
+		End With
+		' pnlPersonalGitUserName
+		With pnlPersonalGitUserName
+			.Name = "pnlPersonalGitUserName"
+			.Text = "Panel1"
+			.Align = DockStyle.alTop
+			.ExtraMargins.Top = 6
+			.TabIndex = 833
+			.SetBounds 0, 24, 417, 24
+			.Designer = @This
+			.Parent = @grbPersonalGit
+		End With
+		' lblPersonalGitUserName
+		With lblPersonalGitUserName
+			.Name = "lblPersonalGitUserName"
+			.Text = ("User Name") & ":"
+			.Align = DockStyle.alLeft
+			.ExtraMargins.Left = 10
+			.TabIndex = 834
+			.SetBounds 10, 0, 115, 24
+			.Designer = @This
+			.Parent = @pnlPersonalGitUserName
+		End With
+		' txtPersonalGitUserName
+		With txtPersonalGitUserName
+			.Name = "txtPersonalGitUserName"
+			.Align = DockStyle.alClient
+			.ExtraMargins.Left = 6
+			.ExtraMargins.Right = 20
+			.TabIndex = 835
+			.SetBounds 135, 2, 262, 20
+			.Text = ""
+			.Designer = @This
+			.Parent = @pnlPersonalGitUserName
+		End With
+		' pnlPersonalGitEmail
+		With pnlPersonalGitEmail
+			.Name = "pnlPersonalGitEmail"
+			.Text = "Panel1"
+			.Align = DockStyle.alTop
+			.ExtraMargins.Top = 6
+			.TabIndex = 836
+			.SetBounds 0, 48, 417, 24
+			.Designer = @This
+			.Parent = @grbPersonalGit
+		End With
+		' lblPersonalGitEmail
+		With lblPersonalGitEmail
+			.Name = "lblPersonalGitEmail"
+			.Text = ("E-mail") & ":"
+			.Align = DockStyle.alLeft
+			.ExtraMargins.Left = 10
+			.TabIndex = 837
+			.SetBounds 10, 0, 115, 24
+			.Designer = @This
+			.Parent = @pnlPersonalGitEmail
+		End With
+		' txtPersonalGitEmail
+		With txtPersonalGitEmail
+			.Name = "txtPersonalGitEmail"
+			.Align = DockStyle.alClient
+			.ExtraMargins.Left = 6
+			.ExtraMargins.Right = 20
+			.TabIndex = 838
+			.SetBounds 135, 2, 262, 20
+			.Text = ""
+			.Designer = @This
+			.Parent = @pnlPersonalGitEmail
+		End With
 		' grbPersonalLicense
 		With grbPersonalLicense
 			.Name = "grbPersonalLicense"
@@ -312,49 +434,68 @@ pfOptions = @fOptions
 			.ExtraMargins.Top = 6
 			.AutoSize = True
 			.TabIndex = 816
-			.SetBounds 0, 186, 417, 22
+			.SetBounds 0, 258, 417, 22
 			.Designer = @This
 			.Parent = @pnlPersonalInfo
+		End With
+		'' Licenses laid out as three columns x two rows (then Other + its field on a
+		'' third row). Each row is an alTop panel whose checkboxes dock alLeft at a fixed
+		'' width, instead of the old single stacked column. The first row carries a larger
+		'' top margin so it clears the group box's own "License" caption (the caption and
+		'' the first checkbox used to overlap).
+		' pnlLicenseRow1 — GPL3 | LGPL | Apache
+		With pnlLicenseRow1
+			.Name = "pnlLicenseRow1"
+			.Text = ""
+			.Align = DockStyle.alTop
+			.ExtraMargins.Top = 16
+			.TabIndex = 816
+			.SetBounds 0, 0, 417, 23
+			.Designer = @This
+			.Parent = @grbPersonalLicense
 		End With
 		' chkLicenseGPL3
 		With chkLicenseGPL3
 			.Name = "chkLicenseGPL3"
 			.Text = ("GPL3")
-			.Align = DockStyle.alTop
-			.ExtraMargins.Top = 2
+			.Align = DockStyle.alLeft
 			.ExtraMargins.Left = 10
 			.TabIndex = 817
 			.Constraints.Height = 21
-			.AutoSize = True
-			.SetBounds 10, 0, 175, 21
+			.SetBounds 10, 0, 140, 21
 			.Designer = @This
-			.Parent = @grbPersonalLicense
+			.Parent = @pnlLicenseRow1
 		End With
 		' chkLicenseLGPL
 		With chkLicenseLGPL
 			.Name = "chkLicenseLGPL"
 			.Text = ("LGPL")
-			.Align = DockStyle.alTop
-			.ExtraMargins.Top = 2
-			.ExtraMargins.Left = 10
+			.Align = DockStyle.alLeft
 			.TabIndex = 818
 			.Constraints.Height = 21
-			.AutoSize = True
-			.SetBounds 10, 21, 175, 21
+			.SetBounds 150, 0, 140, 21
 			.Designer = @This
-			.Parent = @grbPersonalLicense
+			.Parent = @pnlLicenseRow1
 		End With
 		' chkLicenseApache
 		With chkLicenseApache
 			.Name = "chkLicenseApache"
 			.Text = ("Apache")
-			.Align = DockStyle.alTop
-			.ExtraMargins.Top = 2
-			.ExtraMargins.Left = 10
+			.Align = DockStyle.alLeft
 			.TabIndex = 819
 			.Constraints.Height = 21
-			.AutoSize = True
-			.SetBounds 10, 42, 175, 21
+			.SetBounds 290, 0, 140, 21
+			.Designer = @This
+			.Parent = @pnlLicenseRow1
+		End With
+		' pnlLicenseRow2 — BSD | Freeware | Proprietary
+		With pnlLicenseRow2
+			.Name = "pnlLicenseRow2"
+			.Text = ""
+			.Align = DockStyle.alTop
+			.ExtraMargins.Top = 2
+			.TabIndex = 820
+			.SetBounds 0, 23, 417, 23
 			.Designer = @This
 			.Parent = @grbPersonalLicense
 		End With
@@ -362,52 +503,44 @@ pfOptions = @fOptions
 		With chkLicenseBSD
 			.Name = "chkLicenseBSD"
 			.Text = ("BSD")
-			.Align = DockStyle.alTop
-			.ExtraMargins.Top = 2
+			.Align = DockStyle.alLeft
 			.ExtraMargins.Left = 10
-			.TabIndex = 820
+			.TabIndex = 821
 			.Constraints.Height = 21
-			.AutoSize = True
-			.SetBounds 10, 63, 175, 21
+			.SetBounds 10, 0, 140, 21
 			.Designer = @This
-			.Parent = @grbPersonalLicense
+			.Parent = @pnlLicenseRow2
 		End With
 		' chkLicenseFreeware
 		With chkLicenseFreeware
 			.Name = "chkLicenseFreeware"
 			.Text = ("Freeware")
-			.Align = DockStyle.alTop
-			.ExtraMargins.Top = 2
-			.ExtraMargins.Left = 10
-			.TabIndex = 821
+			.Align = DockStyle.alLeft
+			.TabIndex = 822
 			.Constraints.Height = 21
-			.AutoSize = True
-			.SetBounds 10, 84, 175, 21
+			.SetBounds 150, 0, 140, 21
 			.Designer = @This
-			.Parent = @grbPersonalLicense
+			.Parent = @pnlLicenseRow2
 		End With
 		' chkLicenseProprietary
 		With chkLicenseProprietary
 			.Name = "chkLicenseProprietary"
 			.Text = ("Proprietary")
-			.Align = DockStyle.alTop
-			.ExtraMargins.Top = 2
-			.ExtraMargins.Left = 10
-			.TabIndex = 822
+			.Align = DockStyle.alLeft
+			.TabIndex = 823
 			.Constraints.Height = 21
-			.AutoSize = True
-			.SetBounds 10, 105, 175, 21
+			.SetBounds 290, 0, 140, 21
 			.Designer = @This
-			.Parent = @grbPersonalLicense
+			.Parent = @pnlLicenseRow2
 		End With
-		' pnlPersonalLicenseOther
+		' pnlPersonalLicenseOther — third row: Other + its free-text field
 		With pnlPersonalLicenseOther
 			.Name = "pnlPersonalLicenseOther"
 			.Text = "Panel1"
 			.Align = DockStyle.alTop
 			.ExtraMargins.Top = 2
-			.TabIndex = 823
-			.SetBounds 0, 126, 417, 24
+			.TabIndex = 826
+			.SetBounds 0, 46, 417, 24
 			.Designer = @This
 			.Parent = @grbPersonalLicense
 		End With
@@ -2755,6 +2888,9 @@ Sub frmOptions.LoadSettings()
 		.txtPersonalWebsite.Text = *PersonalWebsite
 		.txtPersonalEmail.Text = *PersonalEmail
 		.txtPersonalAddress.Text = *PersonalAddress
+		.txtPersonalGitLogin.Text = *PersonalGitLogin
+		.txtPersonalGitUserName.Text = *PersonalGitUserName
+		.txtPersonalGitEmail.Text = *PersonalGitEmail
 		.chkLicenseGPL3.Checked = PersonalLicenseGPL3
 		.chkLicenseLGPL.Checked = PersonalLicenseLGPL
 		.chkLicenseApache.Checked = PersonalLicenseApache
@@ -3237,6 +3373,9 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		WLet(PersonalWebsite, .txtPersonalWebsite.Text)
 		WLet(PersonalEmail, .txtPersonalEmail.Text)
 		WLet(PersonalAddress, .txtPersonalAddress.Text)
+		WLet(PersonalGitLogin, .txtPersonalGitLogin.Text)
+		WLet(PersonalGitUserName, .txtPersonalGitUserName.Text)
+		WLet(PersonalGitEmail, .txtPersonalGitEmail.Text)
 		PersonalLicenseGPL3 = .chkLicenseGPL3.Checked
 		PersonalLicenseLGPL = .chkLicenseLGPL.Checked
 		PersonalLicenseApache = .chkLicenseApache.Checked
@@ -3459,6 +3598,15 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		' embedded CRLF would corrupt the ini's one-key-per-line structure.
 		If IniValueChangedStr(piniSettings, "PersonalInfo", "Address", Replace(Replace(*PersonalAddress, !"\r\n", "\n"), !"\n", "\n")) Then
 			piniSettings->WriteString "PersonalInfo", "Address", Replace(Replace(*PersonalAddress, !"\r\n", "\n"), !"\n", "\n")
+		End If
+		If IniValueChangedStr(piniSettings, "PersonalInfo", "GitLogin", *PersonalGitLogin) Then
+			piniSettings->WriteString "PersonalInfo", "GitLogin", *PersonalGitLogin
+		End If
+		If IniValueChangedStr(piniSettings, "PersonalInfo", "GitUserName", *PersonalGitUserName) Then
+			piniSettings->WriteString "PersonalInfo", "GitUserName", *PersonalGitUserName
+		End If
+		If IniValueChangedStr(piniSettings, "PersonalInfo", "GitEmail", *PersonalGitEmail) Then
+			piniSettings->WriteString "PersonalInfo", "GitEmail", *PersonalGitEmail
 		End If
 		If IniValueChangedBool(piniSettings, "PersonalInfo", "LicenseGPL3", PersonalLicenseGPL3) Then
 			piniSettings->WriteBool "PersonalInfo", "LicenseGPL3", PersonalLicenseGPL3

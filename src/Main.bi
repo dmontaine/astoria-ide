@@ -137,6 +137,7 @@ Common Shared As WString Ptr DefaultProjectFile
 Common Shared As WString Ptr InterfaceFontName
 Common Shared As WString Ptr gSearchSave, EnvironmentVariables
 Common Shared As WString Ptr PersonalName, PersonalCompany, PersonalWebsite, PersonalEmail, PersonalAddress, PersonalLicenseOtherText
+Common Shared As WString Ptr PersonalGitLogin, PersonalGitUserName, PersonalGitEmail   '' Tools > Options > Personal Information (Git identity)
 Common Shared As WString Ptr ProjectsPath, LastOpenPath, CommandPromptFolder
 Common Shared As WString Ptr DefaultHelp, HelpPath, KeywordsHelpPath, AsmKeywordsHelpPath, DefaultBuildConfiguration
 Common Shared As WString Ptr DefaultMakeTool, CurrentMakeTool1, CurrentMakeTool2

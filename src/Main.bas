@@ -806,6 +806,12 @@ Function AddProject(ByRef FileName As WString, pFilesList As WStringList Ptr, tn
 				'' exists (deleted/moved since last session) instead of blocking startup
 				'' with a modal for something the user isn't actively opening.
 				If Not mApplyingWorkspaceLoad Then MsgBox ("File not found") & ":" & WChr(13, 10) & WChr(13, 10) & FormatMsgPath(FileName)
+				'' A project that no longer exists must not linger in the recent lists or
+				'' stay the remembered "last project" -- otherwise every launch keeps
+				'' pointing at something that can never be opened again.
+				If *RecentProject <> "" AndAlso EqualPaths(*RecentProject, FileName) Then WLet(RecentProject, "")
+				If *RecentFiles <> "" AndAlso EqualPaths(*RecentFiles, FileName) Then WLet(RecentFiles, "")
+				PruneMissingMRUProjects()
 				Return tn
 			End If
 			AddMRUProject FileName
@@ -1762,6 +1768,19 @@ Sub GitCommit
 	Dim As String msgUtf8 = WStrToUtf8(msg)
 	If Len(msgUtf8) > 0 Then Put #FnM, 1, msgUtf8
 	CloseFile_(FnM)
+	'' Commit identity from Tools > Options > Personal Information, set repo-LOCAL
+	'' (never --global). Without this, a machine with no git identity configured fails
+	'' the commit non-interactively with no visible error and leaves zero commits --
+	'' the same trap the original project-creation git setup hit. Git User Name /
+	'' Git E-Mail fall back to the general Name / E-mail address when unset.
+	Dim As UString cfgName = Trim(*PersonalGitUserName)
+	If cfgName = "" Then cfgName = Trim(*PersonalName)
+	Dim As UString cfgEmail = Trim(*PersonalGitEmail)
+	If cfgEmail = "" Then cfgEmail = Trim(*PersonalEmail)
+	Dim As String cfgOut
+	Dim As Integer cfgEc
+	If cfgName <> "" Then RunGitInProject("config user.name " & Chr(34) & cfgName & Chr(34), cfgOut, cfgEc)
+	If cfgEmail <> "" Then RunGitInProject("config user.email " & Chr(34) & cfgEmail & Chr(34), cfgOut, cfgEc)
 	'' Stage everything (new/modified/deleted, minus .gitignore'd), then commit.
 	Dim As String addOut
 	Dim As Integer addEc
@@ -1838,8 +1857,11 @@ End Function
 '' for a manual paste. Astoria never enters credentials or submits a web form -- adding
 '' the key is the user's own action. UI thread. Public so frmNewProject can reuse it.
 Sub SetupSshKey(ByRef provider As String)
-	Dim As String comment = *PersonalEmail
-	If Trim(comment) = "" Then comment = "astoria-ide"
+	'' Key comment: prefer the Git-specific e-mail from Options > Personal Information
+	'' (that's the address the host account is under), falling back to the general one.
+	Dim As String comment = Trim(*PersonalGitEmail)
+	If comment = "" Then comment = Trim(*PersonalEmail)
+	If comment = "" Then comment = "astoria-ide"
 	Dim As String setupLog
 	Dim As UString pubPath = EnsureSshKey(comment, setupLog)
 	If pubPath = "" Then
@@ -10038,6 +10060,16 @@ Sub frmMain_Create(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	If *RecentFile <> "" Then WLet(RecentFile, GetFullPath(*RecentFile))
 	If *RecentProject <> "" Then WLet(RecentProject, GetFullPath(*RecentProject))
 	If *RecentFolder <> "" Then WLet(RecentFolder, GetFullPath(*RecentFolder))
+	'' Drop any "last opened" pointer whose target no longer exists (project/file deleted
+	'' or moved outside the IDE). Otherwise the IDE keeps treating a deleted project as the
+	'' most recent one -- it can't be reopened, and it lingers as the remembered project.
+	'' The MRU lists get the same treatment in SanitizeMRUListsOnLoad; these four are the
+	'' separate single-value pointers. Cleared here, they are written back empty on the
+	'' next settings save, so the staleness does not persist.
+	If *RecentFiles <> "" AndAlso Not FileExists(*RecentFiles) Then WLet(RecentFiles, "")
+	If *RecentFile <> "" AndAlso Not FileExists(*RecentFile) Then WLet(RecentFile, "")
+	If *RecentProject <> "" AndAlso Not FileExists(*RecentProject) Then WLet(RecentProject, "")
+	If *RecentFolder <> "" AndAlso Not FolderExists(*RecentFolder) Then WLet(RecentFolder, "")
 	'' Default-visible toolbar set on a FRESH install is now ALL FIVE bands (owner decision,
 	'' 2026-07-10, reverses 13.3.A O3's "Standard + Run only" minimal default). ReadBool's default
 	'' only applies when the INI key is absent, so an existing user's saved toolbar visibility
@@ -10558,6 +10590,9 @@ Sub OnProgramQuit() Destructor
 	WDeAllocate(PersonalEmail)
 	WDeAllocate(PersonalAddress)
 	WDeAllocate(PersonalLicenseOtherText)
+	WDeAllocate(PersonalGitLogin)
+	WDeAllocate(PersonalGitUserName)
+	WDeAllocate(PersonalGitEmail)
 	'For i As Integer = 0 To Threads.Count - 1
 	'	If Threads.Item(i) <> 0 Then ThreadWait Threads.Item(i)
 	'Next

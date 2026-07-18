@@ -332,6 +332,54 @@ Project integration); see the "Git onboarding automation" section. **Tasks 1–5
 two-mode + git feature are all built** (all 2026-07-17). Remaining: owner end-to-end verification of
 the git flows against real remotes, and the optional refinements noted in each handoff.
 
+## Same-day follow-up (2026-07-17) — Personal Information page, Git identity plumbing, and two settings/recent-project bugs
+
+Owner-driven polish pass over Tools ▸ Options ▸ Personal Information, plus two real bugs the owner
+surfaced by testing destructive scenarios by hand.
+
+**Options ▸ Personal Information (`src/frmOptions.frm`/`.bi`):**
+- **Licenses laid out in three columns** (`pnlLicenseRow1`/`pnlLicenseRow2`, three `alLeft`
+  checkboxes at 140px each) — two rows of three, with Other + its entry field on a third row. This
+  also fixed the **GPL3 checkbox caption overlapping the word "License"** in the group-box header:
+  the first row inside each group box now carries `.ExtraMargins.Top = 16` to clear the caption.
+- **New "Git" group box** (`grbPersonalGit`) holding **Login Name / User Name / E-mail**. Owner's
+  reasoning: boxing the section the way License is boxed means the three fields don't each have to
+  be prefixed with "Git", and it separates them properly from the Address box above.
+- Every personal row got `.ExtraMargins.Top = 6` — the fields were "squished together" — and the
+  dialog grew to `679 × 536` (~½" larger) to hold the new layout.
+
+**Git identity is now stored once and reused everywhere.** The three values persist to
+`[PersonalInfo]` (`GitLogin`/`GitUserName`/`GitEmail`) via `SettingsService.bas`, are exposed as
+`PersonalGitLogin`/`PersonalGitUserName`/`PersonalGitEmail` (`Main.bi`), and are consumed by:
+**New Project** (prefills Git Username; e-mail falls back to `PersonalEmail` when the Git one is
+blank), **Git Commit** (`GitCommit` sets the repo-local `user.name`/`user.email` *before*
+`git add -A`, so commits are attributed correctly without touching the machine's global git
+config), and **Set Up SSH Key** (prefers `PersonalGitEmail` for the key comment).
+
+**AI-friendly now defaults to ON** in the New Project dialog (owner: "the default state … should
+be on"), with the AI-tool dropdown enabled to match.
+
+**Bug — a deleted project left the IDE stuck on it.** Owner deleted a project folder outside the
+IDE; the IDE kept treating it as the last-opened project and put up a "File not found" modal at
+startup. Two fixes in `Main.bas`: (1) at startup, `RecentFiles`/`RecentFile`/`RecentProject`/
+`RecentFolder` are cleared when their target no longer exists; (2) the AddProject not-found branch
+clears the matching Recent pointers and calls `PruneMissingMRUProjects()`, so a failed open also
+evicts the entry from the recent list. **Verified**: with the project deleted, the IDE opens with
+no modal and no project — just the New Project prompt.
+
+**Bug — a missing `astoria.ini` was never recreated, and settings silently went nowhere.** Found
+by the owner deliberately deleting `Settings/astoria.ini` to see whether Astoria would rebuild it;
+it did not. Root cause: `IniFile` records its target path **only** inside `Load()` (`If FileName
+<> "" Then WLet(FFile, FileName)`), but `LoadSettingsIni()` called `Load` only when the file
+already existed. With no path recorded, every `iniSettings.Write*` ended in `SaveToFile(*FFile)`
+with an unset `FFile` — failing with nothing louder than a `Debug.Print`, so the whole session's
+settings never reached `Settings/`, and the file was never created. (The smoking gun: a partial
+`astoria.ini` turning up in the *working directory* instead.) Fixed in `SettingsService.bas` —
+when the file is absent, seed a minimal `[Options]` file (UTF-8 **with BOM**, matching the shipped
+INI's encoding, which also keeps `Update`'s `FLines.Item(0)` access valid on the first write) and
+then load it normally. **Verified** by reproducing the owner's exact test: deleted the INI,
+launched, and it was recreated and taking writes.
+
 ## Git onboarding automation — Tasks 4 & 5 (queued after Task 3, owner-requested 2026-07-17)
 
 Today the "Use Existing Git Project" flow requires the user to have **already** (a) set up an SSH

@@ -328,7 +328,46 @@ and a **foreign** repo (to see refuse-and-delete).
 **Remaining tasks:** ~~task 2~~ **DONE 2026-07-17** (`fc9fc8a`; see the Task-2 handoff below).
 Task 3 — Project menu **Git Commit / Push** automation for git-backed projects (read the remote
 from `project.astoria`; same temp-.bat + `PipeCmd` + SSH pattern). Depends on the task-1 module
-(already in place).
+(already in place). **Tasks 4 & 5 (git onboarding automation) queued after Task 3 — see below.**
+
+## Git onboarding automation — Tasks 4 & 5 (queued after Task 3, owner-requested 2026-07-17)
+
+Today the "Use Existing Git Project" flow requires the user to have **already** (a) set up an SSH
+key with the provider and (b) created the empty remote repo — both manual, documented only in
+`Templates/Git/*.md`. These two tasks automate that onboarding. **"Automated" here still allows
+user interaction** (gathering info, a one-time provider login) — it removes the mechanical steps,
+not the consent. Full feasibility analysis was worked through 2026-07-17; the design conclusions:
+
+- **The robust mechanism is the provider CLI/API, NOT browser automation.** Driving a provider's
+  web UI (Playwright/CDP or Claude-in-Chrome) is fragile: bot detection, 2FA, and CAPTCHA
+  specifically block scripted submission on auth/security pages, and the DOM churns. Use it only as
+  an *assisted* fallback (open the right page prefilled + copy to clipboard; user clicks Save).
+- **One interactive provider auth is unavoidable and by design** — a `gh`/`glab` device-flow login,
+  a pasted token, or a logged-in browser. That's the "user info" the automation gathers.
+- **CLI coverage is uneven:** strong for **GitHub** (`gh`), decent for **GitLab** (`glab`), weak for
+  **Bitbucket** (app-password API only) and **Codeberg/Gitea** (`tea` is niche). So full automation
+  is GitHub-first; assisted-browser is the fallback for the other three.
+
+**Task 4 — SSH public key setup.** Two sub-steps: (a) **generate the keypair locally** — fully
+automatable, no auth/browser: `ssh-keygen -t ed25519 -C "<email>" -f %USERPROFILE%\.ssh\id_ed25519
+-N ""`, handling the key-already-exists case and pre-seeding `known_hosts`
+(`ssh-keyscan <host> >> known_hosts`) so the first push doesn't prompt. (b) **register the public
+key with the provider** — prefer `gh ssh-key add` / `glab ssh-key add` if the CLI is installed and
+authenticated; else assisted-browser (clipboard + open `github.com/settings/ssh/new` etc.). Wire it
+into `SshKeyExists()`'s "no key" path in `frmNewProject` (which today just points at
+`Templates\Git\sshkeys.md`).
+
+**Task 5 — create the empty remote repository.** Prefer `gh repo create <name> --private` /
+`glab repo create`; else REST API + a pasted PAT; else assisted-browser (open the provider's "new
+repo" page prefilled). Wire into the existing **repo-existence preflight** in the git-mode
+`cmdOK_Click` (`RemoteRepoExists`): when the repo doesn't exist, offer **"create it for me"**
+instead of today's "create it first, then continue" Yes/No/Cancel prompt.
+
+**Suggested slice order:** (1) the fully-safe local piece first — `ssh-keygen` + `known_hosts`
+seeding + a `gh`/`glab` presence/auth detection helper; (2) GitHub happy-path via `gh` for both key
+and repo; (3) assisted-browser fallback for the other providers. Note Claude (the assistant) can
+generate keys and call `gh`/`glab`, but must not type passwords/tokens into fields or submit
+account-security web forms unprompted — those stay user-confirmed.
 
 ## Session handoff (2026-07-16) — Agent MCP Server (Tasks 0–5 of 8)
 
@@ -409,7 +448,8 @@ module) and **Task 2 (Edit Project Description, `fc9fc8a`)** are done and compil
 **not yet fully owner-verified** (clone paths need real remotes). See "Session handoff (2026-07-17)
 — New Project two-mode redesign" and the Task-2 handoff below for the full plan, what's done, the
 field enabled/disabled decision to confirm, and exactly what to test. **Task 3 (Project menu → Git
-Commit/Push) is next** and depends on Task 1's `project.astoria` module.
+Commit/Push) is next**, then **Tasks 4 & 5 (git onboarding automation — SSH key + remote-repo
+creation; see "Git onboarding automation" above)**. All depend on Task 1's `project.astoria` module.
 
 **Agent MCP Server — COMPLETE (Tasks 0–7, 2026-07-17).** Verified end-to-end from a real
 MCP client (stdio JSON-RPC 2.0): `create_project` → `write_file` → `build` → `get_errors`

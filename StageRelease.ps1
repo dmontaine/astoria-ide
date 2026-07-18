@@ -64,17 +64,19 @@ foreach ($f in $TopLevelFiles) {
 }
 
 # --- Top-level directories: included wholesale (runtime deps, templates, docs users need) ---
-# Documentation/ (a standalone HTML copy of the FreeBasic language reference) was
-# removed from the repo entirely: Help/ already ships this same information in the
-# IDE's own compiled help form (FB-manual-en_US-1.10.1.chm), and the FreeBASIC
-# website covers anything beyond that - keeping both was redundant given this
-# fork's opinionated, focused scope.
+# Note on Documentation/: the folder of that name that was dropped in 2026-07-16 (2d833f4) was
+# a standalone HTML copy of the FreeBasic language reference, redundant against Help/'s compiled
+# FB-manual-en_US-1.10.1.chm. The folder now holds something different - Astoria's OWN
+# documentation (what the IDE is, the control and framework references, testing status, the
+# changelog). That is written for users and testers, so it ships. Do not re-apply the old
+# exclusion to the new content.
 $WholesaleDirs = @(
     "Compiler",       # bundled fbc64 - users need this to compile their own programs
     "Debuggers",      # bundled gdb - needed for the IDE's debugging feature
     "Templates",      # New Project / New File skeletons, used by the IDE at runtime
     "Resources",      # icons/images the IDE loads at runtime
     "Help",           # in-IDE help content
+    "Documentation",  # Astoria's own docs - see the note above; NOT the old FB manual copy
     "Tools",          # user-facing utility tools (some ship their own .bas alongside a
                        # prebuilt .exe, e.g. COMWrapperBuilder - that's a tool FOR the
                        # user to run/modify, not IDE implementation, so kept as-is)
@@ -92,9 +94,23 @@ foreach ($d in $WholesaleDirs) {
     }
 }
 
-# Compiler/doc and Compiler/examples: the same "our own Help + Examples cover
-# this" reasoning as Documentation/ above - drop the compiler's own bundled
-# copies rather than ship the same material twice.
+# Examples/: strip build output. This staging copies the WORKING TREE, not a clean git
+# export, so anything .gitignore'd but present on the build machine ships unless pruned
+# here. Examples/Controls holds one generated project per toolbox control; building them
+# (as the control test sweep does) leaves ~170 MB of Main.exe and copied runtime DLLs
+# sitting next to the sources. The sources are the point - a user can rebuild any of them
+# by opening the .vfp and pressing build - so keep those and drop the binaries.
+$exampleBinaries = Get-ChildItem -Path (Join-Path $ReleaseRoot "Examples") -Recurse -File `
+                                 -Include *.exe, *.dll -ErrorAction SilentlyContinue
+if ($exampleBinaries) {
+    $freed = [math]::Round((($exampleBinaries | Measure-Object Length -Sum).Sum) / 1MB, 1)
+    $exampleBinaries | Remove-Item -Force
+    Write-Host ("Pruned:           {0} build artifact(s) under Examples ({1} MB)" -f `
+                $exampleBinaries.Count, $freed)
+}
+
+# Compiler/doc and Compiler/examples: our own Help + Examples cover this, so drop
+# the compiler's own bundled copies rather than ship the same material twice.
 $compilerPrune = @("doc", "examples")
 foreach ($sub in $compilerPrune) {
     $path = Join-Path $ReleaseRoot "Compiler\$sub"

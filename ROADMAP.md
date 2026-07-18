@@ -259,3 +259,57 @@ with the AI side deliberately working across **both frontier models** (higher co
 **The task set — to be scoped only after the IDE is declared final/stable:** create **teaching plans and resources for educators**. (Curriculum/lesson plans, classroom setup guidance presumably including the per-user installer and the OpenCode path, and teaching-oriented reference material — exact scope to be defined with the owner when picked up. Nothing here has started; this section records the audience decision and the rationale so the intent survives until then.)
 
 ---
+
+### 13.14 Review upstream MyFbFramework for fixes to backport (owner-added 2026-07-18)
+
+Astoria vendors **MyFbFramework 1.3.7** (`Controls/Framework`, see `changes_en.txt`). Upstream —
+[MyFbFramework](https://github.com/XusinboyBekchanov/MyFbFramework) — has moved on, and our copy is
+demonstrably behind in ways that matter: the `WebBrowser` control in this tree was the **IE-only**
+variant while upstream already had a working WebView2 implementation. The consequence was not
+cosmetic — the control could not render a page at all and crashed on `Navigate` until it was
+replaced on 2026-07-18 (see `Documentation/TestPlan.md` A4). If one control was that far behind,
+others may be.
+
+**The work:** diff `mff/` against upstream and read upstream's `changes_en.txt` from 1.3.7 forward;
+list the fixes we lack; prioritise correctness fixes to controls we actually ship in the toolbox.
+Linux/GTK-only and 32-bit-only changes can be skipped — Astoria is Win64-only.
+
+**Look for missing files, not only changed ones.** `ListViewEx` and `SearchBar` each ship a `.bi`
+whose implementation `.bas` was never included upstream, so any project using one fails with
+"File not found"; both are excluded from the toolbox for that reason. Check whether upstream has
+since supplied them.
+
+**Preserve local adaptations.** Anything marked `ASTORIA CHANGE` must survive a backport — today
+that means WebView2 as the default Windows backend, the guarded `#define`s in
+`mff/WebView/WebView2.bi`, and the ByRef-`WString` fix in `NewWindowRequestedEventArgs.GetURL`
+(**which upstream still has as a bug**). A blind overwrite reintroduces defects already fixed here.
+
+This is bug-fix work and so is compatible with the 1.0 freeze; genuinely new upstream *features*
+should be recorded here rather than taken.
+
+### 13.15 Adapt the upstream framework reference (1300+ pages) into Astoria documentation (owner-added 2026-07-18)
+
+Bring the **full** upstream framework reference into `Documentation/` as Astoria's own. Sources:
+`Controls/Framework/help/MyFbFramework.chm` (1.1 MB) and the upstream `Framework.wiki` repository —
+note `Controls/Framework/Framework.wiki` exists in this tree but is **empty** (an uncloned
+submodule), so the wiki must be fetched.
+
+**Three edits make it Astoria's rather than upstream's:**
+
+1. **Remove Linux/GTK content.** Astoria is Win64-only and the GTK paths are gone from our tree, so
+   GTK examples and Linux notes actively mislead here.
+2. **Remove Win32/32-bit content**, for the same reason: we ship a 64-bit compiler only.
+3. **Add our modifications and fixes**, so the reference describes the code we actually ship — at
+   minimum `WebBrowser`'s WebView2 default (with the `AtlAxWin` failure recorded so it is not
+   reintroduced), the `SQLite3Component.AddField` fix, and the `GetURL` ByRef fix.
+
+**Build on the existing partial coverage rather than duplicating it:** `Documentation/Controls.md`
+already covers the 73 toolbox controls (extracted from the `.chm`) and
+`Documentation/FrameworkFeatures.md` covers the non-toolbox half. Decide whether the full reference
+absorbs those or sits beside them — two documents disagreeing about the same control is worse than
+either alone.
+
+**Licence:** the framework is LGPL (`COPYING.LGPL.txt`, `COPYING.modifiedLGPL.txt`). Republished
+documentation needs attribution to Xusinboy Bekchanov and a statement of what we changed.
+
+Expect a batched job worked section by section across several sessions, not a single pass.

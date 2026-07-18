@@ -157,7 +157,10 @@ Namespace My.Sys.Forms
 		End Function
 		
 		Private Function NewWindowRequestedEventArgs.GetURL() ByRef As WString
-				Return ""
+				' A ByRef WString result cannot return a literal -- it would reference a temporary
+				' that dies with the call. Return a static empty string instead.
+				Static As WString * 1 Empty
+				Return Empty
 		End Function
 		
 		Private Sub WebBrowser.HandleIsAllocated(ByRef Sender As My.Sys.Forms.Control)

@@ -4096,10 +4096,12 @@ Sub InitToolBoxTree()
 	tnToolContainers = tvToolBox.Nodes.Add(("Containers"), "Containers", "", "Folder", "Folder")
 	tnToolComponents = tvToolBox.Nodes.Add(("Components"), "Components", "", "Folder", "Folder")
 	tnToolDialogs = tvToolBox.Nodes.Add(("Dialogs"), "Dialogs", "", "Folder", "Folder")
+	' One Cursor only, at the top of the tree. Upstream (VB/Delphi) gives every palette page
+	' its own pointer because only one page is visible at a time; here all four groups are
+	' expanded at once, so four identical entries just read as a glitch. Clicking a category
+	' header also resets to Cursor (see ToolBoxSelectNode), so each group keeps a deselect
+	' directly above it.
 	tnToolControls->Nodes.Add("Cursor", "Cursor", "", "Cursor", "Cursor")
-	tnToolContainers->Nodes.Add("Cursor", "Cursor", "", "Cursor", "Cursor")
-	tnToolComponents->Nodes.Add("Cursor", "Cursor", "", "Cursor", "Cursor")
-	tnToolDialogs->Nodes.Add("Cursor", "Cursor", "", "Cursor", "Cursor")
 	tnToolControls->Expand()
 	tnToolContainers->Expand()
 	tnToolComponents->Expand()
@@ -4154,9 +4156,14 @@ Sub tvToolBox_NodeActivate(ByRef Designer As My.Sys.Object, ByRef Sender As Tree
 	End If
 End Sub
 
+' Controls hidden from the toolbox because they cannot be built. Both entries below ship a
+' .bi whose implementation .bas was never included in MyFbFramework, so any project placing
+' one fails at compile with "File not found". Nothing here can fix that -- the implementation
+' has to come from upstream. WebBrowser was formerly listed here for a different reason (a
+' ByRef WString returning a literal, since fixed in WebBrowser.bas) and is now available.
 Function IsExcludedToolBoxControl(ControlName As String) As Boolean
 	Select Case LCase(ControlName)
-	Case "webbrowser", "listviewex", "searchbar"
+	Case "listviewex", "searchbar"
 		Return True
 	Case Else
 		Return False
@@ -6151,11 +6158,15 @@ Sub LoadToolBox(ForLibrary As Library Ptr = 0)
 		Dim As TreeNode Ptr parentNode = GetToolBoxCategoryNode(iNew)
 		If parentNode = 0 Then Continue For
 		If ToolBoxNodeExists(parentNode, it) Then Continue For
-		' Insert alphabetically, keeping the Cursor node first (index 0). The
-		' node image comes from imgListTools, keyed by control name (loaded
-		' above from the control library resources).
+		' Insert alphabetically, keeping any pinned Cursor node first. Only the Controls
+		' group has one, so the scan starts at 0 elsewhere -- starting at 1 unconditionally
+		' would leave the first real control out of the comparison and misplace whatever
+		' sorts before it. The node image comes from imgListTools, keyed by control name
+		' (loaded above from the control library resources).
+		Dim As Integer firstSortable = 0
+		If parentNode->Nodes.Count > 0 AndAlso parentNode->Nodes.Item(0)->Text = "Cursor" Then firstSortable = 1
 		Dim As Integer insertIndex = parentNode->Nodes.Count
-		For j = 1 To parentNode->Nodes.Count - 1
+		For j = firstSortable To parentNode->Nodes.Count - 1
 			If LCase(parentNode->Nodes.Item(j)->Text) > LCase(it) Then insertIndex = j: Exit For
 		Next j
 		Dim As TreeNode Ptr toolNode

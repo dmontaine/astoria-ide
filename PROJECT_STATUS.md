@@ -348,15 +348,15 @@ not the consent. Full feasibility analysis was worked through 2026-07-17; the de
   **Bitbucket** (app-password API only) and **Codeberg/Gitea** (`tea` is niche). So full automation
   is GitHub-first; assisted-browser is the fallback for the other three.
 
-**Task 4 — SSH public key setup. Slice 1 DONE (`fd89417`, 2026-07-17)** — see the Task-4 handoff
-below. Shipped as **Git menu ▸ Set Up SSH Key**: generates an ed25519 key if none exists, seeds
-`known_hosts`, copies the public key to the clipboard, and opens the provider's SSH-keys page
-(assisted-browser). **Remaining for Task 4:** the `gh`/`glab` **auto-add** path (skip the browser
-when the CLI is installed + authenticated), and wiring the same setup into `frmNewProject`'s
-`SshKeyExists()` "no key" path (today it just points at `Templates\Git\sshkeys.md`). Original notes:
-(a) **generate the keypair locally** — `ssh-keygen -t ed25519 -C "<email>" -f
-%USERPROFILE%\.ssh\id_ed25519 -N ""`, handle key-already-exists, pre-seed `known_hosts`. (b)
-**register the public key** — prefer `gh ssh-key add` / `glab ssh-key add` if authed; else
+**Task 4 — SSH public key setup. COMPLETE (`fd89417` + `a28ad9e`, 2026-07-17)** — see the Task-4
+handoff below. **Git menu ▸ Set Up SSH Key** generates an ed25519 key if none exists, seeds
+`known_hosts`, copies the public key to the clipboard, then registers it: **`gh`/`glab` auto-add**
+when the CLI is installed + authenticated (`<cli> auth status` exit 0 → `<cli> ssh-key add`), else
+assisted-browser. Also **wired into `frmNewProject`'s no-key path** (Use Existing Git offers to run
+the same `SetupSshKey` with the dialog's provider). Original notes: (a) **generate the keypair
+locally** — `ssh-keygen -t ed25519 -C "<email>" -f %USERPROFILE%\.ssh\id_ed25519 -N ""`, handle
+key-already-exists, pre-seed `known_hosts`. (b) **register the public key** — `gh`/`glab` if authed;
+else
 assisted-browser (done).
 
 **Task 5 — create the empty remote repository.** Prefer `gh repo create <name> --private` /
@@ -459,9 +459,13 @@ always enabled (onboarding, not project-gated). Owner requested each git action 
 - Comment/label defaults to `*PersonalEmail` (Options), else `astoria-ide`. Needs `ssh-keygen` on
   PATH (ships with Git for Windows); a failure surfaces the ssh-keygen output.
 
-**Remaining for Task 4:** `gh`/`glab` auto-add (skip the browser when the CLI is present + authed);
-wire the same flow into `frmNewProject.SshKeyExists()`'s no-key path (New Project git mode). Then
-**Task 5 — Create Remote Repository** as the next item in that setup group.
+**Task 4 completed (`a28ad9e`):** `SetupSshKey(provider)` (refactored out of `GitSetupSshKey`, now
+public + declared in `Main.bi`) tries the provider CLI first — `RunCmdCaptured("<cli> auth status")`;
+if exit 0, offers `<cli> ssh-key add "<pub>" --title "Astoria (<machine>)"`, falling back to the
+assisted-browser on decline/failure. `frmNewProject`'s Use-Existing-Git no-key path now offers to
+run `SetupSshKey(gitProvider)` and stops the attempt (the fresh key still has to be registered with
+the provider before a clone authenticates). New general `RunCmdCaptured` helper (non-git commands).
+**Next: Task 5 — Create Remote Repository** as the next item in the Git-menu setup group.
 
 ## Session handoff (2026-07-17) — Git menu (Task 3): Commit / Pull / Push
 

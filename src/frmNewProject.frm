@@ -12,7 +12,7 @@
 			.MaximizeBox = False
 			.MinimizeBox = False
 			.OnCreate = @Form_Create_
-			.SetBounds 0, 0, 480, 539
+			.SetBounds 0, 0, 480, 475
 			.StartPosition = FormStartPosition.CenterParent
 		End With
 		' pnlBottom — footer: Project Template / Project Name / Primary Form Name / Primary
@@ -24,7 +24,7 @@
 			.Text = ""
 			.Align = DockStyle.alBottom
 			.TabIndex = 35
-			.SetBounds 0, 0, 464, 500
+			.SetBounds 0, 0, 464, 436
 			.Parent = @This
 		End With
 		' pnlMode — the very top row: choose how the project is created. The two radios
@@ -133,70 +133,8 @@
 			.SetBounds 150, 0, 314, 32
 			.Parent = @pnlProjectName
 		End With
-		' pnlFormName — row 2, enabled only for the Windows Application template
-		With pnlFormName
-			.Name = "pnlFormName"
-			.Text = ""
-			.Align = DockStyle.alTop
-			.TabIndex = 5
-			.ExtraMargins.Left = 10
-			.ExtraMargins.Right = 10
-			.SetBounds 0, 0, 464, 32
-			.Parent = @pnlBottom
-		End With
-		' lblFormName
-		With lblFormName
-			.Name = "lblFormName"
-			.Text = ("Primary Form Name") & ":"
-			.Align = DockStyle.alLeft
-			.TabIndex = 6
-			.CenterImage = True
-			.SetBounds 0, 0, 150, 32
-			.Parent = @pnlFormName
-		End With
-		' txtFormName
-		With txtFormName
-			.Name = "txtFormName"
-			.Text = ""
-			.Align = DockStyle.alClient
-			.ExtraMargins.Top = 5
-			.ExtraMargins.Bottom = 5
-			.TabIndex = 7
-			.SetBounds 150, 0, 314, 32
-			.Parent = @pnlFormName
-		End With
-		' pnlModuleName — row 3, enabled for every other template
-		With pnlModuleName
-			.Name = "pnlModuleName"
-			.Text = ""
-			.Align = DockStyle.alTop
-			.TabIndex = 8
-			.ExtraMargins.Left = 10
-			.ExtraMargins.Right = 10
-			.SetBounds 0, 0, 464, 32
-			.Parent = @pnlBottom
-		End With
-		' lblModuleName
-		With lblModuleName
-			.Name = "lblModuleName"
-			.Text = ("Primary Module Name") & ":"
-			.Align = DockStyle.alLeft
-			.TabIndex = 9
-			.CenterImage = True
-			.SetBounds 0, 0, 150, 32
-			.Parent = @pnlModuleName
-		End With
-		' txtModuleName
-		With txtModuleName
-			.Name = "txtModuleName"
-			.Text = ""
-			.Align = DockStyle.alClient
-			.ExtraMargins.Top = 5
-			.ExtraMargins.Bottom = 5
-			.TabIndex = 10
-			.SetBounds 150, 0, 314, 32
-			.Parent = @pnlModuleName
-		End With
+		'' Primary Form Name / Primary Module Name rows removed: the startup file is now
+		'' always "Main" (Main.frm for a GUI app, Main.bas otherwise), created automatically.
 		' pnlAuthor — row 4, Author (defaults from Options > Personal Information > Name)
 		With pnlAuthor
 			.Name = "pnlAuthor"
@@ -648,64 +586,18 @@ Private Sub frmNewProject.cmdOK_Click(ByRef Sender As Control)
 			Exit Sub
 		End If
 	Else
-		Dim As UString mainFileExt = ""
-		Dim As Integer extPos = InStrRev(TemplateMainFile, ".")
-		If extPos > 0 Then mainFileExt = Mid(TemplateMainFile, extPos)
-		'' Windows Application ships a default Form and can *also* get a fresh Module (from
-		'' the generic Templates\Files\Module.bas, not part of the Windows Application
-		'' template itself); every other template only offers a Module/UserControl (routed
-		'' through the same "Module Name" field rather than adding a third contextual
-		'' label). Both name fields are optional -- left blank, that file just isn't created.
-		Dim As Boolean bIsWinApp = (TemplateName = "Windows Application")
-		Dim As UString chosenFormName = ""
-		If bIsWinApp Then chosenFormName = Trim(txtFormName.Text)
-		If chosenFormName <> "" AndAlso Not IsValidProjectItemName(chosenFormName) Then
-			MsgBox ("Enter a valid form name without paths or file extensions."), , mtWarning
-			Me.BringToFront
-			Exit Sub
-		End If
-		Dim As UString chosenModuleName = Trim(txtModuleName.Text)
-		If chosenModuleName <> "" AndAlso Not IsValidProjectItemName(chosenModuleName) Then
-			MsgBox ("Enter a valid module name without paths or file extensions."), , mtWarning
-			Me.BringToFront
-			Exit Sub
-		End If
+		'' The template's default file is always named "Main" now (Main.frm for a GUI
+		'' Windows Application, Main.bas otherwise) -- copy it as-is; no name prompt.
 		If Not EnsureDirectoryExists(localFolder) Then
 			MsgBox ("Could not create project folder!")
 			Me.BringToFront
 			Exit Sub
 		End If
-		'' The template's own shipped default file: the Form, for Windows Application;
-		'' the Module/UserControl, for every other template.
-		Dim As UString mainFileDest
-		If bIsWinApp Then
-			If chosenFormName <> "" Then
-				mainFileDest = localFolder & WindowsSlash & chosenFormName & mainFileExt
-				If Not CopyFileU(TemplateFolder & WindowsSlash & TemplateMainFile, mainFileDest) Then
-					MsgBox ("Could not create the form file") & ":" & WChr(13,10) & WChr(13,10) & mainFileDest & WChr(13,10) & WChr(13,10) & ("Windows error") & " " & Str(GetLastError())
-					Me.BringToFront
-					Exit Sub
-				End If
-			End If
-		ElseIf chosenModuleName <> "" Then
-			mainFileDest = localFolder & WindowsSlash & chosenModuleName & mainFileExt
-			If Not CopyFileU(TemplateFolder & WindowsSlash & TemplateMainFile, mainFileDest) Then
-				MsgBox ("Could not create the module file") & ":" & WChr(13,10) & WChr(13,10) & mainFileDest & WChr(13,10) & WChr(13,10) & ("Windows error") & " " & Str(GetLastError())
-				Me.BringToFront
-				Exit Sub
-			End If
-		End If
-		'' Windows Application's extra Module (both fields filled): a genuinely separate
-		'' file, sourced from the generic per-file template, not the project template.
-		Dim As UString extraModuleExt = ".bas"
-		If bIsWinApp AndAlso chosenModuleName <> "" Then
-			Dim As UString genericModuleTemplate = WinOsPath(ExePath & "/Templates/Files/Module.bas")
-			Dim As UString extraModuleDest = localFolder & WindowsSlash & chosenModuleName & extraModuleExt
-			If Not CopyFileU(genericModuleTemplate, extraModuleDest) Then
-				MsgBox ("Could not create the module file") & ":" & WChr(13,10) & WChr(13,10) & extraModuleDest & WChr(13,10) & WChr(13,10) & ("Windows error") & " " & Str(GetLastError())
-				Me.BringToFront
-				Exit Sub
-			End If
+		Dim As UString mainFileDest = localFolder & WindowsSlash & TemplateMainFile
+		If Not CopyFileU(TemplateFolder & WindowsSlash & TemplateMainFile, mainFileDest) Then
+			MsgBox ("Could not create the main file") & ":" & WChr(13,10) & WChr(13,10) & mainFileDest & WChr(13,10) & WChr(13,10) & ("Windows error") & " " & Str(GetLastError())
+			Me.BringToFront
+			Exit Sub
 		End If
 		'' Rewrite the template's own File=/*File= line -- it points at
 		'' "<TemplateName>/<original name>" (the template's own on-disk layout). The Form
@@ -740,27 +632,14 @@ Private Sub frmNewProject.cmdOK_Click(ByRef Sender As Control)
 		Dim As WString * 1024 vfpLine
 		Do Until EOF(FnIn)
 			Line Input #FnIn, vfpLine
-			If StartsWith(vfpLine, "*File=") OrElse StartsWith(vfpLine, "File=") Then
-				Dim As UString linePrefix = IIf(StartsWith(vfpLine, "*File="), "*File=", "File=")
-				If bIsWinApp Then
-					If chosenFormName <> "" Then
-						vfpLines.Add linePrefix & chosenFormName & mainFileExt
-					ElseIf chosenModuleName <> "" Then
-						vfpLines.Add linePrefix & chosenModuleName & extraModuleExt
-					End If
-				Else
-					If chosenModuleName <> "" Then vfpLines.Add linePrefix & chosenModuleName & mainFileExt
-				End If
+			If StartsWith(vfpLine, "*File=") Then
+				vfpLines.Add "*File=" & TemplateMainFile
+			ElseIf StartsWith(vfpLine, "File=") Then
+				vfpLines.Add "File=" & TemplateMainFile
 			Else
 				vfpLines.Add vfpLine
 			End If
 		Loop
-		'' Windows Application with BOTH Form and Module chosen: the Module has no
-		'' original line to replace above (it isn't part of the template), so it's
-		'' appended as a plain (non-starred) member file -- the Form stays starred.
-		If bIsWinApp AndAlso chosenFormName <> "" AndAlso chosenModuleName <> "" Then
-			vfpLines.Add "File=" & chosenModuleName & extraModuleExt
-		End If
 		CloseFile_(FnIn)
 		Dim As Integer FnOut = FreeFile_
 		Dim As Integer OpenOutResult = Open(*localProjectFilePtr For Output Encoding "utf-8" As #FnOut)
@@ -871,26 +750,8 @@ Private Sub frmNewProject.cboTemplate_Change_(ByRef Designer As My.Sys.Object, B
 	(*Cast(frmNewProject Ptr, Sender.Designer)).cboTemplate_Change(Sender)
 End Sub
 Private Sub frmNewProject.cboTemplate_Change(ByRef Sender As ComboBoxEdit)
-	If cboTemplate.ItemIndex = -1 Then
-		txtFormName.Enabled = False
-		txtFormName.Text = ""
-		txtModuleName.Enabled = False
-		txtModuleName.Text = ""
-		Exit Sub
-	End If
-	'' No auto-filled suggestion in either field, matching the Project Name field (all
-	'' three are optional except Project Name: left blank, cmdOK_Click just skips
-	'' creating that file). Windows Application ships a Form and can optionally also get
-	'' a fresh Module (from the generic Templates\Files\Module.bas, not part of the
-	'' Windows Application template itself); every other template only offers a Module.
-	If cboTemplate.Text = "Windows Application" Then
-		txtFormName.Enabled = True
-		txtModuleName.Enabled = True
-	Else
-		txtFormName.Enabled = False
-		txtFormName.Text = ""
-		txtModuleName.Enabled = True
-	End If
+	'' Nothing to do on template change anymore -- the startup file is always "Main",
+	'' created automatically; there are no per-template Form/Module name fields to toggle.
 End Sub
 
 Private Sub frmNewProject.Form_Create_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)

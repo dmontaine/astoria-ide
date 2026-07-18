@@ -1,4 +1,4 @@
-*File=Console Application/Module1.bas
+*File=Console Application/Main.bas
 ProjectType=0
 Subsystem=1
 ProjectName=""
@@ -10,7 +10,7 @@ MinorVersion=0
 RevisionVersion=0
 BuildVersion=0
 AutoIncrementVersion=false
-ApplicationTitle="Module1"
+ApplicationTitle="Main"
 ApplicationIcon=""
 CompanyName=""
 FileDescription="{ProjectDescription}"

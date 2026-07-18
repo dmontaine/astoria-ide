@@ -15,7 +15,7 @@ Console.ForeColor = clWhite
 
 Print
 Print "This is a FreeBASIC console application created with Astoria."
-Print "Edit Module1.bas to start building your program."
+Print "Edit Main.bas to start building your program."
 Print
 
 ' Keep the window open when run interactively. Skipped when output is redirected

@@ -3,7 +3,7 @@
 Using My.Sys.Forms
 
 '#Region "UserControl"
-    Type UserControl1 Extends UserControl
+    Type Main Extends UserControl
         
     End Type
 '#End Region

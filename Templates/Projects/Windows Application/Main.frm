@@ -1,39 +1,39 @@
 '#Region "Form"
 	#if defined(__FB_MAIN__) AndAlso Not defined(__MAIN_FILE__)
 		#define __MAIN_FILE__
-		#cmdline "Form1.rc"
+		#cmdline "Main.rc"
 		Const _MAIN_FILE_ = __FILE__
 	#endif
 	#include once "mff/Form.bi"
 	
 	Using My.Sys.Forms
 	
-	Type Form1Type Extends Form
+	Type MainType Extends Form
 		Declare Constructor
 		
 	End Type
 	
-	Constructor Form1Type
+	Constructor MainType
 		#if _MAIN_FILE_ = __FILE__
 			With App
 				.CurLanguagePath = ExePath & "/Languages/"
 				.CurLanguage = My.Sys.Language
 			End With
 		#endif
-		' Form1
+		' Main
 		With This
-			.Name = "Form1"
-			.Text = "Form1"
+			.Name = "Main"
+			.Text = "Main"
 			.Designer = @This
 			.SetBounds 0, 0, 350, 300
 		End With
 	End Constructor
 	
-	Dim Shared Form1 As Form1Type
+	Dim Shared Main As MainType
 	
 	#if _MAIN_FILE_ = __FILE__
-		Form1.MainForm = True
-		Form1.Show
+		Main.MainForm = True
+		Main.Show
 		App.Run
 	#endif
 '#End Region

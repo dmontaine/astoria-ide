@@ -20,6 +20,10 @@ experience with the framework.
 The `mff/` prefix resolves to `Controls/Framework/mff/`, which the IDE puts on the include path
 for every build.
 
+**Platform.** Astoria targets Windows, so upstream's cross-platform annotations have been
+stripped - everything listed here is available to you. The MyFbFramework help shows notes like
+*(Windows, Linux)*; those describe the framework's reach, not Astoria's.
+
 ---
 
 ## System and OS
@@ -39,14 +43,11 @@ Reads and writes Windows registry values. `ReadRegistry(Group, Section, Key)` re
 `#include once "mff/Registry.bi"`
 
 > [!WARNING]
-> Windows only - there is no Linux equivalent.
-
-> [!WARNING]
-> Writing to the registry affects the whole machine or user profile. Prefer `IniFile` for ordinary application settings.
+> Writing to the registry affects the whole machine or user profile, and a bad value can break other software. Prefer `IniFile` for ordinary application settings.
 
 ### IniFile
 
-Class for working with ini files (Windows, Linux).
+Class for working with ini files.
 
 The usual choice for application settings - a plain `.ini` file you can read, ship and diff.
 
@@ -65,7 +66,7 @@ Controls a Windows console window from a program that has one: colours, cursor p
 `#include once "mff/Console.bi"`
 
 > [!WARNING]
-> Windows only, and only meaningful in a console subsystem program. A GUI program has no console attached unless it allocates one.
+> Only meaningful in a console subsystem program. A GUI program has no console attached unless it allocates one.
 
 ### Sys / SysUtils
 
@@ -95,7 +96,7 @@ Sends HTTP requests and receives responses from a URI. Build an `HTTPRequest`, c
 
 ### Canvas
 
-Canvas is a class that allows you to create and draw graphics (Windows, Linux).
+Canvas is a class that allows you to create and draw graphics.
 
 The drawing surface. Most controls expose one as `.Canvas`, and that is where custom painting happens.
 
@@ -112,7 +113,7 @@ Colour helpers rather than a drawing surface: conversions between RGB, BGR and A
 
 ### Brush
 
-Defines objects used to fill the interiors of graphical shapes such as rectangles, ellipses, pies, polygons, and paths (Windows only).
+Defines objects used to fill the interiors of graphical shapes such as rectangles, ellipses, pies, polygons, and paths.
 
 Fill style for shapes and backgrounds.
 
@@ -120,7 +121,7 @@ Fill style for shapes and backgrounds.
 
 ### Pen
 
-Defines an object used to draw lines and curves (Windows only).
+Defines an object used to draw lines and curves.
 
 Line style for outlines and strokes.
 
@@ -128,7 +129,7 @@ Line style for outlines and strokes.
 
 ### Font
 
-MyFbFramework. `Font` - Defines text formatting attributes including typeface, size, and style characteristics (Windows, Linux, Web).
+MyFbFramework. `Font` - Defines text formatting attributes including typeface, size, and style characteristics.
 
 A font, as assigned to a control's `.Font`.
 
@@ -136,7 +137,7 @@ A font, as assigned to a control's `.Font`.
 
 ### Icon
 
-Represents a icon, which is a small bitmap image that is used to represent an object (Windows, Linux).
+Represents a icon, which is a small bitmap image that is used to represent an object.
 
 An icon resource, for windows, tray icons and buttons.
 
@@ -144,7 +145,7 @@ An icon resource, for windows, tray icons and buttons.
 
 ### BitmapType
 
-Is an object used to work with images defined by pixel data (Windows, Linux, Web).
+Is an object used to work with images defined by pixel data.
 
 A bitmap image, used by ImageBox, ImageList and custom painting.
 
@@ -156,7 +157,7 @@ A bitmap image, used by ImageBox, ImageList and custom painting.
 
 ### List
 
-Represents a list of objects that can be accessed by index. Provides methods to search, sort, and manipulate lists (Windows, Linux, Android, Web).
+Represents a list of objects that can be accessed by index. Provides methods to search, sort, and manipulate lists.
 
 The framework's general-purpose list, used widely by the controls themselves.
 
@@ -164,7 +165,7 @@ The framework's general-purpose list, used widely by the controls themselves.
 
 ### Dictionary
 
-Represents a collection of keys and values (Windows, Linux, Android, Web).
+Represents a collection of keys and values.
 
 Key/value lookup.
 
@@ -172,7 +173,7 @@ Key/value lookup.
 
 ### StringList
 
-Represents a list of strings that can be accessed by index. Provides methods to search, sort, and manipulate lists (Windows, Linux, Android, Web).
+Represents a list of strings that can be accessed by index. Provides methods to search, sort, and manipulate lists.
 
 A list of `String` values.
 
@@ -180,7 +181,7 @@ A list of `String` values.
 
 ### WStringList
 
-Represents a list of wstrings that can be accessed by index. Provides methods to search, sort, and manipulate lists (Windows, Linux, Android, Web).
+Represents a list of wstrings that can be accessed by index. Provides methods to search, sort, and manipulate lists.
 
 A list of `WString` (wide/Unicode) values - the right choice when text may be non-ASCII.
 
@@ -188,7 +189,7 @@ A list of `WString` (wide/Unicode) values - the right choice when text may be no
 
 ### IntegerList
 
-Represents a list of integers that can be accessed by index. Provides methods to search, sort, and manipulate lists (Windows, Linux, Android, Web).
+Represents a list of integers that can be accessed by index. Provides methods to search, sort, and manipulate lists.
 
 A list of integers.
 
@@ -196,7 +197,7 @@ A list of integers.
 
 ### DoubleList
 
-Represents a list of doubles that can be accessed by index. Provides methods to search, sort, and manipulate lists (Windows, Linux, Android, Web).
+Represents a list of doubles that can be accessed by index. Provides methods to search, sort, and manipulate lists.
 
 A list of doubles.
 
@@ -204,7 +205,7 @@ A list of doubles.
 
 ### PointerList
 
-Represents a list of pointers that can be accessed by index. Provides methods to search, sort, and manipulate lists (Windows, Linux, Android, Web).
+Represents a list of pointers that can be accessed by index. Provides methods to search, sort, and manipulate lists.
 
 A list of raw pointers.
 
@@ -219,7 +220,7 @@ A list of raw pointers.
 
 ### Application
 
-Provides methods and properties to manage an application, such as methods to start and stop an application, and properties to get information about an application. (Windows, Linux, Web, Android).
+Provides methods and properties to manage an application, such as methods to start and stop an application, and properties to get information about an application..
 
 The running application object - `App`. Carries the message loop (`App.Run`), the executable path, and the current language settings.
 
@@ -265,3 +266,21 @@ items and column definitions (`ListViewItem`, `ListViewColumn`, `TreeNode`, `Gri
 `MenuItem`, `ComboBoxItem`, `PaperSize`, `PrintDocumentPage`), plus layout helpers
 (`AnchorType`, `MarginsType`, `SizeConstraints`, `ControlCollection`) and the root `Object`
 type. These are documented in the framework help under their owning control.
+
+---
+
+## Acknowledgements
+
+Everything described here is the work of the **MyFbFramework** and **VisualFBEditor** authors,
+not ours. Astoria has changed none of it - this document exists only because these capabilities
+had no discoverable documentation in our tree, not because we wrote them.
+
+With thanks to **Xusinboy Bekchanov**, author of MyFbFramework and VisualFBEditor, and to
+**Liu XiaLin**, **Nastase Eodor** and **Aloberoger** for their work across the framework.
+MyFbFramework is published under the LGPL / modified LGPL:
+
+- MyFbFramework - <https://github.com/XusinboyBekchanov/MyFbFramework>
+- VisualFBEditor - <https://github.com/XusinboyBekchanov/VisualFBEditor>
+
+See [Controls.md](Controls.md#acknowledgements) for the fuller credits, including the bundled
+add-on libraries.

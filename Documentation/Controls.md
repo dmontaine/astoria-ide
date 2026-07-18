@@ -15,8 +15,13 @@ properties, methods and events every `Control` already has (`Text`, `Enabled`, `
 `Align`, `Anchor`, `OnClick`, and so on). It is a guide to what makes the control distinct, not
 a complete API - the framework help has the full list.
 
-**Platform notes** in parentheses are upstream's. Where a control is Windows-only it is called
-out as a warning, since Astoria targets Windows but the framework does not.
+**Platform.** Astoria targets Windows, so upstream's cross-platform annotations have been
+stripped - every control listed here is available to you. If you consult the MyFbFramework help
+directly you will see notes like *(Windows, Linux, Web)*; those describe the framework's own
+reach, not Astoria's.
+
+**Changes Astoria has made** to a control are called out in its entry under *Changed in
+Astoria*, and summarised in [Changes made in Astoria](#changes-made-in-astoria) at the end.
 
 A control being listed here means it compiles and its window opens and closes. It does **not**
 mean every feature is exercised - see the scope caveats in ControlTesting.md.
@@ -36,7 +41,7 @@ Visual controls: they draw themselves and are placed directly on a form or conta
 
 ### Chart
 
-The Chart control is a chart object that exposes events (Windows, Linux).
+The Chart control is a chart object that exposes events.
 
 **Key properties:** `AxisMax`, `AxisMin`, `BackColorOpacity`, `Border`, `BorderColor`, `BorderRound`, `ChartOrientation`, `ChartStyle`, `Count`, `DonutWidth`, `FillGradient`, `FillOpacity`, `ItemColor`, `LabelsAlignment`, `LabelsFormat`, `LabelsFormats`, `LabelsPosition`, `LabelsVisible`, `LegendAlign`, `LegendVisible`, `LinesColor`, `LinesCurve`, `LinesWidth`, `Rotation`, `SeparatorLine`, `SeparatorLineColor`, `SeparatorLineWidth`, `Special`, `Title`, `TitleFont`, `TitleForeColor`, `ToolTipsFormat`, `VerticalLines`
 
@@ -46,13 +51,13 @@ The Chart control is a chart object that exposes events (Windows, Linux).
 
 ### CheckBox
 
-Displays an V when selected; the V disappears when the CheckBox is cleared (Windows, Linux, Android, Web).
+Displays an V when selected; the V disappears when the CheckBox is cleared.
 
 **Key properties:** `Alignment`, `Caption`, `Checked`, `TabIndex`, `TabStop`
 
 ### CheckedListBox
 
-Displays a ListBox in which a check box is displayed to the left of each item (Windows, Linux).
+Displays a ListBox in which a check box is displayed to the left of each item.
 
 **Key properties:** `Checked`, `Ctl3D`, `HorizontalScrollBar`, `IntegralHeight`, `Item`, `ItemCount`, `ItemData`, `ItemHeight`, `ItemIndex`, `Items`, `MultiColumn`, `RadioCheck`, `SelCount`, `Selected`, `SelectionMode`, `SelItems`, `Sort`, `Style`, `TabIndex`, `TabStop`, `TopIndex`, `VerticalScrollBar`
 
@@ -62,7 +67,7 @@ Displays a ListBox in which a check box is displayed to the left of each item (W
 
 ### ComboBoxEdit
 
-Combines the features of a TextBox and a ListControl (Windows, Linux, Web).
+Combines the features of a TextBox and a ListControl.
 
 **Key properties:** `DropDownCount`, `IntegralHeight`, `Item`, `ItemCount`, `ItemData`, `ItemHeight`, `ItemIndex`, `Items`, `SelColor`, `Sort`, `Style`, `TabIndex`, `TabStop`
 
@@ -85,7 +90,7 @@ ComboBoxEx controls are combo box controls that provide native support for item 
 
 ### CommandButton
 
-Looks like a push button and is used to begin, interrupt, or end a process (Windows, Linux, Android, Web).
+Looks like a push button and is used to begin, interrupt, or end a process.
 
 **Key properties:** `Cancel`, `Caption`, `Default`, `Graphic`, `Style`, `TabIndex`, `TabStop`
 
@@ -93,7 +98,7 @@ Looks like a push button and is used to begin, interrupt, or end a process (Wind
 
 ### DateTimePicker
 
-Represents a Windows control that allows the user to select a date and a time and to display the date and time with a specified format (Windows, Linux, Web).
+Lets the user pick a date and time, and displays it in a format you specify.
 
 **Key properties:** `AutoNextPart`, `CalendarRightAlign`, `Checked`, `CustomFormat`, `DateFormat`, `SelectedDate`, `SelectedDateTime`, `SelectedTime`, `ShowNone`, `ShowUpDown`, `TabIndex`, `TabStop`, `TimePicker`
 
@@ -101,7 +106,7 @@ Represents a Windows control that allows the user to select a date and a time an
 
 ### Grid
 
-Defines a flexible grid area that consists of columns and rows (Windows, Linux, Web).
+Defines a flexible grid area that consists of columns and rows.
 
 **Key properties:** `AllowColumnReorder`, `AllowEdit`, `ColorEditBack`, `ColorEditFore`, `ColorLine`, `ColorSelected`, `ColumnHeaderHidden`, `Columns`, `DataArrayPtr`, `FixCols`, `FullRowSelect`, `GridLines`, `GroupHeaderImages`, `HoverSelection`, `Images`, `OwnerData`, `Rows`, `SelectedColumn`, `SelectedColumnIndex`, `SelectedImages`, `SelectedRow`, `SelectedRowIndex`, `SingleClickActivate`, `SmallImages`, `SortIndex`, `SortOrder`, `StateImages`, `TabIndex`, `TabStop`
 
@@ -123,11 +128,11 @@ Advanced grid control supporting hierarchical data and multiple selection modes.
 **Key events:** `OnBeginScroll`, `OnCellEdited`, `OnCellEditing`, `OnEndScroll`, `OnHeadClick`, `OnHeadColWidthAdjust`, `OnItemActivate`, `OnItemClick`, `OnItemDblClick`, `OnItemExpanding`, `OnItemKeyDown`, `OnSelectedItemChanged`
 
 > [!WARNING]
-> The data-bound counterpart to `Grid`. Documented for Windows only - no Linux note upstream.
+> The data-bound counterpart to `Grid`. Check which of the two an example refers to.
 
 ### Header
 
-A header control is a window that is usually positioned above columns of text or numbers (Windows, Linux).
+A header control is a window that is usually positioned above columns of text or numbers.
 
 **Key properties:** `Alignments`, `Captions`, `DragReorder`, `FullDrag`, `HotTrack`, `ImageIndexes`, `Images`, `Resizable`, `Section`, `SectionCount`, `Style`, `Widths`
 
@@ -137,7 +142,7 @@ A header control is a window that is usually positioned above columns of text or
 
 ### HotKey
 
-A hot key control is a window that enables the user to enter a combination of keystrokes to be used as a hot key (Windows, Linux).
+A hot key control is a window that enables the user to enter a combination of keystrokes to be used as a hot key.
 
 **Key properties:** `TabIndex`, `TabStop`
 
@@ -145,13 +150,13 @@ A hot key control is a window that enables the user to enter a combination of ke
 
 ### HScrollBar
 
-Provides a horizontal scroll bar for easy navigation through long lists of items (Windows, Linux).
+Provides a horizontal scroll bar for easy navigation through long lists of items.
 
 **Key properties:** `ArrowChangeSize`, `MaxValue`, `MinValue`, `PageSize`, `Position`, `TabIndex`, `TabStop`
 
 ### ImageBox
 
-Displays a graphic (Windows, Linux).
+Displays a graphic.
 
 **Key properties:** `CenterImage`, `Graphic`, `RealSizeImage`, `Style`
 
@@ -159,7 +164,7 @@ Displays a graphic (Windows, Linux).
 
 ### IPAddress
 
-An Internet Protocol (IP) address control allows the user to enter an IP address in an easily understood format (Windows, Linux).
+An Internet Protocol (IP) address control allows the user to enter an IP address in an easily understood format.
 
 **Key properties:** `TabIndex`, `TabStop`
 
@@ -169,7 +174,7 @@ An Internet Protocol (IP) address control allows the user to enter an IP address
 
 ### Label
 
-Displays text that a user can't change directly (Windows, Linux, Android, Web).
+Displays text that a user can't change directly.
 
 **Key properties:** `Alignment`, `Border`, `Caption`, `CenterImage`, `Graphic`, `RealSizeImage`, `Style`, `TabIndex`, `TabStop`, `Transparent`, `WordWraps`
 
@@ -177,7 +182,7 @@ Displays text that a user can't change directly (Windows, Linux, Android, Web).
 
 ### LinkLabel
 
-Represents a label control that can display hyperlinks (Windows, Linux).
+Represents a label control that can display hyperlinks.
 
 **Key properties:** `TabIndex`, `TabStop`
 
@@ -185,7 +190,7 @@ Represents a label control that can display hyperlinks (Windows, Linux).
 
 ### ListControl
 
-Displays a list of items from which the user can select one or more (Windows, Linux, Web).
+Displays a list of items from which the user can select one or more.
 
 **Key properties:** `Ctl3D`, `HorizontalScrollBar`, `IntegralHeight`, `Item`, `ItemCount`, `ItemData`, `ItemHeight`, `ItemIndex`, `Items`, `MultiColumn`, `SelCount`, `Selected`, `SelectionMode`, `SelItems`, `Sort`, `Style`, `TabIndex`, `TabStop`, `TopIndex`, `VerticalScrollBar`
 
@@ -195,7 +200,7 @@ Displays a list of items from which the user can select one or more (Windows, Li
 
 ### ListView
 
-Represents a control that displays a list of data items (Windows, Linux, Android).
+Represents a control that displays a list of data items.
 
 **Key properties:** `AllowColumnReorder`, `BorderSelect`, `CheckBoxes`, `ColumnHeaderHidden`, `Columns`, `FullRowSelect`, `GridLines`, `GroupHeaderImages`, `HoverSelection`, `Images`, `LabelTip`, `ListItems`, `MultiSelect`, `SelectedColumn`, `SelectedItem`, `SelectedItemIndex`, `SingleClickActivate`, `SmallImages`, `Sort`, `StateImages`, `TabIndex`, `TabStop`, `View`
 
@@ -205,7 +210,7 @@ Represents a control that displays a list of data items (Windows, Linux, Android
 
 ### MonthCalendar
 
-Represents a Windows control that enables the user to select a date using a visual monthly calendar display (Windows, Linux, Android).
+A control that enables the user to select a date using a visual monthly calendar display.
 
 **Key properties:** `SelectedDate`, `ShortDayNames`, `TabIndex`, `TabStop`, `TodayCircle`, `TodaySelector`, `TrailingDates`, `WeekNumbers`
 
@@ -213,7 +218,7 @@ Represents a Windows control that enables the user to select a date using a visu
 
 ### NumericUpDown
 
-Allows numeric input via textbox with increment/decrement buttons and value constraints (Windows, Linux).
+Allows numeric input via textbox with increment/decrement buttons and value constraints.
 
 **Key properties:** `ArrowKeys`, `DecimalPlaces`, `Increment`, `MaxValue`, `MinValue`, `Position`, `Style`, `TabIndex`, `TabStop`, `Thousands`, `UpDownWidth`, `Wrap`
 
@@ -223,7 +228,7 @@ Allows numeric input via textbox with increment/decrement buttons and value cons
 
 ### OpenFileControl
 
-Embeds a file selection interface directly within forms, supporting multi-select and dynamic filtering (Windows, Linux).
+Embeds a file selection interface directly within forms, supporting multi-select and dynamic filtering.
 
 **Key properties:** `DefaultExt`, `FileName`, `FileNames`, `FileTitle`, `Filter`, `FilterIndex`, `InitialDir`, `MultiSelect`, `Options`, `TabIndex`, `TabStop`
 
@@ -231,18 +236,15 @@ Embeds a file selection interface directly within forms, supporting multi-select
 
 ### PrintPreviewControl
 
-Displays document pages with zoom/scroll capabilities and print layout visualization (Windows only).
+Displays document pages with zoom/scroll capabilities and print layout visualization.
 
 **Key properties:** `CurrentPage`, `Document`, `Orientation`, `PageLength`, `PageSize`, `PageWidth`, `TabIndex`, `TabStop`, `Zoom`
 
 **Key events:** `OnCurrentPageChanged`, `OnZoom`
 
-> [!WARNING]
-> Windows only - there is no Linux implementation.
-
 ### ProgressBar
 
-A progress bar is a window that an application can use to indicate the progress of a lengthy operation (Windows, Linux).
+A progress bar is a window that an application can use to indicate the progress of a lengthy operation.
 
 **Key properties:** `Marquee`, `MaxValue`, `MinValue`, `Orientation`, `Position`, `Smooth`, `StepValue`
 
@@ -250,13 +252,13 @@ A progress bar is a window that an application can use to indicate the progress 
 
 ### RadioButton
 
-Displays an option that can be turned on or off (Windows, Linux, Android, Web).
+Displays an option that can be turned on or off.
 
 **Key properties:** `Alignment`, `Caption`, `Checked`, `TabIndex`, `TabStop`
 
 ### RichTextBox
 
-The RichTextBox control enables you to display or edit flow content including paragraphs, images, tables, and more (Windows, Linux).
+The RichTextBox control enables you to display or edit flow content including paragraphs, images, tables, and more.
 
 **Key properties:** `Alignment`, `CaretPos`, `CharCase`, `Ctl3D`, `EditStyle`, `HideSelection`, `LeftMargin`, `Lines`, `MaskChar`, `Masked`, `MaxLength`, `Modified`, `Multiline`, `NumbersOnly`, `OEMConvert`, `ReadOnly`, `RightMargin`, `ScrollBars`, `SelAlignment`, `SelBackColor`, `SelBold`, `SelBullet`, `SelCharOffset`, `SelCharSet`, `SelColor`, `SelEnd`, `SelFontName`, `SelFontSize`, `SelHangingIndent`, `SelIndent`, `SelItalic`, `SelLength`, `SelProtected`, `SelRightIndent`, `SelStart`, `SelStrikeout`, `SelTabCount`, `SelTabs`, `SelText`, `SelUnderline`, `TabIndex`, `TabStop`, `TextRTF`, `TopLine`, `WantReturn`, `WantTab`, `WordWraps`, `Zoom`
 
@@ -266,7 +268,9 @@ The RichTextBox control enables you to display or edit flow content including pa
 
 ### ScintillaControl
 
-Wraps the Scintilla editing component - the same engine behind the Astoria code editor - giving you a full programmer's text editor with syntax highlighting, folding, margins and multiple selections (Windows).
+Wraps the Scintilla editing component - the same engine behind the Astoria code editor - giving you a full programmer's text editor with syntax highlighting, folding, margins and multiple selections.
+
+*Changed in Astoria.* No source change, but its three DLLs are now copied beside your exe automatically on build; previously a program using it built cleanly and then failed to start.
 
 **Key properties:** `Bold`, `CaretLineBackAlpha`, `CaretLineBackColor`, `CharSet`, `CodePage`, `DarkMode`, `EOLMode`, `FindCount`, `FindData`, `FindIndex`, `FindLength`, `FindLines`, `FindPoses`, `FontName`, `FontSize`, `IndentSize`, `IndicatorSel`, `Italic`, `Length`, `LineCount`, `LineData`, `LineEnd`, `LineLength`, `LineStart`, `LineText`, `MarginWidth`, `Pos`, `PosX`, `PosY`, `SelAlpha`, `SelEnd`, `SelLayer`, `SelLength`, `SelStart`, `SelText`, `SelTxtData`, `TabIndents`, `TabIndex`, `TabStop`, `TabWidth`, `TxtData`, `Underline`, `UseTabs`, `ViewCaretLine`, `ViewEOL`, `ViewFold`, `ViewLineNo`, `ViewWhiteSpace`, `WordWrap`, `Zoom`
 
@@ -282,13 +286,13 @@ Wraps the Scintilla editing component - the same engine behind the Astoria code 
 
 ### ScrollBarControl
 
-Provides a horizontal and a vertical scroll bar for easy navigation through long lists of items (Windows, Linux).
+Provides a horizontal and a vertical scroll bar for easy navigation through long lists of items.
 
 **Key properties:** `ArrowChangeSize`, `MaxValue`, `MinValue`, `PageSize`, `Position`, `Style`, `TabIndex`, `TabStop`
 
 ### SearchBox
 
-The SearchBar is a control made to have a search entry (Windows, Linux).
+The SearchBar is a control made to have a search entry.
 
 **Key properties:** `Alignment`, `CaretPos`, `CharCase`, `Ctl3D`, `HideSelection`, `LeftMargin`, `Lines`, `MaskChar`, `Masked`, `MaxLength`, `Modified`, `Multiline`, `NumbersOnly`, `OEMConvert`, `ReadOnly`, `RightMargin`, `ScrollBars`, `SelEnd`, `SelLength`, `SelStart`, `SelText`, `TabIndex`, `TabStop`, `TopLine`, `WantReturn`, `WantTab`, `WordWraps`
 
@@ -298,7 +302,7 @@ The SearchBar is a control made to have a search entry (Windows, Linux).
 
 ### Splitter
 
-Represents a splitter control that enables the user to resize docked controls (Windows, Linux).
+Represents a splitter control that enables the user to resize docked controls.
 
 **Key properties:** `bCursor`, `MinExtra`
 
@@ -319,7 +323,7 @@ A status bar is a horizontal window at the bottom of a parent window in which an
 
 ### TextBox
 
-Displays information entered at design time by the user, or in code at run time (Windows, Linux, Android, Web).
+Displays information entered at design time by the user, or in code at run time.
 
 **Key properties:** `Alignment`, `CaretPos`, `CharCase`, `Ctl3D`, `HideSelection`, `LeftMargin`, `Lines`, `MaskChar`, `Masked`, `MaxLength`, `Modified`, `Multiline`, `NumbersOnly`, `OEMConvert`, `ReadOnly`, `RightMargin`, `ScrollBars`, `SelEnd`, `SelLength`, `SelStart`, `SelText`, `TabIndex`, `TabStop`, `TopLine`, `WantReturn`, `WantTab`, `WordWraps`
 
@@ -329,7 +333,7 @@ Displays information entered at design time by the user, or in code at run time 
 
 ### ToolBar
 
-A toolbar is a control that contains one or more buttons (Windows, Linux).
+A toolbar is a control that contains one or more buttons.
 
 **Key properties:** `BitmapHeight`, `BitmapWidth`, `ButtonHeight`, `Buttons`, `ButtonWidth`, `Caption`, `DisabledImagesList`, `Divider`, `Flat`, `HotImagesList`, `ImagesList`, `List`, `Transparency`, `Wrapable`
 
@@ -339,7 +343,7 @@ A toolbar is a control that contains one or more buttons (Windows, Linux).
 
 ### ToolPalette
 
-A tool palette with categories (Windows, Linux).
+A tool palette with categories.
 
 **Key properties:** `BitmapHeight`, `BitmapWidth`, `ButtonHeight`, `ButtonWidth`, `DisabledImagesList`, `Divider`, `Flat`, `Groups`, `HotImagesList`, `ImagesList`, `List`, `Style`, `Transparency`, `Wrapable`
 
@@ -347,13 +351,13 @@ A tool palette with categories (Windows, Linux).
 
 ### ToolTips
 
-Represents a small rectangular pop-up window that displays a brief description of a control's purpose when the user rests the pointer on the control (Windows, Linux).
+Represents a small rectangular pop-up window that displays a brief description of a control's purpose when the user rests the pointer on the control.
 
 **Key events:** `OnLinkClicked`
 
 ### TrackBar
 
-A trackbar is a window that contains a slider (sometimes called a thumb) in a channel, and optional tick marks (Windows, Linux).
+A trackbar is a window that contains a slider (sometimes called a thumb) in a channel, and optional tick marks.
 
 **Key properties:** `Frequency`, `LineSize`, `MaxValue`, `MinValue`, `PageSize`, `Position`, `SelEnd`, `SelStart`, `SliderVisible`, `Style`, `TabIndex`, `TabStop`, `ThumbLength`, `TickMark`, `TickStyle`
 
@@ -363,7 +367,7 @@ A trackbar is a window that contains a slider (sometimes called a thumb) in a ch
 
 ### TreeListView
 
-Combines the features of a `TreeView` and a `ListView` (Windows, Linux).
+Combines the features of a `TreeView` and a `ListView`.
 
 **Key properties:** `ColumnHeaderHidden`, `Columns`, `ColumnTypes`, `EditLabels`, `GridLines`, `Images`, `MultiSelect`, `Nodes`, `OwnerData`, `OwnerDraw`, `SelectedColumn`, `SelectedItem`, `SelectedItemIndex`, `SingleClickActivate`, `SortColumn`, `SortOrder`, `StateImages`, `TabIndex`, `TabStop`, `TreeSelection`, `TreeStore`
 
@@ -373,7 +377,7 @@ Combines the features of a `TreeView` and a `ListView` (Windows, Linux).
 
 ### TreeView
 
-Represents a control that displays hierarchical data in a tree structure that has items that can expand and collapse (Windows, Linux, Web).
+Represents a control that displays hierarchical data in a tree structure that has items that can expand and collapse.
 
 **Key properties:** `EditLabels`, `HideSelection`, `Images`, `Nodes`, `SelectedImages`, `SelectedNode`, `Sorted`, `TabIndex`, `TabStop`
 
@@ -383,7 +387,7 @@ Represents a control that displays hierarchical data in a tree structure that ha
 
 ### UpDown
 
-An up-down control is a pair of arrow buttons that the user can click to increment or decrement a value, such as a scroll position or a number displayed in a companion control (called a buddy window) (Windows, Linux).
+An up-down control is a pair of arrow buttons that the user can click to increment or decrement a value, such as a scroll position or a number displayed in a companion control (called a buddy window).
 
 **Key properties:** `Alignment`, `ArrowKeys`, `Associate`, `Increment`, `MaxValue`, `MinValue`, `Position`, `Style`, `TabIndex`, `TabStop`, `Thousands`, `Wrap`
 
@@ -391,13 +395,15 @@ An up-down control is a pair of arrow buttons that the user can click to increme
 
 ### VScrollBar
 
-Provides a vertical scroll bar (Windows, Linux).
+Provides a vertical scroll bar.
 
 **Key properties:** `ArrowChangeSize`, `MaxValue`, `MinValue`, `PageSize`, `Position`, `TabIndex`, `TabStop`
 
 ### WebBrowser
 
-Enables the user to navigate Web pages inside your form (Windows, Linux).
+Enables the user to navigate Web pages inside your form.
+
+*Changed in Astoria.* This control was hidden from the toolbox because the framework would not compile with it: `NewWindowRequestedEventArgs.GetURL()` is declared `ByRef As WString` but returned the literal `""`, and a byref result cannot reference a temporary. It now returns a `Static As WString * 1`.
 
 **Key properties:** `ScriptResult`, `TabIndex`, `TabStop`
 
@@ -406,7 +412,7 @@ Enables the user to navigate Web pages inside your form (Windows, Linux).
 **Key events:** `OnNewWindowRequested`
 
 > [!WARNING]
-> Newly re-enabled (2026-07-18). It had been hidden from the toolbox because the framework failed to compile; that bug is fixed and a form carrying one now builds, runs and closes cleanly. **Actual page rendering and navigation have not been verified** - test before relying on it.
+> Testing confirms only that a form carrying one builds, opens and closes. **Page rendering and navigation have not been verified** - prove it works before relying on it.
 
 > [!WARNING]
 > Hosts the system web-browser control, so what it can render depends on what is installed on the target machine.
@@ -419,7 +425,7 @@ Controls that host other controls. Set a child's `.Parent` to one of these.
 
 ### Form
 
-A window or dialog box that makes up part of an application's user interface (Windows, Linux, Android, Web).
+A window or dialog box that makes up part of an application's user interface.
 
 **Key properties:** `ActiveControl`, `CancelButton`, `Caption`, `ControlBox`, `DefaultButton`, `FormStyle`, `Graphic`, `Icon`, `KeyPreview`, `MainForm`, `MaximizeBox`, `Menu`, `MinimizeBox`, `ModalResult`, `Opacity`, `Owner`, `ShowInTaskbar`, `StartPosition`, `Transparent`, `TransparentColor`, `WindowState`
 
@@ -429,26 +435,26 @@ A window or dialog box that makes up part of an application's user interface (Wi
 
 ### GroupBox
 
-Provides an identifiable grouping for controls (Windows, Linux, Web).
+Provides an identifiable grouping for controls.
 
 **Key properties:** `Caption`, `ParentColor`, `TabIndex`, `TabStop`
 
 ### HorizontalBox
 
-The Horizontal Box lays out its child controls horizontally and will not wrap onto a new line in any circumstances (Windows, Linux, Android)
+The Horizontal Box lays out its child controls horizontally and will not wrap onto a new line in any circumstances
 
 **Key properties:** `Spacing`, `TabIndex`, `TabStop`
 
 ### MsgBoxForm
 
-The framework's own message-box window, used by `MsgBox`. A dark-mode-aware replacement for the native Windows `MessageBox`, built from a Form, Labels and CommandButtons so it follows the application's theme (Windows, Linux).
+The framework's own message-box window, used by `MsgBox`. A dark-mode-aware replacement for the native Windows `MessageBox`, built from a Form, Labels and CommandButtons so it follows the application's theme.
 
 > [!WARNING]
 > Not documented in the framework help - it is an Astoria addition. Normally you use `MsgBox` rather than placing this form yourself.
 
 ### PagePanel
 
-Used to group collections of controls (Windows, Linux, Android, Web).
+Used to group collections of controls.
 
 **Key properties:** `Graphic`, `SelectedPanel`, `SelectedPanelIndex`, `TabIndex`, `TabStop`, `Transparent`
 
@@ -456,19 +462,19 @@ Used to group collections of controls (Windows, Linux, Android, Web).
 
 ### PageScroller
 
-The PageScroller control is used to scroll a panel along with the components placed on it (Windows, Linux).
+The PageScroller control is used to scroll a panel along with the components placed on it.
 
 **Key properties:** `ArrowChangeSize`, `AutoScroll`, `ChildDragDrop`, `Position`, `Style`, `TabIndex`, `TabStop`
 
 ### Panel
 
-Used to group collections of controls (Windows, Linux, Android, Web).
+Used to group collections of controls.
 
 **Key properties:** `BevelInner`, `BevelOuter`, `BevelWidth`, `BorderWidth`, `Graphic`, `TabIndex`, `TabStop`, `Transparent`
 
 ### Picture
 
-Displays a graphic from a bitmap, icon or metafile (Windows, Linux).
+Displays a graphic from a bitmap, icon or metafile.
 
 **Key properties:** `CenterImage`, `Graphic`, `RealSizeImage`, `StretchImage`, `Style`, `TabIndex`, `TabStop`, `Transparent`
 
@@ -476,7 +482,7 @@ Displays a graphic from a bitmap, icon or metafile (Windows, Linux).
 
 ### ReBar
 
-A Rebar control acts as a container for child windows. It can contain one or more bands, and each band can have any combination of a gripper bar, a bitmap, a text label, and one child window (Windows, Linux).
+A Rebar control acts as a container for child windows. It can contain one or more bands, and each band can have any combination of a gripper bar, a bitmap, a text label, and one child window.
 
 **Key properties:** `Bands`, `ImageBacking`, `ImageList`
 
@@ -486,7 +492,7 @@ A Rebar control acts as a container for child windows. It can contain one or mor
 
 ### ScrollControl
 
-Defines a class that support auto-scrolling behavior (Windows, Linux).
+Defines a class that support auto-scrolling behavior.
 
 **Key properties:** `TabIndex`, `TabStop`
 
@@ -494,7 +500,7 @@ Defines a class that support auto-scrolling behavior (Windows, Linux).
 
 ### TabControl
 
-Represents a control that contains multiple items that share the same space on the screen (Windows, Linux).
+Represents a control that contains multiple items that share the same space on the screen.
 
 **Key properties:** `Detachable`, `FlatButtons`, `GroupName`, `Images`, `Multiline`, `Reorderable`, `SelectedTab`, `SelectedTabIndex`, `Tab`, `TabCount`, `TabIndex`, `TabPosition`, `Tabs`, `TabStop`, `TabStyle`
 
@@ -504,7 +510,9 @@ Represents a control that contains multiple items that share the same space on t
 
 ### TabPage
 
-Represents a single tab page in a TabControl (Windows, Linux).
+Represents a single tab page in a TabControl.
+
+*Changed in Astoria.* The TabControl parent requirement was found during testing - it is the only control that cannot be tested, or used, on its own.
 
 **Key properties:** `BevelInner`, `BevelOuter`, `BevelWidth`, `BorderWidth`, `Caption`, `Graphic`, `ImageIndex`, `ImageKey`, `Index`, `Object`, `TabIndex`, `TabStop`, `Transparent`, `UseVisualStyleBackColor`
 
@@ -517,11 +525,11 @@ Represents a single tab page in a TabControl (Windows, Linux).
 
 ### UserControl
 
-Provides an empty control that can be used to create other controls. A Control authored in VisualFBEditor (Windows, Linux).
+Provides an empty control that can be used to create other controls. A Control authored in VisualFBEditor.
 
 ### VerticalBox
 
-The Vertical Box lays out its child controls verically and will not wrap onto a new line in any circumstances (Windows, Linux, Android)
+The Vertical Box lays out its child controls verically and will not wrap onto a new line in any circumstances
 
 **Key properties:** `Spacing`, `TabIndex`, `TabStop`
 
@@ -533,14 +541,14 @@ Non-visual components. They appear in the designer tray rather than on the form,
 
 ### CJSON_TYPE
 
-A wrapper over the cJSON library for parsing and generating JSON: read a document into a tree of nodes, walk or edit it, and serialise it back to text (Windows, Linux).
+A wrapper over the cJSON library for parsing and generating JSON: read a document into a tree of nodes, walk or edit it, and serialise it back to text.
 
 > [!WARNING]
 > Not documented in the framework help. `cJSON64.dll` appears in the built exe's strings but is **not** required at runtime - programs using it run with no DLL alongside.
 
 ### HTTPConnection
 
-Provides a class for sending HTTP requests and receiving HTTP responses from a resource identified by a URI (Windows, Linux, Web).
+Provides a class for sending HTTP requests and receiving HTTP responses from a resource identified by a URI.
 
 **Key properties:** `Abort`, `Host`, `Port`, `Timeout`
 
@@ -550,7 +558,7 @@ Provides a class for sending HTTP requests and receiving HTTP responses from a r
 
 ### ImageList
 
-An image list is a collection of images of the same size, each of which can be referred to by its index (Windows, Linux).
+An image list is a collection of images of the same size, each of which can be referred to by its index.
 
 **Key properties:** `Count`, `DrawingStyle`, `GrowCount`, `ImageHeight`, `ImageType`, `ImageWidth`, `InitialCount`, `Items`, `MaskColor`, `ParentWindow`
 
@@ -560,7 +568,7 @@ An image list is a collection of images of the same size, each of which can be r
 
 ### MainMenu
 
-Represents the menu structure of a form (Windows, Linux).
+Represents the menu structure of a form.
 
 **Key properties:** `Color`, `ColorizeEntire`, `Count`, `DisplayIcons`, `ImagesList`, `Item`, `ParentWindow`, `Style`, `Widget`
 
@@ -573,7 +581,9 @@ Represents the menu structure of a form (Windows, Linux).
 
 ### MariaDBBox
 
-A client component for MariaDB and MySQL servers - connect, run queries, and read result sets. It talks to a database server over the network; it does not embed one (Windows, Linux).
+A client component for MariaDB and MySQL servers - connect, run queries, and read result sets. It talks to a database server over the network; it does not embed one.
+
+*Changed in Astoria.* 16 call sites passed a `String` to `FromUtf8(pZString As ZString Ptr)` and assigned the returned pointer to a `UString`, so the library did not compile at all. They now decode straight from the API pointer. Astoria also ships `libmariadb.dll`, which the library needed but never included, and copies it beside your exe on build.
 
 **Key methods:** `AddField`, `AddItem`, `AddItemUtf`, `Close`, `Count`, `CountUtf`, `CreateIndex`, `CreateIndexUtf`, `CreateTable`, `CreateTableUtf`, `DeleteItem`, `DeleteItemUtf`, `ErrMsg`, `Exec`, `Find`, `FindByte`, `FindByteUtf`, `FindOne`, `FindOneByte`, `FindOneByteUtf`, `FindOneUtf`, `FindOnly`, `FindOnlyUtf`, `FindUtf`, `GetMySQLPtr`, `INIGetKey`, `INISetKey`, `Insert`, `InsertUtf`, `MaxID`, `MaxIDUtf`, `Open`, `SetKey`, `SQLFind`, `SQLFindOne`, `Sum`, `SumUtf`, `TransactionBegin`, `TransactionEnd`, `TransactionRollback`, `UpdateByte`, `UpdateByteUtf`, `UpdateText`, `UpdateTextUtf`, `UpdateUtf`, `Vacuum`, `Version`
 
@@ -590,7 +600,7 @@ A client component for MariaDB and MySQL servers - connect, run queries, and rea
 
 ### NotifyIcon
 
-Specifies a component that creates an icon in the notification area (Windows only).
+Specifies a component that creates an icon in the notification area.
 
 **Key properties:** `BalloonTipIcon`, `BalloonTipIconType`, `BalloonTipText`, `BalloonTipTitle`, `Icon`
 
@@ -598,12 +608,9 @@ Specifies a component that creates an icon in the notification area (Windows onl
 
 **Key events:** `OnBalloonTipClicked`, `OnBalloonTipClosed`, `OnBalloonTipShown`
 
-> [!WARNING]
-> Windows only - there is no Linux implementation.
-
 ### PopupMenu
 
-Represents a context menu (Windows, Linux).
+Represents a context menu.
 
 **Key properties:** `Color`, `ColorizeEntire`, `Count`, `DisplayIcons`, `ImagesList`, `Item`, `ParentMenuItem`, `ParentWindow`, `Style`, `Widget`
 
@@ -616,7 +623,7 @@ Represents a context menu (Windows, Linux).
 
 ### PrintDocument
 
-Defines a reusable object that sends output to a printer (Windows only).
+Defines a reusable object that sends output to a printer.
 
 **Key properties:** `DocumentName`, `Pages`, `PrinterSettings`
 
@@ -624,23 +631,19 @@ Defines a reusable object that sends output to a printer (Windows only).
 
 **Key events:** `OnPrintPage`
 
-> [!WARNING]
-> Windows only - there is no Linux implementation.
-
 ### Printer
 
-Enables you to communicate with a system printer (initially the default printer) (Windows only).
+Enables you to communicate with a system printer (initially the default printer).
 
 **Key properties:** `ColorMode`, `Copies`, `DriveVersion`, `DuplexMode`, `FontSize`, `FromPage`, `Marginbottom`, `MarginLeft`, `MarginRight`, `MarginTop`, `MaxCopies`, `MaxPaperHeight`, `MaxPaperWidth`, `Orientation`, `Page`, `PageLength`, `PageSize`, `PageWidth`, `PaperSizes`, `PortName`, `PrintableHeight`, `PrintableWidth`, `Quality`, `Scale`, `ScaleFactorX`, `ScaleFactorY`, `Title`, `ToPage`
 
 **Key methods:** `CalcPageSize`, `ChoosePrinter`, `DefaultPrinter`, `EndDoc`, `EndDPage`, `GetCharSize`, `GetLines`, `GetPageSize`, `NewFont`, `NewPage`, `reportError`, `StartDoc`, `StartPage`
 
-> [!WARNING]
-> Windows only - there is no Linux implementation.
-
 ### SQLite3Component
 
-An SQLite3 database component. SQLite is a file-backed embedded engine, so this needs no server - you open a `.db` file directly (Windows, Linux).
+An SQLite3 database component. SQLite is a file-backed embedded engine, so this needs no server - you open a `.db` file directly.
+
+*Changed in Astoria.* Same defect as MariaDBBox at 22 call sites, plus 2 that needed `StrPtr()`. The library did not compile before this.
 
 **Key methods:** `AddField`, `AddItem`, `AddItemUtf`, `Close`, `Count`, `CountUtf`, `CreateIndex`, `CreateIndexUtf`, `CreateTable`, `CreateTableUtf`, `DeleteItem`, `DeleteItemUtf`, `ErrMsg`, `Exec`, `Find`, `FindByte`, `FindByteUtf`, `FindOne`, `FindOneByte`, `FindOneByteUtf`, `FindOneUtf`, `FindOnly`, `FindOnlyUtf`, `FindUtf`, `GetSQLitePtr`, `INIGetKey`, `INISetKey`, `Insert`, `InsertUtf`, `MaxID`, `MaxIDUtf`, `MemOpen`, `MemSave`, `Open`, `SetKey`, `SQLFind`, `SQLFindOne`, `Sum`, `SumUtf`, `TransactionBegin`, `TransactionEnd`, `TransactionRollback`, `UpdateByte`, `UpdateByteUtf`, `UpdateText`, `UpdateTextUtf`, `UpdateUtf`, `Vacuum`, `Version`
 
@@ -654,7 +657,7 @@ An SQLite3 database component. SQLite is a file-backed embedded engine, so this 
 
 ### TimerComponent
 
-A control which can execute code at regular intervals by causing a Timer event (Windows, Linux).
+A control which can execute code at regular intervals by causing a Timer event.
 
 **Key properties:** `Interval`
 
@@ -702,36 +705,27 @@ Displays a standard dialog box that prompts the user to open a file.
 
 ### PageSetupDialog
 
-Enables users to change page-related print settings, including margins and paper orientation (Windows only).
+Enables users to change page-related print settings, including margins and paper orientation.
 
 **Key properties:** `BottomMargin`, `Caption`, `LeftMargin`, `Metric`, `MinBottomMargin`, `MinLeftMargin`, `MinRightMargin`, `MinTopMargin`, `Orientation`, `PaperHeight`, `PaperSize`, `PaperWidth`, `PrinterName`, `RightMargin`, `TopMargin`
 
 **Key methods:** `Execute`
 
-> [!WARNING]
-> Windows only - there is no Linux implementation.
-
 ### PrintDialog
 
-Lets users select a printer and choose which sections of the document to print from an application (Windows only).
+Lets users select a printer and choose which sections of the document to print from an application.
 
 **Key properties:** `AllowToFile`, `AllowToNetwork`, `Caption`, `FromPage`, `HelpFile`, `PrinterName`, `SetupDialog`, `ShowHelpButton`, `ToPage`, `xSetupDialog`
 
 **Key methods:** `Execute`
 
-> [!WARNING]
-> Windows only - there is no Linux implementation.
-
 ### PrintPreviewDialog
 
-Represents the raw preview part of print previewing from an application (Windows only).
+Represents the raw preview part of print previewing from an application.
 
 **Key properties:** `Caption`, `Document`
 
 **Key methods:** `Execute`
-
-> [!WARNING]
-> Windows only - there is no Linux implementation.
 
 ### SaveFileDialog
 
@@ -757,3 +751,51 @@ Three framework types look like controls but are deliberately absent.
 
 `FileListBox` is also worth knowing about: despite the name it is **not** a visual control but a
 helper that enumerates files in a directory. See [FrameworkFeatures.md](FrameworkFeatures.md).
+
+---
+
+## Changes made in Astoria
+
+Astoria has modified the bundled control libraries. Everything below is a change from what
+upstream ships, so it is worth knowing if you compare against the original framework or its
+documentation.
+
+| Control | Change |
+| --- | --- |
+| WebBrowser | **Re-enabled.** Hidden as unbuildable; a `ByRef As WString` returning a literal was the only fault. Fixed and returned to the toolbox. Rendering still unproven. |
+| MariaDBBox | **Made to compile** (16 `FromUtf8` call sites), and `libmariadb.dll` - missing from the library entirely - is now shipped and copied beside your exe. |
+| SQLite3Component | **Made to compile** (22 `FromUtf8` call sites, plus 2 needing `StrPtr()`). |
+| ScintillaControl | Its three DLLs are now copied beside your exe on build. |
+| ListViewEx, SearchBar | **Kept hidden.** Each ships a `.bi` whose implementation `.bas` was never included upstream, so neither can be built. Needs an upstream fix. |
+| Toolbox: Cursor | Shown **once**, under Controls, rather than repeated in all four groups. |
+
+Beyond the controls, the build now copies any control library's declared runtime DLLs beside
+the program it builds, so a program using ScintillaControl or MariaDBBox starts on a machine
+other than the one that compiled it. See ControlTesting.md for how a library declares these.
+
+---
+
+## Acknowledgements
+
+Astoria stands on **MyFbFramework** and **VisualFBEditor**, and essentially every control
+documented here is their work rather than ours. Our contribution has been to test them, fix a
+handful of build errors, and write this reference - the design, the implementation and the
+original documentation are theirs.
+
+With thanks to:
+
+- **Xusinboy Bekchanov** - author of MyFbFramework and VisualFBEditor, and the primary hand
+  behind nearly every control in this document.
+- **Liu XiaLin** - co-author across a large part of the framework.
+- **Nastase Eodor** - co-author of much of the control and drawing code.
+- **Aloberoger** - contributor to several controls.
+
+MyFbFramework is published under the LGPL / modified LGPL. The upstream projects:
+
+- MyFbFramework - <https://github.com/XusinboyBekchanov/MyFbFramework>
+- VisualFBEditor - <https://github.com/XusinboyBekchanov/VisualFBEditor>
+
+The descriptions and member lists in this document are drawn from their documentation.
+Bundled add-ons carry their own credits: ScintillaControl (CM.Wang, over Scintilla),
+SQLite3Component (Yongfang Software Development Team), cJSON (Dave Gamble and contributors),
+and MariaDBBox (Xusinboy Bekchanov, over the MariaDB Connector/C).

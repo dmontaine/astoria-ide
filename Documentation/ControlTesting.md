@@ -24,7 +24,13 @@ Each control got its own generated project under `Examples/Controls/<Control>/`:
 **Windows Application** template (`Main.frm`) containing exactly one instance of that control
 and nothing else. Tests 1 and 2 were automated - each project was built **by the IDE itself**
 (over the agent pipe, so `.frm` and the generated `.rc` are handled properly), then the
-resulting `Main.exe` was launched, checked for a live window, and closed.
+resulting `Main.exe` was launched, checked, and closed.
+
+**Test 2 checks the window title**, not merely that a window exists. The first pass asked only
+"is a window up?", which a modal *"DLL not found"* dialog answers just as well as a working
+program - and it scored two startup failures as passes as a result. The check now requires the
+title to be the expected `<Control> test`, so an error dialog fails. Any control that has to be
+force-closed rather than closing on request also fails.
 
 Built binaries are intentionally not committed (see `.gitignore`); the project sources are,
 so every test is reproducible by opening its `.vfp` and pressing build.
@@ -208,6 +214,24 @@ SQLite3Component and Label got none. All then ran and closed gracefully.
   DLLs (see *Runtime DLL dependencies*), so what the harness saw as "a live window" was in fact a
   "DLL not found" error dialog. With the DLLs alongside the exe, each opens its real window and
   closes gracefully.
-- The harness's "is there a live window?" check cannot tell a real window from a modal error
-  dialog, so a startup failure can read as a pass. Worth tightening if these tests are ever
-  re-run in bulk - checking the window title against the expected one would have caught both.
+- The harness's original "is there a live window?" check could not tell a real window from a
+  modal error dialog, so a startup failure read as a pass. **Fixed** - Test 2 now matches the
+  window title, which would have caught both cases above. See *How these were tested*.
+
+## Revision history
+
+The table above is the result of two passes, not one. What changed after the first:
+
+| Change | Effect |
+| --- | --- |
+| **Test 2 now matches the window title** | Two results were false passes: a *"DLL not found"* dialog satisfied the old "a window exists" check. Both were re-run and corrected. |
+| **MariaDBBox fixed and re-tested** | Was a real failure - `libmariadb.dll` was missing from the repo entirely. Now shipped and passing. |
+| **ScintillaControl re-tested** | Was never broken. Its DLLs simply were not beside the exe during the first run; it passes cleanly with them present. |
+| **WebBrowser added** | Previously excluded from the toolbox as unbuildable. The framework bug is fixed, and it now has a test project like every other control. |
+| **`Components-Menu` row removed** | It was never a toolbox element - `Menu` is an abstract base the loader skips. Listing it was an error in the first pass. |
+| **`Controls-Cursor` note** | The Cursor now appears once in the toolbox rather than in all four groups. |
+| **cJSON and SQLite3 re-checked** | Both had been assumed DLL-free; re-verified under the stricter test, and both genuinely need nothing. SQLite3 links statically. |
+| **Runtime-DLL copying added and verified** | See *Automatic runtime-DLL copying*. Removing the DLLs and rebuilding through the IDE restores exactly the right ones. |
+
+Verified counts are unchanged except for `Controls-WebBrowser`, which is `-` pending owner
+inspection - it was added after the review pass.

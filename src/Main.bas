@@ -1420,8 +1420,101 @@ Private Function RunGitInProject(ByRef GitArgs As String, ByRef OutText As Strin
 	Return (ExitCode = 0)
 End Function
 
-'' Git menu > Git Pull: `git pull` in the open project's folder. Shows the combined
-'' git output. Enabled only for a git-backed project (ChangeMenuItemsEnabled).
+'' First line of rawOut that contains needle (case-insensitive), trimmed; "" if none.
+Private Function GitFindLineContaining(ByRef rawOut As String, ByRef needle As String) As String
+	Dim As String low = LCase(needle)
+	Dim As Integer p = 1
+	While p <= Len(rawOut)
+		Dim As Integer nl = InStr(p, rawOut, Chr(10))
+		Dim As String ln
+		If nl = 0 Then
+			ln = Mid(rawOut, p) : p = Len(rawOut) + 1
+		Else
+			ln = Mid(rawOut, p, nl - p) : p = nl + 1
+		End If
+		If InStr(LCase(ln), low) > 0 Then Return Trim(ln, Any !" \t" + Chr(13) + Chr(10))
+	Wend
+	Return ""
+End Function
+
+'' Parse git commit's first line "[branch (root-commit)? hash] subject" into its parts.
+Private Sub GitParseCommitHeader(ByRef rawOut As String, ByRef branch As String, ByRef hash As String, ByRef subject As String)
+	branch = "" : hash = "" : subject = ""
+	Dim As Integer lb = InStr(rawOut, "[")
+	Dim As Integer rb = InStr(rawOut, "]")
+	If lb = 0 OrElse rb <= lb Then Exit Sub
+	Dim As String inside = Trim(Mid(rawOut, lb + 1, rb - lb - 1))   '' "branch [(root-commit)] hash"
+	Dim As Integer fsp = InStr(inside, " ")
+	Dim As Integer lsp = InStrRev(inside, " ")
+	If lsp > 0 Then
+		hash = Trim(Mid(inside, lsp + 1))
+		branch = Trim(Left(inside, fsp - 1))
+	Else
+		branch = inside
+	End If
+	Dim As String afterRb = Mid(rawOut, rb + 1)
+	Dim As Integer nl = InStr(afterRb, Chr(10))
+	If nl > 0 Then afterRb = Left(afterRb, nl - 1)
+	subject = Trim(afterRb, Any !" \t" + Chr(13) + Chr(10))
+End Sub
+
+'' Show a git operation's result as a short plain-English summary rather than dumping
+'' raw git output. op is "commit"/"pull"/"push". Known no-op and failure cases get their
+'' own wording; failures still include git's own text (the actionable part). UI thread.
+Private Sub ShowGitResult(ByRef op As String, gitOk As Boolean, exitCode As Integer, ByRef rawOut As String)
+	Dim As String low = LCase(rawOut)
+	Dim As String msg = ""
+	Dim As Boolean isErr = False
+	Select Case op
+	Case "commit"
+		If InStr(low, "nothing to commit") > 0 Then
+			msg = "Nothing to commit -- there are no changes since the last commit."
+		ElseIf Not gitOk Then
+			isErr = True
+			msg = "Commit failed (exit " & Str(exitCode) & ")." & Chr(10) & Chr(10) & Trim(rawOut)
+		Else
+			Dim As String branch, hash, subject
+			GitParseCommitHeader(rawOut, branch, hash, subject)
+			msg = "Committed"
+			If branch <> "" Then msg &= " to " & branch
+			If hash <> "" Then msg &= " as " & hash
+			msg &= "."
+			If subject <> "" Then msg &= Chr(10) & Chr(10) & Chr(34) & subject & Chr(34)
+			Dim As String stat = GitFindLineContaining(rawOut, "changed")
+			If stat <> "" Then msg &= Chr(10) & Chr(10) & stat
+		End If
+	Case "pull"
+		If InStr(low, "already up to date") > 0 Then
+			msg = "Already up to date -- nothing to pull."
+		ElseIf Not gitOk Then
+			isErr = True
+			msg = "Pull failed (exit " & Str(exitCode) & ")." & Chr(10) & Chr(10) & Trim(rawOut)
+		Else
+			msg = "Pulled changes from the remote."
+			Dim As String stat = GitFindLineContaining(rawOut, "changed")
+			If stat <> "" Then msg &= Chr(10) & Chr(10) & stat
+		End If
+	Case "push"
+		If InStr(low, "up-to-date") > 0 OrElse InStr(low, "up to date") > 0 Then
+			msg = "Nothing to push -- the remote is already up to date."
+		ElseIf Not gitOk Then
+			isErr = True
+			msg = "Push failed (exit " & Str(exitCode) & ")." & Chr(10) & Chr(10) & Trim(rawOut)
+		Else
+			msg = "Pushed your commits to the remote."
+		End If
+	Case Else
+		isErr = Not gitOk
+		msg = Trim(rawOut)
+	End Select
+	If Trim(msg) = "" Then
+		If gitOk Then msg = op & " completed." Else msg = op & " failed (exit " & Str(exitCode) & ")."
+	End If
+	If isErr Then MsgBox msg, , mtWarning Else MsgBox msg, , mtInfo
+End Sub
+
+'' Git menu > Git Pull: `git pull` in the open project's folder, with a plain-English
+'' result summary. Enabled only for a git-backed project (ChangeMenuItemsEnabled).
 Sub GitPull
 	If Not OpenProjectIsGitRepo() Then
 		MsgBox ("The open project is not a Git repository."), , mtWarning
@@ -1430,10 +1523,7 @@ Sub GitPull
 	Dim As String outText
 	Dim As Integer ec
 	Dim As Boolean gitOk = RunGitInProject("pull", outText, ec)
-	If Trim(outText) = "" Then
-		If gitOk Then outText = "git pull completed." Else outText = "git pull failed (exit " & Str(ec) & ")."
-	End If
-	If gitOk Then MsgBox outText, , mtInfo Else MsgBox outText, , mtWarning
+	ShowGitResult("pull", gitOk, ec, outText)
 End Sub
 
 '' Git menu > Git Push: `git push` in the open project's folder.
@@ -1445,10 +1535,7 @@ Sub GitPush
 	Dim As String outText
 	Dim As Integer ec
 	Dim As Boolean gitOk = RunGitInProject("push", outText, ec)
-	If Trim(outText) = "" Then
-		If gitOk Then outText = "git push completed." Else outText = "git push failed (exit " & Str(ec) & ")."
-	End If
-	If gitOk Then MsgBox outText, , mtInfo Else MsgBox outText, , mtWarning
+	ShowGitResult("push", gitOk, ec, outText)
 End Sub
 
 '' Git menu > Git Commit: prompt for a message, then `git add -A` + `git commit`.
@@ -1486,10 +1573,7 @@ Sub GitCommit
 	Dim As Integer ec
 	Dim As Boolean gitOk = RunGitInProject("commit -F " & Chr(34) & msgPath & Chr(34), outText, ec)
 	If FileExistsU(msgPath) Then Kill msgPath
-	If Trim(outText) = "" Then
-		If gitOk Then outText = "git commit completed." Else outText = "git commit failed (exit " & Str(ec) & ")."
-	End If
-	If gitOk Then MsgBox outText, , mtInfo Else MsgBox outText, , mtWarning
+	ShowGitResult("commit", gitOk, ec, outText)
 End Sub
 
 Sub AddNewProjectFile(ByRef Template As WString, ByRef ItemName As WString)

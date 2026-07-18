@@ -325,10 +325,12 @@ shipped for now. Switch to disabled+reprompt if the owner prefers.
 paths against the owner's own repos — an **empty** repo, a **complete** Astoria project pushed up,
 and a **foreign** repo (to see refuse-and-delete).
 
-**Remaining tasks:** ~~task 2~~ **DONE 2026-07-17** (`fc9fc8a`). ~~Task 3~~ **DONE 2026-07-17**
-— delivered as a dedicated top-level **Git menu** (owner chose that over burying it under Project),
-with **Git Commit / Pull / Push**; see the "Git menu" handoff below. **Tasks 4 & 5 (git onboarding
-automation — SSH key + remote-repo creation) are next — see the "Git onboarding automation" section.**
+**Remaining tasks:** ~~task 2~~ **DONE**. ~~Task 3~~ **DONE** — dedicated top-level **Git menu**
+(Commit/Pull/Push; owner chose that over burying it under Project). ~~Tasks 4 & 5~~ **DONE** — git
+onboarding automation (**Set Up SSH Key** + **Create Remote Repository** in the Git menu, plus New
+Project integration); see the "Git onboarding automation" section. **Tasks 1–5 of the New Project
+two-mode + git feature are all built** (all 2026-07-17). Remaining: owner end-to-end verification of
+the git flows against real remotes, and the optional refinements noted in each handoff.
 
 ## Git onboarding automation — Tasks 4 & 5 (queued after Task 3, owner-requested 2026-07-17)
 
@@ -359,11 +361,13 @@ key-already-exists, pre-seed `known_hosts`. (b) **register the public key** — 
 else
 assisted-browser (done).
 
-**Task 5 — create the empty remote repository.** Prefer `gh repo create <name> --private` /
-`glab repo create`; else REST API + a pasted PAT; else assisted-browser (open the provider's "new
-repo" page prefilled). Wire into the existing **repo-existence preflight** in the git-mode
-`cmdOK_Click` (`RemoteRepoExists`): when the repo doesn't exist, offer **"create it for me"**
-instead of today's "create it first, then continue" Yes/No/Cancel prompt.
+**Task 5 — create the empty remote repository. DONE (`95b04f7`, 2026-07-17)** — see the Task-5
+handoff below. **Git menu ▸ Create Remote Repository** creates an empty private repo for the open
+project via `gh`/`glab` when authed (GitHub also wires `origin`), else opens the provider's new-repo
+page. And the **New Project (Git Project mode) preflight** (`RemoteRepoExists`, previously dead code,
+revived): when the repo doesn't exist, it offers **"Create it now?"** — CLI creates it and the clone
+continues (empty → populated); browser path stops for a retry. (REST-API-with-PAT path not built —
+CLI + assisted-browser cover it.)
 
 **Suggested slice order:** (1) the fully-safe local piece first — `ssh-keygen` + `known_hosts`
 seeding + a `gh`/`glab` presence/auth detection helper; (2) GitHub happy-path via `gh` for both key
@@ -465,7 +469,17 @@ if exit 0, offers `<cli> ssh-key add "<pub>" --title "Astoria (<machine>)"`, fal
 assisted-browser on decline/failure. `frmNewProject`'s Use-Existing-Git no-key path now offers to
 run `SetupSshKey(gitProvider)` and stops the attempt (the fresh key still has to be registered with
 the provider before a clone authenticates). New general `RunCmdCaptured` helper (non-git commands).
-**Next: Task 5 — Create Remote Repository** as the next item in the Git-menu setup group.
+
+**Task 5 completed (`95b04f7`):** `TryCliCreateRepo(provider, repoName, sourceFolder, out)` —
+`gh`/`glab` create an empty private repo when authed; GitHub with a local git repo also gets
+`origin` via `gh repo create --source --remote`. `NewRepoPageUrl`/`OpenNewRepoPage` are the
+assisted-browser fallback. **Git menu ▸ Create Remote Repository** (`GitCreateRemoteRepo`) creates
+one for the open project (name/provider from `project.astoria`, else folder/GitHub). New Project
+(Git Project mode) preflights `RemoteRepoExists` before cloning and offers to create a missing repo.
+Caveats: `gh repo create` uses the *authenticated* account (mismatch with a different typed username
+breaks the clone URL); Bitbucket/Codeberg always use the browser. Also renamed the New Project
+mode radio **"Use Existing Git Project" → "Git Project"** (`7b7b435`), since it now creates the repo
+if it doesn't exist. **The whole New Project two-mode + git feature (Tasks 1–5) is now built.**
 
 ## Session handoff (2026-07-17) — Git menu (Task 3): Commit / Pull / Push
 
@@ -534,10 +548,10 @@ way: the `.vfp` *does* still carry the git/metadata keys — `frmNewProject` wri
 module) and **Task 2 (Edit Project Description, `fc9fc8a`)** are done and compile clean; Task 1 is
 **not yet fully owner-verified** (clone paths need real remotes). See "Session handoff (2026-07-17)
 — New Project two-mode redesign" and the Task-2 handoff below for the full plan, what's done, the
-field enabled/disabled decision to confirm, and exactly what to test. **Task 3 is done** — the
-top-level **Git menu** (Commit/Pull/Push; see its handoff below). **Tasks 4 & 5 (git onboarding
-automation — SSH key + remote-repo creation; see "Git onboarding automation" above) are next.** All
-depend on Task 1's `project.astoria` module.
+field enabled/disabled decision to confirm, and exactly what to test. **Tasks 3, 4, and 5 are all
+done** — the top-level **Git menu** (Commit/Pull/Push + Set Up SSH Key + Create Remote Repository)
+and the New Project git integration; see their handoffs below. **All of Tasks 1–5 are now built;**
+what remains is owner end-to-end verification against real remotes.
 
 **Agent MCP Server — COMPLETE (Tasks 0–7, 2026-07-17).** Verified end-to-end from a real
 MCP client (stdio JSON-RPC 2.0): `create_project` → `write_file` → `build` → `get_errors`

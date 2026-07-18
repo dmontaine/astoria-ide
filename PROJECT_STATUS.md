@@ -481,6 +481,14 @@ breaks the clone URL); Bitbucket/Codeberg always use the browser. Also renamed t
 mode radio **"Use Existing Git Project" → "Git Project"** (`7b7b435`), since it now creates the repo
 if it doesn't exist. **The whole New Project two-mode + git feature (Tasks 1–5) is now built.**
 
+**GitHub-only for now (`76c13ae`):** owner decision — until GitLab/Bitbucket/Codeberg catch up on
+the CLI automation, GitHub is the only provider. The New Project provider **dropdown is retired**:
+`cboGitProvider` is hidden/inert, replaced by a static **bold "GitHub" label** (`lblGitProviderValue`)
+where the dropdown sat (keeping the "Git Provider:" caption); `gitProvider` is hardcoded to `"GitHub"`
+in `cmdOK_Click`. To bring back a choice later: re-show + repopulate `cboGitProvider` and delete
+`lblGitProviderValue`. (The provider-specific plumbing — `SshKeyPageUrl`/`NewRepoPageUrl`/`glab`
+branches — is all still there, so re-enabling is UI-only.)
+
 ## Session handoff (2026-07-17) — Git menu (Task 3): Commit / Pull / Push
 
 **Task 3, delivered as a dedicated top-level Git menu** (owner's call: its own menu between Run and

@@ -1,10 +1,44 @@
 # Astoria-IDE — Project Status & Handoff
 
-**Last updated:** 2026-07-17 (In progress: **New Project two-mode redesign + `project.astoria`** — built, compiles clean, NOT yet owner-verified; owner continuing tests on the other computer. See "Session handoff (2026-07-17) — New Project two-mode redesign" below. Earlier: Agent MCP Server **COMPLETE — Tasks 0–7**. Task 7 verified end-to-end from a real stdio MCP client: create → write → build → get_errors → fix → run produced the correct output (`Primes below 1000000 = 78498`). Verification fixed two MCP bugs — Fix B: `create_project` opens the main file; Fix C: agent build saves dirty editors first — and flagged two pre-existing ones, both since fixed (broken Console Application template; `run`-capture NUL truncation — the latter hardened 2026-07-17, pending GUI/MCP verify on the other computer). Earlier today: Task 6 (toggle default-on, status-bar indicator, auto-launch, packaging) `83426ef`; five AI templates gained MCP config `b70143c`.)
+**Last updated:** 2026-07-18 — **FEATURE COMPLETE FOR 1.0.** No further features for this release;
+testing, program-flow and UI tweaks only. See "Feature complete for version 1.0" below and
+[Documentation/Testing.md](Documentation/Testing.md). Preparing to recruit human testers.
+
+*Previous entry, 2026-07-17:* (In progress: **New Project two-mode redesign + `project.astoria`** — built, compiles clean, NOT yet owner-verified; owner continuing tests on the other computer. See "Session handoff (2026-07-17) — New Project two-mode redesign" below. Earlier: Agent MCP Server **COMPLETE — Tasks 0–7**. Task 7 verified end-to-end from a real stdio MCP client: create → write → build → get_errors → fix → run produced the correct output (`Primes below 1000000 = 78498`). Verification fixed two MCP bugs — Fix B: `create_project` opens the main file; Fix C: agent build saves dirty editors first — and flagged two pre-existing ones, both since fixed (broken Console Application template; `run`-capture NUL truncation — the latter hardened 2026-07-17, pending GUI/MCP verify on the other computer). Earlier today: Task 6 (toggle default-on, status-bar indicator, auto-launch, packaging) `83426ef`; five AI templates gained MCP config `b70143c`.)
 **Repository:** [github.com/dmontaine/astoria-ide](https://github.com/dmontaine/astoria-ide)
 **Local path:** C:\Users\don\Astoria-IDE
 
 This is the concise, authoritative handoff for the next work session. Completed-work narratives, investigations, and dated session notes are archived in [HISTORY.md](HISTORY.md). Shipped changes are indexed in [CHANGELOG.md](CHANGELOG.md), and fuller enhancement specifications live in [ROADMAP.md](ROADMAP.md).
+
+## Feature complete for version 1.0 (2026-07-18)
+
+**Astoria IDE is feature complete for version 1.0.** No further features are planned for this
+release. Work from here is limited to:
+
+- **Testing** — see [Documentation/Testing.md](Documentation/Testing.md) for what has been covered
+  and, more usefully, the known gaps.
+- **Program flow and UI tweaks** as testing shows they are needed.
+- **Bug fixes** arising from either.
+
+**A new feature request should be declined for 1.0 and recorded in [ROADMAP.md](ROADMAP.md)
+instead.** The bar for changing anything else is now "a tester hit a problem", not "this would be
+better".
+
+This is in preparation for **recruiting human testers**. Everything to date has been tested by one
+developer on two of their own machines; nobody has yet come to Astoria fresh. The documentation a
+tester needs is in `Documentation/`:
+
+| Document | Purpose |
+| --- | --- |
+| [AstoriaIDESignificantChanges.md](Documentation/AstoriaIDESignificantChanges.md) | What Astoria is, who it is for, and how it differs from VisualFBEditor. Start here. |
+| [Testing.md](Documentation/Testing.md) | What has been tested, what has not, and what a tester can most usefully do. |
+| [Controls.md](Documentation/Controls.md) | Reference for every toolbox control: purpose, key members, warnings. |
+| [FrameworkFeatures.md](Documentation/FrameworkFeatures.md) | The non-toolbox framework: registry, ini files, HTTP, drawing, collections. |
+| [ControlTesting.md](Documentation/ControlTesting.md) | Per-control test results in full. |
+| [DetailedChangelog.md](Documentation/DetailedChangelog.md) | Every change, in date order. |
+
+All six are maintained going forward. `Documentation/AstoriaIDESignificantChanges.md` supersedes
+the `.doc` on P:\Astoria-Docs — edit the Markdown, which is version-controlled.
 
 <a id="active-sub-project--debugger-reliability-queued-2026-07-11"></a>
 

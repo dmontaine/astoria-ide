@@ -325,10 +325,10 @@ shipped for now. Switch to disabled+reprompt if the owner prefers.
 paths against the owner's own repos — an **empty** repo, a **complete** Astoria project pushed up,
 and a **foreign** repo (to see refuse-and-delete).
 
-**Remaining tasks:** task 2 — Project menu **Edit Project Description** (open `project.astoria` for
-editing; enabled when the open project has one). Task 3 — Project menu **Git Commit / Push**
-automation for git-backed projects (read the remote from `project.astoria`; same temp-.bat +
-`PipeCmd` + SSH pattern). Both depend on the task-1 module (already in place).
+**Remaining tasks:** ~~task 2~~ **DONE 2026-07-17** (`fc9fc8a`; see the Task-2 handoff below).
+Task 3 — Project menu **Git Commit / Push** automation for git-backed projects (read the remote
+from `project.astoria`; same temp-.bat + `PipeCmd` + SSH pattern). Depends on the task-1 module
+(already in place).
 
 ## Session handoff (2026-07-16) — Agent MCP Server (Tasks 0–5 of 8)
 
@@ -372,14 +372,44 @@ This fixes the wide-text case *and* hardens capture against any stray NULs, inde
 
 **Aside (self-inflicted, already cleaned up):** while editing comments, a literal `\u0000` typed into an Edit was interpreted as an actual NUL byte and written into the source twice; both were stripped via a lossless Latin1 round-trip and the file now has zero NUL bytes. That's why the new comments avoid writing that escape literally.
 
+## Session handoff (2026-07-17) — New Project: Task 2 (Edit Project Description) + clone-refusal message
+
+**Task 2 of the two-mode redesign is code-complete (`fc9fc8a`), compiles clean (full `fbc64 -c`),
+and was owner-GUI-tested from the main-tree debug build.** On `origin/main`.
+
+- **Project menu ▸ Edit Project Description** ([Main.bas](src/Main.bas) `EditProjectDescription`,
+  wired in [AstoriaIDE.bas](src/AstoriaIDE.bas) `mClick`, item created just below Project
+  Properties in `CreateMenusAndToolBars`). Opens the open project's `project.astoria` in an editor
+  tab for hand-editing. **Enabled only when that file exists** — existence, not marker-validity, so
+  a malformed one is still editable to fix (`ChangeMenuItemsEnabled` in [TabWindow.bas](src/TabWindow.bas)).
+  Selection-independent (tracks the open project, not the tree cursor).
+- New helper `OpenProjectDescriptionPath()` returns the clean single-separator path (strips
+  `GetProjectDirectory`'s trailing slash) so it matches the on-disk path and `GetTab`'s dedup.
+- Include order: moved `ProjectDescription.bi` before `TabWindow.bi` in `Main.bas` so
+  `ChangeMenuItemsEnabled` can see the declarations.
+- **Design choice to confirm:** opens the raw `project.astoria` in the code editor (matches the
+  plan's "open for editing", no new dialog). Switch to a structured form later if wanted.
+- Also in `fc9fc8a`: the **clone-refusal message** now spells out that an existing repo must
+  contain a `project.astoria` with an `AstoriaProject=1` line (an empty file is not enough) — the
+  old wording implied mere presence sufficed. `IsAstoriaProject` reads the marker, not just the
+  file. (See `ProjectDescription.bas` `ReadProjectDescription`.)
+
+**Gotcha learned this session (workflow, not code):** the IDE resolves `ProjectsPath=.\Projects`
+relative to the *running exe's* directory (ExePath). Building/launching a debug exe from the
+`.claude\worktrees\...` worktree makes new-project and clone folders land under the worktree, not
+the real `Projects\`. **Always build + run owner test builds from the main tree
+`C:\Users\don\Astoria-IDE`.** The clone target itself is correct: `frmNewProject.cmdOK_Click` sets
+`localFolder = <ProjectsPath>\<ProjectName>` and clones there — never derived from the origin repo's
+directory, so a teacher's `Examples\...` upload location never follows a student's clone.
+
 ## Next ready work
 
-**In progress: New Project dialog two-mode redesign + `project.astoria` (Task 1 of 3).** Built
-and compiles clean; **not yet owner-verified** — owner is continuing to test on the other
-computer. See "Session handoff (2026-07-17) — New Project two-mode redesign" below for the
-full plan, what's done, the field enabled/disabled decision to confirm, and exactly what to
-test. Tasks 2 (Project menu → Edit Project Description) and 3 (Project menu → Git Commit/Push)
-are queued and depend on Task 1's `project.astoria` module.
+**In progress: New Project dialog two-mode redesign + `project.astoria`.** Task 1 (dialog +
+module) and **Task 2 (Edit Project Description, `fc9fc8a`)** are done and compile clean; Task 1 is
+**not yet fully owner-verified** (clone paths need real remotes). See "Session handoff (2026-07-17)
+— New Project two-mode redesign" and the Task-2 handoff below for the full plan, what's done, the
+field enabled/disabled decision to confirm, and exactly what to test. **Task 3 (Project menu → Git
+Commit/Push) is next** and depends on Task 1's `project.astoria` module.
 
 **Agent MCP Server — COMPLETE (Tasks 0–7, 2026-07-17).** Verified end-to-end from a real
 MCP client (stdio JSON-RPC 2.0): `create_project` → `write_file` → `build` → `get_errors`

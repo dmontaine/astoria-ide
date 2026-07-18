@@ -550,6 +550,35 @@ marker file, edited via **Project ▸ Edit Project Description**) in both `CLAUD
 way: the `.vfp` *does* still carry the git/metadata keys — `frmNewProject` writes them to both the
 `.vfp` and `project.astoria` — so that existing template rule was not stale.)
 
+## Session handoff (2026-07-17) — "Main" startup convention + Edit Project Description dialog
+
+Owner-driven, owner-verified (created Console + Windows App build/run; edited a project's metadata).
+Two parts, commits `c104169` (A) and `d4d775f` (B).
+
+**Part A — "Main" startup convention.** Every project template's startup file is now named **Main**:
+`Main.frm` for a GUI **Windows Application** (its `Form1Type`/`Form1`/`.Name`/`#cmdline "Form1.rc"`
+all renamed `Form1→Main`), `Main.bas` for Console/Dynamic/Static Library (empty `Module1.bas`) and
+Control Library (`UserControl1→Main`); each template `.vfp` updated (`*File=` + `ApplicationTitle`).
+So the New Project dialog **no longer asks for a form/module name**: the **Primary Form Name** /
+**Primary Module Name** rows were removed (dialog 64px shorter, `cboTemplate_Change` gutted, the
+Windows-App extra-module option dropped), and `cmdOK_Click` just copies the template's `Main.*` file
+as-is and rewrites the project `.vfp`'s `*File=` to the bare name. Rationale (owner): the startup
+form/module is a fixed concept, always "Main", created automatically — decoupled from whatever files
+the user later adds/deletes.
+
+**Part B — Edit Project Description dialog** (`frmEditProjectDescription`, replaces the raw-text
+open). Read-only block: Project Name, Template, Mode, **Startup** (`Main.frm`/`Main.bas`, detected on
+disk), Created, Git remote. Editable: **Author, License, Description, Make-AI-friendly + AI Tool**
+(dropdown data-driven from `Templates/AI`). On OK: `WriteProjectDescription` (project.astoria) +
+`UpdateVfpMetadataKeys` (syncs the `.vfp` `Author/License/Description/AIFriendly/AITool` lines) +
+`StampAiTemplateInto` (stamps `Templates/AI/<tool>/` with token substitution **only** when
+AI-friendliness is newly enabled or the tool changed). `StampAiTemplateInto`/`AiCopyTree`/`AiStampFile`
+are a public shared copy of the New Project stamping (a future cleanup could dedupe those + AgentPipe's
+copy). **Deliberately NOT editable** (owner's "be precise" call, avoids risky on-disk file ops):
+Project Name (rename), Startup, Git fields (they mirror the real remote in `.git`), Mode, Template,
+Created. Design decisions confirmed by owner: Git fields read-only; AI toggle *does* stamp; Default
+Form/Module became moot (the "Main" convention supersedes storing per-project names).
+
 ## Next ready work
 
 **In progress: New Project dialog two-mode redesign + `project.astoria`.** Task 1 (dialog +

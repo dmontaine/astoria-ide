@@ -21,6 +21,21 @@
     The release directory lives outside this repo (a sibling of it), so it's
     never tracked by git regardless of .gitignore - only this script is.
 
+    SOURCE OF TRUTH IS THE COMMIT, NOT THE WORKING TREE. Content is exported
+    with `git archive HEAD`, so a file that is not committed cannot ship. This
+    replaced a working-tree copy that shipped whatever happened to be sitting on
+    the build machine: 187 MB of test-build output under Examples/Controls, a
+    complete nested .git repository inside Examples/DeviceExplorer, a stale
+    pre-rename Controls/MyFbFramework folder with no tracked files, and the
+    developer's Settings/Workspace.ini. None of that was intentional, and no
+    exclusion list would have caught the next one.
+
+    The consequence to keep in mind: astoria.exe and astoria-mcp.exe are tracked
+    binaries, so a release ships whatever was last COMMITTED, not what you last
+    built. Build release (Compile.bat, not CompileDebug/CompileIdeOnly - a debug
+    build is ~5x larger and must never ship) and commit before staging. This
+    script warns when the working tree and HEAD disagree.
+
 .NOTES
     Rerun after any change to what should ship, then spot-check the result
     before distributing it.
@@ -46,6 +61,38 @@ if (Test-Path $ReleaseRoot) {
 }
 New-Item -ItemType Directory -Path $ReleaseRoot -Force | Out-Null
 
+# --- Export HEAD to a scratch tree; everything below is copied from THAT, not the repo ---
+# git archive emits only committed files, so nothing ignored or untracked can reach a release.
+$ExportRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("astoria-stage-" + [guid]::NewGuid().ToString("N"))
+New-Item -ItemType Directory -Path $ExportRoot -Force | Out-Null
+try {
+    Push-Location $RepoRoot
+    $head = (& git rev-parse --short HEAD).Trim()
+    if ($LASTEXITCODE -ne 0) { throw "Not a git repository, or git is unavailable - cannot stage." }
+
+    # Write the archive to a file rather than piping it: PowerShell's pipeline passes text,
+    # not bytes, so `git archive | tar -x` corrupts the stream ("Unrecognized archive format").
+    $TarPath = Join-Path $ExportRoot "_head.tar"
+    & git archive --format=tar -o $TarPath HEAD
+    if ($LASTEXITCODE -ne 0) { throw "git archive failed - release not staged." }
+    & tar -xf $TarPath -C $ExportRoot
+    if ($LASTEXITCODE -ne 0) { throw "tar extraction failed - release not staged." }
+    Remove-Item $TarPath -Force
+    Pop-Location
+    Write-Host "Exported HEAD ($head) to a scratch tree"
+
+    # Warn if the tracked binaries on disk differ from what will actually ship.
+    Push-Location $RepoRoot
+    $dirtyBins = (& git status --porcelain -- astoria.exe astoria-mcp.exe) -join "`n"
+    Pop-Location
+    if ($dirtyBins.Trim()) {
+        Write-Warning ("astoria.exe/astoria-mcp.exe differ from HEAD. The release ships the " +
+                       "COMMITTED build, not the one on disk. If you meant to ship your latest " +
+                       "build, do a release build (Compile.bat) and commit it, then re-stage.")
+    }
+
+$SourceRoot = $ExportRoot
+
 # --- Top-level files: runtime artifacts, not source ---
 $TopLevelFiles = @(
     "astoria.exe",
@@ -54,7 +101,7 @@ $TopLevelFiles = @(
 )
 
 foreach ($f in $TopLevelFiles) {
-    $src = Join-Path $RepoRoot $f
+    $src = Join-Path $SourceRoot $f
     if (Test-Path $src) {
         Copy-Item -Path $src -Destination (Join-Path $ReleaseRoot $f) -Force
         Write-Host "Copied file:      $f"
@@ -85,7 +132,7 @@ $WholesaleDirs = @(
 )
 
 foreach ($d in $WholesaleDirs) {
-    $src = Join-Path $RepoRoot $d
+    $src = Join-Path $SourceRoot $d
     if (Test-Path $src) {
         Copy-Item -Path $src -Destination (Join-Path $ReleaseRoot $d) -Recurse -Force
         Write-Host "Copied directory: $d"
@@ -94,20 +141,11 @@ foreach ($d in $WholesaleDirs) {
     }
 }
 
-# Examples/: strip build output. This staging copies the WORKING TREE, not a clean git
-# export, so anything .gitignore'd but present on the build machine ships unless pruned
-# here. Examples/Controls holds one generated project per toolbox control; building them
-# (as the control test sweep does) leaves ~170 MB of Main.exe and copied runtime DLLs
-# sitting next to the sources. The sources are the point - a user can rebuild any of them
-# by opening the .vfp and pressing build - so keep those and drop the binaries.
-$exampleBinaries = Get-ChildItem -Path (Join-Path $ReleaseRoot "Examples") -Recurse -File `
-                                 -Include *.exe, *.dll -ErrorAction SilentlyContinue
-if ($exampleBinaries) {
-    $freed = [math]::Round((($exampleBinaries | Measure-Object Length -Sum).Sum) / 1MB, 1)
-    $exampleBinaries | Remove-Item -Force
-    Write-Host ("Pruned:           {0} build artifact(s) under Examples ({1} MB)" -f `
-                $exampleBinaries.Count, $freed)
-}
+# No Examples build-output prune is needed any more. The test sweep's Main.exe files are
+# .gitignore'd, so git archive never emits them. An earlier revision pruned *.exe/*.dll
+# under Examples/ to solve this from a working-tree copy - which would also have deleted
+# Examples/Test_WellCOM/WellCOM.dll, a tracked file that legitimately ships. Exporting from
+# the commit is both simpler and safer than trying to enumerate what to throw away.
 
 # Compiler/doc and Compiler/examples: our own Help + Examples cover this, so drop
 # the compiler's own bundled copies rather than ship the same material twice.
@@ -150,7 +188,7 @@ foreach ($item in $toolsPrune) {
 # --- Controls/: wholesale, minus vendored/uncurated "examples" subfolders ---
 # mff/*.bas (and the cJSON/MariaDBBox/ScintillaControl/SQLite3 equivalents) ship
 # despite being source code - see the script header comment for why.
-$controlsSrc = Join-Path $RepoRoot "Controls"
+$controlsSrc = Join-Path $SourceRoot "Controls"
 $controlsDst = Join-Path $ReleaseRoot "Controls"
 Copy-Item -Path $controlsSrc -Destination $controlsDst -Recurse -Force
 Write-Host "Copied directory: Controls (incl. framework .bas - see header comment)"
@@ -167,7 +205,7 @@ if ($removedExampleDirs.Count -gt 0) {
 # astoria.ini is skipped so the shipped app generates fresh defaults on first
 # run (SettingsService.bas already handles every key being absent) rather than
 # shipping this machine's MRU projects, window layout, and other personal state.
-$settingsSrc = Join-Path $RepoRoot "Settings"
+$settingsSrc = Join-Path $SourceRoot "Settings"
 $settingsDst = Join-Path $ReleaseRoot "Settings"
 Copy-Item -Path $settingsSrc -Destination $settingsDst -Recurse -Force
 Remove-Item -Path (Join-Path $settingsDst "astoria.ini") -Force -ErrorAction SilentlyContinue
@@ -191,7 +229,13 @@ Write-Host "Copied directory: Settings (excl. astoria.ini and debug_trace.*.log)
 #   Projects/, Temp/, DebugInfo.bak   - local scratch/dev artifacts
 
 Write-Host ""
-Write-Host "Release staged successfully at $ReleaseRoot"
+Write-Host "Release staged successfully at $ReleaseRoot (from commit $head)"
 $fileCount = (Get-ChildItem -Path $ReleaseRoot -Recurse -File).Count
 $sizeMB = (Get-ChildItem -Path $ReleaseRoot -Recurse -File | Measure-Object -Property Length -Sum).Sum / 1MB
 Write-Host ("Files: {0:N0}   Total size: {1:N0} MB" -f $fileCount, $sizeMB)
+
+}
+finally {
+    # The scratch export is a full copy of HEAD (~300 MB); never leave it behind.
+    if (Test-Path $ExportRoot) { Remove-Item -Path $ExportRoot -Recurse -Force -ErrorAction SilentlyContinue }
+}

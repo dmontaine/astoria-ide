@@ -40,6 +40,53 @@ tester needs is in `Documentation/`:
 All six are maintained going forward. `Documentation/AstoriaIDESignificantChanges.md` supersedes
 the `.doc` on P:\Astoria-Docs — edit the Markdown, which is version-controlled.
 
+## Session handoff (2026-07-18) — controls audit, documentation set, release staging
+
+Everything below is committed and pushed. `astoria.exe` and `astoria-mcp.exe` are freshly built
+**release** binaries (`-Wc -O2`, no `-g -exx`) matching this source, smoke-tested: the IDE starts
+and its agent pipe answers `get_status`.
+
+**Shipped this session**
+
+- **Runtime DLL copying.** A control library declares what its programs need at runtime via a
+  `RuntimeDlls` key in `Controls/<Name>/Settings.ini`; `CopyControlRuntimeDlls`
+  (`src/BuildService.bas`) copies those beside the built exe on every successful build, before any
+  Run. Fixes programs using ScintillaControl or MariaDBBox failing to start anywhere but the build
+  machine. `libmariadb.dll` (missing from the repo entirely) is now shipped.
+- **All 73 toolbox controls pass** compile + open/close, owner-verified except WebBrowser. See
+  `Documentation/ControlTesting.md`.
+- **WebBrowser re-enabled** — one framework bug (`GetURL()` declared `ByRef As WString` returning a
+  literal). `ListViewEx` and `SearchBar` stay excluded: their implementation `.bas` files were never
+  shipped by MyFbFramework, which needs an upstream fix, not a local one.
+- **Toolbox Cursor** now appears once rather than in all four groups.
+- **Six documents** in `Documentation/`, indexed above.
+- **`StageRelease.ps1` now exports `git archive HEAD`** instead of copying the working tree.
+
+**Test these first on the other computer**
+
+1. **Drop a WebBrowser control onto a form in the designer.** This is the one gap in its
+   verification. `mff.bi` does *not* include WebBrowser, so `framework.dll` does not contain it —
+   and the designer instantiates controls through that DLL (see `cc9e7dd`). A hand-written `.frm`
+   using one compiles and runs correctly; whether the *designer* can place one is untested and may
+   need WebBrowser adding to the DLL build.
+2. **Page rendering.** Nothing has ever loaded a page in a WebBrowser control.
+3. **Build any project** and confirm the DLL copying reports in the Messages pane.
+
+**Before packaging for testers**
+
+`StageRelease.ps1` ships what was last *committed*. Build release and commit the binaries before
+staging — it warns if they differ. Staged result on this machine: **4,072 files, 286 MB**, from
+commit `acea2cc`.
+
+**Open, not blocking**
+
+- The 73 control test projects ship under `Examples/Controls`. Owner decided to leave them for now;
+  worth revisiting, since near-identical single-control stubs dilute the real teaching examples.
+- The installed app still does not appear in Programs and Features (unsigned binaries — SignPath.io
+  offers free signing for open-source projects and would likely resolve it).
+- `Settings/astoria.ini` is tracked and must be committed whenever it changes so both machines stay
+  in sync.
+
 <a id="active-sub-project--debugger-reliability-queued-2026-07-11"></a>
 
 ## Debugger Reliability (Complete)

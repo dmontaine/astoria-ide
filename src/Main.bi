@@ -164,6 +164,14 @@ Type Library
 	LibX32Folder As UString
 	LibX64Folder As UString
 	Enabled As Boolean
+	'' Runtime DLLs this library's compiled programs need beside their .exe, from the
+	'' RuntimeDlls key in the library's Settings.ini (comma or semicolon separated).
+	'' Empty for libraries that link statically or have no native dependency.
+	RuntimeDlls As UString
+	'' The library's own folder under Controls\ -- where RuntimeDlls are copied from.
+	FolderPath As UString
+	'' Folder name only ("ScintillaControl"), used to spot the library's include in sources.
+	FolderName As UString
 	Handle As Any Ptr
 End Type
 

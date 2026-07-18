@@ -6071,6 +6071,9 @@ Sub LoadToolBox(ForLibrary As Library Ptr = 0)
 						CtlLibrary->Lib64ArmFolder = GetFullPath(GetFullPath(ini.ReadString("Setup", "Lib64ArmFolder"), Temp))
 						CtlLibrary->LibX32Folder = GetFullPath(GetFullPath(ini.ReadString("Setup", "LibX32Folder"), Temp))
 						CtlLibrary->LibX64Folder = GetFullPath(GetFullPath(ini.ReadString("Setup", "LibX64Folder"), Temp))
+						CtlLibrary->RuntimeDlls = ini.ReadString("Setup", "RuntimeDlls")
+						CtlLibrary->FolderName = DirName
+						CtlLibrary->FolderPath = ExePath & WindowsSlash & "Controls" & WindowsSlash & DirName
 						CtlLibrary->Enabled = True
 						If LCase(DirName) = "framework" Then
 							If CtlLibrary->HeadersFolder = "" Then CtlLibrary->HeadersFolder = "mff"

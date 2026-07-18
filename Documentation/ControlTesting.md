@@ -138,8 +138,8 @@ a running MariaDB server and the client/sqlite3 DLLs.
 ## Runtime DLL dependencies
 
 Two controls are backed by native DLLs, and a built program will **not start** unless those DLLs
-sit next to its `.exe` (or on PATH). This is a deployment gap worth noting: the IDE does not
-currently copy a control library's DLLs alongside the programs a user builds.
+sit next to its `.exe` (or on PATH). **The IDE now copies them automatically** on every successful
+build, before the program is run - see *Automatic runtime-DLL copying* below.
 
 | Control | Needs | Shipped in |
 | --- | --- | --- |
@@ -151,6 +151,39 @@ currently copy a control library's DLLs alongside the programs a user builds.
 `libmariadb.lib` / `libmariadbclient.a` (plus a stray `libmariadb.pdb`), so MariaDBBox linked
 successfully and then failed at startup with "libmariadb could not be found". It is LGPL-2.1
 (MariaDB Connector/C) and redistributable alongside dynamically-linked software.
+
+### Automatic runtime-DLL copying
+
+A control library declares what its programs need at runtime with a `RuntimeDlls` key in its
+`Controls/<Name>/Settings.ini` - the same file the toolbox already reads:
+
+```ini
+[setup]
+RuntimeDlls=ScintillaControl64.dll,Scintilla64.dll,Lexilla64.dll
+```
+
+On every successful build `CopyControlRuntimeDlls` (`src/BuildService.bas`) copies those files
+beside the exe, before any Run. A new control library states its own needs by dropping in a
+folder; no IDE code changes.
+
+Two design notes:
+
+- **Build time, not drop time.** At the moment a control is dropped on a form the exe's location
+  isn't known yet, and drop-time copying would do nothing for a project cloned from git. Copying
+  on build gets it right every time, including on a fresh clone.
+- **Usage is detected from the sources, not the exe.** A project counts as using a library when
+  one of its `.frm`/`.bas`/`.bi` files has an `#include` naming that library's `.bi`. The exe's
+  import table can't be used: ScintillaControl loads its DLLs dynamically, so its name never
+  appears there. (`cJSON64.dll` shows the opposite trap - the name appears in the exe, yet the
+  program runs fine without the file.)
+
+Copying is per library, not per DLL: if a project uses ScintillaControl it gets all three, since
+two of them are loaded by the third rather than by the program. Files already present with a
+matching size are left alone, so a running program's DLL is never swapped underneath it.
+
+Verified 2026-07-18 by deleting the DLLs from the test projects and rebuilding through the IDE:
+ScintillaControl got all 3, MariaDBBox got `libmariadb.dll` only (not its own `MariaDBBox_x64.dll`),
+SQLite3Component and Label got none. All then ran and closed gracefully.
 
 ## Other findings
 

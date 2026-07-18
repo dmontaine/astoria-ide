@@ -29,6 +29,91 @@ Sub CompileContextFree(ByRef ctx As CompileContext)
 	WDeAllocate(ctx.ProcessWorkDir)
 End Sub
 
+'' True if any source in SourceDir includes "<LibName>.bi" -- how we tell that a project
+'' actually uses a control library. The exe cannot be used for this: ScintillaControl loads
+'' its DLLs dynamically, so its name never appears in the import table.
+Private Function ProjectUsesControlLibrary(ByRef SourceDir As WString, ByRef LibName As WString) As Boolean
+	If SourceDir = "" OrElse LibName = "" Then Return False
+	Dim As UString Marker = LCase(LibName & ".bi")
+	Dim As String Exts(0 To 2) = {"*.frm", "*.bas", "*.bi"}
+	For e As Integer = 0 To 2
+		Dim As UInteger Attr
+		Dim As WString * 1024 FileName
+		FileName = Dir(SourceDir & WindowsSlash & Exts(e), fbNormal, Attr)
+		While FileName <> ""
+			Dim As Integer f = FreeFile
+			If Open(SourceDir & WindowsSlash & FileName For Input As #f) = 0 Then
+				Dim As String Line_
+				Do Until EOF(f)
+					Line Input #f, Line_
+					'' Only an #include counts -- a mention in a comment or a string does not.
+					If InStr(LCase(Line_), "#include") > 0 AndAlso InStr(LCase(Line_), Marker) > 0 Then
+						Close #f
+						Return True
+					End If
+				Loop
+				Close #f
+			End If
+			FileName = Dir(Attr)
+		Wend
+	Next e
+	Return False
+End Function
+
+'' Copies each used control library's runtime DLLs beside the freshly built exe.
+''
+'' Without this a build succeeds and then fails to start on any machine where the DLLs are not
+'' already adjacent -- which is every machine but the one that built it. Declared per library
+'' via the RuntimeDlls key in Controls\<Name>\Settings.ini, so a new library states its own
+'' needs by dropping in a folder, with no change here.
+Sub CopyControlRuntimeDlls(ByRef ExeName As WString, ByRef SourceDir As WString)
+	If ExeName = "" OrElse SourceDir = "" Then Exit Sub
+	Dim As UString ExeDir = GetFolderName(ExeName, False)
+	If ExeDir = "" Then Exit Sub
+	Dim As Integer Copied
+	Dim As Library Ptr CtlLibrary
+	For i As Integer = 0 To ControlLibraries.Count - 1
+		CtlLibrary = ControlLibraries.Item(i)
+		If CtlLibrary = 0 OrElse (Not CtlLibrary->Enabled) Then Continue For
+		If Trim(CtlLibrary->RuntimeDlls) = "" Then Continue For
+		If Not ProjectUsesControlLibrary(SourceDir, CtlLibrary->FolderName) Then Continue For
+		Dim As UString Rest = CtlLibrary->RuntimeDlls
+		Do
+			Dim As Integer p = InStr(Rest, ",")
+			If p = 0 Then p = InStr(Rest, ";")
+			Dim As UString DllName
+			If p = 0 Then
+				DllName = Trim(Rest) : Rest = ""
+			Else
+				DllName = Trim(Left(Rest, p - 1)) : Rest = Mid(Rest, p + 1)
+			End If
+			If DllName <> "" Then
+				Dim As UString Src = CtlLibrary->FolderPath & WindowsSlash & DllName
+				Dim As UString Dst = ExeDir & WindowsSlash & DllName
+				'' Copy when absent or stale; an up-to-date copy is left alone so a running
+				'' program does not have its DLL replaced underneath it.
+				If FileExistsU(Src) Then
+					Dim As Boolean NeedCopy = Not FileExistsU(Dst)
+					If Not NeedCopy Then NeedCopy = (FileLen(Src) <> FileLen(Dst))
+					If NeedCopy Then
+						If CopyFileU(Src, Dst) Then
+							Copied += 1
+						Else
+							ShowMessages(Str(Time) & ": " & MS("Could not copy $1 beside the program.", *DllName.vptr))
+						End If
+					End If
+				Else
+					ShowMessages(Str(Time) & ": " & MS("$1 declares $2 but the file is missing.", *CtlLibrary->Name.vptr, *DllName.vptr))
+				End If
+			End If
+		Loop While Rest <> ""
+	Next i
+	If Copied > 0 Then
+		Dim As UString CopiedText = Str(Copied)
+		ShowMessages(Str(Time) & ": " & MS("Copied $1 runtime library file(s) beside the program.", *CopiedText.vptr))
+	End If
+End Sub
+
 Sub CompileSetProcessWorkDir(ByRef ctx As CompileContext, Parameter As String, BatchMode As Boolean)
 	If BatchMode Then
 		Dim As UString BatchFileFull = GetFullPath(*ctx.BatchCompilationFileName)
@@ -464,6 +549,12 @@ Function Compile(Parameter As String, bAll As Boolean) As Integer
 			End If
 			StopProgress
 			ThreadsLeave()
+			'' Before any Run: a control library's DLLs must sit beside the exe or it will not start.
+			If Parameter <> "Check" Then
+				ThreadsEnter()
+				CopyControlRuntimeDlls(*ctx.ExeName, GetFolderName(*ctx.MainFile, False))
+				ThreadsLeave()
+			End If
 			If Parameter = "Run" Then
 				If Project <> 0 Then
 					RunPr "", *Project->FileName, *Project->CommandLineArguments, *ctx.MainFile, CompileLine, *ctx.FirstLine

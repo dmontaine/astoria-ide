@@ -6,7 +6,9 @@ it is updated as testing happens, not written once at the end.
 If you are evaluating Astoria as a tester, read [Known gaps](#known-gaps--not-yet-tested) first.
 It tells you where the thin ice is, and those are the areas where your findings are most valuable.
 
-Related: [AstoriaIDESignificantChanges.md](AstoriaIDESignificantChanges.md) for what Astoria is,
+Related: [TestPlan.md](TestPlan.md) for what is *planned* — named scenarios, each marked as
+agent-automatable or needing a person, with a result recorded against it;
+[AstoriaIDESignificantChanges.md](AstoriaIDESignificantChanges.md) for what Astoria is,
 [DetailedChangelog.md](DetailedChangelog.md) for every change, and
 [ControlTesting.md](ControlTesting.md) for the per-control results in full.
 
@@ -106,7 +108,8 @@ Stated plainly, because a tester's time is best spent here.
 | --- | --- |
 | **Database connectivity** | `MariaDBBox` and `SQLite3Component` are proven to compile and construct. **No test has opened a real connection, run a query, or read a result set.** The data path is unproven. |
 | **WebBrowser rendering** | Proven to build, open and close. **Page rendering and navigation are unverified.** |
-| **Any single control in depth** | The control sweep proves each control compiles and its window opens. It does not exercise properties, events, or interaction. A control can pass and still misbehave in use. |
+| **Any single control in depth** | The control sweep proves each control compiles and its window opens. It does not exercise properties, events, or interaction. A control can pass and still misbehave in use. Planned as [TestPlan.md](TestPlan.md) § A. |
+| **Controls used together** | Every control has been tested *alone*. Nothing tests controls cooperating — nested containers, docking under resize, one control's event driving another, a component shared by several consumers. This is how controls are actually used, and where remaining defects are most likely. Planned as [TestPlan.md](TestPlan.md) § B. |
 | **Multi-machine / fresh user** | All testing to date is by one developer on two of their own machines. Nothing has been tested by someone encountering Astoria for the first time — the specific reason human testers are being sought. |
 | **Clean-machine install** | The installer is verified on a development machine. It has not been installed on a machine without a FreeBASIC toolchain already present. |
 | **Performance and scale** | No testing with large projects, long files, or many open documents. |

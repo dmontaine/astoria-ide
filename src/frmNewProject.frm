@@ -921,12 +921,34 @@ Private Sub frmNewProject.Form_Create(ByRef Sender As Control)
 	txtGitEmail.Enabled = False
 	chkAIFriendly.Checked = False
 	cboAITool.Clear
-	cboAITool.AddItem ("Claude Code")
-	cboAITool.AddItem ("Cursor")
-	cboAITool.AddItem ("ChatGPT (Codex)")
-	cboAITool.AddItem ("OpenCode")
-	cboAITool.AddItem ("Kun (Deepseek)")
-	cboAITool.ItemIndex = 0
+	'' Populate the AI Agent list from the Templates/AI subfolders, so adding or
+	'' removing an agent is just adding/removing a folder there -- no code change.
+	'' The folder name is used verbatim as both the dropdown label and the stored
+	'' AITool value (and it maps 1:1 to the template folder StampAITemplate copies).
+	Dim As UString aiRoot = WinOsPath(ExePath & "/Templates/AI")
+	Dim As String aiNames()
+	Dim As Integer aiCount = 0, aiI, aiJ, aiDefault = 0
+	Dim As UInteger aiAttr
+	Dim As String aiEntry = Dir(aiRoot & WindowsSlash & "*", fbDirectory Or fbReadOnly Or fbHidden Or fbSystem Or fbArchive, aiAttr)
+	Do While aiEntry <> ""
+		If (aiAttr And fbDirectory) <> 0 AndAlso aiEntry <> "." AndAlso aiEntry <> ".." Then
+			ReDim Preserve aiNames(aiCount)
+			aiNames(aiCount) = aiEntry
+			aiCount += 1
+		End If
+		aiEntry = Dir(aiAttr)
+	Loop
+	'' Alphabetical (case-insensitive) for a stable order regardless of FS enumeration.
+	For aiI = 0 To aiCount - 2
+		For aiJ = aiI + 1 To aiCount - 1
+			If LCase(aiNames(aiJ)) < LCase(aiNames(aiI)) Then Swap aiNames(aiI), aiNames(aiJ)
+		Next aiJ
+	Next aiI
+	For aiI = 0 To aiCount - 1
+		cboAITool.AddItem aiNames(aiI)
+		If aiNames(aiI) = "ClaudeCode" Then aiDefault = aiI   '' prefer Claude Code as default
+	Next aiI
+	If aiCount > 0 Then cboAITool.ItemIndex = aiDefault
 	cboAITool.Enabled = False
 	'' Apply the default mode's field enabling (git fields off for Create Local).
 	UpdateModeFields()
@@ -1062,18 +1084,11 @@ Private Sub frmNewProject.WriteLicenseFile(ByRef DestFolder As UString, ByRef Li
 	End If
 End Sub
 
-'' Maps the AI Agent dropdown's display label to its Templates/AI/<Tool> folder
-'' name. Returns "" for an unrecognized label (defensive only -- the dropdown is
-'' cbDropDownList, so this can't happen via normal use).
+'' The AI Agent dropdown now lists Templates/AI subfolder names verbatim, so the
+'' selected label already IS the folder name StampAITemplate needs. Kept as a seam
+'' (trims, and yields "" when nothing is selected).
 Private Function frmNewProject.AIToolFolderName(ByRef ToolLabel As String) As UString
-	Select Case ToolLabel
-	Case "Claude Code": Return "ClaudeCode"
-	Case "Cursor": Return "Cursor"
-	Case "ChatGPT (Codex)": Return "ChatGPT"
-	Case "OpenCode": Return "OpenCode"
-	Case "Kun (Deepseek)": Return "Kun"
-	Case Else: Return ""
-	End Select
+	Return Trim(ToolLabel)
 End Function
 
 '' Stamps Templates/AI/<ToolFolder>/ into the new project's folder, substituting

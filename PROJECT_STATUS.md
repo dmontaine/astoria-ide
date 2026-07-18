@@ -380,6 +380,38 @@ INI's encoding, which also keeps `Update`'s `FLines.Item(0)` access valid on the
 then load it normally. **Verified** by reproducing the owner's exact test: deleted the INI,
 launched, and it was recreated and taking writes.
 
+## Same-day follow-up (2026-07-17) — INI defaults template + dead `[Debuggers]` section removed
+
+Owner reported two INI issues after verifying the New Project clone paths (all three work; module
+fields correctly grey out for a complete cloned project).
+
+**The empty terminal dropdown was a regression from the missing-INI fix, not a UI bug.** Tools ▸
+Options ▸ Terminal showed an unpopulated dropdown with no default. Instrumenting
+`frmOptions.LoadSettings` and then querying the live control from outside (`CB_GETCOUNT`/
+`CB_GETCURSEL`) proved the UI path was already correct — 3 terminals, 4 items, index 1 =
+"Standard Windows Console". The real cause: the earlier fix seeded a **bare `[Options]` stub** when
+`astoria.ini` was absent, so a recreated file had no `[Terminals]` — and none of
+`[Helps]`/`[MakeTools]`/`[IncludePaths]`/`[LibraryPaths]` either. That reads as a broken dropdown
+but is really a crippled config. Fixed by shipping **`Settings/astoria.default.ini`** (tool
+defaults only — no MRU, window state, or personal info) and having `LoadSettingsIni` copy it
+byte-for-byte when the settings file is missing, which also preserves the UTF-8 BOM. The bare stub
+survives only as a last resort if the template itself is missing (damaged install). **Verified** by
+deleting `astoria.ini`, launching, and reading the live combo: all sections restored, terminal
+dropdown populated with "Standard Windows Console" selected.
+
+**`[Debuggers]` removed from the shipped INI — it was entirely dead.** Nothing in `src/` reads the
+section (no reader for `DefaultDebugger32/64`, `GDBDebugger32/64`, or the indexed entries): the
+debugger is hardcoded to the bundled 64-bit GDB via `BUNDLED_GDB_PATH` (`Main.bi`), and there is no
+UI for choosing one. The section still listed a 32-bit `gdb-…-i686` folder that **does not ship**
+(only `Debuggers/gdb-11.2.90.20220320-x86_64` exists) plus the upstream author's machine paths
+(`D:\FreeBasic\FBdebugger296\…`, `F:\Install\…VSCode…`). The stale `[Compilers]`
+`DefaultCompiler32` key went with it — also unread, and the Options save path already purges the
+rest of that section. 233 → 205 lines.
+
+Note: the default template intentionally omits the `VisualFBEditor` help entry (upstream's own
+editor help, wrong branding for this fork); the file still ships in `Help/` and the existing
+`astoria.ini` still lists it, so this is reversible if the owner wants it kept.
+
 ## Git onboarding automation — Tasks 4 & 5 (queued after Task 3, owner-requested 2026-07-17)
 
 Today the "Use Existing Git Project" flow requires the user to have **already** (a) set up an SSH

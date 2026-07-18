@@ -69,14 +69,26 @@ Sub LoadSettingsIni()
 	'' leaving the IDE permanently unable to persist anything. Seeding one real section
 	'' also keeps Update's FLines.Item(0) access valid on the very first write.
 	''
-	'' Written as UTF-8 *with* BOM to match the shipped astoria.ini's encoding, so the
-	'' file IniFile subsequently rewrites keeps the same form.
+	'' The seed is a *copy of Settings/astoria.default.ini*, not a bare [Options] stub. A stub
+	'' technically fixes the persistence bug above, but leaves the IDE crippled in a way that
+	'' looks like unrelated UI bugs: with no [Terminals] the Tools > Options terminal dropdown
+	'' is empty and has no default, and [Helps]/[MakeTools]/[IncludePaths]/[LibraryPaths] are
+	'' gone too. The template ships the tool defaults only -- no MRU, window state, or personal
+	'' info -- so a recreated file matches a fresh install. Copying byte-for-byte also
+	'' preserves the UTF-8 BOM the shipped astoria.ini uses.
 	If Not FileExists(SettingsPath) Then
 		EnsureDirectoryExists(ExePath & "/Settings")
-		Dim As Integer fnNew = FreeFile
-		If Open(SettingsPath For Output Encoding "utf-8" As #fnNew) = 0 Then
-			Print #fnNew, "[Options]"
-			Close #fnNew
+		Dim As UString DefaultsPath = ExePath & "/Settings/astoria.default.ini"
+		Dim As Boolean Seeded = False
+		If FileExists(DefaultsPath) Then Seeded = CopyFileU(DefaultsPath, SettingsPath)
+		'' Last resort if the template is missing (damaged install): one real section is still
+		'' enough to give IniFile a path to write to and keep Update's FLines.Item(0) valid.
+		If Not Seeded Then
+			Dim As Integer fnNew = FreeFile
+			If Open(SettingsPath For Output Encoding "utf-8" As #fnNew) = 0 Then
+				Print #fnNew, "[Options]"
+				Close #fnNew
+			End If
 		End If
 	End If
 	If FileExists(SettingsPath) Then

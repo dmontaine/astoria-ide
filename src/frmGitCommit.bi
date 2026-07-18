@@ -17,9 +17,13 @@
 		Declare Constructor
 
 		Dim As CommandButton cmdOK, cmdCancel
-		Dim As Label lblPrompt
-		Dim As TextBox txtMessage
-		Dim As Panel pnlBottom
+		Dim As Label lblFiles, lblPrompt
+		Dim As TextBox txtFiles, txtMessage
+		Dim As Panel pnlBottom, pnlFiles
+		'' Caller sets before ShowModal: FilesList = the files that `git add -A` will
+		'' commit, one per line (e.g. "modified  Foo.bas"), shown read-only so the user
+		'' sees exactly what's included. "" -> "(no changes)".
+		Dim As UString FilesList
 		'' Result: the entered commit message, trimmed ("" if cancelled/empty). Read after
 		'' ShowModal returns ModalResults.OK. Multiline -- first line is the git subject.
 		Dim As UString CommitMessage

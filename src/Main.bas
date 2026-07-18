@@ -1458,6 +1458,40 @@ Private Sub GitParseCommitHeader(ByRef rawOut As String, ByRef branch As String,
 	subject = Trim(afterRb, Any !" \t" + Chr(13) + Chr(10))
 End Sub
 
+'' Turn `git status --porcelain` output ("XY path" per line) into a friendly list
+'' ("modified  Foo.bas", "new  Bar.bi", ...) -- what `git add -A` will commit.
+Private Function GitFormatStatusList(ByRef rawStatus As String) As UString
+	Dim As UString result
+	Dim As Integer p = 1
+	While p <= Len(rawStatus)
+		Dim As Integer nl = InStr(p, rawStatus, Chr(10))
+		Dim As String ln
+		If nl = 0 Then
+			ln = Mid(rawStatus, p) : p = Len(rawStatus) + 1
+		Else
+			ln = Mid(rawStatus, p, nl - p) : p = nl + 1
+		End If
+		If Right(ln, 1) = Chr(13) Then ln = Left(ln, Len(ln) - 1)
+		If Len(ln) < 4 Then Continue While   '' porcelain: 2 status chars + space + path
+		Dim As String code = Left(ln, 2)
+		Dim As String path = Trim(Mid(ln, 4))
+		Dim As String word = "changed"
+		If InStr(code, "?") > 0 Then
+			word = "new"
+		ElseIf InStr(code, "R") > 0 Then
+			word = "renamed"
+		ElseIf InStr(code, "D") > 0 Then
+			word = "deleted"
+		ElseIf InStr(code, "A") > 0 Then
+			word = "new"
+		ElseIf InStr(code, "M") > 0 Then
+			word = "modified"
+		End If
+		result &= word & "  " & path & Chr(13, 10)
+	Wend
+	Return result
+End Function
+
 '' Show a git operation's result as a short plain-English summary rather than dumping
 '' raw git output. op is "commit"/"pull"/"push". Known no-op and failure cases get their
 '' own wording; failures still include git's own text (the actionable part). UI thread.
@@ -1546,8 +1580,18 @@ Sub GitCommit
 		MsgBox ("The open project is not a Git repository."), , mtWarning
 		Exit Sub
 	End If
+	'' Show up front exactly what `git add -A` will commit (excludes .gitignore'd files).
+	'' If nothing changed, don't even open the dialog.
+	Dim As String statusOut
+	Dim As Integer statusEc
+	RunGitInProject("status --porcelain", statusOut, statusEc)
+	If Trim(statusOut) = "" Then
+		MsgBox ("Nothing to commit -- there are no changes since the last commit."), , mtInfo
+		Exit Sub
+	End If
 	Dim fGitCommit As frmGitCommit
 	pfGitCommit = @fGitCommit
+	fGitCommit.FilesList = GitFormatStatusList(statusOut)
 	If fGitCommit.ShowModal(frmMain) <> ModalResults.OK Then Exit Sub
 	Dim As UString msg = Trim(fGitCommit.CommitMessage)
 	If msg = "" Then Exit Sub   '' cancelled or empty -- git requires a message anyway

@@ -17,6 +17,9 @@
 *.bak
 Temp/
 temp/
+# Astoria writes a scratch copy of an unsaved main file named Temp.bas into the
+# project folder (needed there so its relative #includes resolve) -- not source.
+Temp.bas
 
 # OS / editor cruft
 Thumbs.db

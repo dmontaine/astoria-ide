@@ -56,7 +56,7 @@
 		' optUseExistingGit
 		With optUseExistingGit
 			.Name = "optUseExistingGit"
-			.Caption = ("Use Existing Git Project")
+			.Caption = ("Git Project")
 			.Align = DockStyle.alLeft
 			.TabIndex = 2
 			.SetBounds 170, 6, 200, 21

@@ -26,3 +26,4 @@ Settings/*.pass2.log
 
 # Per-control test programs: keep the sources, not the built binaries
 Examples/Controls/**/*.exe
+Examples/Controls/**/*.dll

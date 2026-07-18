@@ -57,7 +57,7 @@ so every test is reproducible by opening its `.vfp` and pressing build.
 | Controls-ProgressBar | Visual | ✅ | ✅ | ✅ |  |
 | Controls-RadioButton | Visual | ✅ | ✅ | ✅ |  |
 | Controls-RichTextBox | Visual | ✅ | ✅ | ✅ |  |
-| Controls-ScintillaControl | Visual | ✅ | ✅ | ✅ | Ran, but ignored the graceful close request (WM_CLOSE); force-closed after 2s. |
+| Controls-ScintillaControl | Visual | ✅ | ✅ | ✅ | Needs Scintilla64.dll / Lexilla64.dll / ScintillaControl64.dll alongside the exe. With them present it opens and closes cleanly - the earlier force-close was a missing-DLL issue, not a control defect. |
 | Controls-ScrollBarControl | Visual | ✅ | ✅ | ✅ |  |
 | Controls-SearchBox | Visual | ✅ | ✅ | ✅ |  |
 | Controls-Splitter | Visual | ✅ | ✅ | ✅ |  |
@@ -89,7 +89,7 @@ so every test is reproducible by opening its `.vfp` and pressing build.
 | Components-HTTPConnection | Other | ✅ | ✅ | ✅ |  |
 | Components-ImageList | Other | ✅ | ✅ | ✅ |  |
 | Components-MainMenu | Other | ✅ | ✅ | ✅ |  |
-| Components-MariaDBBox | Other | ✅ | ✅ | - | Library did not compile - fixed (see Library fixes). Ran, but ignored the graceful close; force-closed. DB connectivity not exercised. |
+| Components-MariaDBBox | Other | ✅ | ✅ | - | Needs libmariadb.dll (MariaDB Connector/C) alongside the exe - now supplied in Controls/MariaDBBox/. Library also required a source fix to compile (see Library fixes). DB connectivity not exercised. |
 | Components-Menu | Other | ✅ | ✅ | - | Requires the fully-qualified type name `My.Sys.Forms.Menu`; the bare `Menu` is rejected by the compiler. MainMenu/PopupMenu work unqualified. |
 | Components-NotifyIcon | Other | ✅ | ✅ | ✅ |  |
 | Components-PopupMenu | Other | ✅ | ✅ | ✅ |  |
@@ -135,10 +135,32 @@ existing idiom, but a leak-free helper would be a worthwhile cleanup.
 the window opens/closes. They do **not** exercise real database connectivity - that would need
 a running MariaDB server and the client/sqlite3 DLLs.
 
+## Runtime DLL dependencies
+
+Two controls are backed by native DLLs, and a built program will **not start** unless those DLLs
+sit next to its `.exe` (or on PATH). This is a deployment gap worth noting: the IDE does not
+currently copy a control library's DLLs alongside the programs a user builds.
+
+| Control | Needs | Shipped in |
+| --- | --- | --- |
+| Controls-ScintillaControl | `Scintilla64.dll`, `Lexilla64.dll`, `ScintillaControl64.dll` | `Controls/ScintillaControl/` |
+| Components-MariaDBBox | `libmariadb.dll` | `Controls/MariaDBBox/` (added 2026-07-18, from the MariaDB 12.3 Connector/C) |
+
+`libmariadb.dll` was previously missing entirely - the repo shipped only the link-time
+`libmariadb.lib` / `libmariadbclient.a` (plus a stray `libmariadb.pdb`), so MariaDBBox linked
+successfully and then failed at startup with "libmariadb could not be found". It is LGPL-2.1
+(MariaDB Connector/C) and redistributable alongside dynamically-linked software.
+
 ## Other findings
 
 - **Containers-TabPage** is the one control that cannot be tested alone: it requires a
   TabControl parent, so its program contains two controls by necessity.
 - **Components-Menu** must be declared as `My.Sys.Forms.Menu`; the bare name is rejected.
-- **Controls-ScintillaControl** and **Components-MariaDBBox** ignore `WM_CLOSE` and had to be
-  force-closed. They still open and close, but they don't honour a normal close request.
+- **Controls-ScintillaControl** and **Components-MariaDBBox** at first appeared to ignore
+  `WM_CLOSE` and had to be force-closed. Neither was a control defect: both were missing runtime
+  DLLs (see *Runtime DLL dependencies*), so what the harness saw as "a live window" was in fact a
+  "DLL not found" error dialog. With the DLLs alongside the exe, each opens its real window and
+  closes gracefully.
+- The harness's "is there a live window?" check cannot tell a real window from a modal error
+  dialog, so a startup failure can read as a pass. Worth tightening if these tests are ever
+  re-run in bulk - checking the window title against the expected one would have caught both.

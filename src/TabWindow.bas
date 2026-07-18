@@ -315,6 +315,10 @@ Sub ChangeMenuItemsEnabled
 	'' fix it). Selection-independent, so it tracks the open project, not the tree cursor.
 	'' FileExistsU("") is False, so no separate empty-path guard is needed.
 	miEditProjectDescription->Enabled = bHasProject AndAlso FileExistsU(OpenProjectDescriptionPath())
+	'' Git menu items: enabled only when the open project's folder is a Git working tree.
+	Dim As Boolean bGitRepo = OpenProjectIsGitRepo()
+	miGitPull->Enabled = bGitRepo
+	miGitPush->Enabled = bGitRepo
 	mnuWindowSeparator->Visible = bEnabledTab
 	miCode->Enabled = bEnabledTab AndAlso bActiveFormFile
 	miForm->Enabled = bEnabledTab AndAlso bActiveFormFile

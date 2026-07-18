@@ -112,7 +112,7 @@ Dim Shared As Panel pnlLeft, pnlRight, pnlBottom, pnlBottomTab, pnlLeftPin, pnlR
 Dim Shared As TrackBar trLeft
 Dim Shared As MainMenu mnuMain
 Dim Shared As MenuItem Ptr mnuStartWithCompile, mnuStart, mnuContinue, mnuBreak, mnuEnd, mnuRestart, mnuStandardToolBar, mnuEditToolBar, mnuProjectToolBar, mnuFormatToolBar, mnuRunToolBar, mnuSplit, mnuSplitHorizontally, mnuSplitVertically, mnuWindowSeparator, miRecentFiles, miSetAsMain, miClearStartUp, miTabSetAsMain, miTabReloadHistoryCode, miRemoveFiles, miToolBars
-Dim Shared As MenuItem Ptr miSaveProject, miSaveProjectAs, miCloseProject, miDeleteProject, miNewFile, miOpenFile, miCloseFile, miDeleteFile, miSaveFile, miSaveFileAs, miPrint, miPrintPreview, miPageSetup, miOpenProjectFolder, miProjectProperties, miEditProjectDescription, miExplorerOpenProjectFolder, miExplorerRename, miExplorerProjectProperties, miExplorerCloseProject, miRename, miRemoveFileFromProject
+Dim Shared As MenuItem Ptr miSaveProject, miSaveProjectAs, miCloseProject, miDeleteProject, miNewFile, miOpenFile, miCloseFile, miDeleteFile, miSaveFile, miSaveFileAs, miPrint, miPrintPreview, miPageSetup, miOpenProjectFolder, miProjectProperties, miEditProjectDescription, miGitPull, miGitPush, miExplorerOpenProjectFolder, miExplorerRename, miExplorerProjectProperties, miExplorerCloseProject, miRename, miRemoveFileFromProject
 Dim Shared As MenuItem Ptr miUndo, miRedo, miCutCurrentLine, miCut, miCopy, miPaste, miSingleComment, miDuplicate, miSelectAll, miIndent, miOutdent, miFormat, miUnformat, miFormatProject, miUnformatProject, miAddSpaces, miDeleteBlankLines, miParameterInfo, miStepInto, miStepOver, miStepOut, miRunToCursor, miGDBCommand, miAddWatch, miToggleBreakpoint, miClearAllBreakpoints, miSetNextStatement, miShowNextStatement
 Dim Shared As MenuItem Ptr dmiMake, dmiMakeClean
 Dim Shared As MenuItem Ptr miCode, miForm, miCodeAndForm, miGotoCodeForm, miFold, miDebugWindows, miCollapseCurrent, miCollapseAllProcedures, miCollapseAll, miUnCollapseCurrent, miUnCollapseAllProcedures, miUnCollapseAll, miImageManager, miAddProcedure, miAddType, miFind, miReplace, miFindNext, miFindPrevious, miGoto, miDefine, miToggleBookmark, miNextBookmark, miPreviousBookmark, miClearAllBookmarks, miSyntaxCheck, miCompile, miCompileAll, miMake, miMakeClean
@@ -1356,6 +1356,98 @@ Sub EditProjectDescription
 	If tb = 0 Then tb = AddTab(*fw)
 	If tb Then tb->SelectTab
 	WDeAllocate(fw)
+End Sub
+
+'' Whether the open project's folder is a Git working tree (has a .git entry).
+'' Gates the Git menu; selection-independent (tracks the open project).
+Function OpenProjectIsGitRepo() As Boolean
+	Dim As UString gitDir = GetProjectDirectory()
+	If gitDir = "" Then Return False
+	Return FolderExistsU(gitDir & ".git")
+End Function
+
+'' Run a git subcommand in the open project's folder via a temp .bat (batch-mode
+'' SSH, no interactive prompts -- can't hang on a credential/host-key prompt),
+'' capturing combined stdout+stderr into OutText and the exit code into ExitCode.
+'' Mirrors frmNewProject.CloneGitRepository's plumbing; blocks until git finishes
+'' (bounded by ConnectTimeout). Returns True on exit code 0. UI thread.
+Private Function RunGitInProject(ByRef GitArgs As String, ByRef OutText As String, ByRef ExitCode As Integer) As Boolean
+	OutText = "" : ExitCode = -1
+	Dim As UString projDir = GetProjectDirectory()
+	If projDir = "" Then Return False
+	'' Strip the trailing separator so `cd /d "..."` doesn't end in \" (cmd mis-parse).
+	If Right(projDir, 1) = "\" OrElse Right(projDir, 1) = "/" Then projDir = Left(projDir, Len(projDir) - 1)
+	EnsureDirectoryExists(ExePath & WindowsSlash & "Temp")
+	Dim As UString batPath = ExePath & WindowsSlash & "Temp" & WindowsSlash & "_astoria_git_op.bat"
+	Dim As UString logPath = ExePath & WindowsSlash & "Temp" & WindowsSlash & "_astoria_git_op.log"
+	Dim As UString resultPath = ExePath & WindowsSlash & "Temp" & WindowsSlash & "_astoria_git_op.result"
+	If FileExistsU(logPath) Then Kill logPath
+	If FileExistsU(resultPath) Then Kill resultPath
+	Dim As Integer Fn = FreeFile_
+	If Open(batPath For Output As #Fn) <> 0 Then Return False
+	Print #Fn, "@echo off"
+	Print #Fn, "set GIT_TERMINAL_PROMPT=0"
+	Print #Fn, "set GIT_SSH_COMMAND=ssh -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=accept-new"
+	Print #Fn, "cd /d " & Chr(34) & projDir & Chr(34)
+	Print #Fn, "git " & GitArgs & " > " & Chr(34) & logPath & Chr(34) & " 2>&1"
+	Print #Fn, "echo %errorlevel% > " & Chr(34) & resultPath & Chr(34)
+	CloseFile_(Fn)
+	PipeCmd batPath, True
+	If FileExistsU(resultPath) Then
+		Dim As Integer FnR = FreeFile_
+		If Open(resultPath For Input As #FnR) = 0 Then
+			Dim As String resultLine
+			Line Input #FnR, resultLine
+			CloseFile_(FnR)
+			ExitCode = Val(Trim(resultLine))
+		End If
+		Kill resultPath
+	End If
+	If FileExistsU(logPath) Then
+		Dim As Integer FnL = FreeFile_
+		If Open(logPath For Binary Access Read As #FnL) = 0 Then
+			Dim As LongInt sz = LOF(FnL)
+			If sz > 0 Then
+				OutText = String(sz, 0)
+				Get #FnL, 1, OutText
+			End If
+			CloseFile_(FnL)
+		End If
+		Kill logPath
+	End If
+	If FileExistsU(batPath) Then Kill batPath
+	Return (ExitCode = 0)
+End Function
+
+'' Git menu > Git Pull: `git pull` in the open project's folder. Shows the combined
+'' git output. Enabled only for a git-backed project (ChangeMenuItemsEnabled).
+Sub GitPull
+	If Not OpenProjectIsGitRepo() Then
+		MsgBox ("The open project is not a Git repository."), , mtWarning
+		Exit Sub
+	End If
+	Dim As String outText
+	Dim As Integer ec
+	Dim As Boolean gitOk = RunGitInProject("pull", outText, ec)
+	If Trim(outText) = "" Then
+		If gitOk Then outText = "git pull completed." Else outText = "git pull failed (exit " & Str(ec) & ")."
+	End If
+	If gitOk Then MsgBox outText, , mtInfo Else MsgBox outText, , mtWarning
+End Sub
+
+'' Git menu > Git Push: `git push` in the open project's folder.
+Sub GitPush
+	If Not OpenProjectIsGitRepo() Then
+		MsgBox ("The open project is not a Git repository."), , mtWarning
+		Exit Sub
+	End If
+	Dim As String outText
+	Dim As Integer ec
+	Dim As Boolean gitOk = RunGitInProject("push", outText, ec)
+	If Trim(outText) = "" Then
+		If gitOk Then outText = "git push completed." Else outText = "git push failed (exit " & Str(ec) & ")."
+	End If
+	If gitOk Then MsgBox outText, , mtInfo Else MsgBox outText, , mtWarning
 End Sub
 
 Sub AddNewProjectFile(ByRef Template As WString, ByRef ItemName As WString)
@@ -6463,6 +6555,13 @@ Sub CreateMenusAndToolBars
 	miRun->Add("-")
 	mnuUseProfiler = miRun->Add(("Use &Profiler") & HK("UseProfiler"), "", "UseProfiler", @mClick, True)
 	miGDBCommand = miRun->Add(("&GDB Command") & HK("GDBCommand"), "", "GDBCommand", @mClick, , , False)
+
+	'' Git -- its own top-level menu (between Run and Tools) for git-backed projects.
+	'' Enabled state is set contextually in ChangeMenuItemsEnabled. Grows as more git
+	'' actions are added (commit, clone, etc.).
+	Var miGit = mnuMain.Add(("&Git"), "", "Git")
+	miGitPull = miGit->Add(("Git &Pull") & HK("GitPull"), "", "GitPull", @mClick, , , False)
+	miGitPush = miGit->Add(("Git Pus&h") & HK("GitPush"), "", "GitPush", @mClick, , , False)
 
 	miXizmat = mnuMain.Add(("&Tools"), "", "Service")
 	miXizmat->Add(("&Command Prompt") & HK("CommandPrompt", "Alt+C"), "Console", "CommandPrompt", @mClick)

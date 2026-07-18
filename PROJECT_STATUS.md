@@ -1,14 +1,75 @@
 # Astoria-IDE — Project Status & Handoff
 
-**Last updated:** 2026-07-18 — **FEATURE COMPLETE FOR 1.0.** No further features for this release;
-testing, program-flow and UI tweaks only. See "Feature complete for version 1.0" below and
-[Documentation/Testing.md](Documentation/Testing.md). Preparing to recruit human testers.
+**Last updated:** 2026-07-18 (afternoon) — **FEATURE COMPLETE FOR 1.0.** No further features for
+this release; testing, program-flow and UI tweaks only. See "Feature complete for version 1.0"
+below and [Documentation/Testing.md](Documentation/Testing.md). Preparing to recruit human testers.
+
+*Current activity: **integration testing** against [Documentation/TestPlan.md](Documentation/TestPlan.md).
+Seven scenarios run and passing (A1, A4, A5, B1, B4, B6, B10); two of them passed only after fixing
+real defects the tests found — the WebBrowser control could not render a page at all and has been
+rebuilt on WebView2, and `SQLite3Component.AddField` could never succeed in its obvious form. See
+"Session handoff (2026-07-18, afternoon)" below for state and the next scenarios.*
 
 *Previous entry, 2026-07-17:* (In progress: **New Project two-mode redesign + `project.astoria`** — built, compiles clean, NOT yet owner-verified; owner continuing tests on the other computer. See "Session handoff (2026-07-17) — New Project two-mode redesign" below. Earlier: Agent MCP Server **COMPLETE — Tasks 0–7**. Task 7 verified end-to-end from a real stdio MCP client: create → write → build → get_errors → fix → run produced the correct output (`Primes below 1000000 = 78498`). Verification fixed two MCP bugs — Fix B: `create_project` opens the main file; Fix C: agent build saves dirty editors first — and flagged two pre-existing ones, both since fixed (broken Console Application template; `run`-capture NUL truncation — the latter hardened 2026-07-17, pending GUI/MCP verify on the other computer). Earlier today: Task 6 (toggle default-on, status-bar indicator, auto-launch, packaging) `83426ef`; five AI templates gained MCP config `b70143c`.)
 **Repository:** [github.com/dmontaine/astoria-ide](https://github.com/dmontaine/astoria-ide)
 **Local path:** C:\Users\don\Astoria-IDE
 
 This is the concise, authoritative handoff for the next work session. Completed-work narratives, investigations, and dated session notes are archived in [HISTORY.md](HISTORY.md). Shipped changes are indexed in [CHANGELOG.md](CHANGELOG.md), and fuller enhancement specifications live in [ROADMAP.md](ROADMAP.md).
+
+## Session handoff (2026-07-18, afternoon) — integration testing begins, WebBrowser rebuilt
+
+**Where things stand: tree clean, everything pushed through `02d263d`.** This session moved from
+"does each control open" to "do controls work, and work together" — and that shift immediately
+found real defects, which is the argument for continuing it.
+
+**A maintained test plan now exists:** [Documentation/TestPlan.md](Documentation/TestPlan.md), 44
+scenarios in five sections, each marked 🤖 agent-automatable / 🤝 assisted / 👤 human, with Status
+and Result columns filled in as they run. It is the forward-looking companion to Testing.md, which
+remains the summary a tester reads first.
+
+**Seven scenarios run, all now passing — two of them only after fixing what they found:**
+
+| | Result |
+| --- | --- |
+| A1 SQLite3 data path | ✅ 26/26. **Found and fixed a real defect** (below). |
+| A4 WebBrowser rendering | ✅ **after rebuilding the control on WebView2** (below). |
+| A5 WebBrowser navigation | ✅ 4/4 — link followed, GoBack, GoForward. |
+| B1 data-entry form | ✅ Six controls read back; radio group correctly deselects. |
+| B4 docking under resize | ✅ 50/50 across five sizes incl. maximise and restore. |
+| B6 list/detail | ✅ Keyboard-driven selection; exactly one event per change. |
+| B10 second form | ✅ Modal round-trip + modeless coexistence; **z-order owner-verified**. |
+
+**The WebBrowser control could not display a page at all, and crashed on `Navigate`.** It hosted
+the retired IE engine through ATL `AtlAxWin`, whose host window was created with empty text, so no
+control was ever instantiated. Replaced with upstream MyFbFramework's **WebView2** implementation,
+which this fork's copy lacked, and made the *default* on Windows rather than opt-in — a user
+dropping the control on a form cannot be expected to know a `#define` exists. Static linking was
+tried and rejected (the static loader is MSVC-built and needs intrinsics MinGW lacks; stubbing them
+would disable Control Flow Guard), so `WebView2Loader.dll` is copied beside built exes by
+`BuildService.CopyFrameworkRuntimeDlls`, and the arch lib folder is added to the library path in
+code so existing installs get it. Verified end to end through a real IDE build. **Requires the
+WebView2 runtime** — ships with Edge on Windows 10/11, but is a genuine dependency for a
+clean-machine install (E7).
+
+**`SQLite3Component.AddField` could never succeed** in its obvious three-argument form: `nNull`
+defaults to 0 meaning NOT NULL with no default, which SQLite refuses to add to an existing table.
+Text defaults were also emitted unquoted, so the vendor's own example was broken. Both fixed.
+
+**Also this session:** shipped defaults separated from live user settings (below); the significant-
+changes doc gained the no-broken-features rule and the installer entry; ROADMAP §13.14/§13.15
+record the upstream backport review and the framework-reference adaptation.
+
+**Next, highest value first:**
+1. **B7 shared ImageList** — one ImageList feeding a ToolBar, TreeView and ListView. This is the
+   exact bug class that broke menu icons; most likely of the remaining B items to find something.
+2. **B13 twenty-control density check** — cheap, and the kind of thing that only fails at scale.
+3. **B3 nested containers** and **B9 timer + progress bar**.
+4. **A2** (SQLite error handling) and **A6/A7** (control property/event depth).
+
+**Two harness lessons worth carrying:** externally-driven GUI tests park a window on the tester's
+desktop for the whole run — B10 was rewritten to drive itself and exit, and B1/B4/B6 should follow
+if that becomes annoying. And a thread timer keeps firing inside `ShowModal`'s message loop, which
+opened three nested dialogs before B10 guarded against it.
 
 ## Shipped defaults separated from live user settings (2026-07-18)
 

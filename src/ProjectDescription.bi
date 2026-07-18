@@ -59,4 +59,11 @@ Declare Function IsAstoriaProject(ByRef ProjectFolder As UString) As Boolean
 '' foreign-repo in the Use Existing Git flow.
 Declare Function FolderIsEffectivelyEmpty(ByRef Folder As UString) As Boolean
 
+'' Defined in Main.bas (they need IDE state / helpers there), declared here so the Edit
+'' Project Description dialog -- included before them -- can call them.
+'' Stamp Templates/AI/<toolFolder>/ into destFolder with token substitution.
+Declare Sub StampAiTemplateInto(ByRef destFolder As UString, ByRef toolFolder As UString, ByRef projectName As String, ByRef author As String, ByRef license As String, ByRef description As String)
+'' Rewrite a .vfp's Author/License/Description/AIFriendly/AITool keys to match d.
+Declare Sub UpdateVfpMetadataKeys(ByRef vfpPath As UString, ByRef d As ProjectDescriptionData)
+
 #include once "ProjectDescription.bas"

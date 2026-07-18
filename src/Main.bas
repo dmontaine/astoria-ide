@@ -230,6 +230,7 @@ LoadSettings
 #include once "frmTemplates.bi"
 #include once "frmNewFileName.bi"
 #include once "frmGitCommit.bi"
+#include once "frmEditProjectDescription.bi"
 #include once "frmNewProject.bi"
 #include once "frmNewFile.bi"
 #include once "frmOpenProject.bi"
@@ -1341,22 +1342,128 @@ Function OpenProjectDescriptionPath() As UString
 	Return ProjectDescriptionPath(descDir)
 End Function
 
-'' Open the project.astoria description file in an editor tab for hand-editing. Wired to
-'' Project menu > Edit Project Description; that item is only enabled when the file
-'' exists (ChangeMenuItemsEnabled), but re-check here since the menu state and a click
-'' aren't atomic.
+'' Substitute the six {{...}} tokens in one template file's bytes and write the result.
+'' Byte-based (templates are plain ASCII/UTF-8; markers are ASCII). Shared copy of
+'' frmNewProject's StampTemplateFile so the Edit Project Description dialog can stamp too.
+Private Sub AiStampFile(ByRef srcFile As UString, ByRef destFile As UString, ByRef projectName As String, ByRef author As String, ByRef license As String, ByRef description As String)
+	Dim As Integer FnIn = FreeFile_
+	If Open(srcFile For Binary Access Read As #FnIn) <> 0 Then Exit Sub
+	Dim As Integer sz = LOF(FnIn)
+	Dim As String contents = String(sz, 0)
+	If sz > 0 Then Get #FnIn, 1, contents
+	CloseFile_(FnIn)
+	Dim As String au = Trim(author)
+	If au = "" Then au = "the author"
+	contents = Replace(contents, "{{PROJECT}}", projectName)
+	contents = Replace(contents, "{{AUTHOR}}", au)
+	contents = Replace(contents, "{{YEAR}}", Format(Now, "yyyy"))
+	contents = Replace(contents, "{{DATE}}", Format(Now, "yyyy-mm-dd"))
+	contents = Replace(contents, "{{LICENSE}}", license)
+	contents = Replace(contents, "{{DESCRIPTION}}", description)
+	Dim As Integer FnOut = FreeFile_
+	If Open(destFile For Binary Access Write As #FnOut) = 0 Then
+		If Len(contents) > 0 Then Put #FnOut, 1, contents
+		CloseFile_(FnOut)
+	End If
+End Sub
+
+'' Recursively copy srcFolder into destFolder, stamping each file; skip .gitkeep.
+'' Drains each directory before recursing (Dir keeps one search handle).
+Private Sub AiCopyTree(ByRef srcFolder As UString, ByRef destFolder As UString, ByRef projectName As String, ByRef author As String, ByRef license As String, ByRef description As String)
+	If Not EnsureDirectoryExists(destFolder) Then Exit Sub
+	Dim As WStringList names
+	Dim As UInteger attr
+	Dim As String f = Dir(srcFolder & WindowsSlash & "*", fbReadOnly Or fbHidden Or fbSystem Or fbDirectory Or fbArchive, attr)
+	Do While f <> ""
+		If f <> "." AndAlso f <> ".." AndAlso f <> ".gitkeep" Then names.Add f
+		f = Dir(attr)
+	Loop
+	For i As Integer = 0 To names.Count - 1
+		Dim As UString itemName = names.Item(i)
+		Dim As UString srcItem = srcFolder & WindowsSlash & itemName
+		Dim As UString destItem = destFolder & WindowsSlash & itemName
+		If FolderExistsU(srcItem) Then
+			AiCopyTree(srcItem, destItem, projectName, author, license, description)
+		Else
+			AiStampFile(srcItem, destItem, projectName, author, license, description)
+		End If
+	Next i
+End Sub
+
+'' Stamp Templates/AI/<toolFolder>/ into destFolder with token substitution. Public so the
+'' Edit Project Description dialog can enable AI-friendliness on an existing project.
+Sub StampAiTemplateInto(ByRef destFolder As UString, ByRef toolFolder As UString, ByRef projectName As String, ByRef author As String, ByRef license As String, ByRef description As String)
+	If Trim(toolFolder) = "" Then Exit Sub
+	Dim As UString srcFolder = WinOsPath(ExePath & "/Templates/AI/" & toolFolder)
+	If Not FolderExistsU(srcFolder) Then Exit Sub
+	AiCopyTree(srcFolder, destFolder, projectName, author, license, description)
+End Sub
+
+'' Update the flat Key="value" metadata lines in a .vfp so they mirror project.astoria after
+'' an edit. Rewrites only the given keys (adds a key if absent); every other line passes
+'' through untouched. Values are wrapped in quotes like the New Project writer does.
+Sub UpdateVfpMetadataKeys(ByRef vfpPath As UString, ByRef d As ProjectDescriptionData)
+	If vfpPath = "" OrElse Not FileExistsU(vfpPath) Then Exit Sub
+	'' key -> value (quoted)
+	Dim As String aiText = "false"
+	If d.AIFriendly Then aiText = "true"
+	Dim As String descEnc = d.Description
+	descEnc = Replace(descEnc, Chr(13) & Chr(10), "\n")
+	descEnc = Replace(descEnc, Chr(10), "\n")
+	Dim keyNames(0 To 4) As String = {"Author", "License", "Description", "AIFriendly", "AITool"}
+	Dim keyVals(0 To 4) As String = {Chr(34) & d.Author & Chr(34), Chr(34) & d.License & Chr(34), Chr(34) & descEnc & Chr(34), aiText, Chr(34) & d.AITool & Chr(34)}
+	'' Read all lines.
+	Dim As WStringList lines
+	Dim As Integer FnIn = FreeFile_
+	Dim As Integer r = Open(vfpPath For Input Encoding "utf-8" As #FnIn)
+	If r <> 0 Then r = Open(vfpPath For Input As #FnIn)
+	If r <> 0 Then Exit Sub
+	Dim As WString * 4096 ln
+	Do Until EOF(FnIn)
+		Line Input #FnIn, ln
+		lines.Add ln
+	Loop
+	CloseFile_(FnIn)
+	'' Rewrite matching keys in place; track which were seen.
+	Dim seen(0 To 4) As Boolean
+	For i As Integer = 0 To lines.Count - 1
+		Dim As UString cur = lines.Item(i)
+		For k As Integer = 0 To 4
+			If StartsWith(cur, keyNames(k) & "=") Then
+				lines.Item(i) = keyNames(k) & "=" & keyVals(k)
+				seen(k) = True
+				Exit For
+			End If
+		Next k
+	Next i
+	For k As Integer = 0 To 4
+		If Not seen(k) Then lines.Add keyNames(k) & "=" & keyVals(k)
+	Next k
+	Dim As Integer FnOut = FreeFile_
+	If Open(vfpPath For Output Encoding "utf-8" As #FnOut) <> 0 Then Exit Sub
+	For i As Integer = 0 To lines.Count - 1
+		Print #FnOut, lines.Item(i)
+	Next i
+	CloseFile_(FnOut)
+End Sub
+
+'' Project menu > Edit Project Description: open the structured dialog for the open
+'' project's project.astoria (read-only for immutable/risky fields, editable metadata).
+'' Enabled only when the file exists (ChangeMenuItemsEnabled); re-checked here.
 Sub EditProjectDescription
 	Dim As UString descPath = OpenProjectDescriptionPath()
 	If descPath = "" OrElse Not FileExistsU(descPath) Then
 		MsgBox ("This project has no project.astoria description file."), , mtWarning
 		Exit Sub
 	End If
-	Dim As WString Ptr fw
-	WLet(fw, descPath)
-	Dim As TabWindow Ptr tb = GetTab(*fw)
-	If tb = 0 Then tb = AddTab(*fw)
-	If tb Then tb->SelectTab
-	WDeAllocate(fw)
+	Dim fEdit As frmEditProjectDescription
+	pfEditProjectDescription = @fEdit
+	fEdit.ProjectFolder = GetProjectDirectory()
+	fEdit.DescPath = descPath
+	fEdit.VfpPath = ""
+	Dim As TreeNode Ptr tnP = GetOpenProjectNode()
+	If tnP <> 0 AndAlso tnP->Tag <> 0 Then fEdit.VfpPath = WGet(Cast(ProjectElement Ptr, tnP->Tag)->FileName)
+	fEdit.ShowModal(frmMain)
 End Sub
 
 '' Whether the open project's folder is a Git working tree (has a .git entry).

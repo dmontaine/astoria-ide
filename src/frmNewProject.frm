@@ -553,8 +553,13 @@ Private Sub frmNewProject.cmdOK_Click(ByRef Sender As Control)
 			Exit Sub
 		End If
 		If Not SshKeyExists() Then
-			MsgBox ("Cloning an existing Git project needs an SSH key.") & Chr(13,10) & Chr(13,10) & _
-				("See") & " Templates\Git\sshkeys.md " & ("for setup steps."), , mtWarning
+			If MsgBox(("Cloning an existing Git project needs an SSH key on this machine, and none was found.") & Chr(13,10) & Chr(13,10) & _
+				("Set one up now?"), "", mtInfo, btYesNo) = mrYes Then
+				SetupSshKey(gitProvider)
+			End If
+			'' Stop this attempt either way -- once the key is added to the provider, click
+			'' Create again to clone. (A newly generated key still has to be registered with
+			'' the provider before a clone will authenticate.)
 			Me.BringToFront
 			Exit Sub
 		End If

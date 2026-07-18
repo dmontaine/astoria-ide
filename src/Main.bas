@@ -1420,6 +1420,52 @@ Private Function RunGitInProject(ByRef GitArgs As String, ByRef OutText As Strin
 	Return (ExitCode = 0)
 End Function
 
+'' Run an arbitrary command line via a temp .bat, capturing combined stdout+stderr into
+'' OutText and the exit code into ExitCode. Like RunGitInProject but not tied to the
+'' project folder -- for setup tools (gh/glab). GIT_TERMINAL_PROMPT=0 keeps it from
+'' blocking on a prompt. Returns True on exit 0. UI thread.
+Private Function RunCmdCaptured(ByRef cmdLine As String, ByRef OutText As String, ByRef ExitCode As Integer) As Boolean
+	OutText = "" : ExitCode = -1
+	EnsureDirectoryExists(ExePath & WindowsSlash & "Temp")
+	Dim As UString batPath = ExePath & WindowsSlash & "Temp" & WindowsSlash & "_astoria_cmd.bat"
+	Dim As UString logPath = ExePath & WindowsSlash & "Temp" & WindowsSlash & "_astoria_cmd.log"
+	Dim As UString resultPath = ExePath & WindowsSlash & "Temp" & WindowsSlash & "_astoria_cmd.result"
+	If FileExistsU(logPath) Then Kill logPath
+	If FileExistsU(resultPath) Then Kill resultPath
+	Dim As Integer Fn = FreeFile_
+	If Open(batPath For Output As #Fn) <> 0 Then Return False
+	Print #Fn, "@echo off"
+	Print #Fn, "set GIT_TERMINAL_PROMPT=0"
+	Print #Fn, cmdLine & " > " & Chr(34) & logPath & Chr(34) & " 2>&1"
+	Print #Fn, "echo %errorlevel% > " & Chr(34) & resultPath & Chr(34)
+	CloseFile_(Fn)
+	PipeCmd batPath, True
+	If FileExistsU(resultPath) Then
+		Dim As Integer FnR = FreeFile_
+		If Open(resultPath For Input As #FnR) = 0 Then
+			Dim As String resultLine
+			Line Input #FnR, resultLine
+			CloseFile_(FnR)
+			ExitCode = Val(Trim(resultLine))
+		End If
+		Kill resultPath
+	End If
+	If FileExistsU(logPath) Then
+		Dim As Integer FnL = FreeFile_
+		If Open(logPath For Binary Access Read As #FnL) = 0 Then
+			Dim As LongInt sz = LOF(FnL)
+			If sz > 0 Then
+				OutText = String(sz, 0)
+				Get #FnL, 1, OutText
+			End If
+			CloseFile_(FnL)
+		End If
+		Kill logPath
+	End If
+	If FileExistsU(batPath) Then Kill batPath
+	Return (ExitCode = 0)
+End Function
+
 '' First line of rawOut that contains needle (case-insensitive), trimmed; "" if none.
 Private Function GitFindLineContaining(ByRef rawOut As String, ByRef needle As String) As String
 	Dim As String low = LCase(needle)
@@ -1678,11 +1724,13 @@ Private Function EnsureSshKey(ByRef comment As String, ByRef setupLog As String)
 	Return ""
 End Function
 
-'' Git menu > Set Up SSH Key: ensure this machine has an SSH key (generating one if not),
-'' copy the public key to the clipboard, and open the provider's SSH-keys page so the user
-'' can paste + save it. Astoria never enters credentials or submits the page -- adding the
-'' key is the user's own action. (Task 4; auto-add via gh/glab is a later refinement.)
-Sub GitSetupSshKey
+'' Reusable SSH-key setup for a provider label (GitHub/GitLab/Bitbucket/Codeberg).
+'' Ensures a key exists (generating an ed25519 one if needed), copies the public key to
+'' the clipboard, then registers it: if the provider CLI (gh/glab) is installed AND
+'' authenticated, offers to add it directly; otherwise opens the provider's SSH-keys page
+'' for a manual paste. Astoria never enters credentials or submits a web form -- adding
+'' the key is the user's own action. UI thread. Public so frmNewProject can reuse it.
+Sub SetupSshKey(ByRef provider As String)
 	Dim As String comment = *PersonalEmail
 	If Trim(comment) = "" Then comment = "astoria-ide"
 	Dim As String setupLog
@@ -1707,13 +1755,32 @@ Sub GitSetupSshKey
 	End If
 	pubKey = Trim(pubKey, Any !" \t" + Chr(13) + Chr(10))
 	If pubKey <> "" Then Clipboard.SetAsText pubKey
-	'' Provider from the open project's project.astoria, else default to GitHub.
-	Dim As UString provider = "GitHub"
-	Dim As UString projFolder = GetProjectDirectory()
-	If projFolder <> "" Then
-		Dim As ProjectDescriptionData d
-		If ReadProjectDescription(projFolder, d) AndAlso Trim(d.GitProvider) <> "" Then provider = d.GitProvider
+	'' If the provider's CLI is installed AND authenticated, offer to add the key directly
+	'' (skip the browser). Only GitHub (gh) and GitLab (glab) have one here.
+	Dim As String cli = ""
+	Select Case LCase(Trim(provider))
+	Case "github", "" : cli = "gh"
+	Case "gitlab"     : cli = "glab"
+	End Select
+	If cli <> "" Then
+		Dim As String authOut
+		Dim As Integer authEc
+		RunCmdCaptured(cli & " auth status", authOut, authEc)
+		If authEc = 0 Then
+			If MsgBox(("Your SSH key is ready. Add it to ") & provider & (" automatically using the ") & cli & (" CLI (you're already signed in)?"), "", mtInfo, btYesNo) = mrYes Then
+				Dim As String title = "Astoria (" & Environ("COMPUTERNAME") & ")"
+				Dim As String addOut
+				Dim As Integer addEc
+				Dim As Boolean added = RunCmdCaptured(cli & " ssh-key add " & Chr(34) & pubPath & Chr(34) & " --title " & Chr(34) & title & Chr(34), addOut, addEc)
+				If added Then
+					MsgBox (("Your SSH key was added to ") & provider & (" via ") & cli & (".") & Chr(13,10) & Chr(13,10) & ("You should be able to clone/push over SSH now.")), , mtInfo
+					Exit Sub
+				End If
+				MsgBox ((cli & " couldn't add the key automatically; opening the web page instead.") & Chr(13,10) & Chr(13,10) & Trim(addOut)), , mtWarning
+			End If
+		End If
 	End If
+	'' Assisted-browser fallback: open the provider's SSH-keys page for a manual paste.
 	Dim As UString url = SshKeyPageUrl(provider)
 	Dim As UString ask = ("Your SSH public key is ready and copied to the clipboard:") & Chr(13,10) & pubPath & Chr(13,10) & Chr(13,10) & _
 		("To give this machine access, add it to ") & provider & ("'s SSH keys.") & Chr(13,10) & Chr(13,10) & _
@@ -1721,6 +1788,17 @@ Sub GitSetupSshKey
 	If MsgBox(ask, "", mtInfo, btYesNo) = mrYes Then
 		ShellExecuteW(0, WStr("open"), url, 0, 0, SW_SHOWNORMAL)
 	End If
+End Sub
+
+'' Git menu > Set Up SSH Key: set up SSH access for the open project's provider (or GitHub).
+Sub GitSetupSshKey
+	Dim As UString provider = "GitHub"
+	Dim As UString projFolder = GetProjectDirectory()
+	If projFolder <> "" Then
+		Dim As ProjectDescriptionData d
+		If ReadProjectDescription(projFolder, d) AndAlso Trim(d.GitProvider) <> "" Then provider = d.GitProvider
+	End If
+	SetupSshKey(provider)
 End Sub
 
 Sub AddNewProjectFile(ByRef Template As WString, ByRef ItemName As WString)

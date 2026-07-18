@@ -246,6 +246,7 @@ Declare Sub GitCommit
 Declare Sub GitPull
 Declare Sub GitPush
 Declare Sub GitSetupSshKey
+Declare Sub SetupSshKey(ByRef provider As String)
 Declare Sub AddNewProjectFile(ByRef Template As WString, ByRef ItemName As WString)
 Declare Function ContainsFileName(tn As TreeNode Ptr, ByRef FileName As WString) As Boolean
 Declare Function GetTreeNodeChild(tn As TreeNode Ptr, ByRef FileName As WString) As TreeNode Ptr

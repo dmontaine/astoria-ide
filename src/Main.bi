@@ -239,6 +239,8 @@ Declare Function PrepareForAnotherProjectU(NewProjectPath As UString = "") As Bo
 Declare Sub AddNewU(Template As UString)
 Declare Function GetOpenProjectNode() As TreeNode Ptr
 Declare Function GetProjectDirectory() As UString
+Declare Function OpenProjectDescriptionPath() As UString
+Declare Sub EditProjectDescription
 Declare Sub AddNewProjectFile(ByRef Template As WString, ByRef ItemName As WString)
 Declare Function ContainsFileName(tn As TreeNode Ptr, ByRef FileName As WString) As Boolean
 Declare Function GetTreeNodeChild(tn As TreeNode Ptr, ByRef FileName As WString) As TreeNode Ptr

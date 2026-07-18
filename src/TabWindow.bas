@@ -310,6 +310,11 @@ Sub ChangeMenuItemsEnabled
 	miExplorerCloseProject->Enabled = bEnabledProjectAndFolder
 	miProjectProperties->Enabled = bEnabledProjectAndFolder
 	miExplorerProjectProperties->Enabled = bEnabledProjectAndFolder
+	'' Edit Project Description: enabled whenever the open project has a project.astoria
+	'' file (existence, not marker-validity -- a malformed one should still be editable to
+	'' fix it). Selection-independent, so it tracks the open project, not the tree cursor.
+	'' FileExistsU("") is False, so no separate empty-path guard is needed.
+	miEditProjectDescription->Enabled = bHasProject AndAlso FileExistsU(OpenProjectDescriptionPath())
 	mnuWindowSeparator->Visible = bEnabledTab
 	miCode->Enabled = bEnabledTab AndAlso bActiveFormFile
 	miForm->Enabled = bEnabledTab AndAlso bActiveFormFile

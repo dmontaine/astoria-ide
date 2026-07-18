@@ -587,7 +587,9 @@ Private Sub frmNewProject.cmdOK_Click(ByRef Sender As Control)
 			'' foreign projects. Remove the clone and refuse.
 			DeleteFolderRecursive(localFolder)
 			MsgBox ("This Git repository is not an Astoria project and is not empty.") & Chr(13,10) & Chr(13,10) & _
-				("Astoria only loads its own projects (with a project.astoria file) or empty repositories."), , mtWarning
+				("Astoria only loads its own projects or empty repositories.") & Chr(13,10) & Chr(13,10) & _
+				("To use an existing repository, it must contain a project.astoria file that includes the line:") & Chr(13,10) & _
+				("    AstoriaProject=1"), , mtWarning
 			Me.BringToFront
 			Exit Sub
 		End If

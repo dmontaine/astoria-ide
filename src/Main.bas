@@ -112,7 +112,7 @@ Dim Shared As Panel pnlLeft, pnlRight, pnlBottom, pnlBottomTab, pnlLeftPin, pnlR
 Dim Shared As TrackBar trLeft
 Dim Shared As MainMenu mnuMain
 Dim Shared As MenuItem Ptr mnuStartWithCompile, mnuStart, mnuContinue, mnuBreak, mnuEnd, mnuRestart, mnuStandardToolBar, mnuEditToolBar, mnuProjectToolBar, mnuFormatToolBar, mnuRunToolBar, mnuSplit, mnuSplitHorizontally, mnuSplitVertically, mnuWindowSeparator, miRecentFiles, miSetAsMain, miClearStartUp, miTabSetAsMain, miTabReloadHistoryCode, miRemoveFiles, miToolBars
-Dim Shared As MenuItem Ptr miSaveProject, miSaveProjectAs, miCloseProject, miDeleteProject, miNewFile, miOpenFile, miCloseFile, miDeleteFile, miSaveFile, miSaveFileAs, miPrint, miPrintPreview, miPageSetup, miOpenProjectFolder, miProjectProperties, miExplorerOpenProjectFolder, miExplorerRename, miExplorerProjectProperties, miExplorerCloseProject, miRename, miRemoveFileFromProject
+Dim Shared As MenuItem Ptr miSaveProject, miSaveProjectAs, miCloseProject, miDeleteProject, miNewFile, miOpenFile, miCloseFile, miDeleteFile, miSaveFile, miSaveFileAs, miPrint, miPrintPreview, miPageSetup, miOpenProjectFolder, miProjectProperties, miEditProjectDescription, miExplorerOpenProjectFolder, miExplorerRename, miExplorerProjectProperties, miExplorerCloseProject, miRename, miRemoveFileFromProject
 Dim Shared As MenuItem Ptr miUndo, miRedo, miCutCurrentLine, miCut, miCopy, miPaste, miSingleComment, miDuplicate, miSelectAll, miIndent, miOutdent, miFormat, miUnformat, miFormatProject, miUnformatProject, miAddSpaces, miDeleteBlankLines, miParameterInfo, miStepInto, miStepOver, miStepOut, miRunToCursor, miGDBCommand, miAddWatch, miToggleBreakpoint, miClearAllBreakpoints, miSetNextStatement, miShowNextStatement
 Dim Shared As MenuItem Ptr dmiMake, dmiMakeClean
 Dim Shared As MenuItem Ptr miCode, miForm, miCodeAndForm, miGotoCodeForm, miFold, miDebugWindows, miCollapseCurrent, miCollapseAllProcedures, miCollapseAll, miUnCollapseCurrent, miUnCollapseAllProcedures, miUnCollapseAll, miImageManager, miAddProcedure, miAddType, miFind, miReplace, miFindNext, miFindPrevious, miGoto, miDefine, miToggleBookmark, miNextBookmark, miPreviousBookmark, miClearAllBookmarks, miSyntaxCheck, miCompile, miCompileAll, miMake, miMakeClean
@@ -215,8 +215,8 @@ LoadSettings
 
 #include once "file.bi"
 #include once "Designer.bi"
-#include once "TabWindow.bi"
 #include once "ProjectDescription.bi"
+#include once "TabWindow.bi"
 #include once "AgentPipe.bi"
 #include once "Debug.bi"
 #include once "frmFind.bi"
@@ -1327,6 +1327,36 @@ Function GetProjectDirectory() As UString
 	If ppe = 0 Then Return ""
 	Return GetFolderNameU(WGet(ppe->FileName))
 End Function
+
+'' Absolute path to the open project's project.astoria file, or "" if no project is
+'' open. The trailing separator from GetProjectDirectory is stripped first so the path
+'' matches the single-separator form the create flow writes on disk -- otherwise
+'' ProjectDescriptionPath would emit "...MyProj\\project.astoria", which still resolves
+'' but wouldn't string-match an already-open tab in GetTab.
+Function OpenProjectDescriptionPath() As UString
+	Dim As UString descDir = GetProjectDirectory()
+	If descDir = "" Then Return ""
+	If Right(descDir, 1) = "\" OrElse Right(descDir, 1) = "/" Then descDir = Left(descDir, Len(descDir) - 1)
+	Return ProjectDescriptionPath(descDir)
+End Function
+
+'' Open the project.astoria description file in an editor tab for hand-editing. Wired to
+'' Project menu > Edit Project Description; that item is only enabled when the file
+'' exists (ChangeMenuItemsEnabled), but re-check here since the menu state and a click
+'' aren't atomic.
+Sub EditProjectDescription
+	Dim As UString descPath = OpenProjectDescriptionPath()
+	If descPath = "" OrElse Not FileExistsU(descPath) Then
+		MsgBox ("This project has no project.astoria description file."), , mtWarning
+		Exit Sub
+	End If
+	Dim As WString Ptr fw
+	WLet(fw, descPath)
+	Dim As TabWindow Ptr tb = GetTab(*fw)
+	If tb = 0 Then tb = AddTab(*fw)
+	If tb Then tb->SelectTab
+	WDeAllocate(fw)
+End Sub
 
 Sub AddNewProjectFile(ByRef Template As WString, ByRef ItemName As WString)
 	Dim tnP As TreeNode Ptr = GetOpenProjectNode()
@@ -6246,7 +6276,8 @@ Sub CreateMenusAndToolBars
 	miProject->Add(("Import from Folder") & "..." & HK("OpenFolder", "Alt+O"), "", "OpenFolder", @mClick)
 	miProject->Add("-")
 	miProjectProperties = miProject->Add(("&Project Properties") & "..." & HK("ProjectProperties"), "", "ProjectProperties", @mClick, , , False)
-	
+	miEditProjectDescription = miProject->Add(("Edit Project Description") & HK("EditProjectDescription"), "", "EditProjectDescription", @mClick, , , False)
+
 	Var miEdit = mnuMain.Add(("&Code"), "", "Tahrir")
 	miCodeMenu = miEdit ' shared pointer so UpdateCodeFormMenuEnabled can grey the whole menu contextually
 	miUndo = miEdit->Add(("Undo") & HK("Undo", "Ctrl+Z"), "Undo", "Undo", @mClick, , , False)

@@ -216,6 +216,7 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 	Case "CancelFileDeletion":                  CancelFileDeletion
 	Case "OpenProjectFolder":                   OpenProjectFolder
 	Case "ProjectProperties":                   pfProjectProperties->ShowModal *pfrmMain : pfProjectProperties->CenterToParent
+	Case "EditProjectDescription":              EditProjectDescription
 	Case "SetAsMain":                           SetAsMain @Sender = miTabSetAsMain
 	Case "ClearStartUp":                        SetMainNode 0
 	Case "ReloadHistoryCode":                   ReloadHistoryCode

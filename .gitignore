@@ -34,3 +34,12 @@ Settings/*.pass2.log
 # Per-control test programs: keep the sources, not the built binaries
 Examples/Controls/**/*.exe
 Examples/Controls/**/*.dll
+
+# Integration test projects: keep the sources and fixtures, not the built binaries
+# or their run artifacts (see Documentation/TestPlan.md).
+Examples/Integration/**/*.exe
+Examples/Integration/**/*.dll
+Examples/Integration/**/*.db
+Examples/Integration/**/a4_ticks.txt
+Examples/Integration/**/a4_result.txt
+Examples/Integration/**/a4_button_trace.txt

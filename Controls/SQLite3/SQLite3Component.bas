@@ -933,6 +933,30 @@ Function SQLite3Component.CreateTableUtf(Table_Utf8 As String) As Long
 	Dim Sql_Utf8 As String = "CREATE TABLE " & Table_Utf8 & " (ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL )"
 	Function = This.Exec(Sql_Utf8)
 End Function
+'' True when a column default can be written into DDL unquoted: a plain number, or one of the
+'' SQL keyword defaults. Anything else is text and must be quoted.
+Private Function SQLite3DefaultIsLiteral(ByRef s As String) As Boolean
+	If Len(s) = 0 Then Return False
+	Select Case UCase(Trim(s))
+	Case "NULL", "CURRENT_TIME", "CURRENT_DATE", "CURRENT_TIMESTAMP", "TRUE", "FALSE"
+		Return True
+	End Select
+	Dim As Integer digits
+	For i As Integer = 0 To Len(s) - 1
+		Select Case s[i]
+		Case Asc("0") To Asc("9")
+			digits += 1
+		Case Asc("+"), Asc("-")
+			If i > 0 Then Return False        '' sign only leads
+		Case Asc(".")
+			'' allowed inside a number
+		Case Else
+			Return False
+		End Select
+	Next
+	Return digits > 0
+End Function
+
 Function SQLite3Component.AddField(Table As UString, nField As UString, nType As UString, default As UString = "", nNull As Boolean = 0) As Long
 	If FSQLite3 = 0 Then ErrStr = "Base not opened": This.Event_Send(12, ErrStr): Return -1
 	If Len(Table) = 0     Then ErrStr = "Table name is empty"  : This.Event_Send(12, ErrStr): Return -1
@@ -941,8 +965,22 @@ Function SQLite3Component.AddField(Table As UString, nField As UString, nType As
 	Dim Sql_Utf8 As String = "ALTER TABLE " & ToUtf8(Table) & " ADD " & ToUtf8(nField) & " " & ToUtf8(nType)
 	Dim tdefault As String
 	If Len(default) > 0 AndAlso Len(nType) > 0 Then tdefault = Replace(ToUtf8(default), "'", "''")
-	If Len(tdefault) > 0 Then Sql_Utf8                       &= " DEFAULT " & tdefault
-	If nNull = 0         Then Sql_Utf8                       &= " NOT NULL "
+	If Len(tdefault) > 0 Then
+		'' Quote the default unless it is a bare number or an SQL keyword default. Appending it
+		'' raw made a text default parse as a column name -- "DEFAULT PNG" rather than
+		'' "DEFAULT 'PNG'" -- which SQLite rejects. The vendor's own example does exactly that.
+		If SQLite3DefaultIsLiteral(tdefault) Then
+			Sql_Utf8 &= " DEFAULT " & tdefault
+		Else
+			Sql_Utf8 &= " DEFAULT '" & tdefault & "'"
+		End If
+	End If
+	'' NOT NULL is only meaningful here when a default exists: SQLite refuses to ALTER TABLE ADD
+	'' a NOT NULL column with no default, because the existing rows would have nothing to hold.
+	'' Appending it unconditionally made the obvious call -- AddField(table, field, type) --
+	'' fail every time, so a caller could not add a column without knowing to pass nNull = True.
+	'' Note the parameter reads backwards: nNull = 0 means NOT NULL.
+	If nNull = 0 AndAlso Len(tdefault) > 0 Then Sql_Utf8 &= " NOT NULL"
 	Function = This.Exec(Sql_Utf8)
 End Function
 Function SQLite3Component.Vacuum() As Long

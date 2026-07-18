@@ -82,20 +82,20 @@ so every test is reproducible by opening its `.vfp` and pressing build.
 | Containers-ReBar | Visual | ✅ | ✅ | ✅ |  |
 | Containers-ScrollControl | Visual | ✅ | ✅ | ✅ |  |
 | Containers-TabControl | Visual | ✅ | ✅ | ✅ |  |
-| Containers-TabPage | Visual | ✅ | ✅ | - | **Required a second control**: a TabPage cannot be parented to a Form, so the test program hosts it inside a TabControl. Passes with that parent. |
+| Containers-TabPage | Visual | ✅ | ✅ | ✅ | **Required a second control**: a TabPage cannot be parented to a Form, so the test program hosts it inside a TabControl. Passes with that parent. |
 | Containers-UserControl | Visual | ✅ | ✅ | ✅ |  |
 | Containers-VerticalBox | Visual | ✅ | ✅ | ✅ |  |
 | Components-CJSON_TYPE | Other | ✅ | ✅ | ✅ |  |
 | Components-HTTPConnection | Other | ✅ | ✅ | ✅ |  |
 | Components-ImageList | Other | ✅ | ✅ | ✅ |  |
 | Components-MainMenu | Other | ✅ | ✅ | ✅ |  |
-| Components-MariaDBBox | Other | ✅ | ✅ | - | Needs libmariadb.dll (MariaDB Connector/C) alongside the exe - now supplied in Controls/MariaDBBox/. Library also required a source fix to compile (see Library fixes). DB connectivity not exercised. |
-| Components-Menu | Other | ✅ | ✅ | - | Requires the fully-qualified type name `My.Sys.Forms.Menu`; the bare `Menu` is rejected by the compiler. MainMenu/PopupMenu work unqualified. |
+| Components-MariaDBBox | Other | ✅ | ✅ | ✅ | Needs libmariadb.dll (MariaDB Connector/C) alongside the exe - now supplied in Controls/MariaDBBox/. Library also required a source fix to compile (see Library fixes). DB connectivity not exercised. |
+| Components-Menu | Other | ✅ | ✅ | ✅ | Requires the fully-qualified type name `My.Sys.Forms.Menu`; the bare `Menu` is rejected by the compiler. MainMenu/PopupMenu work unqualified. |
 | Components-NotifyIcon | Other | ✅ | ✅ | ✅ |  |
 | Components-PopupMenu | Other | ✅ | ✅ | ✅ |  |
 | Components-PrintDocument | Other | ✅ | ✅ | ✅ |  |
 | Components-Printer | Other | ✅ | ✅ | ✅ |  |
-| Components-SQLite3Component | Other | ✅ | ✅ | - | Library did not compile - fixed (see Library fixes). DB connectivity not exercised. |
+| Components-SQLite3Component | Other | ✅ | ✅ | ✅ | Library did not compile - fixed (see Library fixes). DB connectivity not exercised. |
 | Components-TimerComponent | Other | ✅ | ✅ | ✅ |  |
 | Dialogs-ColorDialog | Other | ✅ | ✅ | ✅ |  |
 | Dialogs-FolderBrowserDialog | Other | ✅ | ✅ | ✅ |  |
@@ -145,6 +145,7 @@ currently copy a control library's DLLs alongside the programs a user builds.
 | --- | --- | --- |
 | Controls-ScintillaControl | `Scintilla64.dll`, `Lexilla64.dll`, `ScintillaControl64.dll` | `Controls/ScintillaControl/` |
 | Components-MariaDBBox | `libmariadb.dll` | `Controls/MariaDBBox/` (added 2026-07-18, from the MariaDB 12.3 Connector/C) |
+| Components-SQLite3Component | *nothing* | statically linked via `libsqlite3_x64.a` - the `sqlite3*.dll` files in `Controls/SQLite3/` are unused by builds |
 
 `libmariadb.dll` was previously missing entirely - the repo shipped only the link-time
 `libmariadb.lib` / `libmariadbclient.a` (plus a stray `libmariadb.pdb`), so MariaDBBox linked

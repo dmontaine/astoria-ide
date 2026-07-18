@@ -103,14 +103,9 @@ Sub A4Form.tmr_Timer_(ByRef Designer As My.Sys.Object, ByRef Sender As TimerComp
 		End Scope
 		Exit Sub
 	End If
-	'' GetBody is deliberately not called yet: on this backend it does not return when the
-	'' document is not ready, and because COM pumps messages the timer re-enters, stacking
-	'' blocked calls. Rendering is proven from the screenshot first; see TestPlan A4.
-	pForm->Done = True
-	pForm->tmr.Enabled = False
-	Exit Sub
 	'' Give the document time to arrive before touching the DOM.
 	If pForm->Ticks < 4 Then Exit Sub
+	'' Give the document time to arrive before touching the DOM.
 	Dim As UString body = pForm->wb.GetBody()
 	Scope
 		Dim As Integer ft2 = FreeFile

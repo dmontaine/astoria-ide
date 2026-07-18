@@ -154,7 +154,19 @@ Sub LoadSettings
 		If Temp <> "" Then LibraryPaths.Add Temp
 		i += 1
 	Loop Until NoMoreIndexedSettingsKeys(i)
-	
+
+	'' The framework's architecture-specific lib folder must be on the library path or anything
+	'' using WebBrowser fails to link: WebView2.bi does #inclib "WebView2Loader.dll", and the
+	'' import library lives in lib\win-x64, not in the lib folder the INI lists. Added here
+	'' rather than to the INI defaults so existing installs get it too -- a settings file that
+	'' already exists is never rewritten with new defaults (see LoadSettingsIni).
+	Dim As UString FrameworkArchLib = ".\Controls\Framework\Lib\win-x64"
+	Dim As Boolean HasArchLib
+	For k As Integer = 0 To LibraryPaths.Count - 1
+		If LCase(Trim(LibraryPaths.Item(k))) = LCase(FrameworkArchLib) Then HasArchLib = True: Exit For
+	Next k
+	If Not HasArchLib Then LibraryPaths.Add FrameworkArchLib
+
 	WLet(DefaultCompiler64, "FreeBASIC")
 	WLet(CurrentCompiler64, *DefaultCompiler64)
 	SetBundledCompilerPath()

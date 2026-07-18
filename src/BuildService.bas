@@ -60,6 +60,40 @@ Private Function ProjectUsesControlLibrary(ByRef SourceDir As WString, ByRef Lib
 	Return False
 End Function
 
+'' Copies framework-level runtime DLLs beside the freshly built exe.
+''
+'' The per-library routine below only covers Controls\<Name> libraries, which declare their needs
+'' in their own Settings.ini. WebBrowser is part of mff, has no such folder, and since it now
+'' hosts WebView2 it needs WebView2Loader.dll adjacent or the program dies at startup with
+'' nothing useful on screen. Static linking would have avoided the file entirely, but the static
+'' loader is MSVC-built and will not link under the bundled MinGW toolchain -- see WebView2.bi.
+Sub CopyFrameworkRuntimeDlls(ByRef ExeName As WString, ByRef SourceDir As WString)
+	If ExeName = "" OrElse SourceDir = "" Then Exit Sub
+	'' Only for projects that actually include the control -- no reason to put a browser loader
+	'' beside a console program.
+	If Not ProjectUsesControlLibrary(SourceDir, "WebBrowser") Then Exit Sub
+	Dim As UString ExeDir = GetFolderName(ExeName, False)
+	If ExeDir = "" Then Exit Sub
+	Dim As UString Src = ExePath & WindowsSlash & "Controls" & WindowsSlash & "Framework" & _
+		WindowsSlash & "lib" & WindowsSlash & "win-x64" & WindowsSlash & "WebView2Loader.dll"
+	Dim As UString Dst = ExeDir & WindowsSlash & "WebView2Loader.dll"
+	If Not FileExistsU(Src) Then
+		ShowMessages(Str(Time) & ": " & ("WebBrowser needs WebView2Loader.dll, but it is missing from the framework lib folder."))
+		Exit Sub
+	End If
+	'' Copy when absent or stale; an up-to-date copy is left alone so a running program does not
+	'' have its DLL replaced underneath it.
+	Dim As Boolean NeedCopy = Not FileExistsU(Dst)
+	If Not NeedCopy Then NeedCopy = (FileLen(Src) <> FileLen(Dst))
+	If NeedCopy Then
+		If CopyFileU(Src, Dst) Then
+			ShowMessages(Str(Time) & ": " & ("Copied WebView2Loader.dll beside the program."))
+		Else
+			ShowMessages(Str(Time) & ": " & ("Could not copy WebView2Loader.dll beside the program."))
+		End If
+	End If
+End Sub
+
 '' Copies each used control library's runtime DLLs beside the freshly built exe.
 ''
 '' Without this a build succeeds and then fails to start on any machine where the DLLs are not
@@ -553,6 +587,7 @@ Function Compile(Parameter As String, bAll As Boolean) As Integer
 			If Parameter <> "Check" Then
 				ThreadsEnter()
 				CopyControlRuntimeDlls(*ctx.ExeName, GetFolderName(*ctx.MainFile, False))
+				CopyFrameworkRuntimeDlls(*ctx.ExeName, GetFolderName(*ctx.MainFile, False))
 				ThreadsLeave()
 			End If
 			If Parameter = "Run" Then

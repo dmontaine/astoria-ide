@@ -43,3 +43,6 @@ Examples/Integration/**/*.db
 Examples/Integration/**/a4_ticks.txt
 Examples/Integration/**/a4_result.txt
 Examples/Integration/**/a4_button_trace.txt
+
+# WebView2 creates a per-program user-data folder beside the exe at runtime
+*.exe.WebView2/

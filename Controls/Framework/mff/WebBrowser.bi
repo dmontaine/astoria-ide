@@ -1,17 +1,49 @@
-'################################################################################
+﻿'################################################################################
 '#  WebBrowser.bi                                                               #
 '#  This file is part of MyFBFramework                                          #
 '#  Authors: Xusinboy Bekchanov (2018-2023)                                     #
 '################################################################################
 
+'' ASTORIA CHANGE -- WebView2 is the default backend on Windows.
+''
+'' Upstream leaves the engine opt-in: without __USE_WEBVIEW2__ the control hosts the legacy
+'' Internet Explorer engine through ATL AtlAxWin. That path does not work on current Windows.
+'' Astoria's TestPlan A4 measured it: the AtlAxWin host window is created with empty text, so no
+'' ActiveX control is ever instantiated, the IWebBrowser2 pointers stay null, nothing renders,
+'' and Navigate dereferences a null vtable and kills the program. IE is also retired by
+'' Microsoft, so that backend has no future even if the hosting were repaired.
+''
+'' Making the user type a #define to get a working control fails Astoria's "it just works" bar:
+'' someone dropping a WebBrowser on a form has no way to know the define exists. So the default
+'' is inverted here. __USE_IE_WEBBROWSER__ still selects the old engine for anyone who needs it.
+#if Not defined(__USE_GTK__) And Not defined(__USE_IE_WEBBROWSER__)
+	#ifndef __USE_WEBVIEW2__
+		#define __USE_WEBVIEW2__
+	#endif
+#endif
+
 #include once "Control.bi"
+#ifndef __USE_GTK__
 	#include once "win/exdisp.bi"
 	#include once "win/unknwnbase.bi"
+	#ifdef __USE_WEBVIEW2__
+		#include once "WebView/WebView2.bi"
+	#endif
+#else
+	#include once "WebView/WebKitWebView.bi"
+#endif
 
 Namespace My.Sys.Forms
 	#define QWebBrowser(__Ptr__) (*Cast(WebBrowser Ptr, __Ptr__))
+	#ifdef __USE_WEBVIEW2__
+		Dim Shared Handles As PointerList
+	#endif
 	Type NewWindowRequestedEventArgs
+		#ifdef __USE_WEBVIEW2__
+			Handle As ICoreWebView2NewWindowRequestedEventArgs Ptr
+		#else
 			Handle As Any Ptr
+		#endif
 		Declare Property Handled As Boolean
 		Declare Property Handled(Value As Boolean)
 		Declare Function GetIsUserInitiated() As Boolean
@@ -22,19 +54,56 @@ Namespace My.Sys.Forms
 	'`WebBrowser` - Enables the user to navigate Web pages inside your form (Windows, Linux).
 	Private Type WebBrowser Extends Control
 	Private:
+		#ifndef __USE_GTK__
 			Declare Static Sub WndProc(ByRef Message As Message)
 			Declare Static Sub HandleIsAllocated(ByRef Sender As My.Sys.Forms.Control)
+		#endif
 	Protected:
+		#ifndef __USE_GTK__
+			#ifdef __USE_WEBVIEW2__
+				Dim As ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler Ptr envHandler
+				Dim As ICoreWebView2CreateCoreWebView2ControllerCompletedHandler Ptr completedHandler
+				Dim As ICoreWebView2ExecuteScriptCompletedHandler Ptr ExecuteScriptCompletedHandler
+				Dim As ICoreWebView2NewWindowRequestedEventHandler Ptr NewWindowRequestedEventHandler
+				Dim As ICoreWebView2Controller Ptr webviewController = NULL
+				Dim As ICoreWebView2 Ptr webviewWindow = NULL
+				Dim As BOOL bEnvCreated = False, bExecuteScriptCompletedHandlerCreated = False
+				Dim As ULong HandlerRefCount = 0
+				Dim As ULong ExecuteScriptCompletedHandlerRefCount = 0
+				Dim As ULong NewWindowRequestedEventHandlerRefCount = 0
+				Declare Static Function EnvironmentHandlerAddRef stdcall (This As ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler Ptr) As culong
+				Declare Static Function EnvironmentHandlerRelease stdcall (This As ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler Ptr) As culong
+				Declare Static Function EnvironmentHandlerQueryInterface stdcall (This As ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler Ptr, riid As REFIID, ppvObject As PVOID Ptr) As HRESULT
+				Declare Static Function EnvironmentHandlerInvoke stdcall (This As ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler Ptr, errorCode As HRESULT, arg As ICoreWebView2Environment Ptr) As HRESULT
+				Declare Static Function ControllerHandlerAddRef stdcall (This As ICoreWebView2CreateCoreWebView2ControllerCompletedHandler Ptr) As culong
+				Declare Static Function ControllerHandlerRelease stdcall (This As ICoreWebView2CreateCoreWebView2ControllerCompletedHandler Ptr) As culong
+				Declare Static Function ControllerHandlerQueryInterface stdcall (This As ICoreWebView2CreateCoreWebView2ControllerCompletedHandler Ptr, riid As REFIID, ppvObject As PVOID Ptr) As HRESULT
+				Declare Static Function ControllerHandlerInvoke stdcall (This As ICoreWebView2CreateCoreWebView2ControllerCompletedHandler Ptr, result As HRESULT, createdController As ICoreWebView2Controller Ptr) As HRESULT
+				Declare Static Function ExecuteScriptCompletedHandlerAddRef stdcall (This_ As ICoreWebView2ExecuteScriptCompletedHandler Ptr) As culong
+				Declare Static Function ExecuteScriptCompletedHandlerRelease stdcall (This_ As ICoreWebView2ExecuteScriptCompletedHandler Ptr) As culong
+				Declare Static Function ExecuteScriptCompletedHandlerQueryInterface stdcall (This_ As ICoreWebView2ExecuteScriptCompletedHandler Ptr, riid As REFIID, ppvObject As PVOID Ptr) As HRESULT
+				Declare Static Function ExecuteScriptCompletedHandlerInvoke stdcall (This_ As ICoreWebView2ExecuteScriptCompletedHandler Ptr, errorCode As HRESULT, resultObjectAsJson As LPCWSTR) As HRESULT
+				Declare Static Function NewWindowRequestedEventHandlerAddRef stdcall (This_ As ICoreWebView2NewWindowRequestedEventHandler Ptr) As culong
+				Declare Static Function NewWindowRequestedEventHandlerRelease stdcall (This_ As ICoreWebView2NewWindowRequestedEventHandler Ptr) As culong
+				Declare Static Function NewWindowRequestedEventHandlerQueryInterface stdcall (This_ As ICoreWebView2NewWindowRequestedEventHandler Ptr, riid As REFIID, ppvObject As PVOID Ptr) As HRESULT
+				Declare Static Function NewWindowRequestedEventHandlerInvoke stdcall (This_ As ICoreWebView2NewWindowRequestedEventHandler Ptr, sender As ICoreWebView2 Ptr, args As ICoreWebView2NewWindowRequestedEventArgs Ptr) As HRESULT
+			#else
 				hWebBrowser As HINSTANCE
 				g_IWebBrowser As IWebBrowser2Vtbl Ptr
 				pIWebBrowser As Integer Ptr
+			#endif
+		#endif
 		Declare Virtual Sub ProcessMessage(ByRef Message As Message)
 	Public:
 		Dim As WString Ptr ScriptResult
+		#ifndef ReadProperty_Off
 			'Reads a property value from a stream
 			Declare Virtual Function ReadProperty(ByRef PropertyName As String) As Any Ptr
+		#endif
+		#ifndef WriteProperty_Off
 			'Writes a property value to a stream
 			Declare Virtual Function WriteProperty(ByRef PropertyName As String, Value As Any Ptr) As Boolean
+		#endif
 		Declare Property TabIndex As Integer
 		'Gets/sets the tab order of the control within its container
 		Declare Property TabIndex(Value As Integer)
@@ -82,5 +151,6 @@ Namespace My.Sys.Forms
 	End Type
 End Namespace
 
+#ifndef __USE_MAKE__
 	#include once "WebBrowser.bas"
-
+#endif

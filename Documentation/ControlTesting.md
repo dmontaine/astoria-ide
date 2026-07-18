@@ -77,7 +77,7 @@ so every test is reproducible by opening its `.vfp` and pressing build.
 | Controls-TreeView | Visual | ✅ | ✅ | ✅ |  |
 | Controls-UpDown | Visual | ✅ | ✅ | ✅ |  |
 | Controls-VScrollBar | Visual | ✅ | ✅ | ✅ |  |
-| Controls-WebBrowser | Visual | ✅ | ✅ | - | Was excluded from the toolbox as unbuildable; the framework bug is fixed (see Library fixes) and it now compiles, opens and closes cleanly. **Page rendering and navigation are not exercised by this test.** |
+| Controls-WebBrowser | Visual | ✅ | ✅ | ✅ | Was excluded from the toolbox as unbuildable; the framework bug is fixed (see Library fixes) and it now compiles, opens and closes cleanly. **Rendering verified 2026-07-18** (TestPlan A4): the control previously could not render at all — it hosted the retired IE engine through ATL and crashed on `Navigate`. It now hosts **WebView2**, and a page renders with its content confirmed both in the DOM and on screen. |
 | Containers-Form | Visual | ✅ | ✅ | ✅ |  |
 | Containers-GroupBox | Visual | ✅ | ✅ | ✅ |  |
 | Containers-HorizontalBox | Visual | ✅ | ✅ | ✅ |  |

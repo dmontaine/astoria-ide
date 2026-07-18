@@ -229,6 +229,7 @@ LoadSettings
 #include once "frmOptions.bi"
 #include once "frmTemplates.bi"
 #include once "frmNewFileName.bi"
+#include once "frmGitCommit.bi"
 #include once "frmNewProject.bi"
 #include once "frmNewFile.bi"
 #include once "frmOpenProject.bi"
@@ -1458,16 +1459,24 @@ Sub GitCommit
 		MsgBox ("The open project is not a Git repository."), , mtWarning
 		Exit Sub
 	End If
-	Dim As UString msg = Trim(InputBox("Git Commit", "Commit message:", ""))
+	Dim fGitCommit As frmGitCommit
+	pfGitCommit = @fGitCommit
+	If fGitCommit.ShowModal(frmMain) <> ModalResults.OK Then Exit Sub
+	Dim As UString msg = Trim(fGitCommit.CommitMessage)
 	If msg = "" Then Exit Sub   '' cancelled or empty -- git requires a message anyway
 	EnsureDirectoryExists(ExePath & WindowsSlash & "Temp")
 	Dim As UString msgPath = ExePath & WindowsSlash & "Temp" & WindowsSlash & "_astoria_git_msg.txt"
+	'' Write the message as raw UTF-8 with NO BOM. FB's `Open ... Encoding "utf-8"`
+	'' prepends a BOM, and `git commit -F` folds that BOM into the commit message
+	'' (showed up as a leading "i>>?" garble). Binary write of the UTF-8 bytes avoids it.
+	If FileExistsU(msgPath) Then Kill msgPath
 	Dim As Integer FnM = FreeFile_
-	If Open(msgPath For Output Encoding "utf-8" As #FnM) <> 0 Then
+	If Open(msgPath For Binary Access Write As #FnM) <> 0 Then
 		MsgBox ("Could not write the commit message file."), , mtWarning
 		Exit Sub
 	End If
-	Print #FnM, msg
+	Dim As String msgUtf8 = WStrToUtf8(msg)
+	If Len(msgUtf8) > 0 Then Put #FnM, 1, msgUtf8
 	CloseFile_(FnM)
 	'' Stage everything (new/modified/deleted, minus .gitignore'd), then commit.
 	Dim As String addOut

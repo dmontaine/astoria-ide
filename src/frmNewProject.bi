@@ -48,7 +48,7 @@
 
 		Dim As ComboBoxEdit cboTemplate
 		Dim As CommandButton cmdOK, cmdCancel, cmdOpenExisting
-		Dim As Label lblProjectTemplates, lblProjectName, lblFormName, lblModuleName, lblAuthor, lblLicense, lblDescription, lblAITool, lblGitProvider, lblGitUserName, lblGitEmail
+		Dim As Label lblProjectTemplates, lblProjectName, lblFormName, lblModuleName, lblAuthor, lblLicense, lblDescription, lblAITool, lblGitProvider, lblGitProviderValue, lblGitUserName, lblGitEmail
 		Dim As TextBox txtProjectName, txtFormName, txtModuleName, txtAuthor, txtDescription, txtGitUserName, txtGitEmail
 		Dim As CheckBox chkAIFriendly
 		Dim As RadioButton optCreateLocal, optUseExistingGit

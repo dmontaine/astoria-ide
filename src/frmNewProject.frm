@@ -285,19 +285,30 @@
 			.SetBounds 0, 0, 150, 32
 			.Parent = @pnlGitProvider
 		End With
-		' cboGitProvider -- fixed option list, populated in Form_Create; enabled only
-		' while Use Git is checked
+		' cboGitProvider -- GitHub is the only provider for now, so the dropdown is kept
+		' in the type but hidden/inert; the value shows as the static bold label below.
+		' (Re-show + repopulate this and delete lblGitProviderValue to bring back a choice.)
 		With cboGitProvider
 			.Name = "cboGitProvider"
-			.Text = ""
+			.Text = "GitHub"
 			.Style = ComboBoxEditStyle.cbDropDownList
-			.Align = DockStyle.alClient
-			.ExtraMargins.Top = 5
-			.ExtraMargins.Bottom = 5
-			.TabIndex = 21
+			.Align = DockStyle.alNone
+			.Visible = False
 			.SetBounds 150, 0, 314, 32
 			.Enabled = False
 			.Designer = @This
+			.Parent = @pnlGitProvider
+		End With
+		' lblGitProviderValue -- static bold "GitHub" at the dropdown's former position,
+		' left-justified with its left edge.
+		With lblGitProviderValue
+			.Name = "lblGitProviderValue"
+			.Text = ("GitHub")
+			.Align = DockStyle.alClient
+			.CenterImage = True
+			.TabIndex = 21
+			.SetBounds 150, 0, 314, 32
+			.Font.Bold = True
 			.Parent = @pnlGitProvider
 		End With
 		' pnlGitUserName — row 6c
@@ -543,7 +554,7 @@ Private Sub frmNewProject.cmdOK_Click(ByRef Sender As Control)
 	'' remote first and classify what came down; only an empty clone falls through to the
 	'' template-populate block below (Astoria fills the empty repo like a new project).
 	Dim As Boolean bModeGit = optUseExistingGit.Checked
-	Dim As String gitProvider = cboGitProvider.Text
+	Dim As String gitProvider = "GitHub"   '' GitHub-only for now (provider dropdown retired)
 	Dim As String gitUserName = Trim(txtGitUserName.Text)
 	Dim As String gitURL = ""
 	If bModeGit Then
@@ -927,13 +938,7 @@ Private Sub frmNewProject.Form_Create(ByRef Sender As Control)
 	'' Default to Create Local Project.
 	optCreateLocal.Checked = True
 	optUseExistingGit.Checked = False
-	cboGitProvider.Clear
-	cboGitProvider.AddItem ("GitHub")
-	cboGitProvider.AddItem ("GitLab")
-	cboGitProvider.AddItem ("Bitbucket")
-	cboGitProvider.AddItem ("Codeberg")
-	cboGitProvider.ItemIndex = 0
-	cboGitProvider.Enabled = False
+	'' Git provider is GitHub-only for now -- shown as a static label, no dropdown to fill.
 	txtGitUserName.Enabled = False
 	txtGitUserName.Text = ""
 	'' Git Email defaults from Options > Personal Information > E-mail, but stays
@@ -991,7 +996,6 @@ End Sub
 ''    already contains an Astoria project.
 Private Sub frmNewProject.UpdateModeFields()
 	Dim As Boolean bGit = optUseExistingGit.Checked
-	cboGitProvider.Enabled = bGit
 	txtGitUserName.Enabled = bGit
 	txtGitEmail.Enabled = bGit
 	'' Template/Form/Module: enabled in both modes. In existing-git mode the Windows

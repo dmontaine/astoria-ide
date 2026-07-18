@@ -770,81 +770,10 @@ pfOptions = @fOptions
 			.SetBounds 18, 24, 384, 21
 			.Parent = @grbDefaultTerminal
 		End With
-		' grbTerminalPaths
-		With grbTerminalPaths
-			.Name = "grbTerminalPaths"
-			.Text = ("Terminal Paths")
-			.ExtraMargins.Top = 5
-			.Align = DockStyle.alClient
-			.Margins.Top = 22
-			.Margins.Right = 15
-			.Margins.Left = 15
-			.Margins.Bottom = 15
-			.TabIndex = 93
-			.SetBounds 10, 168, 417, 232
-			.Parent = @pnlTerminal
-		End With
-		' lvTerminalPath
-		With lvTerminalPaths
-			.Name = "lvTerminalPaths"
-			.Text = "lvTerminalPaths"
-			.ExtraMargins.Bottom = 15
-			.Align = DockStyle.alClient
-		lvTerminalPaths.TabIndex = 94
-			.SetBounds 15, 22, 387, 156
-			.Designer = @This
-			.OnItemActivate = @lvTerminalPaths_ItemActivate_
-			.Parent = @grbTerminalPaths
-		End With
-		With cmdClearTerminals
-			.Name = "cmdClearTerminals"
-			.Text = ("&Clear")
-			.ExtraMargins.Right = 0
-			.ExtraMargins.Left = 0
-			.ExtraMargins.Bottom = 0
-			.Align = DockStyle.alRight
-			.TabIndex = 16
-			.SetBounds 290, 0, 97, 24
-			.OnClick = @cmdClearTerminals_Click
-			.Parent = @hbxTerminal
-		End With
-		' cmdRemoveTerminal
-		With cmdRemoveTerminal
-			.Name = "cmdRemoveTerminal"
-			.Text = ("&Remove")
-			.ExtraMargins.Right = 0
-			.ExtraMargins.Left = 0
-			.ExtraMargins.Bottom = 0
-			.Align = DockStyle.alRight
-			.TabIndex = 17
-			.SetBounds 193, 0, 97, 24
-			.OnClick = @cmdRemoveTerminal_Click
-			.Parent = @hbxTerminal
-		End With
-		' cmdChangeTerminal
-		cmdChangeTerminal.Name = "cmdChangeTerminal"
-		cmdChangeTerminal.Text = ("Chan&ge")
-		cmdChangeTerminal.ExtraMargins.Right = 0
-		cmdChangeTerminal.ExtraMargins.Bottom = 0
-		cmdChangeTerminal.ExtraMargins.Left = 0
-		cmdChangeTerminal.Align = DockStyle.alRight
-		cmdChangeTerminal.TabIndex = 18
-		cmdChangeTerminal.SetBounds 96, 0, 97, 24
-		cmdChangeTerminal.OnClick = @cmdChangeTerminal_Click
-		cmdChangeTerminal.Parent = @hbxTerminal
-		' cmdAddTerminal
-		With cmdAddTerminal
-			.Name = "cmdAddTerminal"
-			.Text = ("&Add")
-			.ExtraMargins.Left = 0
-			.ExtraMargins.Right = 0
-			.Align = DockStyle.alRight
-			.ExtraMargins.Bottom = 0
-			.TabIndex = 19
-			.SetBounds -1, 0, 97, 24
-			.OnClick = @cmdAddTerminal_Click
-			.Parent = @hbxTerminal
-		End With
+		'' The "Terminal Paths" list and its Add/Change/Remove/Clear buttons are deliberately
+		'' gone: the terminal list is built in (SeedBuiltInTerminals) and offers only the
+		'' consoles Windows ships, so there is nothing for the user to add or edit -- just the
+		'' Default Terminal dropdown above.
 		' grbThemes
 		With grbThemes
 			.Name = "grbThemes"
@@ -1912,7 +1841,7 @@ pfOptions = @fOptions
 		' lvHelpPaths
 		With lvHelpPaths
 			.Name = "lvHelpPaths"
-			.Text = "lvTerminalPaths1"
+			.Text = "lvHelpPaths"
 			.ExtraMargins.Bottom = 15
 			.Align = DockStyle.alClient
 			lvHelpPaths.TabIndex = 158
@@ -2363,9 +2292,6 @@ pfOptions = @fOptions
 	End With
 		lvShortcuts.Columns.Add ("Action"), , 250
 		lvShortcuts.Columns.Add ("Shortcut"), , 100
-		lvTerminalPaths.Columns.Add ("Version"), , 190
-		lvTerminalPaths.Columns.Add ("Path"), , 190
-		lvTerminalPaths.Columns.Add ("Command line"), , 80
 		lvHelpPaths.Columns.Add ("Version"), , 190
 		lvHelpPaths.Columns.Add ("Path"), , 190
 		' hbxHelp
@@ -2377,16 +2303,6 @@ pfOptions = @fOptions
 			.SetBounds 15, 295, 387, 24
 			.Designer = @This
 			.Parent = @grbHelpPaths
-		End With
-		' hbxTerminal
-		With hbxTerminal
-			.Name = "hbxTerminal"
-			.Text = "HorizontalBox1"
-			.TabIndex = 213
-			.Align = DockStyle.alBottom
-			.SetBounds 15, 193, 387, 24
-			.Designer = @This
-			.Parent = @grbTerminalPaths
 		End With
 		' hbxColors
 		With hbxColors
@@ -2957,13 +2873,10 @@ Sub frmOptions.LoadSettings()
 		Wend
 		.cboTheme.ItemIndex = .cboTheme.IndexOf(*CurrentTheme)
 		LoadTheme
+		'' Built-in terminals only -- no "(not selected)" entry, so index 0 is a usable default
+		'' rather than a blank the user has to notice and fix.
 		.cboTerminal.Clear
-		.lvTerminalPaths.ListItems.Clear
-		.cboTerminal.AddItem ("(not selected)")
 		For i As Integer = 0 To pTerminals->Count - 1
-			.lvTerminalPaths.ListItems.Add pTerminals->Item(i)->Key
-			.lvTerminalPaths.ListItems.Item(i)->Text(1) = pTerminals->Item(i)->Text
-			.lvTerminalPaths.ListItems.Item(i)->Text(2) = Cast(ToolType Ptr, pTerminals->Item(i)->Object)->Parameters
 			.cboTerminal.AddItem pTerminals->Item(i)->Key
 		Next
 		.cboTerminal.ItemIndex = Max(0, .cboTerminal.IndexOf(*DefaultTerminal))
@@ -3037,7 +2950,6 @@ Sub frmOptions.LoadSettings()
 		WLet(.oldInterfFontName, *InterfaceFontName)
 		.InterfFontSize = InterfaceFontSize
 		.oldInterfFontSize = InterfaceFontSize
-		.oldDisplayMenuIcons = DisplayMenuIcons
 		.lblInterfaceFont.Font.Name = *InterfaceFontName
 		.lblInterfaceFont.Caption = * (.InterfFontName) & ", " & .InterfFontSize & "pt"
 	End With
@@ -3150,7 +3062,8 @@ Private Sub frmOptions.Form_Create(ByRef Designer As My.Sys.Object, ByRef Sender
 		Var tnEditor = .tvOptions.Nodes.Add(("Code Editor"), "CodeEditor")
 		Var tnCompiler = .tvOptions.Nodes.Add(("Compiler"), "Compiler")
 		Var tnDebugger = .tvOptions.Nodes.Add(("Debugger"), "Debugger")
-		.tvOptions.Nodes.Add(("Designer"), "Designer")
+		'' Caption only -- the "Designer" key still drives page selection (see SelectPage).
+		.tvOptions.Nodes.Add(("Form Designer"), "Designer")
 		.tvOptions.Nodes.Add(("Personal Information"), "PersonalInfo")
 		tnGeneral->Nodes.Add(("Shortcuts"), "Shortcuts")
 		tnEditor->Nodes.Add(("Colors And Fonts"), "ColorsAndFonts")
@@ -3319,22 +3232,16 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 			End If
 		End If
 		SetBundledCompilerPath()
-		For i As Integer = 0 To pTerminals->Count - 1
-			_Delete(Cast(ToolType Ptr, pTerminals->Item(i)->Object))
-		Next
-		pTerminals->Clear
-		For i As Integer = 0 To .lvTerminalPaths.ListItems.Count - 1
-			tempStr = .lvTerminalPaths.ListItems.Item(i)->Text(0)
-			Tool = _New(ToolType)
-			Tool->Name = tempStr
-			Tool->Path = .lvTerminalPaths.ListItems.Item(i)->Text(1)
-			Tool->Parameters = .lvTerminalPaths.ListItems.Item(i)->Text(2)
-			pTerminals->Add tempStr, .lvTerminalPaths.ListItems.Item(i)->Text(1), Tool
-		Next
-		If *DefaultTerminal <> IIf(.cboTerminal.ItemIndex = 0, "", .cboTerminal.Text) OrElse Not pTerminals->ContainsKey(*CurrentTerminal) Then
-			WLet(DefaultTerminal, IIf(.cboTerminal.ItemIndex = 0, "", .cboTerminal.Text))
-			WLet(CurrentTerminal, *DefaultTerminal)
+		'' The terminal list is built in and not user-editable, so there is nothing to write
+		'' back -- only the selection is saved. There is no "(not selected)" entry: whatever
+		'' the combo shows is a real terminal.
+		If .cboTerminal.ItemIndex >= 0 AndAlso .cboTerminal.Text <> "" Then
+			WLet(DefaultTerminal, .cboTerminal.Text)
+		Else
+			WLet(DefaultTerminal, TERMINAL_WINDOWS_CONSOLE)
 		End If
+		If Not pTerminals->ContainsKey(*DefaultTerminal) Then WLet(DefaultTerminal, TERMINAL_WINDOWS_CONSOLE)
+		WLet(CurrentTerminal, *DefaultTerminal)
 		WLet(TerminalPath, pTerminals->Get(*CurrentTerminal))
 		pHelps->Clear
 		miHelps->Clear
@@ -3343,7 +3250,12 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 			pHelps->Add tempStr, .lvHelpPaths.ListItems.Item(i)->Text(1)
 			miHelps->Add(tempStr, .lvHelpPaths.ListItems.Item(i)->Text(1), , @mClickHelp)
 		Next
-		WLet(DefaultHelp, IIf(.cboHelp.ItemIndex = 0, "", .cboHelp.Text))
+		'' IIf cannot yield a String/WString in FB -- spell the branches out.
+		If .cboHelp.ItemIndex = 0 Then
+			WLet(DefaultHelp, "")
+		Else
+			WLet(DefaultHelp, .cboHelp.Text)
+		End If
 		WLet(HelpPath, pHelps->Get(*DefaultHelp))
 		pIncludePaths->Clear
 		For i As Integer = 0 To .lstIncludePaths.ItemCount - 1
@@ -3434,6 +3346,7 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		WLet(InterfaceFontName, * (.InterfFontName))
 		InterfaceFontSize = .InterfFontSize
 		DisplayMenuIcons = .chkDisplayIcons.Checked
+		ApplyMenuIcons
 		ShowMainToolBar = .chkShowMainToolbar.Checked
 		'gLocalToolBox = .chkShowToolBoxLocal.Checked
 		SetColors
@@ -3494,18 +3407,11 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		If IniValueChangedStr(piniSettings, "Terminals", "DefaultTerminal", *DefaultTerminal) Then
 			piniSettings->WriteString "Terminals", "DefaultTerminal", *DefaultTerminal
 		End If
-		For i As Integer = 0 To pTerminals->Count - 1
-			If IniValueChangedStr(piniSettings, "Terminals", "Version_" & WStr(i), pTerminals->Item(i)->Key) Then
-				piniSettings->WriteString "Terminals", "Version_" & WStr(i), pTerminals->Item(i)->Key
-			End If
-			If IniValueChangedStr(piniSettings, "Terminals", "Path_" & WStr(i), pTerminals->Item(i)->Text) Then
-				piniSettings->WriteString "Terminals", "Path_" & WStr(i), pTerminals->Item(i)->Text
-			End If
-			If IniValueChangedStr(piniSettings, "Terminals", "Command_" & WStr(i), Cast(ToolType Ptr, pTerminals->Item(i)->Object)->Parameters) Then
-				piniSettings->WriteString "Terminals", "Command_" & WStr(i), Cast(ToolType Ptr, pTerminals->Item(i)->Object)->Parameters
-			End If
-		Next
-		i = pTerminals->Count
+		'' Only the selection is persisted -- the list itself is built in (SeedBuiltInTerminals),
+		'' so writing Version_/Path_/Command_ back would just leave dead keys the loader ignores.
+		'' The purge loop below still runs, from index 0, to clear entries written by earlier
+		'' versions (or hand-added by a user when the list was still editable).
+		i = 0
 		Do Until piniSettings->KeyExists("Terminals", "Version_" & WStr(i)) = -1
 			piniSettings->KeyRemove "Terminals", "Version_" & WStr(i)
 			piniSettings->KeyRemove "Terminals", "Path_" & WStr(i)
@@ -4448,7 +4354,8 @@ End Sub
 
 Private Sub frmOptions.Form_Close(ByRef Designer As My.Sys.Object, ByRef Sender As Form, ByRef Action As Integer)
 	If *InterfaceFontName <> *fOptions.oldInterfFontName OrElse InterfaceFontSize <> fOptions.oldInterfFontSize Then MsgBox ("Interface font changes will be applied the next time the application is run.")
-	If DisplayMenuIcons <> fOptions.oldDisplayMenuIcons Then MsgBox ("Display icons in the menu changes will be applied the next time the application is run.")
+	'' No "restart required" prompt for menu icons any more -- ApplyMenuIcons pushes the change
+	'' onto the live menu as soon as the setting is saved.
 	'If fOptions.HotKeysChanged Then MsgBox ML("Hotkey changes will be applied the next time the application is run.")
 End Sub
 
@@ -4726,66 +4633,6 @@ Private Sub frmOptions.cmdRemove_Click(ByRef Designer As My.Sys.Object, ByRef Se
 	End With
 End Sub
 
-Private Sub frmOptions.cmdAddTerminal_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-	pfPath->txtVersion.Text = ""
-	pfPath->txtPath.Text = ""
-	pfPath->txtCommandLine.Text = ""
-	'' T16 smoke-test finding: read the snapshot fields (frmPath.bi), not the live controls
-	'' -- see frmTools.frm's cmdAdd_Click for the full explanation (CloseForm destroys
-	'' pfPath's native controls on every close; nothing here overrides that until now).
-	If pfPath->ShowModal(fOptions) = ModalResults.OK Then
-		With fOptions
-			If .cboTerminal.IndexOf(pfPath->txtVersionText) = -1 Then
-				.lvTerminalPaths.ListItems.Add pfPath->txtVersionText
-				.lvTerminalPaths.ListItems.Item(.lvTerminalPaths.ListItems.Count - 1)->Text(1) = pfPath->txtPathText
-				.lvTerminalPaths.ListItems.Item(.lvTerminalPaths.ListItems.Count - 1)->Text(2) = pfPath->txtCommandLineText
-				.cboTerminal.AddItem pfPath->txtVersionText
-			Else
-				MsgBox ("This version is exists!")
-			End If
-		End With
-	End If
-End Sub
-
-Private Sub frmOptions.cmdChangeTerminal_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-	With fOptions
-		If .lvTerminalPaths.SelectedItem = 0 Then Exit Sub
-		pfPath->txtVersion.Text = .lvTerminalPaths.SelectedItem->Text(0)
-		pfPath->txtPath.Text = .lvTerminalPaths.SelectedItem->Text(1)
-		pfPath->txtCommandLine.Text = .lvTerminalPaths.SelectedItem->Text(2)
-		If pfPath->ShowModal(fOptions) = ModalResults.OK Then
-			If .lvTerminalPaths.SelectedItem->Text(0) = pfPath->txtVersionText OrElse .cboTerminal.IndexOf(pfPath->txtVersionText) = -1 Then
-				Var i = .cboTerminal.IndexOf(.lvTerminalPaths.SelectedItem->Text(0))
-				.cboTerminal.Item(i) = pfPath->txtVersionText
-				.lvTerminalPaths.SelectedItem->Text(0) = pfPath->txtVersionText
-				.lvTerminalPaths.SelectedItem->Text(1) = pfPath->txtPathText
-				.lvTerminalPaths.SelectedItem->Text(2) = pfPath->txtCommandLineText
-			Else
-				MsgBox ("This version is exists!")
-			End If
-		End If
-	End With
-End Sub
-
-Private Sub frmOptions.cmdRemoveTerminal_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-	With fOptions
-		If .lvTerminalPaths.SelectedItem = 0 Then Exit Sub
-		Var iIndex = .cboTerminal.IndexOf(.lvTerminalPaths.SelectedItem->Text(0))
-		If iIndex > -1 Then .cboTerminal.RemoveItem iIndex
-		If .cboTerminal.ItemIndex = -1 Then .cboTerminal.ItemIndex = 0
-		.lvTerminalPaths.ListItems.Remove .lvTerminalPaths.SelectedItemIndex
-	End With
-End Sub
-
-Private Sub frmOptions.cmdClearTerminals_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-	With fOptions
-		.lvTerminalPaths.ListItems.Clear
-		.cboTerminal.Clear
-		.cboTerminal.AddItem ("(not selected)")
-		.cboTerminal.ItemIndex = 0
-	End With
-End Sub
-
 Private Sub frmOptions.cmdAddHelp_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	pfPath->txtVersion.Text = ""
 	pfPath->txtPath.Text = ""
@@ -4942,13 +4789,6 @@ Sub HistoryCodeClean(ByRef Path As WString)
 		f = Dir()
 	Wend
 	HistoryCodeCleanDay = DateValue(Format(Now, "yyyy/mm/dd"))
-End Sub
-
-Private Sub frmOptions.lvTerminalPaths_ItemActivate_(ByRef Designer As My.Sys.Object, ByRef Sender As ListView, ByVal ItemIndex As Integer)
-	(*Cast(frmOptions Ptr, Sender.Designer)).lvTerminalPaths_ItemActivate(Sender, ItemIndex)
-End Sub
-Private Sub frmOptions.lvTerminalPaths_ItemActivate(ByRef Sender As ListView, ByVal ItemIndex As Integer)
-	cmdChangeTerminal_Click *cmdChangeTerminal.Designer, cmdChangeTerminal
 End Sub
 
 

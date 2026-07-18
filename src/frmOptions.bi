@@ -1,4 +1,4 @@
-'#########################################################
+﻿'#########################################################
 '#  frmOptions.bi                                        #
 '#  This file is part of AstoriaIDE                  #
 '#  Authors: Xusinboy Bekchanov (bxusinboy@mail.ru)      #
@@ -66,12 +66,8 @@ Using My.Sys.Forms
 		Declare Static Sub chkUnderline_Click(ByRef Designer As My.Sys.Object, ByRef Sender As CheckBox)
 		Declare Static Sub cmdAdd_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Static Sub cmdRemove_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-		Declare Static Sub cmdAddTerminal_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-		Declare Static Sub cmdRemoveTerminal_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-		Declare Static Sub cmdClearTerminals_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Static Sub cmdFrame_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Static Sub chkFrame_Click(ByRef Designer As My.Sys.Object, ByRef Sender As CheckBox)
-		Declare Static Sub cmdChangeTerminal_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Static Sub cmdAddHelp_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Static Sub cmdChangeHelp_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Static Sub cmdRemoveHelp_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
@@ -84,8 +80,6 @@ Using My.Sys.Forms
 		Declare Static Sub cmdProjectsPath_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		Declare Static Sub lvShortcuts_SelectedItemChanged(ByRef Designer As My.Sys.Object, ByRef Sender As ListView, ByVal ItemIndex As Integer)
 		Declare Static Sub cmdSetShortcut_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
-		Declare Static Sub lvTerminalPaths_ItemActivate_(ByRef Designer As My.Sys.Object, ByRef Sender As ListView, ByVal ItemIndex As Integer)
-		Declare Sub lvTerminalPaths_ItemActivate(ByRef Sender As ListView, ByVal ItemIndex As Integer)
 		Declare Static Sub lvHelpPaths_ItemActivate_(ByRef Designer As My.Sys.Object, ByRef Sender As ListView, ByVal ItemIndex As Integer)
 		Declare Sub lvHelpPaths_ItemActivate(ByRef Sender As ListView, ByVal ItemIndex As Integer)
 						Declare Static Sub cmdInFolder_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
@@ -110,11 +104,11 @@ Using My.Sys.Forms
 		Declare Destructor
 		
 		Dim As TreeView tvOptions
-		Dim As CommandButton cmdOK, cmdCancel, cmdApply, cmdMFFPath, cmdAddInclude, cmdRemoveInclude, cmdAddLibrary, cmdRemoveLibrary, cmdChangeTerminal, cmdAdd, cmdRemove, cmdForeground, cmdFont, cmdProjectsPath, cmdBackground, cmdIndicator, cmdAddTerminal, cmdRemoveTerminal, cmdClearTerminals, cmdSetShortcut
+		Dim As CommandButton cmdOK, cmdCancel, cmdApply, cmdMFFPath, cmdAddInclude, cmdRemoveInclude, cmdAddLibrary, cmdRemoveLibrary, cmdAdd, cmdRemove, cmdForeground, cmdFont, cmdProjectsPath, cmdBackground, cmdIndicator, cmdSetShortcut
 		Dim As Label lblBlack, lblCompiler64, lblCompiler64Path, lblTabSize, lblHistoryLimit, lblGridSize, lblFont, lblProjectsPath, lblForeground, lblBackground, lblIndicator, lblOthers, lblShortcut
 		Dim As ScrollControl pnlGeneral, pnlCodeEditor, pnlDesigner, sccColors, sccInterfaceColors
 		Dim As Panel pnlThemes, pnlShortcuts, pnlColorsAndFonts, pnlCompiler, pnlDebugger, pnlTerminal, pnlHelp, pnlIncludeMFFPath, pnlInterfaceFont, pnlGrid, pnlLine, pnlProjectsPath, pnlSelectShortcut, pnlAutoSaveCharMax
-		Dim As HorizontalBox hbxHelp, hbxTerminal, hbxColors, hbxThemeCommands, hbxForeground, hbxBackground, hbxFrame, hbxIndicator, pnlCommands, hbxIncludePaths, hbxLibraryPaths, hbxInterfaceColors, hbxInterfaceThemeCommands, hbxInterfaceColor
+		Dim As HorizontalBox hbxHelp, hbxColors, hbxThemeCommands, hbxForeground, hbxBackground, hbxFrame, hbxIndicator, pnlCommands, hbxIncludePaths, hbxLibraryPaths, hbxInterfaceColors, hbxInterfaceThemeCommands, hbxInterfaceColor
 		Dim As Panel pnlChangeKeywordsCase, pnlChangeIdentifiersCase, pnlTreatTabAsSpaces, pnlTabSize, pnlHistoryLimit, pnlIntellisenseLimit, pnlHistoryFileSavingDays, pnlChangeEndingType, pnlCodeEditorHoverTime
 		Dim As TextBox txtColorForeground, txtColorBackground, txtColorIndicator, txtColorFrame
 		Dim As TextBox txtMFFpath, txtTabSize, txtHistoryLimit, txtGridSize, txtProjectsPath, txtInFolder, txtIntellisenseLimit, txtHistoryCodeDays,  txtFoldsHtml(0), txtFoldsLng, txtAutoSaveCharMax, txtCodeEditorHoverTime, txtInterfaceColor
@@ -136,8 +130,8 @@ Using My.Sys.Forms
 		Dim As Boolean HotKeysChanged
 		Dim As Integer LibraryPathsCount
 		Dim As ListControl lstIncludePaths, lstLibraryPaths, lstColorKeys, lstInterfaceColorKeys
-		Dim As GroupBox grbGrid, grbColors, grbThemes, grbFont, grbDefaultCompilers, grbDefaultTerminal, grbTerminalPaths, grbIncludePaths, grbLibraryPaths, grbDefaultHelp, grbHelpPaths, grbWhenCompiling, grbShortcuts, grbCommandPromptOptions, grbDisplay, grbCompletion, grbIntelliSense, grbHistory
-		Dim As ListView lvTerminalPaths, lvHelpPaths, lvShortcuts
+		Dim As GroupBox grbGrid, grbColors, grbThemes, grbFont, grbDefaultCompilers, grbDefaultTerminal, grbIncludePaths, grbLibraryPaths, grbDefaultHelp, grbHelpPaths, grbWhenCompiling, grbShortcuts, grbCommandPromptOptions, grbDisplay, grbCompletion, grbIntelliSense, grbHistory
+		Dim As ListView lvHelpPaths, lvShortcuts
 		Dim As Label lblInterfaceFont
 		Dim As CommandButton cmdInterfaceFont
 		Dim As Label lblInterfaceFontLabel
@@ -148,7 +142,6 @@ Using My.Sys.Forms
 		Dim As CheckBox chkHighlightCurrentWord
 		Dim As CheckBox chkHighlightCurrentLine
 		Dim As CheckBox chkHighlightBrackets, chkIncludeMFFPath, chkLimitDebug, chkDisplayWarningsInDebug, chkCreateNonStaticEventHandlers, chkShowKeywordsTooltip, chkShowSymbolsTooltipsOnMouseHover, chkShowClassesExplorerOnOpenWindow, chkAddSpacesToOperators, chkCreateFormTypesWithoutTypeWord, chkPlaceStaticEventHandlersAfterTheConstructor, chkCreateStaticEventHandlersWithAnUnderscoreAtTheBeginning, chkAddRelativePathsToRecent, chkShowTooltipsAtTheTop, chkChangeIdentifiersCase, chkSyntaxHighlightingIdentifiers, chkEnableAutoSuggestions, chkShowHorizontalSeparatorLines, chkCreateEventHandlersWithoutStaticEventHandlerIfEventAllowsIt, chkShowHolidayFrame, ShowClassesExplorerOnOpenWindow, chkChangeEndingType, chkInterfaceColor, chkParameterInfoShow
-		Dim As Boolean oldDisplayMenuIcons
 		Dim As Boolean LastApplySucceeded = True
 		Dim As RadioButton optSaveCurrentFile, optDoNotSave, optSaveAllFiles, optPromptToSave, optMainFileFolder, optInFolder
 		Dim As VerticalBox vbxCodeEditor, vbxGeneral, vbxColors

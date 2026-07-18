@@ -6674,6 +6674,47 @@ Sub GDBCommand
 	End If
 End Sub
 
+'' Push the current DisplayMenuIcons setting onto the already-built menu, so the Options
+'' checkbox takes effect immediately instead of only on the next start.
+''
+'' MenuItem has no "refresh" entry point, so each item is nudged through a property that
+'' writes MIIM_BITMAP straight to the OS: re-assigning ImageKey re-resolves the index and
+'' pushes the bitmap (icons on), while assigning a blank bitmap pushes hbmpItem = 0 (off).
+'' Items keep FImageKey either way, so this is reversible any number of times.
+Sub ApplyMenuIconsToItems(Item As MenuItem Ptr)
+	If Item = 0 Then Exit Sub
+	For i As Integer = 0 To Item->Count - 1
+		Dim As MenuItem Ptr Child = Item->Item(i)
+		If Child Then
+			If DisplayMenuIcons Then
+				If Child->ImageKey <> "" Then Child->ImageKey = Child->ImageKey
+			Else
+				Dim As My.Sys.Drawing.BitmapType NoImage
+				Child->Image = NoImage
+			End If
+			If Child->Count > 0 Then ApplyMenuIconsToItems(Child)
+		End If
+	Next
+End Sub
+
+Sub ApplyMenuIcons
+	mnuMain.ImagesList = @imgList
+	mnuMain.DisplayIcons = DisplayMenuIcons
+	For i As Integer = 0 To mnuMain.Count - 1
+		Dim As MenuItem Ptr Top = mnuMain.Item(i)
+		If Top Then
+			If DisplayMenuIcons Then
+				If Top->ImageKey <> "" Then Top->ImageKey = Top->ImageKey
+			Else
+				Dim As My.Sys.Drawing.BitmapType NoImage
+				Top->Image = NoImage
+			End If
+			ApplyMenuIconsToItems(Top)
+		End If
+	Next
+	If frmMain.Handle Then DrawMenuBar(frmMain.Handle)
+End Sub
+
 Sub CreateMenusAndToolBars
 	pfSplash->lblProcess.Text = ("Load On Startup") & ": " & ("Create Menus And ToolBars")
 	imgList.Name = "imgList"

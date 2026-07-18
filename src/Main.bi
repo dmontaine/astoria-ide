@@ -74,6 +74,7 @@ Common Shared As HelpOptions HelpOption
 Declare Sub PopupClick(ByRef Designer As My.Sys.Object, ByRef Sender As My.Sys.Object)
 Declare Sub ShowPanelMenuItem_Click(ByRef Sender As MenuItem)
 Declare Sub mClick(ByRef Designer As My.Sys.Object, Sender As My.Sys.Object)
+Declare Sub ApplyMenuIcons()   '' push DisplayMenuIcons onto the live menu (no restart needed)
 Declare Sub ReconcileAgentPipe()   '' start/stop the MCP agent pipe to match AllowAgentControl (MCP_SERVER_PLAN.md Task 6)
 Declare Sub UpdateMcpAgentStatusBar()   '' refresh the status-bar MCP Agent On/Off indicator
 Declare Sub mClickMRU(ByRef Designer As My.Sys.Object, Sender As My.Sys.Object)
@@ -133,6 +134,8 @@ Const TARGET_COMPILE_DEFINE As String = "__USE_WINAPI__ -d _WIN32_WINNT=&h0A00"
 Const BUNDLED_COMPILER_FOLDER As String = "Compiler"
 Const BUNDLED_COMPILER_EXE As String = "fbc64.exe"
 Const BUNDLED_GDB_PATH As String = "Debuggers\gdb-11.2.90.20220320-x86_64\bin\gdb.exe"
+'' Fallback/default terminal. The full built-in list lives in SeedBuiltInTerminals.
+Const TERMINAL_WINDOWS_CONSOLE As String = "Standard Windows Console"
 Common Shared As WString Ptr DefaultProjectFile
 Common Shared As WString Ptr InterfaceFontName
 Common Shared As WString Ptr gSearchSave, EnvironmentVariables

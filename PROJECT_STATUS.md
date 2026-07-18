@@ -412,6 +412,47 @@ Note: the default template intentionally omits the `VisualFBEditor` help entry (
 editor help, wrong branding for this fork); the file still ships in `Help/` and the existing
 `astoria.ini` still lists it, so this is reversible if the owner wants it kept.
 
+## Same-day follow-up (2026-07-18) — built-in terminal list, menu icons fixed, help/page cleanup
+
+Owner-requested tweaks after verifying the INI work.
+
+**Terminals are now built in and not user-editable** (owner's call: "the only terminals should be
+those provided by Windows"). The list lives in `SeedBuiltInTerminals()` (`SettingsService.bas`)
+instead of indexed `[Terminals]` keys: Standard Windows Console, Command Prompt, Windows
+PowerShell, and the newly added **Windows Terminal** (`wt.exe -d "{D}" cmd /K "{F}"`). Only the
+*choice* (`DefaultTerminal`) is persisted. Consequences:
+- The "Terminal Paths" ListView and its Add/Change/Remove/Clear buttons are gone from Tools ▸
+  Options ▸ Terminal, along with their handlers and declarations — the page is just the Default
+  Terminal dropdown now.
+- **The "(not selected)" entry is gone**: index 0 is a real terminal, so a default is always shown.
+  An unrecognised name in the INI (hand-edited, or a user-defined entry from an older version)
+  falls back to the standard console rather than leaving a blank the user has to notice.
+- Keeping the list in code means it can never end up empty or stale — the exact failure that made
+  the dropdown look broken in the first place.
+- Verified live via `CB_GETCOUNT`/`CB_GETCURSEL`: `count=4 cursel=0 'Standard Windows Console'`,
+  no ListView, no terminal buttons on the dialog.
+
+**"Display Icons in the Menu" fixed rather than removed — the icons were already there.** Menu
+items already declare image keys (`"New"`, `"Open"`, `"Save"`…) and `imgList` is populated, but
+`MenuItem` resolves a key to an index exactly once, inside `Add`, and only when
+`Owner->ImagesList` is already bound (`Menus.bas`). Startup bound it as
+`IIf(DisplayMenuIcons, @imgList, 0)`, so with the setting off **every item was stamped
+`ImageIndex = -1` for the life of the process** and ticking the box later had nothing left to
+resolve against. `ImagesList` is now bound unconditionally; `DisplayIcons` is the real switch
+(`MenuItem.SetInfo` blanks `hbmpItem` when false). New `ApplyMenuIcons` (`Main.bas`) walks the menu
+and pushes `MIIM_BITMAP` straight to the OS in both directions — re-assigning `ImageKey` to turn
+icons on, assigning a blank bitmap to turn them off — so the setting applies **live**. The
+"changes will be applied the next time the application is run" prompt and its
+`oldDisplayMenuIcons` tracking field were removed with it. Verified: 61 of 176 menu items carry
+bitmaps with icons enabled (only items that declare a key get one).
+
+**Smaller items:** the `VisualFBEditor` help entry is out of both `astoria.ini` and the defaults
+template (Astoria will ship its own documentation; the `.chm` still sits in `Help/` for now), with
+the remaining Helps indices renumbered. The Options page formerly labelled "Designer" is now **Form
+Designer** (caption only — the `"Designer"` key still drives page selection). Also fixed a latent
+`IIf`-returning-a-String on the help dropdown, which FreeBASIC only surfaced once the identical
+terminal line above it was removed.
+
 ## Git onboarding automation — Tasks 4 & 5 (queued after Task 3, owner-requested 2026-07-17)
 
 Today the "Use Existing Git Project" flow requires the user to have **already** (a) set up an SSH

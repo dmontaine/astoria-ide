@@ -9,6 +9,7 @@ Declare Function GetBundledCompilerFolder() As UString
 Declare Function GetBundledCompilerExe() As UString
 Declare Sub SetBundledCompilerPath()
 Declare Sub ResolveFbcExePath(ByRef FbcExe As WString Ptr, CompilerTool As ToolType Ptr, ByRef fbcCommand As WString Ptr)
+Declare Sub SeedBuiltInTerminals()
 Declare Sub LoadSettingsIni()
 Declare Sub LoadSettings
 Declare Sub LoadLanguageTexts

@@ -8,7 +8,30 @@
 #include once "SettingsService.bi"
 #include once "PathUtils.bi"
 
-Const INDEXED_SETTINGS_SECTION_COUNT As Integer = 6
+Const INDEXED_SETTINGS_SECTION_COUNT As Integer = 5
+
+'' The terminal list is built in, not user-editable: Astoria offers exactly the consoles Windows
+'' itself ships. Keeping it in code (rather than indexed [Terminals] keys in astoria.ini) means it
+'' can never end up empty or stale -- an empty list is what made the Options terminal dropdown look
+'' broken. Only the *choice* (DefaultTerminal) is persisted.
+''
+'' {D} is the target's directory and {F} its full path; see ToolType.GetCommand.
+Sub SeedBuiltInTerminals()
+	Dim As ToolType Ptr Tool
+	Terminals.Clear
+	Tool = _New(ToolType) : Tool->Name = TERMINAL_WINDOWS_CONSOLE
+	Tool->Path = "" : Tool->Parameters = ""
+	Terminals.Add TERMINAL_WINDOWS_CONSOLE, Tool->Path, Tool
+	Tool = _New(ToolType) : Tool->Name = "Command Prompt"
+	Tool->Path = "cmd.exe" : Tool->Parameters = "/K ""cd /D ""{D}"" & ""{F}"""""
+	Terminals.Add "Command Prompt", Tool->Path, Tool
+	Tool = _New(ToolType) : Tool->Name = "Windows PowerShell"
+	Tool->Path = "PowerShell.exe" : Tool->Parameters = "-NoExit"
+	Terminals.Add "Windows PowerShell", Tool->Path, Tool
+	Tool = _New(ToolType) : Tool->Name = "Windows Terminal"
+	Tool->Path = "wt.exe" : Tool->Parameters = "-d ""{D}"" cmd /K """"{F}"""""
+	Terminals.Add "Windows Terminal", Tool->Path, Tool
+End Sub
 
 Function GetBundledCompilerFolder() As UString
 	Return ExePath & "/" & BUNDLED_COMPILER_FOLDER
@@ -99,7 +122,6 @@ End Sub
 Private Function NoMoreIndexedSettingsKeys(i As Integer) As Boolean
 	Dim As Integer keySum = 0
 	keySum += iniSettings.KeyExists("MakeTools", "Version_" & WStr(i))
-	keySum += iniSettings.KeyExists("Terminals", "Version_" & WStr(i))
 	keySum += iniSettings.KeyExists("BuildConfigurations", "Name_" & WStr(i))
 	keySum += iniSettings.KeyExists("Helps", "Version_" & WStr(i))
 	keySum += iniSettings.KeyExists("IncludePaths", "Path_" & WStr(i))
@@ -122,14 +144,6 @@ Sub LoadSettings
 			Tool->Parameters = iniSettings.ReadString("MakeTools", "Command_" & WStr(i), "")
 			MakeTools.Add Temp, Tool->Path, Tool
 		End If
-		Temp = iniSettings.ReadString("Terminals", "Version_" & WStr(i), "")
-		If Temp <> "" Then
-			Tool = _New(ToolType)
-			Tool->Name = Temp
-			Tool->Path = SanitizeIniOptionalPath(iniSettings.ReadString("Terminals", "Path_" & WStr(i), ""))
-			Tool->Parameters = iniSettings.ReadString("Terminals", "Command_" & WStr(i), "")
-			Terminals.Add Temp, Tool->Path, Tool
-		End If
 		Temp = iniSettings.ReadString("Helps", "Version_" & WStr(i), "")
 		If Temp <> "" Then Helps.Add Temp, SanitizeIniOptionalPath(iniSettings.ReadString("Helps", "Path_" & WStr(i), ""))
 		Temp = iniSettings.ReadString("BuildConfigurations", "Name_" & WStr(i), "")
@@ -149,7 +163,12 @@ Sub LoadSettings
 	WLet(MakeToolPath1, MakeTools.Get(*CurrentMakeTool1, "make"))
 	WLet(CurrentMakeTool2, *DefaultMakeTool)
 	WLet(MakeToolPath2, MakeTools.Get(*CurrentMakeTool2, "make"))
-	WLet(DefaultTerminal, iniSettings.ReadString("Terminals", "DefaultTerminal", ""))
+	'' Terminals are built in and there is no "(not selected)" choice -- a terminal is always
+	'' selected. Anything unrecognised in the INI (an old hand-edited name, or one of the
+	'' user-defined entries earlier versions allowed) falls back to the standard console.
+	SeedBuiltInTerminals()
+	WLet(DefaultTerminal, iniSettings.ReadString("Terminals", "DefaultTerminal", TERMINAL_WINDOWS_CONSOLE))
+	If Not Terminals.ContainsKey(*DefaultTerminal) Then WLet(DefaultTerminal, TERMINAL_WINDOWS_CONSOLE)
 	WLet(CurrentTerminal, *DefaultTerminal)
 	WLet(TerminalPath, Terminals.Get(*CurrentTerminal, ""))
 	WLet(DefaultHelp, iniSettings.ReadString("Helps", "DefaultHelp", ""))
@@ -252,8 +271,14 @@ Sub LoadSettings
 	ProjectAutoSuggestions = False
 	pDefaultFont->Name = WGet(InterfaceFontName)
 	pDefaultFont->Size  = InterfaceFontSize
+	'' ImagesList must be bound *unconditionally*, even when icons are switched off. MenuItem
+	'' resolves its image key to an index once, inside Add, and only when Owner->ImagesList is
+	'' already set (Menus.bas). Binding it to 0 here left every item with ImageIndex = -1 for the
+	'' life of the process, so ticking "Display Icons in the Menu" produced no icons -- the keys
+	'' had nothing left to resolve against. DisplayIcons is the real switch: MenuItem.SetInfo
+	'' checks it and blanks hbmpItem when it is false.
+	mnuMain.ImagesList = @imgList
 	mnuMain.DisplayIcons = DisplayMenuIcons
-	mnuMain.ImagesList = IIf(DisplayMenuIcons, @imgList, 0)
 	MainReBar.Visible = ShowMainToolBar
 	
 	WLet(Compiler64Arguments, iniSettings.ReadString("Parameters", "Compiler64Arguments", "-b {S} -exx -mt"))

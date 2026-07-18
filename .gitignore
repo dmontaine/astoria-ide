@@ -23,3 +23,6 @@ Settings/Workspace.ini
 Settings/debug_trace.log
 Settings/*.pass1.log
 Settings/*.pass2.log
+
+# Per-control test programs: keep the sources, not the built binaries
+Examples/Controls/**/*.exe

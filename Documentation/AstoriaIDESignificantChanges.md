@@ -81,6 +81,11 @@ them together. Astoria is intended to be the whole environment.
   AI settings. It can be edited later from the Project menu. It also serves as Astoria's marker for
   its own projects — Astoria opens empty repositories and Astoria projects, and declines unfamiliar
   ones rather than guessing at their structure.
+- **A standard Windows installer.** Astoria installs the way Windows software is expected to:
+  a per-user install that needs no administrator rights and raises no elevation prompt, with Start
+  Menu and desktop shortcuts and a projects folder placed somewhere you can actually find rather
+  than buried in the install directory. There is no unpacking an archive and hunting for the
+  executable, and uninstalling is a single step.
 - **A bundled, zero-configuration toolchain.** The 64-bit FreeBASIC compiler and the GDB debugger
   ship with Astoria, already wired up. Nothing to download, nothing to point at.
 - **Clearer switching between code and form.** Each open document carries its own Code / Form /
@@ -94,6 +99,22 @@ them together. Astoria is intended to be the whole environment.
   longer blocks startup with an error and is dropped from the recent list; a missing settings file is
   rebuilt from shipped defaults instead of leaving the IDE silently unable to save anything; and
   debugged programs no longer survive as orphaned processes after the IDE closes.
+- **Nothing broken, unstable, or half-finished is shipped on purpose.** A menu item that does
+  nothing, a control that fails the moment you use it, a setting with no effect — these cost a
+  newcomer more than a missing feature does, because they cannot tell a broken tool from their own
+  mistake. So the standing rule is that a feature either works or does not ship. A control that
+  cannot be built is removed from the toolbox rather than left to fail at compile time. A setting
+  that does nothing is deleted rather than left as a checkbox. Where something is genuinely
+  unproven, it is written down as unproven instead of being presented as working.
+
+  This is an aim held to deliberately, not a claim of perfection — Astoria is one developer's work
+  and has not yet met a wide range of machines. What backs the aim up is that testing is used to
+  find these things and the findings are published: `Documentation/Testing.md` lists what has been
+  verified **and what has not**, and `Documentation/TestPlan.md` records every planned test with its
+  result, including the failures. Recent examples of the rule in action: the WebBrowser control was
+  found to be incapable of displaying a page and was rebuilt on a modern engine rather than shipped
+  as a control that opens an empty window; and a database function that could never succeed was
+  found by testing it and fixed.
 
 ## Section 2: Significant VisualFBEditor features not found in Astoria IDE
 

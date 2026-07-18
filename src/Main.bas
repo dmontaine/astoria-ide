@@ -112,7 +112,7 @@ Dim Shared As Panel pnlLeft, pnlRight, pnlBottom, pnlBottomTab, pnlLeftPin, pnlR
 Dim Shared As TrackBar trLeft
 Dim Shared As MainMenu mnuMain
 Dim Shared As MenuItem Ptr mnuStartWithCompile, mnuStart, mnuContinue, mnuBreak, mnuEnd, mnuRestart, mnuStandardToolBar, mnuEditToolBar, mnuProjectToolBar, mnuFormatToolBar, mnuRunToolBar, mnuSplit, mnuSplitHorizontally, mnuSplitVertically, mnuWindowSeparator, miRecentFiles, miSetAsMain, miClearStartUp, miTabSetAsMain, miTabReloadHistoryCode, miRemoveFiles, miToolBars
-Dim Shared As MenuItem Ptr miSaveProject, miSaveProjectAs, miCloseProject, miDeleteProject, miNewFile, miOpenFile, miCloseFile, miDeleteFile, miSaveFile, miSaveFileAs, miPrint, miPrintPreview, miPageSetup, miOpenProjectFolder, miProjectProperties, miEditProjectDescription, miGitPull, miGitPush, miExplorerOpenProjectFolder, miExplorerRename, miExplorerProjectProperties, miExplorerCloseProject, miRename, miRemoveFileFromProject
+Dim Shared As MenuItem Ptr miSaveProject, miSaveProjectAs, miCloseProject, miDeleteProject, miNewFile, miOpenFile, miCloseFile, miDeleteFile, miSaveFile, miSaveFileAs, miPrint, miPrintPreview, miPageSetup, miOpenProjectFolder, miProjectProperties, miEditProjectDescription, miGitCommit, miGitPull, miGitPush, miExplorerOpenProjectFolder, miExplorerRename, miExplorerProjectProperties, miExplorerCloseProject, miRename, miRemoveFileFromProject
 Dim Shared As MenuItem Ptr miUndo, miRedo, miCutCurrentLine, miCut, miCopy, miPaste, miSingleComment, miDuplicate, miSelectAll, miIndent, miOutdent, miFormat, miUnformat, miFormatProject, miUnformatProject, miAddSpaces, miDeleteBlankLines, miParameterInfo, miStepInto, miStepOver, miStepOut, miRunToCursor, miGDBCommand, miAddWatch, miToggleBreakpoint, miClearAllBreakpoints, miSetNextStatement, miShowNextStatement
 Dim Shared As MenuItem Ptr dmiMake, dmiMakeClean
 Dim Shared As MenuItem Ptr miCode, miForm, miCodeAndForm, miGotoCodeForm, miFold, miDebugWindows, miCollapseCurrent, miCollapseAllProcedures, miCollapseAll, miUnCollapseCurrent, miUnCollapseAllProcedures, miUnCollapseAll, miImageManager, miAddProcedure, miAddType, miFind, miReplace, miFindNext, miFindPrevious, miGoto, miDefine, miToggleBookmark, miNextBookmark, miPreviousBookmark, miClearAllBookmarks, miSyntaxCheck, miCompile, miCompileAll, miMake, miMakeClean
@@ -1446,6 +1446,39 @@ Sub GitPush
 	Dim As Boolean gitOk = RunGitInProject("push", outText, ec)
 	If Trim(outText) = "" Then
 		If gitOk Then outText = "git push completed." Else outText = "git push failed (exit " & Str(ec) & ")."
+	End If
+	If gitOk Then MsgBox outText, , mtInfo Else MsgBox outText, , mtWarning
+End Sub
+
+'' Git menu > Git Commit: prompt for a message, then `git add -A` + `git commit`.
+'' The message is passed through a temp file (`git commit -F`) so quotes, percent
+'' signs, etc. in it can't break the .bat command line. Empty/cancelled aborts.
+Sub GitCommit
+	If Not OpenProjectIsGitRepo() Then
+		MsgBox ("The open project is not a Git repository."), , mtWarning
+		Exit Sub
+	End If
+	Dim As UString msg = Trim(InputBox("Git Commit", "Commit message:", ""))
+	If msg = "" Then Exit Sub   '' cancelled or empty -- git requires a message anyway
+	EnsureDirectoryExists(ExePath & WindowsSlash & "Temp")
+	Dim As UString msgPath = ExePath & WindowsSlash & "Temp" & WindowsSlash & "_astoria_git_msg.txt"
+	Dim As Integer FnM = FreeFile_
+	If Open(msgPath For Output Encoding "utf-8" As #FnM) <> 0 Then
+		MsgBox ("Could not write the commit message file."), , mtWarning
+		Exit Sub
+	End If
+	Print #FnM, msg
+	CloseFile_(FnM)
+	'' Stage everything (new/modified/deleted, minus .gitignore'd), then commit.
+	Dim As String addOut
+	Dim As Integer addEc
+	RunGitInProject("add -A", addOut, addEc)
+	Dim As String outText
+	Dim As Integer ec
+	Dim As Boolean gitOk = RunGitInProject("commit -F " & Chr(34) & msgPath & Chr(34), outText, ec)
+	If FileExistsU(msgPath) Then Kill msgPath
+	If Trim(outText) = "" Then
+		If gitOk Then outText = "git commit completed." Else outText = "git commit failed (exit " & Str(ec) & ")."
 	End If
 	If gitOk Then MsgBox outText, , mtInfo Else MsgBox outText, , mtWarning
 End Sub
@@ -6560,6 +6593,8 @@ Sub CreateMenusAndToolBars
 	'' Enabled state is set contextually in ChangeMenuItemsEnabled. Grows as more git
 	'' actions are added (commit, clone, etc.).
 	Var miGit = mnuMain.Add(("&Git"), "", "Git")
+	miGitCommit = miGit->Add(("Git &Commit") & "..." & HK("GitCommit"), "", "GitCommit", @mClick, , , False)
+	miGit->Add("-")
 	miGitPull = miGit->Add(("Git &Pull") & HK("GitPull"), "", "GitPull", @mClick, , , False)
 	miGitPush = miGit->Add(("Git Pus&h") & HK("GitPush"), "", "GitPush", @mClick, , , False)
 

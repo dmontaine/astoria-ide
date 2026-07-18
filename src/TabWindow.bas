@@ -317,6 +317,7 @@ Sub ChangeMenuItemsEnabled
 	miEditProjectDescription->Enabled = bHasProject AndAlso FileExistsU(OpenProjectDescriptionPath())
 	'' Git menu items: enabled only when the open project's folder is a Git working tree.
 	Dim As Boolean bGitRepo = OpenProjectIsGitRepo()
+	miGitCommit->Enabled = bGitRepo
 	miGitPull->Enabled = bGitRepo
 	miGitPush->Enabled = bGitRepo
 	mnuWindowSeparator->Visible = bEnabledTab

@@ -217,6 +217,7 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 	Case "OpenProjectFolder":                   OpenProjectFolder
 	Case "ProjectProperties":                   pfProjectProperties->ShowModal *pfrmMain : pfProjectProperties->CenterToParent
 	Case "EditProjectDescription":              EditProjectDescription
+	Case "GitCommit":                           GitCommit
 	Case "GitPull":                             GitPull
 	Case "GitPush":                             GitPush
 	Case "SetAsMain":                           SetAsMain @Sender = miTabSetAsMain

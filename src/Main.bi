@@ -242,6 +242,7 @@ Declare Function GetProjectDirectory() As UString
 Declare Function OpenProjectDescriptionPath() As UString
 Declare Sub EditProjectDescription
 Declare Function OpenProjectIsGitRepo() As Boolean
+Declare Sub GitCommit
 Declare Sub GitPull
 Declare Sub GitPush
 Declare Sub AddNewProjectFile(ByRef Template As WString, ByRef ItemName As WString)

@@ -112,7 +112,7 @@ Dim Shared As Panel pnlLeft, pnlRight, pnlBottom, pnlBottomTab, pnlLeftPin, pnlR
 Dim Shared As TrackBar trLeft
 Dim Shared As MainMenu mnuMain
 Dim Shared As MenuItem Ptr mnuStartWithCompile, mnuStart, mnuContinue, mnuBreak, mnuEnd, mnuRestart, mnuStandardToolBar, mnuEditToolBar, mnuProjectToolBar, mnuFormatToolBar, mnuRunToolBar, mnuSplit, mnuSplitHorizontally, mnuSplitVertically, mnuWindowSeparator, miRecentFiles, miSetAsMain, miClearStartUp, miTabSetAsMain, miTabReloadHistoryCode, miRemoveFiles, miToolBars
-Dim Shared As MenuItem Ptr miSaveProject, miSaveProjectAs, miCloseProject, miDeleteProject, miNewFile, miOpenFile, miCloseFile, miDeleteFile, miSaveFile, miSaveFileAs, miPrint, miPrintPreview, miPageSetup, miOpenProjectFolder, miProjectProperties, miEditProjectDescription, miGitCommit, miGitPull, miGitPush, miExplorerOpenProjectFolder, miExplorerRename, miExplorerProjectProperties, miExplorerCloseProject, miRename, miRemoveFileFromProject
+Dim Shared As MenuItem Ptr miSaveProject, miSaveProjectAs, miCloseProject, miDeleteProject, miNewFile, miOpenFile, miCloseFile, miDeleteFile, miSaveFile, miSaveFileAs, miPrint, miPrintPreview, miPageSetup, miOpenProjectFolder, miProjectProperties, miEditProjectDescription, miGitCommit, miGitPull, miGitPush, miGitSshKey, miExplorerOpenProjectFolder, miExplorerRename, miExplorerProjectProperties, miExplorerCloseProject, miRename, miRemoveFileFromProject
 Dim Shared As MenuItem Ptr miUndo, miRedo, miCutCurrentLine, miCut, miCopy, miPaste, miSingleComment, miDuplicate, miSelectAll, miIndent, miOutdent, miFormat, miUnformat, miFormatProject, miUnformatProject, miAddSpaces, miDeleteBlankLines, miParameterInfo, miStepInto, miStepOver, miStepOut, miRunToCursor, miGDBCommand, miAddWatch, miToggleBreakpoint, miClearAllBreakpoints, miSetNextStatement, miShowNextStatement
 Dim Shared As MenuItem Ptr dmiMake, dmiMakeClean
 Dim Shared As MenuItem Ptr miCode, miForm, miCodeAndForm, miGotoCodeForm, miFold, miDebugWindows, miCollapseCurrent, miCollapseAllProcedures, miCollapseAll, miUnCollapseCurrent, miUnCollapseAllProcedures, miUnCollapseAll, miImageManager, miAddProcedure, miAddType, miFind, miReplace, miFindNext, miFindPrevious, miGoto, miDefine, miToggleBookmark, miNextBookmark, miPreviousBookmark, miClearAllBookmarks, miSyntaxCheck, miCompile, miCompileAll, miMake, miMakeClean
@@ -1618,6 +1618,109 @@ Sub GitCommit
 	Dim As Boolean gitOk = RunGitInProject("commit -F " & Chr(34) & msgPath & Chr(34), outText, ec)
 	If FileExistsU(msgPath) Then Kill msgPath
 	ShowGitResult("commit", gitOk, ec, outText)
+End Sub
+
+'' The provider's "add SSH key" settings page (for the assisted-browser key setup).
+Private Function SshKeyPageUrl(ByRef provider As String) As UString
+	Select Case LCase(Trim(provider))
+	Case "gitlab":    Return "https://gitlab.com/-/user_settings/ssh_keys"
+	Case "bitbucket": Return "https://bitbucket.org/account/settings/ssh-keys/"
+	Case "codeberg":  Return "https://codeberg.org/user/settings/keys"
+	Case Else:        Return "https://github.com/settings/ssh/new"
+	End Select
+End Function
+
+'' Ensure an SSH key exists for this user, generating an ed25519 one if none is present,
+'' and seed known_hosts for the common providers so the first push doesn't prompt. Returns
+'' the path to the public key (existing or new), "" on failure. comment is the key's -C
+'' label; setupLog gets ssh-keygen/ssh-keyscan output on a fresh generation. UI thread.
+Private Function EnsureSshKey(ByRef comment As String, ByRef setupLog As String) As UString
+	setupLog = ""
+	Dim As String userProfile = Environ("USERPROFILE")
+	If userProfile = "" Then Return ""
+	Dim As UString sshDir = WinOsPath(userProfile & "/.ssh")
+	'' Already have a key? Prefer ed25519, else any common type.
+	Dim As UString edPub = WinOsPath(sshDir & "/id_ed25519.pub")
+	If FileExistsU(edPub) Then Return edPub
+	Dim As UString rsaPub = WinOsPath(sshDir & "/id_rsa.pub")
+	If FileExistsU(rsaPub) Then Return rsaPub
+	Dim As UString ecPub = WinOsPath(sshDir & "/id_ecdsa.pub")
+	If FileExistsU(ecPub) Then Return ecPub
+	'' Generate a fresh ed25519 key (no passphrase) + seed known_hosts, via a temp .bat.
+	EnsureDirectoryExists(sshDir)
+	EnsureDirectoryExists(ExePath & WindowsSlash & "Temp")
+	Dim As UString edKey = WinOsPath(sshDir & "/id_ed25519")
+	Dim As UString knownHosts = WinOsPath(sshDir & "/known_hosts")
+	Dim As UString batPath = ExePath & WindowsSlash & "Temp" & WindowsSlash & "_astoria_sshsetup.bat"
+	Dim As UString logPath = ExePath & WindowsSlash & "Temp" & WindowsSlash & "_astoria_sshsetup.log"
+	If FileExistsU(logPath) Then Kill logPath
+	Dim As Integer Fn = FreeFile_
+	If Open(batPath For Output As #Fn) <> 0 Then Return ""
+	Print #Fn, "@echo off"
+	Print #Fn, "ssh-keygen -t ed25519 -C " & Chr(34) & comment & Chr(34) & " -f " & Chr(34) & edKey & Chr(34) & " -N """" > " & Chr(34) & logPath & Chr(34) & " 2>&1"
+	Print #Fn, "ssh-keyscan github.com gitlab.com bitbucket.org codeberg.org >> " & Chr(34) & knownHosts & Chr(34) & " 2>> " & Chr(34) & logPath & Chr(34)
+	CloseFile_(Fn)
+	PipeCmd batPath, True
+	If FileExistsU(logPath) Then
+		Dim As Integer FnL = FreeFile_
+		If Open(logPath For Binary Access Read As #FnL) = 0 Then
+			Dim As LongInt sz = LOF(FnL)
+			If sz > 0 Then
+				setupLog = String(sz, 0)
+				Get #FnL, 1, setupLog
+			End If
+			CloseFile_(FnL)
+		End If
+		Kill logPath
+	End If
+	If FileExistsU(batPath) Then Kill batPath
+	If FileExistsU(edPub) Then Return edPub
+	Return ""
+End Function
+
+'' Git menu > Set Up SSH Key: ensure this machine has an SSH key (generating one if not),
+'' copy the public key to the clipboard, and open the provider's SSH-keys page so the user
+'' can paste + save it. Astoria never enters credentials or submits the page -- adding the
+'' key is the user's own action. (Task 4; auto-add via gh/glab is a later refinement.)
+Sub GitSetupSshKey
+	Dim As String comment = *PersonalEmail
+	If Trim(comment) = "" Then comment = "astoria-ide"
+	Dim As String setupLog
+	Dim As UString pubPath = EnsureSshKey(comment, setupLog)
+	If pubPath = "" Then
+		Dim As UString em = ("Could not create or find an SSH key.") & Chr(13,10) & Chr(13,10) & _
+			("This needs ssh-keygen, which ships with Git for Windows -- make sure Git is installed and on PATH.")
+		If Trim(setupLog) <> "" Then em &= Chr(13,10) & Chr(13,10) & Trim(setupLog)
+		MsgBox em, , mtWarning
+		Exit Sub
+	End If
+	'' Read the public key and put it on the clipboard for pasting.
+	Dim As String pubKey
+	Dim As Integer FnP = FreeFile_
+	If Open(pubPath For Binary Access Read As #FnP) = 0 Then
+		Dim As LongInt sz = LOF(FnP)
+		If sz > 0 Then
+			pubKey = String(sz, 0)
+			Get #FnP, 1, pubKey
+		End If
+		CloseFile_(FnP)
+	End If
+	pubKey = Trim(pubKey, Any !" \t" + Chr(13) + Chr(10))
+	If pubKey <> "" Then Clipboard.SetAsText pubKey
+	'' Provider from the open project's project.astoria, else default to GitHub.
+	Dim As UString provider = "GitHub"
+	Dim As UString projFolder = GetProjectDirectory()
+	If projFolder <> "" Then
+		Dim As ProjectDescriptionData d
+		If ReadProjectDescription(projFolder, d) AndAlso Trim(d.GitProvider) <> "" Then provider = d.GitProvider
+	End If
+	Dim As UString url = SshKeyPageUrl(provider)
+	Dim As UString ask = ("Your SSH public key is ready and copied to the clipboard:") & Chr(13,10) & pubPath & Chr(13,10) & Chr(13,10) & _
+		("To give this machine access, add it to ") & provider & ("'s SSH keys.") & Chr(13,10) & Chr(13,10) & _
+		("Open that page now so you can paste the key and save it?")
+	If MsgBox(ask, "", mtInfo, btYesNo) = mrYes Then
+		ShellExecuteW(0, WStr("open"), url, 0, 0, SW_SHOWNORMAL)
+	End If
 End Sub
 
 Sub AddNewProjectFile(ByRef Template As WString, ByRef ItemName As WString)
@@ -6734,6 +6837,9 @@ Sub CreateMenusAndToolBars
 	miGit->Add("-")
 	miGitPull = miGit->Add(("Git &Pull") & HK("GitPull"), "", "GitPull", @mClick, , , False)
 	miGitPush = miGit->Add(("Git Pus&h") & HK("GitPush"), "", "GitPush", @mClick, , , False)
+	miGit->Add("-")
+	'' Onboarding/setup actions (not project-gated). Task 5 adds "Create Remote Repository" here.
+	miGitSshKey = miGit->Add(("Set Up SSH &Key") & "..." & HK("GitSetupSshKey"), "", "GitSetupSshKey", @mClick)
 
 	miXizmat = mnuMain.Add(("&Tools"), "", "Service")
 	miXizmat->Add(("&Command Prompt") & HK("CommandPrompt", "Alt+C"), "Console", "CommandPrompt", @mClick)

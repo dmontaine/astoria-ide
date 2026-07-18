@@ -10,6 +10,29 @@ testing, program-flow and UI tweaks only. See "Feature complete for version 1.0"
 
 This is the concise, authoritative handoff for the next work session. Completed-work narratives, investigations, and dated session notes are archived in [HISTORY.md](HISTORY.md). Shipped changes are indexed in [CHANGELOG.md](CHANGELOG.md), and fuller enhancement specifications live in [ROADMAP.md](ROADMAP.md).
 
+## Shipped defaults separated from live user settings (2026-07-18)
+
+`Settings/astoria.ini` is **no longer tracked**. It is the live per-user settings file — every run
+rewrites window geometry and MRU lists into it, and `[PersonalInfo]` now holds a name, e-mail, and
+Git login — so tracking it churned unrelated session state into commits and would have published
+personal details into a public repository as soon as those fields were filled in. The shipped
+defaults are `Settings/astoria.default.ini`, which **is** tracked; `LoadSettingsIni` copies it when
+no settings file exists, so a fresh clone or an installed release creates its own on first run.
+
+**This is release hygiene, not a feature** — it changes nothing a user sees. Released builds were
+already unaffected: `StageRelease.ps1` has always deleted `astoria.ini` from the staged tree, and
+it copies from a `git archive HEAD` export, which by definition cannot contain an untracked file.
+That `Remove-Item` is now a belt-and-braces no-op and is commented as such. Verified by exporting
+the staged tree: `astoria.ini` absent, `astoria.default.ini` present.
+
+**Consequence worth knowing:** any deliberate default that lived only in `astoria.ini` no longer
+reaches a new install — but this was already true, since that file never shipped. Defaults now come
+from `astoria.default.ini` (tool defaults: MakeTools, Terminals, Helps, Include/Library paths,
+BuildConfigurations) with code defaults filling the rest. `DisplayMenuIcons` is not in the template
+and defaults to `True` in code, which matches the intent of the `d4e36d1` release staging. If a
+first-run experience should have a specific interface theme or font, add it to the template — the
+current one deliberately carries tool defaults only.
+
 ## Feature complete for version 1.0 (2026-07-18)
 
 **Astoria IDE is feature complete for version 1.0.** No further features are planned for this

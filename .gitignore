@@ -19,6 +19,13 @@ src/Temp.rc
 src/compile_out.txt
 Examples/**/*64.exe
 Settings/Workspace.ini
+# Live per-user settings: window geometry, MRU lists, and [PersonalInfo] (name,
+# e-mail, Git login). Every run rewrites it, so tracking it churned unrelated
+# session state into commits and would publish personal details once those
+# fields are filled in. The *shipped defaults* live in Settings/astoria.default.ini,
+# which is tracked; SettingsService.LoadSettingsIni copies it when this file is
+# missing, so a fresh clone or a released build creates its own on first run.
+Settings/astoria.ini
 # Debugger Reliability trace instrumentation output (local-only, per-machine)
 Settings/debug_trace.log
 Settings/*.pass1.log

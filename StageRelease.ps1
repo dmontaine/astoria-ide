@@ -202,9 +202,12 @@ if ($removedExampleDirs.Count -gt 0) {
 }
 
 # --- Settings/: wholesale, minus the developer's personal ini and trace logs ---
-# astoria.ini is skipped so the shipped app generates fresh defaults on first
-# run (SettingsService.bas already handles every key being absent) rather than
-# shipping this machine's MRU projects, window layout, and other personal state.
+# astoria.ini is no longer tracked (see .gitignore), so the git archive export this
+# copies from cannot contain it; the Remove-Item below is a belt-and-braces no-op kept
+# in case this is ever pointed at a working tree instead. The shipped app therefore
+# starts with no settings file and creates one on first run by copying the tracked
+# Settings/astoria.default.ini (SettingsService.LoadSettingsIni) -- rather than
+# inheriting this machine's MRU projects, window layout, and personal information.
 $settingsSrc = Join-Path $SourceRoot "Settings"
 $settingsDst = Join-Path $ReleaseRoot "Settings"
 Copy-Item -Path $settingsSrc -Destination $settingsDst -Recurse -Force

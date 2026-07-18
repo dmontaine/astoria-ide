@@ -247,6 +247,9 @@ Declare Sub GitPull
 Declare Sub GitPush
 Declare Sub GitSetupSshKey
 Declare Sub SetupSshKey(ByRef provider As String)
+Declare Sub GitCreateRemoteRepo
+Declare Sub OpenNewRepoPage(ByRef provider As String)
+Declare Function TryCliCreateRepo(ByRef provider As String, ByRef repoName As String, ByRef sourceFolder As String, ByRef resultOut As String) As Boolean
 Declare Sub AddNewProjectFile(ByRef Template As WString, ByRef ItemName As WString)
 Declare Function ContainsFileName(tn As TreeNode Ptr, ByRef FileName As WString) As Boolean
 Declare Function GetTreeNodeChild(tn As TreeNode Ptr, ByRef FileName As WString) As TreeNode Ptr

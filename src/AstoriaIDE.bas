@@ -221,6 +221,7 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 	Case "GitPull":                             GitPull
 	Case "GitPush":                             GitPush
 	Case "GitSetupSshKey":                      GitSetupSshKey
+	Case "GitCreateRemoteRepo":                 GitCreateRemoteRepo
 	Case "SetAsMain":                           SetAsMain @Sender = miTabSetAsMain
 	Case "ClearStartUp":                        SetMainNode 0
 	Case "ReloadHistoryCode":                   ReloadHistoryCode

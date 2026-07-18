@@ -112,7 +112,7 @@ Dim Shared As Panel pnlLeft, pnlRight, pnlBottom, pnlBottomTab, pnlLeftPin, pnlR
 Dim Shared As TrackBar trLeft
 Dim Shared As MainMenu mnuMain
 Dim Shared As MenuItem Ptr mnuStartWithCompile, mnuStart, mnuContinue, mnuBreak, mnuEnd, mnuRestart, mnuStandardToolBar, mnuEditToolBar, mnuProjectToolBar, mnuFormatToolBar, mnuRunToolBar, mnuSplit, mnuSplitHorizontally, mnuSplitVertically, mnuWindowSeparator, miRecentFiles, miSetAsMain, miClearStartUp, miTabSetAsMain, miTabReloadHistoryCode, miRemoveFiles, miToolBars
-Dim Shared As MenuItem Ptr miSaveProject, miSaveProjectAs, miCloseProject, miDeleteProject, miNewFile, miOpenFile, miCloseFile, miDeleteFile, miSaveFile, miSaveFileAs, miPrint, miPrintPreview, miPageSetup, miOpenProjectFolder, miProjectProperties, miEditProjectDescription, miGitCommit, miGitPull, miGitPush, miGitSshKey, miExplorerOpenProjectFolder, miExplorerRename, miExplorerProjectProperties, miExplorerCloseProject, miRename, miRemoveFileFromProject
+Dim Shared As MenuItem Ptr miSaveProject, miSaveProjectAs, miCloseProject, miDeleteProject, miNewFile, miOpenFile, miCloseFile, miDeleteFile, miSaveFile, miSaveFileAs, miPrint, miPrintPreview, miPageSetup, miOpenProjectFolder, miProjectProperties, miEditProjectDescription, miGitCommit, miGitPull, miGitPush, miGitSshKey, miGitCreateRepo, miExplorerOpenProjectFolder, miExplorerRename, miExplorerProjectProperties, miExplorerCloseProject, miRename, miRemoveFileFromProject
 Dim Shared As MenuItem Ptr miUndo, miRedo, miCutCurrentLine, miCut, miCopy, miPaste, miSingleComment, miDuplicate, miSelectAll, miIndent, miOutdent, miFormat, miUnformat, miFormatProject, miUnformatProject, miAddSpaces, miDeleteBlankLines, miParameterInfo, miStepInto, miStepOver, miStepOut, miRunToCursor, miGDBCommand, miAddWatch, miToggleBreakpoint, miClearAllBreakpoints, miSetNextStatement, miShowNextStatement
 Dim Shared As MenuItem Ptr dmiMake, dmiMakeClean
 Dim Shared As MenuItem Ptr miCode, miForm, miCodeAndForm, miGotoCodeForm, miFold, miDebugWindows, miCollapseCurrent, miCollapseAllProcedures, miCollapseAll, miUnCollapseCurrent, miUnCollapseAllProcedures, miUnCollapseAll, miImageManager, miAddProcedure, miAddType, miFind, miReplace, miFindNext, miFindPrevious, miGoto, miDefine, miToggleBookmark, miNextBookmark, miPreviousBookmark, miClearAllBookmarks, miSyntaxCheck, miCompile, miCompileAll, miMake, miMakeClean
@@ -1799,6 +1799,91 @@ Sub GitSetupSshKey
 		If ReadProjectDescription(projFolder, d) AndAlso Trim(d.GitProvider) <> "" Then provider = d.GitProvider
 	End If
 	SetupSshKey(provider)
+End Sub
+
+'' The provider's "new repository" page (assisted-browser fallback for creating a repo).
+Private Function NewRepoPageUrl(ByRef provider As String) As UString
+	Select Case LCase(Trim(provider))
+	Case "gitlab":    Return "https://gitlab.com/projects/new"
+	Case "bitbucket": Return "https://bitbucket.org/repo/create"
+	Case "codeberg":  Return "https://codeberg.org/repo/create"
+	Case Else:        Return "https://github.com/new"
+	End Select
+End Function
+
+'' Open the provider's "new repository" page in the browser.
+Sub OpenNewRepoPage(ByRef provider As String)
+	Dim As UString url = NewRepoPageUrl(provider)
+	ShellExecuteW(0, WStr("open"), url, 0, 0, SW_SHOWNORMAL)
+End Sub
+
+'' Create an empty private remote repo `name` on `provider` using its CLI (gh/glab) if
+'' installed AND authenticated. For GitHub with a local git repo at sourceFolder, also
+'' wires it as the `origin` remote (gh --source --remote). Returns True only when the CLI
+'' actually created it; resultOut carries the CLI output. False -> caller falls back to the
+'' browser. UI thread.
+Function TryCliCreateRepo(ByRef provider As String, ByRef repoName As String, ByRef sourceFolder As String, ByRef resultOut As String) As Boolean
+	resultOut = ""
+	Dim As String cli = ""
+	Select Case LCase(Trim(provider))
+	Case "github", "" : cli = "gh"
+	Case "gitlab"     : cli = "glab"
+	End Select
+	If cli = "" Then Return False
+	Dim As String authOut
+	Dim As Integer authEc
+	RunCmdCaptured(cli & " auth status", authOut, authEc)
+	If authEc <> 0 Then Return False   '' not installed / not authenticated
+	Dim As String createCmd
+	If cli = "gh" Then
+		createCmd = "gh repo create " & Chr(34) & repoName & Chr(34) & " --private"
+		If sourceFolder <> "" AndAlso FolderExistsU(sourceFolder & "\.git") Then
+			createCmd &= " --source " & Chr(34) & sourceFolder & Chr(34) & " --remote origin"
+		End If
+	Else
+		createCmd = "glab repo create " & Chr(34) & repoName & Chr(34) & " --private"
+	End If
+	Dim As Integer cEc
+	Return RunCmdCaptured(createCmd, resultOut, cEc)
+End Function
+
+'' Git menu > Create Remote Repository: create an empty remote repo for the open project on
+'' its provider (from project.astoria, else GitHub), named after the project. Uses the
+'' provider CLI when signed in (and wires origin for a local git repo), else opens the
+'' provider's new-repo page. Astoria never enters credentials or submits a web form.
+Sub GitCreateRemoteRepo
+	Dim As UString projFolder = GetProjectDirectory()
+	If projFolder = "" Then
+		MsgBox ("Open a project first."), , mtWarning
+		Exit Sub
+	End If
+	'' Name + provider from project.astoria; fall back to the folder name / GitHub.
+	Dim As String repoName = ""
+	Dim As UString provider = "GitHub"
+	Dim As ProjectDescriptionData d
+	If ReadProjectDescription(projFolder, d) Then
+		If Trim(d.ProjectName) <> "" Then repoName = d.ProjectName
+		If Trim(d.GitProvider) <> "" Then provider = d.GitProvider
+	End If
+	If Trim(repoName) = "" Then
+		Dim As UString f = projFolder
+		If Right(f, 1) = "\" OrElse Right(f, 1) = "/" Then f = Left(f, Len(f) - 1)
+		repoName = GetFileNameU(f)
+	End If
+	If Trim(repoName) = "" Then
+		MsgBox ("Could not determine a project name for the repository."), , mtWarning
+		Exit Sub
+	End If
+	If MsgBox(("Create an empty private repository named ") & Chr(34) & repoName & Chr(34) & (" on ") & provider & ("?"), "", mtInfo, btYesNo) <> mrYes Then Exit Sub
+	Dim As String createOut
+	Dim As String srcFolder = projFolder
+	If TryCliCreateRepo(provider, repoName, srcFolder, createOut) Then
+		MsgBox (("Created ") & Chr(34) & repoName & Chr(34) & (" on ") & provider & (".") & Chr(13,10) & Chr(13,10) & Trim(createOut)), , mtInfo
+	Else
+		If MsgBox(("Couldn't create it automatically (no gh/glab CLI, not signed in, or it already exists).") & Chr(13,10) & Chr(13,10) & ("Open ") & provider & ("'s new-repository page to create it by hand?"), "", mtInfo, btYesNo) = mrYes Then
+			OpenNewRepoPage(provider)
+		End If
+	End If
 End Sub
 
 Sub AddNewProjectFile(ByRef Template As WString, ByRef ItemName As WString)
@@ -6916,8 +7001,9 @@ Sub CreateMenusAndToolBars
 	miGitPull = miGit->Add(("Git &Pull") & HK("GitPull"), "", "GitPull", @mClick, , , False)
 	miGitPush = miGit->Add(("Git Pus&h") & HK("GitPush"), "", "GitPush", @mClick, , , False)
 	miGit->Add("-")
-	'' Onboarding/setup actions (not project-gated). Task 5 adds "Create Remote Repository" here.
+	'' Onboarding/setup actions (not project-gated).
 	miGitSshKey = miGit->Add(("Set Up SSH &Key") & "..." & HK("GitSetupSshKey"), "", "GitSetupSshKey", @mClick)
+	miGitCreateRepo = miGit->Add(("Create &Remote Repository") & "..." & HK("GitCreateRemoteRepo"), "", "GitCreateRemoteRepo", @mClick)
 
 	miXizmat = mnuMain.Add(("&Tools"), "", "Service")
 	miXizmat->Add(("&Command Prompt") & HK("CommandPrompt", "Alt+C"), "Console", "CommandPrompt", @mClick)

@@ -1,4 +1,4 @@
-'################################################################################
+﻿'################################################################################
 '#  Form.bi                                                                     #
 '#  This file is part of MyFBFramework                                          #
 '#  Authors: Nastase Eodor, Xusinboy Bekchanov, Liu XiaLin                      #
@@ -931,7 +931,12 @@ Namespace My.Sys.Forms
 							Select Case msg.wParam
 							Case VK_TAB ', VK_LEFT, VK_UP, VK_DOWN, VK_RIGHT, VK_PRIOR, VK_NEXT
 								If Not GetFocus() = Handle Then
-									SelectNextControl(GetKeyState(VK_SHIFT) And 8000)
+									'' ASTORIA CHANGE: &h8000, not decimal 8000. GetKeyState sets bit &h8000 when a key is down,
+									'' and 8000 decimal is &h1F40 -- the two share no bits, so the test fails outright when the
+									'' state is reported as &h8000 (-32768). It only appeared to work because some key-state
+									'' representations (-128, as SetKeyboardState produces) happen to overlap &h1F40. Measured
+									'' by TestPlan B2.
+									SelectNextControl(GetKeyState(VK_SHIFT) And &h8000)
 									TranslateAndDispatch = False
 								ElseIf IsDialogMessage(Handle, @msg) Then
 									TranslateAndDispatch = False

@@ -1,4 +1,4 @@
-'###############################################################################
+﻿'###############################################################################
 '#  PrintPreviewControl.bas                                                           #
 '#  This file is part of MyFBFramework                                         #
 '#  Authors: Xusinboy Bekchanov                                                #
@@ -229,7 +229,12 @@ Namespace My.Sys.Forms
 			Static scrStyle As Integer, scrDirection As Integer
 			Dim Si As SCROLLINFO
 			Dim As Integer MaxWidth, MaxHeight, ScrollPos
-			bShifted = GetKeyState(VK_SHIFT) And 8000
+			'' ASTORIA CHANGE: &h8000, not decimal 8000. GetKeyState sets bit &h8000 when a key is down,
+			'' and 8000 decimal is &h1F40 -- the two share no bits, so the test fails outright when the
+			'' state is reported as &h8000 (-32768). It only appeared to work because some key-state
+			'' representations (-128, as SetKeyboardState produces) happen to overlap &h1F40. Measured
+			'' by TestPlan B2.
+			bShifted = GetKeyState(VK_SHIFT) And &h8000
 			bCtrl = GetKeyState(VK_CONTROL) And 8000
 			Select Case Message.Msg
 			Case WM_PAINT

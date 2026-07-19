@@ -17,7 +17,7 @@ Areas are: **IDE** (`src/`), **Framework/Controls** (`Controls/`), **Templates**
 is to write a good commit message. Regenerate rather than hand-edit; a stale hand-edit is worse
 than no entry. Commits after the last one listed here are not yet folded in.
 
-**Total: 361 commits, 2026-07-02 to 2026-07-18.**
+**Total: 362 commits, 2026-07-02 to 2026-07-18.**
 
 ## 2026-07-02
 
@@ -1097,3 +1097,6 @@ than no entry. Commits after the last one listed here are not yet folded in.
 - **`22c60b1`** — Add the rule: update the reference docs after every test
   A test is finished when the documents say what is now known, not when it passes.
   *Docs · 2 files*
+- **`9c86531`** — TestPlan A6 passes: ScintillaControl edits, undoes and styles correctly
+  8/8 assertions. Text round-trip; line addressing, which proves a genuinely line-structured buffer rather than a string that happens to compare equal; SelectAll + SelText replacement; undo restoring the previous text exactly; redo reapplying it exactly; and ...
+  *Docs, Examples · 7 files*

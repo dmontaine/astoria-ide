@@ -14,6 +14,36 @@ holds focus. Those interactions are where the remaining defects most likely live
 Related: [ControlTesting.md](ControlTesting.md) for per-control results, [Controls.md](Controls.md)
 for what each control is, [FrameworkFeatures.md](FrameworkFeatures.md) for the framework surface.
 
+## What the Section A and B fixtures do NOT cover
+
+The fixtures under `Examples/Integration` are single `.bas` files compiled directly with `fbc`. That
+makes them fast to write and easy to re-run, and it is fine for what they are for: proving that a
+control or a combination of controls *behaves*.
+
+**They do not exercise the build pipeline a user actually travels.** No `.vfp`, no IDE build, no
+`.frm` handling, and — the one that bites — **no runtime-DLL copying**, which is driven by the
+project. A fixture can therefore pass while the same program, created the way a user creates it,
+fails to start.
+
+This is not hypothetical. A6 was first built by hand with its DLLs copied manually, and it passed;
+had the project-path copying been broken, it would still have passed. The 73-control sweep in
+[ControlTesting.md](ControlTesting.md) does go through the IDE, which is exactly why it caught the
+missing `libmariadb.dll` that no Integration fixture would have.
+
+**So: any test whose subject touches deployment — runtime DLLs, resources, the generated `.rc`,
+anything the project owns — must also be verified through a real `.vfp` project built by the IDE.**
+A6 now carries a `.vfp` for that reason and is verified both ways.
+
+Astoria is project-based by design, and more firmly than it first appears: **with no project open
+the IDE offers no Open File command**, so a user cannot reach a loose source file at all, let alone
+build one. With a project open, Build targets the project regardless of what else sits in the
+editor. The unsupported path is therefore unreachable rather than merely discouraged — no guard is
+needed, and one was written and then removed on discovering it could never fire.
+
+Our fixtures reach it only because they are compiled by `fbc` directly, outside the IDE. That is a
+convenience for testing, not a workflow, and it is precisely why anything touching deployment has to
+be re-verified through a real project.
+
 ## Rule: update the documents after every test
 
 **A test is not finished when it passes or fails. It is finished when the documents say what is now

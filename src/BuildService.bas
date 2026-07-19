@@ -584,6 +584,9 @@ Function Compile(Parameter As String, bAll As Boolean) As Integer
 			StopProgress
 			ThreadsLeave()
 			'' Before any Run: a control library's DLLs must sit beside the exe or it will not start.
+			'' Driven by the project, which is the only way programs are built here: with no project
+			'' open the IDE offers no Open File, so a loose source file cannot be reached, let alone
+			'' built. There is deliberately no single-file fallback to warn about.
 			If Parameter <> "Check" Then
 				ThreadsEnter()
 				CopyControlRuntimeDlls(*ctx.ExeName, GetFolderName(*ctx.MainFile, False))

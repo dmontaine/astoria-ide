@@ -8,6 +8,7 @@
 #include once "TabWindow.bi"
 #include once "frmImageManager.bi"
 #include once "Debug.bi"
+#include once "RenameRefactor.bi"
 #include once "vbcompat.bi"  ' for could using format function
 #define TabSpace IIf(TabAsSpaces AndAlso ChoosedTabStyle = 0, WSpace(TabWidth), WStr(!"\t"))
 
@@ -2562,6 +2563,29 @@ Sub TabWindow.ChangeName(ByRef OldName As WString, ByRef NewName As WString)
 			End If
 		Next
 	Next
+
+	'' Rename the control everywhere it is USED, not just where it is declared (ROADMAP 13.17,
+	'' TestPlan C3). Everything above rewrites the four places that DESCRIBE the control -- its
+	'' Dim, its comment, its With block and its .Name -- but the branch that handles `Label1.Text`
+	'' sits inside `ElseIf b Then`, and `b` is only set within the Constructor. A reference from an
+	'' event handler body, which is where references almost always live, was never visited. So a
+	'' rename left the project unbuildable:
+	''
+	''     Error: Variable not declared, Label1 in 'Label1.Text = "Hello, " & TextBox1.Text'
+	''
+	'' Only for controls. Renaming the FORM (iIndex = 1) also renames its type and touches
+	'' declarations across the file, which the targeted branches above already handle; a blanket
+	'' identifier sweep there would over-reach.
+	If iIndex <> 1 AndAlso Len(OldName) > 0 AndAlso OldName <> NewName Then
+		For k As Integer = 0 To tb->txtCode.LinesCount - 1
+			Dim As UString Before = tb->txtCode.Lines(k)
+			Dim As UString After = RenameIdentifierInLine(Before, OldName, NewName)
+			'' Lines the branches above already rewrote no longer contain the old name, so this
+			'' pass is a no-op on them rather than a second edit.
+			If After <> Before Then tb->txtCode.ReplaceLine k, After
+		Next
+	End If
+
 	FormDesign True
 End Sub
 

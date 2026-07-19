@@ -176,6 +176,49 @@ tester needs is in `Documentation/`:
 All six are maintained going forward. `Documentation/AstoriaIDESignificantChanges.md` supersedes
 the `.doc` on P:\Astoria-Docs — edit the Markdown, which is version-controlled.
 
+## Session handoff (2026-07-18, latest) — designer shortcuts, C5/C6/A6, doc rules
+
+All committed and pushed; `main` in sync. `astoria.exe` is a current **release** build (`-Wc -O2`).
+
+**Tests run this session**
+
+| Test | Result |
+| --- | --- |
+| **C4** designer undo/redo | ✅ after the menu restructure (see previous handoff) |
+| **C5** cross-form copy/paste | ✅ — new fixture `Examples/Integration/C5_CopyPaste`. Name collision resolves (`lblShared` → `lblShared1`), declarations update, project rebuilds and runs |
+| **C6** split-view menu tracking | ✅ — measured by sampling Windows' menu state on a timer, not by eye |
+| **A6** ScintillaControl editing | ✅ 8/8 — text round-trip, line addressing, selection replace, undo, redo, style colours |
+
+Section C is complete **except C3** (renaming a control breaks the build, ROADMAP §13.17) — still the
+one 1.0 blocker.
+
+**Rule added, and it earned its keep immediately.** `Documentation/TestPlan.md` now opens with a
+table of which documents to update after every test. It exists because WebBrowser went from "cannot
+render" to "verified" while `Controls.md` kept telling readers to prove it worked first, and the
+runtime-DLL table never gained `WebView2Loader.dll`. Test documents stay current because running a
+test forces a visit; reference documents drift because nothing does. A6 was the first test run under
+the rule and it turned up three reference-doc updates that would otherwise have been skipped.
+
+**A6 is verified through a real project**, not just by hand. It now carries a `.vfp`; built by the
+IDE, the three Scintilla DLLs are copied automatically. TestPlan records the general limitation: the
+Integration fixtures are loose `.bas` files compiled by `fbc`, so they bypass the project pipeline
+entirely — anything touching deployment must be re-checked through a project.
+
+**Single-file editing is unreachable, by design.** Owner established that with no project open the
+IDE offers no Open File command, and with one open Build targets the project. A warning added for
+that case was removed as dead code. This is now stated for users in
+`Documentation/AstoriaIDESignificantChanges.md`: Astoria is a project-based build system, and anyone
+wanting to edit a lone `.bas` should use a text editor.
+
+**Next up, in the order I would take them**
+
+1. **A3 — MariaDBBox connection.** The last unproven data path and the largest remaining gap in
+   `Testing.md`. Needs connection details (host, port, user, password, a database that can take
+   test tables); MariaDB is installed on this machine.
+2. **C3 / ROADMAP §13.17** — the 1.0 blocker.
+3. **D1, D5** — agent-runnable lifecycle tests.
+4. **A8, D2, D3, D6** — need owner interaction.
+
 ## Session handoff (2026-07-18, later) — menu restructure: Code / Code-Form / Form
 
 **Designer keyboard commands work.** Ctrl+Z, Ctrl+Y and the clipboard shortcuts now function on the

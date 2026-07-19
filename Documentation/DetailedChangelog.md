@@ -17,7 +17,7 @@ Areas are: **IDE** (`src/`), **Framework/Controls** (`Controls/`), **Templates**
 is to write a good commit message. Regenerate rather than hand-edit; a stale hand-edit is worse
 than no entry. Commits after the last one listed here are not yet folded in.
 
-**Total: 362 commits, 2026-07-02 to 2026-07-18.**
+**Total: 363 commits, 2026-07-02 to 2026-07-18.**
 
 ## 2026-07-02
 
@@ -1100,3 +1100,6 @@ than no entry. Commits after the last one listed here are not yet folded in.
 - **`9c86531`** — TestPlan A6 passes: ScintillaControl edits, undoes and styles correctly
   8/8 assertions. Text round-trip; line addressing, which proves a genuinely line-structured buffer rather than a string that happens to compare equal; SelectAll + SelText replacement; undo restoring the previous text exactly; redo reapplying it exactly; and ...
   *Docs, Examples · 7 files*
+- **`d9c3193`** — A6 gets a project file; document what the Integration fixtures do not cover
+  A6_ScintillaEditing now has a .vfp and is verified both ways.
+  *Docs, Examples, IDE · 4 files*

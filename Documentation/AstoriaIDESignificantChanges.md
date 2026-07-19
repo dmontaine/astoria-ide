@@ -31,6 +31,12 @@ The trade-off is real and we accept it: a user with unusual requirements has few
 We think that is the right exchange. Configurability that only a small minority needs is paid for by
 every beginner who has to walk past it.
 
+**A project-based build system, not an editor.** Everything in Astoria hangs off a project: the
+build settings, the resource script, the runtime libraries placed beside your executable. There is
+no way to open a single file and build it, and that is deliberate — it is what lets "create a
+project, press Run" work every time. If you want to edit a lone `.bas` file, use a text editor;
+Astoria is for building programs.
+
 **One tool, not a stack.** Astoria combines text editing, visual GUI form design, project
 management, version control, and AI assistance in a single application. Newcomers to programming are
 frequently defeated not by the language but by the assembly required around it — a compiler here, an
@@ -144,6 +150,21 @@ philosophy described above.
 - **The bundled VisualFBEditor help file.** Astoria no longer lists its parent project's help. The
   FreeBASIC manual, the Win32 reference, and the MyFbFramework documentation remain available;
   Astoria's own documentation is being written to replace what was removed.
+- **Editing files outside a project — Astoria is a project-based build system, not a text editor.**
+  There is no way to open a loose source file and work on it: with no project open the IDE offers no
+  Open File command at all, and with a project open, Build always builds the project. This is not an
+  oversight to be worked around, it is the shape of the tool. A program's build settings, its
+  resource script, and the runtime libraries copied next to its executable are all properties of the
+  project — that is what makes "create a project, press Run, it works" true, and a loose file has
+  none of it. A file built outside a project would compile and then fail to start, for reasons the
+  user could not reasonably diagnose.
+
+  The trade-off is real and worth stating plainly: **if you want to edit a `.bas` file directly —
+  a quick tweak, a scratch experiment, someone else's snippet — use a text editor.** Notepad++,
+  VS Code, Vim and the rest all do this well, and Astoria does not try to. Astoria's answer to
+  "I want to try something small" is that creating a project takes one dialog and produces something
+  that builds and runs immediately.
+
 - **A large amount of configuration complexity.** This deserves to be named as a removal in its own
   right, because for many users it is the most consequential one. VisualFBEditor exposed a great many
   settings, and a beginner had no way to tell which of them mattered. Astoria has removed whole

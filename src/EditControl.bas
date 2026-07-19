@@ -1,4 +1,4 @@
-'#########################################################
+﻿'#########################################################
 '#  EditControl.bas                                      #
 '#  This file is part of AstoriaIDE                  #
 '#  Authors: Xusinboy Bekchanov (bxusinboy@mail.ru)      #
@@ -5473,8 +5473,12 @@ Namespace My.Sys.Forms
 		Static bShifted As Boolean
 		Static bCtrl As Boolean
 		Static scrStyle As Integer, scrDirection As Integer
-			bShifted = GetKeyState(VK_SHIFT) And 8000
-			bCtrl = GetKeyState(VK_CONTROL) And 8000
+			'' ASTORIA CHANGE: &h8000, not decimal 8000. GetKeyState sets bit &h8000 when a key
+			'' is down; 8000 decimal is &h1F40 and shares no bits with it, so the modifier was
+			'' detected only for key-state values that happen to overlap &h1F40. Same mistake
+			'' as the framework's, found by TestPlan B2 and fixed there first.
+			bShifted = GetKeyState(VK_SHIFT) And &h8000
+			bCtrl = GetKeyState(VK_CONTROL) And &h8000
 		'Base.ProcessMessage(msg)
 			Select Case msg.Msg
 			Case CM_CREATE

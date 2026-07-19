@@ -235,7 +235,7 @@ Namespace My.Sys.Forms
 			'' representations (-128, as SetKeyboardState produces) happen to overlap &h1F40. Measured
 			'' by TestPlan B2.
 			bShifted = GetKeyState(VK_SHIFT) And &h8000
-			bCtrl = GetKeyState(VK_CONTROL) And 8000
+			bCtrl = GetKeyState(VK_CONTROL) And &h8000
 			Select Case Message.Msg
 			Case WM_PAINT
 				Dim As HDC Dc, memDC

@@ -9245,7 +9245,11 @@ Sub txtImmediate_KeyDown(ByRef Designer As My.Sys.Object, ByRef Sender As Contro
 	Dim As Integer iLine = txtImmediate.GetLineFromCharIndex(txtImmediate.SelStart)
 	Dim As WString Ptr sLine ' = @txtImmediate.Lines(iLine) '  for got wrong value
 	Dim bCtrl As Boolean
-	bCtrl = GetKeyState(VK_CONTROL) And 8000
+	'' ASTORIA CHANGE: &h8000, not decimal 8000. GetKeyState sets bit &h8000 when a key
+	'' is down; 8000 decimal is &h1F40 and shares no bits with it, so the modifier was
+	'' detected only for key-state values that happen to overlap &h1F40. Same mistake
+	'' as the framework's, found by TestPlan B2 and fixed there first.
+	bCtrl = GetKeyState(VK_CONTROL) And &h8000
 	'
 	WLet(sLine, txtImmediate.Lines(iLine))
 	If CInt(Not bCtrl) AndAlso CInt(WGet(sLine) <> "") AndAlso CInt(Not StartsWith(Trim(WGet(sLine)),"'")) Then
@@ -9362,7 +9366,7 @@ txtImmediate.SetSel txtImmediate.GetTextLength, txtImmediate.GetTextLength
 
 Sub txtChangeLog_KeyDown(ByRef Designer As My.Sys.Object, ByRef Sender As Control, Key As Integer, Shift As Integer)
 	Dim bCtrl As Boolean
-	bCtrl = GetKeyState(VK_CONTROL) And 8000
+	bCtrl = GetKeyState(VK_CONTROL) And &h8000
 	If CInt(Not bCtrl) OrElse Shift <> 1 Then mChangeLogEdited = True
 	If CInt(bCtrl) And Key =13 Then
 		txtChangeLog.SelText = __DATE_ISO__ & " " & Time & !"\t" & !"\t"  'Format(Now, "yyyy/mm/dd hh:mm:ss") & !"\t" & !"\t"

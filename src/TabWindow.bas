@@ -10417,7 +10417,8 @@ Sub pnlForm_Message(ByRef Designer As My.Sys.Object, ByRef Sender As Control, By
 			Dim As Integer OldPos
 			Dim scrStyle As Byte
 			Dim As Boolean bShifted
-			bShifted = GetKeyState(VK_SHIFT) And 8000
+			'' ASTORIA CHANGE: &h8000, not decimal 8000 -- see the note in Designer.bas.
+			bShifted = GetKeyState(VK_SHIFT) And &h8000
 			If bShifted Then
 				scrStyle = SB_HORZ
 			Else

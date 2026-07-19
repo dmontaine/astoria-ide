@@ -10422,30 +10422,120 @@ Sub frmMain_Show(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	ChangeEnabledDebug tvExplorer.Nodes.Count > 0, False, False
 End Sub
 
+'' Files found changed on disk and awaiting the reload prompt.
+''
+'' Filenames rather than TabWindow pointers, deliberately: the prompt runs after the activation
+'' handler has returned, and a tab could be closed in between. A stale pointer would be a crash;
+'' a stale filename simply finds no tab and is skipped.
+Dim Shared gChangedFiles() As UString
+Dim Shared gChangedCount As Integer
+Dim Shared gInReloadPrompt As Boolean
+
+Private Sub QueueChangedFile(ByRef FileName As WString)
+	For i As Integer = 0 To gChangedCount - 1
+		If LCase(gChangedFiles(i)) = LCase(FileName) Then Exit Sub
+	Next i
+	If gChangedCount > UBound(gChangedFiles) Then ReDim Preserve gChangedFiles(gChangedCount + 8)
+	gChangedFiles(gChangedCount) = FileName
+	gChangedCount += 1
+End Sub
+
+Private Function FindTabByFileName(ByRef FileName As WString) As TabWindow Ptr
+	For j As Integer = 0 To TabPanels.Count - 1
+		Var ptabCode = @Cast(TabPanel Ptr, TabPanels.Item(j))->tabCode
+		For i As Integer = 0 To ptabCode->TabCount - 1
+			Dim tb As TabWindow Ptr = Cast(TabWindow Ptr, ptabCode->Tab(i))
+			If tb <> 0 AndAlso LCase(tb->FileName) = LCase(FileName) Then Return tb
+		Next i
+	Next j
+	Return 0
+End Function
+
+'' Raised from the main window's message handler on WM_APP_FILECHANGED, never from the activation
+'' handler itself. See ROADMAP 13.18: clicking the IDE to focus it used to be able to raise a modal
+'' from inside OnActivateApp. A modal disables its owner, so the main window stopped responding to
+'' clicks and ignored Close -- and a dialog raised from an activation handler is precisely the case
+'' where it may not come to the front, leaving nothing on screen to answer and no way out but Task
+'' Manager. Deferring it to a posted message means the prompt appears with the window in a normal,
+'' fully activated state.
+Sub PromptReloadChangedFiles()
+	'' The prompt is modal, and activation can fire again while it is up. Without this the second
+	'' post would stack another dialog behind the first.
+	If gInReloadPrompt Then Exit Sub
+	If gChangedCount = 0 Then Exit Sub
+	gInReloadPrompt = True
+
+	'' Snapshot and clear before prompting, so anything detected while the dialog is open queues
+	'' for the next round rather than being lost or re-shown.
+	Dim As Integer n = gChangedCount
+	Dim As UString Files(n - 1)
+	For i As Integer = 0 To n - 1
+		Files(i) = gChangedFiles(i)
+	Next i
+	gChangedCount = 0
+
+	'' One prompt for all of them. The old code raised one dialog per file inside the loop, so a
+	'' git pull touching six open files meant six sequential modals.
+	Dim As UString Msg_
+	If n = 1 Then
+		Msg_ = Files(0) & !"\r" & ("File was changed by another application. Reload it?")
+	Else
+		Msg_ = ("These files were changed by another application. Reload them?") & !"\r"
+		'' Cap the list so a large pull cannot produce a dialog taller than the screen.
+		Dim As Integer shown = n
+		If shown > 12 Then shown = 12
+		For i As Integer = 0 To shown - 1
+			Msg_ &= !"\r" & Files(i)
+		Next i
+		If n > shown Then Msg_ &= !"\r" & ("... and ") & Str(n - shown) & (" more")
+	End If
+
+	'' Belt and braces, per the MsgBoxForm z-order fix: make sure the window that owns the dialog
+	'' is restored and foreground before the dialog appears.
+	If frmMain.WindowState = WindowStates.wsMinimized Then ShowWindow frmMain.Handle, SW_RESTORE
+	SetForegroundWindow frmMain.Handle
+
+	If MsgBox(Msg_, ("Files Changed"), mtQuestion, btYesNo) = mrYes Then
+		For i As Integer = 0 To n - 1
+			Dim tb As TabWindow Ptr = FindTabByFileName(Files(i))
+			'' Skipped rather than assumed: the tab may have been closed while the prompt was up.
+			If tb = 0 Then Continue For
+			tb->txtCode.Changing "Reload"
+			tb->txtCode.LoadFromFile(tb->FileName, tb->FileEncoding, tb->NewLineType)
+			tb->FileEncoding = FileEncodings.Utf8
+			tb->NewLineType = NewLineTypes.WindowsCRLF
+			tb->txtCode.Changed "Reload"
+			tb->DateFileTime = GetFileLastWriteTime(tb->FileName)
+		Next i
+	End If
+
+	gInReloadPrompt = False
+End Sub
+
 Sub frmMain_ActivateApp(ByRef Designer As My.Sys.Object, ByRef Sender As Form)
 	Static bInActivateApp As Boolean
 	If bInActivateApp Then Exit Sub
 	bInActivateApp = True
 	Dim tb As TabWindow Ptr
+	Dim As Boolean bAnyChanged
 	For j As Integer = 0 To TabPanels.Count - 1
 		Var ptabCode = @Cast(TabPanel Ptr, TabPanels.Item(j))->tabCode
 		For i As Integer = 0 To ptabCode->TabCount - 1
 			tb = Cast(TabWindow Ptr, ptabCode->Tab(i))
 			If InStr(tb->FileName, "/") > 0 OrElse InStr(tb->FileName, "\") > 0 Then
 				If FileTimeToVariantTime(GetFileLastWriteTime(tb->FileName)) <> FileTimeToVariantTime(tb->DateFileTime) Then
-					If MsgBox(tb->FileName & !"\r" & ("File was changed by another application. Reload it?"), ("File Changed"), mtQuestion, btYesNo) = mrYes Then
-						tb->txtCode.Changing "Reload"
-						tb->txtCode.LoadFromFile(tb->FileName, tb->FileEncoding, tb->NewLineType)
-						tb->FileEncoding = FileEncodings.Utf8
-						tb->NewLineType = NewLineTypes.WindowsCRLF
-						tb->txtCode.Changed "Reload"
-					End If
+					QueueChangedFile(tb->FileName)
+					bAnyChanged = True
 				End If
+				'' Stamped here, as before, so a declined reload does not re-prompt on every
+				'' subsequent activation.
 				tb->DateFileTime = GetFileLastWriteTime(tb->FileName)
 			End If
 		Next i
 	Next j
 	bInActivateApp = False
+	'' NO MODAL UI IN THIS HANDLER. Post and return; the prompt runs once activation is complete.
+	If bAnyChanged Then PostMessageW(frmMain.Handle, WM_APP_FILECHANGED, 0, 0)
 End Sub
 
 Sub SaveMainWindowPanelLayout()
@@ -10544,6 +10634,12 @@ Sub frmMain_Message(ByRef Designer As My.Sys.Object, ByRef Sender As Control, By
 			'' Agent MCP pipe: run the pending pipe command on the UI thread
 			'' (see AgentPipe.bi / MCP_SERVER_PLAN.md section 5).
 			AgentPipe_ExecutePendingOnUi()
+			Msg.Result = 0
+			Return
+		Case WM_APP_FILECHANGED
+			'' Files changed on disk: prompt now that activation has completed, never from inside
+			'' the activation handler itself (ROADMAP 13.18).
+			PromptReloadChangedFiles()
 			Msg.Result = 0
 			Return
 		Case WM_COPYDATA

@@ -395,7 +395,40 @@ as the project lives.
 Note that keeping the handler name on rename is **deliberate-looking and defensible**; do not
 "fix" it without deciding the policy first. See the C3 entry in `Documentation/TestPlan.md`.
 
-### 13.18 Modal dialog raised from the app-activation handler can hang the IDE — **MANDATORY BEFORE 1.0 BETA** (owner-observed 2026-07-18)
+### 13.18 Modal dialog raised from the app-activation handler can hang the IDE — **FIX IMPLEMENTED 2026-07-18, awaiting owner confirmation** (owner-observed)
+
+**What changed.** Options 1, 3 and 4 were taken together:
+
+1. **No modal UI is raised from `frmMain_ActivateApp` any more.** It now only *detects* changed
+   files, queues their names, and posts `WM_APP_FILECHANGED` to the main window. The prompt runs
+   from the message handler, once activation has fully completed and the window is in a normal
+   state.
+3. **One prompt for all changed files**, listing them (capped at 12 with an "and N more" line).
+   The old loop raised one modal per file, so a `git pull` touching six open files meant six
+   sequential dialogs.
+4. **The main window is restored and brought to the foreground** before the dialog appears, per the
+   earlier `MsgBoxForm` z-order fix.
+
+Filenames are queued rather than `TabWindow` pointers, because the prompt now runs after the
+handler returns and a tab can be closed in between: a stale pointer would be a crash, a stale
+filename simply finds no tab and is skipped. A `gInReloadPrompt` guard stops a second post stacking
+another dialog while the first is up, and the queue is snapshotted and cleared before prompting so
+that anything detected while the dialog is open queues for the next round instead of being lost.
+
+Option 2 (a non-modal info bar) was **not** taken. It is the better end state, but the project is
+feature complete for 1.0 and a new notification surface is a feature, not a program-flow fix. Worth
+revisiting after 1.0.
+
+**Verification status -- read this honestly.** The structural claim is verifiable by reading the
+code and is certain: no modal can now be raised from inside the activation handler. What has *not*
+been done is reproducing the original hang and showing it gone, because the hang was never
+reproducible programmatically in the first place (Windows' foreground lock prevents another process
+from producing a genuine activation). **So this fix removes the documented cause; it has not been
+proven against the symptom.** Confirming it needs an owner run: with two files open in the IDE,
+change both on disk from outside, then click the IDE to focus it. Expected: one dialog listing both
+files, visible and answerable, with the IDE responsive afterwards either way.
+
+The original analysis follows.
 
 **Symptom, observed by the owner during TestPlan C4 setup:** the IDE would not respond to being
 clicked, could not be closed, and had to be killed from Task Manager. No dialog was visible and no

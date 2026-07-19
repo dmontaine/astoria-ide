@@ -326,6 +326,11 @@ Declare Sub LoadToolBox(ForLibrary As Library Ptr = 0)
 Declare Function IsMyFbFrameworkLibrary(ByRef Path As UString) As Boolean
 Declare Function GetMyFbFrameworkLibrary() As Library Ptr
 Declare Sub RunDeferredFormDesign()
+
+'' Posted to the main window when files are found changed on disk, so that the "reload?" prompt is
+'' raised AFTER the activation handler has returned rather than from inside it (ROADMAP 13.18).
+Const WM_APP_FILECHANGED = WM_APP + 72
+Declare Sub PromptReloadChangedFiles()
 Common Shared As Boolean mApplyingWorkspaceLoad
 Common Shared As Boolean mApplyingDeferredFormDesign
 Common Shared As Boolean mApplyingFormTabView

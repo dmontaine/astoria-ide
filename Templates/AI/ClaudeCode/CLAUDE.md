@@ -54,12 +54,27 @@ FreeBASIC is **not** VB.NET, VBA, QBASIC, or C — do not assume their syntax.
 - **Preprocessor:** `#define`, `#include once`, `#if/#endif`, `#macro`.
 - **Comments:** `'` (line) or `/' … '/` (block). **Line continuation:** trailing
   `_`.
+- **Save source as UTF-8 with NO byte-order mark.** This one bites hard and looks
+  like a mystery when it does: FreeBASIC treats a leading BOM as an instruction to
+  make string literals **wide**, so a BOM'd file compiles fine and then prints
+  garbled console output. Astoria strips the BOM when it saves, by design — if you
+  write a file with your own tools, write it BOM-less too, or you will reintroduce
+  the problem the IDE just removed.
 - Identifiers are **case-insensitive**; indentation is not significant, but keep
   it consistent with the surrounding file.
 - A local `Dim` is **procedure-scoped**, not block-scoped — a variable declared
   inside an `If`/loop is visible for the rest of the `Sub`, so deleting that block
   can leave later code referencing an undeclared name.
 - `IIf(...)` cannot return a `String` — use an explicit `If/Else` assignment.
+- `Str(a = b)` prints `0`/`-1`, not `"false"`/`"true"` — a comparison yields an
+  integer. `Str()` of an actual `Boolean` does give `"true"`/`"false"`. Mixing
+  these up silently inverts assertions in test output.
+- **Never `ReDim Preserve` an array whose element type owns heap memory** (a UDT
+  holding a `String`/`WString`, or the framework's `UString`). `ReDim Preserve`
+  relocates elements with a shallow copy, so the old element's destructor frees a
+  buffer the surviving element still points at — a double free that crashes later,
+  at the next unrelated touch, not where the fault is. Use a list type, or hold the
+  data as one delimited string.
 
 ## Astoria project rules
 
@@ -85,6 +100,13 @@ FreeBASIC is **not** VB.NET, VBA, QBASIC, or C — do not assume their syntax.
 
 ## Editing discipline
 
+- **If the Astoria IDE is running with this project open, edit through the
+  `astoria` MCP server** (`write_file`, `set_active_file_content`) rather than
+  writing to disk behind it. The IDE holds its own copy of each open file. When you
+  change a file underneath it, the next time the user clicks back into the IDE it
+  prompts to reload — and if they decline, or an editor buffer is dirty, your change
+  and theirs are now competing. Editing over MCP keeps the IDE's copy authoritative
+  and avoids the prompt entirely. See **use-astoria-mcp**.
 - Match each file's existing indentation (tabs in generated files) and line
   endings.
 - Keep changes small and compile-checked. FreeBASIC reports precise errors

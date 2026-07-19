@@ -33,9 +33,12 @@ FreeBASIC is **not** VB.NET, VBA, QBASIC, or C -- do not assume their syntax.
 - **Memory:** manual for pointers (`New`/`Delete`, `Allocate`/`Deallocate`) -- no garbage collector.
 - **Preprocessor:** `#define`, `#include once`, `#if/#endif`, `#macro`.
 - **Comments:** `'` (line) or `/' ... '/` (block). **Line continuation:** trailing `_`.
+- **Save source as UTF-8 with NO byte-order mark.** FreeBASIC treats a leading BOM as an instruction to make string literals **wide**, so a BOM'd file compiles fine and then prints garbled console output. Astoria strips the BOM on save by design -- if you write a file with your own tools, write it BOM-less too.
 - Identifiers are **case-insensitive**; indentation is not significant, but keep it consistent with the surrounding file.
 - A local `Dim` is **procedure-scoped**, not block-scoped -- a variable declared inside an `If`/loop is visible for the rest of the `Sub`, so deleting that block can leave later code referencing an undeclared name.
 - `IIf(...)` cannot return a `String` -- use an explicit `If/Else` assignment for boolean-to-string logic.
+- `Str(a = b)` prints `0`/`-1`, not `"false"`/`"true"` -- a comparison yields an integer. `Str()` of an actual `Boolean` does give `"true"`/`"false"`.
+- **Never `ReDim Preserve` an array whose element type owns heap memory** (a UDT holding a `String`/`WString`, or the framework's `UString`). It relocates elements with a shallow copy, so the old element's destructor frees a buffer the survivor still points at -- a double free that crashes later, at the next unrelated touch, not where the fault is. Use a list type, or hold the data as one delimited string.
 
 ### Astoria project rules
 
@@ -48,6 +51,7 @@ FreeBASIC is **not** VB.NET, VBA, QBASIC, or C -- do not assume their syntax.
 
 ### Editing discipline
 
+- **If the Astoria IDE is running with this project open, edit through the `astoria` MCP server** (`write_file`, `set_active_file_content`) rather than writing to disk behind it. The IDE holds its own copy of each open file; changing it underneath means the IDE prompts to reload on next focus, and if the user declines or the tab is dirty, the two versions compete. Editing over MCP keeps the IDE's copy authoritative.
 - Match each file's existing indentation (tabs in generated files) and line endings.
 - Keep changes small and compile-checked -- build after each meaningful change.
 - Prefer building/running through the Astoria IDE to confirm a change actually works, not just that it compiles.

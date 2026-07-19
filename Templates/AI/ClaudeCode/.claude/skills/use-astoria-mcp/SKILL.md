@@ -44,6 +44,29 @@ press **F5** or run `fbc` by hand; do it yourself and read the results back.
 All file-path arguments are confined to the open project's folder; paths outside it are
 rejected.
 
+## Prefer these over writing to disk yourself
+
+When the IDE is running with the project open, use `write_file` /
+`set_active_file_content` rather than your own file-writing tools. The IDE holds its own
+copy of every open file, so a change made underneath it puts two versions in play: the
+next time the user focuses the IDE it prompts to reload, and if they decline — or if that
+editor tab has unsaved changes — your edit and theirs are now competing, with whichever
+saves last winning silently.
+
+Going through MCP keeps the IDE's copy authoritative, skips the prompt, and means the
+editor shows your change immediately, which is the point of working inside a live IDE
+rather than behind it.
+
+Two related habits:
+
+- **Write source BOM-less.** `write_file` handles this, but if you ever do write a file
+  directly, a UTF-8 BOM makes FreeBASIC treat string literals as wide and the program
+  prints garbled console output. Astoria strips BOMs on save by design; don't put them
+  back.
+- **Check `get_errors` after `build`, not just the exit code.** It returns structured
+  `file`/`line`/`severity`/`message` entries, which is what you need to fix the *first*
+  error rather than guessing from the tail of the log.
+
 ## The loop
 
 Typical cycle for a change:

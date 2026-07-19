@@ -104,7 +104,10 @@ them together. Astoria is intended to be the whole environment.
   feature at all. Dialogs no longer appear behind the main window; a deleted or missing project no
   longer blocks startup with an error and is dropped from the recent list; a missing settings file is
   rebuilt from shipped defaults instead of leaving the IDE silently unable to save anything; and
-  debugged programs no longer survive as orphaned processes after the IDE closes.
+  debugged programs no longer survive as orphaned processes after the IDE closes. A file changed
+  on disk by something else -- a `git pull`, an AI assistant, a sync client -- is reported in a
+  single prompt that lists what changed, rather than one blocking dialog per file raised at a
+  moment when it could leave the IDE unresponsive.
 - **Nothing broken, unstable, or half-finished is shipped on purpose.** A menu item that does
   nothing, a control that fails the moment you use it, a setting with no effect — these cost a
   newcomer more than a missing feature does, because they cannot tell a broken tool from their own

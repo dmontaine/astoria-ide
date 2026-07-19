@@ -4,11 +4,17 @@
 this release; testing, program-flow and UI tweaks only. See "Feature complete for version 1.0"
 below and [Documentation/Testing.md](Documentation/Testing.md). Preparing to recruit human testers.
 
-*Current activity: **integration testing** against [Documentation/TestPlan.md](Documentation/TestPlan.md).
-Seven scenarios run and passing (A1, A4, A5, B1, B4, B6, B10); two of them passed only after fixing
-real defects the tests found — the WebBrowser control could not render a page at all and has been
-rebuilt on WebView2, and `SQLite3Component.AddField` could never succeed in its obvious form. See
-"Session handoff (2026-07-18, afternoon)" below for state and the next scenarios.*
+*Current activity: **integration testing**. **2026-07-19: both 1.0 blockers are closed and no
+known 1.0 beta blockers remain** -- 13.17 (designer rename broke the build) and 13.18 (a modal from
+the activation handler could hang the IDE) are fixed and owner-confirmed, and TestPlan A3 found and
+fixed four defects in MariaDBBox. Sections B and C of
+[Documentation/TestPlan.md](Documentation/TestPlan.md) are complete, and Section A is complete
+except A8. See "Session handoff (2026-07-19)" below for state and the next scenarios.*
+
+*Earlier in this testing run: seven scenarios (A1, A4, A5, B1, B4, B6, B10), two of which passed
+only after fixing real defects the tests found — the WebBrowser control could not render a page at
+all and has been rebuilt on WebView2, and `SQLite3Component.AddField` could never succeed in its
+obvious form.*
 
 *Previous entry, 2026-07-17:* (In progress: **New Project two-mode redesign + `project.astoria`** — built, compiles clean, NOT yet owner-verified; owner continuing tests on the other computer. See "Session handoff (2026-07-17) — New Project two-mode redesign" below. Earlier: Agent MCP Server **COMPLETE — Tasks 0–7**. Task 7 verified end-to-end from a real stdio MCP client: create → write → build → get_errors → fix → run produced the correct output (`Primes below 1000000 = 78498`). Verification fixed two MCP bugs — Fix B: `create_project` opens the main file; Fix C: agent build saves dirty editors first — and flagged two pre-existing ones, both since fixed (broken Console Application template; `run`-capture NUL truncation — the latter hardened 2026-07-17, pending GUI/MCP verify on the other computer). Earlier today: Task 6 (toggle default-on, status-bar indicator, auto-launch, packaging) `83426ef`; five AI templates gained MCP config `b70143c`.)
 **Repository:** [github.com/dmontaine/astoria-ide](https://github.com/dmontaine/astoria-ide)
@@ -175,6 +181,84 @@ tester needs is in `Documentation/`:
 
 All six are maintained going forward. `Documentation/AstoriaIDESignificantChanges.md` supersedes
 the `.doc` on P:\Astoria-Docs — edit the Markdown, which is version-controlled.
+
+## Session handoff (2026-07-19) — both 1.0 blockers closed; no known beta blockers remain
+
+**Tree clean, everything pushed.** `astoria.exe` is a current release build including every
+fix below. This session closed **§13.17** and **§13.18**, the two items that gated 1.0, and
+fixed four defects in `MariaDBBox` found by running TestPlan A3.
+
+### Tests run
+
+| Test | Result |
+| --- | --- |
+| **A3** MariaDBBox connection | ✅ **34/34** against MariaDB 10.6.8, after finding and fixing 4 real defects |
+| **C3** rename a referenced control | ✅ after fixing §13.17 — owner-verified, project rebuilt from scratch |
+| **§13.18** activation-modal hang | ✅ owner-confirmed after three rounds (see below) |
+
+Section C is now **complete**. Section A is complete except A8. Section B was already complete.
+
+### MariaDBBox: four defects, all fixed (§13.20)
+
+The component was a copy of `SQLite3Component` that had evidently never been run against a
+server. `CreateTable` emitted SQLite's `AUTOINCREMENT`; `AddField` left text defaults
+unquoted; `AddField` silently made columns `NOT NULL` **while reporting success**; and
+`Insert` returned `0` whether it succeeded or failed. All four fixed, with the recording
+checks promoted to regression assertions.
+
+**`Insert`'s contract changed** — it now returns the new row id, or `-1` on failure. No
+in-repo callers, but external code checking `Insert(...) = 0` for success is testing the old
+broken behaviour. Noted in `Controls.md`.
+
+Credentials come from `MARIADB_TEST_*` environment variables and a gitignored `*.local.sql`;
+no password is in the repository. The server-side setup is already done on this machine.
+
+### §13.18 took three rounds, and the second and third were self-inflicted
+
+Worth reading before touching this code:
+
+1. The **original cause** — a modal raised from inside `frmMain_ActivateApp` — was fixed by
+   deferring to a posted `WM_APP_FILECHANGED`, batching all changed files into one prompt,
+   and foregrounding the window first.
+2. That fix **crashed the IDE** on accepting a reload: the queue was an array of `UString`
+   grown with `ReDim Preserve`, which shallow-copies a heap-owning type and double-frees it.
+   It surfaced at the next unrelated touch, so it presented as the *reload* being broken.
+   Because `SaveWorkspace` runs only on a clean close, the crash also lost the session and
+   reopened the previous project — which looked like a third, separate bug and was not.
+3. The prompt then **appeared to list only one of two changed files**. It was listing both;
+   `MsgBoxForm` clips unbreakable text at a fixed width, and two paths sharing a directory
+   prefix clip to the same visible string.
+
+**Method note, because it cost real time.** Three hypotheses were formed about (3) — forward
+slashes, the IDE re-saving the file, form regeneration — and all three were wrong; they aimed
+at detection, which was working correctly the whole time. One trace line per tab settled it in
+a single run. The owner's suggestion that the dialog might be truncating is what closed it.
+Measure before theorising.
+
+### Open, in the order I would take them
+
+1. **§13.22 — `MsgBoxForm` clips long unbreakable text.** Not a blocker, but it will mislead
+   in any future dialog that names a file, and it already did once. Widening the box when the
+   natural width exceeds the fixed 380 is probably the cheapest correct fix.
+2. **Workspace is lost on any crash.** `SaveWorkspace` runs only on clean shutdown. Not yet a
+   roadmap entry; it made a crash look like a separate bug and would annoy a real user.
+3. **§13.21 — the auto-namer reuses a control name its old handler still references.** Needs a
+   policy decision; the untested risk is wiring `OnClick` on the new control generating a
+   handler name that already exists.
+4. **TestPlan D1 and D5** — agent-runnable lifecycle tests. Then A8, then Sections D and E.
+5. Tasks #15 (upstream MFF backport review), #16 (framework reference), #17 (optional BOM pass).
+
+### Also this session
+
+- **`CLAUDE.md` added at the repository root** — guidance for an AI working on *Astoria
+  itself*, which did not exist before. The template under `Templates/AI/ClaudeCode/` ships into
+  user projects and describes writing FreeBASIC apps; it is not what someone maintaining the
+  IDE reads. The new file carries the build procedure, the FreeBASIC traps that have cost time
+  here (BOM, `ReDim Preserve`, `&h8000`, keyword collisions), the document-maintenance rule,
+  and the testing discipline.
+- **The Claude project template gained** the UTF-8 BOM rule (absent entirely), the
+  `ReDim Preserve` rule, `Str(a = b)`, editing through MCP rather than behind the IDE's back,
+  and a testing-discipline section. `AGENTS.md` in that folder mirrors it.
 
 ## Session handoff (2026-07-18, latest) — designer shortcuts, C5/C6/A6, doc rules
 

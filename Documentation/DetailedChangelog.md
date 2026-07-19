@@ -17,7 +17,7 @@ Areas are: **IDE** (`src/`), **Framework/Controls** (`Controls/`), **Templates**
 is to write a good commit message. Regenerate rather than hand-edit; a stale hand-edit is worse
 than no entry. Commits after the last one listed here are not yet folded in.
 
-**Total: 368 commits, 2026-07-02 to 2026-07-18.**
+**Total: 377 commits, 2026-07-02 to 2026-07-19.**
 
 ## 2026-07-02
 
@@ -1118,3 +1118,28 @@ than no entry. Commits after the last one listed here are not yet folded in.
 - **`1f1864c`** — Fix all four MariaDBBox defects found by TestPlan A3
   CreateTable emitted SQLite's AUTOINCREMENT and could never create a table; AddField left text defaults unquoted; AddField silently made columns NOT NULL while reporting success; and Insert returned 0 whether it succeeded or failed. A3 now passes 34/34 and the recording checks are regression assertions. Insert's contract changed: the new row id on success, -1 on failure.
   *Docs, Framework/Controls, Examples · 7 files*
+- **`8ecf02b`** — DetailedChangelog: fold in the five commits through `1f1864c`
+  *Docs · 1 file*
+- **`fc9ebc9`** — Fix C3: rename a control and its references follow (ROADMAP 13.17)
+  The last 1.0 blocker. Renaming a control updated the four places describing it but nothing referencing it, so the project stopped building. The cause was narrow: the branch handling `Label1.Text` already existed but sat inside a block only entered between Constructor and End Constructor, so a reference from an event handler body was never visited. Fixed with an identifier-aware sweep; whole-identifier matching means the handler keeps its own name and `Label10`/`MyLabel1`/strings/comments are untouched.
+  *IDE, Examples · 4 files*
+- **`9b813de`** — TestPlan C3 passes: the last 1.0 blocker is closed
+  Owner re-ran the designer rename; verified by rebuilding the project from scratch rather than trusting the exe timestamp. Also recorded 13.21: a renamed control frees its old name for reuse while its handler keeps it.
+  *Docs · 3 files*
+- **`35a5305`** — Fix 13.18: never raise a modal from the app-activation handler
+  Clicking the IDE to focus it could raise a modal from inside the activation handler, which disables its owner and may never come to the front - the IDE became unresponsive with nothing to answer. Now detection only, posting `WM_APP_FILECHANGED`; the prompt runs after activation completes, batched into one dialog, with the window restored and foregrounded first.
+  *IDE · 2 files*
+- **`cd08ffb`** — Fix a crash I introduced in the 13.18 reload prompt, and instrument the detection
+  The queue was an array of `UString` grown with `ReDim Preserve`, which relocates elements with a shallow copy and double-frees a heap-owning type. Because `SaveWorkspace` runs only on a clean close, the crash also lost the session - which looked like a third separate bug. Rewritten as one newline-delimited string.
+  *IDE · 1 file*
+- **`36cacd8`** — Fix the 13.18 prompt listing two files as one, and record the cause as 13.22
+  The batching worked from the first run; the display was clipping. `MsgBoxForm` measures with `DT_WORDBREAK` into a fixed width, and paths have no spaces to break at, so two files sharing a directory prefix rendered as the same truncated line. The prompt now names the shared folder once and lists bare file names.
+  *IDE, Docs · 2 files*
+- **`6d685d3`** — ROADMAP 13.18 resolved, owner-confirmed: no known 1.0 beta blockers remain
+  *Docs · 2 files*
+- **`b207443`** — Claude template: add the three rules this session's defects would have prevented
+  UTF-8 BOM (absent from the template entirely, and the single most confusing thing an agent can do to itself in FreeBASIC); `ReDim Preserve` on a heap-owning element type; and editing through MCP rather than behind the IDE's back.
+  *Templates · 3 files*
+- **`ef63898`** — Claude template: add testing discipline
+  Verify by effect rather than return value; make the assertion as strong as the claim; measure before theorising.
+  *Templates · 2 files*

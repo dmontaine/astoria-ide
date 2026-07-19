@@ -17,7 +17,7 @@ Areas are: **IDE** (`src/`), **Framework/Controls** (`Controls/`), **Templates**
 is to write a good commit message. Regenerate rather than hand-edit; a stale hand-edit is worse
 than no entry. Commits after the last one listed here are not yet folded in.
 
-**Total: 383 commits, 2026-07-02 to 2026-07-19.**
+**Total: 384 commits, 2026-07-02 to 2026-07-19.**
 
 ## 2026-07-02
 
@@ -1165,3 +1165,6 @@ than no entry. Commits after the last one listed here are not yet folded in.
 - **`be3b611`** — TestPlan: D3 tested the wrong premise; a local project is not a Git repo
   D3 read "Git: local project - create local, add files, commit and push".
   *Docs · 2 files*
+- **`01d0c22`** — ROADMAP 13.25-13.27: first-start dialog, local-to-Git conversion, panel focus
+  Three tasks raised by the owner while testing.
+  *Docs · 3 files*

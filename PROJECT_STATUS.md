@@ -182,6 +182,52 @@ tester needs is in `Documentation/`:
 All six are maintained going forward. `Documentation/AstoriaIDESignificantChanges.md` supersedes
 the `.doc` on P:\Astoria-Docs — edit the Markdown, which is version-controlled.
 
+## Session handoff (2026-07-19, later) — D1/D2 pass, gh dropped, four new tasks
+
+**Tree clean, everything pushed.** `astoria.exe` is a current release build. The IDE was rebuilt from
+the pulled source at the start of this session, so it includes the C3 rename-refactor and §13.18
+work from the other machine.
+
+### Tests
+
+| Test | Result |
+| --- | --- |
+| **D1** console lifecycle | ✅ 12/12, fully automated — `TestHarness/D1_ConsoleLifecycle.ps1` |
+| **D2** Windows app lifecycle | ✅ owner-verified; found §13.24 |
+| **D3** Git-backed project | re-specified and set up; **not yet run** |
+
+D1 asserts on program *output*, not exit status, and rebuilds after reopening — a project that is
+merely listed is not the same as one that still works.
+
+### The gh/glab CLI is gone (`08eaece`)
+
+Owner's call: if someone is running Astoria, a browser is available. All three CLI use sites now use
+the browser path they already had as a fallback — SSH key registration, Create Remote Repository, and
+the New Project clone preflight — each putting the key or repository name on the clipboard first.
+
+I had built a **Set Up GitHub CLI** menu item to make the dependency easier to acquire, and it was
+the wrong question: the right one was whether the dependency earned its place. It did not. That
+feature, its winget install flow, a registry PATH-refresh helper and a console runner were all
+removed. Three findings from the attempt, each of which argued for removal rather than for more
+engineering: gh's sign-in cannot avoid a console; a tool installed while Astoria runs is invisible to
+it; and the failure message had to disambiguate three states that each needed different user action.
+
+### Four tasks raised by the owner while testing
+
+§13.23 (Git setup documentation), §13.25 (first-start dialog: use Git? use AI? personal info),
+§13.26 (convert a local project to Git), §13.27 (left panel jumps to the Toolbox). They share a
+theme — Git and AI are presented to everyone as though everyone wants them. **Decide §13.25 first;**
+a user who answers "no Git" never meets §13.23's or §13.26's problem at all.
+
+§13.24 also came out of D2: analysis leaves a scratch `Temp.bas` beside the user's source.
+
+### Next
+
+1. **§13.27** — smallest and most visible; cause identified in `ApplyView`.
+2. **D3** — set up and ready; step 3 (the new-repository page, with the name on the clipboard) is the
+   path changed by the gh removal and has not been exercised.
+3. **§13.25**, then §13.26 in whatever shape §13.25 leaves it.
+
 ## Session handoff (2026-07-19) — both 1.0 blockers closed; no known beta blockers remain
 
 **Tree clean, everything pushed.** `astoria.exe` is a current release build including every

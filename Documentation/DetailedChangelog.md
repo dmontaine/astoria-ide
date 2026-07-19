@@ -17,7 +17,7 @@ Areas are: **IDE** (`src/`), **Framework/Controls** (`Controls/`), **Templates**
 is to write a good commit message. Regenerate rather than hand-edit; a stale hand-edit is worse
 than no entry. Commits after the last one listed here are not yet folded in.
 
-**Total: 363 commits, 2026-07-02 to 2026-07-18.**
+**Total: 368 commits, 2026-07-02 to 2026-07-18.**
 
 ## 2026-07-02
 
@@ -1103,3 +1103,18 @@ than no entry. Commits after the last one listed here are not yet folded in.
 - **`d9c3193`** — A6 gets a project file; document what the Integration fixtures do not cover
   A6_ScintillaEditing now has a .vfp and is verified both ways.
   *Docs, Examples, IDE · 4 files*
+- **`e235059`** — Astoria is a project-based build system, not an editor; session handoff
+  Establishes for users that single-file editing is unreachable by design: with no project open the IDE offers no Open File command, and with one open Build targets the project.
+  *Docs · 3 files*
+- **`9aa11e2`** — A3 fixture: MariaDBBox against a real server, credentials from the environment
+  Prepares the last unproven data path. Credentials come from MARIADB_TEST_* variables and are never written into a source file; a setup script creates a database and a user scoped to that database alone.
+  *Examples · 2 files*
+- **`cc23967`** — A3 setup: keep the real DB password out of the tracked file
+  The setup script shipped a CHANGE_ME placeholder and told the owner to edit it in place - but the file is tracked, so following the instruction put a real password in the working tree of a pushed repository. Caught before any commit; the password now lives in a gitignored *.local.sql copy.
+  *Build/Tools, Examples · 2 files*
+- **`b1819b1`** — TestPlan A3 passes: MariaDBBox data path works, four defects confirmed
+  24 checks pass against MariaDB 10.6.8 and four real defects are confirmed, so the last unproven data path is now proven - and proven defective in four specific ways rather than vaguely suspect. The strongest assertion is values surviving a genuine disconnect and reconnect, which for a client-server driver proves the data reached another process.
+  *Docs, Examples · 4 files*
+- **`1f1864c`** — Fix all four MariaDBBox defects found by TestPlan A3
+  CreateTable emitted SQLite's AUTOINCREMENT and could never create a table; AddField left text defaults unquoted; AddField silently made columns NOT NULL while reporting success; and Insert returned 0 whether it succeeded or failed. A3 now passes 34/34 and the recording checks are regression assertions. Insert's contract changed: the new row id on success, -1 on failure.
+  *Docs, Framework/Controls, Examples · 7 files*

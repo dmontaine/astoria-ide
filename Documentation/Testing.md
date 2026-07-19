@@ -95,6 +95,13 @@ Commit, Pull and Push from the Git menu, plus SSH key setup and remote repositor
 owner-verified **against GitHub**. GitHub is currently the only provider offered, so this is full
 coverage of what ships.
 
+The complete ongoing workflow is owner-verified by TestPlan D3: create through **Use Existing Git
+Project**, follow the browser-assisted missing-repository path (repository name copied to the
+clipboard), edit, commit, push and pull from Astoria's Git menu. As an additional parity check, a
+tracked file deleted locally was not restored by Pull, exactly matching command-line Git: the
+deletion remains an uncommitted working-tree change until restored with `git restore <path>` or
+committed.
+
 ### Installer
 
 Owner-verified through a full clean install and uninstall cycle: per-user install with no

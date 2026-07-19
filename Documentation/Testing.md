@@ -55,6 +55,16 @@ output. Verification itself found and fixed two MCP bugs and surfaced two pre-ex
 Later hardening: `run` output capture no longer truncates at a NUL byte (wide/UTF-16 program
 output previously showed only its first character).
 
+### Whole-workflow lifecycle
+
+**Console application, end to end (TestPlan D1): 12/12.** Create from the template, edit, build,
+run, read the output back, switch away to another project, reopen, confirm the edit survived, and
+rebuild. Driven through the agent pipe, asserting on program *output* rather than exit status.
+
+This is the regression canary: it touches project creation, the template, the editor, the build
+pipeline, process launch and output capture, and workspace persistence in one pass. If something
+fundamental breaks, this fails first.
+
 ### Build and toolchain
 
 The IDE builds clean with the bundled FBC 1.10.1. Both project templates were verified by

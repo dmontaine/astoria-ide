@@ -162,7 +162,7 @@ End-to-end paths a real user takes, each crossing several IDE subsystems.
 
 | ID | Scenario | What it proves | Who | Status | Result |
 | --- | --- | --- | --- | --- | --- |
-| D1 | **Console app lifecycle** — create, edit, build, run, read output, close, reopen. | The simplest complete path. Regression canary for everything else. | 🤖 | - | |
+| D1 | **Console app lifecycle** — create, edit, build, run, read output, close, reopen. | The simplest complete path. Regression canary for everything else. | 🤖 | ✅ | **12/12**, driven entirely through the agent pipe. `create_project` from the Console Application template; the main file rewritten to print a random marker and a computed sum; build; run; **output asserted on content** (`D1-MARKER-…` and `sum=5050`) rather than on a zero exit code, since a program printing nothing would otherwise pass; switch to another project and confirm the IDE is no longer on it; reopen; confirm the edit survived; and rebuild, which proves the reopened project is genuinely usable rather than merely listed. Re-runnable: `TestHarness/D1_ConsoleLifecycle.ps1`, which deletes and recreates its project each run. |
 | D2 | **Windows app lifecycle** — same, with a form and the designer. | The default path for a new user, given Windows Application is the default template. | 🤝 | - | |
 | D3 | **Git: local project** — create local, add files, commit and push from the Project menu. | The Git menu against a real remote. | 🤝 | - | |
 | D4 | **Git: clone existing** — all three clone classifications (empty, Astoria project, foreign/refused). | Owner-verified 2026-07-18; re-run each release. | 🤝 | ✅ | Owner-verified: all three paths behave; module fields grey out for a complete project. |

@@ -17,7 +17,7 @@ Areas are: **IDE** (`src/`), **Framework/Controls** (`Controls/`), **Templates**
 is to write a good commit message. Regenerate rather than hand-edit; a stale hand-edit is worse
 than no entry. Commits after the last one listed here are not yet folded in.
 
-**Total: 377 commits, 2026-07-02 to 2026-07-19.**
+**Total: 378 commits, 2026-07-02 to 2026-07-19.**
 
 ## 2026-07-02
 
@@ -1104,42 +1104,49 @@ than no entry. Commits after the last one listed here are not yet folded in.
   A6_ScintillaEditing now has a .vfp and is verified both ways.
   *Docs, Examples, IDE · 4 files*
 - **`e235059`** — Astoria is a project-based build system, not an editor; session handoff
-  Establishes for users that single-file editing is unreachable by design: with no project open the IDE offers no Open File command, and with one open Build targets the project.
-  *Docs · 3 files*
+  States plainly in the user-facing document what this session established by accident: there is no way to open a loose source file and work on it.
+  *Docs · 4 files*
 - **`9aa11e2`** — A3 fixture: MariaDBBox against a real server, credentials from the environment
-  Prepares the last unproven data path. Credentials come from MARIADB_TEST_* variables and are never written into a source file; a setup script creates a database and a user scoped to that database alone.
+  Prepares TestPlan A3, the last unproven data path.
   *Examples · 2 files*
 - **`cc23967`** — A3 setup: keep the real DB password out of the tracked file
-  The setup script shipped a CHANGE_ME placeholder and told the owner to edit it in place - but the file is tracked, so following the instruction put a real password in the working tree of a pushed repository. Caught before any commit; the password now lives in a gitignored *.local.sql copy.
-  *Build/Tools, Examples · 2 files*
+  The setup script shipped with a CHANGE_ME placeholder and told the owner to edit it in place.
+  *Examples · 2 files*
 - **`b1819b1`** — TestPlan A3 passes: MariaDBBox data path works, four defects confirmed
-  24 checks pass against MariaDB 10.6.8 and four real defects are confirmed, so the last unproven data path is now proven - and proven defective in four specific ways rather than vaguely suspect. The strongest assertion is values surviving a genuine disconnect and reconnect, which for a client-server driver proves the data reached another process.
-  *Docs, Examples · 4 files*
+  Run against MariaDB 10.6.8. 24 checks pass and 4 real defects are confirmed, so the last unproven data path is now proven -- and it is proven defective in four specific ways rather than vaguely suspect.
+  *Docs, Examples · 6 files*
 - **`1f1864c`** — Fix all four MariaDBBox defects found by TestPlan A3
-  CreateTable emitted SQLite's AUTOINCREMENT and could never create a table; AddField left text defaults unquoted; AddField silently made columns NOT NULL while reporting success; and Insert returned 0 whether it succeeded or failed. A3 now passes 34/34 and the recording checks are regression assertions. Insert's contract changed: the new row id on success, -1 on failure.
-  *Docs, Framework/Controls, Examples · 7 files*
-- **`8ecf02b`** — DetailedChangelog: fold in the five commits through `1f1864c`
+  A3 now passes 34/34 against MariaDB 10.6.8, up from 24 passing with 4 defects recorded.
+  *Docs, Examples, Framework/Controls · 7 files*
+- **`8ecf02b`** — DetailedChangelog: fold in the five commits through 1f1864c
   *Docs · 1 file*
 - **`fc9ebc9`** — Fix C3: rename a control and its references follow (ROADMAP 13.17)
-  The last 1.0 blocker. Renaming a control updated the four places describing it but nothing referencing it, so the project stopped building. The cause was narrow: the branch handling `Label1.Text` already existed but sat inside a block only entered between Constructor and End Constructor, so a reference from an event handler body was never visited. Fixed with an identifier-aware sweep; whole-identifier matching means the handler keeps its own name and `Label10`/`MyLabel1`/strings/comments are untouched.
-  *IDE, Examples · 4 files*
+  The 1.0 blocker. Renaming a control in the property grid updated the four places that DESCRIBE it -- its Dim, its comment, its With block and its .Name -- but nothing that REFERENCES it, so the project stopped building:
+  *Examples, IDE · 5 files*
 - **`9b813de`** — TestPlan C3 passes: the last 1.0 blocker is closed
-  Owner re-ran the designer rename; verified by rebuilding the project from scratch rather than trusting the exe timestamp. Also recorded 13.21: a renamed control frees its old name for reuse while its handler keeps it.
+  Owner re-ran the designer rename against the fixed IDE.
   *Docs · 3 files*
 - **`35a5305`** — Fix 13.18: never raise a modal from the app-activation handler
-  Clicking the IDE to focus it could raise a modal from inside the activation handler, which disables its owner and may never come to the front - the IDE became unresponsive with nothing to answer. Now detection only, posting `WM_APP_FILECHANGED`; the prompt runs after activation completes, batched into one dialog, with the window restored and foregrounded first.
-  *IDE · 2 files*
+  Clicking the IDE to focus it could raise a modal "file changed, reload?" dialog from inside frmMain_ActivateApp.
+  *Docs, IDE · 5 files*
 - **`cd08ffb`** — Fix a crash I introduced in the 13.18 reload prompt, and instrument the detection
-  The queue was an array of `UString` grown with `ReDim Preserve`, which relocates elements with a shallow copy and double-frees a heap-owning type. Because `SaveWorkspace` runs only on a clean close, the crash also lost the session - which looked like a third separate bug. Rewritten as one newline-delimited string.
-  *IDE · 1 file*
+  Owner hit two problems with the first 13.18 fix.
+  *Examples, IDE · 5 files*
+
+## 2026-07-19
+
 - **`36cacd8`** — Fix the 13.18 prompt listing two files as one, and record the cause as 13.22
-  The batching worked from the first run; the display was clipping. `MsgBoxForm` measures with `DT_WORDBREAK` into a fixed width, and paths have no spaces to break at, so two files sharing a directory prefix rendered as the same truncated line. The prompt now names the shared folder once and lists bare file names.
-  *IDE, Docs · 2 files*
+  The batching worked from the first run. The DISPLAY was clipping.
+  *Docs, Examples, IDE · 6 files*
 - **`6d685d3`** — ROADMAP 13.18 resolved, owner-confirmed: no known 1.0 beta blockers remain
-  *Docs · 2 files*
+  With two files changed on disk in one project, activation raises a single dialog naming the shared folder once and listing both files distinctly, the IDE stays responsive, and accepting reloads both without incident.
+  *Docs, Examples · 4 files*
 - **`b207443`** — Claude template: add the three rules this session's defects would have prevented
-  UTF-8 BOM (absent from the template entirely, and the single most confusing thing an agent can do to itself in FreeBASIC); `ReDim Preserve` on a heap-owning element type; and editing through MCP rather than behind the IDE's back.
+  Only Templates/AI/ClaudeCode, per owner instruction; it is the master copy the other AI templates are derived from.
   *Templates · 3 files*
 - **`ef63898`** — Claude template: add testing discipline
   Verify by effect rather than return value; make the assertion as strong as the claim; measure before theorising.
   *Templates · 2 files*
+- **`b69a0d0`** — Documentation current, session handoff, and a CLAUDE.md for the IDE itself
+  Adds a repository-root CLAUDE.md. There was none, so an AI asked to work on Astoria's own source had no guidance at all -- the file under Templates/AI/ClaudeCode/ ships into projects CREATED WITH Astoria and describes writing FreeBASIC apps, which is a diff...
+  *Docs · 4 files*

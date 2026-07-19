@@ -346,7 +346,7 @@ is not.
 mistook the IDE's BOM healing for a fidelity bug and "fixed" it, briefly reintroducing the garbled
 output hazard before the policy was found and the change reverted.
 
-### 13.17 Rename refactoring for controls in the designer (found by TestPlan C3, 2026-07-18)
+### 13.17 Rename refactoring for controls in the designer — **REQUIRED FOR 1.0** (found by TestPlan C3, 2026-07-18)
 
 Renaming a control in the property grid updates the four places that describe the **control** — its
 `Dim`, its comment, its `With` block and its `.Name` — but nothing that **references** it. The
@@ -357,8 +357,15 @@ untouched, so the project stops building:
 Error: Variable not declared, Label1 in 'Label1.Text = "Hello, " & TextBox1.Text'
 ```
 
-**Not silent, and not data loss** — the error names the file, the line and the identifier, and a
-user fixes it in seconds. That is why this is an enhancement rather than a 1.0 bug fix. But on a
+**Owner decision 2026-07-18: this is mandatory for 1.0, not a deferred enhancement.** The reasoning
+is the product's own rule — *it just works*. Renaming a control is an ordinary thing to do in a
+designer; that it silently leaves the project unbuildable is precisely the kind of rough edge a
+newcomer cannot distinguish from their own mistake, which is the standard
+`AstoriaIDESignificantChanges.md` commits Astoria to. The error being discoverable makes it cheap to
+recover from; it does not make it acceptable to ship.
+
+It is not silent data loss — the error names the file, the line and the identifier, and a user fixes
+it in seconds. But on a
 form with a control referenced from a dozen places, one rename produces a dozen errors with no
 warning at the moment of renaming, and the handler is left with a name that no longer matches its
 control (`Label1_Click` on a control called `lblGreeting`), which is quietly confusing for as long

@@ -119,6 +119,7 @@ Dim Shared As MenuItem Ptr miCode, miForm, miCodeAndForm, miGotoCodeForm, miFold
 Dim Shared As MenuItem Ptr miAlignLefts, miAlignCenters, miAlignRights, miAlignTops, miAlignMiddles, miAlignBottoms, miAlignToGrid, miMakeSameSizeWidth, miMakeSameSizeHeight, miMakeSameSizeBoth, miSizeToGrid, miHorizontalSpacingMakeEqual, miHorizontalSpacingIncrease, miHorizontalSpacingDecrease, miHorizontalSpacingRemove, miVerticalSpacingMakeEqual, miVerticalSpacingIncrease, miVerticalSpacingDecrease, miVerticalSpacingRemove, miCenterInParentHorizontally, miCenterInParentVertically, miOrderBringToFront, miOrderSendToBack, miLockControls
 Dim Shared As MenuItem Ptr miFormFormat ' D1 (2026-07-07): top-level Form menu; greyed contextually by UpdateCodeFormMenuEnabled (TabWindow.bas)
 Dim Shared As MenuItem Ptr miCodeMenu ' top-level Code menu; greyed contextually alongside miFormFormat (see UpdateCodeFormMenuEnabled)
+Dim Shared As MenuItem Ptr miCodeFormMenu ' top-level Code/Form menu: commands valid in both views; NEVER greyed (a greyed parent menu kills its accelerators)
 Dim Shared As Boolean gDesignerPaneFocused ' split view: True while the form-designer pane (not the code editor) last held focus
 Dim Shared As MenuItem Ptr miShowWithFolders, miShowWithoutFolders, miShowAsFolder
 Dim Shared As ToolButton Ptr tbtAlignLefts, tbtAlignCenters, tbtAlignRights, tbtAlignTops, tbtAlignMiddles, tbtAlignBottoms, tbtAlignToGrid, tbtMakeSameSizeWidth, tbtMakeSameSizeHeight, tbtMakeSameSizeBoth, tbtSizeToGrid, tbtHorizontalSpacingMakeEqual, tbtHorizontalSpacingIncrease, tbtHorizontalSpacingDecrease, tbtHorizontalSpacingRemove, tbtVerticalSpacingMakeEqual, tbtVerticalSpacingIncrease, tbtVerticalSpacingDecrease, tbtVerticalSpacingRemove, tbtCenterInParentHorizontally, tbtCenterInParentVertically, tbtOrderBringToFront, tbtOrderSendToBack, tbtLockControls
@@ -6992,19 +6993,9 @@ Sub CreateMenusAndToolBars
 
 	Var miEdit = mnuMain.Add(("&Code"), "", "Tahrir")
 	miCodeMenu = miEdit ' shared pointer so UpdateCodeFormMenuEnabled can grey the whole menu contextually
-	miUndo = miEdit->Add(("Undo") & HK("Undo", "Ctrl+Z"), "Undo", "Undo", @mClick, , , False)
-	miRedo = miEdit->Add(("Redo") & HK("Redo", "Ctrl+Shift+Z"), "Redo", "Redo", @mClick, , , False)
-	miEdit->Add("-")
 	miCutCurrentLine = miEdit->Add(("C&ut Current Line") & HK("CutCurrentLine", "Ctrl+Y"), "", "CutCurrentLine", @mClick, , , False)
-	miCut = miEdit->Add(("Cu&t") & HK("Cut", "Ctrl+X"), "Cut", "Cut", @mClick, , , False)
-	miCopy = miEdit->Add(("&Copy") & HK("Copy", "Ctrl+C"), "Copy", "Copy", @mClick, , , False)
-	miPaste = miEdit->Add(("&Paste") & HK("Paste", "Ctrl+V"), "Paste", "Paste", @mClick, , , False)
 	miEdit->Add("-")
 	miSingleComment = miEdit->Add(("&Toggle Comment") & HK("SingleComment", "Ctrl+I"), "Comment", "SingleComment", @mClick, , , False)
-	miEdit->Add("-")
-	miDuplicate = miEdit->Add(("&Duplicate") & HK("Duplicate", "Ctrl+D"), "", "Duplicate", @mClick, , , False)
-	miEdit->Add("-")
-	miSelectAll = miEdit->Add(("Select &All") & HK("SelectAll", "Ctrl+A"), "", "SelectAll", @mClick, , , False)
 	miEdit->Add("-")
 	miIndent = miEdit->Add(("&Indent") & HK("Indent", "Tab"), "", "Indent", @mClick, , , False)
 	miOutdent = miEdit->Add(("&Outdent") & HK("Outdent", "Shift+Tab"), "", "Outdent", @mClick, , , False)
@@ -7084,6 +7075,26 @@ Sub CreateMenusAndToolBars
 	miPreviousBookmark = miBookmark->Add(("Previous Bookmark") & HK("PreviousBookmark", "Ctrl+Shift+F6"), "", "PreviousBookmark", @mClick, , , False)
 	miClearAllBookmarks = miBookmark->Add(("Clear All Bookmarks") & HK("ClearAllBookmarks"), "", "ClearAllBookmarks", @mClick, , , False)
 	
+	'' Commands that apply in BOTH the code editor and the form designer. They live in their own
+	'' top-level menu because Code and Form are greyed contextually, and a greyed top-level menu
+	'' silently disables every keyboard shortcut inside it -- Windows' TranslateAccelerator
+	'' consumes an accelerator whose parent menu is disabled and sends no WM_COMMAND. Undo used to
+	'' sit in the Code menu, so Ctrl+Z did nothing whatsoever on the design surface.
+	''
+	'' This menu is therefore NEVER greyed. Its individual items still enable/disable themselves
+	'' in ChangeMenuItemsEnabled, and mClick routes each one to the editor or the designer
+	'' depending on what has focus.
+	miCodeFormMenu = mnuMain.Add(("Code/Form"), "", "CodeForm")
+	miUndo = miCodeFormMenu->Add(("Undo") & HK("Undo", "Ctrl+Z"), "Undo", "Undo", @mClick, , , False)
+	miRedo = miCodeFormMenu->Add(("Redo") & HK("Redo", "Ctrl+Shift+Z"), "Redo", "Redo", @mClick, , , False)
+	miCodeFormMenu->Add("-")
+	miCut = miCodeFormMenu->Add(("Cu&t") & HK("Cut", "Ctrl+X"), "Cut", "Cut", @mClick, , , False)
+	miCopy = miCodeFormMenu->Add(("&Copy") & HK("Copy", "Ctrl+C"), "Copy", "Copy", @mClick, , , False)
+	miPaste = miCodeFormMenu->Add(("&Paste") & HK("Paste", "Ctrl+V"), "Paste", "Paste", @mClick, , , False)
+	miCodeFormMenu->Add("-")
+	miDuplicate = miCodeFormMenu->Add(("&Duplicate") & HK("Duplicate", "Ctrl+D"), "", "Duplicate", @mClick, , , False)
+	miSelectAll = miCodeFormMenu->Add(("Select &All") & HK("SelectAll", "Ctrl+A"), "", "SelectAll", @mClick, , , False)
+
 	miFormFormat = mnuMain.Add(("&Form"), "", "FormFormat")
 	miFormFormat->Enabled = False ' D1: no form open at startup; enabled by tabCode_SelChange/ApplyFormTabView when a form with controls is active
 	' Control-edit ops (parity with the form-pane right-click menu). @PopupClick acts on
@@ -7091,11 +7102,7 @@ Sub CreateMenusAndToolBars
 	' so the clipboard shortcuts stay owned by the Code menu.
 	miFormFormat->Add(("Default &Event"), "Code", "Default", @PopupClick)
 	miFormFormat->Add("-")
-	miFormFormat->Add(("Copy"), "Copy", "Copy", @PopupClick)
-	miFormFormat->Add(("Cut"), "Cut", "Cut", @PopupClick)
-	miFormFormat->Add(("Paste"), "Paste", "Paste", @PopupClick)
 	miFormFormat->Add(("Delete"), "", "Delete", @PopupClick)
-	miFormFormat->Add(("Duplicate"), "", "Duplicate", @PopupClick)
 	miFormFormat->Add("-")
 	Var miAlign = miFormFormat->Add(("&Align"), "Align", "Align", @mClick)
 	miAlignLefts = miAlign->Add(("&Lefts") & HK("AlignLefts"), "AlignLefts", "AlignLefts", @mClick)
@@ -9799,6 +9806,27 @@ Sub frmMain_ActiveControlChanged(ByRef Designer As My.Sys.Object, ByRef sender A
 		bEnabledIndentAndOutdent = True
 	Case "TextBox", "RichTextBox", "ComboBoxEdit", "ComboBoxEx"
 		bEnabled = True
+	Case "Form"
+		'' The design surface. The form being designed is itself an MFF Form hosted inside
+		'' pnlForm, so clicking a control on it reports ClassName "Form" -- which was in no list
+		'' here, leaving Undo/Redo greyed whenever the designer had focus.
+		''
+		'' A greyed item does not merely look wrong: Windows' TranslateAccelerator CONSUMES a
+		'' keystroke whose menu item is disabled and sends no WM_COMMAND for it. So Ctrl+Z on the
+		'' design surface was destroyed before any window saw it -- measured, with only
+		'' VK_CONTROL reaching the designer's WndProc and mClick never entered. Enabling the item
+		'' is what makes the accelerator deliver at all.
+		''
+		'' Gated on a live designer with a selected control, which is exactly when
+		'' DispatchDesignerCommand can service the command.
+		Scope
+			Dim As TabWindow Ptr tbDes = Cast(TabWindow Ptr, ptabCode->SelectedTab)
+			'' Gated on a live designer only. NOT on cboClass.ItemIndex > 0 ("a control is
+			'' selected"): the focus event arrives before the selection is reflected there, so
+			'' that test reads 0 and the item stayed greyed -- measured as
+			'' "Form guard: tb=-1 des=-1 cboClass=0".
+			If tbDes <> 0 AndAlso tbDes->Des <> 0 Then bEnabled = True
+		End Scope
 	End Select
 	Select Case ActiveForm->ActiveControl
 	Case @txtExplorer, @tvExplorer, @txtForm, @tvToolBox, @txtProperties, @lvProperties, @txtEvents, @lvEvents

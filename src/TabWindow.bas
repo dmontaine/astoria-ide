@@ -275,6 +275,11 @@ Sub UpdateCodeFormMenuEnabled()
 			bCode = True
 		End Select
 	End If
+	'' Greying a whole top-level menu also kills every keyboard shortcut inside it: Windows'
+	'' TranslateAccelerator consumes an accelerator whose parent menu is disabled and sends no
+	'' WM_COMMAND at all. That is safe here only because Code and Form now hold exclusively
+	'' context-specific commands. Anything usable in BOTH views belongs in the Code/Form menu,
+	'' which is never greyed -- see miCodeFormMenu in Main.bas.
 	If miCodeMenu Then miCodeMenu->Enabled = bCode
 	If miFormFormat Then miFormFormat->Enabled = bForm
 End Sub

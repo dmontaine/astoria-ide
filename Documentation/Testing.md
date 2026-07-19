@@ -91,6 +91,8 @@ Uninstall via the Start Menu shortcut works correctly.
 
 ### User interface
 
+Designer keyboard commands: Ctrl+Z/Ctrl+Y/Ctrl+X/Ctrl+C/Ctrl+V verified in both the code editor and the form designer after the Code/Form menu restructure (2026-07-18), with Code and Form confirmed still greying contextually.
+
 Owner walkthroughs of the View menu (which surfaced six real bugs, all fixed), the Code/Form menu
 restructure and contextual greying, the Run menu consolidation, context-menu parity with the
 toolbars, and a toolbar tooltip audit across 13 buttons plus the Image Manager toolbar.
@@ -115,6 +117,38 @@ design**: FreeBASIC treats a BOM as a signal to make string literals wide, so a 
 prints garbled console output, and the IDE normalises to BOM-less UTF-8 (the agent build does the
 same downgrade). And deleting a control leaves its `#include` behind, which is safer than removing
 a line the user may depend on elsewhere.
+
+## A worked example: when reading the code lies
+
+Recorded because the debugging pattern generalises, and because the failure mode was expensive.
+
+**Symptom.** Ctrl+Z did nothing on the form designer. No error, no log entry, no visible effect.
+
+**Four fixes were proposed and built before the cause was known**, each reasoned from reading the
+source, each plausible, each wrong: route Undo through the designer branch of the menu dispatcher;
+move it into the shared dispatcher; add a keyboard handler to `Designer.KeyDown`; enable the menu
+item when the designer has focus. Every one of them was built and every one failed, because all
+four assumed the keystroke was *reaching* the application.
+
+**It was not.** Instrumentation — not reading — showed the truth in stages:
+
+1. A bare `Z` reached the designer's window procedure; with Ctrl held, only `VK_CONTROL` arrived.
+2. `mClick` was never entered, so no menu command was being dispatched.
+3. A/B against **F5**, which works, showed both keys were consumed identically by
+   `TranslateAccelerator` — but only F5 produced a `WM_COMMAND`.
+4. Undo lived in the **Code** menu, which greys in Form view. **Windows suppresses an accelerator
+   whose parent menu is disabled**: it consumes the keystroke and sends no command at all.
+
+**The transferable lesson.** *Greying a top-level menu silently disables every keyboard shortcut
+inside it.* Any command valid in more than one context must live in a menu that is never greyed —
+which is why the **Code/Form** menu now exists.
+
+**The method lesson.** Every conclusion drawn from reading the code was wrong; every conclusion
+drawn from a trace was right. When a symptom is *nothing happens at all*, prove where the input
+dies before proposing what to fix. A diagnosis that has not been measured is a hypothesis, and
+should be labelled as one — the earlier written-up diagnosis of this bug ("the designer has no
+undo") read with complete confidence and was false, and its recommended fix would have made the
+breakage permanent.
 
 ## Known gaps — not yet tested
 

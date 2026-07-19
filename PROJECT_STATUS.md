@@ -176,6 +176,42 @@ tester needs is in `Documentation/`:
 All six are maintained going forward. `Documentation/AstoriaIDESignificantChanges.md` supersedes
 the `.doc` on P:\Astoria-Docs — edit the Markdown, which is version-controlled.
 
+## Session handoff (2026-07-18, later) — menu restructure: Code / Code-Form / Form
+
+**Designer keyboard commands work.** Ctrl+Z, Ctrl+Y and the clipboard shortcuts now function on the
+form designer as well as in the code editor. Owner-verified in both views; Code and Form still grey
+contextually as designed.
+
+**The cause was not what ROADMAP §13.19 recorded.** That entry concluded the designer had no undo
+implementation and proposed either building an undo stack or greying Undo out for honesty. Both were
+wrong: the designer always had undo — every designer edit is written into the code editor's history
+by `DesignerModified`. Undo simply lived in the **Code** menu, which greys in Form view, and
+**Windows' TranslateAccelerator consumes an accelerator whose parent menu is disabled and sends no
+WM_COMMAND at all**. The keystroke was destroyed in the message loop, which is why it produced no
+error and no log entry of any kind. §13.19 is corrected in place.
+
+**Owner's fix, implemented:** menus now separate by context —
+
+| Menu | Holds | Greyed? |
+| --- | --- | --- |
+| **Code** | Cut Current Line, Toggle Comment, Indent/Outdent, Format, Advanced, Add Procedure/Type, Complete Word, Syntax Check, Convert | contextually |
+| **Code/Form** *(new)* | Undo, Redo, Cut, Copy, Paste, Duplicate, Select All | **never** |
+| **Form** | Default Event, Align, Make Same Size, Size to Grid, Spacing, Center in Parent | contextually |
+
+The Form menu's duplicate clipboard items (wired to `@PopupClick`) were removed in favour of the
+single shared set, which `mClick` routes to the editor or the designer by focus.
+
+**Rule to preserve:** any command valid in more than one context belongs in Code/Form. Greying a
+top-level menu silently kills every shortcut inside it.
+
+Two supporting changes were needed for the designer to be recognised as an editing context at all:
+`frmMain_ActiveControlChanged` now treats `ClassName = "Form"` (the designed form is itself an MFF
+Form) as enabling, and `mClick`'s dispatch guard accepts it.
+
+TestPlan C4 now passes. `Documentation/Testing.md` carries the debugging case study — four fixes
+were built from reading the code before instrumentation found the real cause, and that pattern is
+worth not repeating.
+
 ## Session handoff (2026-07-18) — controls audit, documentation set, release staging
 
 Everything below is committed and pushed. `astoria.exe` and `astoria-mcp.exe` are freshly built

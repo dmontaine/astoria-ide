@@ -32,8 +32,8 @@ fix-compile-errors), plus each tool's native convention on top.
 
 | Tool | Primary file(s) | Status |
 |---|---|---|
-| `ClaudeCode/` | `CLAUDE.md`, `.claude/skills/*/SKILL.md` (13 native Claude Code skills), `AGENTS.md` | **Complete** — the 13 `.claude/skills/` match the shared Cursor/ChatGPT/OpenCode/Kun set |
-| `Cursor/` | `.cursor/rules/freebasic.mdc` (always-on rules), `.cursor/rules/freebasic-tasks.mdc` (compact playbooks), `.cursor/skills/*/SKILL.md` (13 native Cursor skills), `.cursorrules` (legacy pointer), `AGENTS.md` | **Complete** |
+| `ClaudeCode/` | `CLAUDE.md`, `.claude/skills/*/SKILL.md` (15 native skills incl. `use-astoria-mcp` + `git-workflow`), `AGENTS.md`, `.mcp.json` | **Complete** — canonical model for the other tools |
+| `Cursor/` | `.cursor/rules/freebasic.mdc` (always-on), `.cursor/rules/freebasic-tasks.mdc`, `.cursor/skills/*/SKILL.md` (15 native skills), `.cursor/mcp.json`, `.cursorrules`, `AGENTS.md` | **Complete** — mirrored from ClaudeCode (2026-07-19): BOM/`ReDim`/`project.astoria`/testing/MCP-edit rules + `git-workflow` |
 | `ChatGPT/` | `AGENTS.md`, `.agents/skills/*/SKILL.md` (13 native Codex skills; inline fallback retained) | **Complete** |
 | `OpenCode/` | `AGENTS.md`, `opencode.json` (references `.opencode/skills/`), `.opencode/skills/*/SKILL.md` (13 native OpenCode skills) | **Complete** |
 | `Kun/` | `SKILL.md` (rules + playbook summary), `AGENTS.md`, `.kun/skills/*/SKILL.md` (13 native Kun skills) | **Complete** — 13 native `.kun/skills/` match the Cursor/ChatGPT set (build-run, add-module, add-control-event, add-form, fix-compile-errors, add-resource, audit-project-manifest, debug-freebasic-app, edit-form-safely, find-framework-control, prepare-release, refactor-freebasic, winapi-interop); `SKILL.md` kept as the working summary |
@@ -63,10 +63,15 @@ assistant to drop project-specific context into.
 
 The Cursor, ChatGPT/Codex, Kun, and OpenCode templates additionally provide
 native skills for safe form editing, manifest audits, framework-control
-discovery, resources, runtime debugging, WinAPI interop, refactoring, and
-release preparation. These extend the five shared playbooks without changing
-the shared `AGENTS.md` baseline (Cursor: `.cursor/skills/`; ChatGPT:
+discovery, resources, runtime debugging, WinAPI interop, refactoring, release
+preparation, MCP driving (`use-astoria-mcp`), and git (`git-workflow` —
+ClaudeCode + Cursor; other tools should mirror when they next update). These
+extend the shared playbooks (Cursor: `.cursor/skills/`; ChatGPT:
 `.agents/skills/`; Kun: `.kun/skills/`; OpenCode: `.opencode/skills/`).
+
+**Cursor MCP config verified (2026-07-19):** `.cursor/mcp.json` uses the documented
+project-scope shape (`mcpServers` → `command`/`args` for local stdio). After
+stamping, replace `{{ASTORIA_MCP_EXE}}` and reload Cursor.
 
 ## Design intent
 

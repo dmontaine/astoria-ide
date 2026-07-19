@@ -15,15 +15,25 @@ FreeBASIC is **not** VB.NET, VBA, QBASIC, or C — do not assume their syntax.
 - Comments `'` or `/' … '/`; line continuation trailing `_`; identifiers case-insensitive.
 - `Dim` is **procedure-scoped**, not block-scoped — a `Dim` inside an `If`/loop lives until `End Sub`.
 - `IIf(...)` cannot return a `String` — use explicit `If/Else` assignment.
+- **Save source as UTF-8 with NO BOM.** A leading BOM makes FreeBASIC treat string literals as wide → garbled console output. Astoria strips BOMs on save; don't reintroduce them.
+- `Str(a = b)` prints `0`/`-1`, not `"false"`/`"true"` (comparison → integer). `Str()` of a real `Boolean` does give `"true"`/`"false"`.
+- **Never `ReDim Preserve` an array whose element type owns heap memory** (`String`/`WString`/`UString` inside a UDT) — shallow copy → double free later. Use a list type or one delimited string.
 
 ## Astoria project
 - `{{PROJECT}}.vfp` is the manifest: every source file is a `File=` line, the main file is starred (`*File=`). Mirror any add/rename/delete there; a file not listed is invisible to the project.
 - Leave the IDE-maintained `.vfp` metadata keys alone (`Author=` … `AITool=`) — the IDE round-trips them on save.
+- **`project.astoria`** is the canonical description + Astoria-project marker (`AstoriaProject=1`). Git remote/identity live there; edit via **Project ▸ Edit Project Description**. Don't delete it.
 - `.frm` files are Form-Designer-managed: edit event-handler bodies freely; prefer the Designer for layout; if hand-editing, keep the `With`-block shape and `' <ControlName>` comment lines.
 - GUI projects use the bundled MFF framework: `#include once "mff/<Control>.bi"`, `Using My.Sys.Forms`.
 - Do not edit `Temp/`, produced `.exe` files, or `{{PROJECT}}_Change.log`.
 
 ## Build / verify
-- Preferred: open the `.vfp` in the Astoria IDE, press **F5** (handles `.frm` mains, `.rc` generation, include paths).
+- **MCP first** when the `astoria` server is connected: `build` / `run` / `get_errors` (see `.cursor/skills/use-astoria-mcp`). Else open the `.vfp` in the Astoria IDE and press **F5**.
+- If the IDE has the project open, edit through MCP (`write_file` / `set_active_file_content`) — don't write behind its back.
 - CLI (console): `fbc -s console <MainFile>.bas`. CLI (GUI): add `-i <AstoriaDir>\Controls\Framework`; `fbc` rejects `.frm` as direct input and the `#cmdline "<name>.rc"` needs the IDE-generated resource — prefer the IDE.
 - Errors are `file(line) error N: message` — fix the FIRST error first; keep changes small and compile-checked.
+
+## Testing
+- Verify by effect, not by a return value that success and failure share.
+- Make the assertion as strong as the claim.
+- Measure before theorising; re-run what caught a bug after fixing it.

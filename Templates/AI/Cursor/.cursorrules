@@ -5,12 +5,16 @@
 # Full rules live in .cursor/rules/freebasic.mdc (always applied) and
 # .cursor/rules/freebasic-tasks.mdc (compact playbooks). On-demand task skills
 # live in .cursor/skills/*/SKILL.md. AGENTS.md holds the complete cross-tool guide.
+# MCP: .cursor/mcp.json (astoria server). Prefer MCP build/run/edit when connected.
 
 You are helping with a FreeBASIC project (.bas modules, .bi headers, .frm forms).
 FreeBASIC is not VB.NET, VBA, QBASIC, or C -- do not assume their syntax.
-Build/run via the Astoria IDE (open {{PROJECT}}.vfp, press F5); GUI projects need
-the IDE (fbc alone lacks the framework include path and .rc generation).
+Build/run via the astoria MCP tools when connected, else Astoria IDE (open
+{{PROJECT}}.vfp, press F5); GUI projects need the IDE (fbc alone lacks the
+framework include path and .rc generation).
 Keep {{PROJECT}}.vfp's File= list in sync with any file add/rename/delete.
+project.astoria is the Astoria marker + Git remote source -- don't delete it.
 .frm files are Form-Designer-managed: edit handler bodies, keep the With-block shape.
 Match existing indentation and line endings; keep changes small and compile-checked.
-Note: a local Dim is procedure-scoped, not block-scoped; IIf cannot return a String.
+Save source UTF-8 with NO BOM; Dim is procedure-scoped; IIf cannot return a String;
+never ReDim Preserve arrays of String/WString/UString-owning UDTs.

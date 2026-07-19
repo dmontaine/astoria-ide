@@ -114,6 +114,31 @@ FreeBASIC is **not** VB.NET, VBA, QBASIC, or C — do not assume their syntax.
 - Prefer building/running through the Astoria IDE to confirm a change actually
   works, not just that it compiles.
 
+## Testing discipline
+
+Three habits, each learned from a real defect that survived a check which looked
+like it had covered it.
+
+- **Verify by effect, not by return value.** Before trusting a call's result, ask
+  what it returns when it *fails*. If success and failure both return `0`, then
+  `If Foo() = 0` is not a test — it passes whether or not anything happened. Prove
+  the thing you actually care about: re-read the row, count the lines, check the
+  file exists. This is not hypothetical; a database call in this stack returned `0`
+  for both, and a test asserting `= 0` reported a confident PASS that could never
+  have failed.
+- **Make the assertion as strong as the claim.** "The window opened" is not "the
+  program works" — a *"DLL not found"* dialog opens a window too. If you claim a
+  feature works, assert on something only a working feature produces.
+- **Measure before theorising.** When something behaves unexpectedly, one printed
+  value or log line beats three plausible explanations. Hypotheses formed by
+  reading code are cheap to produce and easy to build on before checking, and a
+  wrong one sends you into the half of the code that was never broken. Print the
+  state, then decide.
+
+When you fix something, re-run the thing that caught it. A fix that has only been
+compiled has not been tested, and the two defects most recently found in this
+project were both introduced *by* fixes that read correctly.
+
 ## Working with me (Claude Code)
 
 - Ask before anything destructive or irreversible (deleting files, force-pushing,

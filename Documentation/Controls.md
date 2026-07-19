@@ -284,6 +284,10 @@ Wraps the Scintilla editing component - the same engine behind the Astoria code 
 > [!WARNING]
 > Third-party (CM.Wang), distributed as freeware "use at your own risk" - it is not covered by the framework's licence or its support.
 
+Its **undo history is Scintilla's own**, separate from the framework's and from the IDE's. Calling
+`.Undo()`/`.Redo()` on the control affects only that control's buffer. Verified working under
+programmatic edits, not just typed ones (TestPlan A6).
+
 ### ScrollBarControl
 
 Provides a horizontal and a vertical scroll bar for easy navigation through long lists of items.

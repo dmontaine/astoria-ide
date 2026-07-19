@@ -1,0 +1,10 @@
+A6_OK  all assertions passed
+PASS  text round-trip
+PASS  LineText(0)
+PASS  LineText(2)
+PASS  SelText replace
+PASS  undo restores previous text
+PASS  redo reapplies edit
+PASS  style ForeColor round-trip
+PASS  style BackColor round-trip
+

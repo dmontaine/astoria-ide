@@ -480,3 +480,41 @@ harmful. The capability existed and worked; greying it would have made the break
 made it look deliberate. It is worth noting how confident that recommendation reads given the
 premise was false — the diagnosis was reasoned from reading the code, and reading agreed with
 itself. It took measurement, not reading, to find the truth.
+
+### 13.20 MariaDBBox: four defects from an untested SQLite copy (found by TestPlan A3, 2026-07-18)
+
+**Status: confirmed against MariaDB 10.6.8 by `Examples/Integration/A3_MariaDBConnection`.**
+
+`Controls/MariaDBBox/MariaDBBox.bas` is evidently a copy of `SQLite3Component` that was adapted for
+the MySQL client API but never run against a real server. The data path works — A3 passes 24 checks
+including a close-and-reconnect persistence test — but four calls are broken, two of them silently.
+
+1. **`CreateTableUtf` can never create a table.** It emits SQLite's `AUTOINCREMENT`; MariaDB
+   requires `AUTO_INCREMENT`, so the statement is a syntax error. Fix: `AUTO_INCREMENT`.
+2. **`AddField` does not quote a text default.** It escapes embedded apostrophes and then emits
+   `DEFAULT hello`, which MariaDB parses as a column reference (`Unknown column 'hello' in
+   'DEFAULT'`). This is the same defect A1 found in the SQLite twin, where it was fixed by
+   `SQLite3DefaultIsLiteral`; port that helper.
+3. **`AddField` silently makes columns `NOT NULL`.** `nNull` defaults to 0, which appends
+   `NOT NULL` with no default. Unlike SQLite, MariaDB accepts this and invents an implicit
+   default, so the call **succeeds** and the caller gets a column that does not mean what they
+   asked for. Confirmed via `information_schema`: `AddField("people","name","VARCHAR(64)")`
+   yields `IS_NULLABLE=NO`. Fix as in SQLite: only append `NOT NULL` when a default exists.
+4. **`Insert` cannot report failure.** Every error path in `InsertUtf` returns 0, and the success
+   path falls off the end with no assignment (the `last_insert_rowid` line is commented out), so
+   it returns 0 there too. A caller has no way to distinguish a successful insert from a failed
+   one. This is the most serious of the four because it loses data silently. Fix: return the new
+   row id on success and a negative value on failure — and note this changes the contract, so the
+   return convention should be documented at the same time.
+
+**Related: the return conventions across this API are inconsistent** and should be documented even
+if not changed. `Exec`, `Update` and `DeleteItem` return `-1` on error and otherwise
+`mysql_affected_rows`; `Insert` returns 0 regardless; `Count` returns 0 both for "no rows" and for
+"not opened". A3's first draft asserted the wrong convention for `Update`/`DeleteItem` and reported
+two failures against working code.
+
+**Priority.** Defects 1 and 2 fail loudly and are merely broken. Defects 3 and 4 succeed while
+doing the wrong thing, which is the "it just works" standard's real target: a beginner cannot
+diagnose an insert that reports success and stores nothing. Recommend fixing all four together,
+mirroring the SQLite fixes, with A3 promoted from recording them to asserting the corrected
+behaviour once done.

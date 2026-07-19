@@ -15,10 +15,16 @@
 ''
 '' Run setup_astoria_test.sql once as root to create the database and user.
 ''
-'' THREE DEFECTS ARE EXPECTED, all inherited from SQLite3Component by a copy that was never run
-'' against a real server. They are RECORDED rather than asserted, and the test works around them so
-'' that everything downstream still gets exercised -- a test that stops at the first known bug
-'' proves nothing about the code after it. Each is called out at the site below.
+'' FOUR DEFECTS ARE RECORDED, all confirmed against MariaDB 10.6.8 and all consistent with this
+'' component being a copy of SQLite3Component that was never run against a server. They are
+'' RECORDED rather than asserted, and worked around, so that everything downstream still gets
+'' exercised -- a test that stops at the first known bug proves nothing about the code after it.
+''
+'' Two of them cannot be seen in a return code, which is the lesson of this test:
+''   - AddField's NOT NULL defect SUCCEEDS, so the schema has to be queried to see it;
+''   - Insert returns 0 whether it worked or not, so inserts are proven by their effect.
+'' The first version of this file trusted return codes for both and reported a green PASS for an
+'' assertion that could never have failed.
 ''
 '' SELF-CONTAINED AND SELF-EXITING. Exit code is non-zero if any assertion failed.
 
@@ -121,15 +127,22 @@ End If
 '' this outright; MariaDB accepts it outside strict mode by inventing an implicit default, which
 '' is worse: the call succeeds and the column silently does not mean what the caller asked for.
 '' Recorded either way, because the outcome depends on the server's sql_mode.
+'' The return code proves nothing here and the first version of this test wrongly trusted it: the
+'' call SUCCEEDS (rc=0), which is exactly what makes this the worst of the three. The evidence is
+'' in the schema, so ask the server what it actually built.
 Dim As Long rcName = db.AddField("people", "name", "VARCHAR(64)")
 Print "  AddField(3-arg) rc=" & Str(rcName) & " err=[" & db.ErrMsg() & "]"
-Defect("AddField appends NOT NULL with no default", rcName <> 0, _
-	"rc=" & Str(rcName) & " -- outcome depends on sql_mode; see the column dump below")
 
-If rcName <> 0 Then
-	Check("workaround: add a plain nullable column", _
-		Str(db.Exec("ALTER TABLE people ADD name VARCHAR(64)")), "0")
-End If
+Dim As String nullable()
+db.SQLFindOne("SELECT IS_NULLABLE FROM information_schema.COLUMNS " & _
+	"WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='people' AND COLUMN_NAME='name'", nullable())
+Dim As String nameNullable = ""
+If UBound(nullable) >= 0 Then nameNullable = nullable(0)
+
+'' A caller writing AddField(t, "name", "VARCHAR(64)") is asking for a plain column. Getting a
+'' NOT NULL one back means the column does not mean what was asked for, and nothing said so.
+Defect("AddField silently makes the column NOT NULL", nameNullable = "NO", _
+	"rc=0 (success) but IS_NULLABLE=" & nameNullable & " -- the caller asked for a plain column")
 
 Check("add an integer column", Str(db.AddField("people", "age", "INTEGER", "0")), "0")
 
@@ -144,9 +157,26 @@ For i As Integer = 0 To UBound(cols, 1)
 Next i
 
 '' --- insert -------------------------------------------------------------------------------
-Check("insert first row",  Str(db.Insert("people", "name='Ada', age=36")), "0")
-Check("insert second row", Str(db.Insert("people", "name='Grace', age=45")), "0")
-Check("insert third row",  Str(db.Insert("people", "name='Alan', age=41")), "0")
+'' DEFECT 4 -- Insert's return value cannot distinguish success from failure. InsertUtf returns 0
+'' from every error path, and its success path falls off the end with no assignment (the
+'' last_insert_rowid line is commented out), so it returns 0 there too.
+''
+'' The first version of this test asserted Str(db.Insert(...)) = "0" and reported PASS. That
+'' assertion would have passed identically if every insert had silently failed -- the exact
+'' false-pass shape Testing.md warns about, reproduced here by the author of that warning. Insert
+'' success is therefore proven by its EFFECT on the table, never by its return code.
+db.Insert("people", "name='Ada', age=36")
+db.Insert("people", "name='Grace', age=45")
+db.Insert("people", "name='Alan', age=41")
+
+Dim As Long rcInsertOk = db.Insert("people", "name='Doomed', age=1")
+Dim As Long rcInsertBad = db.Insert("people", "no_such_column='x'")
+Defect("Insert returns 0 for both success and failure", rcInsertOk = rcInsertBad, _
+	"success rc=" & Str(rcInsertOk) & ", failure rc=" & Str(rcInsertBad) & _
+	" -- a caller cannot detect a failed insert")
+db.DeleteItem("people", "name='Doomed'")
+
+'' This is what actually proves the three inserts landed.
 Check("row count", Str(db.Count("people")), "3")
 Check("conditional count", Str(db.Count("people", "age > 40")), "2")
 
@@ -183,15 +213,19 @@ Check("MaxID", Str(db.MaxID("people", "ID")), "3")
 Dim As UString NonAscii = WChr(&hC9) & WChr(&hE7) & WChr(&h4E2D)          '' E-acute, c-cedilla, U+4E2D
 Dim As String NonAsciiUtf8 = Chr(&hC3, &h89) & Chr(&hC3, &hA7) & Chr(&hE4, &hB8, &hAD)
 
-Check("insert non-ASCII text", _
-	Str(db.Insert("people", "name='Ada Lovelace " & NonAscii & "', age=36")), "0")
+db.Insert("people", "name='Ada Lovelace " & NonAscii & "', age=36")
+Check("non-ASCII row landed", Str(db.Count("people", "ID>3")), "1")
 Check("non-ASCII survives the round trip", _
 	db.FindOnly("people", "age=36 AND ID>3", "name"), "Ada Lovelace " & NonAsciiUtf8)
 
 '' --- update and delete ------------------------------------------------------------------------
-Check("update a row", Str(db.Update("people", "name='Ada'", "age=37")), "0")
+'' Update and DeleteItem return mysql_affected_rows via Exec, so one row changed reads as 1, not 0.
+'' The first version of this test expected 0 and reported two failures against working code -- the
+'' return conventions are genuinely inconsistent across this API (Exec: -1 on error else affected
+'' rows; Insert: 0 regardless), which is worth stating rather than quietly accommodating.
+Check("update a row reports one affected", Str(db.Update("people", "name='Ada'", "age=37")), "1")
 Check("update took effect", db.FindOnly("people", "name='Ada'", "age"), "37")
-Check("delete a row", Str(db.DeleteItem("people", "name='Alan'")), "0")
+Check("delete a row reports one affected", Str(db.DeleteItem("people", "name='Alan'")), "1")
 Check("count after delete", Str(db.Count("people")), "3")
 
 '' --- transactions -------------------------------------------------------------------------

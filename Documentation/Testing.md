@@ -203,6 +203,10 @@ minute; an unreported problem can cost a release.
 Add to it whenever testing happens, in the same commit as the change being tested where possible.
 Two rules:
 
+- **Update the reference documents too, in the same pass.** A test result that changes what a
+  control does, warns about, or requires belongs in [Controls.md](Controls.md) and
+  [ControlTesting.md](ControlTesting.md) as well as here. Those drift precisely because nothing
+  forces a visit to them — see the rule table at the top of [TestPlan.md](TestPlan.md).
 - **State the assertion, not the conclusion.** "Launched and matched the expected window title" is
   useful; "works" is not, and cannot be re-checked later.
 - **Move items out of [Known gaps](#known-gaps--not-yet-tested) only when they are genuinely

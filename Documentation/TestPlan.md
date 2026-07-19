@@ -14,6 +14,33 @@ holds focus. Those interactions are where the remaining defects most likely live
 Related: [ControlTesting.md](ControlTesting.md) for per-control results, [Controls.md](Controls.md)
 for what each control is, [FrameworkFeatures.md](FrameworkFeatures.md) for the framework surface.
 
+## Rule: update the documents after every test
+
+**A test is not finished when it passes or fails. It is finished when the documents say what is now
+known.** Every test run, do this before moving on:
+
+| Document | Update when |
+| --- | --- |
+| **TestPlan.md** (this file) | Always — the status mark and a Result that states the assertion, not just "works". |
+| **[Testing.md](Testing.md)** | The result changes what is proven or what remains unproven. Move an entry out of *Known gaps* only when genuinely tested; narrow it rather than delete it if only partly covered. |
+| **[ControlTesting.md](ControlTesting.md)** | A control's status changes, or it gains/loses a runtime DLL or a caveat. |
+| **[Controls.md](Controls.md)** | A control's behaviour, warnings, or "Changed in Astoria" note is now wrong. **This is the one most often missed.** |
+| **[FrameworkFeatures.md](FrameworkFeatures.md)** | A non-toolbox framework capability changed. |
+| **[DetailedChangelog.md](DetailedChangelog.md)** | Regenerate from history; never hand-edit. |
+| **[ROADMAP.md](../ROADMAP.md)** | A test found a defect, or disproved an entry already there. |
+
+**Why this rule exists.** On 2026-07-18 the WebBrowser control went from "cannot render at all" to
+"rendering and navigation verified". TestPlan and Testing.md were updated the same day; Controls.md
+was not, and for several commits it kept telling readers *"page rendering and navigation have not
+been verified — prove it works before relying on it"* about a feature that demonstrably worked. The
+runtime-DLL table likewise never gained `WebView2Loader.dll`, the exact omission that table exists
+to prevent.
+
+The pattern to guard against: **test documents stay current because running a test forces a visit to
+them; reference documents drift, because nothing forces the visit.** A reference document that
+understates what works is not harmlessly cautious — it tells users to avoid working features, and it
+is read by people who will never see this plan.
+
 ## How to read this
 
 **Status:** ✅ pass · ❌ fail · ⚠️ partial (see Result) · `-` not yet run

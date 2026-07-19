@@ -91,7 +91,19 @@ Uninstall via the Start Menu shortcut works correctly.
 
 ### User interface
 
-Designer keyboard commands: Ctrl+Z/Ctrl+Y/Ctrl+X/Ctrl+C/Ctrl+V verified in both the code editor and the form designer after the Code/Form menu restructure (2026-07-18), with Code and Form confirmed still greying contextually.
+**Form designer, Section C of the test plan — C1–C6 complete except C3.** Place-and-wire (C1),
+save/reopen round-trip fidelity (C2), multi-select align/size with undo (C4), cross-form copy/paste
+including name-collision resolution (C5), and split-view focus tracking (C6) all pass. **C3 fails**:
+renaming a control breaks the build (ROADMAP §13.17, required for 1.0).
+
+Designer keyboard commands — Ctrl+Z/Ctrl+Y/Ctrl+X/Ctrl+C/Ctrl+V — work in both the code editor and
+the designer after the Code/Form menu restructure, with Code and Form still greying contextually.
+
+Two of these were measured rather than observed, which is worth imitating. C6 sampled Windows' own
+top-level menu state four times a second and logged the transitions, because that is the state
+`TranslateAccelerator` consults — so it proves the shortcuts *can fire*, not merely that the menu
+looks right. C5 read the resulting `.frm` through the agent pipe and checked control names, the
+declaration line, bounds and the rebuild, rather than trusting the screen.
 
 Owner walkthroughs of the View menu (which surfaced six real bugs, all fixed), the Code/Form menu
 restructure and contextual greying, the Run menu consolidation, context-menu parity with the
@@ -166,7 +178,7 @@ Stated plainly, because a tester's time is best spent here.
 | **Accessibility** | Untested — screen readers, keyboard-only navigation, high-DPI and high-contrast modes. |
 | **Debugger breadth** | DR-1..DR-16 closed known defects. There has been no systematic sweep of debugger features against a matrix of program types. |
 | **AI templates beyond Claude Code** | The Claude Code template is exercised regularly in real use. The Codex, Cursor, Kun and OpenCode templates have had their MCP configuration written but not verified against those clients. |
-| **Form designer breadth** | Used constantly in development, but never systematically tested against every control's design-time behaviour. |
+| **Form designer breadth** | **Partly closed as of 2026-07-18.** The designer's core workflows are now covered by TestPlan C1–C6 (place and wire, round-trip, multi-select operations, cross-form paste, split-view focus), and one real defect remains from it — C3, renaming a control breaks the build (§13.17). What is still untested is *breadth*: those tests exercise a handful of common controls, not every control's design-time behaviour, so a less-used control could still misbehave in the designer. |
 
 ## For human testers
 

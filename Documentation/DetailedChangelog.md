@@ -17,7 +17,7 @@ Areas are: **IDE** (`src/`), **Framework/Controls** (`Controls/`), **Templates**
 is to write a good commit message. Regenerate rather than hand-edit; a stale hand-edit is worse
 than no entry. Commits after the last one listed here are not yet folded in.
 
-**Total: 354 commits, 2026-07-02 to 2026-07-18.**
+**Total: 357 commits, 2026-07-02 to 2026-07-18.**
 
 ## 2026-07-02
 
@@ -1076,3 +1076,12 @@ than no entry. Commits after the last one listed here are not yet folded in.
 - **`1c00c1f`** — Split the Code and Form menus, add a never-greyed Code/Form menu
   Ctrl+Z, Ctrl+Y and the clipboard shortcuts now work on the form designer.
   *Docs, IDE · 8 files*
+- **`f84d52d`** — DetailedChangelog: regenerate through 1c00c1f
+  Was 32 commits stale, ending at cb66e26 - it predated the other machine's WebView2 and TestPlan work as well as today's menu restructure.
+  *Docs · 1 file*
+- **`5736988`** — TestPlan C6 passes: split-view menus track the focused pane
+  Verified by sampling Windows' top-level menu state four times a second and logging transitions, rather than by eye.
+  *Docs · 1 file*
+- **`7aba862`** — TestPlan C5 passes: cross-form paste resolves name collisions
+  Adds Examples/Integration/C5_CopyPaste, a fixture built to force the failure rather than hope for it: FormA carries lblShared/txtNotes/btnGo and FormB carries its own lblShared, so pasting FormA's group into FormB guarantees a duplicate name.
+  *Docs, Examples · 7 files*

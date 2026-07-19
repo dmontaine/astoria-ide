@@ -17,7 +17,7 @@ Areas are: **IDE** (`src/`), **Framework/Controls** (`Controls/`), **Templates**
 is to write a good commit message. Regenerate rather than hand-edit; a stale hand-edit is worse
 than no entry. Commits after the last one listed here are not yet folded in.
 
-**Total: 324 commits, 2026-07-02 to 2026-07-18.**
+**Total: 354 commits, 2026-07-02 to 2026-07-18.**
 
 ## 2026-07-02
 
@@ -986,3 +986,93 @@ than no entry. Commits after the last one listed here are not yet folded in.
 - **`cb66e26`** — Docs: record Astoria's changes, drop cross-platform noise, credit upstream
   Three revisions across the documentation set.
   *Docs · 3 files*
+- **`0c71690`** — Declare 1.0 feature complete; add tester-facing documentation set
+  Preparation for recruiting human testers.
+  *Docs · 4 files*
+- **`acea2cc`** — StageRelease: ship Documentation, and stop shipping Examples build output
+  Documentation/ was excluded by omission, with a comment explaining why.
+  *Build/Tools · 1 file*
+- **`d4e36d1`** — StageRelease: export from git archive; release binaries and 1.0 handoff
+  Staging now exports `git archive HEAD` into a scratch tree and copies from that, so a file that is not committed cannot ship.
+  *Build/Tools, Docs, Settings · 5 files*
+- **`2a16812`** — Stop tracking the live settings file; ship defaults via astoria.default.ini
+  Settings/astoria.ini is the per-user settings file: every run rewrites window geometry and MRU lists into it, and [PersonalInfo] now holds a name, e-mail and Git login.
+  *Build/Tools, Docs, Settings · 4 files*
+- **`8ecfc9f`** — Add a maintained test plan covering multi-component and in-depth scenarios
+  Testing.md records what has been tested; this is the forward-looking companion listing what should be, as named scenarios with a result recorded against each.
+  *Docs · 2 files*
+- **`e0873d9`** — Run TestPlan A1 and A4: SQLite3 data path proven, WebBrowser found broken
+  A1 -- SQLite3Component data path: PASS, 26/26.
+  *Docs, Examples, Framework/Controls · 9 files*
+- **`e91ff88`** — WebBrowser: replace the dead IE backend with WebView2, and make it the default
+  TestPlan A4 found the WebBrowser control could not render a page and crashed the program on Navigate.
+  *Docs, Examples, Framework/Controls, IDE · 15 files*
+- **`0c1375d`** — Significant changes: add the no-broken-features rule and the Windows installer
+  Two owner-requested additions to Section 1.
+  *Docs · 1 file*
+- **`15bab4f`** — ROADMAP: record the upstream framework backport review and reference-doc adaptation
+  Two owner-added items, recorded here because the session task list does not survive a session.
+  *Docs · 1 file*
+- **`97a590d`** — Run TestPlan A5: WebBrowser navigation and history pass
+  4/4. Page one loads; the link is followed by clicking it in the page (ExecuteScript -> element.click()) rather than by navigating to the second URL directly -- calling Navigate would prove nothing about links and would not create the history entry that Back...
+  *Docs, Examples · 3 files*
+- **`02d263d`** — Run TestPlan B1, B4, B6 and B10: multi-control integration passes
+  First real coverage of controls cooperating rather than each opening alone.
+  *Docs, Examples · 7 files*
+- **`7cddbb4`** — PROJECT_STATUS: record the integration-testing session and where to resume
+  Handoff entry for 2026-07-18 afternoon. The session moved from "does each control open" to "do controls work, and work together", and that shift found two real defects immediately -- which is the argument for continuing it.
+  *Docs · 1 file*
+- **`80e7804`** — Convert B1, B4 and B6 to self-driving, and run B7 (shared ImageList)
+  The three externally-driven tests parked a window on the tester's desktop for as long as the driving script ran -- unacceptable for a suite meant to be re-run every release.
+  *Docs, Examples · 7 files*
+- **`e764153`** — Run TestPlan B13 and B3, and give the whole integration suite a manifest
+  B13 -- 26 different control types on one form: 7/7.
+  *Docs, Examples · 19 files*
+- **`8e7b39b`** — Run TestPlan B11 and B12: database-to-view and browser composite pass
+  B11 -- SQLite3 query results into a ListView: 13/13.
+  *Docs, Examples · 10 files*
+- **`a7aee72`** — Run TestPlan B2, B5, B8 and B9 -- Section B complete, and fix a framework shift-key bug
+  All thirteen multi-component scenarios now pass.
+  *Docs, Examples, Framework/Controls · 23 files*
+- **`d72cf7d`** — Run TestPlan A7: property and event depth on the seven common controls
+  50/50 across TextBox, ComboBoxEdit, ListView, TreeView, CheckBox, RadioButton and CommandButton.
+  *Docs, Examples · 6 files*
+- **`2518520`** — Run TestPlan A2: SQLite3Component error handling
+  20/20. Missing table, missing column, malformed SQL, insert into a non-existent table, duplicate CreateTable, use after Close, and an impossible file path.
+  *Docs, Examples · 4 files*
+- **`b02a4bc`** — Fix the modifier-key mask across Astoria's own source, and record C2 as partial
+  TestPlan B2 found the framework testing GetKeyState(VK_SHIFT) And 8000 -- decimal 8000 is &h1F40 and shares no bits with the &h8000 key-down flag.
+  *Docs, Framework/Controls, IDE · 10 files*
+- **`a428121`** — Preserve a file's encoding and line endings on save; TestPlan C2 passes
+  C2 asked whether a designer edit round-trips without disturbing the rest of the file.
+  *Docs, IDE · 5 files*
+- **`375eb91`** — Revert the encoding change: BOM-less normalisation on save is deliberate policy
+  a428121 treated the IDE's BOM stripping as a fidelity defect and made saving preserve whatever encoding a file arrived with.
+  *Docs, IDE · 5 files*
+- **`d38c6a9`** — ROADMAP: record the optional BOM normalisation pass as 13.16
+  Measured while answering whether anything deviates from the BOM-less UTF-8 rule.
+  *Docs · 1 file*
+- **`4b758ea`** — Run TestPlan C1: designer place-and-wire end to end passes
+  Owner started from an empty Windows Application form, placed a TextBox, CommandButton and Label, set properties in the property grid, wired a click handler with a line of code, then built and ran it.
+  *Docs · 2 files*
+- **`127a52a`** — Run TestPlan C3: renaming a control breaks the build; record as ROADMAP 13.17
+  C3 asked whether renaming a control leaves handlers bound and the project building.
+  *Docs · 2 files*
+- **`0d20163`** — Classify designer rename refactoring as required for 1.0 (owner decision)
+  ROADMAP 13.17 was recorded as a deferred enhancement on the grounds that the failure is discoverable rather than silent.
+  *Docs · 2 files*
+- **`bde3984`** — ROADMAP 13.18: modal from the activation handler can hang the IDE, mandatory before 1.0 beta
+  Owner hit this during C4 setup: the IDE would not respond to clicks, could not be closed, and had to be killed from Task Manager, with no dialog visible and no error.
+  *Docs · 1 file*
+- **`9cc0f7e`** — Run TestPlan C4: align and size pass, designer has no undo (ROADMAP 13.19)
+  Owner scattered four labels, multi-selected them, and applied Align Left then Make Same Size.
+  *Docs · 2 files*
+- **`623aa2a`** — Add designer Undo/Redo (UNBUILT, UNTESTED) and write the session handoff
+  WARNING: src/AstoriaIDE.bas carries a designer Undo/Redo implementation that has never been compiled or run.
+  *IDE · 1 file*
+- **`1eb56be`** — PROJECT_STATUS: add the session handoff that 623aa2a's message claimed
+  The previous commit's message described a handoff entry, but the script that should have written it failed on a string-escape error and only the source change was committed.
+  *Docs · 1 file*
+- **`1c00c1f`** — Split the Code and Form menus, add a never-greyed Code/Form menu
+  Ctrl+Z, Ctrl+Y and the clipboard shortcuts now work on the form designer.
+  *Docs, IDE · 8 files*

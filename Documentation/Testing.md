@@ -100,6 +100,18 @@ toolbars, and a toolbar tooltip audit across 13 buttons plus the Image Manager t
 Verified that a missing `astoria.ini` is rebuilt from the shipped defaults template rather than
 leaving the IDE silently unable to save.
 
+### Designer round-trip
+
+A designer edit was made to a form and the file diffed byte for byte (TestPlan C2). After a fix,
+the only difference is the edit itself — the moved control's `SetBounds` line — with every other
+control, property, handler, comment and include untouched, and the file's encoding and line
+endings preserved.
+
+The fix mattered: the IDE had been **silently rewriting every edited file** as BOM-less UTF-8 with
+CRLF, discarding the encoding it had just detected on load. In FreeBASIC a UTF-8 BOM changes how
+string literals compile, so this could alter a program's behaviour as a side effect of an
+unrelated edit; an LF file would also have had every line rewritten.
+
 ## Known gaps — not yet tested
 
 Stated plainly, because a tester's time is best spent here.

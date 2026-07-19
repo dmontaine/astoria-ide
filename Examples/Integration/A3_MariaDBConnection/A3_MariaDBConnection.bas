@@ -15,22 +15,27 @@
 ''
 '' Run setup_astoria_test.sql once as root to create the database and user.
 ''
-'' FOUR DEFECTS ARE RECORDED, all confirmed against MariaDB 10.6.8 and all consistent with this
-'' component being a copy of SQLite3Component that was never run against a server. They are
-'' RECORDED rather than asserted, and worked around, so that everything downstream still gets
-'' exercised -- a test that stops at the first known bug proves nothing about the code after it.
+'' FOUR DEFECTS were found by the first run of this test and have since been FIXED in
+'' Controls/MariaDBBox/MariaDBBox.bas (ROADMAP 13.20). The checks that recorded them are now
+'' regression assertions, marked REGRESSION 1-4 below. All four came from this component being a
+'' copy of SQLite3Component that was evidently never run against a server:
 ''
-'' Two of them cannot be seen in a return code, which is the lesson of this test:
-''   - AddField's NOT NULL defect SUCCEEDS, so the schema has to be queried to see it;
-''   - Insert returns 0 whether it worked or not, so inserts are proven by their effect.
-'' The first version of this file trusted return codes for both and reported a green PASS for an
-'' assertion that could never have failed.
+''   1. CreateTable emitted SQLite's AUTOINCREMENT -- it could never create a table.
+''   2. AddField never quoted a text default -- "DEFAULT hello" read as a column reference.
+''   3. AddField silently made columns NOT NULL while REPORTING SUCCESS.
+''   4. Insert returned 0 whether it succeeded or failed.
+''
+'' Defects 3 and 4 are the reason this file asserts the way it does. Neither is visible in a return
+'' code, and the first version of this test trusted return codes for both -- printing a green
+'' "PASS insert first row (0)" for an assertion that would have passed identically had every insert
+'' silently failed. So: schema questions are answered by information_schema, and effects are checked
+'' independently of what a call claims about itself.
 ''
 '' SELF-CONTAINED AND SELF-EXITING. Exit code is non-zero if any assertion failed.
 
 #include once "MariaDBBox.bi"
 
-Dim Shared As Integer gPass, gFail, gDefects
+Dim Shared As Integer gPass, gFail
 
 Sub OnDbError(ByRef Sender As MariaDBBox, ErrorTxt As String)
 	Print "  [component error] " & ErrorTxt
@@ -43,17 +48,6 @@ Sub Check(ByRef CheckName As String, ByRef Got As String, ByRef Want As String)
 	Else
 		gFail += 1
 		Print "FAIL " & CheckName & ": expected [" & Want & "] got [" & Got & "]"
-	End If
-End Sub
-
-'' A known-broken behaviour: reported, counted separately, never fails the run. When one of these
-'' starts passing, the workaround below it should be removed and the check promoted to Check().
-Sub Defect(ByRef DefectName As String, ByVal Broken As Boolean, ByRef Detail As String)
-	If Broken Then
-		gDefects += 1
-		Print "DEFECT " & DefectName & " -- " & Detail
-	Else
-		Print "FIXED? " & DefectName & " now succeeds -- promote this to a real assertion"
 	End If
 End Sub
 
@@ -99,39 +93,30 @@ Print "  client/server version: " & db.Version()
 '' Start from a known state; a leftover table from a previous run would make every count wrong.
 db.Exec("DROP TABLE IF EXISTS people")
 
-'' DEFECT 1 -- CreateTable emits SQLite's AUTOINCREMENT, which MariaDB does not accept
-'' (MariaDBBox.bas, CreateTableUtf). The statement is a syntax error, so the table is never
-'' created and every subsequent call fails against a table that does not exist.
-Dim As Long rcCreate = db.CreateTable("people")
-Defect("CreateTable uses SQLite AUTOINCREMENT", rcCreate <> 0, _
-	"rc=" & Str(rcCreate) & " err=[" & db.ErrMsg() & "] -- MariaDB needs AUTO_INCREMENT")
+'' REGRESSION 1 -- CreateTable emitted SQLite's AUTOINCREMENT, a syntax error on MariaDB, so it
+'' could never create a table at all. Fixed to AUTO_INCREMENT.
+Check("CreateTable succeeds", Str(db.CreateTable("people")), "0")
+Check("the table really exists", Str(db.Count("people")), "0")
 
-'' Workaround so the rest of the test has a table to work with.
-If rcCreate <> 0 Then
-	Check("workaround: create the table with correct MariaDB syntax", _
-		Str(db.Exec("CREATE TABLE people (ID INTEGER PRIMARY KEY AUTO_INCREMENT NOT NULL)")), "0")
-End If
+'' REGRESSION 2 -- a text default was escaped but never quoted, emitting DEFAULT hello, which
+'' MariaDB read as a column reference. Same defect and same fix as the SQLite twin.
+Check("AddField with a text default succeeds", _
+	Str(db.AddField("people", "note", "VARCHAR(64)", "hello")), "0")
 
-'' DEFECT 2 -- a text default is escaped but never quoted (AddField), so this emits
-'' DEFAULT hello and MariaDB rejects it. Same bug as the one A1 found and fixed in SQLite.
-Dim As Long rcTextDefault = db.AddField("people", "note", "VARCHAR(64)", "hello")
-Defect("AddField does not quote a text default", rcTextDefault <> 0, _
-	"rc=" & Str(rcTextDefault) & " err=[" & db.ErrMsg() & "]")
-
-If rcTextDefault <> 0 Then
-	Check("workaround: add the column with a quoted default", _
-		Str(db.Exec("ALTER TABLE people ADD note VARCHAR(64) DEFAULT 'hello'")), "0")
-End If
+'' A numeric default must still go in UNQUOTED -- the fix distinguishes literals from text rather
+'' than quoting everything, and quoting a number would change the column's meaning.
+Check("AddField with a numeric default succeeds", _
+	Str(db.AddField("people", "score", "INTEGER", "7")), "0")
 
 '' DEFECT 3 -- nNull defaults to 0, which appends NOT NULL with no default value. SQLite refuses
 '' this outright; MariaDB accepts it outside strict mode by inventing an implicit default, which
 '' is worse: the call succeeds and the column silently does not mean what the caller asked for.
 '' Recorded either way, because the outcome depends on the server's sql_mode.
-'' The return code proves nothing here and the first version of this test wrongly trusted it: the
-'' call SUCCEEDS (rc=0), which is exactly what makes this the worst of the three. The evidence is
-'' in the schema, so ask the server what it actually built.
-Dim As Long rcName = db.AddField("people", "name", "VARCHAR(64)")
-Print "  AddField(3-arg) rc=" & Str(rcName) & " err=[" & db.ErrMsg() & "]"
+'' REGRESSION 3 -- the return code proves nothing here, which is what made this the nastiest of the
+'' four and what the first version of this test got wrong. The call SUCCEEDED either way; only the
+'' resulting schema showed that the column had been made NOT NULL behind the caller's back. So the
+'' assertion has to ask the server what it actually built.
+Check("AddField(3-arg) succeeds", Str(db.AddField("people", "name", "VARCHAR(64)")), "0")
 
 Dim As String nullable()
 db.SQLFindOne("SELECT IS_NULLABLE FROM information_schema.COLUMNS " & _
@@ -139,10 +124,18 @@ db.SQLFindOne("SELECT IS_NULLABLE FROM information_schema.COLUMNS " & _
 Dim As String nameNullable = ""
 If UBound(nullable) >= 0 Then nameNullable = nullable(0)
 
-'' A caller writing AddField(t, "name", "VARCHAR(64)") is asking for a plain column. Getting a
-'' NOT NULL one back means the column does not mean what was asked for, and nothing said so.
-Defect("AddField silently makes the column NOT NULL", nameNullable = "NO", _
-	"rc=0 (success) but IS_NULLABLE=" & nameNullable & " -- the caller asked for a plain column")
+'' A caller writing AddField(t, "name", "VARCHAR(64)") is asking for a plain column, and must get
+'' one. This is the check that would have caught the defect the return code hid.
+Check("...and the column is nullable, as asked", nameNullable, "YES")
+
+'' NOT NULL must still be honoured when a default exists -- the fix suppresses it only where the
+'' statement would otherwise be meaningless, so this must not have broken the deliberate case.
+Check("AddField with a default is still NOT NULL", _
+	Str(db.AddField("people", "rank_", "INTEGER", "5")), "0")
+Dim As String nullable2()
+db.SQLFindOne("SELECT IS_NULLABLE FROM information_schema.COLUMNS " & _
+	"WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='people' AND COLUMN_NAME='rank_'", nullable2())
+If UBound(nullable2) >= 0 Then Check("...and it is NOT NULL", nullable2(0), "NO")
 
 Check("add an integer column", Str(db.AddField("people", "age", "INTEGER", "0")), "0")
 
@@ -157,26 +150,20 @@ For i As Integer = 0 To UBound(cols, 1)
 Next i
 
 '' --- insert -------------------------------------------------------------------------------
-'' DEFECT 4 -- Insert's return value cannot distinguish success from failure. InsertUtf returns 0
-'' from every error path, and its success path falls off the end with no assignment (the
-'' last_insert_rowid line is commented out), so it returns 0 there too.
+'' REGRESSION 4 -- Insert used to return 0 from every error path AND from its success path, which
+'' fell off the end unassigned. A caller could not tell a stored row from a silently dropped one.
+'' It now returns the new row's id on success and -1 on failure.
 ''
-'' The first version of this test asserted Str(db.Insert(...)) = "0" and reported PASS. That
-'' assertion would have passed identically if every insert had silently failed -- the exact
-'' false-pass shape Testing.md warns about, reproduced here by the author of that warning. Insert
-'' success is therefore proven by its EFFECT on the table, never by its return code.
-db.Insert("people", "name='Ada', age=36")
-db.Insert("people", "name='Grace', age=45")
-db.Insert("people", "name='Alan', age=41")
+'' Both halves are asserted, because a fix that only makes success distinguishable is half a fix.
+Check("insert returns the new row id",   Str(db.Insert("people", "name='Ada', age=36")),   "1")
+Check("insert returns the next row id",  Str(db.Insert("people", "name='Grace', age=45")), "2")
+Check("insert returns the third row id", Str(db.Insert("people", "name='Alan', age=41")),  "3")
 
-Dim As Long rcInsertOk = db.Insert("people", "name='Doomed', age=1")
-Dim As Long rcInsertBad = db.Insert("people", "no_such_column='x'")
-Defect("Insert returns 0 for both success and failure", rcInsertOk = rcInsertBad, _
-	"success rc=" & Str(rcInsertOk) & ", failure rc=" & Str(rcInsertBad) & _
-	" -- a caller cannot detect a failed insert")
-db.DeleteItem("people", "name='Doomed'")
+'' The failing case must be distinguishable from every one of those.
+Check("a failed insert reports -1", Str(db.Insert("people", "no_such_column='x'")), "-1")
 
-'' This is what actually proves the three inserts landed.
+'' And the effect on the table is still checked independently of what Insert claims -- the return
+'' value is now trustworthy, but proving it by its effect is what established that.
 Check("row count", Str(db.Count("people")), "3")
 Check("conditional count", Str(db.Count("people", "age > 40")), "2")
 
@@ -251,10 +238,9 @@ db.Exec("DROP TABLE IF EXISTS people")
 db.Close()
 
 Print ""
-Print "A3 RESULT: " & Str(gPass) & " passed, " & Str(gFail) & " failed, " & _
-	Str(gDefects) & " known defects recorded"
+Print "A3 RESULT: " & Str(gPass) & " passed, " & Str(gFail) & " failed"
 If gFail = 0 Then
-	Print "A3 OVERALL: PASS (with " & Str(gDefects) & " recorded defects to fix)"
+	Print "A3 OVERALL: PASS"
 	End 0
 Else
 	Print "A3 OVERALL: FAIL"

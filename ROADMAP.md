@@ -481,9 +481,13 @@ made it look deliberate. It is worth noting how confident that recommendation re
 premise was false — the diagnosis was reasoned from reading the code, and reading agreed with
 itself. It took measurement, not reading, to find the truth.
 
-### 13.20 MariaDBBox: four defects from an untested SQLite copy (found by TestPlan A3, 2026-07-18)
+### 13.20 MariaDBBox: four defects from an untested SQLite copy — **RESOLVED 2026-07-18** (found by TestPlan A3)
 
-**Status: confirmed against MariaDB 10.6.8 by `Examples/Integration/A3_MariaDBConnection`.**
+**Status: all four FIXED and verified.** A3 now passes 34/34 against MariaDB 10.6.8, with the
+checks that recorded these defects promoted to regression assertions (REGRESSION 1-4 in the test).
+The fixes are in `Controls/MariaDBBox/MariaDBBox.bas`; user programs compile that source directly
+(`MariaDBBox.bi` includes it), so `MariaDBBox_x64.dll` is design-time only and needed no rebuild.
+The original findings are kept below as the record of what was wrong and why.
 
 `Controls/MariaDBBox/MariaDBBox.bas` is evidently a copy of `SQLite3Component` that was adapted for
 the MySQL client API but never run against a real server. The data path works — A3 passes 24 checks

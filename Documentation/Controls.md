@@ -589,6 +589,11 @@ A client component for MariaDB and MySQL servers - connect, run queries, and rea
 
 *Changed in Astoria.* 16 call sites passed a `String` to `FromUtf8(pZString As ZString Ptr)` and assigned the returned pointer to a `UString`, so the library did not compile at all. They now decode straight from the API pointer. Astoria also ships `libmariadb.dll`, which the library needed but never included, and copies it beside your exe on build.
 
+*Also changed in Astoria — four defects fixed 2026-07-18.* Testing this component against a real server (TestPlan A3) showed it to be a copy of `SQLite3Component` that had never been run against MariaDB: **`CreateTable`** emitted SQLite's `AUTOINCREMENT` and so could never create a table; **`AddField`** left a text default unquoted, which MariaDB read as a column reference; **`AddField`** silently made columns `NOT NULL` while reporting success; and **`Insert`** returned `0` whether it succeeded or failed. All four are fixed and covered by regression assertions.
+
+> [!IMPORTANT]
+> **`Insert` now returns the new row's id on success and `-1` on failure.** It previously returned `0` in both cases. If you have code that checks `Insert(...) = 0` to mean success, it is checking the old broken contract and must be updated.
+
 **Key methods:** `AddField`, `AddItem`, `AddItemUtf`, `Close`, `Count`, `CountUtf`, `CreateIndex`, `CreateIndexUtf`, `CreateTable`, `CreateTableUtf`, `DeleteItem`, `DeleteItemUtf`, `ErrMsg`, `Exec`, `Find`, `FindByte`, `FindByteUtf`, `FindOne`, `FindOneByte`, `FindOneByteUtf`, `FindOneUtf`, `FindOnly`, `FindOnlyUtf`, `FindUtf`, `GetMySQLPtr`, `INIGetKey`, `INISetKey`, `Insert`, `InsertUtf`, `MaxID`, `MaxIDUtf`, `Open`, `SetKey`, `SQLFind`, `SQLFindOne`, `Sum`, `SumUtf`, `TransactionBegin`, `TransactionEnd`, `TransactionRollback`, `UpdateByte`, `UpdateByteUtf`, `UpdateText`, `UpdateTextUtf`, `UpdateUtf`, `Vacuum`, `Version`
 
 **Key events:** `OnErrorOut`, `OnSQLString`
@@ -599,8 +604,8 @@ A client component for MariaDB and MySQL servers - connect, run queries, and rea
 > [!WARNING]
 > Requires a reachable MariaDB/MySQL **server**; the control is only a client.
 
-> [!WARNING]
-> Only construction and compilation are verified - **no test has exercised a real connection or query**. Treat the data path as unproven.
+> [!NOTE]
+> **The data path is verified** (2026-07-18, MariaDB 10.6.8): connect, create, insert, query, aggregate, update, delete, transaction rollback, a non-ASCII UTF-8 round trip, and values surviving a real disconnect and reconnect — 34 assertions. Note that result arrays come back as **raw UTF-8** (`rs_Utf8`), and that failures are reported through `OnErrorOut`; wire that event, or a failed query looks like an empty result.
 
 ### NotifyIcon
 

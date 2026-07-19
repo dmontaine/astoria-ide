@@ -359,16 +359,17 @@ End Function
 	End Function
 	Function MariaDBBox.InsertUtf(Table_Utf8 As String, nList_Utf8 As String) As Long
 		Dim m_DB As MYSQL Ptr = FMYSQL
-		If m_DB = NULL Then ErrStr = "Base not opened": This.Event_Send(12, ErrStr): Return 0
-		If Len(Table_Utf8) = 0 Then ErrStr = "Table name is empty": This.Event_Send(12, ErrStr): Return 0
-		If Len(nList_Utf8) = 0 Then ErrStr = "List is empty": This.Event_Send(12, ErrStr): Return 0
+		'' -1 on every failure path, so that no error can be confused with a valid row id.
+		If m_DB = NULL Then ErrStr = "Base not opened": This.Event_Send(12, ErrStr): Return -1
+		If Len(Table_Utf8) = 0 Then ErrStr = "Table name is empty": This.Event_Send(12, ErrStr): Return -1
+		If Len(nList_Utf8) = 0 Then ErrStr = "List is empty": This.Event_Send(12, ErrStr): Return -1
 		Dim zd As String = nList_Utf8, vl As String = ")VALUES(" & nList_Utf8
 		Dim i As Long, zdi As Long = 1, vli As Long = 8, zv As Long
 		zd[0] = 40 ' "("
 		Dim zz As Long
 		For i = 0 To Len(nList_Utf8) - 1
 			If zz <> 0 Then
-				If zv = 0 Then ErrStr = "Field name cannot contain an apostrophe": This.Event_Send(12, ErrStr): Return 0
+				If zv = 0 Then ErrStr = "Field name cannot contain an apostrophe": This.Event_Send(12, ErrStr): Return -1
 				If nList_Utf8[i] = 39 Then
 					zz = 0
 				End If
@@ -378,7 +379,7 @@ End Function
 				Select Case nList_Utf8[i]
 				Case 39 ' "'"
 					zz = 1
-					If zv = 0 Then ErrStr = "Field name cannot contain an apostrophe": This.Event_Send(12, ErrStr): Return 0
+					If zv = 0 Then ErrStr = "Field name cannot contain an apostrophe": This.Event_Send(12, ErrStr): Return -1
 					vl[vli] = nList_Utf8[i]
 					vli += 1
 				Case 44 ' ","
@@ -406,10 +407,14 @@ End Function
 		
 		If This.Exec(Sql_Utf8) = -1 Then
 			ErrStr = "Request failed": This.Event_Send(12, ErrStr)
-			Return 0
+			Return -1
 		End If
-		'Function = MYSQL_last_insert_rowid(m_DB)
 		If Transaction Then Transaction += 1
+		'' The success path used to fall off the end with no assignment, returning 0 -- exactly what
+		'' every error path above returned. A caller therefore had no way to tell a successful
+		'' insert from a failed one, and a silently dropped row looked identical to a stored one.
+		'' Now: the new row's id on success, -1 on failure. Found by TestPlan A3.
+		Function = mysql_insert_id(m_DB)
 	End Function
 	Function MariaDBBox.Exec(Sql_Utf8 As String) As Long
 		Dim m_DB As MYSQL Ptr = FMYSQL
@@ -664,9 +669,37 @@ End Function
 	Function MariaDBBox.CreateTableUtf(Table_Utf8 As String) As Long
 		If FMYSQL = 0 Then ErrStr = "Base not opened": This.Event_Send(12, ErrStr): Return -1
 		If Len(Table_Utf8) = 0 Then ErrStr = "Table name is empty": This.Event_Send(12, ErrStr): Return -1
-		Dim Sql_Utf8 As String = "CREATE TABLE " & Table_Utf8 & " (ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL )"
+		'' AUTO_INCREMENT, not SQLite's AUTOINCREMENT. This component was adapted from
+		'' SQLite3Component and kept the SQLite spelling, which MariaDB rejects as a syntax error --
+		'' so CreateTable could never create a table. Found by TestPlan A3.
+		Dim Sql_Utf8 As String = "CREATE TABLE " & Table_Utf8 & " (ID INTEGER PRIMARY KEY AUTO_INCREMENT NOT NULL )"
 		Function = This.Exec(Sql_Utf8)
 	End Function
+	'' True when a column default can be written into DDL unquoted: a plain number, or one of the
+	'' SQL keyword defaults. Anything else is text and must be quoted. Mirrors
+	'' SQLite3DefaultIsLiteral, with the keyword set MariaDB actually accepts.
+	Private Function MariaDBDefaultIsLiteral(ByRef s As String) As Boolean
+		If Len(s) = 0 Then Return False
+		Select Case UCase(Trim(s))
+		Case "NULL", "CURRENT_TIME", "CURRENT_DATE", "CURRENT_TIMESTAMP", "TRUE", "FALSE"
+			Return True
+		End Select
+		Dim As Integer digits
+		For i As Integer = 0 To Len(s) - 1
+			Select Case s[i]
+			Case Asc("0") To Asc("9")
+				digits += 1
+			Case Asc("+"), Asc("-")
+				If i > 0 Then Return False        '' sign only leads
+			Case Asc(".")
+				'' allowed inside a number
+			Case Else
+				Return False
+			End Select
+		Next
+		Return digits > 0
+	End Function
+
 	Function MariaDBBox.AddField(Table As UString, nField As UString, nType As UString, default As UString = "", nNull As Boolean = 0) As Long
 		If FMYSQL = 0 Then ErrStr = "Base not opened": This.Event_Send(12, ErrStr): Return -1
 		If Len(Table) = 0     Then ErrStr = "Table name is empty"  : This.Event_Send(12, ErrStr): Return -1
@@ -675,8 +708,23 @@ End Function
 		Dim Sql_Utf8 As String = "ALTER TABLE " & ToUtf8(Table) & " ADD " & ToUtf8(nField) & " " & ToUtf8(nType)
 		Dim tdefault As String
 		If Len(default) > 0 AndAlso Len(nType) > 0 Then tdefault = Replace(ToUtf8(default), "'", "''")
-		If Len(tdefault) > 0 Then Sql_Utf8                       &= " DEFAULT " & tdefault
-		If nNull = 0         Then Sql_Utf8                       &= " NOT NULL "
+		If Len(tdefault) > 0 Then
+			'' Quote the default unless it is a bare number or a keyword default. Appending it raw
+			'' made a text default parse as a column reference -- "DEFAULT hello" rather than
+			'' "DEFAULT 'hello'" -- which MariaDB rejects with "Unknown column 'hello' in 'DEFAULT'".
+			'' Same defect, same fix as SQLite3Component.AddField.
+			If MariaDBDefaultIsLiteral(tdefault) Then
+				Sql_Utf8 &= " DEFAULT " & tdefault
+			Else
+				Sql_Utf8 &= " DEFAULT '" & tdefault & "'"
+			End If
+		End If
+		'' NOT NULL is only meaningful here when a default exists. Appending it unconditionally is
+		'' worse on MariaDB than on SQLite: SQLite refuses the statement outright, but MariaDB
+		'' accepts it outside strict mode and invents an implicit default, so the obvious call --
+		'' AddField(table, field, type) -- SUCCEEDED while silently producing a NOT NULL column the
+		'' caller never asked for. Note the parameter reads backwards: nNull = 0 means NOT NULL.
+		If nNull = 0 AndAlso Len(tdefault) > 0 Then Sql_Utf8 &= " NOT NULL"
 		Function = This.Exec(Sql_Utf8)
 	End Function
 	Function MariaDBBox.Vacuum() As Long

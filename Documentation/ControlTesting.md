@@ -96,7 +96,7 @@ so every test is reproducible by opening its `.vfp` and pressing build.
 | Components-HTTPConnection | Other | ✅ | ✅ | ✅ |  |
 | Components-ImageList | Other | ✅ | ✅ | ✅ |  |
 | Components-MainMenu | Other | ✅ | ✅ | ✅ |  |
-| Components-MariaDBBox | Other | ✅ | ✅ | ✅ | Needs libmariadb.dll (MariaDB Connector/C) alongside the exe - now supplied in Controls/MariaDBBox/. Library also required a source fix to compile (see Library fixes). DB connectivity not exercised. |
+| Components-MariaDBBox | Other | ✅ | ✅ | ✅ | Needs libmariadb.dll (MariaDB Connector/C) alongside the exe - now supplied in Controls/MariaDBBox/. Library also required a source fix to compile (see Library fixes). **DB connectivity verified 2026-07-18** against MariaDB 10.6.8 (TestPlan A3, 34 assertions), which found and fixed four further defects - see ROADMAP 13.20. |
 | Components-NotifyIcon | Other | ✅ | ✅ | ✅ |  |
 | Components-PopupMenu | Other | ✅ | ✅ | ✅ |  |
 | Components-PrintDocument | Other | ✅ | ✅ | ✅ |  |

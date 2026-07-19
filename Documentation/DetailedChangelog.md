@@ -17,7 +17,7 @@ Areas are: **IDE** (`src/`), **Framework/Controls** (`Controls/`), **Templates**
 is to write a good commit message. Regenerate rather than hand-edit; a stale hand-edit is worse
 than no entry. Commits after the last one listed here are not yet folded in.
 
-**Total: 379 commits, 2026-07-02 to 2026-07-19.**
+**Total: 380 commits, 2026-07-02 to 2026-07-19.**
 
 ## 2026-07-02
 
@@ -1153,3 +1153,6 @@ than no entry. Commits after the last one listed here are not yet folded in.
 - **`b788865`** — TestPlan D1 passes: console app lifecycle, 12/12
   Create from the Console Application template, edit, build, run, read the output back, switch away to another project, reopen, confirm the edit survived, and rebuild.
   *Build/Tools, Docs · 7 files*
+- **`08eaece`** — Drop the gh/glab CLI dependency; Git setup steps use the browser
+  Owner decision: if someone is running Astoria, a browser is available, so a command-line tool is not worth depending on.
+  *Docs, IDE · 6 files*

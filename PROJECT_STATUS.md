@@ -237,6 +237,12 @@ Measure before theorising.
 
 ### Open, in the order I would take them
 
+0. **§13.23 — document how to set up Git for use with Astoria.** Raised 2026-07-19. The Git
+   integration works but nothing describes the one-time sequence, two steps of which end in a
+   browser and cannot be automated. It is the one path where a beginner can get stuck with an error
+   (authentication failure at push) that points nowhere near the step they missed. Also settle
+   whether Astoria should detect a missing `git` and say so plainly.
+
 1. **§13.22 — `MsgBoxForm` clips long unbreakable text.** Not a blocker, but it will mislead
    in any future dialog that names a file, and it already did once. Widening the box when the
    natural width exceeds the fixed 380 is probably the cheapest correct fix.

@@ -659,3 +659,36 @@ distinguishing tail survives. Widening is the most generally correct and probabl
 Not a 1.0 blocker on its own -- no data is at risk and every current caller either uses short text
 or has been worked around -- but it is a trap for future dialogs and should be fixed before many
 more are written.
+
+### 13.23 No documentation on setting up Git for use with Astoria (owner-raised 2026-07-19)
+
+Astoria's Git integration works, and its individual steps each explain themselves in the moment.
+What does not exist anywhere is the **sequence** — what a user has to do, once, before any of it
+works. That sequence spans the IDE and a web browser, and nothing tells them so up front.
+
+At minimum a user needs to: install Git for Windows (Astoria bundles the compiler and debugger, but
+**not** git itself — `git` must be on PATH); enter their name, e-mail and GitHub username in
+Tools ▸ Options ▸ Personal Information; generate an SSH key with Git ▸ Set Up SSH Key; **paste that
+key into GitHub's SSH-keys page**, which the IDE opens but cannot complete for them; and create the
+remote repository on GitHub before pushing to it.
+
+Two of those steps end in the browser and cannot be automated without either handling the user's
+credentials or shipping a CLI, which is deliberately not done (see the 2026-07-19 removal of the
+gh/glab dependency). That makes documentation the *only* place the whole path can be described, not
+a substitute for a feature we might build later.
+
+**Why this matters more than a typical doc gap.** Git is where the target audience is most likely to
+be starting from zero. A learner who has never used SSH keys has no idea that a generated key is
+useless until it is registered, and the failure they meet is an authentication error at push time —
+far from the step they actually missed. Everything else in Astoria is designed so a beginner cannot
+end up somewhere they cannot get out of; this is the one path where they can.
+
+**Scope:** a page in `Documentation/` written for someone who has never used Git, covering the
+one-time setup in order, what each step is for, what Astoria does and what only they can do, and the
+two or three errors they will hit if a step is skipped — with the fix for each. Should be linked
+from `AstoriaIDESignificantChanges.md`, since that document tells prospective users the Git
+integration exists.
+
+**Also worth settling here:** whether Astoria should detect a missing `git` at startup or on first
+Git use and say so plainly, rather than letting the first Commit fail obscurely. That is a small
+feature, but it belongs with this documentation rather than on its own.

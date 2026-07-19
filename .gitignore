@@ -61,3 +61,6 @@ Examples/Integration/**/b8_result.txt
 Examples/Integration/**/b9_result.txt
 Examples/Integration/**/a7_result.txt
 Examples/Integration/**/a2_test.db
+
+# A3: the local copy carries a real DB password and must never be committed.
+Examples/Integration/**/*.local.sql

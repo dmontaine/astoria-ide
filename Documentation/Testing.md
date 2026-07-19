@@ -102,7 +102,11 @@ leaving the IDE silently unable to save.
 
 ### Designer round-trip
 
-A designer edit was made to a form and the file diffed byte for byte (TestPlan C2). The only
+The designer has been exercised end to end (TestPlan C1): controls placed, properties set in the
+grid, an event handler wired, then built and run. The handler is declared, assigned and implemented,
+the includes match exactly the controls placed, user code sits outside the region the designer
+rewrites, and no line of the original file was removed or altered. Separately, a designer edit was
+made to an existing form and the file diffed byte for byte (TestPlan C2). The only
 difference is the edit itself — the moved control's `SetBounds` line — with every other control,
 property, handler, comment and include untouched.
 

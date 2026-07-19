@@ -126,6 +126,16 @@ Uninstall via the Start Menu shortcut works correctly.
 redo, and style colour round-trips — 8 assertions, all passing. Its undo history is Scintilla's own
 and independent of the framework's.
 
+**Native dialog return values** (TestPlan A8): owner-verified 2026-07-19 with the reusable
+`Examples/Integration/A8_DialogValues` fixture. OpenFile returned the exact selected file path;
+SaveFile returned the exact path chosen by the tester; Color returned `16711680` and changed the
+preview; and Font returned Arial Black at 18 pt with italic enabled. The fixture's Save status said
+FAIL because the tester chose `A8-results.txt` rather than the suggested `A8-selected.txt`, but the
+returned value itself proves the component contract under test. The application stayed alive
+through every dialog and retry, then closed without a crash. An earlier Open crash was diagnosed as
+a fixture wiring error: its hand-built buttons lacked `.Designer = @This`, so the event handler
+received a null owner. After correcting that fixture error, the complete run passed.
+
 **Form designer, Section C of the test plan — C1–C6 all pass; the section is complete.** Place-and-wire (C1),
 save/reopen round-trip fidelity (C2), multi-select align/size with undo (C4), cross-form copy/paste
 including name-collision resolution (C5), and split-view focus tracking (C6) all pass. **C3 now

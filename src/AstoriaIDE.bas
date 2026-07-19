@@ -602,7 +602,31 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 			If tb->cboClass.ItemIndex > 0 Then
 				Dim des As Designer Ptr = tb->Des
 				If des = 0 Then Exit Sub
-				DispatchDesignerCommand(des, Sender.ToString)
+				Select Case Sender.ToString
+				Case "Undo", "Redo"
+					'' Undo/Redo with the designer focused. The designer keeps no history of its
+					'' own and does not need one: every designer change is ALREADY in the code
+					'' editor's undo stack, because DesignerModified brackets each one with
+					'' EditControl.Changing/Changed, which is what builds an EditControlHistory
+					'' entry. So undoing in the designer is literally the same operation as
+					'' undoing in code -- one history serving both views, which is what keeps the
+					'' two consistent.
+					''
+					'' What was missing was only the route. With a control selected,
+					'' cboClass.ItemIndex > 0 sends commands to DispatchDesignerCommand, which has
+					'' no Undo/Redo case, so the keystroke silently did nothing -- reported by
+					'' TestPlan C4 as "Ctrl+Z and Ctrl+Y did not do anything that I could see".
+					''
+					'' The design surface then has to be rebuilt from the text that is now
+					'' current, or the form would still show the old layout while the code behind
+					'' it had changed. FormNeedDesign + RunDeferredFormDesign is the same path the
+					'' IDE already uses when code edits invalidate a form.
+					If Sender.ToString = "Redo" Then tb->txtCode.Redo Else tb->txtCode.Undo
+					tb->FormNeedDesign = True
+					RunDeferredFormDesign()
+				Case Else
+					DispatchDesignerCommand(des, Sender.ToString)
+				End Select
 			ElseIf ActiveForm->ActiveControl->ClassName = "EditControl" OrElse ActiveForm->ActiveControl->ClassName = "Panel" Then
 				Dim ec As EditControl Ptr = @tb->txtCode
 				Select Case Sender.ToString

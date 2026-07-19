@@ -119,6 +119,26 @@ toolbars, and a toolbar tooltip audit across 13 buttons plus the Image Manager t
 Verified that a missing `astoria.ini` is rebuilt from the shipped defaults template rather than
 leaving the IDE silently unable to save.
 
+### Reloading files changed outside the IDE
+
+Owner-verified 2026-07-19. When a file open in the IDE is changed on disk by something else — a
+`git pull`, an AI assistant, a sync client, another editor — clicking back into the IDE now raises
+a single prompt naming the shared folder once and listing every changed file distinctly, and
+accepting it reloads them all.
+
+This began as a hang: the prompt used to be raised from inside the application-activation handler,
+where a modal disables its owner and may never come to the front, leaving the IDE unresponsive with
+nothing on screen to answer (ROADMAP §13.18). It is now posted and shown after activation completes.
+
+**Two further defects were found by testing the fix, which is the argument for testing fixes rather
+than shipping them.** The first crashed the IDE on accepting a reload — an array of `UString` grown
+with `ReDim Preserve`, which shallow-copies a heap-owning type and double-frees it. That crash also
+lost the workspace, because `SaveWorkspace` runs only on a clean close, making it look like a third
+separate bug. The second made the prompt *appear* to list only one of two changed files: it listed
+both, but `MsgBoxForm` clips unbreakable text at a fixed width, and two paths sharing a directory
+prefix clip to the same visible string (ROADMAP §13.22, still open — it will affect any dialog that
+shows a path).
+
 ### Designer round-trip
 
 The designer has been exercised end to end (TestPlan C1): controls placed, properties set in the

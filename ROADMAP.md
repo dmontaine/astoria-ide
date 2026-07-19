@@ -395,7 +395,7 @@ as the project lives.
 Note that keeping the handler name on rename is **deliberate-looking and defensible**; do not
 "fix" it without deciding the policy first. See the C3 entry in `Documentation/TestPlan.md`.
 
-### 13.18 Modal dialog raised from the app-activation handler can hang the IDE — **FIX IMPLEMENTED 2026-07-18, awaiting owner confirmation** (owner-observed)
+### 13.18 Modal dialog raised from the app-activation handler can hang the IDE — **RESOLVED 2026-07-19, owner-confirmed** (owner-observed)
 
 **What changed.** Options 1, 3 and 4 were taken together:
 
@@ -440,8 +440,21 @@ one trace line per tab settled it in a single run by showing both files detected
 moved the search to the half of the code that was actually broken. Measure before theorising; the
 owner's own suggestion that the dialog was truncating is what closed it.
 
-**Verification status -- read this honestly.** The structural claim is verifiable by reading the
-code and is certain: no modal can now be raised from inside the activation handler. What has *not*
+**Owner-confirmed 2026-07-19.** With two files changed on disk in one project, activation raises a
+single dialog naming the shared folder once and listing both files distinctly, the IDE stays
+responsive, and accepting reloads both without incident. The three defects this entry went through
+-- the original hang, a crash introduced by the first fix, and a clipping display that hid half the
+result -- are all fixed.
+
+**On the original symptom, stated precisely.** The reproduction of the *hang itself* was never
+achieved programmatically, so what is proven is that the documented cause is gone and the feature
+now behaves correctly across repeated owner runs. If a freeze on activation is ever seen again,
+press Enter or Escape before killing the process: that still distinguishes an invisible modal from
+a genuine deadlock, and would mean the cause was something other than this.
+
+**Verification status of the original fix -- kept for the record.** The structural claim is
+verifiable by reading the code and is certain: no modal can now be raised from inside the activation
+handler. What has *not*
 been done is reproducing the original hang and showing it gone, because the hang was never
 reproducible programmatically in the first place (Windows' foreground lock prevents another process
 from producing a genuine activation). **So this fix removes the documented cause; it has not been

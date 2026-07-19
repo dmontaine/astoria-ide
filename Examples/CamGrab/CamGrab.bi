@@ -15,6 +15,8 @@
 #include once "qedit.bi"
 ' comment
 
+
+
 Const FPS_UPDATE_INTERVAL = 1000  ' Update FPS once per second
 
 #define SAFE_RELEASE(ComPtr) If (ComPtr <> NULL) Then Cast(IUnknown Ptr, ComPtr)->lpVtbl->Release(Cast(IUnknown Ptr, ComPtr)) : ComPtr = NULL

@@ -17,7 +17,7 @@ Areas are: **IDE** (`src/`), **Framework/Controls** (`Controls/`), **Templates**
 is to write a good commit message. Regenerate rather than hand-edit; a stale hand-edit is worse
 than no entry. Commits after the last one listed here are not yet folded in.
 
-**Total: 380 commits, 2026-07-02 to 2026-07-19.**
+**Total: 381 commits, 2026-07-02 to 2026-07-19.**
 
 ## 2026-07-02
 
@@ -1156,3 +1156,6 @@ than no entry. Commits after the last one listed here are not yet folded in.
 - **`08eaece`** — Drop the gh/glab CLI dependency; Git setup steps use the browser
   Owner decision: if someone is running Astoria, a browser is available, so a command-line tool is not worth depending on.
   *Docs, IDE · 6 files*
+- **`2077c81`** — ROADMAP 13.23: document how to set up Git for use with Astoria
+  Raised by the owner while testing. The Git integration works and each step explains itself in the moment, but nothing describes the sequence a user must complete once before any of it works - and that sequence spans the IDE and a browser.
+  *Docs · 3 files*

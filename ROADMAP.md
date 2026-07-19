@@ -692,3 +692,39 @@ integration exists.
 **Also worth settling here:** whether Astoria should detect a missing `git` at startup or on first
 Git use and say so plainly, rather than letting the first Commit fail obscurely. That is a small
 feature, but it belongs with this documentation rather than on its own.
+
+### 13.24 Analysis scratch file `Temp.bas` is left in the user's project folder (found by TestPlan D2, 2026-07-19)
+
+When code analysis runs against a tab with unsaved changes, `TabWindow.bas` (around lines 11201 and
+11235) writes the tab's current text to a scratch file so the analyser has something on disk to read:
+
+```
+FFileName = GetFolderName(tb->FileName) & "Temp.bas"
+tb->txtCode.SaveToFile(FFileName, ...)
+```
+
+**Nothing deletes it.** After a perfectly ordinary D2 run — create a Windows Application, place three
+controls, wire an event, build — the project folder contained `Temp.bas`, byte-identical to
+`Main.frm`, sitting next to it.
+
+**Why it matters despite being harmless today.** It is not in the `.vfp`, so it does not break the
+build, and this repository's `.gitignore` lists `Temp.bas` — which says the artefact is known and has
+been worked around rather than fixed. A user's project folder has no such `.gitignore`. They get an
+unexplained duplicate of their form beside their form, and the two obvious things a beginner might do
+with it are both bad: add it to the project (duplicate definitions, errors that make no sense) or
+edit it by mistake (work silently discarded on the next analysis run).
+
+It also lands in whatever the user commits, since their own Git repository will not be ignoring it.
+
+**Two fixes, either acceptable:**
+
+1. **Write it somewhere private.** `ExePath/Temp/` already exists and is already used for the
+   Immediate window's scratch file (`Temp/FBTemp.bas`); a per-tab name there keeps the user's folder
+   clean. The existing code already falls back to `ExePath/Temp/Untitled.bas` when the tab has no
+   folder, so the path is half-built already.
+2. **Delete it after use.** Smaller change, but leaves a window where a crash strands the file, and
+   still touches the user's folder.
+
+Option 1 is the correct one: the user's project directory should contain only what the user put
+there. Worth doing before outside testers see it, because "what is this file?" is exactly the kind of
+thing that erodes confidence in a tool that otherwise looks tidy.

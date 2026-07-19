@@ -57,6 +57,12 @@ output previously showed only its first character).
 
 ### Whole-workflow lifecycle
 
+**Windows application with the designer, end to end (TestPlan D2).** The default path for a new
+user: create from the default template, place controls, set properties, wire an event, build, run,
+close, reopen. Event wiring verified in all three of its parts — declared, assigned, implemented —
+since that is the machinery C3's rename defect lived in. Found one artefact, a scratch file left in
+the project folder (ROADMAP §13.24).
+
 **Console application, end to end (TestPlan D1): 12/12.** Create from the template, edit, build,
 run, read the output back, switch away to another project, reopen, confirm the edit survived, and
 rebuild. Driven through the agent pipe, asserting on program *output* rather than exit status.

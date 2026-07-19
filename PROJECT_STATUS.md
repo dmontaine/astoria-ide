@@ -237,13 +237,24 @@ Measure before theorising.
 
 ### Open, in the order I would take them
 
+**Four items raised by the owner while testing on 2026-07-19 (§13.23, §13.25–§13.27).** Together
+they describe one theme: Git and AI are presented to every user as though everyone wants them, and
+the user is left to work out the setup. §13.25 (first-start dialog) is the largest and would
+subsume part of the others — a user who answers "no Git" never meets §13.23's documentation gap or
+§13.26's conversion problem. Worth deciding §13.25 first, since it changes what the other two need
+to cover.
+
 0. **§13.23 — document how to set up Git for use with Astoria.** Raised 2026-07-19. The Git
    integration works but nothing describes the one-time sequence, two steps of which end in a
    browser and cannot be automated. It is the one path where a beginner can get stuck with an error
    (authentication failure at push) that points nowhere near the step they missed. Also settle
    whether Astoria should detect a missing `git` and say so plainly.
 
-1. **§13.22 — `MsgBoxForm` clips long unbreakable text.** Not a blocker, but it will mislead
+1. **§13.27 — the left panel jumps to the Toolbox and stays there.** Smallest of the new items and
+   the most visible: the user selects the Project tab, saves, and is thrown back to the Toolbox.
+2. **§13.25 — first-start dialog** (use Git? use AI? personal information), and **§13.26** — convert
+   a local project to a Git project. Decide §13.25 first; it changes §13.26's scope.
+3. **§13.22 — `MsgBoxForm` clips long unbreakable text.** Not a blocker, but it will mislead
    in any future dialog that names a file, and it already did once. Widening the box when the
    natural width exceeds the fixed 380 is probably the cheapest correct fix.
 2. **Workspace is lost on any crash.** `SaveWorkspace` runs only on clean shutdown. Not yet a

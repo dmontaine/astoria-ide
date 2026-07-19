@@ -728,3 +728,76 @@ It also lands in whatever the user commits, since their own Git repository will 
 Option 1 is the correct one: the user's project directory should contain only what the user put
 there. Worth doing before outside testers see it, because "what is this file?" is exactly the kind of
 thing that erodes confidence in a tool that otherwise looks tidy.
+
+### 13.25 First-start dialog: choose the shape of the IDE once (owner-raised 2026-07-19)
+
+The first time Astoria runs, ask a short set of questions and configure itself from the answers,
+instead of presenting every capability to every user whether they want it or not.
+
+Proposed, from the owner:
+
+- **Use Git?** If no, the Git features are **unavailable** — not greyed with an explanation, simply
+  not part of this user's IDE. A learner writing their first program does not need version control
+  in the menu bar, and its absence removes a whole category of "what is this for?".
+- **Use AI?** Same shape. AI-friendly projects and the MCP server are a headline feature for some
+  users and noise for others.
+- **Personal Information** — offer to fill in name, e-mail and Git identity there and then, rather
+  than leaving the user to discover Tools ▸ Options before their first commit fails.
+
+**Why this fits the philosophy rather than contradicting it.** Astoria's line is "make the choice
+once, on the user's behalf, and remove the option". This is the small set of choices Astoria
+genuinely cannot make for someone: whether they use version control, whether they want an AI
+assistant, and who they are. Asking once, at the only moment when asking is not an interruption, is
+consistent with removing options everywhere else.
+
+**Design points to settle:**
+
+- Reversible afterwards, in Options — a first-start answer must not be a life sentence. That in turn
+  means "unavailable" has to mean *hidden and inert*, not *deleted*, and turning it back on must
+  work without a reinstall.
+- Where the answers live (`astoria.ini`), and what a missing file means — the dialog must not
+  reappear on every run, nor be skipped for a user whose settings were reset.
+- Whether "no Git" should also hide the Git mode in New Project. It should, or the user meets Git
+  anyway at the first thing they do.
+- Interaction with 13.23: a user who says "yes, Git" is exactly the audience for the Git setup
+  documentation, and this dialog is the natural place to link it.
+
+### 13.26 No way to convert a local project into a Git project (owner-raised 2026-07-19)
+
+New Project offers Create Local (no version control) or Use Existing Git Project. The choice is made
+at creation and there is no path between them: someone who starts local and later wants version
+control must create a second project in Git mode and move their files by hand.
+
+This surfaced during TestPlan D3, when Git ▸ Commit was found greyed for a local project. The
+greying is correct — the menu is gated on the folder containing `.git` — but "correct" and "a dead
+end" are both true here.
+
+**What a conversion has to do**, which is why this is a task rather than a one-liner: `git init`;
+stamp the `.gitignore` and `.gitattributes` Astoria already writes for Git projects; make the first
+commit with the user's configured identity; record the provider and URL in `project.astoria` so the
+project reports itself as Git-backed; and then either wire an existing remote or hand off to Create
+Remote Repository. Every one of those pieces exists already for the New Project Git path — this is
+mostly a matter of sequencing them against an existing folder.
+
+**Open:** whether it belongs in the Project menu ("Add version control…") or the Git menu, and
+whether it should offer to create the remote in the same pass or leave that as a separate step.
+
+### 13.27 The left panel jumps to the Toolbox and stays there (found by TestPlan D2, 2026-07-19)
+
+`TabWindow.bas` `ApplyView` ends both the `"Form"` and `"CodeAndForm"` branches with an unconditional
+`tpToolbox->SelectTab` (around lines 10232 and 10246). Every application of a form view therefore
+drags the left panel to the Toolbox — including re-applications the user did not ask for, such as
+after a save or a project-tree change. A new project lands on the Toolbox for the same reason.
+
+**Wanted behaviour, from the owner:** the **Project tree** is the default. The Toolbox is selected
+only while the user is actually working in Form or Code+Form view — and even then, switching *to*
+that view is the moment to select it, not every subsequent refresh.
+
+**The distinction that matters:** selecting the Toolbox when the user *changes view* is helpful;
+re-selecting it when the view is merely re-applied is the IDE overriding a choice the user has
+already made. The fix is to make the jump conditional on an actual view change (`mViewName <>
+ViewName`) rather than on `ApplyView` running, and to default a newly created project to the Project
+tree.
+
+Small, but it is the sort of thing that reads as the tool not listening — the user selects the
+Project tab, saves, and is thrown back to the Toolbox.

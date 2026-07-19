@@ -17,7 +17,7 @@ Areas are: **IDE** (`src/`), **Framework/Controls** (`Controls/`), **Templates**
 is to write a good commit message. Regenerate rather than hand-edit; a stale hand-edit is worse
 than no entry. Commits after the last one listed here are not yet folded in.
 
-**Total: 382 commits, 2026-07-02 to 2026-07-19.**
+**Total: 383 commits, 2026-07-02 to 2026-07-19.**
 
 ## 2026-07-02
 
@@ -1162,3 +1162,6 @@ than no entry. Commits after the last one listed here are not yet folded in.
 - **`50b055e`** — TestPlan D2 passes; record the Temp.bas artefact as 13.24
   Windows app lifecycle through the designer: create from the default template, place a Label, TextBox and CommandButton, set properties, wire the button's Click, build, run, close, reopen.
   *Docs · 4 files*
+- **`be3b611`** — TestPlan: D3 tested the wrong premise; a local project is not a Git repo
+  D3 read "Git: local project - create local, add files, commit and push".
+  *Docs · 2 files*

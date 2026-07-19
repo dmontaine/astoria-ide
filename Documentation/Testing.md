@@ -95,10 +95,11 @@ Uninstall via the Start Menu shortcut works correctly.
 redo, and style colour round-trips — 8 assertions, all passing. Its undo history is Scintilla's own
 and independent of the framework's.
 
-**Form designer, Section C of the test plan — C1–C6 complete except C3.** Place-and-wire (C1),
+**Form designer, Section C of the test plan — C1–C6 all pass; the section is complete.** Place-and-wire (C1),
 save/reopen round-trip fidelity (C2), multi-select align/size with undo (C4), cross-form copy/paste
-including name-collision resolution (C5), and split-view focus tracking (C6) all pass. **C3 fails**:
-renaming a control breaks the build (ROADMAP §13.17, required for 1.0).
+including name-collision resolution (C5), and split-view focus tracking (C6) all pass. **C3 now
+passes too**, after a fix: renaming a control used to update the sites describing it but nothing
+referencing it, leaving the project unbuildable (ROADMAP §13.17). Section C is complete.
 
 Designer keyboard commands — Ctrl+Z/Ctrl+Y/Ctrl+X/Ctrl+C/Ctrl+V — work in both the code editor and
 the designer after the Code/Form menu restructure, with Code and Form still greying contextually.

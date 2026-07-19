@@ -346,7 +346,18 @@ is not.
 mistook the IDE's BOM healing for a fidelity bug and "fixed" it, briefly reintroducing the garbled
 output hazard before the policy was found and the change reverted.
 
-### 13.17 Rename refactoring for controls in the designer — **REQUIRED FOR 1.0** (found by TestPlan C3, 2026-07-18)
+### 13.17 Rename refactoring for controls in the designer — **RESOLVED 2026-07-18** (found by TestPlan C3)
+
+**Status: fixed and owner-verified.** Option 3 was taken: an identifier-aware sweep over the file,
+in `src/RenameRefactor.bi`, applied by `TabWindow.ChangeName` after its existing targeted branches.
+The handler deliberately keeps its name, which whole-identifier matching preserves for free
+(`Label1_Click` is a single token). C3 now passes and the tokenizer carries 18 assertions of its own
+in `Examples/Integration/C3_RenameRefactor`. The original analysis is kept below.
+
+**One thing the analysis below got wrong:** the branch handling `Label1.Text` already existed. It
+sits inside `ElseIf b Then`, and `b` is only set between `Constructor` and `End Constructor`, so a
+reference from an event handler body was never reached. The gap was in which lines were visited,
+not in which patterns were known.
 
 Renaming a control in the property grid updates the four places that describe the **control** — its
 `Dim`, its comment, its `With` block and its `.Name` — but nothing that **references** it. The
@@ -522,3 +533,34 @@ doing the wrong thing, which is the "it just works" standard's real target: a be
 diagnose an insert that reports success and stores nothing. Recommend fixing all four together,
 mirroring the SQLite fixes, with A3 promoted from recording them to asserting the corrected
 behaviour once done.
+
+
+### 13.21 A renamed control frees its old name for reuse while its handler keeps it (observed 2026-07-18)
+
+Follow-on from §13.17, seen in the owner's own test project immediately after the C3 fix.
+
+Renaming a control deliberately does **not** rename its event handler, because renaming a handler
+breaks anything that calls it by name. That policy is right, but it has a consequence worth stating:
+the old control name becomes free again, and the designer's auto-namer will hand it to the next
+control of that type. The test project now genuinely contains:
+
+- a `Label` called `lblGreeting`, whose click handler is `MainType.Label1_Click`, and
+- a different, unrelated `Label` called `Label1`.
+
+Nothing is broken and the project builds. But the handler name now points at the wrong control by
+implication, which is worse than the "name no longer matches its control" case §13.17 anticipated --
+there, the name matched nothing; here it matches something else.
+
+**The concrete risk to check:** wiring an `OnClick` on the new `Label1` should generate
+`Label1_Click`, which already exists and belongs to another control. Whether the designer detects
+the collision, silently reuses the existing handler, or emits a duplicate declaration has not been
+tested. A duplicate `Declare Sub` would fail the build; silently reusing the other control's handler
+would be worse, because it would work and be wrong.
+
+**Options:** offer to rename the handler alongside the control (opt-in, since it is the breaking
+half); or exclude names still referenced by a handler from the auto-namer's pool; or, cheapest,
+detect the collision at wiring time and pick `Label1_Click_1`. Decide the policy before the first
+one, per the note in §13.17.
+
+Not a 1.0 blocker: it requires a specific sequence to reach, produces no silent data loss, and the
+worst case discovered so far is a build error that names the duplicate.

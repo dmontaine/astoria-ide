@@ -445,3 +445,37 @@ the *it just works* standard the product commits to.
 
 There is already a correct re-entrancy guard (`Static bInActivateApp`), so that is not the bug; do
 not "fix" it there.
+
+### 13.19 The form designer has no undo (found by TestPlan C4, 2026-07-18)
+
+Multi-select and the alignment commands work: four scattered labels were selected together, Align
+Left and Make Same Size were applied, and all four ended correctly aligned and equally sized, with
+the result persisting through a save. **What does not work is taking it back.**
+
+`src/Designer.bas` contains **no Undo or Redo implementation at all**. `Undo` is routed to the text
+editor — `AstoriaIDE.bas`: `Case "Undo": txt->Undo` — behind a check that the active control is a
+`TextBox` or `RichTextBox`. With the designer focused that check fails, so Ctrl+Z does nothing and
+says nothing.
+
+**Why this matters more than it first appears.** Unlike §13.17, there is no error message and no
+recovery path. A user who aligns the wrong set of controls, or applies Make Same Size to a group
+containing something that should not be resized, cannot undo it — they must reposition each control
+by hand from memory. Alignment commands are precisely the operations people apply experimentally
+("try it and see"), and experimentation without undo is punishing. For the beginners and students
+Astoria names as its audience, a visual designer that cannot undo is a hard edge.
+
+**Two fixes at very different costs:**
+
+1. **Honest UI, small.** Grey out Undo and Redo (menu item and toolbar button) when the designer has
+   focus, the way the Code/Form menus already grey contextually. It does not add the capability, but
+   it stops the UI implying an action it will not perform, and it tells the user where they stand.
+   This is a small change in the same family as the existing contextual-greying work.
+2. **A designer undo stack, substantial.** Record designer operations — move, resize, align, add,
+   delete, property change — and replay them in reverse. This is the real fix and a genuine feature:
+   it needs a command model the designer does not currently have.
+
+**Owner decision needed on release status.** Option 1 is cheap enough to do before a beta and makes
+the product honest about its limits. Option 2 is a feature, and whether "a designer with no undo"
+is shippable to outside testers is a judgement about the *it just works* standard, not a technical
+question. Note this is a missing capability rather than a defect, which distinguishes it from
+§13.17 and §13.18, both of which are things that actively go wrong.

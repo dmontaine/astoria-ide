@@ -313,3 +313,35 @@ either alone.
 documentation needs attribution to Xusinboy Bekchanov and a statement of what we changed.
 
 Expect a batched job worked section by section across several sessions, not a single pass.
+
+### 13.16 Optional: normalise UTF-8 BOMs across `src/` and `Examples/` in one deliberate pass (owner-added 2026-07-18)
+
+**Optional, cosmetic, and explicitly not urgent.** Astoria's rule is BOM-less UTF-8 for FreeBASIC
+sources: FreeBASIC reads a UTF-8 BOM as a signal to make string literals **wide**, so a BOM'd
+source prints garbled console output. The IDE already normalises to BOM-less on save, and
+`AgentPipe.bas` downgrades `Utf8BOM`→`Utf8` before an agent build.
+
+**The tree is currently mixed** (measured 2026-07-18 while answering "does anything deviate from the
+rule?"):
+
+| Area | With BOM | Without |
+| --- | --- | --- |
+| `Templates/Projects` | **0** | 5 |
+| Examples with a **console** subsystem | **0** | — |
+| `src/` (IDE source) | 24 | 60 |
+| `Examples/` (all) | 221 | 111 |
+
+**Nothing ships in the state that actually misbehaves.** The templates every new project starts from
+are clean, and no console-subsystem example carries a BOM — which is the only configuration where
+the wide-literal behaviour reaches a user. The remainder are GUI sources, where it does not bite the
+same way, and the IDE heals any of them the moment someone edits and saves.
+
+**So this is a uniformity job, not a bug fix.** If it is done, do it as a deliberate one-off pass
+rather than as a side effect of other work: it rewrites ~245 files and produces an enormous diff
+that would bury real changes in history. Strip the BOM only; touch nothing else. Re-run the
+integration suite afterwards, since encoding is exactly the kind of thing that looks harmless and
+is not.
+
+**Do not treat an encoding change as a defect without reading this section first.** TestPlan C2
+mistook the IDE's BOM healing for a fidelity bug and "fixed" it, briefly reintroducing the garbled
+output hazard before the policy was found and the change reverted.

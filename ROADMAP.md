@@ -345,3 +345,34 @@ is not.
 **Do not treat an encoding change as a defect without reading this section first.** TestPlan C2
 mistook the IDE's BOM healing for a fidelity bug and "fixed" it, briefly reintroducing the garbled
 output hazard before the policy was found and the change reverted.
+
+### 13.17 Rename refactoring for controls in the designer (found by TestPlan C3, 2026-07-18)
+
+Renaming a control in the property grid updates the four places that describe the **control** — its
+`Dim`, its comment, its `With` block and its `.Name` — but nothing that **references** it. The
+event handler keeps its old name, and any code referring to the old control variable is left
+untouched, so the project stops building:
+
+```
+Error: Variable not declared, Label1 in 'Label1.Text = "Hello, " & TextBox1.Text'
+```
+
+**Not silent, and not data loss** — the error names the file, the line and the identifier, and a
+user fixes it in seconds. That is why this is an enhancement rather than a 1.0 bug fix. But on a
+form with a control referenced from a dozen places, one rename produces a dozen errors with no
+warning at the moment of renaming, and the handler is left with a name that no longer matches its
+control (`Label1_Click` on a control called `lblGreeting`), which is quietly confusing for as long
+as the project lives.
+
+**Three options, cheapest first:**
+
+1. **Warn at rename time** — "N references to `Label1` remain in code" — leaving the user to fix
+   them. Small, honest, and no risk of touching code the user did not ask us to touch.
+2. **Rename references inside the designer region only**, which the IDE already owns and rewrites.
+   Does not help the handler body, which is where the reference usually is.
+3. **A real rename refactor across the file** — the control variable everywhere, and optionally the
+   handler with it. The most useful, and the one that has to be careful: renaming a handler breaks
+   anything that calls it by name, so that part should be opt-in.
+
+Note that keeping the handler name on rename is **deliberate-looking and defensible**; do not
+"fix" it without deciding the policy first. See the C3 entry in `Documentation/TestPlan.md`.

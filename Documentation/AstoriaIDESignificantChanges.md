@@ -73,8 +73,13 @@ them together. Astoria is intended to be the whole environment.
   created by an AI agent are marked automatically, with that agent's template applied. The assistant
   arrives already knowing the language's conventions and the project's layout.
 - **Built-in Git workflow.** Version control is part of the IDE rather than a separate errand. A Git
-  menu provides Commit, Pull, and Push, and Astoria will also set up your SSH key and create the
-  remote repository for you. Your Git identity is entered once in Options and reused everywhere;
+  menu provides Commit, Pull, and Push. Astoria also generates your SSH key and takes you to the
+  right page on GitHub to register it, and to the new-repository page when a project needs a remote
+  — with the key, or the repository name, already on your clipboard so each is a single paste. It
+  stops short of doing those two steps for you: both need an account action that would mean either
+  handling your credentials or depending on a command-line tool Astoria does not ship, and neither
+  is a trade worth making to save a paste. Your Git identity is entered once in Options and reused
+  everywhere;
   commits are attributed using repository-local settings, so Astoria never disturbs your machine's
   global Git configuration.
 - **Two ways to start a project.** The New Project dialog offers a clear choice: create a purely

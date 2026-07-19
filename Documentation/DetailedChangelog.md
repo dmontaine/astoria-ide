@@ -17,7 +17,7 @@ Areas are: **IDE** (`src/`), **Framework/Controls** (`Controls/`), **Templates**
 is to write a good commit message. Regenerate rather than hand-edit; a stale hand-edit is worse
 than no entry. Commits after the last one listed here are not yet folded in.
 
-**Total: 378 commits, 2026-07-02 to 2026-07-19.**
+**Total: 379 commits, 2026-07-02 to 2026-07-19.**
 
 ## 2026-07-02
 
@@ -1150,3 +1150,6 @@ than no entry. Commits after the last one listed here are not yet folded in.
 - **`b69a0d0`** — Documentation current, session handoff, and a CLAUDE.md for the IDE itself
   Adds a repository-root CLAUDE.md. There was none, so an AI asked to work on Astoria's own source had no guidance at all -- the file under Templates/AI/ClaudeCode/ ships into projects CREATED WITH Astoria and describes writing FreeBASIC apps, which is a diff...
   *Docs · 4 files*
+- **`b788865`** — TestPlan D1 passes: console app lifecycle, 12/12
+  Create from the Console Application template, edit, build, run, read the output back, switch away to another project, reopen, confirm the edit survived, and rebuild.
+  *Build/Tools, Docs · 7 files*

@@ -1885,31 +1885,10 @@ Sub SetupSshKey(ByRef provider As String)
 	End If
 	pubKey = Trim(pubKey, Any !" \t" + Chr(13) + Chr(10))
 	If pubKey <> "" Then Clipboard.SetAsText pubKey
-	'' If the provider's CLI is installed AND authenticated, offer to add the key directly
-	'' (skip the browser). Only GitHub (gh) and GitLab (glab) have one here.
-	Dim As String cli = ""
-	Select Case LCase(Trim(provider))
-	Case "github", "" : cli = "gh"
-	Case "gitlab"     : cli = "glab"
-	End Select
-	If cli <> "" Then
-		Dim As String authOut
-		Dim As Integer authEc
-		RunCmdCaptured(cli & " auth status", authOut, authEc)
-		If authEc = 0 Then
-			If MsgBox(("Your SSH key is ready. Add it to ") & provider & (" automatically using the ") & cli & (" CLI (you're already signed in)?"), "", mtInfo, btYesNo) = mrYes Then
-				Dim As String title = "Astoria (" & Environ("COMPUTERNAME") & ")"
-				Dim As String addOut
-				Dim As Integer addEc
-				Dim As Boolean added = RunCmdCaptured(cli & " ssh-key add " & Chr(34) & pubPath & Chr(34) & " --title " & Chr(34) & title & Chr(34), addOut, addEc)
-				If added Then
-					MsgBox (("Your SSH key was added to ") & provider & (" via ") & cli & (".") & Chr(13,10) & Chr(13,10) & ("You should be able to clone/push over SSH now.")), , mtInfo
-					Exit Sub
-				End If
-				MsgBox ((cli & " couldn't add the key automatically; opening the web page instead.") & Chr(13,10) & Chr(13,10) & Trim(addOut)), , mtWarning
-			End If
-		End If
-	End If
+	'' The public key is on the clipboard; the user pastes it into the provider's page. Astoria
+	'' deliberately does not use a provider CLI to upload it: that would mean depending on a tool
+	'' it does not ship, whose sign-in is a console flow, to save one paste. Everything Astoria
+	'' needs for Git it already has -- git itself, bundled.
 	'' Assisted-browser fallback: open the provider's SSH-keys page for a manual paste.
 	Dim As UString url = SshKeyPageUrl(provider)
 	Dim As UString ask = ("Your SSH public key is ready and copied to the clipboard:") & Chr(13,10) & pubPath & Chr(13,10) & Chr(13,10) & _
@@ -1947,36 +1926,6 @@ Sub OpenNewRepoPage(ByRef provider As String)
 	ShellExecuteW(0, WStr("open"), url, 0, 0, SW_SHOWNORMAL)
 End Sub
 
-'' Create an empty private remote repo `name` on `provider` using its CLI (gh/glab) if
-'' installed AND authenticated. For GitHub with a local git repo at sourceFolder, also
-'' wires it as the `origin` remote (gh --source --remote). Returns True only when the CLI
-'' actually created it; resultOut carries the CLI output. False -> caller falls back to the
-'' browser. UI thread.
-Function TryCliCreateRepo(ByRef provider As String, ByRef repoName As String, ByRef sourceFolder As String, ByRef resultOut As String) As Boolean
-	resultOut = ""
-	Dim As String cli = ""
-	Select Case LCase(Trim(provider))
-	Case "github", "" : cli = "gh"
-	Case "gitlab"     : cli = "glab"
-	End Select
-	If cli = "" Then Return False
-	Dim As String authOut
-	Dim As Integer authEc
-	RunCmdCaptured(cli & " auth status", authOut, authEc)
-	If authEc <> 0 Then Return False   '' not installed / not authenticated
-	Dim As String createCmd
-	If cli = "gh" Then
-		createCmd = "gh repo create " & Chr(34) & repoName & Chr(34) & " --private"
-		If sourceFolder <> "" AndAlso FolderExistsU(sourceFolder & "\.git") Then
-			createCmd &= " --source " & Chr(34) & sourceFolder & Chr(34) & " --remote origin"
-		End If
-	Else
-		createCmd = "glab repo create " & Chr(34) & repoName & Chr(34) & " --private"
-	End If
-	Dim As Integer cEc
-	Return RunCmdCaptured(createCmd, resultOut, cEc)
-End Function
-
 '' Git menu > Create Remote Repository: create an empty remote repo for the open project on
 '' its provider (from project.astoria, else GitHub), named after the project. Uses the
 '' provider CLI when signed in (and wires origin for a local git repo), else opens the
@@ -2004,15 +1953,10 @@ Sub GitCreateRemoteRepo
 		MsgBox ("Could not determine a project name for the repository."), , mtWarning
 		Exit Sub
 	End If
-	If MsgBox(("Create an empty private repository named ") & Chr(34) & repoName & Chr(34) & (" on ") & provider & ("?"), "", mtInfo, btYesNo) <> mrYes Then Exit Sub
-	Dim As String createOut
-	Dim As String srcFolder = projFolder
-	If TryCliCreateRepo(provider, repoName, srcFolder, createOut) Then
-		MsgBox (("Created ") & Chr(34) & repoName & Chr(34) & (" on ") & provider & (".") & Chr(13,10) & Chr(13,10) & Trim(createOut)), , mtInfo
-	Else
-		If MsgBox(("Couldn't create it automatically (no gh/glab CLI, not signed in, or it already exists).") & Chr(13,10) & Chr(13,10) & ("Open ") & provider & ("'s new-repository page to create it by hand?"), "", mtInfo, btYesNo) = mrYes Then
-			OpenNewRepoPage(provider)
-		End If
+	If MsgBox(("Astoria will open ") & provider & ("'s new-repository page, with the name ") & Chr(34) & repoName & Chr(34) & (" to use.") & Chr(13,10) & Chr(13,10) & _
+		("Create it there as an empty private repository, then use Git > Push.") & Chr(13,10) & Chr(13,10) & ("Open the page now?"), "", mtInfo, btYesNo) = mrYes Then
+		Clipboard.SetAsText repoName
+		OpenNewRepoPage(provider)
 	End If
 End Sub
 

@@ -513,22 +513,21 @@ Private Sub frmNewProject.cmdOK_Click(ByRef Sender As Control)
 			Exit Sub
 		End If
 		gitURL = BuildGitURL(gitProvider, gitUserName, ProjectName)
-		'' Preflight: if the remote doesn't exist yet, offer to create it (Task 5) instead
-		'' of failing the clone. A CLI-created empty repo falls through to the clone below
-		'' (empty -> populated from the template); the browser path stops for a retry.
+		'' Preflight: if the remote doesn't exist yet, send the user to the provider's page to
+		'' create it rather than failing the clone with a bare authentication error.
+		''
+		'' Astoria does not create it for them: that needs a provider CLI it does not ship, whose
+		'' sign-in is a console flow, to save one page visit. The repository name goes on the
+		'' clipboard so the page can be filled in with a paste.
 		If Not RemoteRepoExists(gitURL) Then
-			If MsgBox(("The repository doesn't exist yet:") & Chr(13,10) & gitURL & Chr(13,10) & Chr(13,10) & ("Create it now?"), "", mtInfo, btYesNo) = mrYes Then
-				Dim As String createOut2
-				If Not TryCliCreateRepo(gitProvider, ProjectName, "", createOut2) Then
-					OpenNewRepoPage(gitProvider)
-					MsgBox ("Opened ") & gitProvider & ("'s new-repository page. Create ") & Chr(34) & ProjectName & Chr(34) & (" there, then click Create again."), , mtInfo
-					Me.BringToFront
-					Exit Sub
-				End If
-			Else
-				Me.BringToFront
-				Exit Sub
+			If MsgBox(("The repository doesn't exist yet:") & Chr(13,10) & gitURL & Chr(13,10) & Chr(13,10) & _
+				("Open ") & gitProvider & ("'s new-repository page to create it?"), "", mtInfo, btYesNo) = mrYes Then
+				Clipboard.SetAsText ProjectName
+				OpenNewRepoPage(gitProvider)
+				MsgBox ("Create ") & Chr(34) & ProjectName & Chr(34) & (" as an empty repository -- the name is on your clipboard -- then click Create again."), , mtInfo
 			End If
+			Me.BringToFront
+			Exit Sub
 		End If
 		If Not CloneGitRepository(gitURL, localFolder) Then
 			MsgBox ("The repository could not be cloned") & ":" & Chr(13,10) & Chr(13,10) & gitURL & Chr(13,10) & Chr(13,10) & _

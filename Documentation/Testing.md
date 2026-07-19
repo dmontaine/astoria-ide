@@ -102,15 +102,15 @@ leaving the IDE silently unable to save.
 
 ### Designer round-trip
 
-A designer edit was made to a form and the file diffed byte for byte (TestPlan C2). After a fix,
-the only difference is the edit itself — the moved control's `SetBounds` line — with every other
-control, property, handler, comment and include untouched, and the file's encoding and line
-endings preserved.
+A designer edit was made to a form and the file diffed byte for byte (TestPlan C2). The only
+difference is the edit itself — the moved control's `SetBounds` line — with every other control,
+property, handler, comment and include untouched.
 
-The fix mattered: the IDE had been **silently rewriting every edited file** as BOM-less UTF-8 with
-CRLF, discarding the encoding it had just detected on load. In FreeBASIC a UTF-8 BOM changes how
-string literals compile, so this could alter a program's behaviour as a side effect of an
-unrelated edit; an LF file would also have had every line rewritten.
+Two other differences appeared and neither is a defect. The UTF-8 BOM is removed on save **by
+design**: FreeBASIC treats a BOM as a signal to make string literals wide, so a BOM'd source
+prints garbled console output, and the IDE normalises to BOM-less UTF-8 (the agent build does the
+same downgrade). And deleting a control leaves its `#include` behind, which is safer than removing
+a line the user may depend on elsewhere.
 
 ## Known gaps — not yet tested
 

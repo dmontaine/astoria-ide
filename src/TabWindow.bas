@@ -506,15 +506,9 @@ Function AddTab(ByRef FileName As WString, bNew As Boolean, TreeN As TreeNode Pt
 				pApp->MainForm = @frmMain
 				pstBar->Panels[1]->Caption = ("Elapsed time") & ": Loading " & Format((Timer - timeElapse), "0.000s")
 				timeElapse = Timer
-				'' Keep the encoding and line endings the file actually arrived with. LoadFromFile
-				'' takes both ByRef and reports what it detected; overwriting them here -- which is
-				'' what this did -- silently rewrote every edited file as BOM-less UTF-8 with CRLF,
-				'' whatever it had been. Found by TestPlan C2: a designer edit to a UTF-8-with-BOM
-				'' form saved it back without the BOM. That is not cosmetic in FreeBASIC, where a
-				'' BOM changes how string literals are compiled, and it would also rewrite every
-				'' line of an LF file. A user's file format is theirs; changing it is an explicit
-				'' action (Options / the encoding selector), never a side effect of saving.
 				.txtCode.LoadFromFile(FileNameNew, tb->FileEncoding, tb->NewLineType, True)
+				tb->FileEncoding = FileEncodings.Utf8
+				tb->NewLineType = NewLineTypes.WindowsCRLF
 				pstBar->Panels[1]->Caption = pstBar->Panels[1]->Caption & " / " & Format((Timer - timeElapse), "0.000s")
 				timeElapse = Timer
 				If bNew Then

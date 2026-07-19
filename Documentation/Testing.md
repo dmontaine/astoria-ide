@@ -46,6 +46,16 @@ DLL was discovered and shipped.
 Defects DR-1 through DR-16 are fixed and owner-verified. This was a dedicated sub-project against
 the integrated GDB debugger.
 
+**Multi-form debugger workflow (TestPlan D6): passes, owner-verified 2026-07-19.** A separate
+Main/Child form fixture verified breakpoints in both event handlers, Step Over, Locals, Watches,
+FreeBASIC string values and types, return-value propagation, Continue, Stop, and cleanup of both
+the debuggee and GDB. The test found and fixed five integration defects: the first real breakpoint
+was automatically continued; the bottom debugger pane could start collapsed and unresizable;
+Add Watch inserted after its reserved blank row; source-level local names did not resolve GDB's
+FreeBASIC `$1` suffixes; and watch types were never queried. One behavior remains documented as a
+limitation: Step Out from an event handler may first stop in the framework dispatcher because that
+is the caller frame known to GDB. Continuing to the next user breakpoint works correctly.
+
 ### Agent MCP server — complete
 
 Tasks 0–7, verified end-to-end from a real stdio MCP client speaking JSON-RPC 2.0:
@@ -160,6 +170,44 @@ toolbars, and a toolbar tooltip audit across 13 buttons plus the Image Manager t
 Verified that a missing `astoria.ini` is rebuilt from the shipped defaults template rather than
 leaving the IDE silently unable to save.
 
+TestPlan E2 then tested the distinct damaged-file path. The first run was 0/3: Astoria remained
+alive, but restored no missing shipped sections from a truncated file, a garbage-prefixed file, or
+a file missing `[Terminals]`. This is now fixed and the identical run passes 3/3. Startup merges
+only missing keys from `astoria.default.ini`; existing user values, personal information, MRU and
+custom sections remain authoritative. The harness restores the owner's original settings after
+each isolated run.
+
+### Scale and supported limits
+
+Astoria is deliberately project-based: it is not a standalone `.bas` editor, and a source file
+cannot be opened until a project has been created or loaded. The scale results below therefore
+describe project members and project transitions, not arbitrary files or concurrent projects.
+Opening a second project in one process closes the first by design. What remains untested is running
+multiple Astoria processes simultaneously, each with its own project. That test must cover editing,
+building and closing independently, plus contention over the global agent named pipe and shared
+settings/workspace files (TestPlan E11).
+
+A 250-file project passes cleanly: 3.640 seconds to open, 2 ms to enumerate all 250 files, with the
+IDE responsive at 155.2 MB working set and 1,289 handles in the combined scale run.
+
+Sixty simultaneously open documents remained functional and responsive in both runs (10.258 and
+10.510 seconds), followed by a successful transition to the 250-file project in 2.924 seconds, at
+about 155–156 MB working set and 1,289 handles. However, the owner observed several seconds of
+repeated IDE flashing on both runs. A close-only redraw lock did not solve it and was removed: each
+individual `AddTab` also unlocks and repaints, so a real fix needs a batch-open/restore boundary
+around the complete operation. Astoria supports one open project at a time by design, so the earlier
+wording requiring several simultaneous projects was incorrect; the supported stress case is many
+documents followed by a project switch and clean teardown.
+
+A generated 100,000-line, 7.71 MB source member in a loaded project is beyond the practical 1.0
+editor limit. It opened,
+but caused repeated flashing and a “file too big for designer” message and could not complete the
+open/scroll/edit scenario reliably. Until a large-file mode exists, oversized files should be
+warned about before loading and opened code-only with designer, IntelliSense, folding and background
+analysis disabled—or declined. The warning belongs in the project-member loading path and must not
+imply standalone-file support. This is a documented capacity limit; the repeated redraw and
+misleading designer path are defects around that limit.
+
 ### Reloading files changed outside the IDE
 
 Owner-verified 2026-07-19. When a file open in the IDE is changed on disk by something else — a
@@ -242,8 +290,8 @@ Stated plainly, because a tester's time is best spent here.
 | **Clean-machine install** | The installer is verified on a development machine. It has not been installed on a machine without a FreeBASIC toolchain already present. |
 | **Performance and scale** | No testing with large projects, long files, or many open documents. |
 | **Accessibility** | Untested — screen readers, keyboard-only navigation, high-DPI and high-contrast modes. |
-| **Debugger breadth** | DR-1..DR-16 closed known defects. There has been no systematic sweep of debugger features against a matrix of program types. |
-| **AI templates beyond Claude Code** | The Claude Code template is exercised regularly in real use. The Codex, Cursor, Kun and OpenCode templates have had their MCP configuration written but not verified against those clients. |
+| **Debugger breadth** | **Partly closed 2026-07-19.** DR-1..DR-16 closed the known reliability defects, and TestPlan D6 now proves a realistic two-form event workflow including breakpoints, stepping, Locals, Watches, return values, Stop, and process cleanup. A broader matrix of program types is still untested. Step Out may stop first in framework dispatcher code before returning to user code. |
+| **AI templates beyond Claude Code** | **Closed 2026-07-19.** The ChatGPT, Cursor, Kun and OpenCode clients each compared and updated their own template against the Claude Code reference; owner-verified under TestPlan D7. |
 | **Form designer breadth** | **Partly closed as of 2026-07-18.** The designer's core workflows are now covered by TestPlan C1–C6 (place and wire, round-trip, multi-select operations, cross-form paste, split-view focus), and one real defect remains from it — C3, renaming a control breaks the build (§13.17). What is still untested is *breadth*: those tests exercise a handful of common controls, not every control's design-time behaviour, so a less-used control could still misbehave in the designer. |
 
 ## For human testers

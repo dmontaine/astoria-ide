@@ -80,6 +80,47 @@ Sub ResolveFbcExePath(ByRef FbcExe As WString Ptr, CompilerTool As ToolType Ptr,
 	End If
 End Sub
 
+Private Sub MergeOneShippedDefault(ByRef Defaults As IniFile, ByRef Section As WString, ByRef Key As WString)
+	If Defaults.KeyExists(Section, Key) = -1 Then Exit Sub
+	If iniSettings.KeyExists(Section, Key) <> -1 Then Exit Sub
+	Dim As UString Value = Defaults.ReadString(Section, Key, "")
+	iniSettings.WriteString Section, Key, Value
+End Sub
+
+Private Sub MergeMissingShippedSettings(ByRef DefaultsPath As WString)
+	'' An existing astoria.ini is user data, so it remains authoritative. Repair only
+	'' keys shipped in astoria.default.ini that are absent; never replace a value the
+	'' user already has, and never touch personal information, MRU or custom sections.
+	Dim As IniFile Defaults
+	Defaults.Load DefaultsPath
+	If Defaults.SectionCount = 0 Then Exit Sub
+
+	MergeOneShippedDefault Defaults, "MakeTools", "DefaultMakeTool"
+	MergeOneShippedDefault Defaults, "MakeTools", "Version_0"
+	MergeOneShippedDefault Defaults, "MakeTools", "Path_0"
+	MergeOneShippedDefault Defaults, "MakeTools", "Command_0"
+	MergeOneShippedDefault Defaults, "Terminals", "DefaultTerminal"
+	MergeOneShippedDefault Defaults, "Helps", "DefaultHelp"
+	MergeOneShippedDefault Defaults, "Helps", "Version_0"
+	MergeOneShippedDefault Defaults, "Helps", "Path_0"
+	MergeOneShippedDefault Defaults, "Helps", "Version_1"
+	MergeOneShippedDefault Defaults, "Helps", "Path_1"
+	MergeOneShippedDefault Defaults, "Helps", "Version_2"
+	MergeOneShippedDefault Defaults, "Helps", "Path_2"
+	MergeOneShippedDefault Defaults, "IncludePaths", "Path_0"
+	MergeOneShippedDefault Defaults, "LibraryPaths", "Path_0"
+	MergeOneShippedDefault Defaults, "BuildConfigurations", "DefaultBuildConfiguration"
+	MergeOneShippedDefault Defaults, "BuildConfigurations", "Name_0"
+	MergeOneShippedDefault Defaults, "BuildConfigurations", "Switches_0"
+	MergeOneShippedDefault Defaults, "BuildConfigurations", "Name_1"
+	MergeOneShippedDefault Defaults, "BuildConfigurations", "Switches_1"
+	MergeOneShippedDefault Defaults, "BuildConfigurations", "Name_2"
+	MergeOneShippedDefault Defaults, "BuildConfigurations", "Switches_2"
+	MergeOneShippedDefault Defaults, "BuildConfigurations", "Name_3"
+	MergeOneShippedDefault Defaults, "BuildConfigurations", "Switches_3"
+	MergeOneShippedDefault Defaults, "Options", "ShowSymbolsTooltipsOnMouseHover"
+End Sub
+
 Sub LoadSettingsIni()
 	'' No settings file yet -- a fresh install, or the user deleted it. Seed a minimal
 	'' one before loading.
@@ -116,6 +157,11 @@ Sub LoadSettingsIni()
 	End If
 	If FileExists(SettingsPath) Then
 		iniSettings.Load SettingsPath
+		'' A present file may still be truncated, malformed or missing a section. The
+		'' old path accepted that silently and left tool lists empty (TestPlan E2).
+		'' Merge only absent shipped defaults after loading so valid user choices win.
+		Dim As UString RepairDefaultsPath = ExePath & "/Settings/astoria.default.ini"
+		If FileExists(RepairDefaultsPath) Then MergeMissingShippedSettings RepairDefaultsPath
 	End If
 End Sub
 

@@ -475,7 +475,24 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 				End If
 			End If
 		Case "AddWatch":
-			If tb->txtCode.SelText <> "" Then lvWatches.Nodes.Add(tb->txtCode.SelText)
+			Dim As UString watchExpression = Trim(tb->txtCode.SelText)
+			If watchExpression <> "" Then
+				'' The final row is the editable blank sentinel and SnapshotWatchNames excludes
+				'' it deliberately. Appending after it made the new watch become the excluded
+				'' final row, so it was listed but never evaluated (TestPlan D6).
+				Dim As TreeListViewItem Ptr watchItem
+				If lvWatches.Nodes.Count > 0 AndAlso lvWatches.Nodes.Item(lvWatches.Nodes.Count - 1)->Text(0) = "" Then
+					watchItem = lvWatches.Nodes.Item(lvWatches.Nodes.Count - 1)
+					watchItem->Text(0) = watchExpression
+				Else
+					watchItem = lvWatches.Nodes.Add(watchExpression)
+				End If
+				lvWatches.Nodes.Add
+				WatchIndex = watchItem->Index
+				SnapshotWatchNames()
+				command_debug "print " & ResolveWatchGdbName(watchExpression, gRawLocals)
+				If lvWatches.Nodes.Count > 1 Then tpWatches->Caption = ("Watches") & " (" & Str(lvWatches.Nodes.Count - 1) & " " & ("Pos") & ")"
+			End If
 		Case "FindNext":                    pfFind->Find(True)
 		Case "FindPrev":                    pfFind->Find(False)
 		Case "Goto":                        pfGoto->Show *pfrmMain : pfGoto->CenterToParent

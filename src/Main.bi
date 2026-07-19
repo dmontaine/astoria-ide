@@ -40,6 +40,7 @@
 	' --- DR-3 slice 2D: worker->UI marshal of the debug panels (bodies in Debug.bas) ---
 	Declare Sub FillDebugPanelsOnUI()   ' UI thread: fill lvLocals/lvGlobals/lvThreads/lvWatches from staged raw data
 	Declare Sub SnapshotWatchNames()    ' UI thread: refresh the worker-visible watch-name snapshot
+	Declare Function ResolveWatchGdbName(ByRef SourceName As String, ByRef RawLocals As String) As String
 
 	' --- DR-7: worker->UI marshal of Output text + watch-edit result + session-start panel clear ---
 	Declare Sub FlushDebugOutputOnUI()  ' UI thread: apply queued ShowMessages/UpdateWatch/panel-clear
@@ -351,6 +352,7 @@ Declare Sub SetRightClosedStyle(Value As Boolean, WithClose As Boolean = True)
 Declare Sub SetBottomClosedStyle(Value As Boolean, WithClose As Boolean = True)
 Declare Function GetBottomClosedStyle As Boolean
 Declare Function IsBottomCollapsed As Boolean
+Declare Sub ShowBottom()
 Declare Sub SaveMainWindowPanelLayout()
 Declare Function GetLeftClosedStyle As Boolean
 Declare Function IsLeftCollapsed As Boolean

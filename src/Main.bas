@@ -8868,7 +8868,7 @@ Sub lvWatches_CellEdited(ByRef Designer As My.Sys.Object, ByRef Sender As TreeLi
 		End If
 	Else
 		WatchIndex = Item->Index
-		command_debug "print " & UCase(NewText)
+		command_debug "print " & ResolveWatchGdbName(NewText, gRawLocals)
 		If Item->Index = lvWatches.Nodes.Count - 1 Then
 			lvWatches.Nodes.Add
 		End If
@@ -10288,8 +10288,12 @@ Sub frmMain_Show(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	If MainMaximized Then frmMain.WindowState = WindowStates.wsMaximized
 	If GetLeftClosedStyle Then UpdateLeftPinLayout()
 	UpdateBottomPinLayout
-	' CloseBottom in frmMain_Create runs before the form is shown; redo collapsed layout once docked.
-	If Not splBottom.Visible Then CloseBottom
+	'' Apply the saved bottom-pane state explicitly. Testing splitter.Visible here is unreliable
+	'' before the form is fully realized: it can report False even when frmMain_Create restored
+	'' BottomClosed=false/BottomCollapsed=false, which then collapsed a previously resizable pane.
+	Dim As Boolean savedBottomClosed = iniSettings.ReadBool("MainWindow", "BottomClosed", False)
+	Dim As Boolean savedBottomCollapsed = iniSettings.ReadBool("MainWindow", "BottomCollapsed", savedBottomClosed)
+	If savedBottomClosed AndAlso savedBottomCollapsed Then CloseBottom Else ShowBottom
 
 	'' Splash has no fixed display time -- it stays up for exactly as long as startup takes
 	'' (SplashShownAt captured right after Show). Holding it open for the same length of time
@@ -10356,11 +10360,8 @@ Sub frmMain_Show(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	If ShowTipoftheDay AndAlso Not bAgentLaunched Then frmTipOfDay.ShowModal *pfrmMain
 	bApplyingStartupLayout = True
 	ActivateMainWindow()
-	' ActivateMainWindow steals focus; re-expand auto-hide bottom if that was the saved state.
-	If iniSettings.ReadBool("MainWindow", "BottomClosed", False) AndAlso Not iniSettings.ReadBool("MainWindow", "BottomCollapsed", True) Then
-		If ptabBottom->TabPosition = tpBottom AndAlso Not splBottom.Visible Then ShowBottom
-	End If
-	If Not splBottom.Visible Then CloseBottom
+	' ActivateMainWindow can disturb focus but must not replace the saved pane state.
+	If savedBottomClosed AndAlso savedBottomCollapsed Then CloseBottom Else ShowBottom
 	bApplyingStartupLayout = False
 	SetDebugTabsVisible UseDebugger
 	ChangeEnabledDebug tvExplorer.Nodes.Count > 0, False, False

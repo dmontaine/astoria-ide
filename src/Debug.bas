@@ -1673,9 +1673,27 @@ End Sub
 Const DBG_WATCH_MAX = 64
 Dim Shared As String gRawLocals, gRawGlobals, gRawThreads
 Dim Shared As Boolean gHasGlobals
-Dim Shared As String gWatchNameSnap(DBG_WATCH_MAX - 1), gRawWatch(DBG_WATCH_MAX - 1)
+Dim Shared As String gWatchNameSnap(DBG_WATCH_MAX - 1), gRawWatch(DBG_WATCH_MAX - 1), gRawWatchType(DBG_WATCH_MAX - 1)
 Dim Shared As Integer gWatchSnapCount
 Dim Shared As Boolean bPanelFillPending
+
+Function ResolveWatchGdbName(ByRef SourceName As String, ByRef RawLocals As String) As String
+	'' FreeBASIC suffixes local debug symbols (`startingValue` -> `STARTINGVALUE$1`).
+	'' Match the source spelling against the left side of `info locals`/`info args`.
+	Dim As String wanted = UCase(Trim(SourceName)), normalized = Replace(RawLocals, Chr(13), "")
+	Dim As Integer lineStart = 1
+	While lineStart <= Len(normalized)
+		Dim As Integer lineEnd = InStr(lineStart, normalized, Chr(10))
+		Dim As String oneLine
+		If lineEnd = 0 Then oneLine = Mid(normalized, lineStart): lineStart = Len(normalized) + 1 Else oneLine = Mid(normalized, lineStart, lineEnd - lineStart): lineStart = lineEnd + 1
+		Dim As Integer eqPos = InStr(oneLine, "=")
+		If eqPos > 1 Then
+			Dim As String symbolName = Trim(Left(oneLine, eqPos - 1))
+			If UCase(symbolName) = wanted OrElse StartsWith(UCase(symbolName), wanted & "$") Then Return symbolName
+		End If
+	Wend
+	Return wanted
+End Function
 
 ' UI thread only. Refresh the worker-visible snapshot of watch names so the worker never reads
 ' lvWatches. Call from every watch-list mutation site (add/remove/rename/clear).
@@ -1696,7 +1714,15 @@ Sub FillDebugPanelsOnUI()
 	If gHasGlobals Then fill_all_variables(gRawGlobals, 0)
 	fill_threads(gRawThreads, 0)
 	For i As Integer = 0 To gWatchSnapCount - 1
-		If Trim(gWatchNameSnap(i)) <> "" Then UpdateWatch i, gRawWatch(i)
+		If Trim(gWatchNameSnap(i)) <> "" Then
+			UpdateWatch i, gRawWatch(i)
+			Dim As String typeText = gRawWatchType(i)
+			Dim As Integer typePos = InStr(typeText, "type =")
+			If typePos > 0 Then typeText = Trim(Mid(typeText, typePos + 6))
+			Dim As Integer promptPos = InStr(typeText, "(gdb)")
+			If promptPos > 0 Then typeText = Trim(Left(typeText, promptPos - 1))
+			lvWatches.Nodes.Item(i)->Text(2) = typeText
+		End If
 	Next
 End Sub
 
@@ -1715,9 +1741,13 @@ Sub RefreshDebugPanelsAfterStop()
 	For i As Integer = 0 To gWatchSnapCount - 1
 		If Trim(gWatchNameSnap(i)) = "" Then
 			gRawWatch(i) = ""
+			gRawWatchType(i) = ""
 		Else
-			writepipe "print " & UCase(gWatchNameSnap(i)) & !"\n"
+			Dim As String resolvedWatchName = ResolveWatchGdbName(gWatchNameSnap(i), gRawLocals)
+			writepipe "print " & resolvedWatchName & !"\n"
 			gRawWatch(i) = readpipe(, True)
+			writepipe "whatis " & resolvedWatchName & !"\n"
+			gRawWatchType(i) = readpipe(, True)
 		End If
 	Next
 	bPanelFillPending = True
@@ -1941,13 +1971,11 @@ End Sub
 							bGDBLocked = False   '' deinit released tlockGDB
 							Exit Do
 						End If
-						If runtype <> RTSTEP Then
-							writepipe(!"c\n")
-							Running = True
-							Continue Do
-							'					Else
-							'						Result = readpipe
-						End If
+						'' Before DR-8, every debug run deliberately broke at program entry (`b 1`).
+						'' This auto-continue skipped that synthetic stop. DR-8 removed the entry
+						'' breakpoint but left the continuation behind, so GDB hit and then silently
+						'' resumed the first user breakpoint. The first stop now follows the normal
+						'' highlight, locals/watches and user-command path below.
 					End If
 					If ShowResult Then
 						QueueShowMessages(Result)
@@ -2247,6 +2275,10 @@ Sub RunWithDebug(Debugger As String, ByRef ProjectFileName As WString, ByRef Pro
 	WatchIndex = -1
 	exename = Replace(exename, UnixSlash, WindowsSlash)
 	ThreadsEnter()
+	'' A collapsed/auto-hidden bottom pane can already have Locals selected, in which
+	'' case SelectTab raises no selection-change event and the pane stays at header
+	'' height. Debugging requires Locals/Watches to be usable, so expand it explicitly.
+	If Not splBottom.Visible Then ShowBottom()
 	tpLocals->SelectTab
 	ThreadsLeave()
 	Var Pos1 = 0

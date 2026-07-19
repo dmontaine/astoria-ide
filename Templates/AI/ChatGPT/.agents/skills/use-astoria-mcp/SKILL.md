@@ -44,6 +44,18 @@ press **F5** or run `fbc` by hand; do it yourself and read the results back.
 All file-path arguments are confined to the open project's folder; paths outside it are
 rejected.
 
+## Prefer MCP edits while the IDE is open
+
+Use `write_file` / `set_active_file_content` instead of direct filesystem writes when the
+project is open in Astoria. The IDE owns an in-memory copy of every open file; editing
+behind it creates competing versions and a reload prompt. MCP edits keep the editor buffer
+authoritative and visible.
+
+- Write FreeBASIC source as UTF-8 without a BOM. MCP writes handle this; direct writes must
+  do the same because a BOM changes string literal handling and can garble console output.
+- After `build`, inspect `get_errors` and fix the first structured error instead of relying
+  only on an exit code or the tail of a log.
+
 ## The loop
 
 Typical cycle for a change:

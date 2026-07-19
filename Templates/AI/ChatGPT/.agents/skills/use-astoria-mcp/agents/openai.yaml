@@ -1,0 +1,4 @@
+interface:
+  display_name: "Use Astoria MCP"
+  short_description: "Drive the live Astoria IDE through MCP"
+  default_prompt: "Use $use-astoria-mcp to work with the open project through the live Astoria IDE."

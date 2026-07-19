@@ -1,0 +1,4 @@
+interface:
+  display_name: "Git Workflow"
+  short_description: "Safely commit and push Astoria projects"
+  default_prompt: "Use $git-workflow to inspect and perform the requested Git operation for this Astoria project."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Add Control Event"
+  short_description: "Add MFF controls and wire event handlers"
+  default_prompt: "Use $add-control-event to add a control and safely wire its event handler."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Add Form"
+  short_description: "Add and register an Astoria GUI form"
+  default_prompt: "Use $add-form to add and register a new form in this Astoria project."

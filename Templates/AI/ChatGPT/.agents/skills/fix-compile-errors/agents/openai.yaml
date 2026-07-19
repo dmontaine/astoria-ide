@@ -1,0 +1,4 @@
+interface:
+  display_name: "Fix Compile Errors"
+  short_description: "Diagnose and fix FreeBASIC build errors"
+  default_prompt: "Use $fix-compile-errors to diagnose and fix the first root FreeBASIC compilation error."

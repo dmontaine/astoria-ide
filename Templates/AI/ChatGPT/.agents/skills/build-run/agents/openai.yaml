@@ -1,0 +1,4 @@
+interface:
+  display_name: "Build and Run"
+  short_description: "Build and run an Astoria project"
+  default_prompt: "Use $build-run to build and run this Astoria project through the best available path."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Add Module"
+  short_description: "Add FreeBASIC modules and declarations"
+  default_prompt: "Use $add-module to add a FreeBASIC module and keep the project manifest synchronized."

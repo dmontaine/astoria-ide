@@ -10504,16 +10504,43 @@ Sub PromptReloadChangedFiles()
 
 	'' One prompt for all of them. The old code raised one dialog per file inside the loop, so a
 	'' git pull touching six open files meant six sequential modals.
+	''
+	'' FULL PATHS MUST NOT BE PUT ON A LINE OF THEIR OWN HERE. MsgBoxForm.Execute measures the text
+	'' with DT_WORDBREAK into a FIXED content width (380 logical units). A path contains no spaces,
+	'' so there is no break opportunity and the line is clipped at the right edge rather than
+	'' wrapped. Every changed file in a project shares a long directory prefix, so clipping removes
+	'' precisely the part that tells them apart: two different files render as two identical-looking
+	'' lines. That is not hypothetical -- it is how this was found, with the owner reasonably
+	'' reporting that only one of two changed files had been listed.
+	''
+	'' So the shared folder is shown once and the files are listed by name, which fits.
+	Dim As UString Folder = GetFolderName(ChangedAt(Files, 0), False)
+	Dim As Boolean bSameFolder = True
+	For i As Integer = 1 To n - 1
+		If LCase(GetFolderName(ChangedAt(Files, i), False)) <> LCase(Folder) Then
+			bSameFolder = False
+			Exit For
+		End If
+	Next i
+
 	Dim As UString Msg_
 	If n = 1 Then
-		Msg_ = ChangedAt(Files, 0) & !"\r" & ("File was changed by another application. Reload it?")
+		Msg_ = ("File was changed by another application. Reload it?") & !"\r" & !"\r" & _
+			GetFileName(ChangedAt(Files, 0)) & !"\r" & ("in ") & Folder
 	Else
 		Msg_ = ("These files were changed by another application. Reload them?") & !"\r"
+		If bSameFolder Then Msg_ &= !"\r" & ("in ") & Folder & !"\r"
 		'' Cap the list so a large pull cannot produce a dialog taller than the screen.
 		Dim As Integer shown = n
 		If shown > 12 Then shown = 12
 		For i As Integer = 0 To shown - 1
-			Msg_ &= !"\r" & ChangedAt(Files, i)
+			'' Bare name when they share a folder; otherwise the full path, which may still clip --
+			'' but a mixed-folder batch is the rare case and the names still differ at the front.
+			If bSameFolder Then
+				Msg_ &= !"\r" & GetFileName(ChangedAt(Files, i))
+			Else
+				Msg_ &= !"\r" & ChangedAt(Files, i)
+			End If
 		Next i
 		If n > shown Then Msg_ &= !"\r" & ("... and ") & Str(n - shown) & (" more")
 	End If
@@ -10546,23 +10573,11 @@ Sub frmMain_ActivateApp(ByRef Designer As My.Sys.Object, ByRef Sender As Form)
 	bInActivateApp = True
 	Dim tb As TabWindow Ptr
 	Dim As Boolean bAnyChanged
-	DbgTrace("ActivateApp.enter", "TabPanels=" & TabPanels.Count)
 	For j As Integer = 0 To TabPanels.Count - 1
 		Var ptabCode = @Cast(TabPanel Ptr, TabPanels.Item(j))->tabCode
-		DbgTrace("ActivateApp.panel", "j=" & j & " TabCount=" & ptabCode->TabCount)
 		For i As Integer = 0 To ptabCode->TabCount - 1
 			tb = Cast(TabWindow Ptr, ptabCode->Tab(i))
-			If tb = 0 Then
-				DbgTrace("ActivateApp.tab", "j=" & j & " i=" & i & " tb=NULL")
-				Continue For
-			End If
-			'' Diagnostic for ROADMAP 13.18 follow-up: a .frm changed on disk was not reported
-			'' while a .bi in the same project was. Log what is actually walked and compared,
-			'' rather than narrowing by inference.
-			DbgTrace("ActivateApp.tab", "j=" & j & " i=" & i & " file=[" & tb->FileName & "]" & _
-				" hasSep=" & Str(CInt(InStr(tb->FileName, "/") > 0 OrElse InStr(tb->FileName, "\") > 0)) & _
-				" disk=" & Str(FileTimeToVariantTime(GetFileLastWriteTime(tb->FileName))) & _
-				" recorded=" & Str(FileTimeToVariantTime(tb->DateFileTime)))
+			If tb = 0 Then Continue For
 			If InStr(tb->FileName, "/") > 0 OrElse InStr(tb->FileName, "\") > 0 Then
 				If FileTimeToVariantTime(GetFileLastWriteTime(tb->FileName)) <> FileTimeToVariantTime(tb->DateFileTime) Then
 					DbgTrace("ActivateApp.changed", tb->FileName)

@@ -419,6 +419,27 @@ Option 2 (a non-modal info bar) was **not** taken. It is the better end state, b
 feature complete for 1.0 and a new notification surface is a feature, not a program-flow fix. Worth
 revisiting after 1.0.
 
+**Update 2026-07-19 -- two further defects found by owner testing, both fixed.** The deferral and
+batching themselves worked from the first run. What did not:
+
+- **A crash on accepting the reload.** The queue was an array of `UString` grown with
+  `ReDim Preserve`; `UString` owns a heap buffer and FB relocates elements with a shallow copy, so
+  the old element's destructor freed a buffer the survivor still pointed at. A double free, which
+  surfaced at the next touch and so presented as the reload being at fault. Because `SaveWorkspace`
+  only runs on a clean close, the crash also lost the session and reopened the previous project --
+  which looked like a third, separate bug and was not. Now held as one newline-delimited `UString`,
+  with no dynamic UDT storage at all.
+- **The prompt appeared to list only one of two changed files.** It was listing both; the *display*
+  was clipping them. See 13.21 -- `MsgBoxForm` measures with `DT_WORDBREAK` into a fixed width, and
+  paths have no spaces to break at, so both lines rendered as the same truncated prefix. The prompt
+  now shows the shared folder once and lists bare file names.
+
+**Method note worth keeping.** Three hypotheses were formed about why the `.frm` was missing --
+forward slashes, the IDE re-saving the file, form regeneration -- and all three were wrong. Adding
+one trace line per tab settled it in a single run by showing both files detected and queued, which
+moved the search to the half of the code that was actually broken. Measure before theorising; the
+owner's own suggestion that the dialog was truncating is what closed it.
+
 **Verification status -- read this honestly.** The structural claim is verifiable by reading the
 code and is certain: no modal can now be raised from inside the activation handler. What has *not*
 been done is reproducing the original hang and showing it gone, because the hang was never
@@ -597,3 +618,31 @@ one, per the note in §13.17.
 
 Not a 1.0 blocker: it requires a specific sequence to reach, produces no silent data loss, and the
 worst case discovered so far is a build error that names the duplicate.
+### 13.22 MsgBoxForm clips long unbreakable text such as file paths (found while fixing 13.18)
+
+`MsgBoxForm.Execute` measures its message with `DT_WORDBREAK` into a **fixed** content width
+(`iContentWidth = 380` logical units). The box grows in height to fit the measured text, but never
+in width. `DT_WORDBREAK` breaks between words, and a file path contains no spaces -- so a path
+longer than the content width has no break opportunity and is clipped at the right edge instead of
+wrapping.
+
+**Why this matters more than a cosmetic clip.** Paths in one project share a long directory prefix,
+so clipping removes exactly the part that distinguishes them. Two different files render as two
+identical-looking lines. This was found the hard way: the 13.18 reload prompt correctly listed two
+changed files, and the owner reasonably reported that only one was listed, because both lines
+displayed the same truncated prefix. Several wrong hypotheses were chased through the detection and
+queueing code before the owner suggested the display itself might be truncating. The dialog was not
+merely ugly, it was actively misleading.
+
+The 13.18 prompt now works around it by showing the shared folder once and listing bare file names,
+which fit. **The underlying limitation remains** and will affect any dialog that puts a path, URL,
+or other unbreakable token on its own line -- error messages naming a file are the obvious risk.
+
+**Options:** measure the text first and widen the box (up to a sensible maximum, or a fraction of
+the work area) when the natural width exceeds the fixed one; or add `DT_EDITCONTROL` / break long
+tokens at character boundaries so they wrap rather than clip; or middle-ellipsize paths so the
+distinguishing tail survives. Widening is the most generally correct and probably the cheapest.
+
+Not a 1.0 blocker on its own -- no data is at risk and every current caller either uses short text
+or has been worked around -- but it is a trap for future dialogs and should be fixed before many
+more are written.

@@ -1,4 +1,4 @@
-﻿' Copyright (c) 2025 CM.Wang
+' Copyright (c) 2025 CM.Wang
 ' Freeware. Use at your own risk.
 
 '#Region "Form"
@@ -19,8 +19,7 @@
 	
 	#include once "CamGrab.bi"
 	
-	
-	
+	'Comment
 	Using My.Sys.Forms
 	
 	

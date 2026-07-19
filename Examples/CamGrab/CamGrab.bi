@@ -1,4 +1,4 @@
-﻿'CamGrab.bi
+'CamGrab.bi
 ' Copyright (c) 2025 CM.Wang
 ' Freeware. Use at your own risk.
 ' A program that uses DirectShow for video capture; core features include video preview, FPS calculation, and screenshot saving.
@@ -13,7 +13,7 @@
 #include once "win/commdlg.bi"
 #include once "win/ole2.bi"
 #include once "qedit.bi"
-
+' comment
 
 Const FPS_UPDATE_INTERVAL = 1000  ' Update FPS once per second
 

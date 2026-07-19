@@ -10427,17 +10427,48 @@ End Sub
 '' Filenames rather than TabWindow pointers, deliberately: the prompt runs after the activation
 '' handler has returned, and a tab could be closed in between. A stale pointer would be a crash;
 '' a stale filename simply finds no tab and is skipped.
-Dim Shared gChangedFiles() As UString
-Dim Shared gChangedCount As Integer
+'' Held as one newline-delimited string rather than an array of UString.
+''
+'' The first version of this used `Dim Shared gChangedFiles() As UString` with `ReDim Preserve`,
+'' and that CRASHED THE IDE when the reload was accepted. UString owns a heap buffer, and FB's
+'' ReDim Preserve relocates elements with a shallow copy: the old element's destructor then frees
+'' a buffer the surviving element still points at. A double free, which surfaces at the next touch
+'' rather than at the fault, so it looked like the reload was to blame. Never ReDim Preserve an
+'' array of a heap-owning UDT.
+''
+'' A path cannot contain a newline, so it is a safe delimiter and this needs no dynamic UDT storage
+'' at all. Each entry ends with a newline, so the string is either empty or newline-terminated.
+Dim Shared gChangedList As UString
 Dim Shared gInReloadPrompt As Boolean
 
+Private Function ChangedCount(ByRef s As UString) As Integer
+	Dim As Integer c, p = 1
+	Do
+		Dim As Integer q = InStr(p, s, !"\n")
+		If q = 0 Then Exit Do
+		c += 1
+		p = q + 1
+	Loop
+	Return c
+End Function
+
+Private Function ChangedAt(ByRef s As UString, ByVal idx As Integer) As UString
+	Dim As Integer c, p = 1
+	Do
+		Dim As Integer q = InStr(p, s, !"\n")
+		If q = 0 Then Exit Do
+		If c = idx Then Return Mid(s, p, q - p)
+		c += 1
+		p = q + 1
+	Loop
+	Return ""
+End Function
+
 Private Sub QueueChangedFile(ByRef FileName As WString)
-	For i As Integer = 0 To gChangedCount - 1
-		If LCase(gChangedFiles(i)) = LCase(FileName) Then Exit Sub
-	Next i
-	If gChangedCount > UBound(gChangedFiles) Then ReDim Preserve gChangedFiles(gChangedCount + 8)
-	gChangedFiles(gChangedCount) = FileName
-	gChangedCount += 1
+	If Len(FileName) = 0 Then Exit Sub
+	'' Bracket both sides with the delimiter so a path cannot match a longer path that ends with it.
+	If InStr(!"\n" & LCase(gChangedList), !"\n" & LCase(FileName) & !"\n") > 0 Then Exit Sub
+	gChangedList &= FileName & !"\n"
 End Sub
 
 Private Function FindTabByFileName(ByRef FileName As WString) As TabWindow Ptr
@@ -10462,30 +10493,27 @@ Sub PromptReloadChangedFiles()
 	'' The prompt is modal, and activation can fire again while it is up. Without this the second
 	'' post would stack another dialog behind the first.
 	If gInReloadPrompt Then Exit Sub
-	If gChangedCount = 0 Then Exit Sub
+	If Len(gChangedList) = 0 Then Exit Sub
 	gInReloadPrompt = True
 
 	'' Snapshot and clear before prompting, so anything detected while the dialog is open queues
-	'' for the next round rather than being lost or re-shown.
-	Dim As Integer n = gChangedCount
-	Dim As UString Files(n - 1)
-	For i As Integer = 0 To n - 1
-		Files(i) = gChangedFiles(i)
-	Next i
-	gChangedCount = 0
+	'' for the next round rather than being lost or re-shown. One plain UString copy -- no arrays.
+	Dim As UString Files = gChangedList
+	gChangedList = ""
+	Dim As Integer n = ChangedCount(Files)
 
 	'' One prompt for all of them. The old code raised one dialog per file inside the loop, so a
 	'' git pull touching six open files meant six sequential modals.
 	Dim As UString Msg_
 	If n = 1 Then
-		Msg_ = Files(0) & !"\r" & ("File was changed by another application. Reload it?")
+		Msg_ = ChangedAt(Files, 0) & !"\r" & ("File was changed by another application. Reload it?")
 	Else
 		Msg_ = ("These files were changed by another application. Reload them?") & !"\r"
 		'' Cap the list so a large pull cannot produce a dialog taller than the screen.
 		Dim As Integer shown = n
 		If shown > 12 Then shown = 12
 		For i As Integer = 0 To shown - 1
-			Msg_ &= !"\r" & Files(i)
+			Msg_ &= !"\r" & ChangedAt(Files, i)
 		Next i
 		If n > shown Then Msg_ &= !"\r" & ("... and ") & Str(n - shown) & (" more")
 	End If
@@ -10497,7 +10525,7 @@ Sub PromptReloadChangedFiles()
 
 	If MsgBox(Msg_, ("Files Changed"), mtQuestion, btYesNo) = mrYes Then
 		For i As Integer = 0 To n - 1
-			Dim tb As TabWindow Ptr = FindTabByFileName(Files(i))
+			Dim tb As TabWindow Ptr = FindTabByFileName(ChangedAt(Files, i))
 			'' Skipped rather than assumed: the tab may have been closed while the prompt was up.
 			If tb = 0 Then Continue For
 			tb->txtCode.Changing "Reload"
@@ -10518,12 +10546,26 @@ Sub frmMain_ActivateApp(ByRef Designer As My.Sys.Object, ByRef Sender As Form)
 	bInActivateApp = True
 	Dim tb As TabWindow Ptr
 	Dim As Boolean bAnyChanged
+	DbgTrace("ActivateApp.enter", "TabPanels=" & TabPanels.Count)
 	For j As Integer = 0 To TabPanels.Count - 1
 		Var ptabCode = @Cast(TabPanel Ptr, TabPanels.Item(j))->tabCode
+		DbgTrace("ActivateApp.panel", "j=" & j & " TabCount=" & ptabCode->TabCount)
 		For i As Integer = 0 To ptabCode->TabCount - 1
 			tb = Cast(TabWindow Ptr, ptabCode->Tab(i))
+			If tb = 0 Then
+				DbgTrace("ActivateApp.tab", "j=" & j & " i=" & i & " tb=NULL")
+				Continue For
+			End If
+			'' Diagnostic for ROADMAP 13.18 follow-up: a .frm changed on disk was not reported
+			'' while a .bi in the same project was. Log what is actually walked and compared,
+			'' rather than narrowing by inference.
+			DbgTrace("ActivateApp.tab", "j=" & j & " i=" & i & " file=[" & tb->FileName & "]" & _
+				" hasSep=" & Str(CInt(InStr(tb->FileName, "/") > 0 OrElse InStr(tb->FileName, "\") > 0)) & _
+				" disk=" & Str(FileTimeToVariantTime(GetFileLastWriteTime(tb->FileName))) & _
+				" recorded=" & Str(FileTimeToVariantTime(tb->DateFileTime)))
 			If InStr(tb->FileName, "/") > 0 OrElse InStr(tb->FileName, "\") > 0 Then
 				If FileTimeToVariantTime(GetFileLastWriteTime(tb->FileName)) <> FileTimeToVariantTime(tb->DateFileTime) Then
+					DbgTrace("ActivateApp.changed", tb->FileName)
 					QueueChangedFile(tb->FileName)
 					bAnyChanged = True
 				End If

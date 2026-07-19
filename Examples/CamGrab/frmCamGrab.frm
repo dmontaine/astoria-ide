@@ -16,9 +16,14 @@
 	#include once "mff/TimerComponent.bi"
 	#include once "mff/Picture.bi"
 	
+	
 	#include once "CamGrab.bi"
 	
+	
+	
 	Using My.Sys.Forms
+	
+	
 	
 	Type Form1Type Extends Form
 		Declare Sub Form_Create(ByRef Sender As Control)

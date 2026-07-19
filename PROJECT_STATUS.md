@@ -71,6 +71,58 @@ desktop for the whole run — B10 was rewritten to drive itself and exit, and B1
 if that becomes annoying. And a thread timer keeps firing inside `ShowModal`'s message loop, which
 opened three nested dialogs before B10 guarded against it.
 
+## Session handoff (2026-07-18, evening) — designer testing, three release blockers, ONE UNBUILT CHANGE
+
+### Read this first: there is an uncompiled, untested change in the tree
+
+`src/AstoriaIDE.bas` (commit `623aa2a`) carries a **designer Undo/Redo** implementation that has
+**never been built or run**. The build was interrupted before it started, so `astoria.exe` is older
+than the source edit and the committed binaries do **not** contain it.
+
+**First action next session:** run `Compile.bat`, then verify by hand — open a form, move or align a
+control, press Ctrl+Z, and confirm both that the control returns *and* that the design surface
+redraws. It is one self-contained block and safe to revert if it misbehaves.
+
+Why it is small: the designer never needed a history of its own. Every designer change is **already**
+in the code editor's undo stack, because `DesignerModified` (`TabWindow.bas`) brackets each one with
+`EditControl.Changing`/`Changed`, which is what creates an `EditControlHistory` entry. The only thing
+missing was the route — with a control selected, `cboClass.ItemIndex > 0` sends commands to
+`DispatchDesignerCommand`, which had no Undo/Redo case, so C4's Ctrl+Z did nothing. The change adds
+that case, delegates to `tb->txtCode.Undo`/`.Redo`, and rebuilds the surface via `FormNeedDesign` +
+`RunDeferredFormDesign()`. One history serves both views — the form/code consistency that was asked
+for.
+
+**Open question:** `TabWindow.bas:3329` already rebuilds a form when its text changes, so the explicit
+rebuild may be redundant and could show as flicker. If it does, drop those two lines — but confirm the
+refresh still happens before doing so.
+
+Upstream was checked first and has **nothing to backport**: neither VisualFBEditor's `Designer.bas`
+nor its main dispatcher implements designer undo; it routes `Undo` only to text controls, exactly as
+Astoria did.
+
+### Three release blockers found by testing today
+
+| | Status | What |
+| --- | --- | --- |
+| **§13.17** | **Required for 1.0** | Renaming a control updates the four sites describing it but nothing referencing it, so the project stops building. Owner-classified mandatory on the *it just works* rule. Task #18. |
+| **§13.18** | **Mandatory before 1.0 beta** | `frmMain_ActivateApp` raises a modal MsgBox when an open file changed on disk, so clicking the IDE to focus it can hang the application with no visible dialog — owner had to kill it from Task Manager. Strong hypothesis, **not reproduced programmatically**; confirming test is to press Enter/Escape before killing it next time. Task #19. |
+| **§13.19** | Decision pending | The designer had no undo. Addressed by the unbuilt change above; the cheap alternative — grey Undo/Redo out in Form view — stays recorded if the real fix is deferred. |
+
+### Test plan progress
+
+Section A: A1, A2, A4, A5, A7 pass. Section B: **complete, 13/13**. Section C: C1 pass, C2 pass,
+C3 fail (§13.17), C4 partial (align/size pass, undo absent → §13.19). **C5 was never run** —
+copy/paste between forms, the most interesting one left, because pasting must invent non-colliding
+names and C3 showed the naming machinery has gaps.
+
+The scratch project at `C:\Users\don\dontest` is left in place for C5: a working Windows Application
+with four aligned labels, a TextBox, a CommandButton and a wired handler. It builds.
+
+### A discipline worth keeping
+
+**Do not edit a file on disk while the IDE has it open** — that is what triggered the §13.18 hang.
+Close the IDE first, or have the owner make the edit.
+
 ## Shipped defaults separated from live user settings (2026-07-18)
 
 `Settings/astoria.ini` is **no longer tracked**. It is the live per-user settings file — every run

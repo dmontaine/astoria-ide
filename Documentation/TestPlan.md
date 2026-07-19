@@ -44,6 +44,24 @@ Our fixtures reach it only because they are compiled by `fbc` directly, outside 
 convenience for testing, not a workflow, and it is precisely why anything touching deployment has to
 be re-verified through a real project.
 
+## A design point that shapes Sections D and the Git tests
+
+**A local project is not a Git repository, and that is deliberate.** New Project offers two modes:
+*Create Local* makes a plain project with no version control, and *Use Existing Git Project* makes a
+Git-backed one. Choosing Git is a decision made at creation, not something switched on later.
+
+So Git ▸ Commit, Pull and Push are correctly **greyed for a local project** — they are gated on the
+project folder actually containing `.git`. Seeing them greyed there is the design working, not a
+defect, and a test that expects otherwise is testing the wrong thing. D3 originally said "create
+local, add files, commit and push"; that was rewritten after the greying was reported as a possible
+bug during testing.
+
+**Still open, and not a defect:** there is no in-IDE path from a local project to a Git-backed one.
+A user who starts local and later wants version control has to create a new project in Git mode. That
+may be the right answer for 1.0 — it keeps the two modes clean — but it is worth deciding
+deliberately rather than by omission, and it belongs in the Git setup documentation (ROADMAP §13.23)
+either way.
+
 ## Rule: update the documents after every test
 
 **A test is not finished when it passes or fails. It is finished when the documents say what is now
@@ -164,7 +182,7 @@ End-to-end paths a real user takes, each crossing several IDE subsystems.
 | --- | --- | --- | --- | --- | --- |
 | D1 | **Console app lifecycle** — create, edit, build, run, read output, close, reopen. | The simplest complete path. Regression canary for everything else. | 🤖 | ✅ | **12/12**, driven entirely through the agent pipe. `create_project` from the Console Application template; the main file rewritten to print a random marker and a computed sum; build; run; **output asserted on content** (`D1-MARKER-…` and `sum=5050`) rather than on a zero exit code, since a program printing nothing would otherwise pass; switch to another project and confirm the IDE is no longer on it; reopen; confirm the edit survived; and rebuild, which proves the reopened project is genuinely usable rather than merely listed. Re-runnable: `TestHarness/D1_ConsoleLifecycle.ps1`, which deletes and recreates its project each run. |
 | D2 | **Windows app lifecycle** — same, with a form and the designer. | The default path for a new user, given Windows Application is the default template. | 🤝 | ✅ | **Passes.** New project from the default template; Label, TextBox and CommandButton placed; properties set; the button's Click wired and implemented; built, run, closed, reopened. Verified from disk rather than from the screen: all three parts of the event wiring are correct (declared, assigned via `.OnClick`, and implemented), the includes match exactly the controls placed, and the user's handler sits outside the region the designer rewrites. **Found one artefact:** an analysis scratch file `Temp.bas`, byte-identical to `Main.frm`, left in the project folder — recorded as ROADMAP §13.24. Harmless to the build, but it lands in a user's own folder and their own commits. |
-| D3 | **Git: local project** — create local, add files, commit and push from the Project menu. | The Git menu against a real remote. | 🤝 | - | |
+| D3 | **Git: working with a Git-backed project** — create through *Use Existing Git Project*, then edit, commit and push from the Git menu. | The Git menu against a real remote, over the ongoing edit/commit/push cycle rather than the one-time clone (that is D4). | 🤝 | - | |
 | D4 | **Git: clone existing** — all three clone classifications (empty, Astoria project, foreign/refused). | Owner-verified 2026-07-18; re-run each release. | 🤝 | ✅ | Owner-verified: all three paths behave; module fields grey out for a complete project. |
 | D5 | **AI/MCP multi-file project** — an assistant creates a project, writes several files, builds, fixes an error, runs. | The MCP integration on something larger than one file. | 🤖 | - | |
 | D6 | **Debugger against a multi-form program** — breakpoints in event handlers, step, inspect locals and watches, stop, confirm no orphaned process. | Debugger breadth, listed as a gap, against a realistic program rather than a toy. | 🤝 | - | |

@@ -17,7 +17,7 @@ Areas are: **IDE** (`src/`), **Framework/Controls** (`Controls/`), **Templates**
 is to write a good commit message. Regenerate rather than hand-edit; a stale hand-edit is worse
 than no entry. Commits after the last one listed here are not yet folded in.
 
-**Total: 381 commits, 2026-07-02 to 2026-07-19.**
+**Total: 382 commits, 2026-07-02 to 2026-07-19.**
 
 ## 2026-07-02
 
@@ -1159,3 +1159,6 @@ than no entry. Commits after the last one listed here are not yet folded in.
 - **`2077c81`** — ROADMAP 13.23: document how to set up Git for use with Astoria
   Raised by the owner while testing. The Git integration works and each step explains itself in the moment, but nothing describes the sequence a user must complete once before any of it works - and that sequence spans the IDE and a browser.
   *Docs · 3 files*
+- **`50b055e`** — TestPlan D2 passes; record the Temp.bas artefact as 13.24
+  Windows app lifecycle through the designer: create from the default template, place a Label, TextBox and CommandButton, set properties, wire the button's Click, build, run, close, reopen.
+  *Docs · 4 files*

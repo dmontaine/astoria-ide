@@ -55,6 +55,14 @@ output. Verification itself found and fixed two MCP bugs and surfaced two pre-ex
 Later hardening: `run` output capture no longer truncates at a NUL byte (wide/UTF-16 program
 output previously showed only its first character).
 
+**Multi-file MCP lifecycle (TestPlan D5): 14/14.** A live agent created a project, added and
+registered a header/module pair, wrote a three-file program with a deliberate error in the
+secondary module, built, read the structured `Math.bas:6` error, repaired it, rebuilt and ran.
+Output assertions proved both the unique run and the cross-module calculation (`sum_squares=385`).
+The test found and fixed two consistency defects: `list_files` now reports the live project model
+instead of a stale on-disk manifest, and `write_file` always synchronizes an already-open editor
+buffer even when the caller does not request that the file be focused.
+
 ### Whole-workflow lifecycle
 
 **Windows application with the designer, end to end (TestPlan D2).** The default path for a new

@@ -536,28 +536,34 @@ Sub AgentPipe_ExecutePendingOnUi()
 		gCmdResult = res
 
 	Case "list_files"
-		'' Files in the open project, read from the .vfp so it reflects what the
-		'' project actually contains (plan section 3). *File= marks the main file.
+		'' Files in the live project tree. Agent mutations update this model first;
+		'' reading the on-disk .vfp here made a successful add_file invisible until
+		'' the user later saved the project interactively.
 		Dim As ProjectElement Ptr ppe = AgentProject()
 		If ppe = 0 Then
 			gCmdErrCode = "no_project" : gCmdErrMsg = "No project is open." : SetEvent(gCmdDone) : Exit Sub
 		End If
-		Dim As String vfpText = AgentReadFileBytes(WGet(ppe->FileName))
 		Dim As JsonValue Ptr filesArr = JsonNewArray()
-		Dim As String mainFile
-		Dim As Integer p = 1
-		While p <= Len(vfpText)
-			Dim As Integer nl = InStr(p, vfpText, Chr(10))
-			Dim As String ln
-			If nl = 0 Then ln = Mid(vfpText, p) : p = Len(vfpText) + 1 Else ln = Mid(vfpText, p, nl - p) : p = nl + 1
-			If Right(ln, 1) = Chr(13) Then ln = Left(ln, Len(ln) - 1)
-			If Left(ln, 6) = "*File=" Then
-				mainFile = Mid(ln, 7)
-				filesArr->Append(JsonNewString(mainFile))
-			ElseIf Left(ln, 5) = "File=" Then
-				filesArr->Append(JsonNewString(Mid(ln, 6)))
+		Dim As TreeNode Ptr projectNode = GetOpenProjectNode()
+		Dim As UString projectRoot = GetFolderNameU(WGet(ppe->FileName))
+		For j As Integer = 0 To projectNode->Nodes.Count - 1
+			Dim As TreeNode Ptr child = projectNode->Nodes.Item(j)
+			If child->Tag Then
+				Dim As ExplorerElement Ptr eeDirect = Cast(ExplorerElement Ptr, child->Tag)
+				Dim As UString relDirect = Replace(Mid(WGet(eeDirect->FileName), Len(projectRoot) + 1), "\", "/")
+				filesArr->Append(JsonNewString(WStrToUtf8(relDirect)))
+			Else
+				For k As Integer = 0 To child->Nodes.Count - 1
+					Dim As TreeNode Ptr fileNode = child->Nodes.Item(k)
+					If fileNode->Tag Then
+						Dim As ExplorerElement Ptr eeNested = Cast(ExplorerElement Ptr, fileNode->Tag)
+						Dim As UString relNested = Replace(Mid(WGet(eeNested->FileName), Len(projectRoot) + 1), "\", "/")
+						filesArr->Append(JsonNewString(WStrToUtf8(relNested)))
+					End If
+				Next k
 			End If
-		Wend
+		Next j
+		Dim As String mainFile = WStrToUtf8(Replace(Mid(WGet(ppe->MainFileName), Len(projectRoot) + 1), "\", "/"))
 		Dim As JsonValue Ptr res = JsonNewObject()
 		res->SetMember("files", filesArr)
 		If mainFile <> "" Then res->SetMember("main_file", JsonNewString(mainFile)) Else res->SetMember("main_file", JsonNewNull())
@@ -818,20 +824,27 @@ Sub AgentPipe_ExecutePendingOnUi()
 		End If
 		Dim As Boolean registered = False, opened = False
 		If doRegister Then registered = AgentRegisterFileInProject(full)
+		'' Keep an existing editor buffer authoritative even when the caller did not
+		'' ask to focus/open the file. Otherwise the disk changes behind Astoria and
+		'' switching projects later raises a Save Changes/reload conflict.
+		Dim As WString Ptr existingW
+		WLet(existingW, full)
+		Dim As TabWindow Ptr existingTb = GetTab(*existingW)
+		If existingTb Then
+			Dim As WString Ptr existingText = Utf8ToWStr(content)
+			existingTb->txtCode.Text = *existingText
+			existingTb->FileEncoding = FileEncodings.Utf8
+			WDeAllocate(existingText)
+		End If
+		WDeAllocate(existingW)
 		If doOpen Then
 			Dim As WString Ptr fw
 			WLet(fw, full)
-			Dim As TabWindow Ptr tb = GetTab(*fw)
+			Dim As TabWindow Ptr tb = existingTb
 			If tb = 0 Then
 				tb = AddTab(*fw)
 				'' BOM-less UTF-8 (a BOM makes FreeBASIC emit wide console output).
 				If tb Then tb->FileEncoding = FileEncodings.Utf8
-			Else
-				'' Already open: sync the editor to what we just wrote (we have the
-				'' bytes in hand, so no disk re-read is needed).
-				Dim As WString Ptr wtext = Utf8ToWStr(content)
-				tb->txtCode.Text = *wtext
-				WDeAllocate(wtext)
 			End If
 			If tb Then tb->SelectTab
 			opened = (tb <> 0)

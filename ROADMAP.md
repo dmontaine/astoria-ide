@@ -383,3 +383,65 @@ as the project lives.
 
 Note that keeping the handler name on rename is **deliberate-looking and defensible**; do not
 "fix" it without deciding the policy first. See the C3 entry in `Documentation/TestPlan.md`.
+
+### 13.18 Modal dialog raised from the app-activation handler can hang the IDE — **MANDATORY BEFORE 1.0 BETA** (owner-observed 2026-07-18)
+
+**Symptom, observed by the owner during TestPlan C4 setup:** the IDE would not respond to being
+clicked, could not be closed, and had to be killed from Task Manager. No dialog was visible and no
+error appeared. Nothing was lost — the open file was intact and unmodified on disk — but the
+session was gone.
+
+**The code path.** `frmMain_ActivateApp` (`src/Main.bas`, ~10397) runs when the application is
+activated. It walks every open tab, compares each file's last-write time against the one recorded
+when it was loaded, and for any that changed calls:
+
+```
+MsgBox(tb->FileName & "\rFile was changed by another application. Reload it?", "File Changed", mtQuestion, btYesNo)
+```
+
+So **clicking the IDE to focus it can raise a modal dialog**. A modal disables its owner, which is
+why the main window stops responding to clicks and ignores Close; if that dialog does not come to
+the front — and one raised from inside an activation handler is precisely the case where it may not
+— there is nothing on screen to answer, and the only way out is to kill the process.
+
+This is the same family as the modal z-order defect this project already fixed once (`MsgBoxForm.bas`
+had to set `Visible = False` before `CreateWnd`). Worth reading that fix before touching this one.
+
+**Evidence status — read this before assuming it is understood.** The symptom is owner-observed and
+the code path is certain, but the hang has **not been reproduced programmatically**: an attempt
+failed because Windows' foreground lock prevents `SetForegroundWindow` from another process
+producing a genuine activation, so the handler never ran. The hypothesis is strong and matches the
+symptom exactly, but it is a hypothesis.
+
+**The test that would confirm it, cheaply:** when the IDE next freezes this way, press **Enter** or
+**Escape** before killing it. A modal-blocked application still processes keyboard input when clicks
+do nothing, so if the IDE springs back the invisible-modal explanation is confirmed. If Enter and
+Escape do nothing, it is a genuine deadlock and a different investigation entirely.
+
+**Why this must be fixed before outside testers see it.** The trigger is a file changing on disk
+while the IDE has it open — which is not exotic:
+
+- **The IDE's own Git menu.** Pull, or switching branches, rewrites files that are very likely open.
+- **AI agents.** Astoria's headline feature is AI integration, and an assistant editing project
+  files is the normal case, not the edge case.
+- **Cloud sync and external editors.** Any sync client or second editor touching a file does it.
+- It is how the owner hit it: a file was edited outside the IDE while it was open.
+
+A tester who meets this has no error message, no dialog, and no recourse but Task Manager. That is
+the definition of a rough edge a newcomer cannot distinguish from their own mistake, and it fails
+the *it just works* standard the product commits to.
+
+**Fix options, in the order they should be considered:**
+
+1. **Do not show modal UI from the activation handler.** Defer it — post a message and prompt once
+   activation has fully completed, when the window is in a normal state. This alone likely removes
+   the hang.
+2. **Prefer a non-modal notification** — an info bar or status-bar prompt offering *Reload* — over a
+   dialog. Nothing about "a file changed on disk" requires blocking the whole application.
+3. **Batch the files.** The loop raises one dialog per changed file, so a `git pull` touching six
+   open files means six sequential modals. One prompt listing them is better in every way.
+4. If a modal is kept, ensure it is owned by the main window and explicitly brought to front, per
+   the earlier `MsgBoxForm` fix.
+
+There is already a correct re-entrancy guard (`Static bInActivateApp`), so that is not the bug; do
+not "fix" it there.

@@ -403,7 +403,7 @@ Provides a vertical scroll bar.
 
 Enables the user to navigate Web pages inside your form.
 
-*Changed in Astoria.* This control was hidden from the toolbox because the framework would not compile with it: `NewWindowRequestedEventArgs.GetURL()` is declared `ByRef As WString` but returned the literal `""`, and a byref result cannot reference a temporary. It now returns a `Static As WString * 1`.
+*Changed in Astoria.* Twice, and the second change matters more. First it was returned to the toolbox: it had been hidden because the framework would not compile with it (`NewWindowRequestedEventArgs.GetURL()` is declared `ByRef As WString` but returned the literal `""`, and a byref result cannot reference a temporary). Testing then showed it still could not render **anything** — it hosted the retired Internet Explorer engine through ATL `AtlAxWin`, whose host window was created with empty text, so no control was instantiated and `Navigate` crashed the program. It now hosts **WebView2** (Edge/Chromium) by default.
 
 **Key properties:** `ScriptResult`, `TabIndex`, `TabStop`
 
@@ -412,10 +412,10 @@ Enables the user to navigate Web pages inside your form.
 **Key events:** `OnNewWindowRequested`
 
 > [!WARNING]
-> Testing confirms only that a form carrying one builds, opens and closes. **Page rendering and navigation have not been verified** - prove it works before relying on it.
+> Needs `WebView2Loader.dll` beside the built `.exe`. The IDE copies it automatically on build, but a hand-deployed program needs it too.
 
 > [!WARNING]
-> Hosts the system web-browser control, so what it can render depends on what is installed on the target machine.
+> Requires the **WebView2 runtime** on the machine that runs your program. It ships with Edge on Windows 10 and 11, so it is present on essentially all current systems - but it is a dependency of anything you distribute.
 
 ---
 
@@ -762,7 +762,7 @@ documentation.
 
 | Control | Change |
 | --- | --- |
-| WebBrowser | **Re-enabled.** Hidden as unbuildable; a `ByRef As WString` returning a literal was the only fault. Fixed and returned to the toolbox. Rendering still unproven. |
+| WebBrowser | **Re-enabled, then rebuilt on WebView2.** It was hidden as unbuildable (a `ByRef As WString` returning a literal); fixing that revealed it could not render at all, because it hosted the retired IE engine via ATL and crashed on `Navigate`. Now hosts WebView2 by default. Rendering and navigation both verified (TestPlan A4/A5). |
 | MariaDBBox | **Made to compile** (16 `FromUtf8` call sites), and `libmariadb.dll` - missing from the library entirely - is now shipped and copied beside your exe. |
 | SQLite3Component | **Made to compile** (22 `FromUtf8` call sites, plus 2 needing `StrPtr()`). |
 | ScintillaControl | Its three DLLs are now copied beside your exe on build. |

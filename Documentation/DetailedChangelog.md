@@ -17,7 +17,7 @@ Areas are: **IDE** (`src/`), **Framework/Controls** (`Controls/`), **Templates**
 is to write a good commit message. Regenerate rather than hand-edit; a stale hand-edit is worse
 than no entry. Commits after the last one listed here are not yet folded in.
 
-**Total: 357 commits, 2026-07-02 to 2026-07-18.**
+**Total: 358 commits, 2026-07-02 to 2026-07-18.**
 
 ## 2026-07-02
 
@@ -1085,3 +1085,6 @@ than no entry. Commits after the last one listed here are not yet folded in.
 - **`7aba862`** — TestPlan C5 passes: cross-form paste resolves name collisions
   Adds Examples/Integration/C5_CopyPaste, a fixture built to force the failure rather than hope for it: FormA carries lblShared/txtNotes/btnGo and FormB carries its own lblShared, so pasting FormA's group into FormB guarantees a duplicate name.
   *Docs, Examples · 7 files*
+- **`aec71cf`** — Documentation: fold C5/C6 into Testing, regenerate the changelog
+  Testing.md now records the state of the form designer rather than a single fix: TestPlan C1-C6 are complete except C3, and C3's failure (renaming a control breaks the build, ROADMAP 13.17) is named as the one defect the section found.
+  *Docs · 2 files*

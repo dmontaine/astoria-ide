@@ -161,6 +161,7 @@ build, before the program is run - see *Automatic runtime-DLL copying* below.
 | --- | --- | --- |
 | Controls-ScintillaControl | `Scintilla64.dll`, `Lexilla64.dll`, `ScintillaControl64.dll` | `Controls/ScintillaControl/` |
 | Components-MariaDBBox | `libmariadb.dll` | `Controls/MariaDBBox/` (added 2026-07-18, from the MariaDB 12.3 Connector/C) |
+| Controls-WebBrowser | `WebView2Loader.dll` | `Controls/Framework/lib/win-x64/` (copied by `CopyFrameworkRuntimeDlls`; the control is part of mff and has no `Controls/<Name>` folder to declare it from). Also requires the WebView2 runtime, which ships with Edge. |
 | Components-SQLite3Component | *nothing* | statically linked via `libsqlite3_x64.a` - the `sqlite3*.dll` files in `Controls/SQLite3/` are unused by builds |
 
 `libmariadb.dll` was previously missing entirely - the repo shipped only the link-time

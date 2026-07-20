@@ -18,7 +18,7 @@ is to write a good commit message. Regenerate rather than hand-edit; a stale han
 than no entry. Run `.\GenerateChangelog.ps1` from the repository root; `-Check` reports whether
 the file is current and writes nothing, which suits a pre-commit hook.
 
-Everything above the **Total: 445 commits, 2026-07-02 to 2026-07-20.**
+Everything above the **Total: 447 commits, 2026-07-02 to 2026-07-20.**
 
 ## 2026-07-02
 
@@ -1349,3 +1349,9 @@ Everything above the **Total: 445 commits, 2026-07-02 to 2026-07-20.**
 - **`82a4dfe`** — 13.28 pt 3: PAUSED -- the defect is upstream in VisualFBEditor
   The owner ran VisualFBEditor, the upstream project Astoria was forked from, and confirmed the same defect: Alt+C, Alt+G, Alt+R silently do nothing, in both 32-bit and 64-bit VFBE.
   *Docs · 2 files*
+- **`3b355bf`** — DetailedChangelog: regenerate through 82a4dfe
+  Picks up the VFBE-upstream finding and 13.28 pt 3 pause.
+  *Docs · 1 file*
+- **`b943e3c`** — 13.28 pt 3 WORKAROUND: move Code/Git/Run mnemonics off the swallowed letters
+  Not a fix.
+  *Docs, IDE · 6 files*

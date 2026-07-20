@@ -18,7 +18,7 @@ is to write a good commit message. Regenerate rather than hand-edit; a stale han
 than no entry. Run `.\GenerateChangelog.ps1` from the repository root; `-Check` reports whether
 the file is current and writes nothing, which suits a pre-commit hook.
 
-Everything above the **Total: 417 commits, 2026-07-02 to 2026-07-19.**
+Everything above the **Total: 419 commits, 2026-07-02 to 2026-07-20.**
 
 ## 2026-07-02
 
@@ -1264,3 +1264,12 @@ Everything above the **Total: 417 commits, 2026-07-02 to 2026-07-19.**
 - **`712c29b`** — UI: remove Tip of the Day, fix the toolbars to three rows, one Toolbars toggle
   Three owner-requested changes, made together because they touch the same startup and chrome code.
   *Build/Tools, Docs, IDE · 22 files*
+- **`9ec16d0`** — DetailedChangelog: regenerate through 712c29b
+  Picks up the Tip of the Day removal and the toolbar changes.
+  *Docs · 1 file*
+
+## 2026-07-20
+
+- **`e8cad6f`** — E12: shortcut sweep harness, two real defects, rest deferred
+  Tools > Options > General > Shortcuts advertises 54 assigned shortcuts.
+  *Build/Tools, Docs · 7 files*

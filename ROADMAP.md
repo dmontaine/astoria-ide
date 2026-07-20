@@ -884,8 +884,10 @@ strength of a harness that was targeting a modally-disabled window.
 
 ### 13.29 Launching Astoria while it is already running crashes the second process — **RESOLVED 2026-07-19** (found by TestPlan E11)
 
-**Status: fixed, re-tested 10/10 by `TestHarness/E11_MultipleInstances.ps1`, and D1 re-run 12/12 as
-a startup regression check. Not yet owner-verified by hand.** Astoria is deliberately
+**Status: fixed and OWNER-VERIFIED 2026-07-19.** Re-tested 10/10 by
+`TestHarness/E11_MultipleInstances.ps1`, D1 re-run 12/12 as a startup regression check, and the
+owner confirmed by hand that launching Astoria while it is already running now brings the running
+IDE to the front instead of crashing. Astoria is deliberately
 single-instance, and that part always worked — but the second process did not *exit*, it **crashed
 with an access violation**, and the running IDE was never brought to the foreground. A user who
 double-clicked the desktop icon while Astoria was already open (minimised, or behind another
@@ -958,3 +960,51 @@ they are the same defect. *And do not reason about `Command(-1)` — print it.* 
 formed here was that `Start-Process` passes a quoted path so the `.exe` guard misses on the trailing
 quote; a four-line FreeBASIC probe showed `Command(-1)` excludes the program name and strips quotes
 entirely, which killed that theory and pointed at the real one.
+
+### 13.30 The code editor ignores the system high-contrast theme (found by TestPlan E10a, 2026-07-19)
+
+**Status: open. Not a 1.0 blocker on current evidence, but it is the accessibility gap E10 exists to
+find.** Astoria never detects high contrast — there is no `SPI_GETHIGHCONTRAST` call anywhere in
+`src/`. The IDE's own chrome survives anyway, because it uses system colours (`clBtnFace`,
+`GetSysColor`) and contains **zero hardcoded `RGB(...)` literals**. The editor does not, because its
+colours come from `Settings/Themes/*.ini`, which are fixed palettes that know nothing about the
+system theme.
+
+Tested against the Windows 11 **"Night sky"** high-contrast theme (a dark one), confirmed active by
+`SPI_GETHIGHCONTRAST` before any screenshot was taken — `COLOR_WINDOW` black, `COLOR_WINDOWTEXT`
+white.
+
+**1. Line numbers become invisible — the concrete defect.** With a light Astoria theme
+(`CurrentTheme=github`) under a dark high-contrast theme, the line-number margin renders **black
+while the theme's line-number foreground stays near-black**, so the numbers disappear entirely.
+Measured, not inferred: `github.ini` asks for `LineNumbersForeground=556` (`0x00022C`) on
+`LineNumbersBackground=16316664` (`0xF8F8F8`). The background was overridden to black by the system;
+the foreground was not. Without high contrast that margin is light grey and perfectly readable, so
+this is high-contrast-specific rather than a broken theme.
+
+**2. The editor opts out of high contrast altogether.** The code area keeps the theme's own light
+background, so a light-themed editor is a glaring white panel inside an otherwise black IDE. The
+whole point of high contrast is that the user controls contrast globally; an editor that ignores it
+defeats that for the one surface they spend all their time reading.
+
+**3. The selected project-tree node has poor contrast**, and this one shows up in the *owner's own*
+configuration (`gradient-dark`, the shipped default): the selected item paints as orange text on a
+pale lavender background rather than using `COLOR_HIGHLIGHT`/`COLOR_HIGHLIGHTTEXT`. It is the worst
+contrast on screen in an otherwise clean dark-theme capture.
+
+**What passes, and is worth not re-testing.** With a dark Astoria theme against a dark high-contrast
+theme everything is readable: menus, toolbar, project tree, tab strip, editor, the designer surface
+and its form caption. That is a genuine pass but a *coincidence* — the two happened to agree. Do not
+record "high contrast works" from a dark-on-dark run; the light-theme case is the one that tests
+anything.
+
+**Suggested fix, in order of value.** Detect high contrast via `SPI_GETHIGHCONTRAST` and, when it is
+on, drive the editor from system colours instead of the theme palette — Scintilla can be handed
+`COLOR_WINDOW`/`COLOR_WINDOWTEXT` per style. Listening for `WM_SETTINGCHANGE` would let it follow a
+theme switched while the IDE is running. (3) is independent, smaller, and worth doing regardless of
+the rest, since it affects the default configuration.
+
+**One thing left unmeasured.** The bottom Code/Form tab strip appeared vertically clipped in both
+captures ("Code And Form" cut off at the window edge). Whether that is high-contrast-related — HC
+themes often enlarge system fonts and borders — or just this window size was not established, and
+should be checked before it is written up as anything.

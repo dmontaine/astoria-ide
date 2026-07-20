@@ -76,8 +76,10 @@ NOPAUSE=1 SKIP_MFF=1 Compile.bat        # release build: astoria.exe + astoria-m
   a table of which document to touch when. Test documents stay current because running a test
   forces a visit; reference documents drift because nothing does. `Controls.md` is the one
   most often missed.
-- **`DetailedChangelog.md` is generated from commit messages** — write good ones, and
-  regenerate rather than hand-editing.
+- **`DetailedChangelog.md` is generated from commit messages** — write good ones, and regenerate
+  with `.\GenerateChangelog.ps1` rather than hand-editing. `-Check` verifies without writing.
+  Hand-appending is what let the file drift: it invented area names outside the documented
+  vocabulary and cannot get file counts right without running git anyway.
 - Commit and push only when asked.
 
 ## Testing discipline

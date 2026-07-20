@@ -883,9 +883,33 @@ straight into this dialog when no project is loaded, a keyboard-only user met it
 get past it *or out of it*. Input did reach the window (`Alt+F4` proved that); the dialog simply
 ignored navigation, because nothing inside it was focused.
 
-**2. The project tree cannot be reached.** `Ctrl+R` ("Project Explorer") puts the caret in the
-panel's *search box*, not the tree. `Tab` does not move from there into the tree and arrows select
-no node, so no project member can be opened — hence no editing.
+**2. The project tree cannot be reached.** **LARGELY FIXED 2026-07-20; one step needs a hand
+check.** `Ctrl+R` ("Project Explorer") used to put the caret in the panel's *search box*, not the
+tree; `Tab` did not move from there into the tree, so no project member could be opened.
+
+`Ctrl+R` now focuses the **tree** (falling back to the search box only when no project is loaded,
+where the tree has no nodes), and selects the first node if nothing is selected — a tree with no
+selection ignores the arrow keys, so focusing it alone would still have looked unresponsive.
+
+**A second defect surfaced once the tree could be reached, and it would have made the fix useless.**
+`tvExplorer_SelChange` calls `OpenTreeNodeOnSingleClick`, so *any* selection change opened the file
+— right for a mouse click, wrong for arrowing. Walking the tree opened every file passed over, and
+each open moved focus to the editor, so the **second** arrow press went to the editor and keyboard
+navigation ended after one keystroke. A keyboard move is now distinguished from a click
+(`bExplorerKeyboardMove`, set on the arrow/paging keys in `tvExplorer_KeyDown`): arrows move the
+selection without opening anything, and Enter still opens through the existing
+`OnNodeActivate`/`tvExplorer_DblClick` route. The parent-node bookkeeping after the open still runs
+on keyboard moves, so main-project tracking does not silently stop while navigating.
+
+**Verified by effect:** Ctrl+R focuses the tree, and focus *stays* in the tree across four arrow
+presses (it previously jumped to `EditControl` on the first). D1 re-run 12/12.
+
+**Outstanding, and deliberately not recorded as a defect: Enter on a file node did not open it in
+the harness.** The wiring reads correct — `tvExplorer_DblClick` acts on `SelectedNode`, and the
+framework raises `OnNodeActivate` on `NM_RETURN` — and the navigation may simply have been sitting
+on a folder. Given that synthesized `Ctrl+Z` was proved this same day not to reproduce hand
+behaviour (§13.34), a negative from synthesized input is not evidence here. **Needs a hand check:
+Ctrl+R, arrow to a source file, press Enter.**
 
 **3. `Alt+R` does not open the Run menu**, although the mnemonic is advertised in the menu bar and
 `Alt+F` works from an identical state. Workaround: `Alt+F`, then arrow right.
@@ -1217,6 +1241,16 @@ sweep recorded as FAIL — that result is therefore **void, not a defect**. Noth
 detect or report this: the keystroke never arrives. Before recording any shortcut as broken, check
 that nothing else on the machine has claimed it.
 
+**A fifth trap, and the worst of them: synthesized `Ctrl+Z` does not reproduce what a hand does.**
+Driven by `SendInput`, Ctrl+Z never undid anything in the code editor across four runs — while
+`Ctrl+A` worked in the same session, same focus, same input path, which appeared to prove the key
+was arriving and Undo was broken. **It is not: the owner confirmed by hand that Ctrl+Z undoes
+normally in the editor.** One run also showed the document *gaining* two characters after Ctrl+Z,
+which was never explained. Cause unknown; do not trust synthesized Undo/Redo here. **Every
+Undo and Redo result in this sweep is therefore void**, including pass 1's "Undo — TEXT", whose
++1-character delta was an edit being added rather than removed and should have been caught at the
+time. Undo and Redo need testing by hand, or by a method proven against a hand-verified case first.
+
 **Redo's status as of 2026-07-20: UNRESOLVED — do not record it either way.** The owner disabled
 the capturing app's shortcuts and Ctrl+Shift+Z still does not redo, but the hook may not be released
 until a reboot, so it is still unknown whether Astoria's Redo works. Re-test after a reboot with
@@ -1240,3 +1274,28 @@ are commented in the scripts, and they generalise to any UI test here:
 types a character and confirms it reaches the editor before running. When the environment was wrong
 it reported `NO-INSTRUMENT` and stopped, rather than emitting a page of failures — which is exactly
 what it did on two of the three traps above.
+
+**And a caution the instrument check does not cover.** It proves a *character* reaches the editor.
+It does not prove a given *shortcut* behaves as it does under a real hand — the Ctrl+Z trap above
+passed the instrument check every time and was still wrong. A negative result for any shortcut
+whose effect the harness cannot see directly should be confirmed by hand before it is recorded.
+
+### 13.36 Designer: Cut a control, then Undo does not restore it (owner-observed 2026-07-20)
+
+**Status: open, owner-observed by hand.** In the form designer, `Ctrl+X` deletes the selected
+control and `Ctrl+Z` does not bring it back. **Undo itself is fine** — the owner confirmed Ctrl+Z
+undoes normally in the code editor — so this is specific to the designer route.
+
+**Why this contradicts what is already written down, and is worth resolving carefully.** TestPlan C4
+is recorded as passing, and `AstoriaIDE.bas:151` carries a considered explanation of why the
+designer needs no undo history of its own: every designer change is said to be in the code editor's
+undo stack already, because `DesignerModified` brackets each one with `EditControl.Changing`/
+`Changed`, which is what creates an `EditControlHistory` entry — so `Undo` in the designer is
+routed to `tb->txtCode.Undo` and one history is meant to serve both views. Either `CutControl` does
+not go through `DesignerModified`'s bracketing the way the other designer operations do, or the
+entry is created but the surface is not rebuilt from the restored text. Worth checking `Cut`
+specifically against an operation known to undo correctly (an align or a move), rather than
+assuming the whole designer route is broken.
+
+**Do not test this with synthesized input.** Ctrl+Z through `SendInput` does not behave as it does
+under a hand — see §13.34. This one was found by hand and needs to be confirmed the same way.

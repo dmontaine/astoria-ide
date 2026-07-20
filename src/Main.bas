@@ -7895,8 +7895,22 @@ Sub tvExplorer_DblClick(ByRef Designer As My.Sys.Object, ByRef Sender As Control
 	'	tvExplorer.SelectedNode = tn
 End Sub
 
+'' Set while an arrow/paging key is moving the tree selection, so SelChange can tell a keyboard
+'' move from a mouse click (ROADMAP 13.28 part 2). Selecting a node opens the file immediately,
+'' which is right for a click and wrong for arrowing: a keyboard user walking the tree would open
+'' every file passed over, and each open moves focus to the editor -- so the second arrow press
+'' goes to the editor instead of the tree and navigation is over after one keystroke.
+Dim Shared As Boolean bExplorerKeyboardMove
+
 Sub tvExplorer_KeyDown(ByRef Designer As My.Sys.Object, ByRef Sender As Control, Key As Integer, Shift As Integer)
-	If Key = VK_RETURN Then tvExplorer_DblClick Designer, Sender
+	Select Case Key
+	Case VK_RETURN
+		'' Enter is the deliberate "open this" -- keep it, and let it open.
+		bExplorerKeyboardMove = False
+		tvExplorer_DblClick Designer, Sender
+	Case VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT, VK_HOME, VK_END, VK_PRIOR, VK_NEXT
+		bExplorerKeyboardMove = True
+	End Select
 End Sub
 
 Function GetParentNode(tn As TreeNode Ptr) As TreeNode Ptr
@@ -7918,10 +7932,19 @@ Sub tvExplorer_SelChange(ByRef Designer As My.Sys.Object, ByRef Sender As TreeVi
 		Exit Sub
 	End If
 	' A single click on any real editable file node (Forms, Includes, Modules, ...)
-	' opens it immediately, same as double-click would.
-	DbgTrace("SelChange.beforeOpen", "")
-	OpenTreeNodeOnSingleClick Item
-	DbgTrace("SelChange.afterOpen", "")
+	' opens it immediately, same as double-click would. An ARROW-KEY move does not: the user is
+	' navigating, not choosing, and opening here would both open every file walked past and hand
+	' focus to the editor, ending keyboard navigation after one keystroke (ROADMAP 13.28 part 2).
+	' Enter still opens, through OnNodeActivate / tvExplorer_KeyDown.
+	If bExplorerKeyboardMove Then
+		'' Skip only the open -- the parent-node bookkeeping below still has to run, or the
+		'' main-project tracking would silently stop updating while navigating by keyboard.
+		bExplorerKeyboardMove = False
+	Else
+		DbgTrace("SelChange.beforeOpen", "")
+		OpenTreeNodeOnSingleClick Item
+		DbgTrace("SelChange.afterOpen", "")
+	End If
 	Dim As TreeNode Ptr ptn = tvExplorer.SelectedNode
 	If ptn = 0 Then Exit Sub 'David Change For Safty
 	ptn = GetParentNode(ptn)

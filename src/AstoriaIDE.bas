@@ -251,7 +251,24 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 		Next
 		Clipboard.SetAsText *tmpStrPtr
 		_Deallocate(tmpStrPtr)
-	Case "ProjectExplorer":                     tpProject->SelectTab: txtExplorer.SetFocus
+	Case "ProjectExplorer"
+		'' Focus the TREE, not the search box (ROADMAP 13.28 part 2). This command used to land the
+		'' caret in txtExplorer, and since Tab never carried focus on into the tree, a keyboard-only
+		'' user could reach the panel but never a file in it -- which is why E9 recorded "cannot
+		'' open a file without a mouse". The tree already handles arrows itself and opens the
+		'' selected node on Enter (OnNodeActivate), so focusing it is all that was missing.
+		''
+		'' A tree with no selected node ignores the arrow keys, so select the first node when
+		'' nothing is selected -- otherwise focus lands somewhere that still looks unresponsive.
+		'' With no project loaded there are no nodes at all, and then the search box is the only
+		'' useful place for the caret to be.
+		tpProject->SelectTab
+		If tvExplorer.Nodes.Count > 0 Then
+			If tvExplorer.SelectedNode = 0 Then tvExplorer.Nodes.Item(0)->SelectItem
+			tvExplorer.SetFocus
+		Else
+			txtExplorer.SetFocus
+		End If
 	Case "PropertiesWindow":                    tpProperties->SelectTab: txtProperties.SetFocus
 	Case "EventsWindow":                        tpEvents->SelectTab: txtEvents.SetFocus
 	Case "Toolbox":                             tpToolbox->SelectTab: txtForm.SetFocus

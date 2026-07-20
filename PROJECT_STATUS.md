@@ -1,7 +1,8 @@
 # Astoria-IDE — Project Status & Handoff
 
-**Last updated:** 2026-07-19 — integration testing through E8; clean-machine installation and
-single-monitor scaling verified. **FEATURE COMPLETE FOR 1.0**; remaining work is testing and
+**Last updated:** 2026-07-19 (night) — ROADMAP 13.27 owner-verified; CRLF now enforced project-wide
+after 256 files were found to have drifted. Earlier: integration testing through E8; clean-machine
+installation and single-monitor scaling verified. **FEATURE COMPLETE FOR 1.0**; remaining work is testing and
 targeted reliability/polish fixes. See [Documentation/TestPlan.md](Documentation/TestPlan.md) and
 [Documentation/Testing.md](Documentation/Testing.md).
 
@@ -20,6 +21,57 @@ obvious form.*
 **Local path:** C:\Users\don\Astoria-IDE
 
 This is the concise, authoritative handoff for the next work session. Completed-work narratives, investigations, and dated session notes are archived in [HISTORY.md](HISTORY.md). Shipped changes are indexed in [CHANGELOG.md](CHANGELOG.md), and fuller enhancement specifications live in [ROADMAP.md](ROADMAP.md).
+
+## Session handoff (2026-07-19, night) — 13.27 verified, and CRLF enforced instead of frozen
+
+**Where things stand: three commits, all built and the fix owner-verified.** `0d6c6be` (13.27),
+`0086f1a` (line-ending sweep), `3c9dc6b` (verified binary + ROADMAP). Nothing pushed. Untracked
+debug traces and `Projects/Project3/Module1.exe` were deliberately left alone.
+
+**13.27 is resolved and owner-verified.** The left panel no longer jumps to the Toolbox. Astoria
+selects the Project pane only when you enter a different project — startup, New Project, Open
+Project / Open Folder — and `View ▸ Toolbox` still works because that is the user asking. The four
+verification checks are recorded in ROADMAP 13.27. One is worth repeating here: the startup test was
+run with `LeftSelectedTab=1` written into `astoria.ini` first, because at its default `0` the test
+cannot fail — `0` is already Project.
+
+**The previous session's work was recovered, not lost.** It had been staged but never committed, and
+PROJECT_STATUS was never written; the ROADMAP 13.27 writeup it left behind was intact and accurate.
+
+**The line-ending convention had quietly stopped holding, and now it cannot.** A survey found **256
+tracked source files violating the CRLF rule** — 253 entirely LF, 3 mixed. The T01 sweeps
+(`2f445e4`, `4795d9b`, `6682da9`) had set the convention with scoped `-crlf` attributes, but `-crlf`
+means `-text`: *store as-is, never convert*. It froze the CRLF that had just been written and froze
+LF arriving afterwards just as faithfully — it preserved the convention without enforcing it, and a
+whole-file EOL flip produces no readable diff, so nothing ever surfaced. Two causes:
+
+- **Whole-file rewrites by tooling.** `src/TabWindow.bas` was CRLF through 2026-07-18 and flipped at
+  `fc9ebc9`, whose numstat is `13178/13154` — the entire file rewritten to land a targeted fix.
+- **New files born LF.** `AgentMcp.bas`, `AgentPipe.bas`, `JsonLite.bas`, `ProjectDescription.bas`,
+  `RenameRefactor.bi`, `frmGitCommit.*` and the Integration fixtures postdate the sweeps and never
+  had CRLF at all.
+
+`.gitattributes` now uses `text eol=crlf`, which normalises to LF in the blob and checks out CRLF
+unconditionally, so a non-compliant working tree is no longer representable. Patterns are repo-wide
+rather than scoped to three directories — scoping is how `Templates/Files` and `Tools/LNGCreator`
+escaped the original pass. **Do not weaken these back to `-crlf`/`-text`.** Post-sweep scan:
+**4108/4108 compliant, 0 violations**, and the whole tree compiles clean.
+
+**Two method notes worth keeping.**
+
+- *Git will not show you this class of drift.* Under `text`, git normalises the working tree to LF
+  for comparison, so LF files compare equal to their blobs and `git status` reports clean. After the
+  renormalising commit the files had to be deleted and re-checked-out to actually become CRLF; the
+  proof was a byte-level scan of all 4108 files, not `git status`.
+- *A piped build exit code is worthless.* `Compile.bat` piped to a file returned `0` from the pipe.
+  The build was confirmed by effect instead: log tail `Release build complete.`, ~3-minute duration,
+  exe timestamps newer than the newest source, and a **SHA256 differing from the pre-fix binary** —
+  the last because the new exe happened to be byte-identical in *size* to the old one.
+
+**Next.** Nothing is pushed. The remaining TestPlan queue is unchanged: E9 keyboard-only, E10 screen
+reader / high contrast, E11 multiple Astoria instances, plus the unavailable mixed-DPI portion of E8.
+`DetailedChangelog.md` needs regenerating for the three new commits. ROADMAP 13.27 carries one minor
+leftover: `LeftSelectedTab` is now a write-only ini key.
 
 ## Session handoff (2026-07-19, evening) — integration testing through E8
 

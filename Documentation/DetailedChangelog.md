@@ -17,7 +17,7 @@ Areas are: **IDE** (`src/`), **Framework/Controls** (`Controls/`), **Templates**
 is to write a good commit message. Regenerate rather than hand-edit; a stale hand-edit is worse
 than no entry. Commits after the last one listed here are not yet folded in.
 
-**Total: 401 commits, 2026-07-02 to 2026-07-19.**
+**Total: 406 commits, 2026-07-02 to 2026-07-19.**
 
 ## 2026-07-02
 
@@ -1208,3 +1208,18 @@ than no entry. Commits after the last one listed here are not yet folded in.
 - **`e66d153`** — Handoff: warnings removed, and why the earlier attempt broke startup
   Documents the session and closes an open question.
   *Docs · 2 files*
+- **`0d6c6be`** — 13.27: the IDE no longer chooses the left panel for you
+  ApplyView ended both form-view branches with an unconditional tpToolbox->SelectTab, so every application of a form view dragged the panel to the Toolbox, including re-applications the user never asked for. Auto-selection was removed entirely rather than made conditional: the system does not choose the panel.
+  *Docs, IDE · 5 files*
+- **`0086f1a`** — Enforce CRLF project-wide instead of freezing it, and re-sweep 374 files
+  A survey found 256 tracked source files violating the CRLF convention. The scoped `-crlf` attributes meant "store as-is, never convert", which preserved the convention without enforcing it and let whole-file rewrites and newly created files drift to LF invisibly. Now `text eol=crlf`, repo-wide.
+  *Controls, Examples, IDE, Templates, Tools · 374 files*
+- **`3c9dc6b`** — 13.27 owner-verified; ship the binary that was tested
+  Four checks pass, including a startup test run with LeftSelectedTab baited to Toolbox, because at its default of 0 that test cannot fail.
+  *Docs, IDE · 2 files*
+- **`a4c3369`** — PROJECT_STATUS: the handoff the previous session did not get to write
+  Records the recovery, the line-ending drift, and two method notes: git will not surface EOL drift under `text`, and a piped build exit code reports the pipe rather than the build.
+  *Docs · 1 file*
+- **`21d60d1`** — Commit the MCP sidecar from the same build as astoria.exe
+  The previous binary commit shipped astoria.exe and left the sidecar built in the same pass uncommitted, reintroducing the mismatch 3f26136 closed.
+  *IDE · 1 file*

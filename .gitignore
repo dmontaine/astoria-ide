@@ -81,3 +81,15 @@ Examples/Integration/**/A8-results.txt
 Projects/D5_McpMultiFile_*/
 Projects/E_ScaleFixtures/
 Projects/TestD2/
+# Throwaway projects from New Project testing (ROADMAP 13.27 verification).
+Projects/test1/
+Projects/test2/
+
+# Built binaries inside the tracked Projects/ fixtures. The existing `Projects/*.exe`
+# rule only matches the top level, so a build inside Projects/Project3/ escaped it.
+Projects/**/*.exe
+
+# Debugger Reliability traces are written per-run with a scenario suffix
+# (debug_trace.DR14.log, debug_trace.pre2B.log, ...). The unsuffixed name was
+# already ignored; the suffixed ones are just as local and just as regenerable.
+Settings/debug_trace.*.log

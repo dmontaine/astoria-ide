@@ -1,15 +1,18 @@
 # Astoria-IDE — Project Status & Handoff
 
-**Last updated:** 2026-07-19 (night) — ROADMAP 13.27 owner-verified; CRLF now enforced project-wide
-after 256 files were found to have drifted. Earlier: integration testing through E8; clean-machine
-installation and single-monitor scaling verified. **FEATURE COMPLETE FOR 1.0**; remaining work is testing and
-targeted reliability/polish fixes. See [Documentation/TestPlan.md](Documentation/TestPlan.md) and
+**Last updated:** 2026-07-20 (early hours) — Section E testing finished except the screen reader,
+**five defects found and fixed** (13.29, 13.30, 13.32, 13.33, 13.28 parts 1–2), two new ones
+recorded (13.35, 13.36), and the keyboard-accessibility failure that was the plan's only ❌ is now
+mostly closed. **FEATURE COMPLETE FOR 1.0**; remaining work is testing and targeted
+reliability/polish fixes. See [Documentation/TestPlan.md](Documentation/TestPlan.md) and
 [Documentation/Testing.md](Documentation/Testing.md).
 
 *Current activity: **integration testing**. No known 1.0 beta blockers remain. TestPlan sections
-A–D are complete. Environment tests E1–E7 pass; E8 passes at 125%, 150% and 200% on one monitor,
-with mixed-DPI monitor movement unavailable. Remaining planned tests are E9 keyboard-only, E10
-screen reader/high contrast, and E11 multiple Astoria instances.*
+A–D are complete; Section E is complete except **E10b screen reader**, which cannot be run here at
+all — it needs a person who uses one. E9 keyboard-only is no longer a flat failure: parts 1 and 2 of
+13.28 are fixed, parts 3 and 4 remain. E12 (keyboard shortcuts) is a new scenario, partially run —
+see 13.34 for what is left and, more importantly, for the five ways its harness produced confident
+wrong answers.*
 
 *Earlier in this testing run: seven scenarios (A1, A4, A5, B1, B4, B6, B10), two of which passed
 only after fixing real defects the tests found — the WebBrowser control could not render a page at
@@ -21,6 +24,84 @@ obvious form.*
 **Local path:** C:\Users\don\Astoria-IDE
 
 This is the concise, authoritative handoff for the next work session. Completed-work narratives, investigations, and dated session notes are archived in [HISTORY.md](HISTORY.md). Shipped changes are indexed in [CHANGELOG.md](CHANGELOG.md), and fuller enhancement specifications live in [ROADMAP.md](ROADMAP.md).
+
+## Session handoff (2026-07-20, early hours) — Section E finished bar the screen reader; five defects fixed
+
+**Everything is committed and pushed through `0241bba`; the tree is clean and `astoria.exe` is the
+build the tests actually ran against.** One thing to know about that binary: after the final commit
+the working-copy exe changed on disk at a time nothing should have rebuilt it, so it was restored
+from the commit rather than shipped unverified. If that recurs, find out what is writing it before
+trusting a build.
+
+### What was fixed
+
+| | What | Verified |
+| --- | --- | --- |
+| **13.29** | Launching Astoria while it is already running **crashed** the second process (`0xC0000005`) and never raised the running IDE. | Owner-verified |
+| **13.30** | The editor ignored the system **high-contrast** theme; with a light theme, line numbers vanished entirely. | Owner-verified |
+| **13.31** | UI simplification: **Tip of the Day removed**, toolbars pinned to three rows, View ▸ Toolbars reduced to one on/off toggle. | Owner-verified |
+| **13.32** | `Ctrl+Shift+O` (Open Project) was advertised in Options and could never fire. | Owner-verified |
+| **13.33** | `Ctrl+Shift+D` (External Tools) did nothing — three blank duplicate `Tools=` lines in `HotKeys.txt` shadowed the real binding. | Owner-verified |
+| **13.28 pt 1** | The **New Project dialog took no keyboard input at all** and could not be closed — the release-relevant blocker. | Automated; **not** owner-verified |
+| **13.28 pt 2** | The **project tree could not be reached** from the keyboard, so no file could be opened without a mouse. | Automated; **not** owner-verified |
+
+### Do these first
+
+1. **Three hand checks on the two unverified fixes.** Each is seconds, and each covers a change that
+   automated testing cannot fully vouch for:
+   - **New Project**: `Ctrl+Shift+N`, press Tab a few times, press Escape. Then confirm the
+     dialogs that already worked still do — Options, Find, Goto — since 13.28 pt 1 changed
+     `Form.ShowModal` in the **framework**, which every modal in every user program also goes through.
+   - **Project tree**: `Ctrl+R`, arrow to a source file, press **Enter**. Enter did not open a file
+     under synthesized input; the wiring reads correct and the navigation may simply have been on a
+     folder, but it is unconfirmed. This is the one open question on part 2.
+   - **Designer undo (13.36)**: confirm the defect you hit — Cut a control, `Ctrl+Z`.
+2. **13.36 — designer Cut then Undo does not restore the control.** Owner-observed by hand. Undo
+   itself is fine (it works in the code editor), so this is the designer route only. It contradicts
+   both TestPlan C4 and the reasoning at `AstoriaIDE.bas:151` that one history serves both views, so
+   resolve which is wrong before changing code.
+3. **13.28 parts 3 and 4** — `Alt+R` does not open the Run menu, and `Ctrl+F9` is silent when focus
+   is in the Project search box. New clue for part 3: **`Alt+E` fails the same way**, so this is
+   menu mnemonics generally, not one broken binding.
+4. **13.34 — finish the shortcut sweep.** 18 of 54 confirmed working, 2 were broken and are fixed.
+   Read 13.34 before running the harness; the traps below are why.
+
+### Read this before writing another UI test
+
+The shortcut sweep produced **five separate false results**, each confident and each wrong. They are
+documented in 13.34 and in `TestHarness/README.md`, and they generalise:
+
+- **Focus, then reset — never the reverse.** `write_file` reloads the document and drops editor
+  focus. Reported four working shortcuts as dead.
+- **A leftover modal disables everything after it.** Astoria's "Definitions for…" window does not
+  close on Escape, and while it is up the main window is disabled. Produced fifteen false failures.
+- **The IDE may not be where you left it.** On restart it restores the saved workspace; if that is a
+  `.frm`, clicks land on the designer, not a code editor.
+- **Another application can eat the shortcut before Astoria sees it.** A background app was
+  capturing `Ctrl+Shift+Z` among others. Nothing in Astoria can detect this.
+- **Synthesized `Ctrl+Z` does not behave like a hand.** It never undid anything, while `Ctrl+A`
+  worked on the same focus in the same session — which looked exactly like a broken Undo. **It is
+  not broken**; the owner confirmed by hand. Cause still unknown. **Every Undo/Redo result in the
+  sweep is void.**
+
+The instrument check (type a character, confirm it lands, before testing anything) caught two of
+these and is the reason the surviving results can be trusted. It does **not** cover the last one: it
+proves a character arrives, not that a shortcut behaves as it does under a hand. **Confirm any
+negative by hand before recording it as a defect.**
+
+### Still open
+
+- **E10b screen reader** — the only untestable scenario; needs a person who uses one. Carry to the
+  human-tester round.
+- **13.35** — the shortcut file is keyed on a non-unique menu item name, which is what generated
+  13.33's bad data. Every Options save can reintroduce duplicates; a user who adds two external
+  tools and saves can silently blank a working shortcut. Not urgent (the loader now tolerates it),
+  but the generator is untouched.
+- **13.21, 13.22, 13.24** — unchanged, all minor.
+- **External Tools does not close on Escape.** It is shown with `Show`, not `ShowModal`, so it is
+  modeless and 13.28's modal fallback does not reach it. Left deliberately: it is not a trap, and
+  the app-wide pump that would fix it also serves the main window, where Escape must not close
+  anything.
 
 ## Session handoff (2026-07-19, night) — 13.27 verified, and CRLF enforced instead of frozen
 

@@ -1,5 +1,62 @@
 # Astoria-IDE — Project Status & Handoff
 
+## Session handoff (2026-07-20, morning) — 13.28 pt 3: two approaches eliminated, kernel route prepared
+
+**Machine switch in progress.** This session ran on the machine that reproduces the defect; work
+continues from the second computer. **This machine is the intended kernel-debug TARGET and can be
+used to run Astoria.** Nothing in `src/` or `Controls/` was changed — only harness files and
+documentation. No rebuild happened; the binaries are still the 04:12–04:15 build from the previous
+session.
+
+### The one thing to do first, on the other computer
+
+**Press `Alt+C`, `Alt+G`, `Alt+R` in Astoria there.** This has never been tried and it is worth more
+than any instrument built today. Works there → the defect is machine-local and twelve hypotheses
+have been aimed at the wrong target. Fails on both → it is in Astoria, machine state is ruled out
+for free, and the kernel trace is worth its setup. Three keystrokes, either answer is progress.
+
+### What was eliminated
+
+| | Result |
+| --- | --- |
+| **Hypothesis 12** — a hidden/duplicate menu-bar item claiming C/G/R matches first and silently swallows the key | **Refuted.** Live dump: 11 items, each of C/G/R claimed exactly once, all enabled with populated popups (28/31/7). Position does not explain it either — failing indices 3, 6, 7; working 0, 1, 2, 8, 9, 10. |
+| **A user-mode `cdb` trace of `user32`** | **Dead end, and the run is void** — it failed its own positive control. `Alt+E` produced no beep and `Alt+F` no menu signal, so the silence for C/G/R means nothing. Menu-mode handling lives in `win32kfull.sys`; the `user32!*Menu*` exports are the API entry points apps *call*, not the code that services a keystroke. |
+
+The second one is a correction to a recommendation made earlier in the same session. Checking which
+side of the syscall boundary a function lives on, before building a trace around it, would have
+caught it in a minute. Recorded in the harness README so it is not retried.
+
+**Two incidental findings for 13.35, not 13.28:** `&Form` in the menu bar is a genuine duplicate
+`Alt+F` (harmless only because `&File` matches first), and `Code/Form` is the one top-level menu
+with no mnemonic at all. Worth checking whether `ValidateHotKeys` covers menu-bar-to-menu-bar
+collisions or only accelerator-to-menu.
+
+### What was gained
+
+- **Debugging Tools for Windows installed** at `C:\Program Files (x86)\Windows Kits\10\Debuggers\x64`
+  (`cdb`, `kd`, `symchk`, `dbh`), debuggers-only feature set, not the full SDK. Symbol cache at
+  `C:\Symbols`, `_NT_SYMBOL_PATH` set at user scope. Useful beyond this defect.
+- **Kernel symbols verified usable** — `win32kfull.sys` public PDB matches this build and names
+  `xxxMNFindChar`, `xxxMNKeyFilter`, `xxxMNChar`, `xxxMNLoop`, `xxxSysCommand`,
+  `xxxHandleMenuMessages`. This premise was checked *before* recommending the invasive setup.
+- **KDNET setup written up** in the harness README, with machine roles. BitLocker is off on both
+  machines and both use local accounts, so the recovery-lockout risk that normally gates kernel
+  debugging does not apply; Secure Boot must still come off in firmware on the target.
+
+### Unexplained, worth knowing
+
+`astoria.exe` (pid 19872) **exited on its own** partway through the session, between the menu probe
+and the next attach. No WER report, no Application Error event, no System log entry — it did not
+fault. Cause unknown. This is the second recorded instance of the binary behaving oddly outside a
+build (the 2026-07-20 early-hours entry records the exe changing on disk when nothing should have
+written it). If it recurs, find out what is doing it.
+
+### Files added
+
+`TestHarness/13.28_Mnemonics/SysCharTrace.cdb` and `RunSysCharTrace.ps1` — kept despite the void
+result. They are correct instruments pointed at the wrong layer, the non-stopping-breakpoint pattern
+is reusable, and `RunSysCharTrace.ps1` carries the working `SendInput` guard and foreground check.
+
 ## Session handoff (2026-07-20, small hours) — shortcut integrity fixed; 13.28 pt 3 narrowed, not solved
 
 **Everything below is committed and pushed. The tree is clean and `astoria.exe`, `astoria-mcp.exe`

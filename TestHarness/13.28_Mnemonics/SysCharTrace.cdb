@@ -1,0 +1,47 @@
+$$ ============================================================================
+$$ ROADMAP 13.28 part 3 - PHASE 1 user-mode trace: is the bell real?
+$$
+$$ The owner identified this defect by EAR: letters with no menu ring the system
+$$ bell; C, G and R are silent. Everything downstream rests on that observation,
+$$ and it has never been measured - only heard. Phase 1 turns it into an API-level
+$$ fact by watching USER32!MessageBeep itself.
+$$
+$$ Expected if the ear is right:
+$$   Alt+E  -> [BEEP] fires   (no such menu; Windows looked, missed, complained)
+$$   Alt+C  -> no [BEEP]      (Windows never got as far as looking)
+$$
+$$ If Alt+C DOES beep here, the premise of the whole investigation is wrong and
+$$ eleven hypotheses were tested against a mis-stated defect.
+$$
+$$ DELIBERATELY NOT BREAKPOINTED: USER32!DefWindowProcW. It is called thousands
+$$ of times per second in a GUI app, and a conditional breakpoint there is
+$$ evaluated by the debugger on every single call - Astoria would crawl and look
+$$ like a hang. It is armed in Phase 2 only, once we know where to look.
+$$
+$$ All breakpoints are NON-STOPPING ('gc' = go from conditional breakpoint).
+$$ Halting a GUI process steals foreground/activation, and menu-mnemonic handling
+$$ is activation-dependent - a stopping breakpoint destroys the behaviour we are
+$$ trying to observe.
+$$
+$$ x64 calling convention: rcx=hWnd  rdx=Msg  r8=wParam  r9=lParam
+$$ ============================================================================
+
+.echo === SysCharTrace Phase 1: arming ===
+
+$$ --- THE BELL. This is the whole point of Phase 1. ------------------------
+bp USER32!MessageBeep ".printf \"[BEEP] uType=%x\\n\", @rcx; gc"
+
+$$ --- Menu-mode entry/exit. Rare, so cheap to watch. -----------------------
+$$ Entering menu mode at all means Windows accepted the keystroke as a menu
+$$ activation. Silence here for C/G/R means it never began.
+bp USER32!NtUserCalcMenuBar ".printf \"[CalcMenuBar]\\n\"; gc"
+bp USER32!NtUserEndMenu     ".printf \"[EndMenu]\\n\"; gc"
+bp USER32!NtUserHiliteMenuItem ".printf \"[HiliteMenuItem]\\n\"; gc"
+
+$$ --- Popup tracking: fires when a menu actually drops. --------------------
+bp USER32!NtUserTrackPopupMenuEx ".printf \"[TrackPopupMenuEx]\\n\"; gc"
+
+.echo === breakpoints armed ===
+bl
+.echo === running target ===
+g

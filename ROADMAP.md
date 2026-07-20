@@ -914,6 +914,342 @@ Ctrl+R, arrow to a source file, press Enter.**
 **3. `Alt+R` does not open the Run menu**, although the mnemonic is advertised in the menu bar and
 `Alt+F` works from an identical state. Workaround: `Alt+F`, then arrow right.
 
+**Measured properly on 2026-07-20, and the earlier "Alt+E fails the same way" clue was wrong.**
+The whole top-level menu bar was read out of the running process with `GetMenuItemInfo`, and each
+`Alt+<letter>` was then driven with `SendInput` and judged by `GetGUIThreadInfo` menu state rather
+than by appearance:
+
+| Letter | Result |
+| --- | --- |
+| `Alt+F` `Alt+V` `Alt+P` `Alt+T` `Alt+W` `Alt+H` | menu opens ✅ |
+| `Alt+C` | **opens a Command Prompt instead of the Code menu** ❌ |
+| `Alt+R` | nothing ❌ |
+| `Alt+G` | nothing ❌ — **not previously recorded** |
+| `Alt+E` | nothing — **expected, not a defect** |
+
+- **`Alt+E` is not a defect and never was.** There is no Edit menu; it is `&Code`
+  (`Main.bas:6985`). That clue is what framed this item as "menu mnemonics generally", and it should
+  not be used to guide the fix.
+- **`Alt+C` was two defects stacked, and only the first is fixed.** `CommandPrompt=Alt+C` was an
+  accelerator, and `TranslateAccelerator` runs before menu mnemonics, so pressing `Alt+C` opened a
+  terminal. That binding has been **moved to `Ctrl+Shift+C`** (verified by effect: a terminal opens
+  on the new chord, and `Alt+C` no longer hijacks the foreground), and `ValidateHotKeys` (§13.35)
+  now detects the whole shadowing class automatically. **But `Alt+C` still does not open the Code
+  menu.** Removing the accelerator was necessary and not sufficient — it simply joined `Alt+R` and
+  `Alt+G` below. Do not record this item as closed.
+  Note `Ctrl+`` was rejected despite being the VS/VS Code convention: `GetAscKeyCode`
+  (`Menus.bas:1454`) falls through to `Asc()`, so a backtick registers as `VK_NUMPAD0`.
+- **`Alt+C`, `Alt+R` and `Alt+G` are one unexplained defect, not three.** All three are
+  `MFT_STRING`, **enabled**, ampersand intact, with no competing accelerator and no
+  `WM_SYSCHAR`/`WM_SYSKEYDOWN` handler anywhere in `src/` or the framework — Windows should be
+  resolving them itself. They are menu-bar indices **3, 6 and 7**; indices 0–2 and 8–10 all work,
+  and the two odd items sit between them (index 4 `Code/Form` has no mnemonic, index 5 `&Form` is
+  disabled *and* duplicates `&File`'s `F`).
+
+  **Two hypotheses have been tested and disproved, so do not spend time on them again:**
+  1. *A greyed top-level menu swallows its own mnemonic.* Disproved — `GetMenuItemInfo` shows Code,
+     Run and Git all enabled at the moment the presses fail.
+  2. *User tools with an empty `Accelerator=` corrupt the accelerator table.* `Main.bas` appends
+     `\t` to every tool caption, and `MainMenu.ParentWindow` treats any `\t` caption as an
+     accelerator, so it calls `GetAscKeyCode("")` → `Asc("")` and inserts junk `ACCEL` entries.
+     Real, and worth fixing on its own merits — but **not** the cause here: moving `Tools.ini`
+     aside entirely reproduced the identical failure on C, R and G.
+
+  **RESOLVED TO ASTORIA 2026-07-20 — it is not the machine, and not interference.** A stock
+  WinForms control application was built with the *same* mnemonic letters (`&File &Code &Run &Git
+  &Tools`) and driven by the identical probe, on the same machine in the same session, with a
+  `WH_KEYBOARD_LL` hook recording what the input stack actually saw:
+
+  | | `Alt+F` | `Alt+C` | `Alt+R` | `Alt+G` | `Alt+T` |
+  | --- | --- | --- | --- | --- | --- |
+  | WinForms control app | opens | **opens** | **opens** | **opens** | opens |
+  | Astoria | opens | **nothing** | **nothing** | **nothing** | opens |
+
+  The hook recorded `VK 0x43 / 0x52 / 0x47` delivered in **both** runs, so the keystrokes are
+  generated and reach the input stack identically. **The third hypothesis — a background
+  application capturing these combinations (§13.34's trap) — is therefore also disproved for
+  C/R/G.** The cause is inside Astoria or MFF. The control app doubles as a regression fixture and
+  its script is worth keeping.
+
+  **INSTRUMENTED 2026-07-20, and the failure is now precisely characterised.** `frmMain_Message`
+  gained an observer (`LogMenuKey`, gated on `Temp/_astoria_menukeys.on`, off by default, never
+  alters handling) recording `WM_SYSKEYDOWN` / `WM_SYSCHAR` / `WM_MENUCHAR` / `WM_INITMENU` /
+  `WM_INITMENUPOPUP`. Pressing each letter gives three distinct signatures:
+
+  | | `WM_SYSCHAR` | then | Meaning |
+  | --- | --- | --- | --- |
+  | F V P T W H | arrives | `WM_INITMENU` + `WM_INITMENUPOPUP` (idx 0,1,2,8,9,10) | menu opens |
+  | **E** (no such menu) | arrives | `WM_INITMENU` + **`WM_MENUCHAR`** | correct "no match" |
+  | **C R G** | **arrives** | **nothing at all** | activation never starts |
+
+  **`Alt+E` is the control that makes this readable.** It proves the mnemonic-matching path is
+  healthy: Windows enters menu mode and reports "no match" via `WM_MENUCHAR`. C, R and G never get
+  that far — the character reaches the form and menu activation is silently abandoned. **So this is
+  not a mnemonic-matching fault; something consumes `WM_SYSCHAR` before `DefWindowProc` acts.**
+
+  **Also disproved (hypothesis four):** the three are not command items. All eleven bar entries have
+  valid popups — Code `0x13E1209`, Run `0x202121D`, Git `0x1DB067F` — and the working six can be
+  matched one-for-one against the `WM_INITMENUPOPUP` wParams in the log. Code, Run and Git own
+  perfectly good popups that are simply never initialised.
+
+  **MECHANISM FOUND 2026-07-20 — the system keys never reach the form at all.** A second instrument
+  was added one level down, in the framework (`AstoriaLogSysKey` in `Control.bas`, gated on the
+  `ASTORIA_LOGSYSCHAR` environment variable and self-contained, so MFF gains no dependency on
+  Astoria), logging `Handled`/`Result` after `ProcessMessage` at all three dispatch points. The
+  result contradicts what the Astoria-level log implied:
+
+  ```
+  SuperWndProc[TabControl]  WM_SYSKEYDOWN  wParam=&h43  Handled=0  Result=0
+  SuperWndProc[TabControl]  WM_SYSCHAR     wParam=&h63  Handled=0  Result=0
+  ```
+
+  **Every** `WM_SYSKEYDOWN`/`WM_SYSCHAR` — working letters included — arrives at a subclassed
+  **`TabControl`**, not the Form. The focused window is the tab control, and `Control.SuperWndProc`
+  forwards anything MFF does not handle to `CallWindowProc(cp, ...)`, which is comctl32's **own
+  tab-control procedure**, not `DefWindowProc`. Only one Form-level message appears in the entire
+  run: the `WM_MENUCHAR` from `Alt+E`.
+
+  MFF is not the consumer — `Handled=0` and `Result=0` on every line, so `Control.ProcessMessage`
+  passes them straight through to `CallWindowProc`.
+
+  **The tab-label theory this suggested is REFUTED (2026-07-20), on two independent grounds.**
+
+  1. *Structural.* The focused window's **Win32 class is `TabControl`** — a custom class registered
+     by MFF — **not `SysTabControl32`**. There is no comctl32 tab control anywhere in the focus
+     chain (`TabControl` → `Panel` → `Panel` → `Form`), so there is no tab-label mnemonic machinery
+     to blame. The `"TabControl"` in the log above is MFF's own `ClassName` property; reading it as
+     the Win32 class was the error that produced the theory.
+  2. *Empirical.* The prediction was that the failing set moves with the open tabs. It does not:
+     with `FormA.frm` restored and again with `A1_SQLite3DataPath.bas` opened from the command
+     line, the result is identical — F V P T W H open, **C R G do not**.
+
+  That is the sixth hypothesis to die on this defect. Also worth recording: **UI Automation reports
+  zero tab controls** in the process, so MFF's tab control exposes no accessibility tree at all —
+  relevant to E10b (screen reader), which is still untested.
+
+  **What is actually established:** the failing set is C, R and G — menu-bar indices **3, 6 and 7** —
+  and it is stable across documents, workspaces and restarts. Working indices are 0,1,2 and 8,9,10.
+  System keys reach the focused custom `TabControl` and menu activation never starts.
+
+  **SC_KEYMENU measurement, run 2026-07-20.** `WM_SYSCOMMAND`/`SC_KEYMENU` was added to
+  `LogMenuKey`. Result, with focus in the code editor rather than the tab control:
+
+  | Letter | Messages reaching the form |
+  | --- | --- |
+  | bare `Alt` | `SC_KEYMENU` (lParam=0) + `WM_INITMENU` |
+  | F V P T W H | `WM_INITMENU` + `WM_INITMENUPOPUP` idx 0,1,2,8,9,10 |
+  | **E** | `WM_INITMENU` + `WM_MENUCHAR` |
+  | **C R G** | **nothing whatsoever** |
+
+  So the kill happens **before** `SC_KEYMENU` is generated: Windows begins menu activation for
+  `Alt+E` — a letter with genuinely no menu — but not for C, R or G. And it is **focus-independent**:
+  the same three letters fail whether focus is the `TabControl` (where `WM_SYSKEYDOWN`/`WM_SYSCHAR`
+  do reach the form) or the editor (where they do not reach it at all). That combination rules out
+  the focused control as the consumer.
+
+  **Hypothesis seven — the accelerator table — is also disproved.** The table MFF builds was
+  reconstructed from the live menu captions cross-process, applying MFF's own loose parsing rules
+  (`InStr` substring tests for Ctrl/Shift/Alt, `GetAscKeyCode` falling back to `Asc()` of the first
+  character). 65 entries; **exactly one bare `Alt+<letter>` accelerator exists — `Alt+O`** (Import
+  from Folder), which collides with no menu. Nothing consumes `Alt+C`, `Alt+R` or `Alt+G`. No entry
+  had an unrecognised key token either, so the `Asc()` fallback is not firing anywhere.
+
+  A tempting near-miss to record so it is not re-derived: C, R and G each have a `Ctrl+<letter>`
+  accelerator (Copy, Project Explorer, Goto). **That is a coincidence** — F, V, P, T and H all have
+  one too (Find, Paste, Print, Toolbox, Replace) and all work.
+
+  **Seven hypotheses have now been disproved:** greyed menus, empty tool accelerators, background-app
+  capture, command-items-without-popups, comctl32 tab-label mnemonics, tab-label dependence generally,
+  and the accelerator table.
+
+  **Message loop instrumented 2026-07-20 — and it is EXONERATED (hypothesis eight).**
+  `AstoriaLogLoop` in `Application.bas` records every system key at the three points in
+  `Application.Run` that can suppress one: straight off `GetMessage`, after `TranslateAccelerator`,
+  and immediately before the `TranslateMessage`/`DispatchMessage` decision. Every letter — the
+  failing ones included — reaches all three stages with `dispatch=YES`:
+
+  ```
+  1 arrived    WM_SYSCHAR  wParam=&h66 ('f')  dispatch=YES     <- opens its menu
+  2 postAccel  WM_SYSCHAR  wParam=&h66        dispatch=YES
+  3 final      WM_SYSCHAR  wParam=&h66        dispatch=YES
+  1 arrived    WM_SYSCHAR  wParam=&h63 ('c')  dispatch=YES     <- opens nothing
+  2 postAccel  WM_SYSCHAR  wParam=&h63        dispatch=YES
+  3 final      WM_SYSCHAR  wParam=&h63        dispatch=YES
+  ```
+
+  30 `WM_SYSCHAR` stage-records across 10 letters, no `dispatch=NO` anywhere. `TranslateAccelerator`
+  claims nothing, no `OnMessage`/`KeyPreview` hook claims anything, and every message is dispatched.
+  This independently confirms the reconstructed-accelerator-table result by a completely different
+  method.
+
+  **Eight hypotheses disproved.** Greyed menus; empty tool accelerators; background-app capture;
+  command-items-without-popups; comctl32 tab-label mnemonics; tab-label dependence; the accelerator
+  table; the message loop.
+
+  **Where the loss must now be.** `DispatchMessage` delivers `WM_SYSCHAR` to the focused control, and
+  the menu never activates — so the message dies in the focused control's window-procedure chain,
+  between `DispatchMessage` and the `SC_KEYMENU` that `DefWindowProc` should raise to the top-level
+  window. "Focus-independent" was too strong a reading: both observed focus targets (`TabControl`,
+  code editor) are MFF controls and both go through `Control.SuperWndProc`, so what is really
+  established is independence from *which* MFF control, not from the control layer.
+
+  **STRONG LEAD 2026-07-20 — the WINDOW'S SYSTEM MENU claims two of the three letters.**
+
+  A further run happened to have focus on the Form itself rather than a control, so every system key
+  went through `DefWndProc [Form]` — and showed `DefWindowProc` being called on the **top-level
+  window** with `WM_SYSCHAR` for every letter, `Handled=0`, `Result=0`. So Windows' own
+  `DefWindowProc` receives `Alt+C` on the main form and produces nothing, while the identical call
+  with `'e'` produces `WM_MENUCHAR`. Two further hypotheses died on the way: all popups have items
+  (Code 28, Run 31, Git 7 — so nothing is an empty menu), and `SuperWndProc`'s `cp`-is-null path was
+  never reached in that run.
+
+  Reading the **system menu** (`GetSystemMenu`) explains it:
+
+  ```
+  [0] "&Restore"   mnemonic=Alt+R   enabled
+  [6] "&Close"     mnemonic=Alt+C   enabled
+  ```
+
+  `Alt+R` and `Alt+C` are claimed by **&Restore** and **&Close** — exactly the two failing letters
+  that collide with the `&Code` and `&Run` menu-bar mnemonics. That also explains the otherwise
+  baffling silence: a system-menu mnemonic match is handled entirely inside `DefWindowProc`, so the
+  menu bar never activates (no `WM_INITMENU`) and no `WM_MENUCHAR` is raised either — unlike `Alt+E`,
+  which genuinely matches nothing and therefore does produce both.
+
+  **THE SYSTEM-MENU LEAD IS REFUTED — by evidence that was already in hand (hypothesis nine).**
+  The WinForms control app built earlier carries `&File &Code &Run &Git &Tools` on an ordinary
+  top-level window with the same standard system menu, and **Alt+C, Alt+R and Alt+G all open their
+  menus there**, on this machine in the same session. If `&Close`/`&Restore` intercepted those
+  letters, that app would fail identically. It does not.
+
+  It is also wrong on the mechanics: `Alt+<letter>` is dispatched against the **menu bar**, while the
+  system menu is reached by `Alt+Space`. The theory required non-standard behaviour and the control
+  app is direct evidence the standard behaviour holds.
+
+  **The lesson, and it is the recurring one on this defect:** the correlation was strong (C↔Close,
+  R↔Restore) and the silence fit, but it never explained G — and a theory that leaves part of the
+  evidence unexplained should be discarded, not proposed. The control app existed specifically to
+  answer "is this Astoria or the machine", and it should have been re-consulted before the theory was
+  written down rather than after.
+
+  **ANSWERED 2026-07-20 by experiment — it is the LETTER, and the cursed set is exactly {C, G, R}.**
+
+  *Experiment 1, letter vs position.* `&Code` → `Co&de` (D) and `&Run` → `R&un` (U), `&Git` left on G
+  as the control. **`Alt+D` opened Code (bar index 3) and `Alt+U` opened Run (index 6)** — the very
+  menus that had been dead. Nothing is wrong with those menus or their positions.
+
+  *Experiment 2, the system menu, properly tested.* `&Project` → `Proje&ct` (C, at known-good index 2),
+  `&Tools` → `Tool&s` (S, collides with system `&Size`), `&Window` → `Wi&ndow` (N, collides with
+  `Mi&nimize`). Result: **S and N both open** — system-menu collisions are harmless — while **C fails
+  even on Project**, a menu that works perfectly under P. The system-menu lead is dead for good.
+
+  *Experiment 3, the full alphabet.* All 25 letters (O excluded — `Alt+O` is a real accelerator and
+  opens a modal dialog that would poison the run) swept with the `LogMenuKey` instrument armed, which
+  distinguishes the two invisible outcomes: a letter with no menu gives `WM_INITMENU` + `WM_MENUCHAR`
+  (Windows looked and found nothing), a swallowed letter gives **nothing at all**.
+
+  **22 of 25 letters produce `WM_INITMENU`. Exactly three do not: C, G and R.**
+
+  **The decisive detail: `R` is cursed even though no menu uses it in that build** (Run was on U).
+  Unassigned letters A, B, I, J, K, L, M, Q, X, Y, Z all correctly reach menu mode and report no
+  match. R does not. **So the block is below the menu layer entirely** — it is not about menu data,
+  mnemonics, positions, popups or enabled state, and every hypothesis framed in those terms was
+  looking in the wrong place.
+
+  **Correction to the earlier control-app reasoning.** The WinForms app was never a valid control for
+  the *menu* question: WinForms implements its own mnemonic handling in managed code
+  (`ProcessDialogChar`/`ProcessMnemonic`) before `DefWindowProc` sees the key, so it never exercises
+  the Win32 menu-bar search at all. It remains a valid control for "is something machine-global eating
+  these keys" — it received and acted on all three letters — but it cannot speak to anything below
+  that.
+
+  **MFF IS INNOCENT — measured 2026-07-20.** A minimal MyFbFramework application was built
+  (`scratchpad/MffMnemonicTest.bas`, ~50 lines: one `Form`, one `MainMenu` with `&File &Code &Git
+  &Run &Tools`, attached by `This.Menu = @mnu` exactly as `Main.bas:11087` does) and compiled against
+  the same `Controls\Framework` with the same `fbc64` flags. **`Alt+C`, `Alt+G` and `Alt+R` all open
+  their menus there**, alongside the `&File`/`&Tools` controls.
+
+  So the block is **specific to Astoria**, not the framework, not the machine, not Windows, and not
+  menu data. Every user program built on MFF is unaffected.
+
+  **Bisection from the minimal app upward — step 1: context menus, NOT the cause.** Astoria attaches
+  `ContextMenu`s to many controls and their items carry accelerator text after a tab, which is the
+  shape MFF's accelerator builder keys on. Adding a `PopupMenu` with `&Copy⇥Ctrl+C`, `&Goto⇥Ctrl+G`
+  and `Project Explorer⇥Ctrl+R` (Astoria's three real bindings on the cursed letters) changed
+  nothing — all five mnemonics still open.
+
+  Also confirmed by search: Astoria installs **no** `SetWindowsHookEx`/`WH_KEYBOARD`/`WH_GETMESSAGE`
+  hook and calls **no** `RegisterHotKey`, and the only `CreateAcceleratorTable` in the tree is the
+  one in `Menus.bas:1561` already cleared by measurement.
+
+  **The REAL accelerator table, dumped in-process 2026-07-20 — nothing dynamic claims these keys.**
+  The owner asked the right question: could something be adding actions and keys at runtime that
+  override the Alt assignments? It fits the strangest fact — `R` stayed cursed after Run was moved to
+  `U`, when no menu used R at all. Everything said about accelerators until now rested on a
+  *reconstruction* re-parsed from menu captions plus `TranslateAccelerator`'s single boolean, neither
+  of which would catch a table built by an unmodelled path — and `Menus.bas:1561` reassigns
+  `FParentWindow->Accelerator` on every menu rebuild and Options save. So `AstoriaDumpAccels` in
+  `Application.bas` now reads the table Windows actually matches against, via
+  `CopyAcceleratorTable`, once, on the first `WM_SYSKEYDOWN`.
+
+  **65 entries — exactly matching the reconstruction's 65, which validates that earlier method.**
+  Everything keyed on C, G or R carries `FCONTROL`:
+
+  ```
+  Ctrl+R        fVirt=&h9   cmd=1143      Ctrl+G  fVirt=&h9  cmd=1244
+  Ctrl+C        fVirt=&h9   cmd=1257      Ctrl+Shift+C  fVirt=&hD  cmd=1350
+  ```
+
+  Only **two** bare `Alt+<key>` accelerators exist in the whole table: `Alt+VK_F4` (Exit) and
+  `Alt+O` (Import from Folder). *Caution when reading the raw dump: `vk=&h73` renders as `'s'`
+  because the printer shows any value in ASCII range as a character — `&h73` is `VK_F4`, not the
+  letter S. That is a flaw in the instrument's output, not a bare Alt+S accelerator.*
+
+  **So dynamic key registration is conclusively ruled out**, by reading the real table rather than a
+  model of it. Combined with the loop measurement (`TranslateAccelerator` declining the keys) and the
+  absence of any hook or `RegisterHotKey`, nothing in the accelerator path touches Alt+C/G/R.
+
+  **Bisection step 2: the window structure, NOT the cause.** `Panel` → `Panel` → `TabControl` was
+  added to the minimal app with the tab control focused, and the focus chain was verified to match
+  Astoria's exactly:
+
+  ```
+  class='TabControl' / class='Panel' / class='Panel' / class='Form'
+  ```
+
+  All five mnemonics still open, C, G and R included. So it is not the nesting, not the docking, not
+  a focused MFF `TabControl`, and not the tab captions.
+
+  **Module survey of a running Astoria.** No add-in is actually loaded — `AddIns\` contains
+  `FBMemCheckAssist64.dll` and `My Add-In (x64).dll` but neither appears in the process's module
+  list, so add-ins are ruled out without needing a bisection step. Nothing unexpected is loaded
+  either: `framework.dll` plus Windows components. Worth noting for later that the text-services
+  stack **is** present (`msctf.dll`, `tiptsf.dll`, `globinputhost.dll`, `TextShaping.dll`,
+  `Windows.Globalization.dll`, `icu.dll`) — a TSF text service can intercept keystrokes, and Astoria
+  initialises text input where the minimal app does not.
+
+  **Next bisection step: add the editor control.** It is the largest remaining functional difference,
+  it is where text input and any IME/TSF initialisation happens, and it is present in every state
+  where the defect has been observed. If the mnemonics survive that, the remaining candidates are the
+  toolbars/status bar/image lists and the worker threads.
+
+  Note `Form.bas:951`'s `IsDialogMessage` was checked and is **not** involved; that call is scoped to
+  `VK_TAB`. Five hypotheses have now died on this bug; the routing above is the first thing about it
+  that was measured rather than reasoned.
+
+**Two structural mnemonic faults found by the same probe:** `&Form` (bar index 5) duplicates
+`&File`'s `F` *and* is disabled at startup, and `Code/Form` (index 4) has no mnemonic at all.
+
+**A latent framework bug found while reading the accelerator builder:** `GetAscKeyCode` returns
+`127` for `Delete`, but `VK_DELETE` is `46`. No shortcut currently binds Delete, so it is dormant.
+
+**Harness note.** Two *further* false-negative mechanisms were found on 2026-07-20, bringing the
+running total to six: the x64 `INPUT` struct is 40 bytes (the union is sized by `MOUSEINPUT`), and a
+32-byte version made `SendInput` return 0 with `ERROR_INVALID_PARAMETER` — sending nothing, which
+reads exactly like a dead shortcut; and `Alt+C` opening a terminal stole the foreground and turned
+every later letter in the sweep into a false negative. Restore the foreground before **every**
+keystroke, and make the instrument prove it can report a positive before believing any negative.
+
 **4. `Ctrl+F9` (Build) silently does nothing when focus is in the Project search box.** The same
 command from the Run menu builds correctly, and `Ctrl+F9` works once focus is elsewhere. An
 advertised accelerator that fails silently depending on focus is the same shape as §13.19/C4, where
@@ -1204,17 +1540,57 @@ D1 re-run 12/12.
 
 ### 13.35 The shortcut file is keyed on a non-unique menu item name (root cause behind §13.33, 2026-07-20)
 
-**Status: open, deferred. Not urgent — §13.33's loader fix makes the symptom harmless — but the
-generator of the bad data is still there.** `frmOptions.frm:3369` writes
-`Print #Fn, .HotKeysPriv.Item(i) & "=" & Key`, one line per menu item, keyed on `item->Name`. Names
-are not unique across the menu tree, so any menu carrying several items with the same name emits
-duplicate keys, and dynamically added items (the user's external tools) emit blank ones. Every save
-from the Options dialog can reintroduce duplicates.
+**Status: FIXED 2026-07-20 at the generator, plus a startup validator. Compiles clean; the validator
+is proven against injected faults. The end-to-end Options round-trip is NOT yet owner-verified —
+see "What still needs a hand check" below.**
 
-The durable fix is to key shortcuts on something actually unique — the command name used for
-dispatch would do — or to have the writer collapse duplicates and prefer a non-empty binding. Worth
-doing before anyone relies on editing shortcuts heavily; a user who adds two external tools and then
-saves Options can currently blank a working shortcut and would have no way to tell why.
+**The original defect.** `frmOptions.frm` wrote one line per menu item keyed on `item->Name`, and
+names are not unique across the menu tree. `Main.bas:7231` named *every* dynamically added user tool
+`"Tools"` — the same name as the real "External Tools" item — so N configured tools produced N+1
+`Tools=` lines, the extras blank, and whichever landed last decided the binding. That is exactly how
+§13.33 left `Ctrl+Shift+D` dead.
+
+**Three changes, each closing a different step of the pipeline:**
+
+1. **`Main.bas`** — user tools are now named `UserTool0`, `UserTool1`, … instead of all being
+   `"Tools"`. Dispatch is by `mi->Tag` in `mClickTool` and never by name, so the rename is safe.
+2. **`frmOptions.frm` `AddShortcuts`** — user tools and unnamed items are no longer listed in the
+   Options shortcut editor at all. Their accelerator lives in `Tools.ini`, not `HotKeys.txt`, so an
+   edit made there could never have taken effect; the dialog was offering a rebind that silently did
+   nothing, which the product standard says should not ship.
+3. **`frmOptions.frm` writer** — refuses to emit the same key twice, keeping the first. Belt and
+   braces now that (1) and (2) remove the collisions, but the writer is the last place bad data can
+   be created, so it no longer can.
+
+**`ValidateHotKeys` (`Main.bas`) — the durable part.** Every shortcut defect found so far has been
+bad *data*, not bad dispatch: a missing entry (§13.32), blank duplicates (§13.33), and an
+accelerator eating a menu mnemonic (below). All three are decidable by reading the configuration, so
+they are now checked at every startup instead of by driving the GUI. It writes
+`Temp/_astoria_hotkeys.log` **only when something is wrong**, so the file's existence is the signal.
+It never blocks startup and shows the user nothing — a false positive must not stop the IDE. Three
+checks:
+
+- **Duplicate keys** in `HotKeys.txt` — the loader tolerates these, but tolerating is not correcting.
+- **One combination bound to two commands** — the loser fails silently, the most expensive symptom
+  to diagnose by hand.
+- **An accelerator shadowing a top-level menu mnemonic** — `TranslateAccelerator` runs before Windows
+  resolves `Alt+<letter>` against the menu bar, so the menu just stops opening with nothing visibly
+  wrong.
+
+**Verified by effect, and the assertion was made as strong as the claim.** On the real configuration
+the validator reported one problem, independently rediscovering the `Alt+C` collision that had been
+found by hand-probing the GUI earlier the same day. Because a checker that reports nothing looks
+identical to a passing one, the other two checks were then proved against *injected* faults — a
+duplicate `Compile=` line and a second command on `Ctrl+F9` — and both fired. `HotKeys.txt` was
+restored afterwards and confirmed byte-identical by SHA256.
+
+**What still needs a hand check.** Open Options, change any shortcut, save, and confirm
+`HotKeys.txt` contains exactly one `Tools=` line and no blank duplicates. This machine has two
+external tools configured (`Tools/Tools.ini`: chrome, notepad++), so it *is* the reproduction case.
+This was left to a hand check deliberately: GUI automation here has six recorded instances of
+producing confident wrong answers (§13.34 plus two more found on 2026-07-20). If the fix has missed
+a path, the validator will now say so in `Temp/_astoria_hotkeys.log` on the next start — the fix and
+its detector are independent.
 
 ### 13.34 Finish the shortcut sweep (deferred from TestPlan E12, 2026-07-20)
 

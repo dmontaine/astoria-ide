@@ -1,5 +1,59 @@
 # Astoria-IDE — Project Status & Handoff
 
+## Session handoff (2026-07-20, small hours) — shortcut integrity fixed; 13.28 pt 3 narrowed, not solved
+
+**Everything below is committed and pushed. The tree is clean and `astoria.exe`, `astoria-mcp.exe`
+and `framework.dll` are all current builds of this source.**
+
+### Shipped and verified
+
+| | What | Verified |
+| --- | --- | --- |
+| **13.35** | The shortcut generator no longer produces bad data. User tools get unique names (`UserTool0…`) instead of all being `"Tools"`; the Options editor no longer lists items whose shortcut it cannot persist; the writer refuses to emit a duplicate key. | Compiles clean; **Options round-trip NOT owner-verified** |
+| **13.35** | `ValidateHotKeys` — a startup integrity check for duplicate keys, one combination bound to two commands, and accelerators shadowing a menu mnemonic. Writes `Temp/_astoria_hotkeys.log` **only when something is wrong**. | Found the real `Alt+C` collision unaided; other two checks proved against injected faults |
+| **13.35** | Assignment-time prevention in Options: refuses a shortcut that would shadow a top-level menu or that another command already owns. Shares `ShadowedMenuFor` with the validator so detection and prevention cannot drift. | Compiles clean; **dialogs not yet exercised by hand** |
+| — | `HotKeys.txt`: UTF-8 BOM removed (it silently killed the first entry), 24 orphan entries pruned, all verified unreachable. | File verified BOM-less, CRLF, 73 entries |
+| — | Shortcut changes: `CommandPrompt` `Alt+C` → **`Ctrl+Shift+C`**; `Format`/`Unformat` `Ctrl+Tab`/`Ctrl+Shift+Tab` → **`Ctrl+K`/`Ctrl+Shift+K`** (Ctrl+Tab is the Windows standard for switching documents). | `Ctrl+Shift+C` verified by effect; **`Ctrl+K` compiled only** |
+| — | Dead code removed: the unreachable `UnComment` dispatch route, four dangling `TabWindow` declarations with no implementation, three unreachable encoding retries in the Immediate window. | Compiles clean |
+
+### Do these first
+
+1. **Three hand checks**, each seconds long, all on changes automated testing cannot vouch for:
+   Options ▸ Shortcuts → change a shortcut, save, confirm `HotKeys.txt` has exactly one `Tools=`
+   line and no blanks; try assigning `Alt+P` (must refuse, naming Project) and `Ctrl+S` (must
+   refuse, naming Save); and confirm `Ctrl+K` actually formats code.
+2. **Decide the fate of the instrumentation.** `framework.dll` and `astoria.exe` contain diagnostic
+   code for 13.28 (all gated off by an environment variable or a sentinel file, costing a normal run
+   one `Static` read). It is committed because the defect is open. A backup of this exact tree is at
+   `P:\Astoria-IDE-Backups\instrumented-syskey-2026-07-20.zip`. **Strip it and rebuild with
+   `FORCE_MFF=1` before cutting a release.**
+
+### 13.28 part 3 — much better understood, still open
+
+`Alt+C`, `Alt+G` and `Alt+R` do not open their menus. **Read
+[TestHarness/13.28_Mnemonics/README.md](TestHarness/13.28_Mnemonics/README.md) before touching
+this** — it lists eleven disproved hypotheses, the instruments, and the traps.
+
+The single most useful thing learned: **the owner identified the defect signature by ear.** A letter
+with no menu makes Windows beep; C, G and R are *silent*. The automated probe could not tell those
+apart and had been reporting them identically all session. The bell means the keystroke never
+reaches the menu-mnemonic code at all.
+
+What is established: the cursed set is exactly {C, G, R}; it follows the **letter, not the menu**
+(rename Code's mnemonic to D and `Alt+D` works while `Alt+C` still fails, and `Alt+R` stays dead
+when no menu uses R); it is not MFF (a minimal MFF app opens all three), not the accelerator table
+(dumped in-process), not the message loop, not the system menu, not add-ins, not settings.
+
+The open contradiction: `WM_SYSCHAR` reaches the form with `Handled=0, Result=0` and falls through
+to `DefWindowProc`, which then produces neither menu activation nor `WM_MENUCHAR` — while `Alt+E`,
+matching nothing, produces both.
+
+**One caveat on this session's evidence.** The owner noticed the IDE appearing to abort during a run
+while I continued reading probe output as though it were healthy. Probe output looks identical
+either way. The C/G/R result itself is corroborated by ear and reproduced across many runs, but any
+*single* run from this session should be re-confirmed before being built on.
+
+
 **Last updated:** 2026-07-20 (early hours) — Section E testing finished except the screen reader,
 **five defects found and fixed** (13.29, 13.30, 13.32, 13.33, 13.28 parts 1–2), two new ones
 recorded (13.35, 13.36), and the keyboard-accessibility failure that was the plan's only ❌ is now

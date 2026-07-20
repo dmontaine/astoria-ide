@@ -18,7 +18,7 @@ is to write a good commit message. Regenerate rather than hand-edit; a stale han
 than no entry. Run `.\GenerateChangelog.ps1` from the repository root; `-Check` reports whether
 the file is current and writes nothing, which suits a pre-commit hook.
 
-Everything above the **Total: 431 commits, 2026-07-02 to 2026-07-20.**
+Everything above the **Total: 433 commits, 2026-07-02 to 2026-07-20.**
 
 ## 2026-07-02
 
@@ -1309,3 +1309,8 @@ Everything above the **Total: 431 commits, 2026-07-02 to 2026-07-20.**
 - **`5cc5417`** — 13.28 part 3: record the investigation, its harnesses, and the rebuilt binaries
   Alt+C, Alt+G and Alt+R still do not open their menus.
   *Build/Tools, Docs, Framework/Controls, IDE · 14 files*
+- **`1624d0f`** — DetailedChangelog: regenerate through 5cc5417
+  *Docs · 1 file*
+- **`4dcd77a`** — 13.28 part 3: eliminate hypothesis 12 and the user-mode debugger route
+  Two approaches closed off, neither of them the fix, both recorded so they are not retried.
+  *Build/Tools, Docs · 4 files*

@@ -18,6 +18,27 @@ than on a command having returned without error.
 | `E2_CorruptSettings.ps1` | E2 — corrupt settings recovery | Restores the owner's original `astoria.ini` after every case. |
 | `E4_E6_Scale.ps1` | E4, E6 — scale | `-SkipE4` runs the 250-file project only; E4's 100,000-line member is beyond the practical 1.0 limit. |
 | `E11_MultipleInstances.ps1` | E11 — multiple instances | **Starts the IDE itself rather than driving a running one**, and expects two failures while ROADMAP §13.29 is open (E11-3, E11-5). Backs up and restores `astoria.ini`/`Workspace.ini`. |
+| `E12_ShortcutSweep_Pass1.ps1` | E12 — shortcuts, broad pass | Fires every assigned shortcut and records whether a window opened, the text changed, or nothing happened. `-Only <pattern>` limits it. |
+| `E12_ShortcutSweep_Pass2.ps1` | E12 — shortcuts, preconditioned | The commands pass 1 could not see (Cut needs a selection, Redo needs an undo). **Incomplete — see ROADMAP §13.34 before trusting its output.** |
+| `Shortcuts_Input.ps1` | shared | `SendInput` layer used by both E12 passes. Not a test. |
+
+**Three traps these UI harnesses hit, all of which produced confident wrong answers first.** They
+generalise beyond E12:
+
+1. **Reset the document, *then* focus.** `write_file` reloads the file and drops editor focus, so
+   focusing first sends keystrokes into a pane that is no longer listening. This reported four
+   working shortcuts as dead.
+2. **A leftover modal disables everything after it.** Astoria's "Definitions for…" window does not
+   close on Escape (§13.28), and while it is up the main window is disabled, so every later
+   keystroke goes nowhere. One run produced fifteen false failures this way.
+3. **The IDE may not be where you left it.** On restart it restores the saved workspace; if that is
+   a `.frm` it opens in form view and clicks land on the designer, not a code editor. Open the test
+   project explicitly.
+
+**Always prove the instrument before believing a negative.** Both E12 passes type a character and
+confirm it reaches the editor before testing anything, and report `NO-INSTRUMENT` and stop rather
+than emitting failures they cannot justify. Two of the three traps above were caught by that guard
+rather than by inspection.
 
 **One warning from E11 that applies to any harness here.** Do not measure a crash with an exit
 code. `cmd`'s `ERRORLEVEL` does not carry `0xC0000005` out of `start /wait`, and a

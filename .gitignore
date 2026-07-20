@@ -79,6 +79,7 @@ Temp/
 # fixture comparing against a suggested filename the tester chose not to use -- see TestPlan A8).
 Examples/Integration/**/A8-results.txt
 Projects/D5_McpMultiFile_*/
+Projects/SC_Shortcuts/
 Projects/E_ScaleFixtures/
 Projects/TestD2/
 # Throwaway projects from New Project testing (ROADMAP 13.27 verification).

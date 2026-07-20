@@ -1086,3 +1086,72 @@ toolbars at all* and was about to be investigated as a defect; the owner had tog
 off just before it was taken. That was the new single toggle working correctly. Worth remembering
 that a screenshot records a state someone may have just changed, not necessarily the code's own
 behaviour.
+
+### 13.32 Ctrl+Shift+O (Open Project) is advertised but can never fire (found by TestPlan E12, 2026-07-20)
+
+**Status: open. Confirmed with a positive control.** `Settings/Others/HotKeys.txt` assigns
+`OpenProject=Ctrl+Shift+O`, and Tools ▸ Options ▸ General ▸ Shortcuts displays it, so a user is told
+the shortcut exists. Pressing it does nothing at all — no window, no foreground change, after four
+seconds. In the same run `Ctrl+Shift+N` opened the New Project dialog, so the test method was
+working.
+
+**Cause, one line.** Accelerators in this framework are registered from the menu item's own text:
+every other item appends `& HK("Name")`, which puts `\tCtrl+Shift+O` on the caption for
+`TranslateAccelerator` to find. `Main.bas:6859` is
+`miFile->Add(("&Open Project") & "...", "", "OpenProject", @mClick)` — **no `& HK("OpenProject")`**.
+The command itself is fine (`Case "OpenProject": OpenProject` dispatches correctly, and the menu
+item works when clicked); only the accelerator is missing. Same family as §13.28: an advertised
+shortcut that silently does nothing.
+
+**A static sweep found five more shortcuts with no `HK("name")` anywhere in `src/`** —
+`OpenSession` (Ctrl+Alt+O), `SaveSession` (Ctrl+Alt+S), `Close` (Ctrl+F4), `BlockComment`
+(Ctrl+Alt+I), `UnComment` (Ctrl+Shift+I). **Do not treat that list as five more defects.**
+`UnComment` demonstrably works, so some keys are handled directly by the editor control rather than
+through a menu accelerator. The list is a set of candidates to verify by effect, and reporting it
+as a verdict would have been wrong about at least one.
+
+### 13.33 Ctrl+Shift+D (External Tools) does not open its dialog (found by TestPlan E12, 2026-07-20)
+
+**Status: open, cause not yet identified.** Unlike §13.32 the menu item *does* carry its accelerator
+— `Main.bas:7173`, `miXizmat->Add(("&External Tools") & "..." & HK("Tools"), ...)` — and the
+dispatch exists (`Case "Tools": pfTools->Show`). The menu item is under Tools ▸ External Tools and
+is not greyed. Pressing Ctrl+Shift+D produces no window and no foreground change after four seconds,
+measured alongside a working positive control. Worth checking against the §13.19/C4 pattern, where
+`TranslateAccelerator` swallowed an accelerator whose parent menu was disabled without sending any
+`WM_COMMAND`, and against a possible conflict with another registered accelerator.
+
+### 13.34 Finish the shortcut sweep (deferred from TestPlan E12, 2026-07-20)
+
+**Status: deferred, harness committed.** 54 shortcuts are assigned in `HotKeys.txt`. The sweep
+established 18 working and 2 broken (§13.32, §13.33); the rest are unfinished, in three groups:
+
+1. **Eight results invalidated by harness contamination and needing a re-run** — Copy, Paste, Redo,
+   BlockComment, Format, Unformat, CompleteWord, ParameterInfo. After the Cut test emptied the
+   document, `Reset-Doc` stopped restoring it (`write_file` does not overwrite a live *dirty*
+   editor buffer even with `open=true`), so those tests ran against an empty document. **Fix the
+   harness before believing them:** close and reopen the tab rather than rewriting the file. Note
+   the Copy+Paste assertion was `after >= before * 1.8`, which with `before = 0` passes
+   unconditionally — a false pass that only surfaced because the lengths were printed.
+2. **Not yet reached** — FindPrev, the bookmark commands, and Breakpoint. Bookmarks and breakpoints
+   draw only a margin marker, so they need the pixel-comparison approach the harness already has.
+3. **Nineteen destructive or stateful shortcuts** — Exit, Close, CloseProject, Save*/Open* session,
+   Print, CommandPrompt, and the whole debugger/run set. These end or derail a sweep, so each needs
+   its own run with the IDE restarted between.
+
+**Three harness traps, each of which produced confident wrong answers before being caught.** They
+are commented in the scripts, and they generalise to any UI test here:
+
+- *Focus before, reset after.* `write_file` reloads the document and drops editor focus, so
+  focusing and then resetting sends keystrokes into a pane that is no longer listening. The first
+  run reported four working shortcuts as dead, including Ctrl+I.
+- *A leftover modal disables everything after it.* The F2 test opens a "Definitions for…" window
+  which **Escape does not close** (§13.28 again), and with it up the main window is disabled, so
+  every later keystroke silently goes nowhere. One run produced fifteen confident FAILs this way.
+- *The IDE may not be where you left it.* After a restart it restores the saved workspace; if that
+  is a `.frm`, it opens in form view and clicks land on the designer surface, not a code editor.
+  The harness now opens its own project explicitly.
+
+**The instrument check is what makes the results trustworthy**, and it is not optional: each test
+types a character and confirms it reaches the editor before running. When the environment was wrong
+it reported `NO-INSTRUMENT` and stopped, rather than emitting a page of failures — which is exactly
+what it did on two of the three traps above.

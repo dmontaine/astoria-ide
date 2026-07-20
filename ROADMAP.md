@@ -836,3 +836,48 @@ work — `Main.bas:7678` uses it to restore the panel after un-collapsing — so
 value is dead. Harmless, but it is the same species as the vestigial encoding/line-ending pickers
 noted at the top of this document: a setting the UI implies is honoured and which is not. Either
 stop writing it or drop the key.
+
+### 13.28 The IDE cannot be operated by keyboard alone (found by TestPlan E9, 2026-07-19)
+
+**Status: open. Astoria fails its keyboard accessibility baseline.** Building and running are fully
+reachable from the keyboard and the menu bar is properly keyboard-driven, but **a user who cannot
+use a mouse cannot create a project or open a file** — two of the four steps E9 exists to prove.
+
+Four defects, sharing one likely root cause: MFF forms do not run their input through a dialog
+manager, so standard dialog navigation (initial focus, `Tab`, `Escape`, default button) is never
+applied. The menu bar works because menus are native Win32 and handle their own navigation.
+
+**1. The New Project dialog takes no keyboard input at all.** *This is the blocker.* No control has
+initial focus, there is no focus indicator, typing does nothing, `Tab` moves nothing, and `Escape`
+does not close it. Only `Alt+F4` dismisses it — and because the IDE opens straight into this dialog
+when no project is loaded, a keyboard-only user meets it first and cannot get past it *or out of
+it*. Input does reach the window (`Alt+F4` proves that); the dialog simply ignores navigation.
+
+**2. The project tree cannot be reached.** `Ctrl+R` ("Project Explorer") puts the caret in the
+panel's *search box*, not the tree. `Tab` does not move from there into the tree and arrows select
+no node, so no project member can be opened — hence no editing.
+
+**3. `Alt+R` does not open the Run menu**, although the mnemonic is advertised in the menu bar and
+`Alt+F` works from an identical state. Workaround: `Alt+F`, then arrow right.
+
+**4. `Ctrl+F9` (Build) silently does nothing when focus is in the Project search box.** The same
+command from the Run menu builds correctly, and `Ctrl+F9` works once focus is elsewhere. An
+advertised accelerator that fails silently depending on focus is the same shape as §13.19/C4, where
+a greyed parent menu made `TranslateAccelerator` swallow a shortcut without sending `WM_COMMAND`.
+
+**Not all dialogs are affected**, which is useful for locating the fix: the *Recent Projects* dialog
+is keyboard-navigable (arrows move the selection, `Enter` opens), and it is the only reason E9 could
+test build and run at all. Compare it against the New Project form.
+
+**Suggested order.** (1) is the release-relevant one — a modal that cannot be closed from the
+keyboard is a trap, not merely an inconvenience, and `Escape` alone would remove the trap even
+before full `Tab` traversal lands. (2) follows, since without it the IDE cannot be used for its main
+purpose without a mouse. (3) and (4) are smaller and independent.
+
+**How to re-run this.** Use real synthesized input (`SendInput`), never posted `WM_COMMAND`/
+`BM_CLICK` — A7 established that a posted message travels a path a real user cannot, and driving
+this test that way would report a confident pass. Guard the harness so it refuses to send unless
+`astoria.exe` owns the foreground: an unguarded run types into whatever application Windows has
+handed the foreground to, which happened during this test. And prove the instrument can fire before
+believing what it does not say — "typing does nothing" was nearly recorded as a defect on the
+strength of a harness that was targeting a modally-disabled window.

@@ -261,10 +261,10 @@ Public:
 	Declare Sub ConvertToUppercaseFirstLetter(ByVal StartLine As Integer = -1, ByVal EndLine As Integer = -1)
 	Declare Sub ConvertFromHexStrUnicode(ByVal StartLine As Integer = -1, ByVal EndLine As Integer = -1)
 	Declare Sub ConvertToHexStrUnicode(ByVal StartLine As Integer = -1, ByVal EndLine As Integer = -1)
-	Declare Sub Comment
-	Declare Sub UnComment
-	Declare Sub Indent
-	Declare Sub Outdent
+	'' Comment / UnComment / Indent / Outdent were declared here with no implementation anywhere
+	'' and no callers -- removed 2026-07-20. These operations live on EditControl and are reached
+	'' through it (ec->ToggleComment, ec->Indent, ec->Outdent). A declaration with no body is not
+	'' harmless: it reads as available API, and the first caller to trust it fails at link time.
 	Declare Sub Define
 	Declare Sub ClearTypes
 	Declare Sub FormDesign(NotForms As Boolean = False)

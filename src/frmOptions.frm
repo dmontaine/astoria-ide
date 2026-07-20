@@ -3034,7 +3034,12 @@ End Function
 
 Sub AddShortcuts(item As MenuItem Ptr, ByRef Prefix As WString = "")
 	With fOptions
-		If StartsWith(item->Name, "Recent") OrElse item->Caption = "-" Then Exit Sub
+		'' "UserTool*" are the user's external tools, added dynamically from Tools.ini.
+		'' Their accelerator is stored in Tools.ini, not HotKeys.txt, so an edit made here
+		'' could never take effect -- listing them offered a rebind that silently did
+		'' nothing. An unnamed item cannot be keyed at all. Both are skipped (13.35).
+		If StartsWith(item->Name, "Recent") OrElse StartsWith(item->Name, "UserTool") _
+			OrElse item->Name = "" OrElse item->Caption = "-" Then Exit Sub
 		Dim As UString itemCaption = Replace(IIf(Len(Prefix) = 0, WStr(""), Prefix & WStr(" -> ")) & item->Caption, "&", "")
 		Dim As UString itemHotKey
 		Dim As Integer Pos1 = InStr(itemCaption, !"\t")
@@ -3359,8 +3364,17 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 			If OpenResult2 <> 0 Then
 				MsgBox ("Couldn't save your keyboard shortcut changes - check that the Settings folder still exists and isn't read-only") & "." & WChr(13,10) & ExePath & "/Settings/Others/HotKeys.txt", "Astoria IDE", mtError
 			Else
+				'' One line per key, never two. Menu item names are not guaranteed unique
+				'' across the whole tree, and a duplicate here is what blanked a working
+				'' shortcut in 13.33: whichever line landed second decided the binding.
+				'' AddShortcuts no longer contributes the items that collided, so this is
+				'' belt and braces -- but the writer is the last place that can still emit
+				'' bad data, so it refuses to (13.35).
+				Dim As Dictionary Written
 				For i As Integer = 0 To .lvShortcuts.ListItems.Count - 1
 					If .HotKeysPriv.Item(i) = "" Then Continue For
+					If Written.Item(.HotKeysPriv.Item(i)) <> 0 Then Continue For
+					Written.Add .HotKeysPriv.Item(i), "1"
 					Item = .lvShortcuts.ListItems.Item(i)->Tag
 					Pos1 = InStr(Item->Caption, !"\t")
 					If Pos1 = 0 Then Pos1 = Len(Item->Caption) + 1
@@ -4761,13 +4775,43 @@ Private Sub frmOptions.lvShortcuts_SelectedItemChanged(ByRef Designer As My.Sys.
 	End With
 End Sub
 
+'' The one place a shortcut is assigned, and therefore the one place a bad one can be prevented
+'' rather than merely detected later by ValidateHotKeys (ROADMAP 13.35).
+''
+'' Two rules, and only two. Both describe bindings that are *provably* broken -- the shortcut
+'' cannot work, whatever the user intended -- so refusing them takes nothing away. Anything
+'' merely unconventional is still allowed: the standard here is reliability, not conformance,
+'' and a user who wants an odd but working binding is entitled to it.
 Private Sub frmOptions.cmdSetShortcut_Click(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	With fOptions
 		Var Index = .lvShortcuts.SelectedItemIndex
-		If Index > -1 Then
-			.lvShortcuts.SelectedItem->Text(1) = .hkShortcut.Text
-			.HotKeysChanged = True
+		If Index = -1 Then Exit Sub
+		Dim As String Proposed = Trim(.hkShortcut.Text)
+
+		'' Rule 1: it would shadow a top-level menu. The menu silently stops opening.
+		If Proposed <> "" Then
+			Dim As String Shadowed = ShadowedMenuFor(Proposed)
+			If Shadowed <> "" Then
+				MsgBox Proposed & " " & ("already opens the") & " " & Shadowed & " " & ("menu. Choose a different shortcut - if this were assigned, that menu would stop opening, and there would be nothing on screen to explain why."), "Astoria IDE", mtWarning
+				Exit Sub
+			End If
 		End If
+
+		'' Rule 2: another command already has it. Checked against the LIST, not the saved
+		'' HotKeys dictionary, because unsaved edits made earlier in this same dialog are
+		'' what will actually be written -- the dictionary is still the old state.
+		If Proposed <> "" Then
+			For i As Integer = 0 To .lvShortcuts.ListItems.Count - 1
+				If i = Index Then Continue For
+				If UCase(Trim(.lvShortcuts.ListItems.Item(i)->Text(1))) = UCase(Proposed) Then
+					MsgBox Proposed & " " & ("is already assigned to") & " " & .lvShortcuts.ListItems.Item(i)->Text(0) & ". " & ("Clear it there first - two commands on one shortcut means one of them silently stops working."), "Astoria IDE", mtWarning
+					Exit Sub
+				End If
+			Next
+		End If
+
+		.lvShortcuts.SelectedItem->Text(1) = .hkShortcut.Text
+		.HotKeysChanged = True
 	End With
 End Sub
 

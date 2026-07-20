@@ -252,6 +252,10 @@ Declare Function PrepareForAnotherProjectU(NewProjectPath As UString = "") As Bo
 Declare Sub AddNewU(Template As UString)
 Declare Function GetOpenProjectNode() As TreeNode Ptr
 Declare Function GetProjectDirectory() As UString
+'' Shortcut configuration integrity (ROADMAP 13.35). ShadowedMenuFor is shared with the Options
+'' dialog so detection and prevention cannot drift apart.
+Declare Function ShadowedMenuFor(ByRef Combo As String) As String
+Declare Sub ValidateHotKeys
 Declare Function OpenProjectDescriptionPath() As UString
 Declare Sub EditProjectDescription
 Declare Function OpenProjectIsGitRepo() As Boolean

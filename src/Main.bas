@@ -160,6 +160,8 @@ Dim Shared As WStringOrStringList Comps, GlobalAsmFunctionsHelp, GlobalFunctions
 Dim Shared As WStringList AddIns, IncludeFiles, LoadPaths, IncludePaths, LibraryPaths, MRUFiles, MRUFolders, MRUProjects, ProfilingFunctions
 Dim Shared As WString Ptr RecentFiles, RecentFile, RecentProject, RecentFolder
 Dim Shared As Dictionary Helps, HotKeys, Compilers, MakeTools, Terminals, BuildConfigurations
+'' Set once at startup; see LogMenuKey / ROADMAP 13.28. Off unless the sentinel file exists.
+Dim Shared As Boolean bLogMenuKeys
 Dim Shared As ListView lvProblems, lvSuggestions, lvSearch, lvToDo, lvMemory
 Dim Shared As ProgressBar prProgress
 Dim Shared As CommandButton btnPropertyValue
@@ -6621,8 +6623,19 @@ Sub LoadHotKeys
 	Dim As Integer Fn = FreeFile_, Pos1
 	Dim As String Buff
 	If Open(ExePath & "/Settings/Others/HotKeys.txt" For Input As #Fn) = 0 Then
+		Dim As Boolean bFirstLine = True
 		While Not EOF(Fn)
 			Line Input #Fn, Buff
+			'' Strip a UTF-8 BOM off the first line. The file is opened without an encoding, so a
+			'' BOM arrives as three raw bytes and becomes part of the first KEY -- "New" was being
+			'' stored as <BOM>New and silently never matched. It went unnoticed for as long as it
+			'' did because HK() falls back to its code default, and that default happened to be the
+			'' same Ctrl+N, so the shortcut worked while its configuration entry was dead.
+			'' The shipped file is now BOM-less; this keeps existing user files working too.
+			If bFirstLine Then
+				If Len(Buff) >= 3 AndAlso Left(Buff, 3) = Chr(239) & Chr(187) & Chr(191) Then Buff = Mid(Buff, 4)
+				bFirstLine = False
+			End If
 			Pos1 = InStr(Buff, "=")
 			If Pos1 > 0 Then
 				Dim As String hkKey = Left(Buff, Pos1 - 1)
@@ -6637,6 +6650,120 @@ Sub LoadHotKeys
 		Wend
 	End If
 	CloseFile_(Fn)
+End Sub
+
+
+'' Integrity check for the whole shortcut configuration (ROADMAP 13.35).
+''
+'' The point of this is that shortcut defects here have never been dispatch bugs -- they
+'' have been bad DATA: a missing entry (13.32), blank duplicates shadowing a real binding
+'' (13.33), and an accelerator quietly eating a menu mnemonic (Alt+C vs the Code menu).
+'' Every one of those was found by driving the GUI by hand, which does not scale to 54
+'' shortcuts and cannot be re-run cheaply. All three are decidable by reading the config,
+'' so they are checked here instead, at every startup.
+''
+'' It writes Temp/_astoria_hotkeys.log ONLY when something is wrong, so the existence of
+'' that file is the signal. A clean configuration leaves nothing behind. Nothing is shown
+'' to the user and nothing is blocked: this is a developer/tester instrument, and a false
+'' positive must never stop the IDE from starting.
+'' Given a key combination, returns the caption of the top-level menu it would shadow, or "".
+''
+'' TranslateAccelerator runs BEFORE Windows resolves Alt+<letter> against the menu bar, so an
+'' accelerator on Alt+<letter> silently stops that menu from opening. There is no error, and
+'' nothing looks wrong in the menu itself -- Alt+C vs the "&Code" menu cost a morning of GUI
+'' probing to find. Shared deliberately: ValidateHotKeys uses it to report existing damage, and
+'' the Options dialog uses it to refuse to create any more (ROADMAP 13.35).
+Function ShadowedMenuFor(ByRef Combo As String) As String
+	Dim As String Wanted = UCase(Trim(Combo))
+	If Left(Wanted, 4) <> "ALT+" Then Return ""
+	'' Only a bare Alt+<single letter> collides. Ctrl+Alt+X and Shift+Alt+X do not reach the
+	'' menu-bar mnemonic path at all, so they are legitimate bindings.
+	If Len(Wanted) <> 5 Then Return ""
+	Dim As String Letter = Mid(Wanted, 5, 1)
+	If Letter < "A" OrElse Letter > "Z" Then Return ""
+	For i As Integer = 0 To mnuMain.Count - 1
+		Dim As MenuItem Ptr Top = mnuMain.Item(i)
+		If Top = 0 Then Continue For
+		Dim As String Caption = Top->Caption
+		Dim As Integer pAmp = InStr(Caption, "&")
+		If pAmp = 0 OrElse pAmp >= Len(Caption) Then Continue For
+		If UCase(Mid(Caption, pAmp + 1, 1)) = Letter Then Return Replace(Caption, "&", "")
+	Next
+	Return ""
+End Function
+
+
+Sub ValidateHotKeys
+	Dim As String ProblemText
+	Dim As Integer nProblems = 0
+
+	'' 1. Duplicate keys in the file. The loader tolerates these (a later non-empty value
+	''    fills a blank one), but tolerating is not the same as being correct -- two lines
+	''    for one command means something upstream is still generating them.
+	Dim As Dictionary SeenKeys
+	Dim As Integer Fn = FreeFile_
+	If Open(ExePath & "/Settings/Others/HotKeys.txt" For Input As #Fn) = 0 Then
+		Dim As String Buff
+		While Not EOF(Fn)
+			Line Input #Fn, Buff
+			Dim As Integer pEq = InStr(Buff, "=")
+			If pEq > 0 Then
+				Dim As String hkKey = Trim(Left(Buff, pEq - 1))
+				If hkKey <> "" Then
+					If SeenKeys.Item(hkKey) <> 0 Then
+						ProblemText &= "DUPLICATE KEY: '" & hkKey & "' appears more than once in HotKeys.txt" & Chr(13, 10)
+						nProblems += 1
+					Else
+						SeenKeys.Add hkKey, "1"
+					End If
+				End If
+			End If
+		Wend
+		CloseFile_(Fn)
+	End If
+
+	'' 2. One key combination bound to two different commands. Whichever accelerator
+	''    Windows registers second is the one that never fires, and the loser fails
+	''    silently -- exactly the symptom that is most expensive to diagnose by hand.
+	Dim As Dictionary ComboOwner
+	For i As Integer = 0 To HotKeys.Count - 1
+		Dim As DictionaryItem Ptr hkItem = HotKeys.Item(i)
+		If hkItem = 0 Then Continue For
+		Dim As String Combo = UCase(Trim(hkItem->Text))
+		If Combo = "" Then Continue For
+		Dim As DictionaryItem Ptr Owner = ComboOwner.Item(Combo)
+		If Owner <> 0 Then
+			ProblemText &= "CONFLICT: '" & hkItem->Text & "' is bound to both '" & Owner->Text & "' and '" & hkItem->Key & "'" & Chr(13, 10)
+			nProblems += 1
+		Else
+			ComboOwner.Add Combo, hkItem->Key
+		End If
+	Next
+
+	'' 3. An accelerator that shadows a top-level menu mnemonic. TranslateAccelerator runs
+	''    BEFORE Windows gets to resolve Alt+<letter> against the menu bar, so the menu
+	''    simply stops opening -- with no error and nothing wrong in the menu itself.
+	''    This is the check that catches Alt+C (CommandPrompt) vs the "&Code" menu.
+	For i As Integer = 0 To HotKeys.Count - 1
+		Dim As DictionaryItem Ptr hkItem = HotKeys.Item(i)
+		If hkItem = 0 Then Continue For
+		Dim As String Shadowed = ShadowedMenuFor(hkItem->Text)
+		If Shadowed <> "" Then
+			ProblemText &= "SHADOWED MENU: " & hkItem->Text & " opens the '" & Shadowed & "' menu, but is also bound to '" & hkItem->Key & "' -- the menu will not open" & Chr(13, 10)
+			nProblems += 1
+		End If
+	Next
+
+	If nProblems = 0 Then Exit Sub
+
+	Dim As Integer FnLog = FreeFile_
+	If Open(ExePath & "/Temp/_astoria_hotkeys.log" For Output As #FnLog) = 0 Then
+		Print #FnLog, "Astoria shortcut configuration problems (" & Trim(Str(nProblems)) & ")"
+		Print #FnLog, "Checked at startup by ValidateHotKeys -- see ROADMAP 13.35."
+		Print #FnLog, ""
+		Print #FnLog, ProblemText
+		CloseFile_(FnLog)
+	End If
 End Sub
 
 
@@ -6991,10 +7118,15 @@ Sub CreateMenusAndToolBars
 	miIndent = miEdit->Add(("&Indent") & HK("Indent", "Tab"), "", "Indent", @mClick, , , False)
 	miOutdent = miEdit->Add(("&Outdent") & HK("Outdent", "Shift+Tab"), "", "Outdent", @mClick, , , False)
 	miEdit->Add("-")
-	miFormat = miEdit->Add(("&Format") & HK("Format", "Ctrl+Tab"), "Format", "Format", @mClick, , , False)
+	'' Ctrl+Tab is the Windows standard for switching documents, not for formatting -- binding
+	'' it here fought the tab control and surprised every tester. Ctrl+K/Ctrl+Shift+K instead.
+	'' Not Shift+Alt+F (VS Code's) despite being the better-known formatting chord: Alt+letter
+	'' bindings are the one class proven fragile here (Alt+C shadowed a menu; Alt+R and Alt+G
+	'' fail for reasons still unknown), and reliability outranks conformance. See ROADMAP 13.28.
+	miFormat = miEdit->Add(("&Format") & HK("Format", "Ctrl+K"), "Format", "Format", @mClick, , , False)
 	miEdit->Add("-")
 	Var miEditAdvanced = miEdit->Add(("Advanced"), "", "EditAdvanced")
-	miUnformat = miEditAdvanced->Add(("&Unformat") & HK("Unformat", "Ctrl+Shift+Tab"), "Unformat", "Unformat", @mClick, , , False)
+	miUnformat = miEditAdvanced->Add(("&Unformat") & HK("Unformat", "Ctrl+Shift+K"), "Unformat", "Unformat", @mClick, , , False)
 	miFormatProject = miEditAdvanced->Add(("&Format Project") & HK("FormatProject"), "", "FormatProject", @mClick, , , False)
 	miUnformatProject = miEditAdvanced->Add(("&Unformat Project") & HK("UnformatProject"), "", "UnformatProject", @mClick, , , False)
 	miAddSpaces = miEditAdvanced->Add(("Add &Spaces") & HK("AddSpaces"), "", "AddSpaces", @mClick, , , False)
@@ -7188,7 +7320,12 @@ Sub CreateMenusAndToolBars
 	miGitCreateRepo = miGit->Add(("Create &Remote Repository") & "..." & HK("GitCreateRemoteRepo"), "", "GitCreateRemoteRepo", @mClick)
 
 	miXizmat = mnuMain.Add(("&Tools"), "", "Service")
-	miXizmat->Add(("&Command Prompt") & HK("CommandPrompt", "Alt+C"), "Console", "CommandPrompt", @mClick)
+	'' Was Alt+C, which permanently shadowed the "&Code" menu: TranslateAccelerator runs before
+	'' Windows resolves Alt+<letter> against the menu bar, so the menu simply never opened and
+	'' a terminal appeared instead. Alt+<letter> belongs to menus (ROADMAP 13.28/13.35).
+	'' Not Ctrl+` despite being the VS/VS Code convention -- GetAscKeyCode (Menus.bas:1454)
+	'' falls through to Asc(), so a backtick would register as VK_NUMPAD0.
+	miXizmat->Add(("&Command Prompt") & HK("CommandPrompt", "Ctrl+Shift+C"), "Console", "CommandPrompt", @mClick)
 	miXizmat->Add("-")
 	miXizmat->Add(("&Add-Ins") & "..." & HK("AddIns"), "", "AddIns", @mClick)
 	miXizmat->Add(("&External Tools") & "..." & HK("Tools"), "", "Tools", @mClick)
@@ -7197,6 +7334,12 @@ Sub CreateMenusAndToolBars
 	Dim As WString * 1024 Buff
 	Dim As MenuItem Ptr mi
 	Dim As UserToolType Ptr tt
+	'' Each user tool needs its OWN menu item name. They were all called "Tools" --
+	'' the same name as the real "External Tools" item above -- so the Options dialog,
+	'' which keys HotKeys.txt on item->Name, wrote one "Tools=" line per tool and
+	'' shadowed the real binding with blanks. That is ROADMAP 13.33/13.35 at source.
+	'' Dispatch is by mi->Tag in mClickTool and never by Name, so this rename is safe.
+	Dim As Integer iUserTool = 0
 	Dim As WString * 260 ToolsINI
 		ToolsINI = ExePath & "/Tools/Tools.ini"
 	If FileExists(ToolsINI) Then
@@ -7228,7 +7371,8 @@ Sub CreateMenusAndToolBars
 					ExtractIconEx(GetFullPath(tt->Path), NULL, NULL, @IcoHandle, 1)
 					Bitm = IcoHandle
 					DestroyIcon IcoHandle
-					mi = miXizmat->Add(tt->Name & !"\t" & tt->Accelerator, Bitm, "Tools", @mClickTool)
+					mi = miXizmat->Add(tt->Name & !"\t" & tt->Accelerator, Bitm, "UserTool" & Trim(Str(iUserTool)), @mClickTool)
+					iUserTool += 1
 					Bitm.Handle = 0
 					mi->Tag = tt
 					tt = 0
@@ -7356,8 +7500,11 @@ Sub CreateMenusAndToolBars
 	'tbEdit.DisabledImagesList = @imgListD
 	tbEdit.Flat = True
 	tbEdit.List = True
-	tbtFormat = tbEdit.Buttons.Add(, "Format", , @mClick, "Format", , ("Format") & HK("Format", "Ctrl+Tab", True), True, ToolButtonState.tstNone)
-	tbtUnformat = tbEdit.Buttons.Add(, "Unformat", , @mClick, "Unformat", , ("Unformat") & HK("Unformat", "Shift+Ctrl+Tab", True), True, ToolButtonState.tstNone)
+	tbtFormat = tbEdit.Buttons.Add(, "Format", , @mClick, "Format", , ("Format") & HK("Format", "Ctrl+K", True), True, ToolButtonState.tstNone)
+	'' This default read "Shift+Ctrl+Tab" while every other Unformat site read "Ctrl+Shift+Tab".
+	'' Harmless only because HotKeys.txt supplies the value everywhere; had the key ever been
+	'' absent, the toolbar tooltip would have advertised a different shortcut from the menu.
+	tbtUnformat = tbEdit.Buttons.Add(, "Unformat", , @mClick, "Unformat", , ("Unformat") & HK("Unformat", "Ctrl+Shift+K", True), True, ToolButtonState.tstNone)
 	tbEdit.Buttons.Add tbsSeparator
 	tbtSingleComment = tbEdit.Buttons.Add(, "Comment", , @mClick, "SingleComment", , ("Toggle comment") & HK("SingleComment", "Ctrl+I", True), True, ToolButtonState.tstNone)
 	tbEdit.Buttons.Add tbsSeparator
@@ -7459,6 +7606,10 @@ Sub CreateMenusAndToolBars
 End Sub
 
 CreateMenusAndToolBars
+'' Must run after the menus exist: the mnemonic-shadowing check reads the menu bar.
+ValidateHotKeys
+'' Checked once here rather than per message -- this sits in the main window's message path.
+bLogMenuKeys = FileExists(ExePath & "/Temp/_astoria_menukeys.on")
 'tbStandard.AddRange 1, @cboCommands
 
 Sub tbLeft_OnResize(ByRef Designer As My.Sys.Object, ByRef Sender As Control, NewWidth As Integer, NewHeight As Integer)
@@ -9313,10 +9464,13 @@ Sub txtImmediate_KeyDown(ByRef Designer As My.Sys.Object, ByRef Sender As Contro
 			WLet(LogText, "")
 			Fn = FreeFile_
 			Dim Result As Integer=-1 '
+			'' The utf-16 / utf-32 / utf-8 retries that used to follow were unreachable and are
+			'' removed (2026-07-20). This Open carries no encoding, so it can only fail on ACCESS
+			'' -- the file is missing or locked -- and re-opening the same inaccessible path with a
+			'' different encoding fails identically. They read as encoding robustness while
+			'' providing none: a genuinely UTF-16 log opens successfully here and is then read as
+			'' ANSI, and the code written to catch that could never run.
 			Result = Open(ExePath & "/Temp/Compile1.log" For Input As #Fn)
-			If Result <> 0 Then Result = Open(ExePath & "/Temp/Compile1.log" For Input Encoding "utf-16" As #Fn)
-			If Result <> 0 Then Result = Open(ExePath & "/Temp/Compile1.log" For Input Encoding "utf-32" As #Fn)
-			If Result <> 0 Then Result =  Open(ExePath & "/Temp/Compile1.log" For Input Encoding "utf-8" As #Fn)
 			If Result = 0 Then
 				While Not EOF(Fn)
 					Line Input #Fn, Buff
@@ -10799,7 +10953,50 @@ Sub frmMain_Close(ByRef Designer As My.Sys.Object, ByRef Sender As Form, ByRef A
 	"in module " & ZGet(Ermn()) & " (Handler file: " & __FILE__ & ") "
 End Sub
 
+'' Diagnostic instrument for ROADMAP 13.28 part 3: Alt+C, Alt+R and Alt+G do not open their
+'' menus, while Alt+F and Alt+T do, and a stock WinForms app with the same letters opens all
+'' five on this machine. Three hypotheses formed by reading code have now been disproved, so
+'' this measures what the window actually receives instead of proposing a fourth.
+''
+'' How to read the output:
+''   WM_SYSKEYDOWN present, WM_SYSCHAR absent -> something consumed the key before translation
+''                                               (TranslateAccelerator is the prime suspect)
+''   WM_SYSCHAR present, WM_MENUCHAR follows  -> Windows saw the character and could NOT match
+''                                               it to a menu item; the fault is in the menu data
+''   WM_INITMENU / WM_INITMENUPOPUP           -> the menu did open
+''
+'' Enabled only when Temp/_astoria_menukeys.on exists, so a normal run costs nothing. It only
+'' observes: it never sets Msg.Result and never returns, so message handling is unchanged.
+Sub LogMenuKey(ByRef Tag As String, wp As WPARAM, lp As LPARAM)
+	Dim As Integer FnLog = FreeFile_
+	If Open(ExePath & "/Temp/_astoria_menukeys.log" For Append As #FnLog) = 0 Then
+		Print #FnLog, Tag & "  wParam=&h" & Hex(wp) & "  lParam=&h" & Hex(lp)
+		CloseFile_(FnLog)
+	End If
+End Sub
+
 Sub frmMain_Message(ByRef Designer As My.Sys.Object, ByRef Sender As Control, ByRef Msg As Message)
+		If bLogMenuKeys Then
+			Select Case Msg.Msg
+			Case WM_SYSKEYDOWN:    LogMenuKey("WM_SYSKEYDOWN   ", Msg.wParam, Msg.lParam)
+			Case WM_SYSCHAR:       LogMenuKey("WM_SYSCHAR      ", Msg.wParam, Msg.lParam)
+			Case WM_MENUCHAR:      LogMenuKey("WM_MENUCHAR     ", Msg.wParam, Msg.lParam)
+			Case WM_INITMENU:      LogMenuKey("WM_INITMENU     ", Msg.wParam, Msg.lParam)
+			Case WM_INITMENUPOPUP: LogMenuKey("WM_INITMENUPOPUP", Msg.wParam, Msg.lParam)
+			Case WM_SYSCOMMAND
+				'' DefWindowProc turns an unhandled WM_SYSCHAR on a CHILD window into
+				'' WM_SYSCOMMAND / SC_KEYMENU (&hF100) sent to the TOP-LEVEL window, and that is
+				'' the message that actually opens a menu -- lParam carries the character.
+				'' So this splits the remaining search space for 13.28 part 3: if SC_KEYMENU
+				'' arrives for Alt+F but not for Alt+C, the loss is below the form in the child's
+				'' DefWindowProc path; if it arrives for both, the loss is in the menu search
+				'' itself and the menu-bar data is back in scope despite measuring correct.
+				''
+				'' Filtered to SC_KEYMENU: WM_SYSCOMMAND also carries move/size/minimise traffic.
+				'' Windows uses the low four bits of wParam internally, so mask before comparing.
+				If (Msg.wParam And &hFFF0) = &hF100 Then LogMenuKey("SC_KEYMENU      ", Msg.wParam, Msg.lParam)
+			End Select
+		End If
 		Select Case Msg.Msg
 		Case WM_APP_AGENTCMD
 			'' Agent MCP pipe: run the pending pipe command on the UI thread

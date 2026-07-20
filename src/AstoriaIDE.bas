@@ -589,7 +589,11 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 	Case "AddUserControl":                  AddFromTemplate ExePath + "/Templates/Files/User Control.bas"
 	Case "AddResource":                     AddFromTemplate ExePath + "/Templates/Files/Resource.rc"
 	Case "AddManifest":                     AddFromTemplate ExePath + "/Templates/Files/Manifest.xml"
-	Case "Undo", "Redo", "CutCurrentLine", "Cut", "Copy", "Paste", "SelectAll", "Duplicate", "SingleComment", "UnComment", _
+	'' "UnComment" removed 2026-07-20: Astoria consolidated commenting into the single
+	'' "Toggle Comment" command (SingleComment -> ec->ToggleComment), so no menu item, toolbar
+	'' button or shortcut is named UnComment and the dispatch case below was unreachable. The
+	'' EditControl.UnComment METHOD is still live -- ToggleComment calls it (EditControl.bas:2989).
+	Case "Undo", "Redo", "CutCurrentLine", "Cut", "Copy", "Paste", "SelectAll", "Duplicate", "SingleComment", _
 		"Indent", "Outdent", "Format", "Unformat", "AddSpaces", "Breakpoint", "ToggleBookmark", "CollapseAll", "UnCollapseAll", "CollapseAllProcedures", "UnCollapseAllProcedures", _
 		"CollapseCurrent", "UnCollapseCurrent", "CompleteWord", "Define", _
 		"AlignLefts", "AlignCenters", "AlignRights", "AlignTops", "AlignMiddles", "AlignBottoms", "AlignToGrid", "MakeSameSizeWidth", "MakeSameSizeHeight", "MakeSameSizeBoth", "SizeToGrid", _
@@ -668,7 +672,6 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 				Case "Duplicate":                   ec->DuplicateLine
 				Case "SelectAll":                   ec->SelectAll
 				Case "SingleComment":               ec->ToggleComment
-				Case "UnComment":                   ec->UnComment
 				Case "Indent":                      ec->Indent
 				Case "Outdent":                     ec->Outdent
 				Case "Format":                      ec->FormatCode

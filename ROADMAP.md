@@ -1824,3 +1824,54 @@ and awaiting an ethernet cable.
 
 **The instrumentation is left in place** and inert until `ASTORIA_LOGSYSCHAR` is set, so a shipped
 build behaves identically. Removing it can wait for the actual fix, since it will help verify one.
+
+### 13.28 pt 3 — **PAUSED 2026-07-20. The defect is UPSTREAM, not Astoria's.** (owner-observed)
+
+The owner ran **VisualFBEditor** — the upstream project Astoria was forked from — and it exhibits
+the identical defect: `Alt+C`, `Alt+G` and `Alt+R` silently do nothing. **In both the 32-bit and
+64-bit versions.** So every hypothesis aimed at Astoria's own code was aimed at the wrong project.
+
+**What this means, in order of importance:**
+
+- **The kernel trace is deferred.** It would still find the answer, but there is a much cheaper
+  route now. `MffMnemonicTest` (minimal MFF app) works; `VisualFBEditor` fails; **Astoria fails.**
+  So the mechanism lives in something VisualFBEditor does that `MffMnemonicTest` does not — a
+  vastly smaller code delta than Astoria's full codebase, and one that can be bisected in the
+  upstream repository directly.
+- **This is very likely a known FreeBASIC/MFF community bug**, or one that has been noticed and
+  not fixed. Worth searching the upstream repo's issues, the FreeBASIC forums, and any
+  MyFbFramework discussion before starting a new bisect. The specific search string is easy:
+  *"Alt+C" or "Alt+R" not opening menu* against the framework or against VisualFBEditor.
+- **The fix, when found, likely belongs upstream** — Astoria inherits it either way, and pushing
+  the fix upstream benefits everyone building on the framework.
+
+**Nothing already established is invalidated.** Every elimination in this section is still true;
+the target of the investigation moves. Position, odd items, menu icons, accelerator table, message
+loop, `TranslateAccelerator`, control-mnemonic matching — all remain measured out at the Astoria
+level.
+
+**Two paths for the next attempt, in the recommended order:**
+
+1. **Search upstream first.** If someone has hit this already, the fix is a link away instead of a
+   bisect away. Cost: a few minutes.
+2. **Bisect MffMnemonicTest → VisualFBEditor**, not MffMnemonicTest → Astoria. Add pieces one at a
+   time from VFBE's source to the test app (or strip pieces from a local VFBE build) until the
+   behaviour flips. This has the same shape as the Astoria bisect that never converged, but the
+   search space is *orders of magnitude smaller* — VFBE has a handful of forms, not the whole IDE.
+
+**The kernel trace, if the above dead-ends.** The other machine (`10.0.0.10`) still has KDNET
+prepared. Reaching for it requires installing Debugging Tools on the host, which was underway when
+the VFBE observation arrived and is cancelled. Instructions are in the harness README.
+
+**Everything built this session remains useful:**
+
+- `MenuProbe.ps1` — validated positive-control-gated Alt+letter probe, with the 40-byte `INPUT`
+  struct assertion.
+- `ASTORIA_BISECT` scaffolding in `src/Main.bas` — inert with the env var unset, gates for
+  `toolbars`, `statusbar`, `leftpanel`, `rightpanel`, `bottompanel`, `menuicons`, `fixodditems`,
+  `shiftindices`.
+- `AstoriaLogAccel` / `AstoriaLogSysKey` / `AstoriaLogLoop` in the framework — inert without
+  `ASTORIA_LOGSYSCHAR`. Same instruments will work against a stock VFBE build with a matching
+  framework change.
+- `MffMnemonicTest.bas` — updated this session to put Ctrl+C/G/R on the main menu, so it truly
+  parallels VFBE/Astoria's accelerator configuration and works. Remains the useful control.

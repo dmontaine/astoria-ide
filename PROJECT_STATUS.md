@@ -1,5 +1,44 @@
 # Astoria-IDE — Project Status & Handoff
 
+## Session handoff (2026-07-20, afternoon) — 13.28 pt 3 PAUSED: the defect is UPSTREAM in VisualFBEditor
+
+**13.28 part 3 is paused, not solved.** The owner ran VisualFBEditor — the upstream project Astoria
+was forked from — and confirmed the same defect: `Alt+C`, `Alt+G`, `Alt+R` silently do nothing, in
+both 32- and 64-bit VFBE. Which means every hypothesis this investigation aimed at Astoria's own
+code was aimed at the wrong project.
+
+**The kernel trace setup is cancelled** for now. It would still find the answer, but there is a
+much cheaper route: `MffMnemonicTest` (minimal MFF) works; VisualFBEditor fails; Astoria fails.
+The mechanism lives in something VFBE does that `MffMnemonicTest` does not — a much smaller code
+delta than Astoria's whole codebase, and one that can be bisected in the upstream repo directly.
+Instructions for KDNET remain in `TestHarness/13.28_Mnemonics/README.md` if we come back to it.
+
+### What to do first, when this resumes
+
+1. **Search upstream** — the FreeBASIC forums, the VisualFBEditor GitHub, the MyFbFramework
+   discussion. If someone has hit this already, the fix is a link away. Cost: minutes.
+2. **Bisect MffMnemonicTest → VisualFBEditor**, not against Astoria. VFBE is a handful of forms,
+   not the whole IDE — orders of magnitude smaller search space. Add pieces one at a time from
+   VFBE's source, or strip pieces from a local VFBE build, until the behaviour flips.
+3. **The fix, when found, likely belongs upstream.** Astoria inherits it either way, and pushing
+   it upstream benefits everyone building on the framework.
+
+### What this session still leaves usable
+
+Every elimination is still true — position, odd items, menu icons, accelerator table, message loop,
+TranslateAccelerator, control mnemonics. What changes is *which project's code* is being searched.
+
+The instrumentation and bisect scaffolding stay in place, all inert until their env vars are set:
+- `MenuProbe.ps1` — validated Alt+letter probe with the 40-byte INPUT struct assertion.
+- `ASTORIA_BISECT` gates in `Main.bas` — chrome, panels, menu icons, menu shape.
+- `AstoriaLogAccel`/`AstoriaLogSysKey`/`AstoriaLogLoop` in the framework — gated on
+  `ASTORIA_LOGSYSCHAR`. **These will work on a stock VFBE build with a matching framework change**,
+  which is worth knowing if a VFBE bisect gets serious.
+- `MffMnemonicTest.bas` — updated to put Ctrl+C/G/R on the main menu, so it truly parallels
+  VFBE/Astoria's accelerator configuration. Remains the useful control.
+
+### Session-earlier work (still relevant)
+
 ## Session handoff (2026-07-20, morning) — 13.28 pt 3: two approaches eliminated, kernel route prepared
 
 **Machine switch in progress.** This session ran on the machine that reproduces the defect; work

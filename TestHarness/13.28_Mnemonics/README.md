@@ -212,17 +212,39 @@ Wi-Fi will not work for this). Plug both machines into the same switch or router
 Target identity at time of writing: hostname `ACE`, `10.0.0.2` via Wi-Fi, gateway `10.0.0.1`. The
 wired interface will get its own address once connected — use that one.
 
-Target setup (elevated), then reboot:
+### Target setup — DONE 2026-07-20, awaiting reboot
+
+The target is already configured. `kdnet.exe 10.0.0.11 50000` was run elevated and reported
+*"Enabling network debugging on Realtek PCIe GbE Family Controller."* Resulting state:
 
 ```
-bcdedit /dbgsettings                          REM check current state first
-bcdedit /dbgsettings net hostip:<HOST-IP> port:50000
-bcdedit /debug on
+busparams   2.0.0
+debugtype   NET
+hostip      10.0.0.11        (the HOST - the other machine, not this one)
+port        50000
+dhcp        Yes
+debug       Yes              (in the {current} boot entry)
 ```
 
-`hostip` is the **other** machine's address, not this one's. `/dbgsettings net` prints a
-**connection key** — record it, the host needs it to connect. `kdnet.exe <HOST-IP> 50000` will do
-the same configuration and print the key, if that is preferred to `bcdedit`.
+**The target has NOT been rebooted yet.** Kernel debugging does not engage until it has.
+
+**The connection key is deliberately not recorded here — this repository is public, and the key
+grants full kernel read/write to anyone who can reach this machine on the network.** It does not
+need storing: run `bcdedit /dbgsettings` on the target, elevated, and it reprints. The host then
+connects with:
+
+```
+kd -k net:port=50000,key=<KEY-FROM-bcdedit-/dbgsettings>
+```
+
+Addressing at time of setup: target `10.0.0.10` (static, hostname `ACE`), host `10.0.0.11` (static),
+gateway `10.0.0.1`, both wired through the Realtek GbE port. **Note the target's Ethernet mask was
+set to /8 rather than /24** when it was made static; it works on this flat LAN because the gateway
+still falls in range, but it is unintended and worth correcting. The target does not actually need a
+static address — only the host does, because `hostip` is baked into the target's boot config and
+fails silently if the host's address moves.
+
+To undo everything: `bcdedit /debug off` on the target, elevated.
 
 Host:
 

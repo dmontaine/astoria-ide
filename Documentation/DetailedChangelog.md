@@ -18,7 +18,7 @@ is to write a good commit message. Regenerate rather than hand-edit; a stale han
 than no entry. Run `.\GenerateChangelog.ps1` from the repository root; `-Check` reports whether
 the file is current and writes nothing, which suits a pre-commit hook.
 
-Everything above the **Total: 441 commits, 2026-07-02 to 2026-07-20.**
+Everything above the **Total: 443 commits, 2026-07-02 to 2026-07-20.**
 
 ## 2026-07-02
 
@@ -1337,3 +1337,9 @@ Everything above the **Total: 441 commits, 2026-07-02 to 2026-07-20.**
 - **`e979d15`** — 13.28 pt 3: menu-bisect follow-up, three more hypotheses eliminated
   Not solved.
   *Build/Tools, Docs, IDE · 5 files*
+- **`caec120`** — DetailedChangelog: regenerate through e979d15
+  Picks up the menu-bisect follow-up eliminations.
+  *Docs · 1 file*
+- **`ae5450c`** — 13.28 pt 3: TranslateAccelerator ruled out; every user-mode layer eliminated
+  Rung 1 done.
+  *Docs, Framework/Controls, IDE · 6 files*

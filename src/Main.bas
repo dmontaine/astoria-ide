@@ -6830,6 +6830,7 @@ Sub ApplyMenuIconsToItems(Item As MenuItem Ptr)
 End Sub
 
 Sub ApplyMenuIcons
+	If BisectSkip("menuicons") Then Exit Sub   '' 13.28 pt 3 bisection -- TEMPORARY
 	mnuMain.ImagesList = @imgList
 	mnuMain.DisplayIcons = DisplayMenuIcons
 	For i As Integer = 0 To mnuMain.Count - 1
@@ -11033,6 +11034,19 @@ End Sub
 '' and a wide monitor collapses everything onto one very long line of icons (owner decision,
 '' 2026-07-19). Re-applied after any visibility change, because hiding and re-showing bands
 '' otherwise lets them reflow.
+'' ROADMAP 13.28 pt 3 bisection scaffolding -- TEMPORARY. With ASTORIA_BISECT unset this returns
+'' False for everything and startup is untouched, so the shipped behaviour is unchanged.
+Function BisectSkip(ByRef Part As String) As Boolean
+	Static As String Spec
+	Static As Boolean Loaded
+	If Not Loaded Then
+		Spec = LCase(Environ("ASTORIA_BISECT"))
+		Loaded = True
+	End If
+	If Spec = "" Then Return False
+	Return InStr("," & Spec & ",", "," & LCase(Part) & ",") > 0
+End Function
+
 Sub LockToolBarRows
 	If MainReBar.Bands.Count < 5 Then Exit Sub
 	MainReBar.Bands.Item(0)->Break = False   '' Standard  -- row 1
@@ -11088,13 +11102,15 @@ frmMain.Menu = @mnuMain
 '' 13.3.A O3: bands are now Standard(0), Edit(1), Project(2), Run(3), Format(4) -- Build/Debug
 '' folded into Run, so the ReBar drops from 7 bands to 5. See the matching Item(N) updates in
 '' AstoriaIDE.bas's toolbar-toggle Cases and this Sub's own visibility/save code below.
-MainReBar.Add @tbStandard
-MainReBar.Add @tbEdit
-MainReBar.Add @tbProject
-MainReBar.Add @tbRun
-MainReBar.Add @tbFormat
-'rbBottom.Add @tbFormat
-frmMain.Add @MainReBar
+If Not BisectSkip("toolbars") Then      '' 13.28 pt 3 bisection -- TEMPORARY
+	MainReBar.Add @tbStandard
+	MainReBar.Add @tbEdit
+	MainReBar.Add @tbProject
+	MainReBar.Add @tbRun
+	MainReBar.Add @tbFormat
+	'rbBottom.Add @tbFormat
+	frmMain.Add @MainReBar
+End If
 'frmMain.Add @rbLeft
 'frmMain.Add @rbRight
 '#else
@@ -11102,14 +11118,20 @@ frmMain.Add @MainReBar
 '	frmMain.Add @tbStandard
 '#endif
 pfSplash->lblProcess.Text = ("Load On Startup") & ": " & ("Main Form")
-frmMain.Add @stBar
+If Not BisectSkip("statusbar") Then frmMain.Add @stBar      '' 13.28 pt 3 bisection -- TEMPORARY
 'frmMain.Add @rbBottom
-frmMain.Add @pnlLeft
-frmMain.Add @splLeft
-frmMain.Add @pnlRight
-frmMain.Add @splRight
-frmMain.Add @pnlBottom
-frmMain.Add @splBottom
+If Not BisectSkip("leftpanel") Then                          '' 13.28 pt 3 bisection -- TEMPORARY
+	frmMain.Add @pnlLeft
+	frmMain.Add @splLeft
+End If
+If Not BisectSkip("rightpanel") Then                         '' 13.28 pt 3 bisection -- TEMPORARY
+	frmMain.Add @pnlRight
+	frmMain.Add @splRight
+End If
+If Not BisectSkip("bottompanel") Then                        '' 13.28 pt 3 bisection -- TEMPORARY
+	frmMain.Add @pnlBottom
+	frmMain.Add @splBottom
+End If
 frmMain.Add ptabPanel
 frmMain.Show
 

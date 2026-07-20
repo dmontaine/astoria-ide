@@ -33,7 +33,6 @@ Type MainType Extends Form
 	Dim As Panel pnlOuter
 	Dim As Panel pnlInner
 	Dim As TabControl tabTest
-	Dim As EditControl txtCode
 End Type
 
 Constructor MainType
@@ -48,14 +47,20 @@ Constructor MainType
 	Var miFile = mnu.Add("&File", "", "File")
 	miFile->Add("File item", "", "FileItem")
 
+	'' BISECTION STEP 4 (ROADMAP 13.28 pt 3): put Ctrl+C, Ctrl+G, Ctrl+R on the MAIN menu here --
+	'' the way Astoria has them. MffMnemonicTest previously put those accelerators on a CONTEXT
+	'' menu, which does not populate the main-window accelerator table, so this test never truly
+	'' matched Astoria's configuration for the ACCEL search a keystroke goes through. If Alt+C
+	'' still works with those items on the main menu, hypothesis 7 (the accelerator table) is
+	'' really refuted; if Alt+C fails here too, we have found the discriminator.
 	Var miCode = mnu.Add("&Code", "", "Code")
-	miCode->Add("Code item", "", "CodeItem")
+	miCode->Add("&Copy" & Chr(9) & "Ctrl+C", "", "Copy")
 
 	Var miGit = mnu.Add("&Git", "", "Git")
-	miGit->Add("Git item", "", "GitItem")
+	miGit->Add("&Goto" & Chr(9) & "Ctrl+G", "", "Goto")
 
 	Var miRun = mnu.Add("&Run", "", "Run")
-	miRun->Add("Run item", "", "RunItem")
+	miRun->Add("Project Explorer" & Chr(9) & "Ctrl+R", "", "Explorer")
 
 	Var miTools = mnu.Add("&Tools", "", "Tools")
 	miTools->Add("Tools item", "", "ToolsItem")
@@ -87,11 +92,6 @@ Constructor MainType
 	tabTest.AddTab("Project")
 	tabTest.AddTab("Toolbox")
 	tabTest.Parent = @pnlInner
-
-	'' The editor fills the rest of the form, as it does in Astoria.
-	txtCode.Name = "txtCode"
-	txtCode.Align = DockStyle.alClient
-	txtCode.Parent = @This
 
 	This.Menu = @mnu
 End Constructor

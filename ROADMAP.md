@@ -1686,3 +1686,66 @@ assuming the whole designer route is broken.
 
 **Do not test this with synthesized input.** Ctrl+Z through `SendInput` does not behave as it does
 under a hand — see §13.34. This one was found by hand and needs to be confirmed the same way.
+
+### 13.28 pt 3 — bisection progress (2026-07-20, later)
+
+**Twelve hypotheses were already ruled out. Six more were eliminated cheaply in this session; the
+cause is still not identified.** New eliminations, each verified by effect:
+
+- **No visible chrome is responsible.** A gated bisect built into `src/Main.bas` (behind
+  `ASTORIA_BISECT`, temporary scaffolding to be removed once the defect is solved) skipped, in one
+  build, each of: toolbars, status bar, left panel, right panel, bottom panel — separately and all
+  together. The defect reproduces identically in every configuration, including the "all off" case
+  where `frmMain` has almost nothing on it. Six of six configurations reproduce; the seventh
+  (baseline) was inconclusive from a cold-startup Alt+F miss and does not weigh either way.
+- **Menu icons are not responsible.** Skipping `ApplyMenuIcons` — no icons on any menu item, no
+  `DisplayIcons`, no chance of an owner-drawn item interacting oddly with mnemonic search — leaves
+  the defect intact.
+- **`RegisterHotKey` is not used anywhere** in `src/` or `Controls/Framework/mff/`. Would have
+  swallowed the key silently and fit the signature perfectly; it does not exist here.
+- **The framework does not do control-mnemonic matching.** No `WM_SYSCHAR` handler in
+  `Controls/Framework/mff/*.bas` competes with the default menu-mnemonic path.
+- **Hypothesis 7 (the accelerator table) is now REFUTED for real.** `MffMnemonicTest.bas` previously
+  put Ctrl+C/G/R on a **context menu**, which does not populate `FActiveForm->Accelerator`. It has
+  been rebuilt with those items on the **main menu**, matching Astoria's actual configuration for
+  the accelerator search a keystroke goes through — and Alt+C/G/R still all work in it. If the
+  accelerator table were the mechanism, this would have failed.
+
+**Fifth harness trap, again: the x64 `INPUT` struct is 40 bytes, not 32.** Omitting `MOUSEINPUT`
+from the union gives 32 bytes because it becomes the size of the `KEYBDINPUT` alone rather than of
+the largest union member. `SendInput` then fails with `ERROR_INVALID_PARAMETER (87)` and sends
+*nothing at all* — every letter reads as "no menu". Already documented in the harness README,
+walked into again anyway, and caught in one run only because the `Alt+F` positive control failed
+alongside `Alt+C/G/R`. The revised `menuprobe.ps1` asserts `Marshal.SizeOf(INP) == 40` at startup so
+this cannot silently recur.
+
+**Instruments left behind for the next investigator.**
+
+- `TestHarness/13.28_Mnemonics/menuprobe.ps1` (in scratchpad; move to `TestHarness/` when kept):
+  positive-control-gated Alt+letter probe, with the struct assertion. Reports "no menu" per letter
+  and refuses to declare a run valid until Alt+F opens.
+- `ASTORIA_BISECT` env var in `Main.bas` / `Main.bi`: comma-list of subsystems to skip
+  (`toolbars`, `statusbar`, `leftpanel`, `rightpanel`, `bottompanel`, `menuicons`). Empty or unset =
+  normal startup, so nothing ships changed for anyone else. Add more gates as needed;
+  `BisectSkip("part")` reads the env var once and caches.
+- `MffMnemonicTest.bas` now truly parallels Astoria's main-menu accelerator configuration and still
+  works, so it remains the useful control.
+
+**What has not been tried and is worth continuing with.**
+
+- **Bisect the menu itself, not the chrome around it.** Add a gate that builds a minimal 5-item
+  menu (File / Code / Run / Git / Tools) instead of the full 11 — matches MffMnemonicTest exactly.
+  If the defect disappears, something in the extra 6 items causes it (the odd `Code/Form` at
+  index 4, the disabled `&Form` at index 5, or the sheer count) and can be narrowed further.
+- **The message pump.** `Application.bas:407` calls `TranslateAccelerator` before `TranslateMessage`.
+  `MffMnemonicTest` runs the same pump, but the accelerator table it hands over is different (its
+  main menu holds Ctrl+C/G/R too, and Alt+C works there). Worth logging what
+  `TranslateAccelerator` returns for each `Alt+<letter>` on `WM_SYSCHAR` in the real IDE, to see
+  whether it is silently consuming the message.
+- **Worker threads.** MffMnemonicTest is single-threaded; Astoria runs the agent pipe on a worker.
+  A worker calling into GUI code (or holding a lock a GUI call needs) is a long shot, but easy to
+  test with an `ASTORIA_BISECT=agentpipe` gate.
+
+**Cost so far.** One synthesized-input trap earned back once; six eliminations; the bisect
+scaffolding and the improved test app are reusable regardless of which direction the next attempt
+takes.

@@ -281,6 +281,11 @@ Declare Sub SetAsMain(IsTab As Boolean)
 Declare Sub SetAutoColors
 Declare Sub ApplyToolBarVisibility
 Declare Sub LockToolBarRows
+'' ROADMAP 13.28 pt 3 bisection scaffolding -- TEMPORARY, remove once the defect is located.
+'' Set ASTORIA_BISECT to a comma list (toolbars,statusbar,leftpanel,rightpanel) to skip building
+'' those parts of the main window, then re-run the Alt+letter probe. Unset = normal startup, so a
+'' shipped build behaves exactly as before.
+Declare Function BisectSkip(ByRef Part As String) As Boolean
 Declare Sub StartProgress()
 Declare Sub StopProgress()
 Declare Sub ThreadCounter(Id As Any Ptr)

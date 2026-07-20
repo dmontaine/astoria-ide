@@ -80,6 +80,8 @@ Temp/
 Examples/Integration/**/A8-results.txt
 Projects/D5_McpMultiFile_*/
 Projects/SC_Shortcuts/
+TestHarness/13.28_Mnemonics/MffMnemonicTest.exe
+TestHarness/13.28_Mnemonics/framework.dll
 Projects/E_ScaleFixtures/
 Projects/TestD2/
 # Throwaway projects from New Project testing (ROADMAP 13.27 verification).

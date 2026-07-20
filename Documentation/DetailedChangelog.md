@@ -17,7 +17,7 @@ Areas are: **IDE** (`src/`), **Framework/Controls** (`Controls/`), **Templates**
 is to write a good commit message. Regenerate rather than hand-edit; a stale hand-edit is worse
 than no entry. Commits after the last one listed here are not yet folded in.
 
-**Total: 400 commits, 2026-07-02 to 2026-07-19.**
+**Total: 401 commits, 2026-07-02 to 2026-07-19.**
 
 ## 2026-07-02
 
@@ -1205,3 +1205,6 @@ than no entry. Commits after the last one listed here are not yet folded in.
 - **`3f26136`** — Rebuild framework.dll so the shipped binary matches its source
   The previous commit fixed warnings in Control.bas and Application.bas but left the committed DLL as it was, on the reasoning that default arguments are resolved in the caller from the .bi declarations and so the binary could not change.
   *Framework/Controls · 1 file*
+- **`e66d153`** — Handoff: warnings removed, and why the earlier attempt broke startup
+  Documents the session and closes an open question.
+  *Docs · 2 files*

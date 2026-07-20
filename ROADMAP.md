@@ -782,22 +782,37 @@ mostly a matter of sequencing them against an existing folder.
 **Open:** whether it belongs in the Project menu ("Add version control…") or the Git menu, and
 whether it should offer to create the remote in the same pass or leave that as a separate step.
 
-### 13.27 The left panel jumps to the Toolbox and stays there (found by TestPlan D2, 2026-07-19)
+### 13.27 The left panel jumps to the Toolbox — **RESOLVED 2026-07-19**
 
-`TabWindow.bas` `ApplyView` ends both the `"Form"` and `"CodeAndForm"` branches with an unconditional
-`tpToolbox->SelectTab` (around lines 10232 and 10246). Every application of a form view therefore
-drags the left panel to the Toolbox — including re-applications the user did not ask for, such as
-after a save or a project-tree change. A new project lands on the Toolbox for the same reason.
+**Resolved.** Astoria no longer selects the Project or Toolbox panel except when the user enters a
+different project. Whatever panel you choose stays chosen.
 
-**Wanted behaviour, from the owner:** the **Project tree** is the default. The Toolbox is selected
-only while the user is actually working in Form or Code+Form view — and even then, switching *to*
-that view is the moment to select it, not every subsequent refresh.
+`ApplyView` used to end both the `"Form"` and `"CodeAndForm"` branches with an unconditional
+`tpToolbox->SelectTab`, so every application of a form view dragged the panel there — including
+re-applications the user never asked for, such as after a save.
 
-**The distinction that matters:** selecting the Toolbox when the user *changes view* is helpful;
-re-selecting it when the view is merely re-applied is the IDE overriding a choice the user has
-already made. The fix is to make the jump conditional on an actual view change (`mViewName <>
-ViewName`) rather than on `ApplyView` running, and to default a newly created project to the Project
-tree.
+**The fix is a rule, not a condition.** The first attempt made the jump conditional on the user
+having chosen the view, threading a `ByUser` flag through `ApplyView`/`ShowView`. That fixed opening
+a form but not adding a file, and the owner's call was better than the mechanism: *remove
+auto-selection entirely; the system does not choose the panel.* The flag went with it — machinery
+for deciding when the IDE should choose, in service of a rule that says it should not.
 
-Small, but it is the sort of thing that reads as the tool not listening — the user selects the
-Project tab, saves, and is thrown back to the Toolbox.
+Astoria now selects the Project pane at exactly three moments, all of them "you have entered a
+different project":
+
+1. **Startup.** Previously it restored `LeftSelectedTab` from `astoria.ini`, which is the same
+   problem in slower motion — the panel a previous session happened to end on is not a choice for
+   this one.
+2. **New Project.** This was the inconsistency the owner caught: Open Project and Open Folder
+   already selected the Project pane, and New Project alone left you wherever you were, so a new
+   project inherited the previous project's panel.
+3. **Open Project / Open Folder** — unchanged, already did this.
+
+**View ▸ Toolbox** remains, because that is the user asking.
+
+**Method note.** A long detour went into instrumenting `TabPage.SelectTab` to find a "mystery path"
+that was selecting the Toolbox when a file was added. The instrumentation never fired — its log path
+contained `	ab_trace.log`, whose `	` had been turned into a literal tab by a shell heredoc, so
+every write failed silently and the silence was read as evidence. The third such escape-mangling of
+the session. Two lessons, both cheap: build Windows paths in generated code with `Chr(92)` or forward
+slashes, and **prove an instrument can fire before trusting what it does not say.**

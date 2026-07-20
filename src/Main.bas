@@ -2967,6 +2967,11 @@ Sub NewProject()
 			End If
 			AddNewU pfNewProject->SelectedTemplate
 		End If
+		'' A new project is a new context, so show its tree rather than inheriting whichever panel
+		'' the last project happened to leave selected. This matches Open Project and Open Folder,
+		'' which already do it, and it is the only other point where Astoria picks this panel --
+		'' see the startup note at leftSelectedTabIndex and ROADMAP 13.27.
+		tpProject->SelectTab
 	End If
 	' "Open Existing Project" button on the New Project dialog: it closed with Cancel + this flag;
 	' now bring up the Open Project window (only reached on the non-OK path, so no early Return skips it).
@@ -8138,8 +8143,16 @@ tpProject = AddToTabControl(("Project"), "Project", "tabLeft", 0)
 tpToolbox = AddToTabControl(("Toolbox"), "Toolbox", "tabLeft", 1) ' ToolBox is better than "Form"
 tpToolbox->Name = "Toolbox"
 
-leftSelectedTabIndex = iniSettings.ReadInteger("MainWindow", "LeftSelectedTab", 0)
-If leftSelectedTabIndex < 0 OrElse leftSelectedTabIndex >= tabLeft.TabCount Then leftSelectedTabIndex = 0
+'' The left panel starts on Project, every time. This is the ONLY point at which Astoria
+'' chooses that panel for the user -- nothing else selects Project or Toolbox on their
+'' behalf, so whatever they pick stays picked until they pick something else.
+''
+'' The IDE used to jump to the Toolbox whenever a form view was applied, which included
+'' re-applications the user never asked for: selecting Project, saving, and being thrown
+'' back to the Toolbox. Reading a saved LeftSelectedTab has the same problem in slower
+'' motion -- the panel a previous session happened to end on is not a choice for this one.
+'' See ROADMAP 13.27.
+leftSelectedTabIndex = 0
 
 pnlLeftPin.Anchor.Right = AnchorStyle.asAnchor
 pnlLeftPin.Top = tabItemHeight

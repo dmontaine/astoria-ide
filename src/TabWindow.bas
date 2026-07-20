@@ -10229,7 +10229,6 @@ Sub TabWindow.ApplyView(ByRef ViewName As String)
 				FormNeedDesign = False
 			End If
 		End If
-		tpToolbox->SelectTab
 	Case "CodeAndForm"
 		pnlForm.Align = DockStyle.alRight
 		pnlForm.Width = 350
@@ -10243,7 +10242,6 @@ Sub TabWindow.ApplyView(ByRef ViewName As String)
 				FormNeedDesign = False
 			End If
 		End If
-		tpToolbox->SelectTab
 	Case Else
 		Exit Sub
 	End Select

@@ -91,7 +91,7 @@ fundamental breaks, this fails first.
 
 ### Build and toolchain
 
-The IDE builds clean with the bundled FBC 1.10.1. Both project templates were verified by
+The IDE builds clean with the bundled FBC 1.10.1 — **zero warnings**, and so does a user's own project. Both were noisy until 2026-07-19: six `warning 36` lines from the framework appeared in every single user build, plus `-Wmissing-braces` in the DeviceExplorer example. All are fixed at source; nothing is suppressed. Both project templates were verified by
 compiling them unmodified — the Console Application template was fixed during this (it referenced
 an undeclared `DebugWindowHandle`) and re-verified via both `fbc64` directly and MCP
 `create_project` + `build`.

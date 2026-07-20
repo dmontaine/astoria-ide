@@ -17,7 +17,7 @@ Areas are: **IDE** (`src/`), **Framework/Controls** (`Controls/`), **Templates**
 is to write a good commit message. Regenerate rather than hand-edit; a stale hand-edit is worse
 than no entry. Commits after the last one listed here are not yet folded in.
 
-**Total: 397 commits, 2026-07-02 to 2026-07-19.**
+**Total: 398 commits, 2026-07-02 to 2026-07-19.**
 
 ## 2026-07-02
 
@@ -1196,3 +1196,6 @@ than no entry. Commits after the last one listed here are not yet folded in.
   *Docs, Framework/Controls · 9 files*
 - **`46078e6`** — Revert warning cleanup that broke startup
   *Docs, Framework/Controls · 7 files*
+- **`4d7499b`** — Tidy test artefacts: complete the A8 fixture, ignore generated output
+  Three separate things the recent test runs left in the tree.
+  *Docs, Examples · 5 files*

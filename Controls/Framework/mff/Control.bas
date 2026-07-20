@@ -1560,7 +1560,7 @@ Namespace My.Sys.Forms
 			Base.Move IIf(FDesignMode AndAlso (Designer = @This), 0, IIf(Constraints.Left, Constraints.Left, cLeft)), IIf(FDesignMode AndAlso (Designer = @This), 0, IIf(Constraints.Top, Constraints.Top, cTop)), IIf(Constraints.Width, Constraints.Width, cWidth), IIf(Constraints.Height, Constraints.Height, cHeight)
 		End Sub
 		
-			Private Function Control.RegisterClass(ByRef wClassName As WString, ByRef wClassAncestor As WString = "", WndProcAddr As Any Ptr = 0) As Integer
+			Private Function Control.RegisterClass(ByRef wClassName As WString, ByRef wClassAncestor As WString, WndProcAddr As Any Ptr = 0) As Integer
 				Dim As Integer Result
 				Dim As WNDCLASSEX Wc
 				Dim As Any Ptr ClassProc

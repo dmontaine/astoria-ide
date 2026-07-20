@@ -993,7 +993,7 @@ Namespace My.Sys.Forms
 		PaintControl
 	End Sub
 	
-	Sub EditControlContent.ChangeCollapsibility(LineIndex As Integer, ByRef LineText As WString = "", EC As Any Ptr = 0)
+	Sub EditControlContent.ChangeCollapsibility(LineIndex As Integer, ByRef LineText As WString, EC As Any Ptr = 0)
 		If LineIndex < 0 OrElse LineIndex >= Lines.Count Then Exit Sub
 		Dim As EditControlLine Ptr ecl = Lines.Items[LineIndex], eclOld, eclOld_
 		Dim As Integer i, j, OldLineIndex = LineIndex - 1
@@ -1143,7 +1143,7 @@ Namespace My.Sys.Forms
 		ecl->ConstructionNextCount = ecl->MainStatement->ConstructionNextCount
 	End Sub
 	
-	Sub EditControl.ChangeCollapsibility(LineIndex As Integer, ByRef LineText As WString = "")
+	Sub EditControl.ChangeCollapsibility(LineIndex As Integer, ByRef LineText As WString)
 		Dim As Integer i, j, k, Idx
 		Dim OldCollapsed As Boolean, OldConstructionIndex As Integer = -1, OldConstructionPart As Integer = 0, OldLineIndex As Integer = LineIndex - 1
 		If LineIndex < 0 OrElse LineIndex > Content.Lines.Count - 1 Then Exit Sub
@@ -1471,7 +1471,7 @@ Namespace My.Sys.Forms
 		OldCharIndex = GetOldCharIndex
 	End Sub
 	
-	Sub EditControl.Changing(ByRef Comment As WString = "")
+	Sub EditControl.Changing(ByRef Comment As WString)
 		ChangingStarted = True
 		FOldSelStartLine = FSelStartLine
 		FOldSelEndLine = FSelEndLine
@@ -1505,7 +1505,7 @@ Namespace My.Sys.Forms
 		OldLinesCount = LinesCount
 	End Sub
 	
-	Sub EditControl.Changed(ByRef Comment As WString = "")
+	Sub EditControl.Changed(ByRef Comment As WString)
 		OldnCaretPosX = nCaretPosX
 		OldCharIndex = GetOldCharIndex
 		If WithHistory Then
@@ -1541,7 +1541,7 @@ Namespace My.Sys.Forms
 		ChangingStarted = False
 	End Sub
 	
-	Sub EditControl.ChangeText(ByRef Value As WString, CharTo As Integer = 0, ByRef Comment As WString = "", SelStartLine As Integer = -1, SelStartChar As Integer = -1, WithoutShow As Boolean = False)
+	Sub EditControl.ChangeText(ByRef Value As WString, CharTo As Integer = 0, ByRef Comment As WString, SelStartLine As Integer = -1, SelStartChar As Integer = -1, WithoutShow As Boolean = False)
 		If Not WithoutShow Then Changing Comment
 		ChangePos CharTo
 		Dim As Integer iSelStartLine, iSelEndLine, iSelStartChar, iSelEndChar
@@ -3440,7 +3440,7 @@ Namespace My.Sys.Forms
 		Return sTemp
 	End Function
 	
-	Function EditControlContent.GetLeftArgTypeName(iSelEndLine As Integer, iSelEndChar As Integer, ByRef teEnum As TypeElement Ptr = 0, ByRef teEnumOld As TypeElement Ptr = 0, ByRef teTypeOld As TypeElement Ptr = 0, ByRef OldTypeName As String = "", ByRef bTypes As Boolean = False, ByRef bWithoutWith As Boolean = False) As String
+	Function EditControlContent.GetLeftArgTypeName(iSelEndLine As Integer, iSelEndChar As Integer, ByRef teEnum As TypeElement Ptr = 0, ByRef teEnumOld As TypeElement Ptr = 0, ByRef teTypeOld As TypeElement Ptr = 0, ByRef OldTypeName As String, ByRef bTypes As Boolean = False, ByRef bWithoutWith As Boolean = False) As String
 		Dim As String sTemp, sTemp2, TypeName, sOldTypeName, BaseTypeName
 		Dim sLine As WString Ptr
 		Dim As TypeElement Ptr Oldte, OldTypete
@@ -5447,7 +5447,7 @@ Namespace My.Sys.Forms
 		Return IdentifierWord
 	End Function
 	
-	Function GetKeyWordCase(ByRef KeyWord As String, KeyWordsList As WStringOrStringList Ptr = 0, OriginalCaseWord As String = "") As String
+	Function GetKeyWordCase(ByRef KeyWord As String, KeyWordsList As WStringOrStringList Ptr = 0, OriginalCaseWord As String) As String
 		If ChangeKeyWordsCase Then
 			Select Case ChoosedKeyWordsCase
 			Case KeyWordsCase.OriginalCase

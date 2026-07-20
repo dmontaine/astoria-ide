@@ -19,7 +19,10 @@
 #include once "newdev.bi"
 
 #define DEFINE_GUID(n, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) Dim Shared n As GUID = (l, w1, w2, {b1, b2, b3, b4, b5, b6, b7, b8})
-#define DEFINE_PROPERTYKEY(n, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8, pid) Dim Shared n As PROPERTYKEY = (l, w1, w2, {b1, b2, b3, b4, b5, b6, b7, b8}, pid)
+'' PROPERTYKEY is { GUID fmtid; DWORD pid }, so the GUID's four fields need their own
+'' initializer rather than being flattened alongside pid -- otherwise the generated C is
+'' `{ l, w1, w2, {b...}, pid }`, which gcc reports as -Wmissing-braces on every build.
+#define DEFINE_PROPERTYKEY(n, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8, pid) Dim Shared n As PROPERTYKEY = ((l, w1, w2, {b1, b2, b3, b4, b5, b6, b7, b8}), pid)
 
 #include once "devpkey.bi"
 #include once "devguid.bi"

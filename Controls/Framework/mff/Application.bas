@@ -304,6 +304,94 @@ Namespace My
 		End If
 	End Sub
 	
+	'' ASTORIA DIAGNOSTIC (ROADMAP 13.28 part 3) -- companion to AstoriaLogSysKey in Control.bas.
+	''
+	'' Alt+C / Alt+R / Alt+G never open their menus while Alt+F / Alt+T do. The failure has been
+	'' shown to be inside Astoria, focus-independent, and to happen BEFORE Windows generates
+	'' SC_KEYMENU -- and the accelerator table has been reconstructed and cleared of blame. The
+	'' message loop is the only remaining thing that sees a message before dispatch without
+	'' depending on which control has focus, so this records the fate of each system key at the
+	'' three points in the loop that can suppress it:
+	''
+	''   1 arrived    -- straight off GetMessage, before anything has looked at it
+	''   2 postAccel  -- after TranslateAccelerator had its chance
+	''   3 final      -- immediately before the TranslateMessage/DispatchMessage decision
+	''
+	'' Whichever stage first shows dispatch=NO is the one that swallows it. Gated on the
+	'' ASTORIA_LOGSYSCHAR environment variable, so a normal run costs one Static read.
+	Private Sub AstoriaLogLoop(ByRef Stage As String, uMsg As UINT, wp As WPARAM, bDispatch As Integer)
+		Static As Integer bOn = -1
+		If bOn = -1 Then
+			bOn = 0
+			If Environ("ASTORIA_LOGSYSCHAR") <> "" Then bOn = 1
+		End If
+		If bOn = 0 Then Exit Sub
+		If uMsg <> WM_SYSKEYDOWN AndAlso uMsg <> WM_SYSCHAR Then Exit Sub
+		Dim As String MsgName = "WM_SYSCHAR   "
+		If uMsg = WM_SYSKEYDOWN Then MsgName = "WM_SYSKEYDOWN"
+		'' Explicit If/Else, not IIf: IIf cannot yield a String in FreeBASIC.
+		Dim As String D = "dispatch=YES"
+		If bDispatch = 0 Then D = "dispatch=NO"
+		Dim As Integer FnLog = FreeFile
+		If Open(Environ("TEMP") & "\_astoria_loop.log" For Append As #FnLog) = 0 Then
+			Print #FnLog, Stage & "  " & MsgName & "  wParam=&h" & Hex(wp) & "  " & D
+			Close #FnLog
+		End If
+	End Sub
+
+	'' One-shot dump of the REAL accelerator table (ROADMAP 13.28 part 3).
+	''
+	'' Everything said about accelerators so far rested on a RECONSTRUCTION built by re-parsing menu
+	'' captions cross-process, plus TranslateAccelerator's single boolean return. Neither would catch
+	'' a table built by a path that was not modelled, and Menus.bas:1561 rebuilds and reassigns
+	'' FParentWindow->Accelerator every time MainMenu.ParentWindow is set -- which Astoria does after
+	'' every Options save and on menu rebuilds. CopyAcceleratorTable reads the table Windows is
+	'' actually matching against, so this replaces the model with the thing itself.
+	''
+	'' Fires once, on the first WM_SYSKEYDOWN, so it reports the table as it stands at the moment the
+	'' keys are being lost. Gated on ASTORIA_LOGSYSCHAR.
+	Private Sub AstoriaDumpAccels(hAcc As HACCEL)
+		Static As Integer bDone = 0
+		Static As Integer bOn = -1
+		If bDone Then Exit Sub
+		If bOn = -1 Then
+			bOn = 0
+			If Environ("ASTORIA_LOGSYSCHAR") <> "" Then bOn = 1
+		End If
+		If bOn = 0 Then Exit Sub
+		bDone = 1
+		Dim As Integer FnLog = FreeFile
+		If Open(Environ("TEMP") & "\_astoria_accels.log" For Output As #FnLog) <> 0 Then Exit Sub
+		If hAcc = 0 Then
+			Print #FnLog, "FActiveForm->Accelerator is NULL -- there is no accelerator table at all."
+			Close #FnLog
+			Exit Sub
+		End If
+		Dim As Integer n = CopyAcceleratorTable(hAcc, NULL, 0)
+		Print #FnLog, "Accelerator table entries: " & Str(n)
+		Print #FnLog, ""
+		If n > 0 Then
+			Dim As ACCEL Ptr a = CAllocate(n, SizeOf(ACCEL))
+			If a <> 0 Then
+				CopyAcceleratorTable(hAcc, a, n)
+				For i As Integer = 0 To n - 1
+					Dim As String m = ""
+					If a[i].fVirt And FCONTROL Then m &= "Ctrl+"
+					If a[i].fVirt And FSHIFT Then m &= "Shift+"
+					If a[i].fVirt And FALT Then m &= "Alt+"
+					Dim As String k = "vk=&h" & Hex(a[i].key)
+					If a[i].key >= 32 AndAlso a[i].key < 127 Then k &= " '" & Chr(a[i].key) & "'"
+					Dim As String flag = ""
+					'' The three letters under investigation, called out so they cannot be missed.
+					If a[i].key = 67 OrElse a[i].key = 71 OrElse a[i].key = 82 Then flag = "   <<< C/G/R"
+					Print #FnLog, "  " & m & k & "   fVirt=&h" & Hex(a[i].fVirt) & "  cmd=" & Str(a[i].cmd) & flag
+				Next
+				Deallocate a
+			End If
+		End If
+		Close #FnLog
+	End Sub
+
 	Private Sub Application.Run
 			Dim As MSG msg
 			If FormCount = 0 Then
@@ -313,8 +401,11 @@ Namespace My
 			Dim TranslateAndDispatch As Boolean
 			While GetMessage(@msg, NULL, 0, 0)
 				TranslateAndDispatch = True
+				AstoriaLogLoop("1 arrived  ", msg.message, msg.wParam, TranslateAndDispatch)
 				If FActiveForm <> 0 Then
+					If msg.message = WM_SYSKEYDOWN Then AstoriaDumpAccels(FActiveForm->Accelerator)
 					If FActiveForm->Accelerator Then TranslateAndDispatch = TranslateAccelerator(FActiveForm->Handle, FActiveForm->Accelerator, @msg) = 0
+					AstoriaLogLoop("2 postAccel", msg.message, msg.wParam, TranslateAndDispatch)
 					'If FActiveForm->Parent AndAlso FActiveForm->Parent->Accelerator Then TranslateAndDispatch = TranslateAccelerator(FActiveForm->Parent->Handle, FActiveForm->Parent->Accelerator, @msg) = 0
 					If TranslateAndDispatch Then
 						Select Case msg.message
@@ -366,6 +457,7 @@ Namespace My
 						If mess.Result Then TranslateAndDispatch = False
 					End Select
 				End If
+				AstoriaLogLoop("3 final    ", msg.message, msg.wParam, TranslateAndDispatch)
 				If TranslateAndDispatch Then
 					TranslateMessage @msg
 					DispatchMessage @msg

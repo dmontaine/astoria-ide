@@ -1394,6 +1394,69 @@ Namespace My.Sys.Forms
 			Next i
 		End Sub
 		
+		'' ASTORIA DIAGNOSTIC (ROADMAP 13.28): Alt+C / Alt+R / Alt+G do not open their menus while
+		'' Alt+F and Alt+T do, and a stock WinForms app with the same letters opens all five on the
+		'' same machine. Instrumentation in Astoria proved WM_SYSCHAR REACHES the form and that menu
+		'' activation then never starts -- no WM_INITMENU and no WM_MENUCHAR, where Alt+E (a letter
+		'' with genuinely no menu) correctly produces both.
+		''
+		'' The suspect is the dispatch decision below: if ProcessMessage leaves Message.Result
+		'' non-zero, this function RETURNS and DefWindowProc is never called -- and DefWindowProc is
+		'' what activates a menu-bar mnemonic. This records Handled/Result for the system-key
+		'' messages so the branch actually taken is measured rather than reasoned about.
+		''
+		'' Gated on the ASTORIA_LOGSYSCHAR environment variable so it costs a normal run one Static
+		'' read. Deliberately self-contained: the framework gains no dependency on Astoria.
+		Private Sub AstoriaLogSysKey(ByRef Site As String, Msg As UINT, wParam As WPARAM, bHandled As Integer, nResult As LongInt)
+			Static As Integer bOn = -1
+			If bOn = -1 Then
+				bOn = 0
+				If Environ("ASTORIA_LOGSYSCHAR") <> "" Then bOn = 1
+			End If
+			If bOn = 0 Then Exit Sub
+			If Msg <> WM_SYSKEYDOWN AndAlso Msg <> WM_SYSCHAR AndAlso Msg <> WM_MENUCHAR Then Exit Sub
+			Dim As String MsgName = "WM_MENUCHAR"
+			If Msg = WM_SYSKEYDOWN Then MsgName = "WM_SYSKEYDOWN"
+			If Msg = WM_SYSCHAR Then MsgName = "WM_SYSCHAR"
+			'' Explicit If/Else, not IIf: IIf cannot yield a String in FreeBASIC.
+			Dim As String Outcome = "called"
+			If bHandled <> 0 OrElse nResult <> 0 Then Outcome = "SKIPPED"
+			Dim As Integer FnLog = FreeFile
+			If Open(Environ("TEMP") & "\_astoria_syschar.log" For Append As #FnLog) = 0 Then
+				Print #FnLog, Site & "  " & MsgName & "  wParam=&h" & Hex(wParam) & _
+					"  Handled=" & Str(bHandled) & "  Result=" & Str(nResult) & _
+					"  -> DefWindowProc " & Outcome
+				Close #FnLog
+			End If
+		End Sub
+
+		'' Companion to AstoriaLogSysKey, recording what SuperWndProc actually FORWARDS to.
+		''
+		'' SuperWndProc ends with:  cp = GetClassProc(FWindow) : If cp <> 0 Then CallWindowProc(cp,...)
+		'' so when GetClassProc returns 0 the call is skipped entirely and the message is dropped --
+		'' no DefWindowProc, therefore no SC_KEYMENU, therefore no menu. That is precisely the shape
+		'' of 13.28 part 3, and this logs cp and the forwarded result to confirm or kill it.
+		Private Sub AstoriaLogSysProc(ByRef Site As String, uMsg As UINT, wp As WPARAM, cp As Any Ptr, res As LongInt)
+			Static As Integer bOn = -1
+			If bOn = -1 Then
+				bOn = 0
+				If Environ("ASTORIA_LOGSYSCHAR") <> "" Then bOn = 1
+			End If
+			If bOn = 0 Then Exit Sub
+			If uMsg <> WM_SYSCHAR AndAlso uMsg <> WM_SYSKEYDOWN Then Exit Sub
+			Dim As String MsgName = "WM_SYSCHAR   "
+			If uMsg = WM_SYSKEYDOWN Then MsgName = "WM_SYSKEYDOWN"
+			'' Explicit If/Else, not IIf: IIf cannot yield a String in FreeBASIC.
+			Dim As String Verdict = "forwarded"
+			If cp = 0 Then Verdict = "*** cp=0, CallWindowProc SKIPPED -- message DROPPED ***"
+			Dim As Integer FnLog = FreeFile
+			If Open(Environ("TEMP") & "\_astoria_syschar.log" For Append As #FnLog) = 0 Then
+				Print #FnLog, Site & "  " & MsgName & "  wParam=&h" & Hex(wp) & _
+					"  cp=&h" & Hex(CInt(cp)) & "  result=" & Str(res) & "  " & Verdict
+				Close #FnLog
+			End If
+		End Sub
+
 			Private Function Control.DefWndProc(FWindow As HWND, Msg As UINT, wParam As WPARAM, lParam As LPARAM) As LRESULT
 				Dim Message As Message
 				Dim As Control Ptr Ctrl
@@ -1409,6 +1472,7 @@ Namespace My.Sys.Forms
 					'?Ctrl
 					If Ctrl->ClassName <> "" Then
 						Ctrl->ProcessMessage(Message)
+						AstoriaLogSysKey("DefWndProc  [" & Ctrl->ClassName & "]", Msg, wParam, Message.Handled, Message.Result)
 						If Message.Handled Then
 							Return Message.Result
 						ElseIf Message.Result = -1 Then
@@ -1451,6 +1515,7 @@ Namespace My.Sys.Forms
 				If Ctrl Then
 					Proc = Ctrl->PrevProc
 					Ctrl->ProcessMessage(Message)
+					AstoriaLogSysKey("CallWndProc [" & Ctrl->ClassName & "]", Msg, wParam, Message.Handled, Message.Result)
 					If Message.Handled Then
 						Return Message.Result
 					ElseIf Message.Result = -1 Then
@@ -1487,6 +1552,7 @@ Namespace My.Sys.Forms
 					With *Ctrl
 						If Ctrl->ClassName <> "" Then
 							.ProcessMessage(Message)
+							AstoriaLogSysKey("SuperWndProc[" & Ctrl->ClassName & "]", Msg, wParam, Message.Handled, Message.Result)
 							If Message.Handled Then
 								Return Message.Result
 							ElseIf Message.Result = -1 Then
@@ -1505,6 +1571,7 @@ Namespace My.Sys.Forms
 				If cp <> 0 Then
 					Message.Result = CallWindowProc(cp, FWindow, Msg, wParam, lParam)
 				End If
+				AstoriaLogSysProc("SuperWndProc.forward", Msg, wParam, cp, Message.Result)
 				'				If Ctrl AndAlso Ctrl->ClassName <> "" Then
 				'					Ctrl->ProcessMessageAfter(Message)
 				'				End If

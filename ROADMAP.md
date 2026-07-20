@@ -881,3 +881,80 @@ this test that way would report a confident pass. Guard the harness so it refuse
 handed the foreground to, which happened during this test. And prove the instrument can fire before
 believing what it does not say — "typing does nothing" was nearly recorded as a defect on the
 strength of a harness that was targeting a modally-disabled window.
+
+### 13.29 Launching Astoria while it is already running crashes the second process — **RESOLVED 2026-07-19** (found by TestPlan E11)
+
+**Status: fixed, re-tested 10/10 by `TestHarness/E11_MultipleInstances.ps1`, and D1 re-run 12/12 as
+a startup regression check. Not yet owner-verified by hand.** Astoria is deliberately
+single-instance, and that part always worked — but the second process did not *exit*, it **crashed
+with an access violation**, and the running IDE was never brought to the foreground. A user who
+double-clicked the desktop icon while Astoria was already open (minimised, or behind another
+window) got a Windows crash report and no IDE in front of them.
+
+**The fix, in `Main.bas`.** Two changes, one per side of the handover:
+
+- *Sender.* `EnumWindows` now runs **unconditionally**, not only when a file was named, so a plain
+  second launch hands over instead of falling through. The payload travels in a fixed
+  `ZString * 4096` rather than `StrPtr` of a var-len string, because `StrPtr("")` can be NULL and
+  the receiver rejects a null pointer — which is exactly the no-file case that had to be carried.
+  `AllowSetForegroundWindow` is called for the target process first, or its own
+  `SetForegroundWindow` is refused and the user still sees nothing. The callback no longer calls
+  `End` from inside the enumeration; it returns `False` to stop it.
+- *Exit.* The bare `End` is replaced by `ExitProcess(0)`. **This is the crash fix.** Module-level
+  code is run from the CRT's global initialiser table, and `End` unwound the CRT from inside that
+  walk — the backtrace faulted in `msvcrt!_initterm_e` every time. Nothing needs flushing at that
+  point: no file is open and `framework.dll` is not loaded until later.
+- *Receiver.* The `WM_COPYDATA` handler already restored and foregrounded itself; it now treats an
+  **empty** payload as "raise the window, open nothing" instead of ignoring it.
+
+**Verified by the transition, not the end state.** With the IDE minimised, a second launch takes it
+from `IsIconic=True` to `IsIconic=False` and into the foreground — a state change the old build
+could not produce, because it sent no message at all. Crash records went from 3/3 to 0/3 on the
+no-argument path.
+
+**The running instance was never harmed.** Verified across nine second-launch attempts: it stayed
+alive, kept serving the agent pipe, and `astoria.ini` and `Workspace.ini` were byte-intact
+afterwards. This was alarming rather than destructive — but it was exactly the "cannot tell a broken
+tool from their own mistake" case the product standard is written against, and it happened on the
+most ordinary user action there is.
+
+**Reproduced 6/6 with no arguments; 0/3 with a file argument.** Same fault offset every time
+(`0xC0000005` at `0x246be4`, faulting module `astoria.exe`), so this was deterministic, not a race.
+
+**The cause is narrow and the two paths differ by one statement.** `Main.bas:76-84`:
+
+- With a file argument, `Command(-1)` is non-empty, the guard on line 80 passes, `EnumWindows`
+  forwards the path to the running instance by `WM_COPYDATA`, and the process leaves through the
+  `End` **inside `EnumWindowsProc`** (line 69). No crash.
+- With no arguments, `Command(-1)` is **empty** — it excludes the program name — so the line 80
+  guard fails, `EnumWindows` is skipped, and control reaches the bare `End` on **line 83**. That is
+  the statement that faults.
+
+So the fault was in the module-level `End`, reached before `DyLibLoad` of `framework.dll` and before
+the `Application` object is fully stood up. **Confirmed under GDB rather than assumed:** the
+backtrace put the faulting frame beneath `msvcrt!_initterm_e`, the CRT's global
+constructor/terminator table walker. FreeBASIC runs module-level code from that table, so `End`
+there tears the CRT down from inside the walk that is still executing it. (Astoria's own frames all
+resolve to the nearest export, `StatusBarPanelByIndex`, and are not meaningful — `_initterm_e` is
+the informative one.) The `End` inside `EnumWindowsProc` never faulted because it runs from a
+callback, not directly from the initialiser frame.
+
+**A second, separate defect on the same path: the second launch does not raise the running IDE.**
+Measured with a non-Astoria window deliberately parked in the foreground first — after the second
+launch the foreground was unchanged. Even once the crash is fixed, a bare `End` leaves the user
+having double-clicked an icon for no visible effect. The forwarding machinery to do this properly
+already exists and is proven to work (the `.vfp` path above); the no-argument case simply does not
+use it. Foregrounding the existing main window before `End` would fix both halves of the user
+experience.
+
+**How to re-run this, and two warnings that cost real time here.** *Do not trust the exit code.*
+Two separate instruments reported a confident clean exit for a launch form that was in fact
+crashing every single time: `start /wait astoria.exe & echo EXIT=%ERRORLEVEL%` prints the *previous*
+errorlevel because `cmd` expands the variable when it parses the compound line, and even written
+correctly `cmd`'s `ERRORLEVEL` does not carry `0xC0000005` out of `start /wait`. Count crash records
+in the Windows Application event log (Provider `Application Error`, Id 1000, filtered to
+`astoria.exe`) instead — three attempts should produce three records, and the fault offset confirms
+they are the same defect. *And do not reason about `Command(-1)` — print it.* The first explanation
+formed here was that `Start-Process` passes a quoted path so the `.exe` guard misses on the trailing
+quote; a four-line FreeBASIC probe showed `Command(-1)` excludes the program name and strips quotes
+entirely, which killed that theory and pointed at the real one.

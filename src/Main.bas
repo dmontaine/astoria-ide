@@ -55,32 +55,56 @@ Const SAVE_FILTER_RC As Integer = 5
 Const SAVE_FILTER_OTHER As Integer = 6
 
 Dim Shared As Boolean bQuitting
+	'' Payload handed to the already-running instance. A fixed buffer rather than StrPtr of a
+	'' var-len string, because StrPtr("") can be NULL and the receiver rejects a null pointer --
+	'' which is precisely the "no file named" case this has to carry (ROADMAP 13.29).
+	Dim Shared As ZString * 4096 HandoverPayload
+
 	Function EnumWindowsProc(ByVal hWnd As HWND, ByVal lParam As LPARAM) As BOOL
 		Dim As Any Ptr VisualFBEditorAppPtr = GetProp(hWnd, "VisualFBEditorApp")
-		
+
 		If VisualFBEditorAppPtr <> 0 Then
 			Dim As ZString Ptr FileFromCmdLine = Cast(ZString Ptr, lParam)
+			'' Grant the instance we are handing over to the right to take the foreground.
+			'' Without this its own SetForegroundWindow is refused and the user, who just
+			'' launched Astoria, sees nothing happen at all.
+			Dim As DWORD OtherProcessId
+			GetWindowThreadProcessId(hWnd, @OtherProcessId)
+			AllowSetForegroundWindow(OtherProcessId)
 			Dim cds As COPYDATASTRUCT
 			cds.dwData = 0
 			cds.cbData = Len(*FileFromCmdLine) + 1
 			cds.lpData = FileFromCmdLine
 			If SendMessage(hWnd, WM_COPYDATA, 0, Cast(lParam, @cds)) <> 0 Then
 				bQuitting = True
-				End
+				Return False        '' handed over; stop enumerating
 			End If
 		End If
-		
+
 		Return True
 	End Function
-	
+
 	If App.PrevInstance Then
 		Var FileFromCommandLine = Command(-1)
 		Var Pos1 = InStr(FileFromCommandLine, "2>CON")
 		If Pos1 > 0 Then FileFromCommandLine = Left(FileFromCommandLine, Pos1 - 1)
-		If FileFromCommandLine <> "" AndAlso Right(LCase(FileFromCommandLine), 4) <> ".exe" Then
-			EnumWindows(@EnumWindowsProc, Cast(LPARAM, StrPtr(FileFromCommandLine)))
-		End If
-		End
+		'' An .exe here would be this program's own name, never a file the user wants opened.
+		'' Command(-1) already excludes the program name, so this is belt and braces.
+		If Right(LCase(FileFromCommandLine), 4) = ".exe" Then FileFromCommandLine = ""
+		HandoverPayload = Left(FileFromCommandLine, 4095)
+
+		'' Hand over to the running instance UNCONDITIONALLY -- with a file to open when one was
+		'' given, and in every case so that it comes to the front. The old code ran this only
+		'' when a file was named, so a plain second launch (the desktop icon, the commonest case
+		'' there is) fell straight through to the End below and did nothing visible (13.29).
+		EnumWindows(@EnumWindowsProc, Cast(LPARAM, @HandoverPayload))
+
+		'' Leave without FB's End. This is module-level code, which FreeBASIC runs from the CRT's
+		'' global initialiser table; End unwinds the CRT from inside that walk and faulted in
+		'' msvcrt!_initterm_e every time (13.29, 0xC0000005). Nothing needs flushing here -- no
+		'' file is open and framework.dll is not loaded until below -- so leaving directly is
+		'' both correct and the only thing that does not re-enter the teardown that crashed.
+		ExitProcess(0)
 	End If
 	
 	' MyFbFramework must load before any other FB control DLL in Controls\ (shared fbrt runtime).
@@ -10661,7 +10685,10 @@ Sub frmMain_Message(ByRef Designer As My.Sys.Object, ByRef Sender As Control, By
 			Dim pCDS As COPYDATASTRUCT Ptr = Cast(COPYDATASTRUCT Ptr, Msg.lParam)
 			Dim As ZString Ptr FileNameFromCmdLine = Cast(ZString Ptr, pCDS->lpData)
 			If FileNameFromCmdLine <> 0 Then
-				OpenFiles *FileNameFromCmdLine
+				'' An empty payload means a second Astoria was launched with no file named. There
+				'' is nothing to open, but the user still asked for the IDE, so raise it anyway
+				'' rather than ignoring them (ROADMAP 13.29).
+				If Len(*FileNameFromCmdLine) > 0 Then OpenFiles *FileNameFromCmdLine
 				If frmMain.WindowState = WindowStates.wsMinimized Then ShowWindow frmMain.Handle, SW_RESTORE
 				SetForegroundWindow frmMain.Handle
 				SetFocus frmMain.Handle

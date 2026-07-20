@@ -184,10 +184,23 @@ each isolated run.
 Astoria is deliberately project-based: it is not a standalone `.bas` editor, and a source file
 cannot be opened until a project has been created or loaded. The scale results below therefore
 describe project members and project transitions, not arbitrary files or concurrent projects.
-Opening a second project in one process closes the first by design. What remains untested is running
-multiple Astoria processes simultaneously, each with its own project. That test must cover editing,
-building and closing independently, plus contention over the global agent named pipe and shared
-settings/workspace files (TestPlan E11).
+Opening a second project in one process closes the first by design.
+
+**Running two Astoria processes at once is not possible, and that is deliberate** (TestPlan E11,
+2026-07-19). Astoria is single-instance: it takes a named mutex on the exe name and ends the second
+process. The contention this was expected to test therefore cannot occur — which matters, because
+the settings and workspace files *are* shared per install rather than per process, so a second
+instance would genuinely have written over the first. The single instance was confirmed to own the
+agent named pipe, and repeated launch attempts left the running IDE alive, still serving the pipe,
+with its settings and workspace files intact.
+
+Testing this **found a real defect, now fixed** (ROADMAP §13.29): the second process used to *crash*
+rather than exit, deterministically, on every launch that named no file, and the running IDE was
+never brought forward — so double-clicking the icon while Astoria was already open produced a crash
+report and no visible IDE. A second launch now hands over to the running instance in every case:
+the IDE is restored if minimised and raised to the front, opening a file too if one was named. All
+ten E11 checks pass, and D1 was re-run as a startup regression check. **Not yet owner-verified by
+hand.**
 
 A 250-file project passes cleanly: 3.640 seconds to open, 2 ms to enumerate all 250 files, with the
 IDE responsive at 155.2 MB working set and 1,289 handles in the combined scale run.
@@ -291,10 +304,11 @@ Stated plainly, because a tester's time is best spent here.
 | **Multi-machine / fresh user** | All testing to date is by one developer on two of their own machines. Nothing has been tested by someone encountering Astoria for the first time — the specific reason human testers are being sought. |
 | **Clean-machine install** | **Closed 2026-07-19 (TestPlan E7).** Version 1.3.7 installed on a bare computer without a pre-existing FreeBASIC toolchain, then compiled and ran a program successfully. |
 | **Performance and scale** | **Partly closed 2026-07-19 (E4–E6).** A 250-file project passes, and 60 open project documents remain functional, although bulk opening flashes repeatedly for several seconds. A 100,000-line/7.71 MB project member is beyond the practical 1.0 limit and needs an up-front warning/code-only path. See “Scale and supported limits” above. |
+| **Multiple Astoria instances** | **Closed as a gap 2026-07-19 (E11), with a defect found.** The scenario cannot occur: Astoria is single-instance by design, so the shared-settings contention this gap was worried about is unreachable. The single instance owns the agent named pipe, and repeated launch attempts leave the running IDE and its settings intact. **Testing it found one real defect, since fixed** (ROADMAP §13.29): the second process crashed (`0xC0000005`) rather than exiting, on every launch without a file argument, and the running IDE was not raised — so double-clicking the icon while Astoria was open crashed a process and showed nothing. A second launch now restores and raises the running IDE instead. 10/10 checks pass; re-runnable as `TestHarness/E11_MultipleInstances.ps1`. |
 | **Accessibility and display scaling** | **Display scaling partly closed 2026-07-19 (E8):** the IDE passes visual use at 125%, 150% and 200% on one monitor. Mixed-DPI monitor movement was unavailable. **Keyboard-only operation tested 2026-07-19 (E9) and it FAILS** — this is now a known defect rather than an untested gap. Building and running are reachable from the keyboard, and the menu bar is properly keyboard-driven, but **a project cannot be created or edited without a mouse**: the New Project dialog accepts no keyboard input at all (not even Escape to close it), and the project tree cannot be reached, so no source file can be opened. See ROADMAP §13.28. Screen readers and high-contrast mode remain untested (E10). |
 | **Debugger breadth** | **Partly closed 2026-07-19.** DR-1..DR-16 closed the known reliability defects, and TestPlan D6 now proves a realistic two-form event workflow including breakpoints, stepping, Locals, Watches, return values, Stop, and process cleanup. A broader matrix of program types is still untested. Step Out may stop first in framework dispatcher code before returning to user code. |
 | **AI templates beyond Claude Code** | **Closed 2026-07-19.** The ChatGPT, Cursor, Kun and OpenCode clients each compared and updated their own template against the Claude Code reference; owner-verified under TestPlan D7. |
-| **Form designer breadth** | **Partly closed as of 2026-07-18.** The designer's core workflows are now covered by TestPlan C1–C6 (place and wire, round-trip, multi-select operations, cross-form paste, split-view focus), and one real defect remains from it — C3, renaming a control breaks the build (§13.17). What is still untested is *breadth*: those tests exercise a handful of common controls, not every control's design-time behaviour, so a less-used control could still misbehave in the designer. |
+| **Form designer breadth** | **Partly closed; Section C is complete, 6/6.** The designer's core workflows are covered by TestPlan C1–C6 (place and wire, round-trip fidelity, multi-select operations, cross-form paste, split-view focus). C3 found a real defect — renaming a control broke the build — and it was **fixed and owner-verified 2026-07-18 (§13.17, the last 1.0 blocker)**; the rename tokenizer now carries its own regression test. One follow-on observation remains open, not a defect in itself: because a renamed control's handler keeps its original name, a later control can be auto-named into the old name (§13.21). What is still untested is *breadth*: those tests exercise a handful of common controls, not every control's design-time behaviour, so a less-used control could still misbehave in the designer. |
 
 ## For human testers
 

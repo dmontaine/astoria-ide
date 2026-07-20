@@ -18,7 +18,7 @@ is to write a good commit message. Regenerate rather than hand-edit; a stale han
 than no entry. Run `.\GenerateChangelog.ps1` from the repository root; `-Check` reports whether
 the file is current and writes nothing, which suits a pre-commit hook.
 
-Everything above the **Total: 437 commits, 2026-07-02 to 2026-07-20.**
+Everything above the **Total: 439 commits, 2026-07-02 to 2026-07-20.**
 
 ## 2026-07-02
 
@@ -1325,3 +1325,9 @@ Everything above the **Total: 437 commits, 2026-07-02 to 2026-07-20.**
 - **`b072609`** — 13.28 part 3: the defect reproduces on the second machine, silently
   The previous session's handoff asked for three keystrokes on the other computer, on the grounds that either answer would be progress.
   *Build/Tools, Docs · 3 files*
+- **`a61a1d1`** — DetailedChangelog: regenerate through b072609
+  Picks up the cross-machine confirmation for 13.28 part 3.
+  *Docs · 1 file*
+- **`3380be4`** — 13.28 pt 3: six more hypotheses eliminated, cause still unknown
+  Not solved.
+  *Build/Tools, Docs, IDE · 9 files*

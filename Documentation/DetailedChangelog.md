@@ -18,7 +18,7 @@ is to write a good commit message. Regenerate rather than hand-edit; a stale han
 than no entry. Run `.\GenerateChangelog.ps1` from the repository root; `-Check` reports whether
 the file is current and writes nothing, which suits a pre-commit hook.
 
-Everything above the **Total: 413 commits, 2026-07-02 to 2026-07-19.**
+Everything above the **Total: 415 commits, 2026-07-02 to 2026-07-19.**
 
 ## 2026-07-02
 
@@ -1252,3 +1252,9 @@ Everything above the **Total: 413 commits, 2026-07-02 to 2026-07-19.**
 - **`ae1bb5a`** — E10a: the editor ignores high contrast; 13.29 owner-verified
   Splits E10 into E10a (high contrast) and E10b (screen reader).
   *Docs · 3 files*
+- **`feb9a1c`** — DetailedChangelog: regenerate through ae1bb5a
+  Picks up the E10a high-contrast result and ROADMAP 13.30.
+  *Docs · 1 file*
+- **`94d8cae`** — 13.30: the editor now follows the system high-contrast theme
+  Astoria never called SPI_GETHIGHCONTRAST anywhere in src/.
+  *Docs, IDE · 6 files*

@@ -48,7 +48,7 @@ Enum NewLineTypes
 	LinuxLF
 	MacOSCR
 End Enum
-Declare Function MsgBox Alias "MsgBox" (ByRef MsgStr As WString, ByRef Caption As WString = "", MsgType As MessageType = MessageType.mtInfo, ButtonsType As ButtonsTypes = ButtonsTypes.btOK) As MessageResult
+Declare Function MsgBox Alias "MsgBox" (ByRef MsgStr As WString, ByRef Caption As WString = WStr(""), MsgType As MessageType = MessageType.mtInfo, ButtonsType As ButtonsTypes = ButtonsTypes.btOK) As MessageResult
 'Gets a handle to the debug window when the application is launched from the IDE.
 'Declared here (as in Application.bas) so a no-interface/console program that
 'includes NoInterface.bi without Application still compiles; stays null (debug
@@ -145,7 +145,7 @@ Namespace Debug
 	End Sub
 End Namespace
 
-Public Function MsgBox Alias "MsgBox" (ByRef MsgStr As WString, ByRef Caption As WString = "", MsgType As MessageType = MessageType.mtInfo, ButtonsType As ButtonsTypes = ButtonsTypes.btOK) As MessageResult
+Public Function MsgBox Alias "MsgBox" (ByRef MsgStr As WString, ByRef Caption As WString = WStr(""), MsgType As MessageType = MessageType.mtInfo, ButtonsType As ButtonsTypes = ButtonsTypes.btOK) As MessageResult
 	Dim As Integer Result = -1
 	Dim As WString Ptr FCaption = CAllocate((Len(Caption) + 1) * SizeOf(WString))
 	Dim As WString Ptr FMsgStr = CAllocate((Len(MsgStr) + 1) * SizeOf(WString))

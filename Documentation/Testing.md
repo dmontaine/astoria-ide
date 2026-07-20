@@ -124,7 +124,9 @@ committed.
 
 Owner-verified through a full clean install and uninstall cycle: per-user install with no
 elevation prompt, Start Menu and desktop shortcuts, and the seeded `ProjectsPath` pointing at a
-findable location rather than the hidden install folder.
+findable location rather than the hidden install folder. TestPlan E7 subsequently passed on a bare
+computer with no pre-installed FreeBASIC toolchain: the installed IDE compiled and ran a program,
+confirming that the installer is self-contained for its core build/run workflow.
 
 **Known limitation:** the installed app does not appear in Control Panel ▸ Programs and Features,
 despite a well-formed uninstall registry entry. Most likely because the executables are unsigned.
@@ -287,9 +289,9 @@ Stated plainly, because a tester's time is best spent here.
 | **Any single control in depth** | **Covered for the seven common controls as of 2026-07-18** (TestPlan A7, 50 assertions): properties set and read back — cross-checked against the real window, not just the wrapper — and one real event fired per control. ScintillaControl is additionally covered for editing, undo/redo and styling (A6). The remaining controls still have only the sweep's "it compiles and its window opens", so a control outside those seven can still pass and misbehave in use. |
 | **Controls used together** | **Complete as of 2026-07-18 — all 13 planned scenarios pass.** Data-entry forms, tab-order traversal, nested containers, docking and box layouts under resize, list/detail selection, a shared ImageList across three consumers, full application chrome, timer-driven progress, second forms, database-to-view, a browser composite, and 26 control types on one form. Between them these found a framework shift-key bug, two silent image-index traps, and two build-configuration requirements. See [TestPlan.md](TestPlan.md) § B. |
 | **Multi-machine / fresh user** | All testing to date is by one developer on two of their own machines. Nothing has been tested by someone encountering Astoria for the first time — the specific reason human testers are being sought. |
-| **Clean-machine install** | The installer is verified on a development machine. It has not been installed on a machine without a FreeBASIC toolchain already present. |
-| **Performance and scale** | No testing with large projects, long files, or many open documents. |
-| **Accessibility** | Untested — screen readers, keyboard-only navigation, high-DPI and high-contrast modes. |
+| **Clean-machine install** | **Closed 2026-07-19 (TestPlan E7).** Version 1.3.7 installed on a bare computer without a pre-existing FreeBASIC toolchain, then compiled and ran a program successfully. |
+| **Performance and scale** | **Partly closed 2026-07-19 (E4–E6).** A 250-file project passes, and 60 open project documents remain functional, although bulk opening flashes repeatedly for several seconds. A 100,000-line/7.71 MB project member is beyond the practical 1.0 limit and needs an up-front warning/code-only path. See “Scale and supported limits” above. |
+| **Accessibility and display scaling** | **Display scaling partly closed 2026-07-19 (E8):** the IDE passes visual use at 125%, 150% and 200% on one monitor. Mixed-DPI monitor movement was unavailable. Keyboard-only operation, screen readers and high-contrast mode remain untested (E9–E10). |
 | **Debugger breadth** | **Partly closed 2026-07-19.** DR-1..DR-16 closed the known reliability defects, and TestPlan D6 now proves a realistic two-form event workflow including breakpoints, stepping, Locals, Watches, return values, Stop, and process cleanup. A broader matrix of program types is still untested. Step Out may stop first in framework dispatcher code before returning to user code. |
 | **AI templates beyond Claude Code** | **Closed 2026-07-19.** The ChatGPT, Cursor, Kun and OpenCode clients each compared and updated their own template against the Claude Code reference; owner-verified under TestPlan D7. |
 | **Form designer breadth** | **Partly closed as of 2026-07-18.** The designer's core workflows are now covered by TestPlan C1–C6 (place and wire, round-trip, multi-select operations, cross-form paste, split-view focus), and one real defect remains from it — C3, renaming a control breaks the build (§13.17). What is still untested is *breadth*: those tests exercise a handful of common controls, not every control's design-time behaviour, so a less-used control could still misbehave in the designer. |

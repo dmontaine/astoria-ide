@@ -607,13 +607,9 @@ Namespace Debug
 			_Deallocate(tMsgPtr)
 		End Sub
 		
-		Private Sub Print Overload(ByRef Msg As WString, ByRef Msg1 As Const WString = "", ByRef Msg2 As Const WString = "", ByRef Msg3 As Const WString = "", ByRef Msg4 As Const WString = "", bWriteLog As Boolean = False, bPrintMsg As Boolean = False, bShowMsg As Boolean = False, bPrintToDebugWindow As Boolean = True)
+		Private Sub Print Overload(ByRef Msg As WString, bWriteLog As Boolean = False, bPrintMsg As Boolean = False, bShowMsg As Boolean = False, bPrintToDebugWindow As Boolean = True)
 			Dim As WString Ptr tMsgPtr
 			WLet(tMsgPtr, Msg)
-			If Msg1 <> "" Then WAdd(tMsgPtr, Chr(9) & Msg1)
-			If Msg2 <> "" Then WAdd(tMsgPtr, Chr(9) & Msg2)
-			If Msg3 <> "" Then WAdd(tMsgPtr, Chr(9) & Msg3)
-			If Msg4 <> "" Then WAdd(tMsgPtr, Chr(9) & Msg4)
 			Print(*tMsgPtr, bWriteLog, bPrintMsg, bShowMsg, bPrintToDebugWindow)
 			_Deallocate(tMsgPtr)
 		End Sub
@@ -673,7 +669,7 @@ Public Function ML(ByRef V As WString) ByRef As WString
 	End If
 End Function
 
-Public Function MsgBox Alias "MsgBox" (ByRef MsgStr As WString, ByRef Caption As WString = "", MsgType As MessageType = MessageType.mtInfo, ButtonsType As ButtonsTypes = ButtonsTypes.btOK) As MessageResult __EXPORT__
+Public Function MsgBox Alias "MsgBox" (ByRef MsgStr As WString, ByRef Caption As WString = WStr(""), MsgType As MessageType = MessageType.mtInfo, ButtonsType As ButtonsTypes = ButtonsTypes.btOK) As MessageResult __EXPORT__
 	' Built on MsgBoxForm (a plain Form) rather than the native MessageBox API.
 	' T11 spent a long session methodically theming the real MessageBox dialog
 	' via a thread-scoped WH_CBT hook + SetWindowSubclass - title bar, message
@@ -1041,5 +1037,3 @@ End Function
 	Function ApplicationFileName Alias "ApplicationFileName"(App As My.Application Ptr) ByRef As WString __EXPORT__
 		Return App->FileName
 	End Function
-
-

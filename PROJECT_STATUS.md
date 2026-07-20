@@ -1,16 +1,14 @@
 # Astoria-IDE — Project Status & Handoff
 
-**Last updated:** 2026-07-19 — Cursor AI template upgraded to ClaudeCode parity (git-workflow +
-BOM/`ReDim`/`project.astoria`/testing/MCP-edit rules). **FEATURE COMPLETE FOR 1.0** otherwise;
-testing, program-flow and UI tweaks only. See "Feature complete for version 1.0" below and
+**Last updated:** 2026-07-19 — integration testing through E8; clean-machine installation and
+single-monitor scaling verified. **FEATURE COMPLETE FOR 1.0**; remaining work is testing and
+targeted reliability/polish fixes. See [Documentation/TestPlan.md](Documentation/TestPlan.md) and
 [Documentation/Testing.md](Documentation/Testing.md).
 
-*Current activity: **integration testing**. **2026-07-19: both 1.0 blockers are closed and no
-known 1.0 beta blockers remain** -- 13.17 (designer rename broke the build) and 13.18 (a modal from
-the activation handler could hang the IDE) are fixed and owner-confirmed, and TestPlan A3 found and
-fixed four defects in MariaDBBox. Sections B and C of
-[Documentation/TestPlan.md](Documentation/TestPlan.md) are complete, and Section A is complete
-except A8. See "Session handoff (2026-07-19)" below for state and the next scenarios.*
+*Current activity: **integration testing**. No known 1.0 beta blockers remain. TestPlan sections
+A–D are complete. Environment tests E1–E7 pass; E8 passes at 125%, 150% and 200% on one monitor,
+with mixed-DPI monitor movement unavailable. Remaining planned tests are E9 keyboard-only, E10
+screen reader/high contrast, and E11 multiple Astoria instances.*
 
 *Earlier in this testing run: seven scenarios (A1, A4, A5, B1, B4, B6, B10), two of which passed
 only after fixing real defects the tests found — the WebBrowser control could not render a page at
@@ -22,6 +20,37 @@ obvious form.*
 **Local path:** C:\Users\don\Astoria-IDE
 
 This is the concise, authoritative handoff for the next work session. Completed-work narratives, investigations, and dated session notes are archived in [HISTORY.md](HISTORY.md). Shipped changes are indexed in [CHANGELOG.md](CHANGELOG.md), and fuller enhancement specifications live in [ROADMAP.md](ROADMAP.md).
+
+## Session handoff (2026-07-19, evening) — integration testing through E8
+
+**Where things stand:** TestPlan A–D are complete. E1–E7 pass; E8 passes at 125%, 150% and 200%
+on a single monitor. The remaining queue is E9 (keyboard-only workflow), E10 (screen reader and
+high contrast), E11 (two Astoria processes with independent projects), plus the unavailable
+mixed-DPI monitor-move portion of E8.
+
+**Clean-machine packaging is proven.** `BuildInstaller.ps1` staged commit `c838493` into
+`C:\Users\don\Astoria-IDE-Release` (4,178 files, 287 MB) and built unsigned installer version
+1.3.7 at `C:\Users\don\Astoria-IDE-Installer\AstoriaIDE-Setup-1.3.7.exe`. The owner installed it
+on a bare computer with no existing FreeBASIC toolchain, then compiled and ran a program. That
+installer predates the final warning-only cleanup described below; rebuild it from the new HEAD
+before distributing another copy.
+
+**The D6 multi-form debugger workflow passes after five fixes.** Breakpoints in Main and Child
+event handlers, Step Over, Locals, Watches, FreeBASIC string values/types, returned values, Stop,
+and process cleanup were owner-verified. Step Out may first land in the framework dispatcher; this
+is documented as a GDB caller-frame limitation. The reusable fixture is
+`Examples/Integration/D6_DebugMultiForm`.
+
+**Final compiler-warning cleanup:** `Application.bas` no longer emits its five parameter-default
+warnings. `MsgBox` now uses an explicitly wide empty-string default in both GUI and console
+interfaces. The unused four-message `Debug.Print` overload tail was removed; this also fixes calls
+such as `Debug.Print message, True`, where `True` previously bound as `Msg1` instead of the intended
+`bWriteLog`. A full `Compile.bat` release build succeeds. Remaining warnings are in `Control.bas`
+and `EditControl.bas`, not `Application.bas`.
+
+**Do not sweep local artifacts into the next commit.** `Examples/DeviceExplorer/DeviceExplorer.vfp`
+was changed by the owner's test run and was deliberately left unstaged, along with generated
+projects/results, old debug traces, and `.claude/`.
 
 ## Session handoff (2026-07-18, afternoon) — integration testing begins, WebBrowser rebuilt
 

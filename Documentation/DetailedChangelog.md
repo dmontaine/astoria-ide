@@ -18,7 +18,7 @@ is to write a good commit message. Regenerate rather than hand-edit; a stale han
 than no entry. Run `.\GenerateChangelog.ps1` from the repository root; `-Check` reports whether
 the file is current and writes nothing, which suits a pre-commit hook.
 
-Everything above the **Total: 427 commits, 2026-07-02 to 2026-07-20.**
+Everything above the **Total: 431 commits, 2026-07-02 to 2026-07-20.**
 
 ## 2026-07-02
 
@@ -1297,3 +1297,15 @@ Everything above the **Total: 427 commits, 2026-07-02 to 2026-07-20.**
 - **`8b7d69e`** — PROJECT_STATUS: handoff for the Section E testing session
   Five defects found and fixed this session (13.29 second-launch crash, 13.30 high contrast, 13.32 and 13.33 dead shortcuts, 13.28 parts 1-2 keyboard access), plus 13.31 UI simplification, and two new ones recorded (13.35, 13.36).
   *Docs · 1 file*
+- **`637f448`** — DetailedChangelog: regenerate through 8b7d69e
+  Picks up the session handoff.
+  *Docs · 1 file*
+- **`824b24c`** — Shortcut integrity: fix 13.35 at the generator, and validate at startup
+  Every shortcut defect found so far has been bad DATA rather than bad dispatch: a missing entry (13.32), blank duplicates shadowing a real binding (13.33), and an accelerator quietly eating a menu mnemonic.
+  *IDE, Settings · 7 files*
+- **`ec554be`** — Framework: gated diagnostics for the Alt+C/G/R defect (13.28 part 3)
+  Three hypotheses formed by reading code had already been disproved, so these measure instead of proposing a fourth.
+  *Framework/Controls · 2 files*
+- **`5cc5417`** — 13.28 part 3: record the investigation, its harnesses, and the rebuilt binaries
+  Alt+C, Alt+G and Alt+R still do not open their menus.
+  *Build/Tools, Docs, Framework/Controls, IDE · 14 files*

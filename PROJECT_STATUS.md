@@ -1,5 +1,82 @@
 # Astoria-IDE — Project Status & Handoff
 
+## Session handoff (2026-07-20, evening) — pt 3 workaround shipped; Alt+E added; kernel trace deferred
+
+**Everything committed and pushed through `ad1e723`. Tree clean. `astoria.exe` is the build the
+tests ran against.**
+
+Building on the earlier "afternoon" handoff below (which recorded that §13.28 pt 3 turned out to be
+an *upstream* defect in VisualFBEditor, not Astoria-specific), this stretch of the session did
+three concrete things:
+
+### 1. Workaround for §13.28 pt 3 shipped
+
+The three swallowed letters have their menu mnemonics moved off them. **Not a fix**; the underlying
+defect is unchanged. Verified by effect — the affected menus now open on the new letters, and the
+same probe still reports `Alt+C/G/R` silent (correct under a workaround).
+
+| Menu | Was | Now | Rendered |
+| --- | --- | --- | --- |
+| Code | `&Code` (Alt+C) | `Co&de` (Alt+D) | Co**d**e |
+| Git  | `&Git`  (Alt+G) | `G&it`  (Alt+I) | G**i**t  |
+| Run  | `&Run`  (Alt+R) | `R&un`  (Alt+U) | R**u**n  |
+
+Recorded as a workaround in ROADMAP §13.28 pt 3, in `CHANGELOG.md`, and in
+`Documentation/AstoriaIDESignificantChanges.md` §2 (the doc a new user reads). All three source
+sites carry the comment `13.28 pt 3 workaround` so a grep finds them when the real fix arrives.
+
+**Owner picked `Alt+O` for Code first**; declined because `OpenFolder=Alt+O` in `HotKeys.txt` is a
+bare-Alt accelerator, and `TranslateAccelerator` runs before menu-mnemonic search — so `Alt+O` for
+the Code menu would have triggered Open Folder instead. `Alt+D` has no conflict.
+
+### 2. Alt+E added to Code/Form
+
+Code/Form was the one top-level menu with no mnemonic at all. Now `Cod&e/Form` (Alt+E). Alt+E was
+verified free of every other binding. The visible label is unchanged, only the underline moves.
+Also folded the previously-per-gate override into the shipped default (the `ASTORIA_BISECT=fixodditems`
+gate's Code/Form half became redundant).
+
+### 3. Kernel trace preparation cancelled
+
+The other machine's KDNET setup on ACE is preserved and can be resumed. Debugging Tools for Windows
+was about to be installed on this machine (the intended host) when the VisualFBEditor observation
+arrived. Cancelled.
+
+### Two hand-checks pending, if convenient
+
+- **Menu bar underlines.** Hold Alt in the IDE and confirm the underlines are on **d** (Code),
+  **i** (Git), **u** (Run), **e** (Code/Form). Every other menu keeps its natural underline.
+- **`Alt+E` opens Code/Form** (an item that previously had no keyboard route at all).
+
+### Kept, for the future §13.28 pt 3 investigation
+
+All this session's instrumentation and scaffolding stays in place, inert without env vars:
+
+- `TestHarness/13.28_Mnemonics/MenuProbe.ps1` — validated Alt+letter probe with the 40-byte `INPUT`
+  struct assertion. Asserts `SizeOf(INP)=40` at startup, refuses to declare a run valid until
+  `Alt+F` opens.
+- `TestHarness/13.28_Mnemonics/BisectRun.ps1` — driver that sweeps a list of `ASTORIA_BISECT` values,
+  now carrying all eleven cases tried across this session and the previous one.
+- `ASTORIA_BISECT` scaffolding in `src/Main.bas` / `src/Main.bi` — gates for `toolbars`,
+  `statusbar`, `leftpanel`, `rightpanel`, `bottompanel`, `menuicons`, `fixodditems`, `shiftindices`.
+- `AstoriaLogAccel` / `AstoriaLogSysKey` / `AstoriaLogLoop` in `Controls/Framework/mff/` — gated on
+  `ASTORIA_LOGSYSCHAR`. **These will work against a stock VFBE build** with the same framework
+  changes applied, which matters if the next investigator bisects at the framework level.
+- `TestHarness/13.28_Mnemonics/MffMnemonicTest.bas` — this session's version puts Ctrl+C/G/R on the
+  main menu (not a context menu), truly paralleling VFBE/Astoria's accelerator configuration. Still
+  opens all three menus, which is what refuted hypothesis 7 for real.
+
+### On a Gemini answer received mid-session
+
+The owner shared an LLM response claiming "Windows reserves specific Alt+Letter combinations —
+Alt+R for Xbox Game Bar, Alt+C and Alt+G for hidden system-level shortcuts." **That is confidently
+wrong on the central claim.** Xbox Game Bar uses `Win+Alt+R`, not `Alt+R`; nothing in Windows
+reserves `Alt+C` or `Alt+G`; and the claim is directly contradicted by measurement — `MffMnemonicTest`
+opens all three menus on the same machine, in the same session, using the same OS. Recorded here so
+future readers do not chase that theory: **the defect lives in something VFBE does that a minimal
+MFF app does not**, and every path from that upstream diff has already been eliminated inside
+Astoria's own code.
+
 ## Session handoff (2026-07-20, afternoon) — 13.28 pt 3 PAUSED: the defect is UPSTREAM in VisualFBEditor
 
 **13.28 part 3 is paused, not solved.** The owner ran VisualFBEditor — the upstream project Astoria
@@ -182,19 +259,22 @@ either way. The C/G/R result itself is corroborated by ear and reproduced across
 *single* run from this session should be re-confirmed before being built on.
 
 
-**Last updated:** 2026-07-20 (early hours) — Section E testing finished except the screen reader,
-**five defects found and fixed** (13.29, 13.30, 13.32, 13.33, 13.28 parts 1–2), two new ones
-recorded (13.35, 13.36), and the keyboard-accessibility failure that was the plan's only ❌ is now
-mostly closed. **FEATURE COMPLETE FOR 1.0**; remaining work is testing and targeted
-reliability/polish fixes. See [Documentation/TestPlan.md](Documentation/TestPlan.md) and
-[Documentation/Testing.md](Documentation/Testing.md).
+**Last updated:** 2026-07-20 (evening) — §13.28 pt 3 (Alt+C/G/R silence) is confirmed to be an
+*upstream* defect in VisualFBEditor rather than an Astoria-specific one, and its investigation is
+paused pending a proper two-machine lab. A **workaround is shipped**: the three affected menus use
+`Alt+D`, `Alt+I`, `Alt+U` instead. `Alt+E` was also added to Code/Form. **FEATURE COMPLETE FOR 1.0**;
+remaining work is testing and targeted reliability/polish fixes. Section-E history: five defects
+found and fixed earlier (13.29, 13.30, 13.32, 13.33, 13.28 parts 1–2), two new ones recorded
+(13.35, 13.36 — 13.35 later fixed by the other machine). See
+[Documentation/TestPlan.md](Documentation/TestPlan.md) and [Documentation/Testing.md](Documentation/Testing.md).
 
-*Current activity: **integration testing**. No known 1.0 beta blockers remain. TestPlan sections
-A–D are complete; Section E is complete except **E10b screen reader**, which cannot be run here at
-all — it needs a person who uses one. E9 keyboard-only is no longer a flat failure: parts 1 and 2 of
-13.28 are fixed, parts 3 and 4 remain. E12 (keyboard shortcuts) is a new scenario, partially run —
-see 13.34 for what is left and, more importantly, for the five ways its harness produced confident
-wrong answers.*
+*Current activity: **integration testing**, with §13.28 pt 3 paused as noted. No known 1.0 beta
+blockers remain. TestPlan sections A–D are complete; Section E is complete except **E10b screen
+reader**, which cannot be run here at all — it needs a person who uses one. §13.28 keyboard-only:
+parts 1 and 2 are fixed; part 3's user-facing symptom is worked around; part 4 (Ctrl+F9 silent from
+search box) is untouched. E12 (keyboard shortcuts): 18 confirmed working, 2 defects found and fixed,
+the rest deferred — see 13.34 for what is left and the six ways its harness produced confident wrong
+answers.*
 
 *Earlier in this testing run: seven scenarios (A1, A4, A5, B1, B4, B6, B10), two of which passed
 only after fixing real defects the tests found — the WebBrowser control could not render a page at

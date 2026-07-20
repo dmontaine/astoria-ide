@@ -18,7 +18,7 @@ is to write a good commit message. Regenerate rather than hand-edit; a stale han
 than no entry. Run `.\GenerateChangelog.ps1` from the repository root; `-Check` reports whether
 the file is current and writes nothing, which suits a pre-commit hook.
 
-Everything above the **Total: 421 commits, 2026-07-02 to 2026-07-20.**
+Everything above the **Total: 423 commits, 2026-07-02 to 2026-07-20.**
 
 ## 2026-07-02
 
@@ -1279,3 +1279,9 @@ Everything above the **Total: 421 commits, 2026-07-02 to 2026-07-20.**
 - **`4ff9dd8`** — Fix both shortcut defects E12 found (13.32, 13.33)
   13.32 -- Ctrl+Shift+O (Open Project) could never fire.
   *Docs, IDE, Settings · 6 files*
+- **`4ed09fa`** — DetailedChangelog: regenerate through 4ff9dd8
+  Picks up the 13.32/13.33 shortcut fixes.
+  *Docs · 1 file*
+- **`5318633`** — 13.28 part 1: a modal dialog can be used and closed from the keyboard
+  E9 recorded the New Project dialog as taking no keyboard input at all -- no initial focus, Tab moving nothing, Escape not closing it, only Alt+F4 dismissing it.
+  *Docs, Framework/Controls, IDE · 9 files*

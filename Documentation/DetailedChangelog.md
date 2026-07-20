@@ -18,7 +18,7 @@ is to write a good commit message. Regenerate rather than hand-edit; a stale han
 than no entry. Run `.\GenerateChangelog.ps1` from the repository root; `-Check` reports whether
 the file is current and writes nothing, which suits a pre-commit hook.
 
-Everything above the **Total: 447 commits, 2026-07-02 to 2026-07-20.**
+Everything above the **Total: 449 commits, 2026-07-02 to 2026-07-20.**
 
 ## 2026-07-02
 
@@ -1355,3 +1355,9 @@ Everything above the **Total: 447 commits, 2026-07-02 to 2026-07-20.**
 - **`b943e3c`** — 13.28 pt 3 WORKAROUND: move Code/Git/Run mnemonics off the swallowed letters
   Not a fix.
   *Docs, IDE · 6 files*
+- **`603268a`** — DetailedChangelog: regenerate through b943e3c
+  Picks up the 13.28 pt 3 mnemonic workaround.
+  *Docs · 1 file*
+- **`b9061ee`** — Add Alt+E as mnemonic for the Code/Form menu
+  Code/Form was the one top-level menu without a mnemonic (index 4, "Code/Form" with no ampersand -- called out in the earlier menu-bar dump as one of the "incidental findings for 13.35").
+  *IDE · 3 files*

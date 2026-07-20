@@ -1749,3 +1749,40 @@ this cannot silently recur.
 **Cost so far.** One synthesized-input trap earned back once; six eliminations; the bisect
 scaffolding and the improved test app are reusable regardless of which direction the next attempt
 takes.
+
+### 13.28 pt 3 — menu-bisect follow-up (2026-07-20, later still)
+
+**Three more eliminations under two new gates in one build; the defect still reproduces.** The
+gates match the two obvious remaining hypotheses about the menu itself and its layout.
+
+- **`ASTORIA_BISECT=fixodditems`** — renames the two odd items in Astoria's menu bar so they stop
+  looking odd:
+  - `Code/Form` (index 4, **no mnemonic**) → `Co&deForm` (gets `Alt+D`).
+  - `&Form` (index 5, **disabled duplicate of `Alt+F`**) → `For&m` (gets `Alt+M`, which nothing
+    else claims).
+  Under this gate the menu bar has 11 items, all with unique mnemonics, none disabled at startup
+  in a way that duplicates a working item's letter. Defect is unchanged: `Alt+C/G/R` silent.
+- **`ASTORIA_BISECT=shiftindices`** — inserts a dummy `Sh&im` menu before `File`, pushing every
+  real menu index down by one so `Code` is at index 4 rather than 3, `Run` at 7, `Git` at 8. If
+  position from the menu-bar start were the mechanism, the failing letters would change. They do
+  not — same {C, G, R} silent.
+- **Combined** (`fixodditems,shiftindices`) — same result. So the failure is not the odd items,
+  not the disabled duplicate, and not the position of a letter within the menu bar.
+
+**And no visible child control in `frmMain` has an `&C`, `&G` or `&R` caption**, so it is not
+`IsDialogMessage`-style control-mnemonic matching either — a grep of all `tb*/cbo*/txt*` and tab
+captions turns up nothing. Dialog forms have `&Cancel`, `&Copy` etc., but those forms are not on
+screen when the probe fires.
+
+**What remains untried, in the order most likely to be worth it:**
+
+1. **Framework-level `TranslateAccelerator` return-value logging.** `Application.bas:407` runs the
+   accelerator table before `TranslateMessage`; instrumenting its return for each `Alt+<letter>` on
+   `WM_SYSCHAR` would say whether that call is silently consuming the message. Needs a
+   `FORCE_MFF=1` rebuild.
+2. **`agentpipe` gate** in `Main.bas` to prove or eliminate the worker thread. Long shot.
+3. **The kernel trace**, once the ethernet cable arrives.
+
+**Rung 1 is the next thing to try, and it is a rebuild not a redesign** — the framework already has
+`ASTORIA_LOGSYSCHAR` for the `WM_SYSCHAR` layer; the analogous log at the `TranslateAccelerator`
+boundary is one edit and one env var away.

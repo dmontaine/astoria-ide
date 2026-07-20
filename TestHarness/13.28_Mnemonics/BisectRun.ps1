@@ -5,13 +5,19 @@ $ErrorActionPreference = 'Stop'
 $sp = 'C:\Users\don\AppData\Local\Temp\claude\C--Users-don-Astoria-IDE\a801ea1d-b6dc-48c1-a0aa-a601aa6c8295\scratchpad'
 
 $cases = @(
-  '',                    # baseline, all pieces present
+  '',                                                       # baseline, all pieces present
+  # chrome (2026-07-20 sweep): none of these change the defect
   'toolbars',
   'statusbar',
   'leftpanel',
   'rightpanel',
   'bottompanel',
-  'toolbars,statusbar,leftpanel,rightpanel,bottompanel'   # all off
+  'toolbars,statusbar,leftpanel,rightpanel,bottompanel',    # all chrome off
+  # menu shape (2026-07-20 follow-up): also no effect
+  'menuicons',                                              # skip DisplayIcons on mnuMain
+  'fixodditems',                                            # give Code/Form and &Form unique mnemonics
+  'shiftindices',                                           # insert Sh&im menu before File
+  'fixodditems,shiftindices'                                # both
 )
 
 $grid = @()

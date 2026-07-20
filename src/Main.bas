@@ -7000,6 +7000,13 @@ Sub CreateMenusAndToolBars
 	'mnuMain.ImagesList = @imgList
 	pfSplash->lblProcess.Text = ("Load On Startup") & ": " & ("Load Hot Keys")
 	LoadHotKeys
+	'' 13.28 pt 3 bisection -- TEMPORARY. Inserts one dummy item BEFORE File, pushing every real
+	'' menu index down by one. If Alt+C then works with Code at index 4 instead of 3, position
+	'' relative to the menu-bar start is the mechanism.
+	If BisectSkip("shiftindices") Then
+		Dim miShim As MenuItem Ptr = mnuMain.Add(("Sh&im"), "", "Shim")
+		miShim->Add("shim item", "", "ShimItem")
+	End If
 	Var miFile = mnuMain.Add(("&File"), "", "File")
 	miFile->Add(("&New Project") & HK("NewProject", "Ctrl+Shift+N"), "Project", "NewProject", @mClick)
 	'' The accelerator comes from the caption -- HK() appends "\tCtrl+Shift+O", which is what
@@ -7208,7 +7215,12 @@ Sub CreateMenusAndToolBars
 	'' This menu is therefore NEVER greyed. Its individual items still enable/disable themselves
 	'' in ChangeMenuItemsEnabled, and mClick routes each one to the editor or the designer
 	'' depending on what has focus.
-	miCodeFormMenu = mnuMain.Add(("Code/Form"), "", "CodeForm")
+	'' 13.28 pt 3 bisection -- TEMPORARY. The base caption is the one Astoria always shipped.
+	'' With ASTORIA_BISECT=fixodditems the mnemonic-less item and the disabled duplicate-Alt+F
+	'' are given proper unique mnemonics, so we can measure whether either oddity is what tells
+	'' Windows' mnemonic search to swallow C/G/R.
+	Dim cfCap As String = IIf(BisectSkip("fixodditems"), ("Co&deForm"), ("Code/Form"))
+	miCodeFormMenu = mnuMain.Add(cfCap, "", "CodeForm")
 	miUndo = miCodeFormMenu->Add(("Undo") & HK("Undo", "Ctrl+Z"), "Undo", "Undo", @mClick, , , False)
 	miRedo = miCodeFormMenu->Add(("Redo") & HK("Redo", "Ctrl+Shift+Z"), "Redo", "Redo", @mClick, , , False)
 	miCodeFormMenu->Add("-")
@@ -7219,7 +7231,10 @@ Sub CreateMenusAndToolBars
 	miDuplicate = miCodeFormMenu->Add(("&Duplicate") & HK("Duplicate", "Ctrl+D"), "", "Duplicate", @mClick, , , False)
 	miSelectAll = miCodeFormMenu->Add(("Select &All") & HK("SelectAll", "Ctrl+A"), "", "SelectAll", @mClick, , , False)
 
-	miFormFormat = mnuMain.Add(("&Form"), "", "FormFormat")
+	'' 13.28 pt 3 bisection -- TEMPORARY. Change "&Form" to "For&m" under the gate to remove the
+	'' duplicate Alt+F it shares with &File. Alt+M is not otherwise claimed.
+	Dim ffCap As String = IIf(BisectSkip("fixodditems"), ("For&m"), ("&Form"))
+	miFormFormat = mnuMain.Add(ffCap, "", "FormFormat")
 	miFormFormat->Enabled = False ' D1: no form open at startup; enabled by tabCode_SelChange/ApplyFormTabView when a form with controls is active
 	' Control-edit ops (parity with the form-pane right-click menu). @PopupClick acts on
 	' the active designer's selection unconditionally; plain captions (no accelerator text)

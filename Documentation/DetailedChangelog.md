@@ -17,7 +17,7 @@ Areas are: **IDE** (`src/`), **Framework/Controls** (`Controls/`), **Templates**
 is to write a good commit message. Regenerate rather than hand-edit; a stale hand-edit is worse
 than no entry. Commits after the last one listed here are not yet folded in.
 
-**Total: 398 commits, 2026-07-02 to 2026-07-19.**
+**Total: 400 commits, 2026-07-02 to 2026-07-19.**
 
 ## 2026-07-02
 
@@ -1199,3 +1199,9 @@ than no entry. Commits after the last one listed here are not yet folded in.
 - **`4d7499b`** — Tidy test artefacts: complete the A8 fixture, ignore generated output
   Three separate things the recent test runs left in the tree.
   *Docs, Examples · 5 files*
+- **`205d0ea`** — Remove every compiler warning from user builds and from the IDE's own
+  A user building any project saw six framework warnings; building the DeviceExplorer example added two more.
+  *Docs, Examples, Framework/Controls, IDE · 8 files*
+- **`3f26136`** — Rebuild framework.dll so the shipped binary matches its source
+  The previous commit fixed warnings in Control.bas and Application.bas but left the committed DLL as it was, on the reasoning that default arguments are resolved in the caller from the .bi declarations and so the binary could not change.
+  *Framework/Controls · 1 file*

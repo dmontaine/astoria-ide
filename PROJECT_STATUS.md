@@ -214,6 +214,52 @@ tester needs is in `Documentation/`:
 All six are maintained going forward. `Documentation/AstoriaIDESignificantChanges.md` supersedes
 the `.doc` on P:\Astoria-Docs — edit the Markdown, which is version-controlled.
 
+## Session handoff (2026-07-19, evening) — every compiler warning removed
+
+**Tree clean, everything pushed.** `astoria.exe` and `framework.dll` are both current release
+builds, and the DLL now matches its source.
+
+### Warnings: all gone, none suppressed
+
+| Build | Before | After |
+| --- | --- | --- |
+| Any user project (framework) | 6 | **0** |
+| DeviceExplorer example | +2 `-Wmissing-braces` | **0** |
+| The IDE itself | 7 | **0** |
+| `framework.dll` | 0 | **0** |
+
+**One rule explains all thirteen `warning 36` lines.** FreeBASIC reports "Mismatching parameter
+initializer" when a `ByRef WString` parameter carries a default on **both** the `Declare` and the
+definition — the two `""` literals are separate objects, so they do not match despite reading
+identically. **The default belongs to the declaration; the definition must not repeat it.** Worth
+knowing before writing new framework or IDE code, because the warning is otherwise baffling.
+
+The `-Wmissing-braces` pair came from DeviceExplorer's `DEFINE_PROPERTYKEY` macro flattening a
+`GUID` alongside `pid` in a `PROPERTYKEY`. Fixed by nesting the GUID's initializer, and verified by
+diffing the **generated C**: values byte-for-byte identical, only braces added. That check mattered
+more than the warning — a silently altered GUID would break device property lookups far more quietly.
+
+### Why the earlier attempt broke startup — now answered
+
+`6f1dcee` was reverted in `46078e6` as "warning cleanup that broke startup", cause unrecorded. It is
+no longer a mystery: **that change deleted the `Msg1`–`Msg4` parameters from `Debug.Print`**, which
+is not a warning fix but the removal of a four-argument overload the framework calls. It also
+changed `MsgBox`'s default from `""` to `WStr("")` in both places rather than removing the
+duplicate. No further investigation is needed, and the framework header cleanup it attempted is
+safe to redo as long as no parameter is removed.
+
+### Verification, in order
+
+A four-line program reproduced all six framework warnings — a seconds-long loop instead of a full
+IDE build, which is what made this tractable. Each fix was confirmed against it; the IDE rebuilt to
+zero warnings; **the IDE starts and its agent pipe answers `get_status`**, the exact gate the last
+attempt failed; DeviceExplorer was rebuilt *through the IDE* with a clean Output pane; and after the
+DLL rebuild the whole chain was re-run through the pipe, including opening a `.frm` (where the
+designer instantiates controls through `framework.dll`).
+
+`framework.dll` was rebuilt at the owner's request for source/binary parity: same size, 163 bytes
+different (0.02%) — build stamps only, confirming the fix could not alter codegen.
+
 ## Session handoff (2026-07-19, later) — D1/D2 pass, gh dropped, four new tasks
 
 **Tree clean, everything pushed.** `astoria.exe` is a current release build. The IDE was rebuilt from

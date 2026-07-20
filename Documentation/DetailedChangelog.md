@@ -18,7 +18,7 @@ is to write a good commit message. Regenerate rather than hand-edit; a stale han
 than no entry. Run `.\GenerateChangelog.ps1` from the repository root; `-Check` reports whether
 the file is current and writes nothing, which suits a pre-commit hook.
 
-Everything above the **Total: 425 commits, 2026-07-02 to 2026-07-20.**
+Everything above the **Total: 427 commits, 2026-07-02 to 2026-07-20.**
 
 ## 2026-07-02
 
@@ -1291,3 +1291,9 @@ Everything above the **Total: 425 commits, 2026-07-02 to 2026-07-20.**
 - **`58f3fbc`** — 13.28 part 2: the project tree can be reached and walked from the keyboard
   Ctrl+R ("Project Explorer") put the caret in the panel's search box, and Tab never carried focus on into the tree, so a keyboard-only user could reach the panel but never a file in it.
   *Docs, IDE · 5 files*
+- **`0241bba`** — DetailedChangelog: regenerate through 58f3fbc
+  Picks up 13.28 part 2, 13.36, and the 13.34 harness caveat.
+  *Docs · 1 file*
+- **`8b7d69e`** — PROJECT_STATUS: handoff for the Section E testing session
+  Five defects found and fixed this session (13.29 second-launch crash, 13.30 high contrast, 13.32 and 13.33 dead shortcuts, 13.28 parts 1-2 keyboard access), plus 13.31 UI simplification, and two new ones recorded (13.35, 13.36).
+  *Docs · 1 file*

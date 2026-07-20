@@ -41,12 +41,14 @@ and process cleanup were owner-verified. Step Out may first land in the framewor
 is documented as a GDB caller-frame limitation. The reusable fixture is
 `Examples/Integration/D6_DebugMultiForm`.
 
-**Final compiler-warning cleanup:** `Application.bas` no longer emits its five parameter-default
-warnings. `MsgBox` now uses an explicitly wide empty-string default in both GUI and console
-interfaces. The unused four-message `Debug.Print` overload tail was removed; this also fixes calls
-such as `Debug.Print message, True`, where `True` previously bound as `Msg1` instead of the intended
-`bWriteLog`. A full `Compile.bat` release build succeeds. Remaining warnings are in `Control.bas`
-and `EditControl.bas`, not `Application.bas`.
+**Do not repeat the attempted compiler-warning cleanup from `6f1dcee`.** Replacing the optional
+`ByRef WString` defaults and simplifying the `Debug.Print` overload removed the five
+`Application.bas` warnings and compiled successfully, but the resulting IDE crashed reliably with
+an access violation while loading the Toolbox. A stable global empty `WString` default was also
+tried and produced the same crash. The full change was reverted to the last owner-verified
+implementation; the harmless warnings remain. The restored release build was then launched through
+startup and remained alive and responsive after Toolbox loading. Reliability takes precedence over
+cosmetic warning removal unless a future fix is both ABI-safe and startup-tested.
 
 **Do not sweep local artifacts into the next commit.** `Examples/DeviceExplorer/DeviceExplorer.vfp`
 was changed by the owner's test run and was deliberately left unstaged, along with generated

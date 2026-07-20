@@ -18,7 +18,7 @@ is to write a good commit message. Regenerate rather than hand-edit; a stale han
 than no entry. Run `.\GenerateChangelog.ps1` from the repository root; `-Check` reports whether
 the file is current and writes nothing, which suits a pre-commit hook.
 
-Everything above the **Total: 411 commits, 2026-07-02 to 2026-07-19.**
+Everything above the **Total: 413 commits, 2026-07-02 to 2026-07-19.**
 
 ## 2026-07-02
 
@@ -1246,3 +1246,9 @@ Everything above the **Total: 411 commits, 2026-07-02 to 2026-07-19.**
 - **`18d3325`** — TestPlan E11 passes, and fix the crash it found on a second launch
   E11 asked what happens when two Astoria processes run at once.
   *Build/Tools, Docs, IDE · 8 files*
+- **`9429448`** — DetailedChangelog: regenerate through 18d3325
+  Picks up the E11 result and the 13.29 second-launch crash fix.
+  *Docs · 1 file*
+- **`ae1bb5a`** — E10a: the editor ignores high contrast; 13.29 owner-verified
+  Splits E10 into E10a (high contrast) and E10b (screen reader).
+  *Docs · 3 files*

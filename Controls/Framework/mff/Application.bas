@@ -339,6 +339,38 @@ Namespace My
 		End If
 	End Sub
 
+	'' ASTORIA DIAGNOSTIC (ROADMAP 13.28 part 3) -- direct TranslateAccelerator return log.
+	''
+	'' AstoriaLogLoop above records dispatch=YES/NO, but that combines two very different states:
+	''   * TranslateAccelerator was called and returned 0 (did not match)
+	''   * TranslateAccelerator was skipped because FActiveForm->Accelerator was NULL
+	''   * (nonzero return would flip dispatch to NO, which no run has seen for Alt+letter)
+	'' This logs the raw ret and the hAcc used, so the three cases can be told apart. Same gate.
+	Private Sub AstoriaLogAccel(uMsg As UINT, wp As WPARAM, hAcc As Any Ptr, ret As Integer, bCalled As Integer)
+		Static As Integer bOn = -1
+		If bOn = -1 Then
+			bOn = 0
+			If Environ("ASTORIA_LOGSYSCHAR") <> "" Then bOn = 1
+		End If
+		If bOn = 0 Then Exit Sub
+		If uMsg <> WM_SYSKEYDOWN AndAlso uMsg <> WM_SYSCHAR Then Exit Sub
+		Dim As String MsgName = "WM_SYSCHAR   "
+		If uMsg = WM_SYSKEYDOWN Then MsgName = "WM_SYSKEYDOWN"
+		Dim As String Note = ""
+		If bCalled = 0 Then
+			Note = "SKIPPED (FActiveForm->Accelerator is NULL)"
+		Else
+			Note = "returned " & Str(ret)
+			If ret <> 0 Then Note &= " -- accelerator MATCHED (consumed message)"
+		End If
+		Dim As Integer FnLog = FreeFile
+		If Open(Environ("TEMP") & "\_astoria_syschar.log" For Append As #FnLog) = 0 Then
+			Print #FnLog, "TranslateAccelerator  " & MsgName & "  wParam=&h" & Hex(wp) & _
+				"  hAcc=" & Str(CULngInt(hAcc)) & "  " & Note
+			Close #FnLog
+		End If
+	End Sub
+
 	'' One-shot dump of the REAL accelerator table (ROADMAP 13.28 part 3).
 	''
 	'' Everything said about accelerators so far rested on a RECONSTRUCTION built by re-parsing menu
@@ -404,7 +436,13 @@ Namespace My
 				AstoriaLogLoop("1 arrived  ", msg.message, msg.wParam, TranslateAndDispatch)
 				If FActiveForm <> 0 Then
 					If msg.message = WM_SYSKEYDOWN Then AstoriaDumpAccels(FActiveForm->Accelerator)
-					If FActiveForm->Accelerator Then TranslateAndDispatch = TranslateAccelerator(FActiveForm->Handle, FActiveForm->Accelerator, @msg) = 0
+					If FActiveForm->Accelerator Then
+						Dim As Integer accRet = TranslateAccelerator(FActiveForm->Handle, FActiveForm->Accelerator, @msg)
+						AstoriaLogAccel(msg.message, msg.wParam, FActiveForm->Accelerator, accRet, 1)
+						TranslateAndDispatch = (accRet = 0)
+					Else
+						AstoriaLogAccel(msg.message, msg.wParam, 0, 0, 0)
+					End If
 					AstoriaLogLoop("2 postAccel", msg.message, msg.wParam, TranslateAndDispatch)
 					'If FActiveForm->Parent AndAlso FActiveForm->Parent->Accelerator Then TranslateAndDispatch = TranslateAccelerator(FActiveForm->Parent->Handle, FActiveForm->Parent->Accelerator, @msg) = 0
 					If TranslateAndDispatch Then

@@ -34,6 +34,16 @@ defect is machine-local and twelve hypotheses have been aimed at the wrong targe
 it is in Astoria, machine state is ruled out for free, and the kernel trace is worth its setup.
 Three keystrokes, either answer is progress.
 
+**Follow-up 2026-07-20 (later): every user-mode layer is now measured out.** A menu-side bisect
+eliminated chrome (toolbars, status bar, panels), menu icons, the two odd menu items, and menu
+position; a static grep eliminated `RegisterHotKey`, framework mnemonic handling, and child-control
+mnemonics; `MffMnemonicTest` with the same Ctrl+C/G/R on its main menu confirmed the accelerator
+table is not the mechanism; and a new `AstoriaLogAccel` in the framework recorded that
+`TranslateAccelerator` returns 0 for Alt+C exactly as it does for Alt+F, using the same table
+handle, with WM_SYSCHAR reaching the form's WndProc identically. The kernel trace is now the only
+place the answer can be — not a last-resort option but the sole remaining route, since every layer
+above it has been ruled out by direct measurement.
+
 ### What was eliminated
 
 | | Result |

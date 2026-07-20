@@ -1786,3 +1786,41 @@ screen when the probe fires.
 **Rung 1 is the next thing to try, and it is a rebuild not a redesign** — the framework already has
 `ASTORIA_LOGSYSCHAR` for the `WM_SYSCHAR` layer; the analogous log at the `TranslateAccelerator`
 boundary is one edit and one env var away.
+
+### 13.28 pt 3 — TranslateAccelerator return-value log (2026-07-20, later still)
+
+**Rung 1 done. TranslateAccelerator is not the mechanism.** New instrumentation (`AstoriaLogAccel`
+in `Application.bas`, gated on the existing `ASTORIA_LOGSYSCHAR`) records the raw return value of
+each `TranslateAccelerator` call for `WM_SYSKEYDOWN` and `WM_SYSCHAR`, plus the accelerator table
+handle it used. Ran on the same rebuild with `Alt+F`/`Alt+T` (controls) and `Alt+C`/`Alt+G`/`Alt+R`
+(defect).
+
+**The two paths are byte-for-byte identical through the entire message loop:**
+
+| Stage | `Alt+F` (works) | `Alt+C` (silent) |
+| --- | --- | --- |
+| Accelerator table `hAcc` | `590119` | `590119` |
+| `TranslateAccelerator` returns | `0` | `0` |
+| `1 arrived` (raw GetMessage) | `WM_SYSKEYDOWN` / `WM_SYSCHAR` dispatch=YES | same |
+| `2 postAccel` | dispatch=YES | dispatch=YES |
+| `3 final` | dispatch=YES | dispatch=YES |
+
+Same story for `Alt+G` (`h47`/`h67`), `Alt+R` (`h52`/`h72`) and `Alt+T` (`h54`/`h74`). Every
+`Alt+letter` message passes through the same accelerator table (`hAcc=590119`), is *not* consumed
+by any accelerator (`returned 0`), is dispatched normally, and reaches `DefWindowProc` on the same
+window procedure chain.
+
+**What this closes.** Every layer under Astoria's own control is now measured to behave identically
+for the failing letters and the working ones. The message loop cannot see the difference; the form
+window procedure does not intercept it (already established, `Handled=0, Result=0`); the
+accelerator table does not match it; `TranslateAccelerator` returns 0 either way. Whatever produces
+the silent-swallow signature is inside `DefWindowProc`'s menu-mode search — which lives in
+`win32kfull.sys`, on the kernel side of the syscall boundary.
+
+**The kernel trace is now the only remaining route.** It is no longer "the invasive option of last
+resort" — it is the *only* place the answer can still be, because every other place has been
+eliminated by direct measurement, not by hypothesis. The other machine's KDNET setup is prepared
+and awaiting an ethernet cable.
+
+**The instrumentation is left in place** and inert until `ASTORIA_LOGSYSCHAR` is set, so a shipped
+build behaves identically. Removing it can wait for the actual fix, since it will help verify one.

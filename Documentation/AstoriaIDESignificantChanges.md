@@ -158,6 +158,13 @@ philosophy described above.
 - **Tip of the Day.** VisualFBEditor opened a Tip of the Day dialog at startup, with a Help menu item
   to bring it back. Both are gone. A modal dialog between the user and the IDE every time it starts
   is a cost paid on every launch for something read once, if at all.
+- **Alt-key shortcuts for the Code, Git and Run menus.** The natural mnemonics — `Alt+C`, `Alt+G`,
+  `Alt+R` — silently do nothing on the machines we have tested; the same defect is present in
+  upstream VisualFBEditor in both 32- and 64-bit builds and its root cause is unresolved.
+  Astoria's Code menu is therefore reached with `Alt+D` (rendered *Co**d**e*), Git with `Alt+I`
+  (*G**i**t*), and Run with `Alt+U` (*R**u**n*). The menu bar shows the mnemonic underlines
+  accordingly. Every other menu keeps its natural shortcut. The three swallowed letters will be
+  restored to their normal positions when the underlying defect is understood.
 - **Choosing which toolbars are shown, and how they are arranged.** VisualFBEditor let each of the
   five toolbars be shown or hidden independently, and let the toolbar rows reflow to whatever the
   window width allowed. Astoria shows all of them or none — a single View ▸ Toolbars toggle — and

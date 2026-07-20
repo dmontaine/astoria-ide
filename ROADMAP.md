@@ -1875,3 +1875,36 @@ the VFBE observation arrived and is cancelled. Instructions are in the harness R
   framework change.
 - `MffMnemonicTest.bas` — updated this session to put Ctrl+C/G/R on the main menu, so it truly
   parallels VFBE/Astoria's accelerator configuration and works. Remains the useful control.
+
+### 13.28 pt 3 — WORKAROUND SHIPPED 2026-07-20 (owner-approved)
+
+**The underlying defect is not fixed** — it lives upstream in something VisualFBEditor does, and
+that investigation is paused pending a proper two-machine lab setup (KVM constraint). Meanwhile, so
+that the three affected menus have working Alt-shortcuts, the mnemonics are moved off the swallowed
+letters:
+
+| Menu | Was | Now | Rendered |
+| --- | --- | --- | --- |
+| Code | `&Code` (Alt+C) | `Co&de` (Alt+D) | Co**d**e |
+| Git  | `&Git` (Alt+G)  | `G&it` (Alt+I)  | G**i**t |
+| Run  | `&Run` (Alt+R)  | `R&un` (Alt+U)  | R**u**n |
+
+**Verified by effect** on the same machine that reproduces the underlying defect: Alt+D opens the
+Code menu, Alt+I opens Git, Alt+U opens Run, alongside the six controls (Alt+F/V/P/T/W/H all still
+open their menus). Pressing Alt+C/G/R does still nothing — confirmed by the same probe that
+established the defect, which is the intended state under a *workaround* (as opposed to a fix).
+
+**Alt+O was the owner's first choice for Code and was declined**: `Settings/Others/HotKeys.txt` has
+`OpenFolder=Alt+O`, and `TranslateAccelerator` runs before menu-mnemonic search, so `Alt+O` would
+have triggered Open Folder instead of the Code menu — the same "advertised menu never opens" shape
+we are trying to remove. `Alt+D` has no conflict.
+
+**Interaction with the bisect scaffolding.** The `fixodditems` gate previously renamed `Code/Form`
+to `Co&deForm` (Alt+D). To avoid clashing with the new workaround `Alt+D` on the real Code menu,
+that gate now uses `Cod&eForm` (Alt+E). No user-visible effect (the gate is off unless
+`ASTORIA_BISECT=fixodditems` is set), but future investigators who reproduce the defect by
+reverting the workaround letters must remember to revert this at the same time.
+
+**Revert when the underlying defect is fixed** — grep for `13.28 pt 3 workaround` in `src/Main.bas`
+to find the three sites (Code, Run, Git) and the bisect-gate note. Reverting is a three-line change
+plus the bisect-gate letter.

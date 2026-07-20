@@ -7117,7 +7117,10 @@ Sub CreateMenusAndToolBars
 	miProjectProperties = miProject->Add(("&Project Properties") & "..." & HK("ProjectProperties"), "", "ProjectProperties", @mClick, , , False)
 	miEditProjectDescription = miProject->Add(("Edit Project Description") & HK("EditProjectDescription"), "", "EditProjectDescription", @mClick, , , False)
 
-	Var miEdit = mnuMain.Add(("&Code"), "", "Tahrir")
+	'' Mnemonic is Co&de (Alt+D), not &Code (Alt+C), as a workaround for ROADMAP 13.28 pt 3 --
+	'' the letters C, G and R are silently swallowed by menu-mode search here (and in upstream
+	'' VisualFBEditor), for reasons still unknown. Revert to "&Code" when that defect is fixed.
+	Var miEdit = mnuMain.Add(("Co&de"), "", "Tahrir")
 	miCodeMenu = miEdit ' shared pointer so UpdateCodeFormMenuEnabled can grey the whole menu contextually
 	miCutCurrentLine = miEdit->Add(("C&ut Current Line") & HK("CutCurrentLine", "Ctrl+Y"), "", "CutCurrentLine", @mClick, , , False)
 	miEdit->Add("-")
@@ -7219,7 +7222,9 @@ Sub CreateMenusAndToolBars
 	'' With ASTORIA_BISECT=fixodditems the mnemonic-less item and the disabled duplicate-Alt+F
 	'' are given proper unique mnemonics, so we can measure whether either oddity is what tells
 	'' Windows' mnemonic search to swallow C/G/R.
-	Dim cfCap As String = IIf(BisectSkip("fixodditems"), ("Co&deForm"), ("Code/Form"))
+	'' Under the fixodditems gate we give Code/Form a mnemonic. Was Alt+D, changed to Alt+E to
+	'' avoid clashing with the workaround Alt+D on the real Code menu (13.28 pt 3 workaround).
+	Dim cfCap As String = IIf(BisectSkip("fixodditems"), ("Cod&eForm"), ("Code/Form"))
 	miCodeFormMenu = mnuMain.Add(cfCap, "", "CodeForm")
 	miUndo = miCodeFormMenu->Add(("Undo") & HK("Undo", "Ctrl+Z"), "Undo", "Undo", @mClick, , , False)
 	miRedo = miCodeFormMenu->Add(("Redo") & HK("Redo", "Ctrl+Shift+Z"), "Redo", "Redo", @mClick, , , False)
@@ -7289,7 +7294,8 @@ Sub CreateMenusAndToolBars
 	'' 13.3.A O2: Build + Debug + Run consolidated into one Run menu. "Build" survives as a command,
 	'' not a menu. Top-level = the 90% path; the rest lives in the two "More ... Options" submenus.
 	'' Captions are relabeled in the S2 pass; this pass only changes structure/grouping.
-	Var miRun = mnuMain.Add(("&Run"), "", "Run")
+	'' R&un (Alt+U) rather than &Run (Alt+R) -- ROADMAP 13.28 pt 3 workaround; see &Code above.
+	Var miRun = mnuMain.Add(("R&un"), "", "Run")
 	mnuStartWithCompile = miRun->Add(("&Run") & HK("StartWithCompile", "F5"), "StartWithCompile", "StartWithCompile", @mClick, , , False)
 	miCompile = miRun->Add(("&Build") & HK("Compile", "Ctrl+F9"), "Compile", "Compile", @mClick, , , False)
 	miRun->Add("-")
@@ -7325,7 +7331,8 @@ Sub CreateMenusAndToolBars
 	'' Git -- its own top-level menu (between Run and Tools) for git-backed projects.
 	'' Enabled state is set contextually in ChangeMenuItemsEnabled. Grows as more git
 	'' actions are added (commit, clone, etc.).
-	Var miGit = mnuMain.Add(("&Git"), "", "Git")
+	'' G&it (Alt+I) rather than &Git (Alt+G) -- ROADMAP 13.28 pt 3 workaround; see &Code above.
+	Var miGit = mnuMain.Add(("G&it"), "", "Git")
 	miGitCommit = miGit->Add(("Git &Commit") & "..." & HK("GitCommit"), "", "GitCommit", @mClick, , , False)
 	miGit->Add("-")
 	miGitPull = miGit->Add(("Git &Pull") & HK("GitPull"), "", "GitPull", @mClick, , , False)

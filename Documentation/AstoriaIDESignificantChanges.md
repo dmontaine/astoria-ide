@@ -155,6 +155,18 @@ philosophy described above.
   nothing to add, edit, or misconfigure.
 - **Multi-language user interface.** VisualFBEditor shipped translations of its interface. Astoria's
   interface is English only.
+- **Tip of the Day.** VisualFBEditor opened a Tip of the Day dialog at startup, with a Help menu item
+  to bring it back. Both are gone. A modal dialog between the user and the IDE every time it starts
+  is a cost paid on every launch for something read once, if at all.
+- **Choosing which toolbars are shown, and how they are arranged.** VisualFBEditor let each of the
+  five toolbars be shown or hidden independently, and let the toolbar rows reflow to whatever the
+  window width allowed. Astoria shows all of them or none — a single View ▸ Toolbars toggle — and
+  pins them to three fixed rows: Standard, Edit and Project on the first, Run on the second, Format
+  on the third. The layout no longer changes when the window is resized or moved to a wider monitor.
+  Per-toolbar choice let a user end up with a half-populated bar and no obvious way back, and a wide
+  monitor collapsed the whole set onto a single long line of icons that was harder to read than the
+  three-row form it replaced. Right-clicking a toolbar does nothing, since there is nothing left to
+  choose.
 - **The bundled VisualFBEditor help file.** Astoria no longer lists its parent project's help. The
   FreeBASIC manual, the Win32 reference, and the MyFbFramework documentation remain available;
   Astoria's own documentation is being written to replace what was removed.

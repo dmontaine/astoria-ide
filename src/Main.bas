@@ -135,7 +135,7 @@ Dim Shared As Label lblLeft
 Dim Shared As Panel pnlLeft, pnlRight, pnlBottom, pnlBottomTab, pnlLeftPin, pnlRightPin, pnlBottomPin, pnlPropertyValue, pnlColor
 Dim Shared As TrackBar trLeft
 Dim Shared As MainMenu mnuMain
-Dim Shared As MenuItem Ptr mnuStartWithCompile, mnuStart, mnuContinue, mnuBreak, mnuEnd, mnuRestart, mnuStandardToolBar, mnuEditToolBar, mnuProjectToolBar, mnuFormatToolBar, mnuRunToolBar, mnuSplit, mnuSplitHorizontally, mnuSplitVertically, mnuWindowSeparator, miRecentFiles, miSetAsMain, miClearStartUp, miTabSetAsMain, miTabReloadHistoryCode, miRemoveFiles, miToolBars
+Dim Shared As MenuItem Ptr mnuStartWithCompile, mnuStart, mnuContinue, mnuBreak, mnuEnd, mnuRestart, mnuSplit, mnuSplitHorizontally, mnuSplitVertically, mnuWindowSeparator, miRecentFiles, miSetAsMain, miClearStartUp, miTabSetAsMain, miTabReloadHistoryCode, miRemoveFiles, miToolBars
 Dim Shared As MenuItem Ptr miSaveProject, miSaveProjectAs, miCloseProject, miDeleteProject, miNewFile, miOpenFile, miCloseFile, miDeleteFile, miSaveFile, miSaveFileAs, miPrint, miPrintPreview, miPageSetup, miOpenProjectFolder, miProjectProperties, miEditProjectDescription, miGitCommit, miGitPull, miGitPush, miGitSshKey, miGitCreateRepo, miExplorerOpenProjectFolder, miExplorerRename, miExplorerProjectProperties, miExplorerCloseProject, miRename, miRemoveFileFromProject
 Dim Shared As MenuItem Ptr miUndo, miRedo, miCutCurrentLine, miCut, miCopy, miPaste, miSingleComment, miDuplicate, miSelectAll, miIndent, miOutdent, miFormat, miUnformat, miFormatProject, miUnformatProject, miAddSpaces, miDeleteBlankLines, miParameterInfo, miStepInto, miStepOver, miStepOut, miRunToCursor, miGDBCommand, miAddWatch, miToggleBreakpoint, miClearAllBreakpoints, miSetNextStatement, miShowNextStatement
 Dim Shared As MenuItem Ptr dmiMake, dmiMakeClean
@@ -264,7 +264,6 @@ LoadSettings
 #include once "frmParameters.bi"
 #include once "frmProjectProperties.bi"
 #include once "frmSave.bi"
-#include once "frmTipOfDay.frm"
 #include once "Debug.bi"
 
 pComps = @Comps
@@ -6936,12 +6935,10 @@ Sub CreateMenusAndToolBars
 	miView->Add("-")
 	miImageManager = miView->Add(("Image Manager") & HK("ImageManager"), "", "ImageManager", @mClick, , , False)
 	miView->Add("-")
-	miToolBars = miView->Add(("Toolbars") & HK("Toolbars"), "", "Toolbars", @mClick)
-	mnuStandardToolBar = miToolBars->Add(("Standard") & HK("Standard"), "", "Standard", @mClick, True)
-	mnuEditToolBar = miToolBars->Add(("Edit") & HK("Edit"), "", "Edit", @mClick, True)
-	mnuProjectToolBar = miToolBars->Add(("Project") & HK("Project"), "", "Project", @mClick, True)
-	mnuFormatToolBar = miToolBars->Add(("Format") & HK("FormFormat"), "", "FormFormat", @mClick, True)
-	mnuRunToolBar = miToolBars->Add(("Run") & HK("Run"), "", "Run", @mClick, True)
+	'' One checkable item, not a submenu of five. The toolbars are shown together or not at all --
+	'' picking individual ones left a user with a half-populated bar and no obvious way back, and
+	'' the row layout below is fixed anyway, so per-toolbar choice bought nothing.
+	miToolBars = miView->Add(("Toolbars") & HK("Toolbars"), "", "Toolbars", @mClick, True)
 	
 	Var miProject = mnuMain.Add(("&Project"), "", "Project")
 	miProject->Add(("Add &Form") & HK("AddForm", "Ctrl+Alt+N"), "Form", "AddForm", @mClick)
@@ -7240,8 +7237,6 @@ Sub CreateMenusAndToolBars
 	miHelp->Add("-")
 	miHelp->Add(("FreeBasic WiKi") & HK("FreeBasicWiKi"), "Book", "FreeBasicWiKi", @mClick)
 	miHelp->Add(("FreeBasic Forums") & HK("FreeBasicForums"), "Forum", "FreeBasicForums", @mClick)
-	miHelp->Add("-")
-	miHelp->Add(("Tip of the Day"), "Book", "TipoftheDay", @mClick)
 	miHelp->Add("-")
 	miHelp->Add(("&About") & HK("About"), "About", "About", @mClick)
 	
@@ -10249,41 +10244,24 @@ Sub frmMain_Create(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	If *RecentFile <> "" AndAlso Not FileExists(*RecentFile) Then WLet(RecentFile, "")
 	If *RecentProject <> "" AndAlso Not FileExists(*RecentProject) Then WLet(RecentProject, "")
 	If *RecentFolder <> "" AndAlso Not FolderExists(*RecentFolder) Then WLet(RecentFolder, "")
-	'' Default-visible toolbar set on a FRESH install is now ALL FIVE bands (owner decision,
-	'' 2026-07-10, reverses 13.3.A O3's "Standard + Run only" minimal default). ReadBool's default
-	'' only applies when the INI key is absent, so an existing user's saved toolbar visibility
-	'' (including someone who deliberately hid Edit/Project/Format under the old default) is
-	'' preserved untouched. Build/Debug toolbars are retired (folded into Run); bands are now
-	'' Standard(0), Edit(1), Project(2), Run(3), Format(4).
-	ShowStandardToolBar = iniSettings.ReadBool("MainWindow", "ShowStandardToolBar", True)
-	ShowEditToolBar = iniSettings.ReadBool("MainWindow", "ShowEditToolBar", True)
-	ShowProjectToolBar = iniSettings.ReadBool("MainWindow", "ShowProjectToolbar", True)
-	ShowFormatToolBar = iniSettings.ReadBool("MainWindow", "ShowFormatToolbar", True)
-	'' 13.3.A O3 migration (corrected 2026-07-07): Build + Debug toolbars were folded into Run.
-	'' On the FIRST launch after upgrade (ShowRunToolbar key absent), seed Run's visibility from the
-	'' retired ShowBuildToolbar/ShowDebugToolbar keys so the merged bar's Build/Stop/debug buttons
-	'' don't vanish for someone who had those bars up. Crucially this is a ONE-TIME carry-forward:
-	'' the earlier form OR-ed the retired keys on every load, which permanently latched Run visible
-	'' (the stale ShowBuildToolbar is never rewritten, so it stayed True forever) and made "hide the
-	'' Run toolbar" impossible. ReadBool ignores its default when the key exists, so an existing
-	'' saved ShowRunToolbar wins; the retired keys are only consulted as that default. Then remove
-	'' them (KeyRemove flushes on the next Write in frmMain_Close) so they can't re-latch or linger.
-	ShowRunToolBar = iniSettings.ReadBool("MainWindow", "ShowRunToolbar", _
-		iniSettings.ReadBool("MainWindow", "ShowBuildToolbar", True) OrElse iniSettings.ReadBool("MainWindow", "ShowDebugToolbar", False))
+	'' The toolbars are all shown or all hidden -- one setting, one menu item (owner decision,
+	'' 2026-07-19). This replaces five independent ShowXxxToolBar keys and the View ▸ Toolbars
+	'' submenu that drove them. A user who had hidden individual bars gets them all back; that is
+	'' the intent, since a half-populated bar with no obvious way back was the problem.
+	'' Bands are Standard(0), Edit(1), Project(2), Run(3), Format(4).
+	ShowToolBars = iniSettings.ReadBool("MainWindow", "ShowToolBars", True)
+	'' Retired keys: the five per-toolbar ones, the Build/Debug bars folded into Run back in
+	'' 13.3.A O3, and Tip of the Day. Removed so they cannot linger in a user's settings file.
+	iniSettings.KeyRemove("MainWindow", "ShowStandardToolBar")
+	iniSettings.KeyRemove("MainWindow", "ShowEditToolBar")
+	iniSettings.KeyRemove("MainWindow", "ShowProjectToolbar")
+	iniSettings.KeyRemove("MainWindow", "ShowFormatToolbar")
+	iniSettings.KeyRemove("MainWindow", "ShowRunToolbar")
 	iniSettings.KeyRemove("MainWindow", "ShowBuildToolbar")
 	iniSettings.KeyRemove("MainWindow", "ShowDebugToolbar")
-	ShowTipoftheDay = iniSettings.ReadBool("MainWindow", "ShowTipoftheDay", True)
-	ShowTipoftheDayIndex = iniSettings.ReadInteger("MainWindow", "ShowTipoftheDayIndex", 0)
-	MainReBar.Bands.Item(0)->Visible = ShowStandardToolBar
-	MainReBar.Bands.Item(1)->Visible = ShowEditToolBar
-	MainReBar.Bands.Item(2)->Visible = ShowProjectToolBar
-	MainReBar.Bands.Item(3)->Visible = ShowRunToolBar
-	MainReBar.Bands.Item(4)->Visible = ShowFormatToolBar
-	mnuStandardToolBar->Checked = ShowStandardToolBar
-	mnuEditToolBar->Checked = ShowEditToolBar
-	mnuProjectToolBar->Checked = ShowProjectToolBar
-	mnuFormatToolBar->Checked = ShowFormatToolBar
-	mnuRunToolBar->Checked = ShowRunToolBar
+	iniSettings.KeyRemove("MainWindow", "ShowTipoftheDay")
+	iniSettings.KeyRemove("MainWindow", "ShowTipoftheDayIndex")
+	ApplyToolBarVisibility
 	'Dim As Integer Subsystem = iniSettings.ReadInteger("MainWindow", "Subsystem", 0)
 	tbtNotSetted->Checked = True
 	'Select Case Subsystem
@@ -10310,14 +10288,21 @@ Sub frmMain_Create(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	
 	bSharedFind = CheckCompilerPaths
 
-		'' 13.3.A: was a hardcoded "0 To 5" assuming 7 bands (maximize all but the last, Format).
-		'' Band count is now 5 after the O3 toolbar consolidation; compute the upper bound from
-		'' Bands.Count instead of a literal so this can't silently go stale again if the band count
-		'' ever changes. Bands.Item(i) on an out-of-range i returns a null pointer, and the old
-		'' hardcoded "5" crashed on startup (SIGSEGV in ReBarBand.Maximize) once bands dropped to 5.
-		For i As Integer = 0 To MainReBar.Bands.Count - 2
-			MainReBar.Bands.Item(i)->Maximize
-		Next
+		'' Pin the three rows first, then maximise only the LAST band on each one. Maximising a band
+		'' makes it fill its row, so maximising a band that shares a row (Standard or Edit) would
+		'' shove its neighbours onto rows of their own -- which is exactly the reflow this is meant
+		'' to stop. Rows are Standard+Edit+Project / Run / Format, so the last-on-row bands are
+		'' 2, 3 and 4.
+		''
+		'' 13.3.A history worth keeping: this loop was once a hardcoded "0 To 5" assuming 7 bands,
+		'' and crashed on startup (SIGSEGV in ReBarBand.Maximize) once the count dropped to 5,
+		'' because Bands.Item(i) returns a null pointer for an out-of-range i. Hence the guard.
+		LockToolBarRows
+		If MainReBar.Bands.Count >= 5 Then
+			For i As Integer = 2 To 4
+				If MainReBar.Bands.Item(i) <> 0 Then MainReBar.Bands.Item(i)->Maximize
+			Next i
+		End If
 	'frmMain.RequestAlign
 End Sub
 
@@ -10483,9 +10468,8 @@ Sub frmMain_Show(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 		ChangeMenuItemsEnabled
 		' Nothing to reopen (fresh install, or a workspace with no surviving project/tabs): prompt the
 		' user with File > New Project so they choose the project type, instead of landing on an empty
-		' IDE. This is the original design intent (see the commented Case 1: NewProject below) and a
-		' startup modal here is already the norm (frmTipOfDay.ShowModal further down). Cancelling just
-		' leaves the empty IDE, which is fine.
+		' IDE. This is the original design intent (see the commented Case 1: NewProject below).
+		' Cancelling just leaves the empty IDE, which is fine.
 		If Not bWorkspaceLoaded AndAlso Not bAgentLaunched Then
 			NewProject
 		End If
@@ -10505,7 +10489,6 @@ Sub frmMain_Show(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
 	'			OpenFiles GetFullPath(*RecentFiles)
 	'		End Select
 	'	End If
-	If ShowTipoftheDay AndAlso Not bAgentLaunched Then frmTipOfDay.ShowModal *pfrmMain
 	bApplyingStartupLayout = True
 	ActivateMainWindow()
 	' ActivateMainWindow can disturb focus but must not replace the saved pane state.
@@ -10734,14 +10717,8 @@ Sub frmMain_Close(ByRef Designer As My.Sys.Object, ByRef Sender As Form, ByRef A
 	iniSettings.WriteBool("MainWindow", "UseDebugger", UseDebugger)
 	'iniSettings.WriteInteger("MainWindow", "Subsystem", IIf(tbtConsole->Checked, 1, IIf(tbtGUI->Checked, 2, 0)))
 	iniSettings.WriteBool("MainWindow", "ShowMainToolBar", ShowMainToolBar)
-	iniSettings.WriteBool("MainWindow", "ShowStandardToolBar", ShowStandardToolBar)
-	iniSettings.WriteBool("MainWindow", "ShowEditToolBar", ShowEditToolBar)
-	iniSettings.WriteBool("MainWindow", "ShowProjectToolBar", ShowProjectToolBar)
-	iniSettings.WriteBool("MainWindow", "ShowFormatToolBar", ShowFormatToolBar) '' was never persisted before 13.3.A; harmless pre-existing gap fixed while touching this block
-	iniSettings.WriteBool("MainWindow", "ShowRunToolBar", ShowRunToolBar)
+	iniSettings.WriteBool("MainWindow", "ShowToolBars", ShowToolBars)
 	iniSettings.WriteInteger("MainWindow", "MainHeight", frmMain.Height)
-	iniSettings.WriteInteger("MainWindow", "ShowTipoftheDayIndex", ShowTipoftheDayIndex)
-	iniSettings.WriteBool("MainWindow", "ShowTipoftheDay", ShowTipoftheDay)
 	SaveTabPagePlacement("Project", tpProject)
 	SaveTabPagePlacement("ToolBox", tpToolbox)
 	SaveTabPagePlacement("Properties", tpProperties)
@@ -10809,17 +10786,34 @@ Sub frmMain_Message(ByRef Designer As My.Sys.Object, ByRef Sender As Control, By
 		End Select
 End Sub
 
-Sub ToolBar_MouseUp(ByRef Designer As My.Sys.Object, ByRef Sender As Control, MouseButton As Integer, x As Integer, y As Integer, Shift As Integer)
-	If MouseButton <> 1 Then Exit Sub
-	Sender.ContextMenu = miToolBars->SubMenu
+'' Force the toolbars into three fixed rows -- Standard+Edit+Project, then Run, then Format --
+'' regardless of how wide the window or monitor is. RBBS_BREAK (ReBarBand.Break) starts a new row,
+'' so a break on Run and on Format pins the grouping; without it the ReBar reflows on every resize
+'' and a wide monitor collapses everything onto one very long line of icons (owner decision,
+'' 2026-07-19). Re-applied after any visibility change, because hiding and re-showing bands
+'' otherwise lets them reflow.
+Sub LockToolBarRows
+	If MainReBar.Bands.Count < 5 Then Exit Sub
+	MainReBar.Bands.Item(0)->Break = False   '' Standard  -- row 1
+	MainReBar.Bands.Item(1)->Break = False   '' Edit      -- row 1
+	MainReBar.Bands.Item(2)->Break = False   '' Project   -- row 1
+	MainReBar.Bands.Item(3)->Break = True    '' Run       -- row 2
+	MainReBar.Bands.Item(4)->Break = True    '' Format    -- row 3
+End Sub
+
+'' All five toolbars are shown or hidden together; there is no per-toolbar choice any more.
+Sub ApplyToolBarVisibility
+	For i As Integer = 0 To MainReBar.Bands.Count - 1
+		If MainReBar.Bands.Item(i) <> 0 Then MainReBar.Bands.Item(i)->Visible = ShowToolBars
+	Next i
+	If miToolBars <> 0 Then miToolBars->Checked = ShowToolBars
+	If ShowToolBars Then LockToolBarRows
 End Sub
 
 pfSplash->lblProcess.Text = ("Load On Startup") & ": " & ("Command bars")
-tbStandard.OnMouseUp = @ToolBar_MouseUp
-tbEdit.OnMouseUp = @ToolBar_MouseUp
-tbProject.OnMouseUp = @ToolBar_MouseUp
-tbFormat.OnMouseUp = @ToolBar_MouseUp
-tbRun.OnMouseUp = @ToolBar_MouseUp
+'' The right-click handler that popped the View ▸ Toolbars submenu is gone with the submenu --
+'' there is nothing left to choose, and leaving it wired would have dereferenced a SubMenu that no
+'' longer exists.
 
 
 MainReBar.Name = "MainReBar"

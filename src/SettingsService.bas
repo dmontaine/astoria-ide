@@ -354,8 +354,7 @@ End Sub
 ' mlKeys/mcKeys/mpKeys/mlCompiler translation tables consulted by ML()/MC()/MP()/
 ' MLCompilerFun(). Those wrapper calls have been removed from the app entirely, so
 ' the load/parse logic is gone too. App.CurLanguage is still set (App.Language's
-' default) since a couple of unrelated features -- e.g. frmTipOfDay's "<lang>.tip"
-' lookup -- key off of it.
+' default) because unrelated code still keys off it.
 Sub LoadLanguageTexts
 	LoadSettingsIni()
 	App.CurLanguage = "English"

@@ -268,14 +268,10 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 	Case "ThreadsWindow":                       tpThreads->SelectTab
 	Case "WatchWindow":                         tpWatches->SelectTab
 	Case "ImageManager":                        pfImageManager->Show *pfrmMain : pfImageManager->CenterToParent
-	Case "Toolbars":                            'ShowMainToolbar = Not ShowMainToolbar: ReBar1.Visible = ShowMainToolbar: pfrmMain->RequestAlign
-	Case "Standard":                            ShowStandardToolBar = Not ShowStandardToolBar: MainReBar.Bands.Item(0)->Visible = ShowStandardToolBar: mnuStandardToolBar->Checked = ShowStandardToolBar: pfrmMain->RequestAlign
-	Case "Edit":                                ShowEditToolBar = Not ShowEditToolBar: MainReBar.Bands.Item(1)->Visible = ShowEditToolBar: mnuEditToolBar->Checked = ShowEditToolBar: pfrmMain->RequestAlign
-	Case "Project":                             ShowProjectToolBar = Not ShowProjectToolBar: MainReBar.Bands.Item(2)->Visible = ShowProjectToolBar: mnuProjectToolBar->Checked = ShowProjectToolBar: pfrmMain->RequestAlign
-	'' 13.3.A O3: Build/Debug toolbars folded into Run; bands are now Standard(0), Edit(1),
-	'' Project(2), Run(3), Format(4).
-	Case "Run":                                 ShowRunToolBar = Not ShowRunToolBar: MainReBar.Bands.Item(3)->Visible = ShowRunToolBar: mnuRunToolBar->Checked = ShowRunToolBar: pfrmMain->RequestAlign
-	Case "FormFormat":                          ShowFormatToolBar = Not ShowFormatToolBar: MainReBar.Bands.Item(4)->Visible = ShowFormatToolBar: mnuFormatToolBar->Checked = ShowFormatToolBar: pfrmMain->RequestAlign
+	'' 13.3.A O3: Build/Debug toolbars folded into Run; bands are Standard(0), Edit(1),
+	'' Project(2), Run(3), Format(4). All five are shown or hidden together -- one View ▸ Toolbars
+	'' toggle, no per-toolbar submenu.
+	Case "Toolbars":                            ShowToolBars = Not ShowToolBars: ApplyToolBarVisibility: pfrmMain->RequestAlign
 	Case "TBUseDebugger":                       ChangeUseDebugger tbtUseDebugger->Checked, 0
 	Case "UseDebugger":                         ChangeUseDebugger Not UseDebugger, 1
 	Case "UseProfiler":                         If UseDebugger Then ChangeUseProfiler Not mnuUseProfiler->Checked, 1
@@ -685,7 +681,6 @@ Sub mClick(ByRef Designer_ As My.Sys.Object, Sender As My.Sys.Object)
 	Case "FreeBasicForums":                 OpenUrl "https://www.freebasic.net/forum/index.php"
 	Case "FreeBasicWiKi":                   OpenUrl "https://www.freebasic.net/wiki/wikka.php?wakka=PageIndex"
 	Case "About":                           pfAbout->Show *pfrmMain : pfAbout->CenterToParent
-	Case "TipoftheDay":                     pfTipOfDay->ShowModal *pfrmMain : pfTipOfDay->CenterToParent
 	End Select
 End Sub
 

@@ -120,10 +120,10 @@ Common Shared As Boolean mFormFindInFile
 Common Shared As Boolean InDebug, FormClosing, Restarting, FastRunning, RunningToCursor
 Common Shared As Boolean HighlightCurrentLine, HighlightCurrentWord, HighlightBrackets
 Common Shared As Boolean mTabSelChangeByError
-Common Shared As Boolean DisplayMenuIcons, ShowMainToolBar, ShowStandardToolBar, ShowEditToolBar, ShowProjectToolBar, ShowFormatToolBar, ShowRunToolBar
-Common Shared As Boolean ShowKeywordsToolTip, ShowTooltipsAtTheTop, ShowHorizontalSeparatorLines, ShowHolidayFrame, ShowTipoftheDay
+Common Shared As Boolean DisplayMenuIcons, ShowMainToolBar, ShowToolBars
+Common Shared As Boolean ShowKeywordsToolTip, ShowTooltipsAtTheTop, ShowHorizontalSeparatorLines, ShowHolidayFrame
 Common Shared As Boolean OpenCommandPromptInMainFileFolder, ShowProjectFolders
-Common Shared As Integer WhenVisualFBEditorStarts, ShowTipoftheDayIndex
+Common Shared As Integer WhenVisualFBEditorStarts
 Common Shared As Integer AutoSaveBeforeCompiling, HistoryCodeDays
 Common Shared As Double  HistoryCodeCleanDay
 Common Shared As Integer IncludeMFFPath
@@ -275,6 +275,8 @@ Declare Sub PageSetup()
 Declare Sub ReloadHistoryCode
 Declare Sub SetAsMain(IsTab As Boolean)
 Declare Sub SetAutoColors
+Declare Sub ApplyToolBarVisibility
+Declare Sub LockToolBarRows
 Declare Sub StartProgress()
 Declare Sub StopProgress()
 Declare Sub ThreadCounter(Id As Any Ptr)

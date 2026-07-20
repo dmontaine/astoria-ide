@@ -1043,3 +1043,46 @@ editor theme, exactly as users who do not need high contrast pick from the same 
 captures ("Code And Form" cut off at the window edge). Whether that is high-contrast-related — HC
 themes often enlarge system fonts and borders — or just this window size was not established, and
 should be checked before it is written up as anything.
+
+### 13.31 UI simplification: Tip of the Day removed, toolbars fixed and all-or-nothing — **RESOLVED and OWNER-VERIFIED 2026-07-19**
+
+Three owner-requested changes, made together because they all touch the same startup and chrome
+code. Recorded here rather than treated as new features: each **removes** a choice rather than
+adding one, which is the direction the *it just works* rule points.
+
+**1. Tip of the Day is gone.** The Help menu item, the startup modal, the `TipoftheDay` command
+case, the `#include`, both globals, `src/frmTipOfDay.frm` and `Help/Tip of the Day/` are all
+removed. `ShowTipoftheDay` and `ShowTipoftheDayIndex` are actively `KeyRemove`d on load so they do
+not linger in a settings file that already has them.
+
+**2. The toolbars are pinned to three fixed rows** — Standard+Edit+Project, then Run, then Format —
+regardless of window or monitor width. Previously the ReBar reflowed on every resize, so a wide
+monitor collapsed the whole set onto one very long line of icons, which the owner found harder to
+read than the three-row form. `RBBS_BREAK` (`ReBarBand.Break`) on Run and on Format pins the
+grouping, re-applied after any visibility change because hiding and re-showing bands otherwise lets
+them reflow.
+
+**The interacting detail worth knowing before touching this again:** *maximising a band makes it
+fill its row*, so the old loop — which maximised bands 0..3 — would have shoved Standard's and
+Edit's row-mates onto rows of their own, defeating the breaks. It now maximises only the **last band
+on each row** (2, 3, 4). The framework compounds this: `ReBarBand.Update` calls
+`If Not FBreak Then Maximize`, so a band without a break maximises itself. The null-pointer guard
+from the 13.3.A startup crash (`Bands.Item(i)` returns null out of range) is kept.
+
+**3. View ▸ Toolbars is one on/off toggle, not a submenu of five.** Backed by a single
+`ShowToolBars` key; the five retired per-toolbar keys are `KeyRemove`d. Per-toolbar choice let a
+user end up with a half-populated bar and no obvious way back, and bought nothing once the row
+layout is fixed. **Consequence:** right-clicking a toolbar no longer does anything — that handler
+existed only to pop the submenu, and leaving it wired would have dereferenced a `SubMenu` that no
+longer exists. A user who had hidden individual bars gets them all back on upgrade, which is the
+intent.
+
+**Verified:** clean build, zero warnings, D1 re-run 12/12 (startup is on the changed path). The owner
+confirmed all three by hand — including that the three rows hold with the window maximised, which is
+the whole point of (2) and the one thing a narrow-window screenshot cannot show.
+
+**A capture that looked like a failure was not one.** A screenshot taken during this work showed *no
+toolbars at all* and was about to be investigated as a defect; the owner had toggled View ▸ Toolbars
+off just before it was taken. That was the new single toggle working correctly. Worth remembering
+that a screenshot records a state someone may have just changed, not necessarily the code's own
+behaviour.

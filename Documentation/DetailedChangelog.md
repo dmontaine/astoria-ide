@@ -18,7 +18,7 @@ is to write a good commit message. Regenerate rather than hand-edit; a stale han
 than no entry. Run `.\GenerateChangelog.ps1` from the repository root; `-Check` reports whether
 the file is current and writes nothing, which suits a pre-commit hook.
 
-Everything above the **Total: 449 commits, 2026-07-02 to 2026-07-20.**
+Everything above the **Total: 451 commits, 2026-07-02 to 2026-07-20.**
 
 ## 2026-07-02
 
@@ -1361,3 +1361,9 @@ Everything above the **Total: 449 commits, 2026-07-02 to 2026-07-20.**
 - **`b9061ee`** — Add Alt+E as mnemonic for the Code/Form menu
   Code/Form was the one top-level menu without a mnemonic (index 4, "Code/Form" with no ampersand -- called out in the earlier menu-bar dump as one of the "incidental findings for 13.35").
   *IDE · 3 files*
+- **`ad1e723`** — DetailedChangelog: regenerate through b9061ee
+  Picks up the Alt+E for Code/Form.
+  *Docs · 1 file*
+- **`25d59ec`** — PROJECT_STATUS: session-close handoff -- pt 3 workaround shipped, Alt+E added
+  Adds an "evening" session-close handoff on top of this morning's "afternoon" pause note.
+  *Docs · 1 file*

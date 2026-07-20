@@ -9989,6 +9989,50 @@ Sub LoadTools
 	Next
 End Sub
 
+'' ---------------------------------------------------------------- high contrast (ROADMAP 13.30)
+''
+'' Astoria's chrome survives a high-contrast theme on its own, because it paints with system
+'' colours. The editor does not: its colours come from Settings/Themes/*.ini, which are fixed
+'' palettes that cannot know what the system theme is. Left alone, a light Astoria theme under a
+'' dark high-contrast theme is a white panel in an otherwise black IDE -- and the line-number
+'' margin renders the system background with the theme's near-black foreground on top of it, so
+'' the numbers vanish entirely.
+''
+'' The rule applied below: when high contrast is on, the system owns the background, and any
+'' foreground that cannot be read against it is replaced by the system text colour. Token colours
+'' that still contrast are kept, so syntax highlighting survives wherever it legitimately can.
+
+Function IsHighContrastMode() As Boolean
+	Dim As HIGHCONTRASTW hc
+	hc.cbSize = SizeOf(HIGHCONTRASTW)
+	If SystemParametersInfoW(SPI_GETHIGHCONTRAST, SizeOf(HIGHCONTRASTW), @hc, 0) = 0 Then Return False
+	Return (hc.dwFlags And HCF_HIGHCONTRASTON) <> 0
+End Function
+
+'' WCAG relative luminance of a Windows COLORREF (which is BGR, not RGB -- getting this backwards
+'' silently swaps red and blue and only shows up as a wrong contrast decision).
+Private Function ColorLuminance(ByVal c As Integer) As Double
+	If c < 0 Then Return 0
+	Dim As Double ch(0 To 2)
+	ch(0) = ((c       ) And &hFF) / 255.0   '' R
+	ch(1) = ((c Shr  8) And &hFF) / 255.0   '' G
+	ch(2) = ((c Shr 16) And &hFF) / 255.0   '' B
+	For i As Integer = 0 To 2
+		If ch(i) <= 0.03928 Then
+			ch(i) = ch(i) / 12.92
+		Else
+			ch(i) = ((ch(i) + 0.055) / 1.055) ^ 2.4
+		End If
+	Next i
+	Return 0.2126 * ch(0) + 0.7152 * ch(1) + 0.0722 * ch(2)
+End Function
+
+Private Function ContrastRatio(ByVal c1 As Integer, ByVal c2 As Integer) As Double
+	Dim As Double l1 = ColorLuminance(c1), l2 = ColorLuminance(c2)
+	If l1 < l2 Then Swap l1, l2
+	Return (l1 + 0.05) / (l2 + 0.05)
+End Function
+
 Sub GetColors(ByRef cs As ECColorScheme, DefaultForeground As Integer = -1, DefaultBackground As Integer = -1, DefaultFrame As Integer = -1, DefaultIndicator As Integer = -1)
 	cs.Foreground = IIf(cs.ForegroundOption = -1, DefaultForeground, cs.ForegroundOption)
 	cs.Background = IIf(cs.BackgroundOption = -1, DefaultBackground, cs.BackgroundOption)
@@ -9998,6 +10042,17 @@ Sub GetColors(ByRef cs As ECColorScheme, DefaultForeground As Integer = -1, Defa
 	GetColor cs.Background, cs.BackgroundRed, cs.BackgroundGreen, cs.BackgroundBlue
 	GetColor cs.Frame, cs.FrameRed, cs.FrameGreen, cs.FrameBlue
 	GetColor cs.Indicator, cs.IndicatorRed, cs.IndicatorGreen, cs.IndicatorBlue
+End Sub
+
+'' Force one style onto the system background, keeping its foreground only if that foreground can
+'' actually be read there. 4.5:1 is the WCAG AA threshold for body text. Defined after GetColors
+'' because it calls it and there is no forward declaration.
+Private Sub HighContrastStyle(ByRef cs As ECColorScheme, ByVal SysBack As Integer, ByVal SysText As Integer)
+	cs.BackgroundOption = SysBack
+	If cs.ForegroundOption = -1 OrElse ContrastRatio(cs.ForegroundOption, SysBack) < 4.5 Then
+		cs.ForegroundOption = SysText
+	End If
+	GetColors cs, SysText, SysBack
 End Sub
 
 Sub SetAutoColors
@@ -10044,6 +10099,62 @@ Sub SetAutoColors
 		NormalText.ForegroundOption = clBlack
 		NormalText.BackgroundOption = clWhite
 		GetColors NormalText, clBlack, clWhite
+	End If
+
+	'' High contrast: the system owns the colours, not the theme file (ROADMAP 13.30). Applied
+	'' last so it overrides everything resolved above, and only while high contrast is actually on
+	'' -- with it off, not one value here changes.
+	If IsHighContrastMode() Then
+		Dim As Integer SysBack = GetSysColor(COLOR_WINDOW)
+		Dim As Integer SysText = GetSysColor(COLOR_WINDOWTEXT)
+
+		HighContrastStyle NormalText, SysBack, SysText
+		HighContrastStyle Identifiers, SysBack, SysText
+		HighContrastStyle Comments, SysBack, SysText
+		HighContrastStyle Strings, SysBack, SysText
+		HighContrastStyle Numbers, SysBack, SysText
+		HighContrastStyle RealNumbers, SysBack, SysText
+		HighContrastStyle ColorOperators, SysBack, SysText
+		HighContrastStyle SpaceIdentifiers, SysBack, SysText
+		For k As Integer = 0 To UBound(Keywords)
+			HighContrastStyle Keywords(k), SysBack, SysText
+		Next k
+		HighContrastStyle ColorByRefParameters, SysBack, SysText
+		HighContrastStyle ColorByValParameters, SysBack, SysText
+		HighContrastStyle ColorCommonVariables, SysBack, SysText
+		HighContrastStyle ColorComps, SysBack, SysText
+		HighContrastStyle ColorConstants, SysBack, SysText
+		HighContrastStyle ColorDefines, SysBack, SysText
+		HighContrastStyle ColorFields, SysBack, SysText
+		HighContrastStyle ColorGlobalFunctions, SysBack, SysText
+		HighContrastStyle ColorEnumMembers, SysBack, SysText
+		HighContrastStyle ColorGlobalEnums, SysBack, SysText
+		HighContrastStyle ColorLineLabels, SysBack, SysText
+		HighContrastStyle ColorLocalVariables, SysBack, SysText
+		HighContrastStyle ColorMacros, SysBack, SysText
+		HighContrastStyle ColorGlobalNamespaces, SysBack, SysText
+		HighContrastStyle ColorProperties, SysBack, SysText
+		HighContrastStyle ColorSharedVariables, SysBack, SysText
+		HighContrastStyle ColorSubs, SysBack, SysText
+		HighContrastStyle ColorGlobalTypes, SysBack, SysText
+
+		'' The line-number margin is the defect that started this: the theme asks for a near-black
+		'' number on a near-white margin, the system supplies the background and not the
+		'' foreground, and the numbers disappear. Pin both ends to system colours.
+		LineNumbers.ForegroundOption = SysText
+		LineNumbers.BackgroundOption = SysBack
+		GetColors LineNumbers, SysText, SysBack
+
+		'' Selection and the current-line/word highlights must follow the system too, or they
+		'' repaint a theme colour over text that is now system-coloured.
+		Selection.ForegroundOption = GetSysColor(COLOR_HIGHLIGHTTEXT)
+		Selection.BackgroundOption = GetSysColor(COLOR_HIGHLIGHT)
+		GetColors Selection, GetSysColor(COLOR_HIGHLIGHTTEXT), GetSysColor(COLOR_HIGHLIGHT)
+		CurrentLine.BackgroundOption = GetSysColor(COLOR_BTNFACE)
+		GetColors CurrentLine, SysText, GetSysColor(COLOR_BTNFACE)
+		CurrentWord.BackgroundOption = GetSysColor(COLOR_BTNFACE)
+		GetColors CurrentWord, SysText, GetSysColor(COLOR_BTNFACE)
+		GetColors FoldLines, SysText
 	End If
 End Sub
 

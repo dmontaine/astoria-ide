@@ -961,14 +961,16 @@ formed here was that `Start-Process` passes a quoted path so the `.exe` guard mi
 quote; a four-line FreeBASIC probe showed `Command(-1)` excludes the program name and strips quotes
 entirely, which killed that theory and pointed at the real one.
 
-### 13.30 The code editor ignores the system high-contrast theme (found by TestPlan E10a, 2026-07-19)
+### 13.30 The code editor ignores the system high-contrast theme — **RESOLVED and OWNER-VERIFIED 2026-07-19** (found by TestPlan E10a)
 
-**Status: open. Not a 1.0 blocker on current evidence, but it is the accessibility gap E10 exists to
-find.** Astoria never detects high contrast — there is no `SPI_GETHIGHCONTRAST` call anywhere in
-`src/`. The IDE's own chrome survives anyway, because it uses system colours (`clBtnFace`,
-`GetSysColor`) and contains **zero hardcoded `RGB(...)` literals**. The editor does not, because its
-colours come from `Settings/Themes/*.ini`, which are fixed palettes that know nothing about the
-system theme.
+**Status: fixed. The owner confirmed Astoria "came up nicely" when started with the Dusk
+high-contrast theme already active.** One limitation was found during that check and **accepted
+deliberately** — see "Accepted limitation" below.
+
+Astoria never detected high contrast — there was no `SPI_GETHIGHCONTRAST` call anywhere in `src/`.
+The IDE's own chrome survived anyway, because it uses system colours (`clBtnFace`, `GetSysColor`)
+and contains **zero hardcoded `RGB(...)` literals**. The editor did not, because its colours come
+from `Settings/Themes/*.ini`, which are fixed palettes that know nothing about the system theme.
 
 Tested against the Windows 11 **"Night sky"** high-contrast theme (a dark one), confirmed active by
 `SPI_GETHIGHCONTRAST` before any screenshot was taken — `COLOR_WINDOW` black, `COLOR_WINDOWTEXT`
@@ -987,10 +989,16 @@ background, so a light-themed editor is a glaring white panel inside an otherwis
 whole point of high contrast is that the user controls contrast globally; an editor that ignores it
 defeats that for the one surface they spend all their time reading.
 
-**3. The selected project-tree node has poor contrast**, and this one shows up in the *owner's own*
-configuration (`gradient-dark`, the shipped default): the selected item paints as orange text on a
-pale lavender background rather than using `COLOR_HIGHLIGHT`/`COLOR_HIGHLIGHTTEXT`. It is the worst
-contrast on screen in an otherwise clean dark-theme capture.
+**3. RETRACTED — the selected project-tree node was never a defect.** It was originally recorded
+here as orange text on pale lavender, "the worst contrast on screen". That was wrong, and the way it
+was wrong is worth keeping. Astoria sets **no** tree colours anywhere — there is no
+`ForeColor`/`BackColor` on any tree control, and the framework's `NM_CUSTOMDRAW` path returns
+`CDRF_DODEFAULT` — so those colours came from Windows, not from Astoria. Measuring a second
+high-contrast theme settled it: under **Dusk**, `COLOR_HIGHLIGHT` is (161,191,222) pale blue and
+`COLOR_HIGHLIGHTTEXT` is (33,45,59) dark. High-contrast themes really do use a pale highlight with
+dark text, so what was seen under **Night sky** was that theme's own selection colours, correctly
+honoured. **Acting on this would have replaced correct behaviour with a bug.** The lesson: before
+calling a colour wrong, check whether the application chose it at all.
 
 **What passes, and is worth not re-testing.** With a dark Astoria theme against a dark high-contrast
 theme everything is readable: menus, toolbar, project tree, tab strip, editor, the designer surface
@@ -998,11 +1006,38 @@ and its form caption. That is a genuine pass but a *coincidence* — the two hap
 record "high contrast works" from a dark-on-dark run; the light-theme case is the one that tests
 anything.
 
-**Suggested fix, in order of value.** Detect high contrast via `SPI_GETHIGHCONTRAST` and, when it is
-on, drive the editor from system colours instead of the theme palette — Scintilla can be handed
-`COLOR_WINDOW`/`COLOR_WINDOWTEXT` per style. Listening for `WM_SETTINGCHANGE` would let it follow a
-theme switched while the IDE is running. (3) is independent, smaller, and worth doing regardless of
-the rest, since it affects the default configuration.
+**The fix, in `Main.bas`.** `IsHighContrastMode()` wraps `SPI_GETHIGHCONTRAST`. `SetAutoColors` —
+the single point where every editor style resolves — gained a final block that applies one rule:
+**the system owns the background, and a theme foreground is kept only if it clears a 4.5:1 WCAG
+contrast ratio against it**, otherwise it is replaced with `COLOR_WINDOWTEXT`. Syntax colour
+therefore survives wherever it legitimately can. Line numbers are pinned to system colours at both
+ends (the invisible-text case); selection follows `COLOR_HIGHLIGHT`/`COLOR_HIGHLIGHTTEXT`, and the
+current-line and current-word highlights follow `COLOR_BTNFACE`. The whole block sits inside
+`If IsHighContrastMode()`, so **with high contrast off not one value changes**.
+
+Note the luminance helper reads a **COLORREF, which is BGR** — getting that backwards silently swaps
+red and blue and shows up only as a wrong contrast decision, not as an error.
+
+**Verified by exact pixel values rather than by eye.** With a light theme (`github`) under Dusk, the
+line-number margin and the code area both render `45,50,54` — `COLOR_WINDOW` exactly — with digits
+at `255,255,255`, `COLOR_WINDOWTEXT` exactly. Before the fix the margin was black with no visible
+digits at all. With the dark `gradient-dark` theme, syntax highlighting is **preserved** (cyan,
+orange and blue all clear 4.5:1), which is the property that distinguishes this from simply
+flattening everything to white. D1 re-run 12/12.
+
+**The high-contrast-*off* path is owner-verified too**: Astoria starts correctly after a theme
+change, so the gated block genuinely changes nothing when high contrast is not active. That matters
+because the fix touches the colour resolution every editor style passes through — a regression there
+would have hit every user, not only high-contrast ones.
+
+**Accepted limitation, owner's decision 2026-07-19: switching the system theme *while Astoria is
+running* leaves the colours a mish-mash.** Colours are resolved at load, and there is no
+`WM_SETTINGCHANGE` handling, so a theme change mid-session is not picked up. Closing and reopening
+Astoria fixes it completely. The owner's reasoning, recorded so this is not re-opened as a bug:
+Windows' own applications are imperfect under a live high-contrast switch, the workaround is trivial
+and obvious, and a high-contrast user always retains the more important choice — picking a dark
+editor theme, exactly as users who do not need high contrast pick from the same variety. Handling
+`WM_SETTINGCHANGE` remains the correct eventual fix if this is ever revisited; it is not 1.0 work.
 
 **One thing left unmeasured.** The bottom Code/Form tab strip appeared vertically clipped in both
 captures ("Code And Form" cut off at the window edge). Whether that is high-contrast-related — HC

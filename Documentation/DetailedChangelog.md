@@ -18,7 +18,7 @@ is to write a good commit message. Regenerate rather than hand-edit; a stale han
 than no entry. Run `.\GenerateChangelog.ps1` from the repository root; `-Check` reports whether
 the file is current and writes nothing, which suits a pre-commit hook.
 
-Everything above the **Total: 409 commits, 2026-07-02 to 2026-07-19.**
+Everything above the **Total: 411 commits, 2026-07-02 to 2026-07-19.**
 
 ## 2026-07-02
 
@@ -1241,3 +1241,8 @@ Everything above the **Total: 409 commits, 2026-07-02 to 2026-07-19.**
 - **`9369086`** — TestPlan E9 fails: the IDE cannot be operated by keyboard alone
   Build and run are fully reachable from the keyboard and the menu bar is properly keyboard-driven -- Alt+F opens File, mnemonics are underlined, arrows walk between menus.
   *Docs · 3 files*
+- **`925553d`** — DetailedChangelog: regenerate through 9369086
+  *Docs · 1 file*
+- **`18d3325`** — TestPlan E11 passes, and fix the crash it found on a second launch
+  E11 asked what happens when two Astoria processes run at once.
+  *Build/Tools, Docs, IDE · 8 files*

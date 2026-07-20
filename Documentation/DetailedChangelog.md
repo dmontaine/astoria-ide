@@ -18,7 +18,7 @@ is to write a good commit message. Regenerate rather than hand-edit; a stale han
 than no entry. Run `.\GenerateChangelog.ps1` from the repository root; `-Check` reports whether
 the file is current and writes nothing, which suits a pre-commit hook.
 
-Everything above the **Total: 433 commits, 2026-07-02 to 2026-07-20.**
+Everything above the **Total: 437 commits, 2026-07-02 to 2026-07-20.**
 
 ## 2026-07-02
 
@@ -1314,3 +1314,14 @@ Everything above the **Total: 433 commits, 2026-07-02 to 2026-07-20.**
 - **`4dcd77a`** — 13.28 part 3: eliminate hypothesis 12 and the user-mode debugger route
   Two approaches closed off, neither of them the fix, both recorded so they are not retried.
   *Build/Tools, Docs · 4 files*
+- **`d590ed3`** — DetailedChangelog: regenerate through 4dcd77a
+  *Docs · 1 file*
+- **`07d829c`** — 13.28 part 3: verify every kernel-debug prerequisite on the target
+  Checked the setup requirements rather than assuming them, since the last two recommendations in this investigation both failed on unchecked premises.
+  *Build/Tools, Docs · 2 files*
+- **`0245a49`** — 13.28 part 3: target configured for kernel debugging, pending reboot
+  kdnet.exe enabled network debugging on the Realtek GbE NIC.
+  *Build/Tools · 1 file*
+- **`b072609`** — 13.28 part 3: the defect reproduces on the second machine, silently
+  The previous session's handoff asked for three keystrokes on the other computer, on the grounds that either answer would be progress.
+  *Build/Tools, Docs · 3 files*

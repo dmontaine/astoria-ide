@@ -782,10 +782,22 @@ mostly a matter of sequencing them against an existing folder.
 **Open:** whether it belongs in the Project menu ("Add version control…") or the Git menu, and
 whether it should offer to create the remote in the same pass or leave that as a separate step.
 
-### 13.27 The left panel jumps to the Toolbox — **RESOLVED 2026-07-19**
+### 13.27 The left panel jumps to the Toolbox — **RESOLVED and OWNER-VERIFIED 2026-07-19**
 
 **Resolved.** Astoria no longer selects the Project or Toolbox panel except when the user enters a
 different project. Whatever panel you choose stays chosen.
+
+**Verified** by the owner against the 21:27 build of `0d6c6be`, four checks, all passing:
+
+1. **Startup lands on Project.** Tested with `LeftSelectedTab=1` (Toolbox) written into
+   `astoria.ini` first — with the value left at its default `0` this test cannot fail, because `0`
+   *is* Project. Baiting the setting against the fix is what makes it an assertion.
+2. **New Project selects Project** rather than inheriting the previous project's panel.
+3. **No unrequested jumps.** With a form open and Project selected: saving, **adding a file**, and
+   switching Code / Form / Code+Form all leave the panel alone. Adding a file is the deliberate
+   case — it is precisely what the abandoned `ByUser` attempt still got wrong.
+4. **View ▸ Toolbox still selects the Toolbox.** Removing auto-selection must not remove the
+   manual path.
 
 `ApplyView` used to end both the `"Form"` and `"CodeAndForm"` branches with an unconditional
 `tpToolbox->SelectTab`, so every application of a form view dragged the panel there — including
@@ -816,3 +828,11 @@ contained `	ab_trace.log`, whose `	` had been turned into a literal tab by a she
 every write failed silently and the silence was read as evidence. The third such escape-mangling of
 the session. Two lessons, both cheap: build Windows paths in generated code with `Chr(92)` or forward
 slashes, and **prove an instrument can fire before trusting what it does not say.**
+
+**Leftover, minor.** `LeftSelectedTab` in `astoria.ini` is now write-only: still written on tab
+change (`Main.bas:8089`) and on close (`Main.bas:10561`), but never read back, since startup
+hardcodes `0` (`Main.bas:8155`). The in-session `leftSelectedTabIndex` variable is still doing real
+work — `Main.bas:7678` uses it to restore the panel after un-collapsing — so only the *persisted*
+value is dead. Harmless, but it is the same species as the vestigial encoding/line-ending pickers
+noted at the top of this document: a setting the UI implies is honoured and which is not. Either
+stop writing it or drop the key.

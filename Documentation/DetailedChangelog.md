@@ -18,7 +18,7 @@ is to write a good commit message. Regenerate rather than hand-edit; a stale han
 than no entry. Run `.\GenerateChangelog.ps1` from the repository root; `-Check` reports whether
 the file is current and writes nothing, which suits a pre-commit hook.
 
-Everything above the **Total: 423 commits, 2026-07-02 to 2026-07-20.**
+Everything above the **Total: 425 commits, 2026-07-02 to 2026-07-20.**
 
 ## 2026-07-02
 
@@ -1285,3 +1285,9 @@ Everything above the **Total: 423 commits, 2026-07-02 to 2026-07-20.**
 - **`5318633`** — 13.28 part 1: a modal dialog can be used and closed from the keyboard
   E9 recorded the New Project dialog as taking no keyboard input at all -- no initial focus, Tab moving nothing, Escape not closing it, only Alt+F4 dismissing it.
   *Docs, Framework/Controls, IDE · 9 files*
+- **`3cd3ea6`** — DetailedChangelog: regenerate through 5318633
+  Picks up the 13.28 part 1 modal keyboard fix.
+  *Docs · 1 file*
+- **`58f3fbc`** — 13.28 part 2: the project tree can be reached and walked from the keyboard
+  Ctrl+R ("Project Explorer") put the caret in the panel's search box, and Tab never carried focus on into the tree, so a keyboard-only user could reach the panel but never a file in it.
+  *Docs, IDE · 5 files*

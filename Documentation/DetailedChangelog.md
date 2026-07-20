@@ -18,7 +18,7 @@ is to write a good commit message. Regenerate rather than hand-edit; a stale han
 than no entry. Run `.\GenerateChangelog.ps1` from the repository root; `-Check` reports whether
 the file is current and writes nothing, which suits a pre-commit hook.
 
-Everything above the **Total: 415 commits, 2026-07-02 to 2026-07-19.**
+Everything above the **Total: 417 commits, 2026-07-02 to 2026-07-19.**
 
 ## 2026-07-02
 
@@ -1258,3 +1258,9 @@ Everything above the **Total: 415 commits, 2026-07-02 to 2026-07-19.**
 - **`94d8cae`** — 13.30: the editor now follows the system high-contrast theme
   Astoria never called SPI_GETHIGHCONTRAST anywhere in src/.
   *Docs, IDE · 6 files*
+- **`33f1317`** — DetailedChangelog: regenerate through 94d8cae
+  Picks up the 13.30 high-contrast fix and the E10a pass.
+  *Docs · 1 file*
+- **`712c29b`** — UI: remove Tip of the Day, fix the toolbars to three rows, one Toolbars toggle
+  Three owner-requested changes, made together because they touch the same startup and chrome code.
+  *Build/Tools, Docs, IDE · 22 files*

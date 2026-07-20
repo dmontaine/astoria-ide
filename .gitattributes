@@ -1,10 +1,20 @@
-*.rc -crlf
-/src/*.bas -crlf
-/src/*.bi -crlf
-/src/*.frm -crlf
-/Controls/**/*.bas -crlf
-/Controls/**/*.bi -crlf
-/Controls/**/*.frm -crlf
-/Examples/**/*.bas -crlf
-/Examples/**/*.bi -crlf
-/Examples/**/*.frm -crlf
+# Line endings: FreeBASIC sources and resource scripts are CRLF, project-wide.
+#
+# These were `-crlf` (i.e. `-text`, "store as-is, never convert"). That froze the
+# CRLF the T01 sweeps had just established -- necessary at the time, because
+# core.autocrlf=true was silently reverting a plain conversion -- but it equally
+# froze any LF that arrived afterwards. It preserved the convention without
+# enforcing it, and 256 files drifted to LF with no diff noise to warn anyone
+# (whole-file rewrites by tooling, and new files simply born LF).
+#
+# `text eol=crlf` enforces instead of freezing: git normalises to LF in the blob
+# and checks out CRLF unconditionally, so a working tree that violates the rule
+# is no longer representable. Do not weaken these back to -crlf/-text.
+#
+# Patterns are repo-wide by design -- a scoped rule is how Templates/ and Tools/
+# escaped the original sweeps.
+
+*.bas text eol=crlf
+*.bi  text eol=crlf
+*.frm text eol=crlf
+*.rc  text eol=crlf

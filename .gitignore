@@ -72,3 +72,12 @@ Projects/D1_ConsoleLifecycle/
 # IDE scratch: timestamped .bak copies and temporary forms written during editing.
 # Regenerated as needed and never part of a build.
 Temp/
+
+# Test-harness output and generated test projects.
+# All are recreated by their harness or fixture on the next run; committing them adds churn,
+# and A8-results.txt in particular reads as failures out of context (the FAIL lines are the
+# fixture comparing against a suggested filename the tester chose not to use -- see TestPlan A8).
+Examples/Integration/**/A8-results.txt
+Projects/D5_McpMultiFile_*/
+Projects/E_ScaleFixtures/
+Projects/TestD2/

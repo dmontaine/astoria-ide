@@ -17,7 +17,7 @@ Areas are: **IDE** (`src/`), **Framework/Controls** (`Controls/`), **Templates**
 is to write a good commit message. Regenerate rather than hand-edit; a stale hand-edit is worse
 than no entry. Commits after the last one listed here are not yet folded in.
 
-**Total: 384 commits, 2026-07-02 to 2026-07-19.**
+**Total: 397 commits, 2026-07-02 to 2026-07-19.**
 
 ## 2026-07-02
 
@@ -1168,3 +1168,31 @@ than no entry. Commits after the last one listed here are not yet folded in.
 - **`01d0c22`** — ROADMAP 13.25-13.27: first-start dialog, local-to-Git conversion, panel focus
   Three tasks raised by the owner while testing.
   *Docs · 3 files*
+- **`79a2c10`** — Session handoff: D1/D2 pass, gh removed, four tasks recorded
+  Documents the session and tidies two things the testing left behind.
+  *Docs · 3 files*
+- **`b5bf467`** — Upgrade Cursor AI template to ClaudeCode parity
+  Co-authored-by: Cursor <cursoragent@cursor.com>
+  *Docs, Templates · 8 files*
+- **`0b42427`** — ChatGPT template: align skills and safety rules
+  *Templates · 10 files*
+- **`de8c1e5`** — Update OpenCode template to ClaudeCode parity: MCP + git-workflow + new rules
+  *Templates · 4 files*
+- **`11a9fb1`** — Sync Kun AI templates with ClaudeCode: add AGENTS.md sections (BOM warning, Str/ReDim pitfalls, project.astoria, testing discipline, git-workflow, MCP editing), update SKILL.md to match CLAUDE.md scope, add git-workflow skill and .mcp.json
+  *Templates · 2 files*
+- **`3e2c6cc`** — Add Kimi AI templates mirror
+  *Templates · 19 files*
+- **`6ebf35c`** — TestPlan D3 passes Git-backed workflow
+  *Docs · 2 files*
+- **`be8c169`** — Fix MCP multi-file consistency and pass D5
+  *Build/Tools, Docs, IDE · 6 files*
+- **`5f0f84c`** — Kun template: align skills and safety rules
+  *Templates · 2 files*
+- **`4840947`** — Mark native dialog return-value test complete
+  *Docs, Examples · 5 files*
+- **`c838493`** — Fix settings recovery and multi-form debugging
+  *Build/Tools, Docs, Examples, IDE · 16 files*
+- **`6f1dcee`** — Verify clean install and remove framework warnings
+  *Docs, Framework/Controls · 9 files*
+- **`46078e6`** — Revert warning cleanup that broke startup
+  *Docs, Framework/Controls · 7 files*

@@ -7218,14 +7218,12 @@ Sub CreateMenusAndToolBars
 	'' This menu is therefore NEVER greyed. Its individual items still enable/disable themselves
 	'' in ChangeMenuItemsEnabled, and mClick routes each one to the editor or the designer
 	'' depending on what has focus.
-	'' 13.28 pt 3 bisection -- TEMPORARY. The base caption is the one Astoria always shipped.
-	'' With ASTORIA_BISECT=fixodditems the mnemonic-less item and the disabled duplicate-Alt+F
-	'' are given proper unique mnemonics, so we can measure whether either oddity is what tells
-	'' Windows' mnemonic search to swallow C/G/R.
-	'' Under the fixodditems gate we give Code/Form a mnemonic. Was Alt+D, changed to Alt+E to
-	'' avoid clashing with the workaround Alt+D on the real Code menu (13.28 pt 3 workaround).
-	Dim cfCap As String = IIf(BisectSkip("fixodditems"), ("Cod&eForm"), ("Code/Form"))
-	miCodeFormMenu = mnuMain.Add(cfCap, "", "CodeForm")
+	'' Cod&e/Form (Alt+E) rather than Code/Form (no mnemonic) -- adds a keyboard route to the item
+	'' that was the one top-level menu without one. Alt+E was verified free of other bindings; the
+	'' visible label is unchanged, only the underline moves.
+	'' The fixodditems bisect gate below still swaps &Form to For&m (its disabled duplicate-Alt+F
+	'' half); this half is redundant with the shipped default and was folded in.
+	miCodeFormMenu = mnuMain.Add(("Cod&e/Form"), "", "CodeForm")
 	miUndo = miCodeFormMenu->Add(("Undo") & HK("Undo", "Ctrl+Z"), "Undo", "Undo", @mClick, , , False)
 	miRedo = miCodeFormMenu->Add(("Redo") & HK("Redo", "Ctrl+Shift+Z"), "Redo", "Redo", @mClick, , , False)
 	miCodeFormMenu->Add("-")

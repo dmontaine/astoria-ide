@@ -6606,6 +6606,17 @@ Sub UpdateWindowMenu
 End Sub
 
 
+'' HotKeys.txt can legitimately contain the SAME KEY MORE THAN ONCE, because the Options dialog
+'' writes one line per menu item keyed on that item's Name -- and menu item names are not unique.
+'' The Tools menu alone produced four "Tools=" lines, three of them blank (the dynamically added
+'' user tools), which shadowed the real "Tools=Ctrl+Shift+D" and left Ctrl+Shift+D dead: the
+'' caption never got its "\t..." text, so no accelerator was ever registered (ROADMAP 13.33).
+''
+'' So: a later NON-EMPTY value fills in a key that is present but blank. A blank duplicate can no
+'' longer shadow a real binding, whichever order they appear in. Blank is still honoured when it is
+'' the only entry for a key -- that is a deliberately unassigned shortcut, and skipping blanks
+'' outright would resurrect shortcuts a user had cleared, because HK() falls back to its code
+'' default when a key is absent entirely.
 Sub LoadHotKeys
 	Dim As Integer Fn = FreeFile_, Pos1
 	Dim As String Buff
@@ -6614,7 +6625,14 @@ Sub LoadHotKeys
 			Line Input #Fn, Buff
 			Pos1 = InStr(Buff, "=")
 			If Pos1 > 0 Then
-				HotKeys.Add Left(Buff, Pos1 - 1), Mid(Buff, Pos1 + 1)
+				Dim As String hkKey = Left(Buff, Pos1 - 1)
+				Dim As String hkValue = Mid(Buff, Pos1 + 1)
+				Dim As DictionaryItem Ptr existing = HotKeys.Item(hkKey)
+				If existing = 0 Then
+					HotKeys.Add hkKey, hkValue
+				ElseIf Trim(existing->Text) = "" AndAlso Trim(hkValue) <> "" Then
+					existing->Text = hkValue
+				End If
 			End If
 		Wend
 	End If
@@ -6856,7 +6874,10 @@ Sub CreateMenusAndToolBars
 	LoadHotKeys
 	Var miFile = mnuMain.Add(("&File"), "", "File")
 	miFile->Add(("&New Project") & HK("NewProject", "Ctrl+Shift+N"), "Project", "NewProject", @mClick)
-	miFile->Add(("&Open Project") & "...", "", "OpenProject", @mClick)
+	'' The accelerator comes from the caption -- HK() appends "\tCtrl+Shift+O", which is what
+	'' TranslateAccelerator matches on. This line had no HK() at all, so Ctrl+Shift+O was listed in
+	'' Tools > Options > Shortcuts and could never fire (ROADMAP 13.32).
+	miFile->Add(("&Open Project") & "..." & HK("OpenProject", "Ctrl+Shift+O"), "", "OpenProject", @mClick)
 	miFile->Add(("&Recent Projects") & "...", "", "RecentProject", @mClick)
 	miCloseProject = miFile->Add(("Close Project") & HK("CloseProject", "Ctrl+Shift+F4"), "", "CloseProject", @mClick, , , False)
 	miFile->Add("-")

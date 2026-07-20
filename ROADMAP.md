@@ -1087,9 +1087,14 @@ off just before it was taken. That was the new single toggle working correctly. 
 that a screenshot records a state someone may have just changed, not necessarily the code's own
 behaviour.
 
-### 13.32 Ctrl+Shift+O (Open Project) is advertised but can never fire (found by TestPlan E12, 2026-07-20)
+### 13.32 Ctrl+Shift+O (Open Project) is advertised but can never fire — **RESOLVED 2026-07-20** (found by TestPlan E12)
 
-**Status: open. Confirmed with a positive control.** `Settings/Others/HotKeys.txt` assigns
+**Status: fixed and re-tested. Not yet owner-verified.** `Main.bas:6859` now reads
+`miFile->Add(("&Open Project") & "..." & HK("OpenProject", "Ctrl+Shift+O"), ...)`, matching every
+working sibling. Verified by effect: Ctrl+Shift+O opens the **Open Project** dialog, alongside
+Ctrl+Shift+N as a control. D1 re-run 12/12.
+
+**Confirmed with a positive control.** `Settings/Others/HotKeys.txt` assigns
 `OpenProject=Ctrl+Shift+O`, and Tools ▸ Options ▸ General ▸ Shortcuts displays it, so a user is told
 the shortcut exists. Pressing it does nothing at all — no window, no foreground change, after four
 seconds. In the same run `Ctrl+Shift+N` opened the New Project dialog, so the test method was
@@ -1110,15 +1115,52 @@ shortcut that silently does nothing.
 through a menu accelerator. The list is a set of candidates to verify by effect, and reporting it
 as a verdict would have been wrong about at least one.
 
-### 13.33 Ctrl+Shift+D (External Tools) does not open its dialog (found by TestPlan E12, 2026-07-20)
+### 13.33 Ctrl+Shift+D (External Tools) does not open its dialog — **RESOLVED 2026-07-20** (found by TestPlan E12)
 
-**Status: open, cause not yet identified.** Unlike §13.32 the menu item *does* carry its accelerator
-— `Main.bas:7173`, `miXizmat->Add(("&External Tools") & "..." & HK("Tools"), ...)` — and the
-dispatch exists (`Case "Tools": pfTools->Show`). The menu item is under Tools ▸ External Tools and
-is not greyed. Pressing Ctrl+Shift+D produces no window and no foreground change after four seconds,
-measured alongside a working positive control. Worth checking against the §13.19/C4 pattern, where
-`TranslateAccelerator` swallowed an accelerator whose parent menu was disabled without sending any
-`WM_COMMAND`, and against a possible conflict with another registered accelerator.
+**Status: fixed and re-tested. Not yet owner-verified.** The cause turned out to be **data, not
+code**, and the route to it is worth keeping because three plausible theories were wrong first.
+
+**What it was not.** Not a conflict — no other shortcut is bound to Ctrl+Shift+D. Not the §13.19/C4
+greyed-parent pattern — the Tools menu is never disabled. Not the editor swallowing the key — it
+failed identically with focus in the code editor, the project tree, and the menu bar, while
+Ctrl+Shift+N worked from all three.
+
+**What settled it was looking at the menu.** A screenshot of the open Tools menu showed
+*Command Prompt* with `Alt+C` beside it and *External Tools…* with **nothing** — so `HK("Tools")`
+had returned an empty string and the caption never got its `\t` text. Accelerators are built in
+`Menus.bas` (`MainMenu.ParentWindow`) by scanning captions for a tab character, so a caption without
+one gets no accelerator at all.
+
+**Root cause: `HotKeys.txt` contained four `Tools=` lines, three of them blank.** `LoadHotKeys` used
+`Dictionary.Add` per line and the first entry wins, so the lookup returned `""` from the first blank
+rather than `Ctrl+Shift+D` from the fourth. The duplicates exist because the Options dialog writes
+one line per menu item keyed on `item->Name`, and **menu item names are not unique** — the
+dynamically added user tools (chrome, notepad++) share the Tools name and contribute blank entries.
+
+**Two changes.** `LoadHotKeys` now lets a later **non-empty** value fill in a key that is present but
+blank, so a blank duplicate can never shadow a real binding whichever order they appear in. A blank
+is still honoured when it is the only entry for a key — that is a deliberately cleared shortcut, and
+skipping blanks outright would resurrect shortcuts a user had removed, because `HK()` falls back to
+its code default when a key is absent entirely. Separately the three blank duplicates were removed
+from the **shipped** `Settings/Others/HotKeys.txt`, which is tracked — meaning Ctrl+Shift+D was dead
+on a fresh install too, not just on this machine.
+
+**Verified by effect:** Ctrl+Shift+D now opens the Tools dialog, with Ctrl+Shift+N as a control.
+D1 re-run 12/12.
+
+### 13.35 The shortcut file is keyed on a non-unique menu item name (root cause behind §13.33, 2026-07-20)
+
+**Status: open, deferred. Not urgent — §13.33's loader fix makes the symptom harmless — but the
+generator of the bad data is still there.** `frmOptions.frm:3369` writes
+`Print #Fn, .HotKeysPriv.Item(i) & "=" & Key`, one line per menu item, keyed on `item->Name`. Names
+are not unique across the menu tree, so any menu carrying several items with the same name emits
+duplicate keys, and dynamically added items (the user's external tools) emit blank ones. Every save
+from the Options dialog can reintroduce duplicates.
+
+The durable fix is to key shortcuts on something actually unique — the command name used for
+dispatch would do — or to have the writer collapse duplicates and prefer a non-empty binding. Worth
+doing before anyone relies on editing shortcuts heavily; a user who adds two external tools and then
+saves Options can currently blank a working shortcut and would have no way to tell why.
 
 ### 13.34 Finish the shortcut sweep (deferred from TestPlan E12, 2026-07-20)
 

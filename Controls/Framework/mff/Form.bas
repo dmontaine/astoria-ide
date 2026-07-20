@@ -919,6 +919,16 @@ Namespace My.Sys.Forms
 				Visible = True
 				SetWindowPos(FHandle, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE)
 				SetForegroundWindow(FHandle)
+				'' ASTORIA CHANGE (ROADMAP 13.28): give a modal dialog an initial focus.
+				'' Form.Show already does this; ShowModal never did, so a modal opened with focus on
+				'' the form itself and nothing focused inside it. That single omission caused both
+				'' halves of the reported failure: the VK_TAB case below takes its
+				'' "GetFocus() = Handle" branch when no control is focused, so Tab moved nothing;
+				'' and Control.bas's per-control VK_ESCAPE handler never received a key at all,
+				'' because no control was there to receive one. The New Project dialog -- which the
+				'' IDE opens into when no project is loaded -- was therefore unusable AND unclosable
+				'' from the keyboard.
+				SelectNextControl
 				InShowModal = True
 				Dim As MSG msg
 				Dim TranslateAndDispatch As Boolean
@@ -939,6 +949,20 @@ Namespace My.Sys.Forms
 									SelectNextControl(GetKeyState(VK_SHIFT) And &h8000)
 									TranslateAndDispatch = False
 								ElseIf IsDialogMessage(Handle, @msg) Then
+									TranslateAndDispatch = False
+								End If
+							Case VK_ESCAPE
+								'' ASTORIA CHANGE (ROADMAP 13.28): a modal that cannot be closed from
+								'' the keyboard is a trap, not an inconvenience. Dialogs that name a
+								'' CancelButton are already served by Control.bas's VK_ESCAPE handler,
+								'' which runs that button's own OnClick -- and leaving those alone
+								'' keeps Escape free for what a focused control legitimately uses it
+								'' for, such as closing an open combo dropdown. This is only the
+								'' fallback for a modal that names no CancelButton, so there is
+								'' always a way out.
+								If FCancelButton = 0 Then
+									ModalResult = ModalResults.Cancel
+									Visible = False
 									TranslateAndDispatch = False
 								End If
 							End Select

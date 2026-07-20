@@ -11,6 +11,14 @@
 			.BorderStyle = FormBorderStyle.FixedDialog
 			.MaximizeBox = False
 			.MinimizeBox = False
+			'' Escape must close this dialog (ROADMAP 13.28). The framework already runs the form's
+			'' CancelButton on Escape; this form simply never named one, and since the IDE opens
+			'' straight into it when no project is loaded, a keyboard-only user met it first and
+			'' could not get past it or out of it. cmdCancel's own OnClick sets
+			'' ModalResult = Cancel, so routing Escape through it keeps one exit path rather than
+			'' two. The pointer is a stable member address; cmdCancel's properties and OnClick are
+			'' assigned further down and are in place long before any key is pressed.
+			.CancelButton = @cmdCancel
 			.OnCreate = @Form_Create_
 			.SetBounds 0, 0, 480, 475
 			.StartPosition = FormStartPosition.CenterParent

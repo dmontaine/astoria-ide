@@ -777,6 +777,7 @@ documentation.
 | ScintillaControl | Its three DLLs are now copied beside your exe on build. |
 | ListViewEx, SearchBar | **Kept hidden.** Each ships a `.bi` whose implementation `.bas` was never included upstream, so neither can be built. Needs an upstream fix. |
 | Toolbox: Cursor | Shown **once**, under Controls, rather than repeated in all four groups. |
+| Form (modal dialogs) | **A modal dialog now receives an initial focus and can always be closed from the keyboard** (ROADMAP §13.28). Upstream's `Form.Show` focuses the first control but `Form.ShowModal` did not, so a modal opened with nothing inside it focused — which silently disabled *both* keyboard behaviours that depend on a focused control: `Tab` traversal took its "no control focused" branch and moved nothing, and the per-control `Escape` handler never received a key. `ShowModal` now calls `SelectNextControl` as `Show` does. A modal that names no `CancelButton` also gets an `Escape` fallback in the modal message pump that cancels and closes it; dialogs that *do* name one are left to the existing per-control handler, so `Escape` stays available to a focused control that needs it — closing an open combo dropdown, for instance. **Affects every modal dialog**, in your programs as well as the IDE's. |
 
 Beyond the controls, the build now copies any control library's declared runtime DLLs beside
 the program it builds, so a program using ScintillaControl or MariaDBBox starts on a machine

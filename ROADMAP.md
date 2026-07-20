@@ -839,19 +839,49 @@ stop writing it or drop the key.
 
 ### 13.28 The IDE cannot be operated by keyboard alone (found by TestPlan E9, 2026-07-19)
 
-**Status: open. Astoria fails its keyboard accessibility baseline.** Building and running are fully
-reachable from the keyboard and the menu bar is properly keyboard-driven, but **a user who cannot
-use a mouse cannot create a project or open a file** — two of the four steps E9 exists to prove.
+**Status: PART 1 RESOLVED 2026-07-20 — the blocker is gone. Parts 2–4 remain open.** Not yet
+owner-verified.
+
+**Part 1 (the New Project dialog) is fixed, and the cause was one omission in the framework.**
+`Form.Show` focuses the first control; `Form.ShowModal` never did. A modal therefore opened with
+focus on the form itself and nothing inside it focused — and that single omission disabled *both*
+reported behaviours at once, which is why they looked like separate defects: the modal pump's
+`VK_TAB` case takes its `GetFocus() = Handle` branch when no control is focused, so Tab moved
+nothing; and `Control.bas`'s per-control `VK_ESCAPE` handler never received a key, because no
+control was there to receive one. `ShowModal` now calls `SelectNextControl` as `Show` does.
+
+Two supporting changes: a modal naming no `CancelButton` gets an `Escape` fallback in the pump that
+cancels and closes it, so no modal can be a trap; and `frmNewProject` now names its `cmdCancel` as
+`CancelButton`, routing Escape through the button's own handler rather than adding a second exit
+path. Dialogs that already name a `CancelButton` are deliberately left to the existing per-control
+handler, so Escape remains available to a focused control that legitimately uses it — closing an
+open combo dropdown, for instance.
+
+**Verified by effect** on three dialogs: New Project and Find each get initial focus on a real
+control, move focus on Tab, and close on Escape. D1 re-run 12/12 and E11 10/10 as regression checks,
+since this is framework code every dialog goes through. Documented in `Documentation/Controls.md`
+because it changes behaviour for **user programs too**, not only the IDE.
+
+**One dialog still does not close on Escape: External Tools.** It is shown with `Show`, not
+`ShowModal` (`AstoriaIDE.bas:679`), so it is modeless and the modal pump's fallback does not reach
+it. This is **not** the same trap — a modeless window does not disable the IDE, so the user is not
+stuck — and the app-wide pump that would fix it also serves the main window, where Escape must
+certainly not close anything. Left open deliberately rather than risking that.
+
+**Remaining, still open.** Building and running are fully reachable from the keyboard and the menu
+bar is properly keyboard-driven, but **a user who cannot use a mouse still cannot open a file**,
+because the project tree cannot be reached (part 2 below).
 
 Four defects, sharing one likely root cause: MFF forms do not run their input through a dialog
 manager, so standard dialog navigation (initial focus, `Tab`, `Escape`, default button) is never
 applied. The menu bar works because menus are native Win32 and handle their own navigation.
 
-**1. The New Project dialog takes no keyboard input at all.** *This is the blocker.* No control has
-initial focus, there is no focus indicator, typing does nothing, `Tab` moves nothing, and `Escape`
-does not close it. Only `Alt+F4` dismisses it — and because the IDE opens straight into this dialog
-when no project is loaded, a keyboard-only user meets it first and cannot get past it *or out of
-it*. Input does reach the window (`Alt+F4` proves that); the dialog simply ignores navigation.
+**1. The New Project dialog takes no keyboard input at all.** *This was the blocker.* **FIXED
+2026-07-20 — see the status note above.** No control had initial focus, typing did nothing, `Tab`
+moved nothing, and `Escape` did not close it; only `Alt+F4` dismissed it. Because the IDE opens
+straight into this dialog when no project is loaded, a keyboard-only user met it first and could not
+get past it *or out of it*. Input did reach the window (`Alt+F4` proved that); the dialog simply
+ignored navigation, because nothing inside it was focused.
 
 **2. The project tree cannot be reached.** `Ctrl+R` ("Project Explorer") puts the caret in the
 panel's *search box*, not the tree. `Tab` does not move from there into the tree and arrows select
@@ -1179,6 +1209,19 @@ established 18 working and 2 broken (§13.32, §13.33); the rest are unfinished,
 3. **Nineteen destructive or stateful shortcuts** — Exit, Close, CloseProject, Save*/Open* session,
    Print, CommandPrompt, and the whole debugger/run set. These end or derail a sweep, so each needs
    its own run with the IDE restarted between.
+
+**A fourth trap, and it is not in the harness at all: another application can eat the shortcut
+before Astoria ever sees it.** The owner had a background app capturing **Ctrl+Shift+Q, Ctrl+Shift+E,
+Ctrl+Shift+A, Ctrl+Shift+Z and Ctrl+Shift+W** system-wide. `Ctrl+Shift+Z` is **Redo**, which this
+sweep recorded as FAIL — that result is therefore **void, not a defect**. Nothing in Astoria can
+detect or report this: the keystroke never arrives. Before recording any shortcut as broken, check
+that nothing else on the machine has claimed it.
+
+**Redo's status as of 2026-07-20: UNRESOLVED — do not record it either way.** The owner disabled
+the capturing app's shortcuts and Ctrl+Shift+Z still does not redo, but the hook may not be released
+until a reboot, so it is still unknown whether Astoria's Redo works. Re-test after a reboot with
+`Ctrl+Z` (Undo, verified working) in the same run as a control: if Undo fires and Redo does not from
+the same state, that is a genuine Astoria defect rather than interference.
 
 **Three harness traps, each of which produced confident wrong answers before being caught.** They
 are commented in the scripts, and they generalise to any UI test here:

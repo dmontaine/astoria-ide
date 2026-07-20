@@ -18,7 +18,7 @@ is to write a good commit message. Regenerate rather than hand-edit; a stale han
 than no entry. Run `.\GenerateChangelog.ps1` from the repository root; `-Check` reports whether
 the file is current and writes nothing, which suits a pre-commit hook.
 
-Everything above the **Total: 407 commits, 2026-07-02 to 2026-07-19.**
+Everything above the **Total: 409 commits, 2026-07-02 to 2026-07-19.**
 
 ## 2026-07-02
 
@@ -1235,3 +1235,9 @@ Everything above the **Total: 407 commits, 2026-07-02 to 2026-07-19.**
 - **`03e1209`** — Ignore local test artefacts and regenerate the changelog
   Throwaway New Project fixtures from the 13.27 verification, built binaries inside the tracked Projects/ fixtures (the existing `Projects/*.exe` rule only matched the top level, so a build inside Projects/Project3/ escaped it), and the suffixed debugger traces alongside the already-ignored...
   *Build/Tools, Docs · 2 files*
+- **`2567952`** — Add the changelog generator the documentation already assumed existed
+  DetailedChangelog.md has always described itself as generated from commit messages, and CLAUDE.md told contributors to "regenerate rather than hand-edit" -- but no generator existed, so every entry was appended by hand.
+  *Build/Tools, Docs · 3 files*
+- **`9369086`** — TestPlan E9 fails: the IDE cannot be operated by keyboard alone
+  Build and run are fully reachable from the keyboard and the menu bar is properly keyboard-driven -- Alt+F opens File, mnemonics are underlined, arrows walk between menus.
+  *Docs · 3 files*

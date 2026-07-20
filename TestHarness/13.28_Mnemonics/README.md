@@ -65,6 +65,14 @@ covers menu-bar-to-menu-bar collisions or only accelerator-to-menu.
 
 ## What is established
 
+- **The defect reproduces on a second machine, with the same silent signature** (2026-07-20). The
+  owner pressed `Alt+C`/`Alt+G`/`Alt+R` on the other computer against the same binary: no menu, and
+  **no bell**. The bell was checked deliberately — a beep there would have meant ordinary
+  no-such-mnemonic behaviour and pointed away from the win32k mnemonic path. **This rules out
+  machine state, installed software and per-machine input hooks**, and it means the failing set can
+  be reproduced on demand on either machine. It does *not* rule out something common to both
+  Windows installs; if the kernel trace comes back empty, a third machine or a different Windows
+  build is the cheap next test rather than more hypotheses.
 - The keystrokes reach the process (`WH_KEYBOARD_LL` sees them; a WinForms app on the same machine
   acts on them).
 - `WM_SYSCHAR` reaches Astoria's form with `Handled=0, Result=0`, which falls through to

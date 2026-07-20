@@ -955,6 +955,17 @@ than by appearance:
      Real, and worth fixing on its own merits — but **not** the cause here: moving `Tools.ini`
      aside entirely reproduced the identical failure on C, R and G.
 
+  **CONFIRMED ON A SECOND MACHINE 2026-07-20 — the defect is not machine-local.** The owner pressed
+  `Alt+C`, `Alt+G` and `Alt+R` in Astoria on the other computer, against the same binary: no menu
+  opens and **no bell rings** — the identical silent signature. The bell was checked deliberately
+  rather than assumed, because a beep on the second machine would have meant Windows entered menu
+  mode and failed to match, i.e. ordinary no-such-mnemonic behaviour, pointing away from the
+  win32k mnemonic path entirely. **Machine state, installed software and per-machine input hooks
+  are therefore ruled out**, and the failing set reproduces on demand on either machine — so an
+  instrument can be built wherever is convenient and validated on both. It does **not** rule out
+  something common to both Windows installs: if the kernel trace comes back empty, a third machine
+  or a different Windows build is the cheap next test, ahead of more hypotheses.
+
   **RESOLVED TO ASTORIA 2026-07-20 — it is not the machine, and not interference.** A stock
   WinForms control application was built with the *same* mnemonic letters (`&File &Code &Run &Git
   &Tools`) and driven by the identical probe, on the same machine in the same session, with a

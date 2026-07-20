@@ -8,12 +8,31 @@ used to run Astoria.** Nothing in `src/` or `Controls/` was changed — only har
 documentation. No rebuild happened; the binaries are still the 04:12–04:15 build from the previous
 session.
 
-### The one thing to do first, on the other computer
+### The one thing to do first, on the other computer — **ANSWERED 2026-07-20**
 
-**Press `Alt+C`, `Alt+G`, `Alt+R` in Astoria there.** This has never been tried and it is worth more
-than any instrument built today. Works there → the defect is machine-local and twelve hypotheses
-have been aimed at the wrong target. Fails on both → it is in Astoria, machine state is ruled out
-for free, and the kernel trace is worth its setup. Three keystrokes, either answer is progress.
+**It fails on the second computer too, and it fails silently.** The owner pressed `Alt+C`, `Alt+G`
+and `Alt+R` on the other machine, running the same binary: no menu opens, and **no bell** — the
+identical signature, not merely "no menu". The distinction was checked deliberately, because a beep
+would have meant Windows entered menu mode and failed to match, which is ordinary
+no-such-mnemonic behaviour and would have pointed somewhere else entirely.
+
+**What this buys.** The defect is **not machine-local**: machine state, installed software, and any
+per-machine input hook are ruled out for free. The twelve hypotheses were aimed at the right target
+after all, and the kernel trace is worth its setup. It also means the failing set {C, G, R} is
+reproducible on demand on either machine, so any future instrument can be developed wherever is
+convenient and validated on both.
+
+**What it does not settle.** Two machines sharing a Windows version and a similar configuration are
+not proof that nothing environmental is involved — only that nothing *specific to one machine* is.
+If the kernel trace comes back empty, "something common to both Windows installs" is still live and
+a third machine, or a different Windows build, becomes the cheap next test rather than more
+hypotheses.
+
+**Original instruction, retained for the record:** Press `Alt+C`, `Alt+G`, `Alt+R` in Astoria there.
+This has never been tried and it is worth more than any instrument built today. Works there → the
+defect is machine-local and twelve hypotheses have been aimed at the wrong target. Fails on both →
+it is in Astoria, machine state is ruled out for free, and the kernel trace is worth its setup.
+Three keystrokes, either answer is progress.
 
 ### What was eliminated
 

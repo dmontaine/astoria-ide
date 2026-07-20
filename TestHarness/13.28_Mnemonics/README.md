@@ -195,21 +195,34 @@ Two machines are available. **This machine (the one this session ran on) is the 
 it reproduces the defect and can run Astoria. The second machine is the HOST and needs none of the
 setup below.
 
-BitLocker is **off on both machines** and both use local accounts, so the recovery-lockout risk that
-would normally gate this does not apply. Secure Boot must still be disabled in firmware on the
-target — `bcdedit /debug on` is blocked by Secure Boot policy — which is reversible and harmless
-without BitLocker.
+**Prerequisites, all verified on the target 2026-07-20 — no firmware change or reboot risk remains:**
+
+| Check | Result |
+| --- | --- |
+| BitLocker | **Off on both machines**, both on local accounts. The recovery-lockout risk that normally gates kernel debugging does not apply. |
+| Secure Boot | **Already off.** `HKLM\SYSTEM\CurrentControlSet\Control\SecureBoot\State\UEFISecureBootEnabled = 0`. No firmware trip needed. (This value is readable without elevation; `Confirm-SecureBootUEFI` is not.) |
+| Debug-capable NIC | **Realtek PCIe GbE, `busparams=2.0.0`** — reported supported by `kdnet.exe`. |
+| USB alternative | Intel USB 3.20 xHC, `busparams=0.20.0` — would need an A/A debug cable. |
+| Hypervisor | `kdnet.exe` reports KDNET is supported in guest VMs, if a VM target is ever preferred. |
+
+**The one thing missing is an ethernet cable.** The Realtek port reports *"Not plugged in"*, and the
+machine is currently on Wi-Fi only (MediaTek MT7922 — **not** in `kdnet.exe`'s supported list, so
+Wi-Fi will not work for this). Plug both machines into the same switch or router before starting.
+
+Target identity at time of writing: hostname `ACE`, `10.0.0.2` via Wi-Fi, gateway `10.0.0.1`. The
+wired interface will get its own address once connected — use that one.
 
 Target setup (elevated), then reboot:
 
 ```
-bcdedit /debugger uselastboot          REM optional: check current state first
+bcdedit /dbgsettings                          REM check current state first
 bcdedit /dbgsettings net hostip:<HOST-IP> port:50000
 bcdedit /debug on
 ```
 
-`/dbgsettings net` prints a **connection key** — record it, the host needs it. Wired ethernet is
-strongly preferable to Wi-Fi for KDNET stability.
+`hostip` is the **other** machine's address, not this one's. `/dbgsettings net` prints a
+**connection key** — record it, the host needs it to connect. `kdnet.exe <HOST-IP> 50000` will do
+the same configuration and print the key, if that is preferred to `bcdedit`.
 
 Host:
 

@@ -39,9 +39,12 @@ collisions or only accelerator-to-menu.
 - **Kernel symbols verified usable** — `win32kfull.sys` public PDB matches this build and names
   `xxxMNFindChar`, `xxxMNKeyFilter`, `xxxMNChar`, `xxxMNLoop`, `xxxSysCommand`,
   `xxxHandleMenuMessages`. This premise was checked *before* recommending the invasive setup.
-- **KDNET setup written up** in the harness README, with machine roles. BitLocker is off on both
-  machines and both use local accounts, so the recovery-lockout risk that normally gates kernel
-  debugging does not apply; Secure Boot must still come off in firmware on the target.
+- **KDNET setup written up** in the harness README, with machine roles and **every prerequisite
+  verified on the target**: BitLocker off on both machines, Secure Boot **already off**
+  (`UEFISecureBootEnabled = 0`), and a debug-supported Realtek PCIe GbE NIC (`busparams=2.0.0`).
+  No firmware change and no reboot risk remain. **The only missing piece is an ethernet cable** —
+  the Realtek port reports "Not plugged in" and the machine is on Wi-Fi only, which `kdnet.exe`
+  does not list as supported.
 
 ### Unexplained, worth knowing
 

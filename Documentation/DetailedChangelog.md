@@ -18,7 +18,7 @@ is to write a good commit message. Regenerate rather than hand-edit; a stale han
 than no entry. Run `.\GenerateChangelog.ps1` from the repository root; `-Check` reports whether
 the file is current and writes nothing, which suits a pre-commit hook.
 
-Everything above the **Total: 419 commits, 2026-07-02 to 2026-07-20.**
+Everything above the **Total: 421 commits, 2026-07-02 to 2026-07-20.**
 
 ## 2026-07-02
 
@@ -1273,3 +1273,9 @@ Everything above the **Total: 419 commits, 2026-07-02 to 2026-07-20.**
 - **`e8cad6f`** — E12: shortcut sweep harness, two real defects, rest deferred
   Tools > Options > General > Shortcuts advertises 54 assigned shortcuts.
   *Build/Tools, Docs · 7 files*
+- **`7fc0f09`** — DetailedChangelog: regenerate through e8cad6f
+  Picks up the E12 shortcut sweep and ROADMAP 13.32-13.34.
+  *Docs · 1 file*
+- **`4ff9dd8`** — Fix both shortcut defects E12 found (13.32, 13.33)
+  13.32 -- Ctrl+Shift+O (Open Project) could never fire.
+  *Docs, IDE, Settings · 6 files*

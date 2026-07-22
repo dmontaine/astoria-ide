@@ -18,7 +18,7 @@ is to write a good commit message. Regenerate rather than hand-edit; a stale han
 than no entry. Run `.\GenerateChangelog.ps1` from the repository root; `-Check` reports whether
 the file is current and writes nothing, which suits a pre-commit hook.
 
-Everything above the **Total: 451 commits, 2026-07-02 to 2026-07-20.**
+Everything above the **Total: 453 commits, 2026-07-02 to 2026-07-22.**
 
 ## 2026-07-02
 
@@ -1367,3 +1367,12 @@ Everything above the **Total: 451 commits, 2026-07-02 to 2026-07-20.**
 - **`25d59ec`** — PROJECT_STATUS: session-close handoff -- pt 3 workaround shipped, Alt+E added
   Adds an "evening" session-close handoff on top of this morning's "afternoon" pause note.
   *Docs · 1 file*
+- **`035a315`** — DetailedChangelog: regenerate through 25d59ec
+  Picks up the session-close handoff.
+  *Docs · 1 file*
+
+## 2026-07-22
+
+- **`9d277f2`** — Remove Git integration; consolidate project description into a Properties tab
+  Git is an advanced feature that doesn't fit Astoria's target audience (returning Basic programmers, hobbyists, students), so every user-facing Git surface is gone:
+  *Docs, Examples, IDE, Templates · 54 files*

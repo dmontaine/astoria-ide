@@ -29,7 +29,6 @@ describe what the program does, its layout, and any rules you want followed.
 Task playbooks live in `.kun/skills/` and load on demand:
 
 - **use-astoria-mcp** — drive the live IDE through the `astoria` MCP server (build, run, read errors, edit files) when it's connected; preferred over manual F5/CLI.
-- **git-workflow** — commit/push a git-backed project; the remote lives in `project.astoria` (IDE Project menu > Git Commit/Push, or git CLI over SSH).
 - **build-run** — build and run (via MCP if connected, else IDE F5 or `fbc` CLI with its GUI caveats).
 - **fix-compile-errors** — decoding `fbc`'s errors and this stack's common ones.
 - **add-module** — new `.bas`/`.bi` pair, registered in the `.vfp`.
@@ -87,16 +86,14 @@ FreeBASIC is **not** VB.NET, VBA, QBASIC, or C — do not assume their syntax.
   be mirrored in its `File=` lines (easiest via the IDE's project Explorer). A
   file not listed there is invisible to the project.
 - **Leave the IDE-maintained metadata keys alone** (`Author=`, `License=`,
-  `Description=`, `UseGit=`, `GitProvider=`, `GitUserName=`, `GitEmail=`,
-  `GitURL=`, `AIFriendly=`, `AITool=`) — the IDE round-trips them on save.
+  `Description=`, `AIFriendly=`, `AITool=`) — the IDE round-trips them on save.
 - **`project.astoria`** (project root) is the canonical description file and the
   marker that identifies this folder as an Astoria project — it must keep its
   `AstoriaProject=1` line. It records the creation choices (author, license,
-  description, Git provider/username/email/remote URL, AI settings) and is what
-  the IDE's **Edit Project Description** and **Git Commit/Push** features read
-  from (the `.vfp` mirrors some of the same keys). Don't delete or rename it;
-  edit it via **Project menu > Edit Project Description**, or by hand as
-  line-based `Key=Value` (UTF-8). See the **git-workflow** skill.
+  description, AI settings) and is what the IDE's **Edit Project Description**
+  reads from (the `.vfp` mirrors some of the same keys). Don't delete or rename
+  it; edit it via **Project menu > Edit Project Description**, or by hand as
+  line-based `Key=Value` (UTF-8).
 - **`.frm` files are designer-managed.** The `'#Region "Form"` block is generated
   by Astoria's Form Designer — edit event-handler bodies freely; prefer the
   Designer for layout/control changes; keep the `With`-block shape and
@@ -148,10 +145,6 @@ project were both introduced *by* fixes that read correctly.
 
 - Ask before anything destructive or irreversible (deleting files, force-pushing,
   etc.).
-- Commit only when asked; write clear, scoped commit messages; never force-push.
-  If this project is git-backed, its remote lives in `project.astoria` and a
-  `.gitignore`/`.gitattributes` pair is already provided — commit/push via
-  **Project > Git Commit/Push** or the git CLI over SSH (see **git-workflow**).
 - Put project-specific context you want me to remember into `resources/` or add
   it to this file.
 

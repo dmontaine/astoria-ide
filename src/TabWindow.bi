@@ -43,7 +43,6 @@ Type ProjectElement Extends ExplorerElement
 	Subsystem As Integer
 	ProjectName As WString Ptr
 	HelpFileName As WString Ptr
-	ProjectDescription As WString Ptr
 	PassAllModuleFilesToCompiler As Boolean
 	OpenProjectAsFolder As Boolean
 	ProjectFolderType As ProjectFolderTypes
@@ -81,18 +80,12 @@ Type ProjectElement Extends ExplorerElement
 	AndroidSDKLocation As WString Ptr
 	AndroidNDKLocation As WString Ptr
 	JDKLocation As WString Ptr
-	' New Project dialog metadata (Author/License/Description/Git/AI) -- written at
+	' New Project dialog metadata (Author/License/Description/AI) -- written at
 	' project creation (frmNewProject) and round-tripped through load/save here so a
-	' later project save doesn't silently drop the keys. No IDE UI reads them yet
-	' (PROJECT_SETUP_PLAN Task 8, the Project Properties editor, will).
+	' later project save doesn't silently drop the keys.
 	Author As WString Ptr
 	License As WString Ptr
 	Description As WString Ptr
-	UseGit As Boolean
-	GitProvider As WString Ptr
-	GitUserName As WString Ptr
-	GitEmail As WString Ptr
-	GitURL As WString Ptr
 	AIFriendly As Boolean
 	AITool As WString Ptr
 	bQuitThread As Boolean

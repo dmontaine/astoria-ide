@@ -308,124 +308,6 @@ pfOptions = @fOptions
 			.Designer = @This
 			.Parent = @pnlPersonalAddress
 		End With
-		' grbPersonalGit — Git identity group (used by the New Project dialog's Use
-		' Existing Git mode and the Git Commit/SSH-key operations). Grouping these in
-		' their own box, like License, sets them off from the Address field above and
-		' lets the labels drop the redundant "Git" prefix.
-		With grbPersonalGit
-			.Name = "grbPersonalGit"
-			.Text = ("Git")
-			.Align = DockStyle.alTop
-			.ExtraMargins.Top = 12
-			.AutoSize = True
-			.TabIndex = 829
-			.SetBounds 0, 186, 417, 22
-			.Designer = @This
-			.Parent = @pnlPersonalInfo
-		End With
-		' pnlPersonalGitLogin — first row inside the group; the larger top margin clears
-		' the group box's own "Git" caption.
-		With pnlPersonalGitLogin
-			.Name = "pnlPersonalGitLogin"
-			.Text = "Panel1"
-			.Align = DockStyle.alTop
-			.ExtraMargins.Top = 16
-			.TabIndex = 830
-			.SetBounds 0, 0, 417, 24
-			.Designer = @This
-			.Parent = @grbPersonalGit
-		End With
-		' lblPersonalGitLogin
-		With lblPersonalGitLogin
-			.Name = "lblPersonalGitLogin"
-			.Text = ("Login Name") & ":"
-			.Align = DockStyle.alLeft
-			.ExtraMargins.Left = 10
-			.TabIndex = 831
-			.SetBounds 10, 0, 115, 24
-			.Designer = @This
-			.Parent = @pnlPersonalGitLogin
-		End With
-		' txtPersonalGitLogin
-		With txtPersonalGitLogin
-			.Name = "txtPersonalGitLogin"
-			.Align = DockStyle.alClient
-			.ExtraMargins.Left = 6
-			.ExtraMargins.Right = 20
-			.TabIndex = 832
-			.SetBounds 135, 2, 262, 20
-			.Text = ""
-			.Designer = @This
-			.Parent = @pnlPersonalGitLogin
-		End With
-		' pnlPersonalGitUserName
-		With pnlPersonalGitUserName
-			.Name = "pnlPersonalGitUserName"
-			.Text = "Panel1"
-			.Align = DockStyle.alTop
-			.ExtraMargins.Top = 6
-			.TabIndex = 833
-			.SetBounds 0, 24, 417, 24
-			.Designer = @This
-			.Parent = @grbPersonalGit
-		End With
-		' lblPersonalGitUserName
-		With lblPersonalGitUserName
-			.Name = "lblPersonalGitUserName"
-			.Text = ("User Name") & ":"
-			.Align = DockStyle.alLeft
-			.ExtraMargins.Left = 10
-			.TabIndex = 834
-			.SetBounds 10, 0, 115, 24
-			.Designer = @This
-			.Parent = @pnlPersonalGitUserName
-		End With
-		' txtPersonalGitUserName
-		With txtPersonalGitUserName
-			.Name = "txtPersonalGitUserName"
-			.Align = DockStyle.alClient
-			.ExtraMargins.Left = 6
-			.ExtraMargins.Right = 20
-			.TabIndex = 835
-			.SetBounds 135, 2, 262, 20
-			.Text = ""
-			.Designer = @This
-			.Parent = @pnlPersonalGitUserName
-		End With
-		' pnlPersonalGitEmail
-		With pnlPersonalGitEmail
-			.Name = "pnlPersonalGitEmail"
-			.Text = "Panel1"
-			.Align = DockStyle.alTop
-			.ExtraMargins.Top = 6
-			.TabIndex = 836
-			.SetBounds 0, 48, 417, 24
-			.Designer = @This
-			.Parent = @grbPersonalGit
-		End With
-		' lblPersonalGitEmail
-		With lblPersonalGitEmail
-			.Name = "lblPersonalGitEmail"
-			.Text = ("E-mail") & ":"
-			.Align = DockStyle.alLeft
-			.ExtraMargins.Left = 10
-			.TabIndex = 837
-			.SetBounds 10, 0, 115, 24
-			.Designer = @This
-			.Parent = @pnlPersonalGitEmail
-		End With
-		' txtPersonalGitEmail
-		With txtPersonalGitEmail
-			.Name = "txtPersonalGitEmail"
-			.Align = DockStyle.alClient
-			.ExtraMargins.Left = 6
-			.ExtraMargins.Right = 20
-			.TabIndex = 838
-			.SetBounds 135, 2, 262, 20
-			.Text = ""
-			.Designer = @This
-			.Parent = @pnlPersonalGitEmail
-		End With
 		' grbPersonalLicense
 		With grbPersonalLicense
 			.Name = "grbPersonalLicense"
@@ -2804,9 +2686,6 @@ Sub frmOptions.LoadSettings()
 		.txtPersonalWebsite.Text = *PersonalWebsite
 		.txtPersonalEmail.Text = *PersonalEmail
 		.txtPersonalAddress.Text = *PersonalAddress
-		.txtPersonalGitLogin.Text = *PersonalGitLogin
-		.txtPersonalGitUserName.Text = *PersonalGitUserName
-		.txtPersonalGitEmail.Text = *PersonalGitEmail
 		.chkLicenseGPL3.Checked = PersonalLicenseGPL3
 		.chkLicenseLGPL.Checked = PersonalLicenseLGPL
 		.chkLicenseApache.Checked = PersonalLicenseApache
@@ -3290,9 +3169,6 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		WLet(PersonalWebsite, .txtPersonalWebsite.Text)
 		WLet(PersonalEmail, .txtPersonalEmail.Text)
 		WLet(PersonalAddress, .txtPersonalAddress.Text)
-		WLet(PersonalGitLogin, .txtPersonalGitLogin.Text)
-		WLet(PersonalGitUserName, .txtPersonalGitUserName.Text)
-		WLet(PersonalGitEmail, .txtPersonalGitEmail.Text)
 		PersonalLicenseGPL3 = .chkLicenseGPL3.Checked
 		PersonalLicenseLGPL = .chkLicenseLGPL.Checked
 		PersonalLicenseApache = .chkLicenseApache.Checked
@@ -3518,15 +3394,6 @@ Private Sub frmOptions.cmdApply_Click(ByRef Designer As My.Sys.Object, ByRef Sen
 		' embedded CRLF would corrupt the ini's one-key-per-line structure.
 		If IniValueChangedStr(piniSettings, "PersonalInfo", "Address", Replace(Replace(*PersonalAddress, !"\r\n", "\n"), !"\n", "\n")) Then
 			piniSettings->WriteString "PersonalInfo", "Address", Replace(Replace(*PersonalAddress, !"\r\n", "\n"), !"\n", "\n")
-		End If
-		If IniValueChangedStr(piniSettings, "PersonalInfo", "GitLogin", *PersonalGitLogin) Then
-			piniSettings->WriteString "PersonalInfo", "GitLogin", *PersonalGitLogin
-		End If
-		If IniValueChangedStr(piniSettings, "PersonalInfo", "GitUserName", *PersonalGitUserName) Then
-			piniSettings->WriteString "PersonalInfo", "GitUserName", *PersonalGitUserName
-		End If
-		If IniValueChangedStr(piniSettings, "PersonalInfo", "GitEmail", *PersonalGitEmail) Then
-			piniSettings->WriteString "PersonalInfo", "GitEmail", *PersonalGitEmail
 		End If
 		If IniValueChangedBool(piniSettings, "PersonalInfo", "LicenseGPL3", PersonalLicenseGPL3) Then
 			piniSettings->WriteBool "PersonalInfo", "LicenseGPL3", PersonalLicenseGPL3

@@ -57,12 +57,18 @@ Using My.Sys.Forms
 		Declare Constructor
 		
 		Dim As TabControl tabProperties
-		Dim As TabPage tpGeneral, tpMake, tpCompile, tpIncludes
+		Dim As TabPage tpGeneral, tpMake, tpCompile, tpIncludes, tpDescription
 		Dim As CommandButton cmdOK, cmdCancel, cmdAdvancedOptions, CommandButton1, cmdAddComponent, cmdRemoveComponent, cmdAddOtherInclude, cmdRemoveOtherInclude, cmdAddLibrary, cmdRemoveLibrary
-		Dim As Label lblProjectType, lblMainFile, lblProjectName, lblProjectDescription, lblIcon, lblTitle, lblMajor, lblMinor, lblRevision, lblBuild, lblResourceFile, lblType, lblValue, lblHelpFileName, lblSubsystem, lblComponents, lblOthers
+		Dim As Label lblProjectType, lblMainFile, lblProjectName, lblIcon, lblTitle, lblMajor, lblMinor, lblRevision, lblBuild, lblResourceFile, lblType, lblValue, lblHelpFileName, lblSubsystem, lblComponents, lblOthers
+		'' Description tab labels
+		Dim As Label lblDescInfo, lblDescAuthor, lblDescLicense, lblDescDescription, lblDescAITool
 		Dim As Picture picVersionNumber, picApplication, picVersionInformation, picComponents, picOtherIncludes
 		Dim As ComboBoxEdit cboProjectType, cboMainFile, cboResourceFile, cboSubsystem
-		Dim As TextBox txtProjectName, txtProjectDescription, txtIcon, txtTitle, txtMajor, txtMinor, txtRevision, txtBuild, txtValue, txtHelpFileName
+		Dim As TextBox txtProjectName, txtIcon, txtTitle, txtMajor, txtMinor, txtRevision, txtBuild, txtValue, txtHelpFileName
+		'' Description tab fields
+		Dim As TextBox txtDescInfo, txtDescAuthor, txtDescDescription
+		Dim As ComboBoxEdit cboDescLicense, cboDescAITool
+		Dim As CheckBox chkDescAIFriendly
 		Dim As GroupBox grbVersionNumber, grbApplication, grbVersionInformation, grbCompileMode, grbIncludePaths, grbLibraryPaths
 		Dim As CheckBox chkAutoIncrementVersion, chkPassAllModuleFilesToCompiler, chkManifest, chkRunAsAdministrator, chkOpenProjectAsFolder
 		Dim As ListControl lstType, lstComponents, lstOtherIncludes, lstLibraryPaths
@@ -72,6 +78,9 @@ Using My.Sys.Forms
 		Dim As ImageBox imgIcon
 		Dim As FolderBrowserDialog BrowseD
 		Dim As OpenFileDialog OpenD
+		'' Description-tab helpers (defined in frmProjectProperties.frm)
+		Declare Sub LoadDescriptionTab(ByRef ProjectFolder As UString)
+		Declare Sub SaveDescriptionTab(ByRef ProjectFolder As UString)
 	End Type
 	
 	Common Shared pfProjectProperties As frmProjectProperties Ptr

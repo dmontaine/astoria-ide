@@ -22,7 +22,7 @@ FreeBASIC is **not** VB.NET, VBA, QBASIC, or C — do not assume their syntax.
 ## Astoria project
 - `{{PROJECT}}.vfp` is the manifest: every source file is a `File=` line, the main file is starred (`*File=`). Mirror any add/rename/delete there; a file not listed is invisible to the project.
 - Leave the IDE-maintained `.vfp` metadata keys alone (`Author=` … `AITool=`) — the IDE round-trips them on save.
-- **`project.astoria`** is the canonical description + Astoria-project marker (`AstoriaProject=1`). Git remote/identity live there; edit via **Project ▸ Edit Project Description**. Don't delete it.
+- **`project.astoria`** is the canonical description + Astoria-project marker (`AstoriaProject=1`). Edit via **Project ▸ Edit Project Description**. Don't delete it.
 - `.frm` files are Form-Designer-managed: edit event-handler bodies freely; prefer the Designer for layout; if hand-editing, keep the `With`-block shape and `' <ControlName>` comment lines.
 - GUI projects use the bundled MFF framework: `#include once "mff/<Control>.bi"`, `Using My.Sys.Forms`.
 - Do not edit `Temp/`, produced `.exe` files, or `{{PROJECT}}_Change.log`.

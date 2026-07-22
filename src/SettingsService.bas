@@ -296,11 +296,6 @@ Sub LoadSettings
 	' stores each key as a single line, so a literal embedded CRLF would corrupt
 	' the ini's line-based structure.
 	WLet(PersonalAddress, Replace(iniSettings.ReadString("PersonalInfo", "Address", ""), "\n", !"\r\n"))
-	'' Git identity -- feeds the New Project dialog's Use Existing Git mode and the
-	'' Git Commit/Push dialogs so the user isn't retyping it per project.
-	WLet(PersonalGitLogin, iniSettings.ReadString("PersonalInfo", "GitLogin", ""))
-	WLet(PersonalGitUserName, iniSettings.ReadString("PersonalInfo", "GitUserName", ""))
-	WLet(PersonalGitEmail, iniSettings.ReadString("PersonalInfo", "GitEmail", ""))
 	PersonalLicenseGPL3 = iniSettings.ReadBool("PersonalInfo", "LicenseGPL3", False)
 	PersonalLicenseLGPL = iniSettings.ReadBool("PersonalInfo", "LicenseLGPL", False)
 	PersonalLicenseApache = iniSettings.ReadBool("PersonalInfo", "LicenseApache", False)

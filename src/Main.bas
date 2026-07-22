@@ -1,4 +1,4 @@
-﻿'#########################################################
+'#########################################################
 '#  Main.bas                                             #
 '#  This file is part of AstoriaIDE                  #
 '#  Authors: Xusinboy Bekchanov (bxusinboy@mail.ru)      #
@@ -136,7 +136,7 @@ Dim Shared As Panel pnlLeft, pnlRight, pnlBottom, pnlBottomTab, pnlLeftPin, pnlR
 Dim Shared As TrackBar trLeft
 Dim Shared As MainMenu mnuMain
 Dim Shared As MenuItem Ptr mnuStartWithCompile, mnuStart, mnuContinue, mnuBreak, mnuEnd, mnuRestart, mnuSplit, mnuSplitHorizontally, mnuSplitVertically, mnuWindowSeparator, miRecentFiles, miSetAsMain, miClearStartUp, miTabSetAsMain, miTabReloadHistoryCode, miRemoveFiles, miToolBars
-Dim Shared As MenuItem Ptr miSaveProject, miSaveProjectAs, miCloseProject, miDeleteProject, miNewFile, miOpenFile, miCloseFile, miDeleteFile, miSaveFile, miSaveFileAs, miPrint, miPrintPreview, miPageSetup, miOpenProjectFolder, miProjectProperties, miEditProjectDescription, miGitCommit, miGitPull, miGitPush, miGitSshKey, miGitCreateRepo, miExplorerOpenProjectFolder, miExplorerRename, miExplorerProjectProperties, miExplorerCloseProject, miRename, miRemoveFileFromProject
+Dim Shared As MenuItem Ptr miSaveProject, miSaveProjectAs, miCloseProject, miDeleteProject, miNewFile, miOpenFile, miCloseFile, miDeleteFile, miSaveFile, miSaveFileAs, miPrint, miPrintPreview, miPageSetup, miOpenProjectFolder, miProjectProperties, miExplorerOpenProjectFolder, miExplorerRename, miExplorerProjectProperties, miExplorerCloseProject, miRename, miRemoveFileFromProject
 Dim Shared As MenuItem Ptr miUndo, miRedo, miCutCurrentLine, miCut, miCopy, miPaste, miSingleComment, miDuplicate, miSelectAll, miIndent, miOutdent, miFormat, miUnformat, miFormatProject, miUnformatProject, miAddSpaces, miDeleteBlankLines, miParameterInfo, miStepInto, miStepOver, miStepOut, miRunToCursor, miGDBCommand, miAddWatch, miToggleBreakpoint, miClearAllBreakpoints, miSetNextStatement, miShowNextStatement
 Dim Shared As MenuItem Ptr dmiMake, dmiMakeClean
 Dim Shared As MenuItem Ptr miCode, miForm, miCodeAndForm, miGotoCodeForm, miFold, miDebugWindows, miCollapseCurrent, miCollapseAllProcedures, miCollapseAll, miUnCollapseCurrent, miUnCollapseAllProcedures, miUnCollapseAll, miImageManager, miAddProcedure, miAddType, miFind, miReplace, miFindNext, miFindPrevious, miGoto, miDefine, miToggleBookmark, miNextBookmark, miPreviousBookmark, miClearAllBookmarks, miSyntaxCheck, miCompile, miCompileAll, miMake, miMakeClean
@@ -256,8 +256,6 @@ LoadSettings
 #include once "frmOptions.bi"
 #include once "frmTemplates.bi"
 #include once "frmNewFileName.bi"
-#include once "frmGitCommit.bi"
-#include once "frmEditProjectDescription.bi"
 #include once "frmNewProject.bi"
 #include once "frmNewFile.bi"
 #include once "frmOpenProject.bi"
@@ -1020,8 +1018,6 @@ Function AddProject(ByRef FileName As WString, pFilesList As WStringList Ptr, tn
 					WLet(ppe->ProjectName, Mid(Buff, Pos1 + 2, Len(Buff) - Pos1 - 2))
 				ElseIf Parameter = "HelpFileName" Then
 					WLet(ppe->HelpFileName, Mid(Buff, Pos1 + 2, Len(Buff) - Pos1 - 2))
-				ElseIf Parameter = "ProjectDescription" Then
-					WLet(ppe->ProjectDescription, Mid(Buff, Pos1 + 2, Len(Buff) - Pos1 - 2))
 				ElseIf Parameter = "PassAllModuleFilesToCompiler" Then
 					ppe->PassAllModuleFilesToCompiler = CBool(Mid(Buff, Pos1 + 1))
 				ElseIf Parameter = "OpenProjectAsFolder" Then
@@ -1086,16 +1082,6 @@ Function AddProject(ByRef FileName As WString, pFilesList As WStringList Ptr, tn
 					WLet(ppe->License, Mid(Buff, Pos1 + 2, Len(Buff) - Pos1 - 2))
 				ElseIf Parameter = "Description" Then
 					WLet(ppe->Description, Mid(Buff, Pos1 + 2, Len(Buff) - Pos1 - 2))
-				ElseIf Parameter = "UseGit" Then
-					ppe->UseGit = CBool(Mid(Buff, Pos1 + 1))
-				ElseIf Parameter = "GitProvider" Then
-					WLet(ppe->GitProvider, Mid(Buff, Pos1 + 2, Len(Buff) - Pos1 - 2))
-				ElseIf Parameter = "GitUserName" Then
-					WLet(ppe->GitUserName, Mid(Buff, Pos1 + 2, Len(Buff) - Pos1 - 2))
-				ElseIf Parameter = "GitEmail" Then
-					WLet(ppe->GitEmail, Mid(Buff, Pos1 + 2, Len(Buff) - Pos1 - 2))
-				ElseIf Parameter = "GitURL" Then
-					WLet(ppe->GitURL, Mid(Buff, Pos1 + 2, Len(Buff) - Pos1 - 2))
 				ElseIf Parameter = "AIFriendly" Then
 					ppe->AIFriendly = CBool(Mid(Buff, Pos1 + 1))
 				ElseIf Parameter = "AITool" Then
@@ -1477,512 +1463,6 @@ Sub UpdateVfpMetadataKeys(ByRef vfpPath As UString, ByRef d As ProjectDescriptio
 		Print #FnOut, lines.Item(i)
 	Next i
 	CloseFile_(FnOut)
-End Sub
-
-'' Project menu > Edit Project Description: open the structured dialog for the open
-'' project's project.astoria (read-only for immutable/risky fields, editable metadata).
-'' Enabled only when the file exists (ChangeMenuItemsEnabled); re-checked here.
-Sub EditProjectDescription
-	Dim As UString descPath = OpenProjectDescriptionPath()
-	If descPath = "" OrElse Not FileExistsU(descPath) Then
-		MsgBox ("This project has no project.astoria description file."), , mtWarning
-		Exit Sub
-	End If
-	Dim fEdit As frmEditProjectDescription
-	pfEditProjectDescription = @fEdit
-	fEdit.ProjectFolder = GetProjectDirectory()
-	fEdit.DescPath = descPath
-	fEdit.VfpPath = ""
-	Dim As TreeNode Ptr tnP = GetOpenProjectNode()
-	If tnP <> 0 AndAlso tnP->Tag <> 0 Then fEdit.VfpPath = WGet(Cast(ProjectElement Ptr, tnP->Tag)->FileName)
-	fEdit.ShowModal(frmMain)
-End Sub
-
-'' Whether the open project's folder is a Git working tree (has a .git entry).
-'' Gates the Git menu; selection-independent (tracks the open project).
-Function OpenProjectIsGitRepo() As Boolean
-	Dim As UString gitDir = GetProjectDirectory()
-	If gitDir = "" Then Return False
-	Return FolderExistsU(gitDir & ".git")
-End Function
-
-'' Run a git subcommand in the open project's folder via a temp .bat (batch-mode
-'' SSH, no interactive prompts -- can't hang on a credential/host-key prompt),
-'' capturing combined stdout+stderr into OutText and the exit code into ExitCode.
-'' Mirrors frmNewProject.CloneGitRepository's plumbing; blocks until git finishes
-'' (bounded by ConnectTimeout). Returns True on exit code 0. UI thread.
-Private Function RunGitInProject(ByRef GitArgs As String, ByRef OutText As String, ByRef ExitCode As Integer) As Boolean
-	OutText = "" : ExitCode = -1
-	Dim As UString projDir = GetProjectDirectory()
-	If projDir = "" Then Return False
-	'' Strip the trailing separator so `cd /d "..."` doesn't end in \" (cmd mis-parse).
-	If Right(projDir, 1) = "\" OrElse Right(projDir, 1) = "/" Then projDir = Left(projDir, Len(projDir) - 1)
-	EnsureDirectoryExists(ExePath & WindowsSlash & "Temp")
-	Dim As UString batPath = ExePath & WindowsSlash & "Temp" & WindowsSlash & "_astoria_git_op.bat"
-	Dim As UString logPath = ExePath & WindowsSlash & "Temp" & WindowsSlash & "_astoria_git_op.log"
-	Dim As UString resultPath = ExePath & WindowsSlash & "Temp" & WindowsSlash & "_astoria_git_op.result"
-	If FileExistsU(logPath) Then Kill logPath
-	If FileExistsU(resultPath) Then Kill resultPath
-	Dim As Integer Fn = FreeFile_
-	If Open(batPath For Output As #Fn) <> 0 Then Return False
-	Print #Fn, "@echo off"
-	Print #Fn, "set GIT_TERMINAL_PROMPT=0"
-	Print #Fn, "set GIT_SSH_COMMAND=ssh -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=accept-new"
-	Print #Fn, "cd /d " & Chr(34) & projDir & Chr(34)
-	Print #Fn, "git " & GitArgs & " > " & Chr(34) & logPath & Chr(34) & " 2>&1"
-	Print #Fn, "echo %errorlevel% > " & Chr(34) & resultPath & Chr(34)
-	CloseFile_(Fn)
-	PipeCmd batPath, True
-	If FileExistsU(resultPath) Then
-		Dim As Integer FnR = FreeFile_
-		If Open(resultPath For Input As #FnR) = 0 Then
-			Dim As String resultLine
-			Line Input #FnR, resultLine
-			CloseFile_(FnR)
-			ExitCode = Val(Trim(resultLine))
-		End If
-		Kill resultPath
-	End If
-	If FileExistsU(logPath) Then
-		Dim As Integer FnL = FreeFile_
-		If Open(logPath For Binary Access Read As #FnL) = 0 Then
-			Dim As LongInt sz = LOF(FnL)
-			If sz > 0 Then
-				OutText = String(sz, 0)
-				Get #FnL, 1, OutText
-			End If
-			CloseFile_(FnL)
-		End If
-		Kill logPath
-	End If
-	If FileExistsU(batPath) Then Kill batPath
-	Return (ExitCode = 0)
-End Function
-
-'' Run an arbitrary command line via a temp .bat, capturing combined stdout+stderr into
-'' OutText and the exit code into ExitCode. Like RunGitInProject but not tied to the
-'' project folder -- for setup tools (gh/glab). GIT_TERMINAL_PROMPT=0 keeps it from
-'' blocking on a prompt. Returns True on exit 0. UI thread.
-Private Function RunCmdCaptured(ByRef cmdLine As String, ByRef OutText As String, ByRef ExitCode As Integer) As Boolean
-	OutText = "" : ExitCode = -1
-	EnsureDirectoryExists(ExePath & WindowsSlash & "Temp")
-	Dim As UString batPath = ExePath & WindowsSlash & "Temp" & WindowsSlash & "_astoria_cmd.bat"
-	Dim As UString logPath = ExePath & WindowsSlash & "Temp" & WindowsSlash & "_astoria_cmd.log"
-	Dim As UString resultPath = ExePath & WindowsSlash & "Temp" & WindowsSlash & "_astoria_cmd.result"
-	If FileExistsU(logPath) Then Kill logPath
-	If FileExistsU(resultPath) Then Kill resultPath
-	Dim As Integer Fn = FreeFile_
-	If Open(batPath For Output As #Fn) <> 0 Then Return False
-	Print #Fn, "@echo off"
-	Print #Fn, "set GIT_TERMINAL_PROMPT=0"
-	Print #Fn, cmdLine & " > " & Chr(34) & logPath & Chr(34) & " 2>&1"
-	Print #Fn, "echo %errorlevel% > " & Chr(34) & resultPath & Chr(34)
-	CloseFile_(Fn)
-	PipeCmd batPath, True
-	If FileExistsU(resultPath) Then
-		Dim As Integer FnR = FreeFile_
-		If Open(resultPath For Input As #FnR) = 0 Then
-			Dim As String resultLine
-			Line Input #FnR, resultLine
-			CloseFile_(FnR)
-			ExitCode = Val(Trim(resultLine))
-		End If
-		Kill resultPath
-	End If
-	If FileExistsU(logPath) Then
-		Dim As Integer FnL = FreeFile_
-		If Open(logPath For Binary Access Read As #FnL) = 0 Then
-			Dim As LongInt sz = LOF(FnL)
-			If sz > 0 Then
-				OutText = String(sz, 0)
-				Get #FnL, 1, OutText
-			End If
-			CloseFile_(FnL)
-		End If
-		Kill logPath
-	End If
-	If FileExistsU(batPath) Then Kill batPath
-	Return (ExitCode = 0)
-End Function
-
-'' First line of rawOut that contains needle (case-insensitive), trimmed; "" if none.
-Private Function GitFindLineContaining(ByRef rawOut As String, ByRef needle As String) As String
-	Dim As String low = LCase(needle)
-	Dim As Integer p = 1
-	While p <= Len(rawOut)
-		Dim As Integer nl = InStr(p, rawOut, Chr(10))
-		Dim As String ln
-		If nl = 0 Then
-			ln = Mid(rawOut, p) : p = Len(rawOut) + 1
-		Else
-			ln = Mid(rawOut, p, nl - p) : p = nl + 1
-		End If
-		If InStr(LCase(ln), low) > 0 Then Return Trim(ln, Any !" \t" + Chr(13) + Chr(10))
-	Wend
-	Return ""
-End Function
-
-'' Parse git commit's first line "[branch (root-commit)? hash] subject" into its parts.
-Private Sub GitParseCommitHeader(ByRef rawOut As String, ByRef branch As String, ByRef hash As String, ByRef subject As String)
-	branch = "" : hash = "" : subject = ""
-	Dim As Integer lb = InStr(rawOut, "[")
-	Dim As Integer rb = InStr(rawOut, "]")
-	If lb = 0 OrElse rb <= lb Then Exit Sub
-	Dim As String inside = Trim(Mid(rawOut, lb + 1, rb - lb - 1))   '' "branch [(root-commit)] hash"
-	Dim As Integer fsp = InStr(inside, " ")
-	Dim As Integer lsp = InStrRev(inside, " ")
-	If lsp > 0 Then
-		hash = Trim(Mid(inside, lsp + 1))
-		branch = Trim(Left(inside, fsp - 1))
-	Else
-		branch = inside
-	End If
-	Dim As String afterRb = Mid(rawOut, rb + 1)
-	Dim As Integer nl = InStr(afterRb, Chr(10))
-	If nl > 0 Then afterRb = Left(afterRb, nl - 1)
-	subject = Trim(afterRb, Any !" \t" + Chr(13) + Chr(10))
-End Sub
-
-'' Turn `git status --porcelain` output ("XY path" per line) into a friendly list
-'' ("modified  Foo.bas", "new  Bar.bi", ...) -- what `git add -A` will commit.
-Private Function GitFormatStatusList(ByRef rawStatus As String) As UString
-	Dim As UString result
-	Dim As Integer p = 1
-	While p <= Len(rawStatus)
-		Dim As Integer nl = InStr(p, rawStatus, Chr(10))
-		Dim As String ln
-		If nl = 0 Then
-			ln = Mid(rawStatus, p) : p = Len(rawStatus) + 1
-		Else
-			ln = Mid(rawStatus, p, nl - p) : p = nl + 1
-		End If
-		If Right(ln, 1) = Chr(13) Then ln = Left(ln, Len(ln) - 1)
-		If Len(ln) < 4 Then Continue While   '' porcelain: 2 status chars + space + path
-		Dim As String code = Left(ln, 2)
-		Dim As String path = Trim(Mid(ln, 4))
-		Dim As String word = "changed"
-		If InStr(code, "?") > 0 Then
-			word = "new"
-		ElseIf InStr(code, "R") > 0 Then
-			word = "renamed"
-		ElseIf InStr(code, "D") > 0 Then
-			word = "deleted"
-		ElseIf InStr(code, "A") > 0 Then
-			word = "new"
-		ElseIf InStr(code, "M") > 0 Then
-			word = "modified"
-		End If
-		result &= word & "  " & path & Chr(13, 10)
-	Wend
-	Return result
-End Function
-
-'' Show a git operation's result as a short plain-English summary rather than dumping
-'' raw git output. op is "commit"/"pull"/"push". Known no-op and failure cases get their
-'' own wording; failures still include git's own text (the actionable part). UI thread.
-Private Sub ShowGitResult(ByRef op As String, gitOk As Boolean, exitCode As Integer, ByRef rawOut As String)
-	Dim As String low = LCase(rawOut)
-	Dim As String msg = ""
-	Dim As Boolean isErr = False
-	Select Case op
-	Case "commit"
-		If InStr(low, "nothing to commit") > 0 Then
-			msg = "Nothing to commit -- there are no changes since the last commit."
-		ElseIf Not gitOk Then
-			isErr = True
-			msg = "Commit failed (exit " & Str(exitCode) & ")." & Chr(10) & Chr(10) & Trim(rawOut)
-		Else
-			Dim As String branch, hash, subject
-			GitParseCommitHeader(rawOut, branch, hash, subject)
-			msg = "Committed"
-			If branch <> "" Then msg &= " to " & branch
-			If hash <> "" Then msg &= " as " & hash
-			msg &= "."
-			If subject <> "" Then msg &= Chr(10) & Chr(10) & Chr(34) & subject & Chr(34)
-			Dim As String stat = GitFindLineContaining(rawOut, "changed")
-			If stat <> "" Then msg &= Chr(10) & Chr(10) & stat
-		End If
-	Case "pull"
-		If InStr(low, "already up to date") > 0 Then
-			msg = "Already up to date -- nothing to pull."
-		ElseIf Not gitOk Then
-			isErr = True
-			msg = "Pull failed (exit " & Str(exitCode) & ")." & Chr(10) & Chr(10) & Trim(rawOut)
-		Else
-			msg = "Pulled changes from the remote."
-			Dim As String stat = GitFindLineContaining(rawOut, "changed")
-			If stat <> "" Then msg &= Chr(10) & Chr(10) & stat
-		End If
-	Case "push"
-		If InStr(low, "up-to-date") > 0 OrElse InStr(low, "up to date") > 0 Then
-			msg = "Nothing to push -- the remote is already up to date."
-		ElseIf Not gitOk Then
-			isErr = True
-			msg = "Push failed (exit " & Str(exitCode) & ")." & Chr(10) & Chr(10) & Trim(rawOut)
-		Else
-			msg = "Pushed your commits to the remote."
-		End If
-	Case Else
-		isErr = Not gitOk
-		msg = Trim(rawOut)
-	End Select
-	If Trim(msg) = "" Then
-		If gitOk Then msg = op & " completed." Else msg = op & " failed (exit " & Str(exitCode) & ")."
-	End If
-	If isErr Then MsgBox msg, , mtWarning Else MsgBox msg, , mtInfo
-End Sub
-
-'' Git menu > Git Pull: `git pull` in the open project's folder, with a plain-English
-'' result summary. Enabled only for a git-backed project (ChangeMenuItemsEnabled).
-Sub GitPull
-	If Not OpenProjectIsGitRepo() Then
-		MsgBox ("The open project is not a Git repository."), , mtWarning
-		Exit Sub
-	End If
-	Dim As String outText
-	Dim As Integer ec
-	Dim As Boolean gitOk = RunGitInProject("pull", outText, ec)
-	ShowGitResult("pull", gitOk, ec, outText)
-End Sub
-
-'' Git menu > Git Push: `git push` in the open project's folder.
-Sub GitPush
-	If Not OpenProjectIsGitRepo() Then
-		MsgBox ("The open project is not a Git repository."), , mtWarning
-		Exit Sub
-	End If
-	Dim As String outText
-	Dim As Integer ec
-	Dim As Boolean gitOk = RunGitInProject("push", outText, ec)
-	ShowGitResult("push", gitOk, ec, outText)
-End Sub
-
-'' Git menu > Git Commit: prompt for a message, then `git add -A` + `git commit`.
-'' The message is passed through a temp file (`git commit -F`) so quotes, percent
-'' signs, etc. in it can't break the .bat command line. Empty/cancelled aborts.
-Sub GitCommit
-	If Not OpenProjectIsGitRepo() Then
-		MsgBox ("The open project is not a Git repository."), , mtWarning
-		Exit Sub
-	End If
-	'' Show up front exactly what `git add -A` will commit (excludes .gitignore'd files).
-	'' If nothing changed, don't even open the dialog.
-	Dim As String statusOut
-	Dim As Integer statusEc
-	RunGitInProject("status --porcelain", statusOut, statusEc)
-	If Trim(statusOut) = "" Then
-		MsgBox ("Nothing to commit -- there are no changes since the last commit."), , mtInfo
-		Exit Sub
-	End If
-	Dim fGitCommit As frmGitCommit
-	pfGitCommit = @fGitCommit
-	fGitCommit.FilesList = GitFormatStatusList(statusOut)
-	If fGitCommit.ShowModal(frmMain) <> ModalResults.OK Then Exit Sub
-	Dim As UString msg = Trim(fGitCommit.CommitMessage)
-	If msg = "" Then Exit Sub   '' cancelled or empty -- git requires a message anyway
-	EnsureDirectoryExists(ExePath & WindowsSlash & "Temp")
-	Dim As UString msgPath = ExePath & WindowsSlash & "Temp" & WindowsSlash & "_astoria_git_msg.txt"
-	'' Write the message as raw UTF-8 with NO BOM. FB's `Open ... Encoding "utf-8"`
-	'' prepends a BOM, and `git commit -F` folds that BOM into the commit message
-	'' (showed up as a leading "i>>?" garble). Binary write of the UTF-8 bytes avoids it.
-	If FileExistsU(msgPath) Then Kill msgPath
-	Dim As Integer FnM = FreeFile_
-	If Open(msgPath For Binary Access Write As #FnM) <> 0 Then
-		MsgBox ("Could not write the commit message file."), , mtWarning
-		Exit Sub
-	End If
-	Dim As String msgUtf8 = WStrToUtf8(msg)
-	If Len(msgUtf8) > 0 Then Put #FnM, 1, msgUtf8
-	CloseFile_(FnM)
-	'' Commit identity from Tools > Options > Personal Information, set repo-LOCAL
-	'' (never --global). Without this, a machine with no git identity configured fails
-	'' the commit non-interactively with no visible error and leaves zero commits --
-	'' the same trap the original project-creation git setup hit. Git User Name /
-	'' Git E-Mail fall back to the general Name / E-mail address when unset.
-	Dim As UString cfgName = Trim(*PersonalGitUserName)
-	If cfgName = "" Then cfgName = Trim(*PersonalName)
-	Dim As UString cfgEmail = Trim(*PersonalGitEmail)
-	If cfgEmail = "" Then cfgEmail = Trim(*PersonalEmail)
-	Dim As String cfgOut
-	Dim As Integer cfgEc
-	If cfgName <> "" Then RunGitInProject("config user.name " & Chr(34) & cfgName & Chr(34), cfgOut, cfgEc)
-	If cfgEmail <> "" Then RunGitInProject("config user.email " & Chr(34) & cfgEmail & Chr(34), cfgOut, cfgEc)
-	'' Stage everything (new/modified/deleted, minus .gitignore'd), then commit.
-	Dim As String addOut
-	Dim As Integer addEc
-	RunGitInProject("add -A", addOut, addEc)
-	Dim As String outText
-	Dim As Integer ec
-	Dim As Boolean gitOk = RunGitInProject("commit -F " & Chr(34) & msgPath & Chr(34), outText, ec)
-	If FileExistsU(msgPath) Then Kill msgPath
-	ShowGitResult("commit", gitOk, ec, outText)
-End Sub
-
-'' The provider's "add SSH key" settings page (for the assisted-browser key setup).
-Private Function SshKeyPageUrl(ByRef provider As String) As UString
-	Select Case LCase(Trim(provider))
-	Case "gitlab":    Return "https://gitlab.com/-/user_settings/ssh_keys"
-	Case "bitbucket": Return "https://bitbucket.org/account/settings/ssh-keys/"
-	Case "codeberg":  Return "https://codeberg.org/user/settings/keys"
-	Case Else:        Return "https://github.com/settings/ssh/new"
-	End Select
-End Function
-
-'' Ensure an SSH key exists for this user, generating an ed25519 one if none is present,
-'' and seed known_hosts for the common providers so the first push doesn't prompt. Returns
-'' the path to the public key (existing or new), "" on failure. comment is the key's -C
-'' label; setupLog gets ssh-keygen/ssh-keyscan output on a fresh generation. UI thread.
-Private Function EnsureSshKey(ByRef comment As String, ByRef setupLog As String) As UString
-	setupLog = ""
-	Dim As String userProfile = Environ("USERPROFILE")
-	If userProfile = "" Then Return ""
-	Dim As UString sshDir = WinOsPath(userProfile & "/.ssh")
-	'' Already have a key? Prefer ed25519, else any common type.
-	Dim As UString edPub = WinOsPath(sshDir & "/id_ed25519.pub")
-	If FileExistsU(edPub) Then Return edPub
-	Dim As UString rsaPub = WinOsPath(sshDir & "/id_rsa.pub")
-	If FileExistsU(rsaPub) Then Return rsaPub
-	Dim As UString ecPub = WinOsPath(sshDir & "/id_ecdsa.pub")
-	If FileExistsU(ecPub) Then Return ecPub
-	'' Generate a fresh ed25519 key (no passphrase) + seed known_hosts, via a temp .bat.
-	EnsureDirectoryExists(sshDir)
-	EnsureDirectoryExists(ExePath & WindowsSlash & "Temp")
-	Dim As UString edKey = WinOsPath(sshDir & "/id_ed25519")
-	Dim As UString knownHosts = WinOsPath(sshDir & "/known_hosts")
-	Dim As UString batPath = ExePath & WindowsSlash & "Temp" & WindowsSlash & "_astoria_sshsetup.bat"
-	Dim As UString logPath = ExePath & WindowsSlash & "Temp" & WindowsSlash & "_astoria_sshsetup.log"
-	If FileExistsU(logPath) Then Kill logPath
-	Dim As Integer Fn = FreeFile_
-	If Open(batPath For Output As #Fn) <> 0 Then Return ""
-	Print #Fn, "@echo off"
-	Print #Fn, "ssh-keygen -t ed25519 -C " & Chr(34) & comment & Chr(34) & " -f " & Chr(34) & edKey & Chr(34) & " -N """" > " & Chr(34) & logPath & Chr(34) & " 2>&1"
-	Print #Fn, "ssh-keyscan github.com gitlab.com bitbucket.org codeberg.org >> " & Chr(34) & knownHosts & Chr(34) & " 2>> " & Chr(34) & logPath & Chr(34)
-	CloseFile_(Fn)
-	PipeCmd batPath, True
-	If FileExistsU(logPath) Then
-		Dim As Integer FnL = FreeFile_
-		If Open(logPath For Binary Access Read As #FnL) = 0 Then
-			Dim As LongInt sz = LOF(FnL)
-			If sz > 0 Then
-				setupLog = String(sz, 0)
-				Get #FnL, 1, setupLog
-			End If
-			CloseFile_(FnL)
-		End If
-		Kill logPath
-	End If
-	If FileExistsU(batPath) Then Kill batPath
-	If FileExistsU(edPub) Then Return edPub
-	Return ""
-End Function
-
-'' Reusable SSH-key setup for a provider label (GitHub/GitLab/Bitbucket/Codeberg).
-'' Ensures a key exists (generating an ed25519 one if needed), copies the public key to
-'' the clipboard, then registers it: if the provider CLI (gh/glab) is installed AND
-'' authenticated, offers to add it directly; otherwise opens the provider's SSH-keys page
-'' for a manual paste. Astoria never enters credentials or submits a web form -- adding
-'' the key is the user's own action. UI thread. Public so frmNewProject can reuse it.
-Sub SetupSshKey(ByRef provider As String)
-	'' Key comment: prefer the Git-specific e-mail from Options > Personal Information
-	'' (that's the address the host account is under), falling back to the general one.
-	Dim As String comment = Trim(*PersonalGitEmail)
-	If comment = "" Then comment = Trim(*PersonalEmail)
-	If comment = "" Then comment = "astoria-ide"
-	Dim As String setupLog
-	Dim As UString pubPath = EnsureSshKey(comment, setupLog)
-	If pubPath = "" Then
-		Dim As UString em = ("Could not create or find an SSH key.") & Chr(13,10) & Chr(13,10) & _
-			("This needs ssh-keygen, which ships with Git for Windows -- make sure Git is installed and on PATH.")
-		If Trim(setupLog) <> "" Then em &= Chr(13,10) & Chr(13,10) & Trim(setupLog)
-		MsgBox em, , mtWarning
-		Exit Sub
-	End If
-	'' Read the public key and put it on the clipboard for pasting.
-	Dim As String pubKey
-	Dim As Integer FnP = FreeFile_
-	If Open(pubPath For Binary Access Read As #FnP) = 0 Then
-		Dim As LongInt sz = LOF(FnP)
-		If sz > 0 Then
-			pubKey = String(sz, 0)
-			Get #FnP, 1, pubKey
-		End If
-		CloseFile_(FnP)
-	End If
-	pubKey = Trim(pubKey, Any !" \t" + Chr(13) + Chr(10))
-	If pubKey <> "" Then Clipboard.SetAsText pubKey
-	'' The public key is on the clipboard; the user pastes it into the provider's page. Astoria
-	'' deliberately does not use a provider CLI to upload it: that would mean depending on a tool
-	'' it does not ship, whose sign-in is a console flow, to save one paste. Everything Astoria
-	'' needs for Git it already has -- git itself, bundled.
-	'' Assisted-browser fallback: open the provider's SSH-keys page for a manual paste.
-	Dim As UString url = SshKeyPageUrl(provider)
-	Dim As UString ask = ("Your SSH public key is ready and copied to the clipboard:") & Chr(13,10) & pubPath & Chr(13,10) & Chr(13,10) & _
-		("To give this machine access, add it to ") & provider & ("'s SSH keys.") & Chr(13,10) & Chr(13,10) & _
-		("Open that page now so you can paste the key and save it?")
-	If MsgBox(ask, "", mtInfo, btYesNo) = mrYes Then
-		ShellExecuteW(0, WStr("open"), url, 0, 0, SW_SHOWNORMAL)
-	End If
-End Sub
-
-'' Git menu > Set Up SSH Key: set up SSH access for the open project's provider (or GitHub).
-Sub GitSetupSshKey
-	Dim As UString provider = "GitHub"
-	Dim As UString projFolder = GetProjectDirectory()
-	If projFolder <> "" Then
-		Dim As ProjectDescriptionData d
-		If ReadProjectDescription(projFolder, d) AndAlso Trim(d.GitProvider) <> "" Then provider = d.GitProvider
-	End If
-	SetupSshKey(provider)
-End Sub
-
-'' The provider's "new repository" page (assisted-browser fallback for creating a repo).
-Private Function NewRepoPageUrl(ByRef provider As String) As UString
-	Select Case LCase(Trim(provider))
-	Case "gitlab":    Return "https://gitlab.com/projects/new"
-	Case "bitbucket": Return "https://bitbucket.org/repo/create"
-	Case "codeberg":  Return "https://codeberg.org/repo/create"
-	Case Else:        Return "https://github.com/new"
-	End Select
-End Function
-
-'' Open the provider's "new repository" page in the browser.
-Sub OpenNewRepoPage(ByRef provider As String)
-	Dim As UString url = NewRepoPageUrl(provider)
-	ShellExecuteW(0, WStr("open"), url, 0, 0, SW_SHOWNORMAL)
-End Sub
-
-'' Git menu > Create Remote Repository: create an empty remote repo for the open project on
-'' its provider (from project.astoria, else GitHub), named after the project. Uses the
-'' provider CLI when signed in (and wires origin for a local git repo), else opens the
-'' provider's new-repo page. Astoria never enters credentials or submits a web form.
-Sub GitCreateRemoteRepo
-	Dim As UString projFolder = GetProjectDirectory()
-	If projFolder = "" Then
-		MsgBox ("Open a project first."), , mtWarning
-		Exit Sub
-	End If
-	'' Name + provider from project.astoria; fall back to the folder name / GitHub.
-	Dim As String repoName = ""
-	Dim As UString provider = "GitHub"
-	Dim As ProjectDescriptionData d
-	If ReadProjectDescription(projFolder, d) Then
-		If Trim(d.ProjectName) <> "" Then repoName = d.ProjectName
-		If Trim(d.GitProvider) <> "" Then provider = d.GitProvider
-	End If
-	If Trim(repoName) = "" Then
-		Dim As UString f = projFolder
-		If Right(f, 1) = "\" OrElse Right(f, 1) = "/" Then f = Left(f, Len(f) - 1)
-		repoName = GetFileNameU(f)
-	End If
-	If Trim(repoName) = "" Then
-		MsgBox ("Could not determine a project name for the repository."), , mtWarning
-		Exit Sub
-	End If
-	If MsgBox(("Astoria will open ") & provider & ("'s new-repository page, with the name ") & Chr(34) & repoName & Chr(34) & (" to use.") & Chr(13,10) & Chr(13,10) & _
-		("Create it there as an empty private repository, then use Git > Push.") & Chr(13,10) & Chr(13,10) & ("Open the page now?"), "", mtInfo, btYesNo) = mrYes Then
-		Clipboard.SetAsText repoName
-		OpenNewRepoPage(provider)
-	End If
 End Sub
 
 Sub AddNewProjectFile(ByRef Template As WString, ByRef ItemName As WString)
@@ -2552,7 +2032,6 @@ Function SaveProject(ByRef tnP As TreeNode Ptr, bWithQuestion As Boolean = False
 	Print #Fn, "Subsystem=" & ppe->Subsystem
 	Print #Fn, "ProjectName=""" & *ppe->ProjectName & """"
 	Print #Fn, "HelpFileName=""" & *ppe->HelpFileName & """"
-	Print #Fn, "ProjectDescription=""" & *ppe->ProjectDescription & """"
 	Print #Fn, "PassAllModuleFilesToCompiler=" & ppe->PassAllModuleFilesToCompiler
 	Print #Fn, "OpenProjectAsFolder=" & ppe->OpenProjectAsFolder
 	Print #Fn, "MajorVersion=" & ppe->MajorVersion
@@ -2589,11 +2068,6 @@ Function SaveProject(ByRef tnP As TreeNode Ptr, bWithQuestion As Boolean = False
 	Print #Fn, "Author=""" & WGet(ppe->Author) & """"
 	Print #Fn, "License=""" & WGet(ppe->License) & """"
 	Print #Fn, "Description=""" & WGet(ppe->Description) & """"
-	Print #Fn, "UseGit=" & ppe->UseGit
-	Print #Fn, "GitProvider=""" & WGet(ppe->GitProvider) & """"
-	Print #Fn, "GitUserName=""" & WGet(ppe->GitUserName) & """"
-	Print #Fn, "GitEmail=""" & WGet(ppe->GitEmail) & """"
-	Print #Fn, "GitURL=""" & WGet(ppe->GitURL) & """"
 	Print #Fn, "AIFriendly=" & ppe->AIFriendly
 	Print #Fn, "AITool=""" & WGet(ppe->AITool) & """"
 	For i As Integer = 0 To ppe->Components.Count - 1
@@ -7115,7 +6589,6 @@ Sub CreateMenusAndToolBars
 	miProject->Add(("Import from Folder") & "..." & HK("OpenFolder", "Alt+O"), "", "OpenFolder", @mClick)
 	miProject->Add("-")
 	miProjectProperties = miProject->Add(("&Project Properties") & "..." & HK("ProjectProperties"), "", "ProjectProperties", @mClick, , , False)
-	miEditProjectDescription = miProject->Add(("Edit Project Description") & HK("EditProjectDescription"), "", "EditProjectDescription", @mClick, , , False)
 
 	'' Mnemonic is Co&de (Alt+D), not &Code (Alt+C), as a workaround for ROADMAP 13.28 pt 3 --
 	'' the letters C, G and R are silently swallowed by menu-mode search here (and in upstream
@@ -7325,20 +6798,6 @@ Sub CreateMenusAndToolBars
 	miRun->Add("-")
 	mnuUseProfiler = miRun->Add(("Use &Profiler") & HK("UseProfiler"), "", "UseProfiler", @mClick, True)
 	miGDBCommand = miRun->Add(("&GDB Command") & HK("GDBCommand"), "", "GDBCommand", @mClick, , , False)
-
-	'' Git -- its own top-level menu (between Run and Tools) for git-backed projects.
-	'' Enabled state is set contextually in ChangeMenuItemsEnabled. Grows as more git
-	'' actions are added (commit, clone, etc.).
-	'' G&it (Alt+I) rather than &Git (Alt+G) -- ROADMAP 13.28 pt 3 workaround; see &Code above.
-	Var miGit = mnuMain.Add(("G&it"), "", "Git")
-	miGitCommit = miGit->Add(("Git &Commit") & "..." & HK("GitCommit"), "", "GitCommit", @mClick, , , False)
-	miGit->Add("-")
-	miGitPull = miGit->Add(("Git &Pull") & HK("GitPull"), "", "GitPull", @mClick, , , False)
-	miGitPush = miGit->Add(("Git Pus&h") & HK("GitPush"), "", "GitPush", @mClick, , , False)
-	miGit->Add("-")
-	'' Onboarding/setup actions (not project-gated).
-	miGitSshKey = miGit->Add(("Set Up SSH &Key") & "..." & HK("GitSetupSshKey"), "", "GitSetupSshKey", @mClick)
-	miGitCreateRepo = miGit->Add(("Create &Remote Repository") & "..." & HK("GitCreateRemoteRepo"), "", "GitCreateRemoteRepo", @mClick)
 
 	miXizmat = mnuMain.Add(("&Tools"), "", "Service")
 	'' Was Alt+C, which permanently shadowed the "&Code" menu: TranslateAccelerator runs before
@@ -10797,8 +10256,8 @@ Sub PromptReloadChangedFiles()
 	gChangedList = ""
 	Dim As Integer n = ChangedCount(Files)
 
-	'' One prompt for all of them. The old code raised one dialog per file inside the loop, so a
-	'' git pull touching six open files meant six sequential modals.
+	'' One prompt for all of them. The old code raised one dialog per file inside the loop, so an
+	'' external tool touching six open files at once meant six sequential modals.
 	''
 	'' FULL PATHS MUST NOT BE PUT ON A LINE OF THEIR OWN HERE. MsgBoxForm.Execute measures the text
 	'' with DT_WORDBREAK into a FIXED content width (380 logical units). A path contains no spaces,
@@ -11203,9 +10662,6 @@ Sub OnProgramQuit() Destructor
 	WDeAllocate(PersonalEmail)
 	WDeAllocate(PersonalAddress)
 	WDeAllocate(PersonalLicenseOtherText)
-	WDeAllocate(PersonalGitLogin)
-	WDeAllocate(PersonalGitUserName)
-	WDeAllocate(PersonalGitEmail)
 	'For i As Integer = 0 To Threads.Count - 1
 	'	If Threads.Item(i) <> 0 Then ThreadWait Threads.Item(i)
 	'Next

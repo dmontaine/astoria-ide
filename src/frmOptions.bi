@@ -151,13 +151,10 @@ Using My.Sys.Forms
 		' Personal Information page (Tools > Options > Personal Information)
 		Dim As ScrollControl pnlPersonalInfo
 		Dim As Panel pnlPersonalName, pnlPersonalCompany, pnlPersonalWebsite, pnlPersonalEmail, pnlPersonalAddress, pnlPersonalLicenseOther
-		Dim As Panel pnlPersonalGitLogin, pnlPersonalGitUserName, pnlPersonalGitEmail
 		Dim As Panel pnlLicenseRow1, pnlLicenseRow2
 		Dim As Label lblPersonalName, lblPersonalCompany, lblPersonalWebsite, lblPersonalEmail, lblPersonalAddress
-		Dim As Label lblPersonalGitLogin, lblPersonalGitUserName, lblPersonalGitEmail
 		Dim As TextBox txtPersonalName, txtPersonalCompany, txtPersonalWebsite, txtPersonalEmail, txtPersonalAddress, txtPersonalLicenseOther
-		Dim As TextBox txtPersonalGitLogin, txtPersonalGitUserName, txtPersonalGitEmail
-		Dim As GroupBox grbPersonalLicense, grbPersonalGit
+		Dim As GroupBox grbPersonalLicense
 		Dim As CheckBox chkLicenseGPL3, chkLicenseLGPL, chkLicenseApache, chkLicenseBSD, chkLicenseFreeware, chkLicenseProprietary, chkLicenseOther
 		Declare Static Sub chkLicenseOther_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As CheckBox)
 		Declare Sub chkLicenseOther_Click(ByRef Sender As CheckBox)

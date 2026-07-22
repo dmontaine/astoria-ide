@@ -13,7 +13,7 @@ Build/run via the astoria MCP tools when connected, else Astoria IDE (open
 {{PROJECT}}.vfp, press F5); GUI projects need the IDE (fbc alone lacks the
 framework include path and .rc generation).
 Keep {{PROJECT}}.vfp's File= list in sync with any file add/rename/delete.
-project.astoria is the Astoria marker + Git remote source -- don't delete it.
+project.astoria is the Astoria project marker -- don't delete it.
 .frm files are Form-Designer-managed: edit handler bodies, keep the With-block shape.
 Match existing indentation and line endings; keep changes small and compile-checked.
 Save source UTF-8 with NO BOM; Dim is procedure-scoped; IIf cannot return a String;

@@ -1,7 +1,7 @@
-﻿	'#Compile -exx "Form1.rc"
+	'#Compile -exx "Form1.rc"
 '#Region "Form"
 	#include once "frmNewProject.bi"
-	
+
 	Constructor frmNewProject
 		With This
 			.Name = "frmNewProject"
@@ -20,60 +20,34 @@
 			'' assigned further down and are in place long before any key is pressed.
 			.CancelButton = @cmdCancel
 			.OnCreate = @Form_Create_
-			.SetBounds 0, 0, 480, 475
+			.SetBounds 0, 0, 480, 400
 			.StartPosition = FormStartPosition.CenterParent
 		End With
-		' pnlBottom — footer: Project Template / Project Name / Primary Form Name / Primary
-		' Module Name / Author / License / Use Git+URL / AI Friendly rows, stacked above the
-		' OK/Cancel/Open Existing button row. Everything the old two-dialog flow asked for
-		' across separate popups now lives in this one dialog.
+		' pnlBottom — footer: Project Template / Project Name / Author / License /
+		' AI Friendly / Description rows, stacked above the OK/Cancel/Open Existing button row.
 		With pnlBottom
 			.Name = "pnlBottom"
 			.Text = ""
 			.Align = DockStyle.alBottom
 			.TabIndex = 35
-			.SetBounds 0, 0, 464, 436
+			.SetBounds 0, 0, 464, 361
 			.Parent = @This
 		End With
-		' pnlMode — the very top row: choose how the project is created. The two radios
-		' auto-group (same parent). Create Local = purely local from a template; Use
-		' Existing Git = clone an existing remote repo. UpdateModeFields enables the
-		' fields each mode needs.
-		With pnlMode
-			.Name = "pnlMode"
+		' pnlButtons — fixed-height strip at the bottom of pnlBottom that holds OK/
+		' Cancel/Open-Existing. Without it, the three buttons dock into whatever vertical
+		' space the row panels above leave inside pnlBottom -- when rows were removed
+		' (Git mode + provider/username/email) that leftover space ballooned and the
+		' buttons stretched to fill it.
+		With pnlButtons
+			.Name = "pnlButtons"
 			.Text = ""
-			.Align = DockStyle.alTop
-			.TabIndex = 1
-			.ExtraMargins.Left = 10
-			.ExtraMargins.Right = 10
-			.SetBounds 0, 0, 464, 32
+			.Align = DockStyle.alBottom
+			.Constraints.Height = 40
+			.SetBounds 0, 0, 464, 40
 			.Parent = @pnlBottom
 		End With
-		' optCreateLocal
-		With optCreateLocal
-			.Name = "optCreateLocal"
-			.Caption = ("Create Local Project")
-			.Align = DockStyle.alLeft
-			.TabIndex = 1
-			.SetBounds 0, 6, 170, 21
-			.Checked = True
-			.Designer = @This
-			.OnClick = @optMode_Click_
-			.Parent = @pnlMode
-		End With
-		' optUseExistingGit
-		With optUseExistingGit
-			.Name = "optUseExistingGit"
-			.Caption = ("Git Project")
-			.Align = DockStyle.alLeft
-			.TabIndex = 2
-			.SetBounds 170, 6, 200, 21
-			.Designer = @This
-			.OnClick = @optMode_Click_
-			.Parent = @pnlMode
-		End With
 		' pnlProjectTemplate — row 0: project template (label-left + dropdown, matching
-		' the other field rows). Added before pnlProjectName so it docks as the top row.
+		' the other field rows). Added first so it docks as the top row.
 		With pnlProjectTemplate
 			.Name = "pnlProjectTemplate"
 			.Text = ""
@@ -95,7 +69,7 @@
 			.Parent = @pnlProjectTemplate
 		End With
 		' cboTemplate — pick-only dropdown; populated in Form_Create, defaults to
-		' Windows Application. Same label-left/combo-alClient layout as Git Provider.
+		' Windows Application.
 		With cboTemplate
 			.Name = "cboTemplate"
 			.Text = ""
@@ -209,121 +183,6 @@
 			.Designer = @This
 			.Parent = @pnlLicense
 		End With
-		' pnlGitProvider — row 6b, Git host (GitHub/GitLab/Bitbucket/Codeberg); combined
-		' with Git Username + Project Name to build the remote URL (see BuildGitURL)
-		With pnlGitProvider
-			.Name = "pnlGitProvider"
-			.Text = ""
-			.Align = DockStyle.alTop
-			.TabIndex = 19
-			.ExtraMargins.Left = 10
-			.ExtraMargins.Right = 10
-			.SetBounds 0, 128, 464, 32
-			.Parent = @pnlBottom
-		End With
-		' lblGitProvider
-		With lblGitProvider
-			.Name = "lblGitProvider"
-			.Text = ("Git Provider") & ":"
-			.Align = DockStyle.alLeft
-			.TabIndex = 20
-			.CenterImage = True
-			.SetBounds 0, 0, 150, 32
-			.Parent = @pnlGitProvider
-		End With
-		' cboGitProvider -- GitHub is the only provider for now, so the dropdown is kept
-		' in the type but hidden/inert; the value shows as the static bold label below.
-		' (Re-show + repopulate this and delete lblGitProviderValue to bring back a choice.)
-		With cboGitProvider
-			.Name = "cboGitProvider"
-			.Text = "GitHub"
-			.Style = ComboBoxEditStyle.cbDropDownList
-			.Align = DockStyle.alNone
-			.Visible = False
-			.SetBounds 150, 0, 314, 32
-			.Enabled = False
-			.Designer = @This
-			.Parent = @pnlGitProvider
-		End With
-		' lblGitProviderValue -- static bold "GitHub" at the dropdown's former position,
-		' left-justified with its left edge.
-		With lblGitProviderValue
-			.Name = "lblGitProviderValue"
-			.Text = ("GitHub")
-			.Align = DockStyle.alClient
-			.CenterImage = True
-			.TabIndex = 21
-			.SetBounds 150, 0, 314, 32
-			.Font.Bold = True
-			.Parent = @pnlGitProvider
-		End With
-		' pnlGitUserName — row 6c
-		With pnlGitUserName
-			.Name = "pnlGitUserName"
-			.Text = ""
-			.Align = DockStyle.alTop
-			.TabIndex = 22
-			.ExtraMargins.Left = 10
-			.ExtraMargins.Right = 10
-			.SetBounds 0, 160, 464, 32
-			.Parent = @pnlBottom
-		End With
-		' lblGitUserName
-		With lblGitUserName
-			.Name = "lblGitUserName"
-			.Text = ("Git Username") & ":"
-			.Align = DockStyle.alLeft
-			.TabIndex = 23
-			.CenterImage = True
-			.SetBounds 0, 0, 150, 32
-			.Parent = @pnlGitUserName
-		End With
-		' txtGitUserName — enabled only while Use Git is checked
-		With txtGitUserName
-			.Name = "txtGitUserName"
-			.Text = ""
-			.Align = DockStyle.alClient
-			.ExtraMargins.Top = 5
-			.ExtraMargins.Bottom = 5
-			.TabIndex = 24
-			.SetBounds 150, 0, 314, 32
-			.Enabled = False
-			.Parent = @pnlGitUserName
-		End With
-		' pnlGitEmail — row 6d
-		With pnlGitEmail
-			.Name = "pnlGitEmail"
-			.Text = ""
-			.Align = DockStyle.alTop
-			.TabIndex = 25
-			.ExtraMargins.Left = 10
-			.ExtraMargins.Right = 10
-			.SetBounds 0, 192, 464, 32
-			.Parent = @pnlBottom
-		End With
-		' lblGitEmail
-		With lblGitEmail
-			.Name = "lblGitEmail"
-			.Text = ("Git Email") & ":"
-			.Align = DockStyle.alLeft
-			.TabIndex = 26
-			.CenterImage = True
-			.SetBounds 0, 0, 150, 32
-			.Parent = @pnlGitEmail
-		End With
-		' txtGitEmail — enabled only while Use Git is checked; defaults from
-		' Options > Personal Information > E-mail (Form_Create), stays editable
-		With txtGitEmail
-			.Name = "txtGitEmail"
-			.Text = ""
-			.Align = DockStyle.alClient
-			.ExtraMargins.Top = 5
-			.ExtraMargins.Bottom = 5
-			.TabIndex = 27
-			.SetBounds 150, 0, 314, 32
-			.Enabled = False
-			.Parent = @pnlGitEmail
-		End With
 		' pnlAIFriendly — row 7
 		With pnlAIFriendly
 			.Name = "pnlAIFriendly"
@@ -332,7 +191,7 @@
 			.TabIndex = 28
 			.ExtraMargins.Left = 10
 			.ExtraMargins.Right = 10
-			.SetBounds 0, 224, 464, 32
+			.SetBounds 0, 96, 464, 32
 			.Parent = @pnlBottom
 		End With
 		' chkAIFriendly
@@ -372,11 +231,14 @@
 			.Designer = @This
 			.Parent = @pnlAIFriendly
 		End With
-		' pnlDescription -- Project Description; label ABOVE a full-width multiline box
+		' pnlDescription -- Project Description; label ABOVE a full-width multiline box.
+		' alClient so the description grows into whatever vertical space the alTop rows
+		' and alBottom button strip leave over -- avoids a fixed height that either wastes
+		' space (as it did after Git rows were removed) or clips a taller form later.
 		With pnlDescription
 			.Name = "pnlDescription"
 			.Text = ""
-			.Align = DockStyle.alTop
+			.Align = DockStyle.alClient
 			.TabIndex = 32
 			.ExtraMargins.Left = 10
 			.ExtraMargins.Right = 10
@@ -413,42 +275,42 @@
 			.Text = ("Cancel")
 			.Align = DockStyle.alRight
 			.ExtraMargins.Bottom = 8
-			.ExtraMargins.Top = 4
+			.ExtraMargins.Top = 8
 			.ExtraMargins.Right = 10
 			.TabIndex = 38
-			.SetBounds 527, 228, 88, 20
+			.SetBounds 366, 8, 88, 24
 			.Designer = @This
 			.OnClick = @cmdCancel_Click_
-			.Parent = @pnlBottom
+			.Parent = @pnlButtons
 		End With
 		' cmdOK
 		With cmdOK
 			.Name = "cmdOK"
 			.Text = ("OK")
 			.Align = DockStyle.alRight
-			.ExtraMargins.Top = 4
-			.ExtraMargins.Right = 10
+			.ExtraMargins.Top = 8
+			.ExtraMargins.Right = 4
 			.ExtraMargins.Bottom = 8
 			.TabIndex = 37
-			.SetBounds 430, 228, 88, 20
+			.SetBounds 274, 8, 88, 24
 			.Default = True
 			.Designer = @This
 			.OnClick = @cmdOK_Click_
-			.Parent = @pnlBottom
+			.Parent = @pnlButtons
 		End With
 		' cmdOpenExisting  (lower-left, aligned with OK; opens the Open Project window instead)
 		With cmdOpenExisting
 			.Name = "cmdOpenExisting"
 			.Text = ("Open Existing Project")
 			.Align = DockStyle.alLeft
-			.ExtraMargins.Top = 4
+			.ExtraMargins.Top = 8
 			.ExtraMargins.Left = 10
 			.ExtraMargins.Bottom = 8
 			.TabIndex = 36
-			.SetBounds 10, 228, 160, 20
+			.SetBounds 10, 8, 160, 24
 			.Designer = @This
 			.OnClick = @cmdOpenExisting_Click_
-			.Parent = @pnlBottom
+			.Parent = @pnlButtons
 		End With
 	End Constructor
 
@@ -496,84 +358,6 @@ Private Sub frmNewProject.cmdOK_Click(ByRef Sender As Control)
 		Me.BringToFront
 		Exit Sub
 	End If
-	'' Mode: Create Local Project vs Use Existing Git Project. In git mode we clone the
-	'' remote first and classify what came down; only an empty clone falls through to the
-	'' template-populate block below (Astoria fills the empty repo like a new project).
-	Dim As Boolean bModeGit = optUseExistingGit.Checked
-	Dim As String gitProvider = "GitHub"   '' GitHub-only for now (provider dropdown retired)
-	Dim As String gitUserName = Trim(txtGitUserName.Text)
-	Dim As String gitURL = ""
-	If bModeGit Then
-		If gitUserName = "" Then
-			MsgBox ("Enter a Git username."), , mtWarning
-			Me.BringToFront
-			Exit Sub
-		End If
-		If Not SshKeyExists() Then
-			If MsgBox(("Cloning an existing Git project needs an SSH key on this machine, and none was found.") & Chr(13,10) & Chr(13,10) & _
-				("Set one up now?"), "", mtInfo, btYesNo) = mrYes Then
-				SetupSshKey(gitProvider)
-			End If
-			'' Stop this attempt either way -- once the key is added to the provider, click
-			'' Create again to clone. (A newly generated key still has to be registered with
-			'' the provider before a clone will authenticate.)
-			Me.BringToFront
-			Exit Sub
-		End If
-		gitURL = BuildGitURL(gitProvider, gitUserName, ProjectName)
-		'' Preflight: if the remote doesn't exist yet, send the user to the provider's page to
-		'' create it rather than failing the clone with a bare authentication error.
-		''
-		'' Astoria does not create it for them: that needs a provider CLI it does not ship, whose
-		'' sign-in is a console flow, to save one page visit. The repository name goes on the
-		'' clipboard so the page can be filled in with a paste.
-		If Not RemoteRepoExists(gitURL) Then
-			If MsgBox(("The repository doesn't exist yet:") & Chr(13,10) & gitURL & Chr(13,10) & Chr(13,10) & _
-				("Open ") & gitProvider & ("'s new-repository page to create it?"), "", mtInfo, btYesNo) = mrYes Then
-				Clipboard.SetAsText ProjectName
-				OpenNewRepoPage(gitProvider)
-				MsgBox ("Create ") & Chr(34) & ProjectName & Chr(34) & (" as an empty repository -- the name is on your clipboard -- then click Create again."), , mtInfo
-			End If
-			Me.BringToFront
-			Exit Sub
-		End If
-		If Not CloneGitRepository(gitURL, localFolder) Then
-			MsgBox ("The repository could not be cloned") & ":" & Chr(13,10) & Chr(13,10) & gitURL & Chr(13,10) & Chr(13,10) & _
-				("Check that it exists on") & " " & gitProvider & " " & ("and that you have access."), , mtWarning
-			Me.BringToFront
-			Exit Sub
-		End If
-		If IsAstoriaProject(localFolder) Then
-			'' A complete Astoria project cloned down -- load it as-is; the creation
-			'' fields don't apply. Stamp the AI template if asked (harmless if present).
-			If chkAIFriendly.Checked Then
-				Dim As UString aiFolderC = AIToolFolderName(cboAITool.Text)
-				If aiFolderC <> "" Then StampAITemplate(localFolder, aiFolderC, ProjectName, Trim(txtAuthor.Text), cboLicense.Text, txtDescription.Text)
-			End If
-			Dim As UString foundVfp = FindProjectVfp(localFolder)
-			If foundVfp <> "" Then
-				SelectedProjectFile = foundVfp
-			Else
-				SelectedFolder = localFolder
-			End If
-			SelectedTemplate = localFolder
-			ModalResult = ModalResults.OK
-			Me.CloseForm
-			Exit Sub
-		ElseIf Not FolderIsEffectivelyEmpty(localFolder) Then
-			'' Non-empty repo that is NOT an Astoria project: we don't try to interpret
-			'' foreign projects. Remove the clone and refuse.
-			DeleteFolderRecursive(localFolder)
-			MsgBox ("This Git repository is not an Astoria project and is not empty.") & Chr(13,10) & Chr(13,10) & _
-				("Astoria only loads its own projects or empty repositories.") & Chr(13,10) & Chr(13,10) & _
-				("To use an existing repository, it must contain a project.astoria file that includes the line:") & Chr(13,10) & _
-				("    AstoriaProject=1"), , mtWarning
-			Me.BringToFront
-			Exit Sub
-		End If
-		'' Empty repo -- fall through and populate it from the chosen template, exactly
-		'' like a new local project (localFolder already exists as the empty clone).
-	End If
 	'' Find the template's own default file (every shipped project template has exactly
 	'' one) so its real name can be validated/renamed from the inline Form/Module Name
 	'' field, instead of silently copying the template's own file name straight in.
@@ -607,14 +391,11 @@ Private Sub frmNewProject.cmdOK_Click(ByRef Sender As Control)
 			Exit Sub
 		End If
 		'' Rewrite the template's own File=/*File= line -- it points at
-		'' "<TemplateName>/<original name>" (the template's own on-disk layout). The Form
-		'' stays the project's starred/main file when both exist; if the Form was skipped
-		'' but a Module was still requested, the Module takes over the starred position.
-		'' If both were left blank, the line is dropped entirely (nothing was created).
-		'' Read the whole template into memory and close it BEFORE opening the destination
-		'' for writing -- this app runs background worker threads that also do file I/O
-		'' (IntelliSense parsing etc.), so two simultaneously-open handles from this
-		'' thread's own read+write loop is avoided as a precaution, not just tidiness.
+		'' "<TemplateName>/<original name>" (the template's own on-disk layout). Read the whole
+		'' template into memory and close it BEFORE opening the destination for writing -- this
+		'' app runs background worker threads that also do file I/O (IntelliSense parsing etc.),
+		'' so two simultaneously-open handles from this thread's own read+write loop is avoided
+		'' as a precaution, not just tidiness.
 		Dim As WString Ptr localTemplatePtr, localProjectFilePtr
 		WLet(localTemplatePtr, localTemplate)
 		WLet(localProjectFilePtr, localProjectFile)
@@ -664,13 +445,9 @@ Private Sub frmNewProject.cmdOK_Click(ByRef Sender As Control)
 		WDeAllocate(localTemplatePtr)
 		WDeAllocate(localProjectFilePtr)
 	End If
-	'' New-project metadata (Author/License/Git). Appended as plain key=value lines in
-	'' the same flat format already used by every other .vfp key (CompanyName, LegalCopyright,
-	'' etc.) -- AddProject's key parser (Main.bas) is an If/ElseIf chain with no matching
-	'' branch for these new keys, so they're safely ignored by today's project loader,
-	'' the same as any other key it doesn't recognize. Git URL is stored for reference only
-	'' -- no git commands are run. "Make project AI friendly" is captured as a flag only for
-	'' now; what it should actually generate is an open decision for a later session.
+	'' New-project metadata (Author/License/Description/AI). Appended as plain key=value
+	'' lines in the same flat format already used by every other .vfp key (CompanyName,
+	'' LegalCopyright, etc.) -- AddProject's key parser (Main.bas) reads these back.
 	Dim As String chosenAuthor = Trim(txtAuthor.Text)
 	Dim As String chosenLicense = cboLicense.Text
 	Dim As String chosenDescription = txtDescription.Text
@@ -678,9 +455,6 @@ Private Sub frmNewProject.cmdOK_Click(ByRef Sender As Control)
 	chosenDescription = Replace(chosenDescription, Chr(10), "\n")
 	chosenDescription = Replace(chosenDescription, Chr(13), "\n")
 	Dim As String chosenAITool = cboAITool.Text
-	Dim As String chosenGitEmail = Trim(txtGitEmail.Text)
-	Dim As String useGitText = "false"
-	If bModeGit Then useGitText = "true"
 	Dim As String aiFriendlyText = "false"
 	If chkAIFriendly.Checked Then aiFriendlyText = "true"
 	Dim As Integer FnMeta = FreeFile_
@@ -688,30 +462,17 @@ Private Sub frmNewProject.cmdOK_Click(ByRef Sender As Control)
 		Print #FnMeta, "Author=" & Chr(34) & chosenAuthor & Chr(34)
 		Print #FnMeta, "License=" & Chr(34) & chosenLicense & Chr(34)
 		Print #FnMeta, "Description=" & Chr(34) & chosenDescription & Chr(34)
-		Print #FnMeta, "UseGit=" & useGitText
-		Print #FnMeta, "GitProvider=" & Chr(34) & gitProvider & Chr(34)
-		Print #FnMeta, "GitUserName=" & Chr(34) & gitUserName & Chr(34)
-		Print #FnMeta, "GitEmail=" & Chr(34) & chosenGitEmail & Chr(34)
-		Print #FnMeta, "GitURL=" & Chr(34) & gitURL & Chr(34)
 		Print #FnMeta, "AIFriendly=" & aiFriendlyText
 		Print #FnMeta, "AITool=" & Chr(34) & chosenAITool & Chr(34)
 		CloseFile_(FnMeta)
 	End If
-	'' project.astoria -- the canonical Astoria description file (the marker that lets the
-	'' clone flow recognise this as an Astoria project). Written for every created project.
+	'' project.astoria -- the canonical Astoria description file. Written for every created project.
 	Dim As ProjectDescriptionData descData
-	descData.Mode        = IIf(bModeGit, ProjectCreateMode.pcmExistingGit, ProjectCreateMode.pcmLocalProject)
 	descData.ProjectName = ProjectName
 	descData.Template    = TemplateName
 	descData.Author      = chosenAuthor
 	descData.License     = chosenLicense
-	descData.Description  = txtDescription.Text
-	If bModeGit Then
-		descData.GitProvider = gitProvider
-		descData.GitUserName = gitUserName
-		descData.GitEmail    = chosenGitEmail
-	End If
-	descData.GitURL      = gitURL
+	descData.Description = txtDescription.Text
 	descData.AIFriendly  = chkAIFriendly.Checked
 	descData.AITool      = chosenAITool
 	descData.Created     = Format(Now, "yyyy-mm-dd")
@@ -720,13 +481,6 @@ Private Sub frmNewProject.cmdOK_Click(ByRef Sender As Control)
 	If chkAIFriendly.Checked Then
 		Dim As UString aiFolder = AIToolFolderName(chosenAITool)
 		If aiFolder <> "" Then StampAITemplate(localFolder, aiFolder, ProjectName, chosenAuthor, chosenLicense, txtDescription.Text)
-	End If
-	'' Existing-git empty clone: seed .gitignore/.gitattributes so the eventual commit
-	'' (Project menu > Git Commit/Push) governs line endings and ignores build output.
-	'' No git init/commit/push here -- the clone already set up git, and commit/push are
-	'' the user's explicit Project-menu actions.
-	If bModeGit Then
-		WriteGitSupportFiles(localFolder, ProjectName, chosenAuthor, chosenLicense, txtDescription.Text)
 	End If
 	SelectedTemplate = localTemplate
 	SelectedFolder = localFolder
@@ -779,15 +533,13 @@ Private Sub frmNewProject.Form_Create(ByRef Sender As Control)
 			AddProjectTemplateItem(PreferredTemplates(i))
 		End If
 	Next
-	'' Default to Windows Application (first in the preferred order, so index 0 when it
-	'' ships). cboTemplate_Change enables the Form/Module fields to match.
+	'' Default to Windows Application (first in the preferred order, so index 0 when it ships).
 	Dim As Integer defaultIdx = TemplateNames.IndexOf("Windows Application")
 	If defaultIdx = -1 AndAlso cboTemplate.ItemCount > 0 Then defaultIdx = 0
 	If defaultIdx <> -1 Then cboTemplate.ItemIndex = defaultIdx
 	cboTemplate_Change(cboTemplate)
 	'' No auto-generated name in any of the three fields -- project name is required and
-	'' the owner types their own; the form/module name fields are optional (left blank,
-	'' cmdOK_Click skips creating that file).
+	'' the owner types their own.
 	txtProjectName.Text = ""
 	'' Author defaults from Options > Personal Information > Name, but stays editable so
 	'' a one-off project can credit someone else without touching the global setting.
@@ -803,22 +555,6 @@ Private Sub frmNewProject.Form_Create(ByRef Sender As Control)
 	cboLicense.AddItem ("Proprietary")
 	cboLicense.AddItem ("Other")
 	cboLicense.ItemIndex = 0
-	'' Default to Create Local Project.
-	optCreateLocal.Checked = True
-	optUseExistingGit.Checked = False
-	'' Git provider is GitHub-only for now -- shown as a static label, no dropdown to fill.
-	'' Git identity defaults come from Options > Personal Information so it isn't retyped
-	'' per project; both stay editable (a host account can differ from the usual details).
-	'' Git Login Name is the account segment of the remote URL (git@host:<login>/repo.git).
-	txtGitUserName.Text = *PersonalGitLogin
-	txtGitUserName.Enabled = False
-	'' Git E-Mail falls back to the general E-mail address when no Git-specific one is set.
-	If Trim(*PersonalGitEmail) <> "" Then
-		txtGitEmail.Text = *PersonalGitEmail
-	Else
-		txtGitEmail.Text = *PersonalEmail
-	End If
-	txtGitEmail.Enabled = False
 	'' AI-friendly is ON by default (agent-first): a new project ships with the selected
 	'' agent's rules/skills stamped in unless the user opts out.
 	chkAIFriendly.Checked = True
@@ -853,31 +589,6 @@ Private Sub frmNewProject.Form_Create(ByRef Sender As Control)
 	If aiCount > 0 Then cboAITool.ItemIndex = aiDefault
 	'' Tool picker follows the checkbox, which now defaults to checked.
 	cboAITool.Enabled = chkAIFriendly.Checked
-	'' Apply the default mode's field enabling (git fields off for Create Local).
-	UpdateModeFields()
-End Sub
-
-Private Sub frmNewProject.optMode_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As RadioButton)
-	(*Cast(frmNewProject Ptr, Sender.Designer)).optMode_Click(Sender)
-End Sub
-Private Sub frmNewProject.optMode_Click(ByRef Sender As RadioButton)
-	UpdateModeFields()
-End Sub
-
-'' Enable the fields each creation mode needs.
-''  - Create Local Project: template + names + author/license/description/AI; git fields off.
-''  - Use Existing Git Project: git Provider/Username/Email on. Template + Form/Module stay
-''    enabled too -- they're used only if the cloned repo turns out to be empty (Astoria
-''    then populates the empty repo like a new local project); ignored for a repo that
-''    already contains an Astoria project.
-Private Sub frmNewProject.UpdateModeFields()
-	Dim As Boolean bGit = optUseExistingGit.Checked
-	txtGitUserName.Enabled = bGit
-	txtGitEmail.Enabled = bGit
-	'' Template/Form/Module: enabled in both modes. In existing-git mode the Windows
-	'' Application template still gates the Form field via cboTemplate_Change.
-	cboTemplate.Enabled = True
-	cboTemplate_Change(cboTemplate)
 End Sub
 
 Private Sub frmNewProject.chkAIFriendly_Click_(ByRef Designer As My.Sys.Object, ByRef Sender As Control)
@@ -1051,228 +762,5 @@ Private Sub frmNewProject.StampTemplateFile(ByRef SrcFile As UString, ByRef Dest
 	If Open(DestFile For Binary Access Write As #FnOut) = 0 Then
 		If Len(Contents) > 0 Then Put #FnOut, 1, Contents
 		CloseFile_(FnOut)
-	End If
-End Sub
-
-'' Stamps Templates/Git/gitignore.txt and gitattributes.txt into the new project
-'' as .gitignore / .gitattributes (token-substituted -- gitattributes.txt uses
-'' {{PROJECT}}). Written whenever Use Git is checked, before SetupGitRepository's
-'' "git add ." so they land in -- and govern -- the initial commit. Missing
-'' template files are skipped silently (StampTemplateFile's own behavior).
-Private Sub frmNewProject.WriteGitSupportFiles(ByRef DestFolder As UString, ByRef ProjectName As String, ByRef AuthorName As String, ByRef LicenseName As String, ByRef DescriptionText As String)
-	Dim As UString gitTplFolder = WinOsPath(ExePath & "/Templates/Git")
-	StampTemplateFile(gitTplFolder & WindowsSlash & "gitignore.txt", DestFolder & WindowsSlash & ".gitignore", ProjectName, AuthorName, LicenseName, DescriptionText)
-	StampTemplateFile(gitTplFolder & WindowsSlash & "gitattributes.txt", DestFolder & WindowsSlash & ".gitattributes", ProjectName, AuthorName, LicenseName, DescriptionText)
-End Sub
-
-'' Whether a usable SSH key already exists for the current Windows user --
-'' checked at %USERPROFILE%\.ssh\ for the three common key types. Mirrors the
-'' check Templates/Git/sshkeys.md walks the user through by hand.
-Private Function frmNewProject.SshKeyExists() As Boolean
-	Dim As UString sshFolder = Environ("USERPROFILE") & "\.ssh\"
-	If FileExistsU(sshFolder & "id_ed25519.pub") Then Return True
-	If FileExistsU(sshFolder & "id_rsa.pub") Then Return True
-	If FileExistsU(sshFolder & "id_ecdsa.pub") Then Return True
-	Return False
-End Function
-
-'' git clone GitURL into DestFolder (which must not already exist -- git creates it).
-'' Runs from a temp .bat so the exit code can be captured (PipeCmd returns nothing),
-'' batch-mode SSH so it can't block on a credential/host-key prompt. Returns True only
-'' when clone exits 0 and the folder actually materialised. Mirrors RemoteRepoExists.
-Private Function frmNewProject.CloneGitRepository(ByRef GitURL As String, ByRef DestFolder As UString) As Boolean
-	EnsureDirectoryExists(ExePath & WindowsSlash & "Temp")
-	Dim As UString batPath = ExePath & WindowsSlash & "Temp" & WindowsSlash & "_astoria_git_clone.bat"
-	Dim As UString resultPath = ExePath & WindowsSlash & "Temp" & WindowsSlash & "_astoria_git_clone.result"
-	If FileExistsU(resultPath) Then Kill resultPath
-	Dim As Integer Fn = FreeFile_
-	If Open(batPath For Output As #Fn) <> 0 Then Return False
-	Print #Fn, "@echo off"
-	Print #Fn, "set GIT_TERMINAL_PROMPT=0"
-	Print #Fn, "set GIT_SSH_COMMAND=ssh -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=accept-new"
-	Print #Fn, "git clone " & Chr(34) & Trim(GitURL) & Chr(34) & " " & Chr(34) & DestFolder & Chr(34) & " >NUL 2>&1"
-	Print #Fn, "echo %errorlevel% > " & Chr(34) & resultPath & Chr(34)
-	CloseFile_(Fn)
-	PipeCmd batPath, True
-	Dim As Boolean ok = False
-	If FileExistsU(resultPath) Then
-		Dim As Integer FnR = FreeFile_
-		If Open(resultPath For Input As #FnR) = 0 Then
-			Dim As String resultLine
-			Line Input #FnR, resultLine
-			CloseFile_(FnR)
-			ok = (Trim(resultLine) = "0")
-		End If
-		Kill resultPath
-	End If
-	If FileExistsU(batPath) Then Kill batPath
-	If ok AndAlso Not FolderExistsU(DestFolder) Then ok = False
-	Return ok
-End Function
-
-'' Find a project (.vfp) file in Folder, preferring one named after the folder.
-'' "" if none. Used to pick the project file of a cloned complete Astoria project.
-Private Function frmNewProject.FindProjectVfp(ByRef Folder As UString) As UString
-	Dim As UString wantName = LCase(GetFileNameU(Folder)) & ".vfp"
-	Dim As UString firstVfp = ""
-	Dim As UInteger attr
-	Dim As String f = Dir(WinOsPath(Folder & "/*.vfp"), fbNormal Or fbArchive Or fbReadOnly, attr)
-	Do While f <> ""
-		Dim As UString full = WinOsPath(Folder & "/" & f)
-		If firstVfp = "" Then firstVfp = full
-		If LCase(f) = wantName Then Return full
-		f = Dir(attr)
-	Loop
-	Return firstVfp
-End Function
-
-'' Delete a folder and everything under it (used to remove a refused clone). Shells
-'' `rmdir /s /q` via a temp .bat -- robust against a cloned .git tree's many files,
-'' and attrib -r first so read-only git objects don't block the removal.
-Private Sub frmNewProject.DeleteFolderRecursive(ByRef Folder As UString)
-	If Trim(Folder) = "" OrElse Not FolderExistsU(Folder) Then Exit Sub
-	EnsureDirectoryExists(ExePath & WindowsSlash & "Temp")
-	Dim As UString batPath = ExePath & WindowsSlash & "Temp" & WindowsSlash & "_astoria_rmdir.bat"
-	Dim As Integer Fn = FreeFile_
-	If Open(batPath For Output As #Fn) <> 0 Then Exit Sub
-	Print #Fn, "@echo off"
-	Print #Fn, "attrib -r -h -s " & Chr(34) & Folder & "\*.*" & Chr(34) & " /s /d >NUL 2>&1"
-	Print #Fn, "rmdir /s /q " & Chr(34) & Folder & Chr(34) & " >NUL 2>&1"
-	CloseFile_(Fn)
-	PipeCmd batPath, True
-	If FileExistsU(batPath) Then Kill batPath
-End Sub
-
-'' Whether GitURL already exists and is reachable, via a preflight "git ls-remote"
-'' (works against a bare remote URL -- no local repo needed yet). Runs from a temp
-'' .bat (Temp\, same convention as SetupGitRepository) so the exit code can be
-'' captured through a small result file, since PipeCmd itself returns nothing.
-'' GIT_TERMINAL_PROMPT=0 and a batch-mode/timeout-bounded SSH command guarantee
-'' this can't block waiting on a credential or host-key prompt that never comes --
-'' the exact class of hang SetupGitRepository already hit once from a different
-'' cause (see its own comments).
-Private Function frmNewProject.RemoteRepoExists(ByRef GitURL As String) As Boolean
-	EnsureDirectoryExists(ExePath & WindowsSlash & "Temp")
-	Dim As UString batPath = ExePath & WindowsSlash & "Temp" & WindowsSlash & "_astoria_git_check.bat"
-	Dim As UString resultPath = ExePath & WindowsSlash & "Temp" & WindowsSlash & "_astoria_git_check.result"
-	If FileExistsU(resultPath) Then Kill resultPath
-	Dim As Integer Fn = FreeFile_
-	If Open(batPath For Output As #Fn) <> 0 Then Return False
-	Print #Fn, "@echo off"
-	Print #Fn, "set GIT_TERMINAL_PROMPT=0"
-	Print #Fn, "set GIT_SSH_COMMAND=ssh -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new"
-	Print #Fn, "git ls-remote " & Chr(34) & Trim(GitURL) & Chr(34) & " >NUL 2>&1"
-	Print #Fn, "echo %errorlevel% > " & Chr(34) & resultPath & Chr(34)
-	CloseFile_(Fn)
-	PipeCmd batPath, True
-	Dim As Boolean Exists = False
-	If FileExistsU(resultPath) Then
-		Dim As Integer FnR = FreeFile_
-		If Open(resultPath For Input As #FnR) = 0 Then
-			Dim As String resultLine
-			Line Input #FnR, resultLine
-			CloseFile_(FnR)
-			Exists = (Trim(resultLine) = "0")
-		End If
-		Kill resultPath
-	End If
-	If FileExistsU(batPath) Then Kill batPath
-	Return Exists
-End Function
-
-'' Maps the Git Provider dropdown's label to its fixed public SSH host. All four
-'' providers offered here (GitHub/GitLab/Bitbucket/Codeberg) use one canonical
-'' hosted domain and the standard git@host:user/repo.git shape -- unlike
-'' self-hostable Gitea/Forgejo (no single domain) or SourceHut/SourceForge
-'' (different URL shape entirely), which is why the dropdown stops at these four.
-Private Function frmNewProject.GitProviderHost(ByRef ProviderLabel As String) As UString
-	Select Case ProviderLabel
-	Case "GitHub": Return "github.com"
-	Case "GitLab": Return "gitlab.com"
-	Case "Bitbucket": Return "bitbucket.org"
-	Case "Codeberg": Return "codeberg.org"
-	Case Else: Return ""
-	End Select
-End Function
-
-'' Matching Templates/Git/*.md guide for a provider label. No bitbucket.md exists
-'' yet, so Bitbucket falls back to the generic other.md until one is written.
-Private Function frmNewProject.GitProviderGuideName(ByRef ProviderLabel As String) As String
-	Select Case ProviderLabel
-	Case "GitHub": Return "github.md"
-	Case "GitLab": Return "gitlab.md"
-	Case "Codeberg": Return "codeberg.md"
-	Case Else: Return "other.md"
-	End Select
-End Function
-
-'' Builds the SSH remote URL from Provider + Git Username + the project's own
-'' name -- the whole reason those three fields replaced the old free-typed Git
-'' URL field.
-Private Function frmNewProject.BuildGitURL(ByRef ProviderLabel As String, ByRef GitUserName As String, ByRef ProjName As String) As UString
-	Dim As UString host = GitProviderHost(ProviderLabel)
-	If host = "" OrElse Trim(GitUserName) = "" Then Return ""
-	Return "git@" & host & ":" & Trim(GitUserName) & "/" & ProjName & ".git"
-End Function
-
-'' Scope decision (owner, 2026-07-15, extended to all four providers same day):
-'' automatic git init/remote setup runs for GitHub/GitLab/Bitbucket/Codeberg alike,
-'' gated only on an existing SSH key -- that's the one precondition Astoria can
-'' safely wire up without typed credentials, and the repo-existence preflight in
-'' cmdOK_Click already covers the "create the empty repo first" step generically
-'' for any of the four. No SSH key falls back to pointing at the matching
-'' Templates/Git/*.md guide instead of doing nothing silently (no bitbucket.md
-'' exists yet -- falls back to other.md until one is written, a later task).
-'' Deliberately stops at `git remote add origin` -- `git push` is a separate,
-'' explicit action the user takes themselves (it's the first action that
-'' actually reaches a remote server / creates public history), not part of
-'' project creation.
-Private Sub frmNewProject.SetupGitRepository(ByRef ProjectFolder As UString, ByRef GitURL As String, ByRef GitUserName As String, ByRef GitEmail As String)
-	Dim As String urlLower = LCase(GitURL)
-	If SshKeyExists() Then
-		'' Written to ExePath\Temp, not the new project folder itself -- if the
-		'' script lived inside the project folder, "git add ." would stage (and
-		'' "git commit" would then include) the setup script itself in the very
-		'' first commit, since Kill only runs after PipeCmd returns.
-		EnsureDirectoryExists(ExePath & WindowsSlash & "Temp")
-		Dim As UString batPath = ExePath & WindowsSlash & "Temp" & WindowsSlash & "_astoria_git_setup.bat"
-		'' A machine with no global git user.name/user.email configured makes
-		'' "git commit" fail silently (non-zero exit, no commit, script keeps
-		'' going) -- found by direct reproduction: init/add/remote-add all
-		'' succeeded but the repo was left with zero commits. Set the identity
-		'' local to this one repo (never --global) from the dialog's own Git
-		'' Username/Email fields, so the commit can't be skipped for that reason.
-		Dim As String gitCfgName = Trim(GitUserName)
-		If gitCfgName = "" Then gitCfgName = "Astoria IDE User"
-		Dim As String gitCfgEmail = Trim(GitEmail)
-		If gitCfgEmail = "" Then gitCfgEmail = "astoria-user@localhost"
-		Dim As Integer Fn = FreeFile_
-		If Open(batPath For Output As #Fn) <> 0 Then Exit Sub
-		Print #Fn, "@echo off"
-		Print #Fn, "cd /d " & Chr(34) & ProjectFolder & Chr(34)
-		Print #Fn, "git init"
-		Print #Fn, "git config user.name " & Chr(34) & gitCfgName & Chr(34)
-		Print #Fn, "git config user.email " & Chr(34) & gitCfgEmail & Chr(34)
-		Print #Fn, "git add ."
-		Print #Fn, "git commit -m " & Chr(34) & "Initial commit" & Chr(34)
-		Print #Fn, "git branch -M main"
-		If Trim(GitURL) <> "" Then Print #Fn, "git remote add origin " & Trim(GitURL)
-		CloseFile_(Fn)
-		'' PipeCmd's UseShell:=True path already wraps this in cmd /c "...";
-		'' quoting batPath ourselves here as well would double the outer quotes
-		'' into cmd /c ""<path>"", which cmd.exe can misparse into a stray
-		'' interactive shell that never exits -- and since PipeCmd waits
-		'' INFINITE on the process, that hangs the whole UI thread. Pass the
-		'' raw path, matching every other UseShell:=True call site.
-		PipeCmd batPath, True
-		If FileExistsU(batPath) Then Kill batPath
-	Else
-		Dim As String guideName = "other.md"
-		If InStr(urlLower, "gitlab.com") > 0 Then guideName = "gitlab.md"
-		If InStr(urlLower, "codeberg.org") > 0 Then guideName = "codeberg.md"
-		If InStr(urlLower, "github.com") > 0 Then guideName = "github.md"
-		MsgBox ("Automatic Git setup needs an existing SSH key.") & Chr(13,10) & Chr(13,10) & _
-			("See") & " Templates\Git\" & guideName & " " & ("and") & " Templates\Git\sshkeys.md" & " " & ("for manual setup steps.")
-		Me.BringToFront
 	End If
 End Sub

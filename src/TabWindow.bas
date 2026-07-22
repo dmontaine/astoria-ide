@@ -36,7 +36,6 @@ Destructor ProjectElement
 	WDeAllocate(BatchCompilationFileNameLinux)
 	WDeAllocate(ProjectName)
 	WDeAllocate(HelpFileName)
-	WDeAllocate(ProjectDescription)
 	WDeAllocate(ApplicationTitle)
 	WDeAllocate(ApplicationIcon)
 	WDeAllocate(CompanyName)
@@ -58,10 +57,6 @@ Destructor ProjectElement
 	WDeAllocate(Author)
 	WDeAllocate(License)
 	WDeAllocate(Description)
-	WDeAllocate(GitProvider)
-	WDeAllocate(GitUserName)
-	WDeAllocate(GitEmail)
-	WDeAllocate(GitURL)
 	WDeAllocate(AITool)
 	Files.Clear
 End Destructor
@@ -316,16 +311,6 @@ Sub ChangeMenuItemsEnabled
 	miExplorerCloseProject->Enabled = bEnabledProjectAndFolder
 	miProjectProperties->Enabled = bEnabledProjectAndFolder
 	miExplorerProjectProperties->Enabled = bEnabledProjectAndFolder
-	'' Edit Project Description: enabled whenever the open project has a project.astoria
-	'' file (existence, not marker-validity -- a malformed one should still be editable to
-	'' fix it). Selection-independent, so it tracks the open project, not the tree cursor.
-	'' FileExistsU("") is False, so no separate empty-path guard is needed.
-	miEditProjectDescription->Enabled = bHasProject AndAlso FileExistsU(OpenProjectDescriptionPath())
-	'' Git menu items: enabled only when the open project's folder is a Git working tree.
-	Dim As Boolean bGitRepo = OpenProjectIsGitRepo()
-	miGitCommit->Enabled = bGitRepo
-	miGitPull->Enabled = bGitRepo
-	miGitPush->Enabled = bGitRepo
 	mnuWindowSeparator->Visible = bEnabledTab
 	miCode->Enabled = bEnabledTab AndAlso bActiveFormFile
 	miForm->Enabled = bEnabledTab AndAlso bActiveFormFile
@@ -11448,7 +11433,11 @@ Sub Versioning(ByRef FileName As WString, ByRef sFirstLine As WString, ByRef Pro
 					ElseIf StartsWith(LCase(sLine), "#define ver_filedescription_str ") Then
 						Var Pos3 = InStr(sLine, """")
 						If Pos3 > 0 Then
-							WAdd(sLines, NewLine & ..Left(sLine, Pos3) & Replace(WGet(Project->FileDescription), "{ProjectDescription}", WGet(Project->ProjectDescription)) & "\0""")
+							'' The {ProjectDescription} placeholder used to interpolate the retired
+							'' single-line Project Description field. Now that the field is gone, any
+							'' leftover placeholder in a .vfp resolves to empty so an old .vfp still
+							'' parses without leaking the literal "{ProjectDescription}" into the resource.
+							WAdd(sLines, NewLine & ..Left(sLine, Pos3) & Replace(WGet(Project->FileDescription), "{ProjectDescription}", "") & "\0""")
 							bChanged = True
 						End If
 					ElseIf StartsWith(LCase(sLine), "#define ver_internalname_str ") Then

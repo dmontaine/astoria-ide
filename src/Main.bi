@@ -141,7 +141,6 @@ Common Shared As WString Ptr DefaultProjectFile
 Common Shared As WString Ptr InterfaceFontName
 Common Shared As WString Ptr gSearchSave, EnvironmentVariables
 Common Shared As WString Ptr PersonalName, PersonalCompany, PersonalWebsite, PersonalEmail, PersonalAddress, PersonalLicenseOtherText
-Common Shared As WString Ptr PersonalGitLogin, PersonalGitUserName, PersonalGitEmail   '' Tools > Options > Personal Information (Git identity)
 Common Shared As WString Ptr ProjectsPath, LastOpenPath, CommandPromptFolder
 Common Shared As WString Ptr DefaultHelp, HelpPath, KeywordsHelpPath, AsmKeywordsHelpPath, DefaultBuildConfiguration
 Common Shared As WString Ptr DefaultMakeTool, CurrentMakeTool1, CurrentMakeTool2
@@ -257,15 +256,6 @@ Declare Function GetProjectDirectory() As UString
 Declare Function ShadowedMenuFor(ByRef Combo As String) As String
 Declare Sub ValidateHotKeys
 Declare Function OpenProjectDescriptionPath() As UString
-Declare Sub EditProjectDescription
-Declare Function OpenProjectIsGitRepo() As Boolean
-Declare Sub GitCommit
-Declare Sub GitPull
-Declare Sub GitPush
-Declare Sub GitSetupSshKey
-Declare Sub SetupSshKey(ByRef provider As String)
-Declare Sub GitCreateRemoteRepo
-Declare Sub OpenNewRepoPage(ByRef provider As String)
 Declare Sub AddNewProjectFile(ByRef Template As WString, ByRef ItemName As WString)
 Declare Function ContainsFileName(tn As TreeNode Ptr, ByRef FileName As WString) As Boolean
 Declare Function GetTreeNodeChild(tn As TreeNode Ptr, ByRef FileName As WString) As TreeNode Ptr

@@ -1,5 +1,38 @@
 # Astoria-IDE — Project Status & Handoff
 
+## Session handoff (2026-07-21) — Git features removed
+
+**Owner decision:** git is an advanced feature that does not fit Astoria's target
+audience (returning Basic programmers, hobbyists, students). All user-facing Git
+integration has been ripped out:
+
+- Top-level **Git menu** (Commit / Pull / Push / Set Up SSH Key / Create Remote Repository) — gone.
+- **`frmGitCommit`** dialog — deleted.
+- **New Project dialog** — "Git Project" clone mode and Provider/Username/Email fields removed; only "Create Local Project" remains, so the mode radios are gone too.
+- **Options ▸ Personal Information** — the "Git" identity group (Login / User Name / E-mail) removed.
+- **`project.astoria` / `.vfp`** — `UseGit`, `GitProvider`, `GitUserName`, `GitEmail`, `GitURL` keys no longer written or read (existing files with these keys still parse; unknown keys are silently ignored).
+- **`Templates/Git/`** — deleted (`.gitignore`/`.gitattributes` stamps, sshkeys/github/gitlab/codeberg guides).
+- **`Templates/AI/*/skills/git-workflow/`** — deleted across all six AI-agent vendors.
+- **AGENTS.md / CLAUDE.md / SKILL.md** in every AI template — git bullets, "Git: commit and push" sections, and `git-workflow` skill references scrubbed.
+
+**Kept as-is (they are not the same thing):**
+
+- The Astoria IDE repository itself. `.git/`, `.gitignore`, `.gitattributes`, `GenerateChangelog.ps1` and everything about how *we develop Astoria* are untouched.
+- Defensive `.git/` / `.gitkeep` filters in the `audit-project-manifest` skills — harmless even for users who add git separately.
+
+**ROADMAP** — §13.23 (document Git setup), §13.26 (convert local project to Git), and the "Use Git?" branch of §13.25 (first-start dialog) are obsolete; see the notes under each. §13.28 pt 3's `G&it (Alt+I)` menu no longer exists but the &Code (Alt+D) and &Run (Alt+U) workarounds remain in place.
+
+**Backup:** the pre-removal repository was zipped to
+`~/Documents/Astoria-IDE-pre-git-removal-2026-07-21.zip` (includes `.git`) in case
+an "advanced" fork with these features is wanted later.
+
+**Not verified in this session:** the build. `Compile.bat` was not run — please
+close the IDE (linking fails while `astoria.exe` is in use) and run
+`NOPAUSE=1 SKIP_MFF=1 Compile.bat`, then exercise New Project, Edit Project
+Description, and Options ▸ Personal Information.
+
+---
+
 ## Session handoff (2026-07-20, evening) — pt 3 workaround shipped; Alt+E added; kernel trace deferred
 
 **Everything committed and pushed through `ad1e723`. Tree clean. `astoria.exe` is the build the

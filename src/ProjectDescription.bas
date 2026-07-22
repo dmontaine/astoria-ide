@@ -31,16 +31,11 @@ Function WriteProjectDescription(ByRef ProjectFolder As UString, ByRef d As Proj
 	Print #fn, "# Records the choices made when this project was created with the Astoria IDE."
 	Print #fn, "# Edit via the Project menu > Edit Project Description."
 	Print #fn, "AstoriaProject=1"
-	Print #fn, "Mode=" & IIf(d.Mode = ProjectCreateMode.pcmExistingGit, "ExistingGit", "LocalProject")
 	Print #fn, "ProjectName=" & d.ProjectName
 	Print #fn, "Template=" & d.Template
 	Print #fn, "Author=" & d.Author
 	Print #fn, "License=" & d.License
 	Print #fn, "Description=" & DescEncodeNewlines(d.Description)
-	Print #fn, "GitProvider=" & d.GitProvider
-	Print #fn, "GitUserName=" & d.GitUserName
-	Print #fn, "GitEmail=" & d.GitEmail
-	Print #fn, "GitURL=" & d.GitURL
 	Print #fn, "AIFriendly=" & IIf(d.AIFriendly, "true", "false")
 	Print #fn, "AITool=" & d.AITool
 	Print #fn, "Created=" & d.Created
@@ -69,16 +64,11 @@ Function ReadProjectDescription(ByRef ProjectFolder As UString, ByRef d As Proje
 		Dim As UString valStr = Mid(ln, eq + 1)
 		Select Case key
 		Case "AstoriaProject": If Trim(valStr) = "1" Then hasMarker = True
-		Case "Mode":           d.Mode = IIf(Trim(valStr) = "ExistingGit", ProjectCreateMode.pcmExistingGit, ProjectCreateMode.pcmLocalProject)
 		Case "ProjectName":    d.ProjectName = valStr
 		Case "Template":       d.Template = valStr
 		Case "Author":         d.Author = valStr
 		Case "License":        d.License = valStr
 		Case "Description":    d.Description = DescDecodeNewlines(valStr)
-		Case "GitProvider":    d.GitProvider = valStr
-		Case "GitUserName":    d.GitUserName = valStr
-		Case "GitEmail":       d.GitEmail = valStr
-		Case "GitURL":         d.GitURL = valStr
 		Case "AIFriendly":     d.AIFriendly = (LCase(Trim(valStr)) = "true")
 		Case "AITool":         d.AITool = valStr
 		Case "Created":        d.Created = valStr
@@ -91,14 +81,4 @@ End Function
 Function IsAstoriaProject(ByRef ProjectFolder As UString) As Boolean
 	Dim As ProjectDescriptionData d
 	Return ReadProjectDescription(ProjectFolder, d)
-End Function
-
-Function FolderIsEffectivelyEmpty(ByRef Folder As UString) As Boolean
-	Dim As UInteger attr
-	Dim As String f = Dir(WinOsPath(Folder & "/*"), fbReadOnly Or fbHidden Or fbSystem Or fbDirectory Or fbArchive, attr)
-	Do While f <> ""
-		If f <> "." AndAlso f <> ".." AndAlso LCase(f) <> ".git" Then Return False
-		f = Dir(attr)
-	Loop
-	Return True
 End Function

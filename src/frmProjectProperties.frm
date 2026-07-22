@@ -112,18 +112,6 @@ pfProjectProperties = @fProjectProperties
 		txtProjectName.TabIndex = 11
 		txtProjectName.SetBounds 10, 200, 202, 21
 		txtProjectName.Parent = @tpGeneral
-		' lblProjectDescription
-		lblProjectDescription.Name = "lblProjectDescription"
-		lblProjectDescription.Text = ("Project Description") & ":"
-		lblProjectDescription.TabIndex = 17
-		lblProjectDescription.SetBounds 10, 298, 220, 18
-		lblProjectDescription.Parent = @tpGeneral
-		' txtProjectDescription
-		txtProjectDescription.Name = "txtProjectDescription"
-		txtProjectDescription.Text = ""
-		txtProjectDescription.TabIndex = 18
-		txtProjectDescription.SetBounds 10, 316, 466, 24
-		txtProjectDescription.Parent = @tpGeneral
 		' grbVersionNumber
 		grbVersionNumber.Name = "grbVersionNumber"
 		grbVersionNumber.Text = ("Version Number")
@@ -251,6 +239,118 @@ pfProjectProperties = @fProjectProperties
 			.SetBounds 65182, 22, 487, 356
 			.Designer = @This
 			.Parent = @tabProperties
+		End With
+		' tpDescription -- consolidates what used to be the standalone Edit Project
+		' Description dialog. Read-only info block + editable Author/License/Description
+		' + AI Friendly/Agent, all backed by project.astoria (auto-created on demand).
+		With tpDescription
+			.Name = "tpDescription"
+			.Text = ("Description")
+			.TabIndex = 200
+			.Caption = ("Description")
+			.UseVisualStyleBackColor = True
+			.SetBounds 2, 22, 487, 356
+			.Designer = @This
+			.Parent = @tabProperties
+		End With
+		' lblDescInfo -- header for the read-only summary
+		With lblDescInfo
+			.Name = "lblDescInfo"
+			.Text = ("Project details (read-only)") & ":"
+			.TabIndex = 201
+			.SetBounds 10, 8, 460, 16
+			.Parent = @tpDescription
+		End With
+		' txtDescInfo -- multi-line readonly summary of Project Name / Template / Startup / Created
+		With txtDescInfo
+			.Name = "txtDescInfo"
+			.Text = ""
+			.Multiline = True
+			.ReadOnly = True
+			.ScrollBars = ScrollBarsType.Vertical
+			.TabIndex = 202
+			.SetBounds 10, 26, 460, 88
+			.Parent = @tpDescription
+		End With
+		' lblDescAuthor
+		With lblDescAuthor
+			.Name = "lblDescAuthor"
+			.Text = ("Author") & ":"
+			.TabIndex = 203
+			.SetBounds 10, 124, 100, 18
+			.Parent = @tpDescription
+		End With
+		' txtDescAuthor
+		With txtDescAuthor
+			.Name = "txtDescAuthor"
+			.Text = ""
+			.TabIndex = 204
+			.SetBounds 120, 122, 350, 21
+			.Parent = @tpDescription
+		End With
+		' lblDescLicense
+		With lblDescLicense
+			.Name = "lblDescLicense"
+			.Text = ("License") & ":"
+			.TabIndex = 205
+			.SetBounds 10, 152, 100, 18
+			.Parent = @tpDescription
+		End With
+		' cboDescLicense
+		With cboDescLicense
+			.Name = "cboDescLicense"
+			.Text = ""
+			.Style = ComboBoxEditStyle.cbDropDownList
+			.TabIndex = 206
+			.SetBounds 120, 150, 200, 21
+			.Designer = @This
+			.Parent = @tpDescription
+		End With
+		' lblDescDescription
+		With lblDescDescription
+			.Name = "lblDescDescription"
+			.Text = ("Description") & ":"
+			.TabIndex = 207
+			.SetBounds 10, 182, 200, 18
+			.Parent = @tpDescription
+		End With
+		' txtDescDescription -- the multi-line description (long-form, unlike the retired
+		' single-line "Project Description" field this tab replaces)
+		With txtDescDescription
+			.Name = "txtDescDescription"
+			.Text = ""
+			.Multiline = True
+			.WantReturn = True
+			.ScrollBars = ScrollBarsType.Vertical
+			.TabIndex = 208
+			.SetBounds 10, 200, 460, 100
+			.Parent = @tpDescription
+		End With
+		' chkDescAIFriendly
+		With chkDescAIFriendly
+			.Name = "chkDescAIFriendly"
+			.Text = ("Make project AI friendly")
+			.TabIndex = 209
+			.SetBounds 10, 310, 180, 21
+			.Parent = @tpDescription
+		End With
+		' lblDescAITool
+		With lblDescAITool
+			.Name = "lblDescAITool"
+			.Text = ("AI Agent") & ":"
+			.TabIndex = 210
+			.SetBounds 200, 312, 70, 18
+			.Parent = @tpDescription
+		End With
+		' cboDescAITool
+		With cboDescAITool
+			.Name = "cboDescAITool"
+			.Text = ""
+			.Style = ComboBoxEditStyle.cbDropDownList
+			.TabIndex = 211
+			.SetBounds 280, 310, 190, 21
+			.Designer = @This
+			.Parent = @tpDescription
 		End With
 		' Initialization
 		cboProjectType.AddItem ("Executable")
@@ -666,7 +766,6 @@ Private Sub frmProjectProperties.cmdOK_Click(ByRef Designer As My.Sys.Object, By
 		ppe->Subsystem = .cboSubsystem.ItemIndex
 		WLet(ppe->ProjectName, .txtProjectName.Text)
 		WLet(ppe->HelpFileName, .txtHelpFileName.Text)
-		WLet(ppe->ProjectDescription, .txtProjectDescription.Text)
 		ppe->PassAllModuleFilesToCompiler = .chkPassAllModuleFilesToCompiler.Checked
 		ppe->OpenProjectAsFolder = .chkOpenProjectAsFolder.Checked
 		ppe->MajorVersion = Val(.txtMajor.Text)
@@ -700,6 +799,10 @@ Private Sub frmProjectProperties.cmdOK_Click(ByRef Designer As My.Sys.Object, By
 			ppe->LibraryPaths.Add .lstLibraryPaths.Item(i)
 		Next
 		WLet(ppe->CommandLineArguments, "")
+		'' Description tab -- persist to project.astoria in the .vfp's own folder.
+		Dim As UString vfpDir = ""
+		If ppe->FileName <> 0 Then vfpDir = GetFolderName(*ppe->FileName)
+		If Trim(vfpDir) <> "" Then .SaveDescriptionTab(vfpDir)
 		If Not EndsWith(.ProjectTreeNode->Text, "*") Then .ProjectTreeNode->Text &= "*"
 		.CloseForm
 	End With
@@ -789,7 +892,6 @@ Public Sub frmProjectProperties.RefreshProperties()
 				If .ResourceFiles.IndexOf(*ppe->ResourceFileName) > -1 Then .cboResourceFile.Text = .ResourceFiles.Item(.ResourceFiles.IndexOf(*ppe->ResourceFileName))->Key Else .cboResourceFile.ItemIndex = 0
 				.txtProjectName.Text = *ppe->ProjectName
 				.txtHelpFileName.Text = *ppe->HelpFileName
-				.txtProjectDescription.Text = *ppe->ProjectDescription
 				.chkPassAllModuleFilesToCompiler.Checked = ppe->PassAllModuleFilesToCompiler
 				.chkOpenProjectAsFolder.Checked = ppe->OpenProjectAsFolder
 				.txtMajor.Text = WStr(ppe->MajorVersion)
@@ -824,6 +926,12 @@ Public Sub frmProjectProperties.RefreshProperties()
 				For i As Integer = 0 To ppe->LibraryPaths.Count - 1
 					.lstLibraryPaths.AddItem ppe->LibraryPaths.Item(i)
 				Next
+				'' Description tab is backed by project.astoria in the .vfp's own folder;
+				'' compute the folder from ppe->FileName rather than GetProjectDirectory,
+				'' because RefreshProperties fires before the tree cursor is committed.
+				Dim As UString vfpDir = ""
+				If ppe->FileName <> 0 Then vfpDir = GetFolderName(*ppe->FileName)
+				If Trim(vfpDir) <> "" Then .LoadDescriptionTab(vfpDir)
 			End If
 		Else
 			.ProjectTreeNode = ptn
@@ -835,7 +943,6 @@ Public Sub frmProjectProperties.RefreshProperties()
 			.cboResourceFile.ItemIndex = -1
 			.txtProjectName.Text = ""
 			.txtHelpFileName.Text = ""
-			.txtProjectDescription.Text = ""
 			.chkPassAllModuleFilesToCompiler.Checked = False
 			.chkOpenProjectAsFolder.Checked = False
 			.txtMajor.Text = ""
@@ -978,5 +1085,99 @@ End Sub
 Private Sub frmProjectProperties.cmdRemoveLibrary_Click(ByRef Sender As Control)
 	Var Index = lstLibraryPaths.ItemIndex
 	If Index <> -1 Then lstLibraryPaths.RemoveItem Index
+End Sub
+
+'' Description tab -- backed entirely by project.astoria. If the project has no
+'' project.astoria yet (imported folder, or an example that predates it), seed one
+'' from what the .vfp already knows and use it from here on. The tab replaces the
+'' standalone Edit Project Description dialog and the small single-line
+'' "Project Description" field the General tab used to carry (which was in fact
+'' the Windows resource FileDescription source, not the project's own description).
+Sub frmProjectProperties.LoadDescriptionTab(ByRef ProjectFolder As UString)
+	If Trim(ProjectFolder) = "" Then Exit Sub
+	Dim As ProjectDescriptionData d
+	If Not ReadProjectDescription(ProjectFolder, d) Then
+		'' Seed from the .vfp's own already-loaded metadata, so a first open finds
+		'' the fields populated with what the project already knows.
+		If ProjectTreeNode <> 0 AndAlso ProjectTreeNode->Tag <> 0 Then
+			Dim As ProjectElement Ptr ppe = ProjectTreeNode->Tag
+			d.ProjectName = WGet(ppe->ProjectName)
+			d.Author      = WGet(ppe->Author)
+			d.License     = WGet(ppe->License)
+			d.Description = WGet(ppe->Description)
+		End If
+		If Trim(d.ProjectName) = "" Then
+			Dim As UString f = ProjectFolder
+			'' `..` escapes to the outer scope -- inside a Form's method, unqualified Right/Left
+			'' resolve to the control's position properties (which have no indexed getter), not to
+			'' FB's Right()/Left() string intrinsics.
+			If ..Right(f, 1) = "\" OrElse ..Right(f, 1) = "/" Then f = ..Left(f, Len(f) - 1)
+			d.ProjectName = GetFileNameU(f)
+		End If
+		WriteProjectDescription(ProjectFolder, d)
+	End If
+	'' Read-only info block.
+	Dim As UString startup = ("(none)")
+	If FileExistsU(WinOsPath(ProjectFolder & "/Main.frm")) Then
+		startup = "Main.frm " & ("(startup form)")
+	ElseIf FileExistsU(WinOsPath(ProjectFolder & "/Main.bas")) Then
+		startup = "Main.bas " & ("(startup module)")
+	End If
+	Dim As UString nl = Chr(13) & Chr(10)
+	txtDescInfo.Text = ("Project Name") & ":  " & d.ProjectName & nl & _
+		("Template") & ":  " & d.Template & nl & _
+		("Startup") & ":  " & startup & nl & _
+		("Created") & ":  " & d.Created
+	'' Editable fields.
+	txtDescAuthor.Text = d.Author
+	txtDescDescription.Text = d.Description
+	cboDescLicense.Clear
+	cboDescLicense.AddItem ("GPL") : cboDescLicense.AddItem ("LGPL") : cboDescLicense.AddItem ("Apache")
+	cboDescLicense.AddItem ("MIT") : cboDescLicense.AddItem ("Mozilla") : cboDescLicense.AddItem ("BSD")
+	cboDescLicense.AddItem ("Freeware") : cboDescLicense.AddItem ("Proprietary") : cboDescLicense.AddItem ("Other")
+	Dim As Integer licIdx = cboDescLicense.IndexOf(d.License)
+	If licIdx < 0 Then
+		If Trim(d.License) <> "" Then
+			cboDescLicense.AddItem d.License
+			licIdx = cboDescLicense.IndexOf(d.License)
+		Else
+			licIdx = 0
+		End If
+	End If
+	cboDescLicense.ItemIndex = licIdx
+	'' AI Tool list from Templates/AI subfolders (same source as New Project).
+	cboDescAITool.Clear
+	Dim As UString aiRoot = WinOsPath(ExePath & "/Templates/AI")
+	Dim As UInteger aiAttr
+	Dim As String aiEntry = Dir(aiRoot & WindowsSlash & "*", fbDirectory Or fbReadOnly Or fbHidden Or fbSystem Or fbArchive, aiAttr)
+	Do While aiEntry <> ""
+		If (aiAttr And fbDirectory) <> 0 AndAlso aiEntry <> "." AndAlso aiEntry <> ".." Then cboDescAITool.AddItem aiEntry
+		aiEntry = Dir(aiAttr)
+	Loop
+	Dim As Integer aiIdx = cboDescAITool.IndexOf(d.AITool)
+	If aiIdx < 0 Then
+		If Trim(d.AITool) <> "" Then
+			cboDescAITool.AddItem d.AITool
+			aiIdx = cboDescAITool.IndexOf(d.AITool)
+		Else
+			aiIdx = 0
+		End If
+	End If
+	If cboDescAITool.ItemCount > 0 Then cboDescAITool.ItemIndex = aiIdx
+	chkDescAIFriendly.Checked = d.AIFriendly
+End Sub
+
+Sub frmProjectProperties.SaveDescriptionTab(ByRef ProjectFolder As UString)
+	If Trim(ProjectFolder) = "" Then Exit Sub
+	Dim As ProjectDescriptionData d
+	'' Preserve the immutable fields (ProjectName / Template / Created) that the tab
+	'' doesn't edit -- rewrite around them rather than clobbering with blanks.
+	ReadProjectDescription(ProjectFolder, d)
+	d.Author      = txtDescAuthor.Text
+	d.License     = cboDescLicense.Text
+	d.Description = txtDescDescription.Text
+	d.AIFriendly  = chkDescAIFriendly.Checked
+	If cboDescAITool.ItemCount > 0 Then d.AITool = cboDescAITool.Text
+	WriteProjectDescription(ProjectFolder, d)
 End Sub
 

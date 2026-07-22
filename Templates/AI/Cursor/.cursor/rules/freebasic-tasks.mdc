@@ -1,5 +1,5 @@
 ---
-description: Task playbooks for {{PROJECT}} — MCP build/run, git workflow, modules, MFF controls/events, forms, and FreeBASIC compile errors. Apply when doing any of those tasks. Fuller on-demand skills live under .cursor/skills/.
+description: Task playbooks for {{PROJECT}} — MCP build/run, modules, MFF controls/events, forms, and FreeBASIC compile errors. Apply when doing any of those tasks. Fuller on-demand skills live under .cursor/skills/.
 globs:
 alwaysApply: false
 ---
@@ -7,7 +7,7 @@ alwaysApply: false
 # Task playbooks — {{PROJECT}}
 
 Compact mirrors of the shared playbooks. Prefer the matching skill under
-`.cursor/skills/<name>/SKILL.md` when available (includes MCP, git, and the
+`.cursor/skills/<name>/SKILL.md` when available (includes MCP and the
 extended skills beyond the core five below).
 
 ## Build and run
@@ -15,11 +15,6 @@ extended skills beyond the core five below).
 2. Else Astoria IDE: open `{{PROJECT}}.vfp`, press **F5**.
 3. Console CLI: `fbc -s console <MainFile>.bas`; the main file is the `*File=` entry in the `.vfp`.
 4. GUI CLI: `<AstoriaDir>\Compiler\fbc64.exe -s gui -i <AstoriaDir>\Controls\Framework <MainFile>.bas` — but `fbc` rejects `.frm` input and the `.rc` is IDE-generated, so prefer the IDE.
-
-## Git (git-backed projects)
-1. Read remote/identity from `project.astoria` (`GitURL=`, `GitProvider=`, …) — don't invent a remote.
-2. Commit/push via **Project ▸ Git Commit/Push** or `git add` / `git commit` / `git push` over SSH.
-3. Commit only when asked; never force-push. Keep `project.astoria`. See skill: `git-workflow`.
 
 ## Add a module
 1. Create `NewName.bas` (+ `NewName.bi` for the `Declare` lines and shared `Type`s if other files call in).

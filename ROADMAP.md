@@ -2,6 +2,17 @@
 
 **Extracted from PROJECT_STATUS.md on 2026-07-06.** For current status and open items, see [PROJECT_STATUS.md](PROJECT_STATUS.md).
 
+> **2026-07-21 — Git features removed.** The owner decided Git integration is
+> an advanced feature that does not fit Astoria's target audience. All
+> user-facing Git surface (Git menu, `frmGitCommit`, New Project clone mode,
+> Options ▸ Personal Information Git group, `UseGit`/`Git*` keys in
+> `project.astoria`/`.vfp`, `Templates/Git/`, `git-workflow` skills across the
+> AI templates) is gone. §13.23 (document Git setup), §13.26 (convert local
+> project to Git), and the "Use Git?" branch of §13.25 are therefore
+> **OBSOLETE** — see the notes on each. Historical mnemonic-debugging text
+> below that references `&Git`/`G&it` is left in place as the record of what
+> was investigated; the menu itself no longer exists.
+
 ---
 
 ## 13. Future enhancements (owner-added, unscheduled)
@@ -250,8 +261,7 @@ Traced the call chain but stopped short of isolating the actual gap (owner defer
 **Owner decision: educators are a named target audience for Astoria**, alongside end-user developers. The positioning: many development stacks overwhelm beginners and the people teaching them. Astoria combines:
 
 - an **easy-to-learn language** (FreeBASIC),
-- a **single tool** covering both text/console and GUI development,
-- built-in **Git integration** (New Project dialog wires up the local repo, `.gitignore`/`.gitattributes`, provider guides), and
+- a **single tool** covering both text/console and GUI development, and
 - built-in **AI integration** (the "AI friendly" project stamping with per-tool rules and skills),
 
 with the AI side deliberately working across **both frontier models** (higher cost) **and open-source models via OpenCode** — the latter specifically appealing for schools operating on limited budgets.
@@ -660,7 +670,11 @@ Not a 1.0 blocker on its own -- no data is at risk and every current caller eith
 or has been worked around -- but it is a trap for future dialogs and should be fixed before many
 more are written.
 
-### 13.23 No documentation on setting up Git for use with Astoria (owner-raised 2026-07-19)
+### 13.23 No documentation on setting up Git for use with Astoria — **OBSOLETE (2026-07-21): Git features removed**
+
+Superseded by the 2026-07-21 removal of all user-facing Git integration. Kept for the record of the reasoning that led to the removal decision — a user who has never used SSH keys, meeting an authentication error at push time far from the step they missed, is precisely the failure mode this section warned about, and simplification won out over documenting the sequence.
+
+Original text follows.
 
 Astoria's Git integration works, and its individual steps each explain themselves in the moment.
 What does not exist anywhere is the **sequence** — what a user has to do, once, before any of it
@@ -729,7 +743,10 @@ Option 1 is the correct one: the user's project directory should contain only wh
 there. Worth doing before outside testers see it, because "what is this file?" is exactly the kind of
 thing that erodes confidence in a tool that otherwise looks tidy.
 
-### 13.25 First-start dialog: choose the shape of the IDE once (owner-raised 2026-07-19)
+### 13.25 First-start dialog: choose the shape of the IDE once (owner-raised 2026-07-19) — **Git branch obsolete (2026-07-21)**
+
+The "Use Git?" question is moot: Git is no longer part of Astoria. The remaining scope (Use AI?, Personal Information) is unaffected. Original text follows.
+
 
 The first time Astoria runs, ask a short set of questions and configure itself from the answers,
 instead of presenting every capability to every user whether they want it or not.
@@ -762,7 +779,9 @@ consistent with removing options everywhere else.
 - Interaction with 13.23: a user who says "yes, Git" is exactly the audience for the Git setup
   documentation, and this dialog is the natural place to link it.
 
-### 13.26 No way to convert a local project into a Git project (owner-raised 2026-07-19)
+### 13.26 No way to convert a local project into a Git project — **OBSOLETE (2026-07-21): Git features removed**
+
+Superseded by the 2026-07-21 removal of Git integration. There is no longer a Git mode to convert to. Original text follows.
 
 New Project offers Create Local (no version control) or Use Existing Git Project. The choice is made
 at creation and there is no path between them: someone who starts local and later wants version

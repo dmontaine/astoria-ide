@@ -642,8 +642,8 @@ Sub AgentPipe_ExecutePendingOnUi()
 
 	Case "create_project"
 		'' Create a new project from a template under the configured Projects path
-		'' and open it. Headless equivalent of the New Project dialog's core (git/
-		'' AI/license extras are separate tools / a later unification with the dialog).
+		'' and open it. Headless equivalent of the New Project dialog's core (AI/
+		'' license extras are separate tools / a later unification with the dialog).
 		Dim As String nm, template, aiTool
 		If gCmdArgs Then
 			nm = Trim(gCmdArgs->GetStr("name"))
@@ -714,10 +714,8 @@ Sub AgentPipe_ExecutePendingOnUi()
 		Dim As UString aiFolder = AgentAiToolFolder(aiToolMeta)
 		Dim As Boolean aiStamped = AgentStampAiTemplate(newFolder, aiFolder, nm)
 		'' project.astoria -- the canonical Astoria description file (same as the New
-		'' Project dialog writes). Marks this as an Astoria project. MCP create_project
-		'' is always a local template-based create (no clone tool), so Mode=LocalProject.
+		'' Project dialog writes). Marks this as an Astoria project.
 		Dim As ProjectDescriptionData descData
-		descData.Mode        = ProjectCreateMode.pcmLocalProject
 		descData.ProjectName = nm
 		descData.Template    = template
 		descData.AIFriendly  = True
